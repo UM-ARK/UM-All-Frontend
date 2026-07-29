@@ -1,5 +1,6 @@
 import React, {
     useCallback,
+    useEffect,
     useLayoutEffect,
     useMemo,
     useRef,
@@ -7,6 +8,7 @@ import React, {
 import {
     ActivityIndicator,
     Alert,
+    InteractionManager,
     Pressable,
     RefreshControl,
     Share,
@@ -188,8 +190,10 @@ const HarborTopicDetail = ({ route, navigation }) => {
     const initialTopicTitle = route.params?.topicTitle;
     const requestedPostNumber = Number(route.params?.postNumber);
     const composerRefreshAt = route.params?.composerRefreshAt;
+    const pendingReplyDraft = route.params?.pendingReplyDraft;
     const listRef = useRef(null);
     const imageViewerRef = useRef(null);
+    const pendingReplyDraftFrameRef = useRef(null);
     const readingBridgeRef = useRef({});
     const sessionStatusRef = useRef(sessionStatus);
     const resetTopicReading = useCallback(() => {
@@ -504,6 +508,95 @@ const HarborTopicDetail = ({ route, navigation }) => {
             topicId,
         ],
     );
+
+    useEffect(() => {
+        if (
+            !pendingReplyDraft ||
+            pendingReplyDraft.mode !== 'reply' ||
+            !topic?.id ||
+            isLoading
+        ) {
+            return undefined;
+        }
+        const replyToPostNumber = Number(
+            pendingReplyDraft.replyToPostNumber,
+        );
+        const hasReplyTarget =
+            Number.isInteger(replyToPostNumber) &&
+            replyToPostNumber > 0;
+        const targetPostNumber = hasReplyTarget
+            ? replyToPostNumber
+            : requestedPostNumber;
+        const targetPost = Number.isInteger(targetPostNumber)
+            ? posts.find(
+                post =>
+                    Number(post.post_number) === targetPostNumber,
+            )
+            : null;
+        if (
+            Number.isInteger(targetPostNumber) &&
+            targetPostNumber > 0 &&
+            !targetPost
+        ) {
+            return undefined;
+        }
+
+        const interaction = InteractionManager.runAfterInteractions(() => {
+            if (targetPostNumber > 0) {
+                scrollToPost(targetPostNumber, {
+                    allowFetch: false,
+                    animated: false,
+                });
+            }
+            pendingReplyDraftFrameRef.current = requestAnimationFrame(() => {
+                pendingReplyDraftFrameRef.current =
+                    requestAnimationFrame(() => {
+                        openHarborComposer(navigation, {
+                            ...pendingReplyDraft,
+                            topicId,
+                            topicTitle:
+                                topic.title ||
+                                pendingReplyDraft.topicTitle ||
+                                initialTopicTitle,
+                            categoryId:
+                                topic.category_id ??
+                                pendingReplyDraft.categoryId,
+                            ...(hasReplyTarget
+                                ? {
+                                    replyToUsername:
+                                        targetPost?.username ||
+                                        targetPost?.display_username ||
+                                        targetPost?.name,
+                                }
+                                : {}),
+                        });
+                        navigation.setParams({
+                            pendingReplyDraft: undefined,
+                        });
+                    });
+            });
+        });
+
+        return () => {
+            interaction.cancel();
+            if (pendingReplyDraftFrameRef.current != null) {
+                cancelAnimationFrame(
+                    pendingReplyDraftFrameRef.current,
+                );
+                pendingReplyDraftFrameRef.current = null;
+            }
+        };
+    }, [
+        initialTopicTitle,
+        isLoading,
+        navigation,
+        pendingReplyDraft,
+        posts,
+        requestedPostNumber,
+        scrollToPost,
+        topic,
+        topicId,
+    ]);
 
     const openPostQuoteComposer = useCallback(
         post => {

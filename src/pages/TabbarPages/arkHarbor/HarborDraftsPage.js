@@ -181,7 +181,7 @@ const HarborDraftsPage = ({navigation}) => {
         draft => {
             trigger();
             const context = getDraftContext(draft);
-            navigation.navigate('HarborComposer', {
+            const composerParams = {
                 mode: draft.mode,
                 draftKey: draft.draftKey,
                 fromDraftBox: true,
@@ -191,7 +191,20 @@ const HarborDraftsPage = ({navigation}) => {
                 postId: context.postId,
                 postNumber: context.postNumber,
                 replyToPostNumber: context.replyToPostNumber,
-            });
+            };
+            if (draft.mode === 'reply' && context.topicId) {
+                navigation.navigate('HarborTopicDetail', {
+                    topicId: context.topicId,
+                    topicTitle: context.topicTitle,
+                    postNumber:
+                        context.replyToPostNumber ||
+                        context.postNumber ||
+                        1,
+                    pendingReplyDraft: composerParams,
+                });
+                return;
+            }
+            navigation.navigate('HarborComposer', composerParams);
         },
         [navigation],
     );
