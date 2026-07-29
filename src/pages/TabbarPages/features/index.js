@@ -260,16 +260,15 @@ function Index({ navigation }) {
                 showsVerticalScrollIndicator={true}
                 contentInsetAdjustmentBehavior="automatic"
                 keyboardShouldPersistTaps="handled">
-                <View
+                <SearchBar
+                    navigation={navigation}
+                    entryFuncName="features_search_entry"
+                    // 與下方功能卡片 marginHorizontal: scale(10) 同寬
                     style={{
                         width: '100%',
-                        alignItems: 'center',
-                    }}>
-                    <SearchBar
-                        navigation={navigation}
-                        entryFuncName="features_search_entry"
-                    />
-                </View>
+                        paddingHorizontal: scale(10),
+                    }}
+                />
 
                 {frequentFeatures.length > 0 ? (
                     <View

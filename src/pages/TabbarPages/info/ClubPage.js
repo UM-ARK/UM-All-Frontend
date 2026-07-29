@@ -11,6 +11,8 @@ import ClubSearchBar from './components/ClubSearchBar';
 import { filterClubsBySearchQuery } from './utils/clubSearchFilter';
 import axios from 'axios';
 import { scale, verticalScale } from 'react-native-size-matters';
+import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const ITEMS_PER_ROW = 3;
 /** 與網格對齊的左右內距 */
@@ -95,6 +97,10 @@ const buildSections = (clubDataList) => {
 function ClubPage() {
     const { theme } = useContext(ThemeContext);
     const { themeColor, black, white } = theme;
+    const insets = useSafeAreaInsets();
+    // 優先讀 Tab Bar 實際高度，避免底部文案被浮動底欄遮擋
+    const tabBarHeight =
+        useContext(BottomTabBarHeightContext) ?? insets.bottom + 49;
     const [allClubs, setAllClubs] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [isLoading, setIsLoading] = useState(true);
@@ -182,7 +188,7 @@ function ClubPage() {
     }, []);
 
     const renderBottomInfo = useCallback(() => (
-        <View style={{ marginBottom: scale(20) }}>
+        <View style={{ marginBottom: tabBarHeight + scale(20) }}>
             <Text
                 style={{
                     ...uiStyle.defaultText,
@@ -220,7 +226,7 @@ function ClubPage() {
                 </Text>
             </TouchableOpacity>
         </View>
-    ), [allClubs.length, black.third, themeColor]);
+    ), [allClubs.length, black.third, tabBarHeight, themeColor]);
 
     const windowWidth = Dimensions.get('window').width;
     const rawCellWidth =
@@ -309,7 +315,7 @@ function ClubPage() {
                     position: 'absolute',
                     zIndex: 2,
                     right: scale(10),
-                    bottom: verticalScale(70),
+                    bottom: tabBarHeight + verticalScale(16),
                     opacity: 0.9,
                     backgroundColor: white,
                     borderRadius: scale(10),
