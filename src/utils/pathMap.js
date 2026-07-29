@@ -188,7 +188,7 @@ export const UMALL_LOGO = 'https://umall.one/static/logo.png';
 // 用戶協議
 export const USER_AGREE = 'https://umall.one/user_agreement.html';
 // 常見問題
-export const USUAL_Q = 'https://umall.one/qa.html';
+export const USUAL_Q = 'https://umall.one/qa';
 
 // Webview 服務
 // 選咩課

@@ -8,7 +8,6 @@ import {
     TouchableWithoutFeedback,
     Platform,
     Linking,
-    Alert,
     AppState,
     Keyboard,
     FlatList,
@@ -25,9 +24,9 @@ import {
     MAIL,
     ARK_WIKI,
     UM_Moodle,
-    ARK_HARBOR,
     ARK_WIKI_DONATE_RANK,
     AFD_UMACARK,
+    USUAL_Q,
 } from '../../../../utils/pathMap.js';
 import EventPage from './EventPage.js';
 import ModalBottom from '../../../../components/ModalBottom.js';
@@ -46,7 +45,6 @@ import CustomBottomSheet from '../../../../utils/BottomSheet';
 import HyperlinkText from '../../../../components/HyperlinkText.js';
 import SearchBar from './components/SearchBar.js';
 import CalendarBar from './components/CalendarBar';
-import { FontAwesome, FontAwesome5, MaterialIcons, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { FlatGrid } from 'react-native-super-grid';
 import Toast from 'react-native-toast-message';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -59,7 +57,7 @@ import { useTranslation } from 'react-i18next';
 import { BottomSheetScrollView, BottomSheetFlatList } from '@gorhom/bottom-sheet';
 import ScrollToTopButton from '../../../../components/ScrollToTopButton';
 import TouchableScale from '../../../../components/TouchableScale';
-import { useHarborSession } from '../../../../contexts/HarborSessionContext';
+import FeatureIcon from './search/components/FeatureIcon';
 
 const MIN_REFRESH_DURATION = 800;
 const DONATE_PROBE_TIMEOUT_MS = 2500;
@@ -88,27 +86,24 @@ const paymentArr = [
     require('../../../../static/img/donate/alipay.jpg'),
 ];
 
-// 定義可使用icon，注意大小寫
+// FeatureIcon 支援的 icon_type（與服務頁一致）
 const iconTypes = {
     ionicons: 'ionicons',
     materialCommunityIcons: 'MaterialCommunityIcons',
-    fontAwesome5: 'FontAwesome5',
-    materialIcons: 'MaterialIcons',
-    img: 'img',
-    view: 'view',
 };
 
 const HomeScreen = ({ navigation }) => {
     const { theme } = useTheme();
     const { white, bg_color, black, themeColor, themeColorLight, themeColorUltraLight, viewShadow, TIME_TABLE_COLOR } = theme;
-    const { t } = useTranslation(['common', 'home']);
-    const { login, status: harborSessionStatus } = useHarborSession();
+    const { t, i18n } = useTranslation(['common', 'home']);
+    const isTc = i18n.language === 'tc';
+    const featureFontSize = isTc ? verticalScale(10) : verticalScale(8);
 
     // 狀態
     const functionArray = useMemo(() => [
         {
-            icon_name: 'bus',
-            icon_type: iconTypes.ionicons,
+            icon_name: 'bus-stop',
+            icon_type: iconTypes.materialCommunityIcons,
             function_name: t('校園巴士', { ns: 'home' }),
             func: () => {
                 trigger();
@@ -128,19 +123,19 @@ const HomeScreen = ({ navigation }) => {
                 openLink(UM_Moodle);
             },
         },
+        // {
+        //     icon_name: 'plus',
+        //     icon_type: iconTypes.materialCommunityIcons,
+        //     function_name: t('新想法', { ns: 'home' }),
+        //     func: () => {
+        //         trigger();
+        //         logToFirebase('funcUse', { funcName: 'harbor_new' });
+        //         navigation.navigate('HarborComposer', { mode: 'newTopic' });
+        //     },
+        // },
         {
-            icon_name: 'plus',
-            icon_type: iconTypes.view,
-            function_name: t('新想法', { ns: 'home' }),
-            func: () => {
-                trigger();
-                logToFirebase('funcUse', { funcName: 'harbor_new' });
-                navigation.navigate('HarborComposer', { mode: 'newTopic' });
-            },
-        },
-        {
-            icon_name: 'volunteer-activism',
-            icon_type: iconTypes.materialIcons,
+            icon_name: 'hand-heart',
+            icon_type: iconTypes.materialCommunityIcons,
             function_name: t('支持我們', { ns: 'home' }),
             func: () => {
                 trigger();
@@ -157,39 +152,16 @@ const HomeScreen = ({ navigation }) => {
             },
         },
         {
-            icon_name: 'log-in',
+            icon_name: 'help-circle-outline',
             icon_type: iconTypes.ionicons,
-            function_name: t('論壇登入', { ns: 'home' }),
-            func: async () => {
+            function_name: t('常見問題', { ns: 'home' }),
+            func: () => {
                 trigger();
-                logToFirebase('funcUse', { funcName: 'harbor_login' });
-                if (harborSessionStatus === 'signedIn') {
-                    navigation.navigate('MyTabbar');
-                    return;
-                }
-                if (
-                    harborSessionStatus === 'restoring' ||
-                    harborSessionStatus === 'authorizing'
-                ) {
-                    return;
-                }
-                try {
-                    const signedIn = await login({
-                        routeName: 'Tabbar',
-                        params: { screen: 'MyTabbar' },
-                    });
-                    if (signedIn) {
-                        navigation.navigate('MyTabbar');
-                    }
-                } catch {
-                    Alert.alert(
-                        t('Harbor 登入失敗'),
-                        t('Harbor 登入失敗，請稍後再試。'),
-                    );
-                }
+                logToFirebase('funcUse', { funcName: 'usual_q' });
+                openLink(USUAL_Q);
             },
         },
-    ], [harborSessionStatus, login, navigation, t]);
+    ], [navigation, t]);
     const [calRefreshKey, setCalRefreshKey] = useState(0);
     const [isShowModal, setIsShowModal] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
@@ -211,8 +183,6 @@ const HomeScreen = ({ navigation }) => {
     const appStateListener = useRef(null);
     const bottomSheetRef = useRef(null);
     const refreshingRef = useRef(false);
-
-    const { i18n } = useTranslation();
 
     // 生命週期
     useEffect(() => {
@@ -364,109 +334,32 @@ const HomeScreen = ({ navigation }) => {
         }
     };
 
-    // 渲染顶部校历图标
-    // 渲染功能圖標
-    const GetFunctionIcon = ({ icon_type, icon_name, function_name, func }) => {
-        let icon = null;
-        const imageSize = verticalScale(23);
-        const iconSize = verticalScale(23);
-        const containerSize = verticalScale(40); // 固定容器大小
-        const iconColor = theme.themeColor;
-
-        if (icon_type == 'ionicons') {
-            icon = (
-                <Ionicons
-                    name={icon_name}
-                    size={iconSize}
-                    color={iconColor}
-                />
-            );
-        } else if (icon_type == 'MaterialCommunityIcons') {
-            icon = (
-                <MaterialCommunityIcons
-                    name={icon_name}
-                    size={iconSize + scale(3)}
-                    color={iconColor}
-                />
-            );
-        } else if (icon_type == 'FontAwesome5') {
-            icon = (
-                <FontAwesome5
-                    name={icon_name}
-                    size={iconSize - verticalScale(3)}
-                    color={iconColor}
-                />
-            );
-        } else if (icon_type == 'MaterialIcons') {
-            icon = (
-                <MaterialIcons
-                    name={icon_name}
-                    size={iconSize - verticalScale(3)}
-                    color={iconColor}
-                />
-            );
-        } else if (icon_type == 'img') {
-            icon = (
-                <Image
-                    source={icon_name}
-                    style={{
-                        backgroundColor: theme.trueWhite,
-                        height: imageSize, width: imageSize,
-                        borderRadius: verticalScale(8),
-                    }}
-                />
-            );
-        } else if (icon_type == 'view') {
-            icon = (
-                <View style={{
-                    width: imageSize, height: imageSize,
-                    borderRadius: verticalScale(8),
-                    backgroundColor: themeColor,
-                    alignItems: 'center', justifyContent: 'center',
-                }}>
-                    <FontAwesome
-                        name={'plus'}
-                        size={imageSize - verticalScale(8)}
-                        color={white}
-                    />
-                </View>
-            );
-        }
-
-        return (
+    // 快捷功能：與服務頁相同的 FeatureIcon + 文字樣式
+    const renderQuickFeature = useCallback(
+        item => (
             <TouchableScale
                 style={{
-                    justifyContent: 'center', alignItems: 'center',
-                    width: containerSize, height: containerSize,
-                }}
-                onPress={func}>
-                <View style={{
-                    width: verticalScale(25),
-                    height: verticalScale(25),
                     justifyContent: 'center',
                     alignItems: 'center',
-                    marginBottom: verticalScale(2),
-                }}>
-                    {icon}
-                </View>
-
-                {function_name && (<View style={{
-                    width: '100%',
-                }}>
-                    <Text style={{
+                }}
+                activeOpacity={0.7}
+                onPress={item.func}
+                key={item.function_name}>
+                <FeatureIcon item={item} size={scale(22)} />
+                <Text
+                    style={{
                         ...uiStyle.defaultText,
-                        fontSize: verticalScale(8),
-                        fontWeight: 'bold',
-                        color: theme.themeColor,
+                        fontSize: featureFontSize,
+                        color: black.second,
                         textAlign: 'center',
-                        lineHeight: verticalScale(10),
+                        marginTop: verticalScale(4),
                     }}>
-                        {function_name}
-                    </Text>
-                </View>)}
+                    {item.function_name}
+                </Text>
             </TouchableScale>
-        );
-    };
+        ),
+        [black.second, featureFontSize],
+    );
 
     // 打開/關閉底部Modal
     const tiggerModalBottom = () => setIsShowModal(!isShowModal);
@@ -647,21 +540,32 @@ const HomeScreen = ({ navigation }) => {
                     </TouchableScale>
                 </View>
 
-                {/* 快捷功能圖標 */}
-                <View style={{ width: screenWidth * 0.8, marginTop: verticalScale(5) }}>
-                    <FlatGrid
+                {/* 快捷功能圖標（樣式對齊服務頁 FeatureIcon） */}
+                <View
+                    style={{
+                        width: '100%',
+                        marginTop: verticalScale(5),
+                        paddingHorizontal: scale(10),
+                    }}>
+                    <View
                         style={{
-                            backgroundColor: white, borderRadius: verticalScale(5),
-                        }}
-                        itemContainerStyle={{ alignItems: 'center', justifyContent: 'center' }}
-                        maxItemsPerRow={5}
-                        itemDimension={scale(50)}
-                        spacing={verticalScale(2)}
-                        data={functionArray}
-                        renderItem={({ item }) => GetFunctionIcon(item)}
-                        showsVerticalScrollIndicator={false}
-                        scrollEnabled={false}
-                    />
+                            backgroundColor: white,
+                            borderRadius: scale(10),
+                        }}>
+                        <FlatGrid
+                            itemContainerStyle={{
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                            }}
+                            maxItemsPerRow={5}
+                            itemDimension={scale(50)}
+                            spacing={scale(10)}
+                            data={functionArray}
+                            renderItem={({ item }) => renderQuickFeature(item)}
+                            showsVerticalScrollIndicator={false}
+                            scrollEnabled={false}
+                        />
+                    </View>
                 </View>
 
                 {/* 更新提示 */}
