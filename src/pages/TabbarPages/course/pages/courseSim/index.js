@@ -231,7 +231,8 @@ function CourseSim({ route, navigation }) {
     const [timeFilterFrom, setTimeFilterFrom] = useState(timeFrom);
     const [timeFilterTo, setTimeFilterTo] = useState(timeTo);
     const [showTimePicker, setShowTimePicker] = useState(false);
-    const [timetableView, setTimetableView] = useState('detail');
+    // null：尚未讀完上次具體／概覽；讀完前不渲染課表，避免先閃 detail
+    const [timetableView, setTimetableView] = useState(null);
 
     const [hasOpenCourseSearch, setHasOpenCourseSearch] = useState(false);
     const [bottomSheetMode, setBottomSheetMode] = useState('search');
@@ -243,9 +244,12 @@ function CourseSim({ route, navigation }) {
         let cancelled = false;
 
         getLocalStorage(TIMETABLE_VIEW_STORAGE_KEY).then(storedView => {
-            if (!cancelled && isTimetableView(storedView)) {
-                setTimetableView(storedView);
+            if (cancelled) {
+                return;
             }
+            setTimetableView(
+                isTimetableView(storedView) ? storedView : 'detail',
+            );
         });
 
         return () => {
@@ -2771,18 +2775,20 @@ E11-0000
                 {/* 渲染課表或首次使用提示 */}
                 <View style={{ flex: 1 }}>
                     {planSlots.length > 0 ? (
-                        <>
-                            {timetableView === 'overview' ? (
-                                renderOverview()
-                            ) : (
-                                <ScrollView
-                                    horizontal
-                                    showsHorizontalScrollIndicator={false}>
-                                    {dayList.map(day => renderDay(day))}
-                                </ScrollView>
-                            )}
-                            {renderReminder()}
-                        </>
+                        timetableView ? (
+                            <>
+                                {timetableView === 'overview' ? (
+                                    renderOverview()
+                                ) : (
+                                    <ScrollView
+                                        horizontal
+                                        showsHorizontalScrollIndicator={false}>
+                                        {dayList.map(day => renderDay(day))}
+                                    </ScrollView>
+                                )}
+                                {renderReminder()}
+                            </>
+                        ) : null
                     ) : (
                         renderFirstUse()
                     )}
@@ -2790,7 +2796,9 @@ E11-0000
             </ScrollView>
 
             {/* 有排課時才顯示具體／概覽切換；與 FAB 同層，bottom 扣掉 Tab Bar */}
-            {planSlots.length > 0 && !hasOpenCourseSearch
+            {planSlots.length > 0 &&
+            timetableView &&
+            !hasOpenCourseSearch
                 ? renderViewSwitcher()
                 : null}
 
