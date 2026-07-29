@@ -1,163 +1,207 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import {
+    ActivityIndicator,
+    Animated,
+    Pressable,
+    StyleSheet,
+    Text,
+    View,
+} from 'react-native';
 
-import { Image } from 'expo-image';
-import { useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { scale, verticalScale } from 'react-native-size-matters';
+import PagerView from 'react-native-pager-view';
+import { moderateScale, scale, verticalScale } from 'react-native-size-matters';
 
 import { uiStyle, useTheme } from '../../../../components/ThemeContext';
-import TouchableScale from '../../../../components/TouchableScale';
-import { fetchHarborDrafts } from '../../../../utils/harbor/harborApi';
-import {
-    getHarborDraftAccountId,
-    getLocalHarborDrafts,
-    getPendingHarborDraftDeletes,
-    mergeHarborDrafts,
-} from '../../../../utils/harbor/harborDrafts';
 import { trigger } from '../../../../utils/trigger';
+import HarborDraftsPage from '../../arkHarbor/HarborDraftsPage';
+import HarborActivityPage from '../pages/HarborActivityPage';
+import HarborInboxPage from '../pages/HarborInboxPage';
 import HarborProfileCard from './HarborProfileCard';
-import HarborSectionHeader from './HarborSectionHeader';
-import HarborStatsCard from './HarborStatsCard';
+import HarborStatsPane from './HarborStatsPane';
 
-const HarborDashboard = ({ user, navigation }) => {
+const PAGE_CONFIG = [
+    { key: 'unread', label: '未讀' },
+    { key: 'topics', label: '發佈', kind: 'topics' },
+    { key: 'replies', label: '評論', kind: 'replies' },
+    { key: 'bookmarks', label: '收藏', kind: 'bookmarks' },
+    { key: 'likes', label: '贊過', kind: 'likes' },
+    { key: 'drafts', label: '草稿' },
+    { key: 'stats', label: '統計' },
+];
+const TAB_INDICATOR_WIDTH = moderateScale(24, 0.1);
+const AnimatedPagerView = Animated.createAnimatedComponent(PagerView);
+
+const HarborDashboard = ({
+    user,
+    navigation,
+    contentBottomInset,
+    isRefreshing,
+    onProfileRefresh,
+}) => {
     const { theme } = useTheme();
     const { t } = useTranslation('my');
-    const [draftCount, setDraftCount] = React.useState(0);
-
-    // 進入「我的」頁時刷新草稿數量，供草稿箱角標顯示
-    useFocusEffect(
-        React.useCallback(() => {
-            const accountId = getHarborDraftAccountId(user);
-            if (!accountId) {
-                setDraftCount(0);
-                return undefined;
-            }
-
-            const controller = new AbortController();
-            let cancelled = false;
-
-            const loadDraftCount = async () => {
-                try {
-                    const [localDrafts, pendingDeletes] = await Promise.all([
-                        getLocalHarborDrafts(accountId),
-                        getPendingHarborDraftDeletes(accountId),
-                    ]);
-                    // 先以本機草稿即時顯示角標，再嘗試合併遠端
-                    if (!cancelled) {
-                        setDraftCount(
-                            mergeHarborDrafts(
-                                localDrafts,
-                                [],
-                                pendingDeletes,
-                            ).length,
-                        );
-                    }
-
-                    let remoteDrafts = [];
-                    try {
-                        const result = await fetchHarborDrafts({
-                            signal: controller.signal,
-                        });
-                        remoteDrafts = result.items;
-                    } catch {
-                        // 遠端失敗時保留本機計數即可
-                    }
-                    if (!cancelled && !controller.signal.aborted) {
-                        setDraftCount(
-                            mergeHarborDrafts(
-                                localDrafts,
-                                remoteDrafts,
-                                pendingDeletes,
-                            ).length,
-                        );
-                    }
-                } catch {
-                    if (!cancelled) {
-                        setDraftCount(0);
-                    }
-                }
-            };
-
-            loadDraftCount();
-            return () => {
-                cancelled = true;
-                controller.abort();
-            };
-        }, [user]),
+    const pagerRef = React.useRef(null);
+    const tabsRef = React.useRef(null);
+    const pageScrollOffset = React.useRef(new Animated.Value(0)).current;
+    const pageScrollPosition = React.useRef(new Animated.Value(0)).current;
+    const [currentIndex, setCurrentIndex] = React.useState(0);
+    const [mountedPages, setMountedPages] = React.useState({ unread: true });
+    const [tabLayouts, setTabLayouts] = React.useState({});
+    const [tabsViewportWidth, setTabsViewportWidth] = React.useState(0);
+    const [tabsContentWidth, setTabsContentWidth] = React.useState(0);
+    const unreadCount =
+        (Number(user.unreadNotifications) || 0) +
+        (Number(user.unreadMessages) || 0);
+    const pagePosition = React.useMemo(
+        () => Animated.add(pageScrollPosition, pageScrollOffset),
+        [pageScrollOffset, pageScrollPosition],
+    );
+    const indicatorInputRange = PAGE_CONFIG.map((page, index) => index);
+    const indicatorOutputRange = PAGE_CONFIG.map(page => {
+        const layout = tabLayouts[page.key];
+        return layout
+            ? layout.x + (layout.width - TAB_INDICATOR_WIDTH) / 2
+            : 0;
+    });
+    const hasMeasuredTabs = PAGE_CONFIG.every(
+        page => tabLayouts[page.key] !== undefined,
+    );
+    const indicatorTranslateX = pagePosition.interpolate({
+        inputRange: indicatorInputRange,
+        outputRange: indicatorOutputRange,
+        extrapolate: 'clamp',
+    });
+    const handlePageScroll = React.useMemo(
+        () =>
+            Animated.event(
+                [
+                    {
+                        nativeEvent: {
+                            offset: pageScrollOffset,
+                            position: pageScrollPosition,
+                        },
+                    },
+                ],
+                { useNativeDriver: true },
+            ),
+        [pageScrollOffset, pageScrollPosition],
     );
 
-    const unreadNotifications = Number(user.unreadNotifications) || 0;
-    const unreadMessages = Number(user.unreadMessages) || 0;
-    const inboxBadge = unreadNotifications + unreadMessages;
-    // 有未讀通知優先開通知分頁，否則開站內訊息
-    const inboxInitialTab =
-        unreadNotifications > 0 || unreadMessages === 0
-            ? 'notifications'
-            : 'messages';
+    const ensureMounted = React.useCallback(pageKey => {
+        setMountedPages(current =>
+            current[pageKey] ? current : { ...current, [pageKey]: true },
+        );
+    }, []);
 
-    const actions = [
-        {
-            key: 'inbox',
-            label: t('收件匣'),
-            icon: 'notifications-outline',
-            route: 'HarborInbox',
-            params: { initialTab: inboxInitialTab },
-            badge: inboxBadge,
+    const selectPage = React.useCallback(
+        index => {
+            const page = PAGE_CONFIG[index];
+            if (!page) {
+                return;
+            }
+            ensureMounted(page.key);
+            setCurrentIndex(index);
+            pagerRef.current?.setPage(index);
         },
-        {
-            key: 'topics',
-            label: t('我的話題'),
-            icon: 'chatbox-ellipses-outline',
-            kind: 'topics',
-        },
-        {
-            key: 'replies',
-            label: t('我的回覆'),
-            icon: 'arrow-undo-outline',
-            kind: 'replies',
-        },
-        {
-            key: 'bookmarks',
-            label: t('我的收藏'),
-            icon: 'bookmark-outline',
-            kind: 'bookmarks',
-        },
-        {
-            key: 'likes',
-            label: t('我讚好的'),
-            icon: 'heart-outline',
-            kind: 'likes',
-        },
-        {
-            key: 'drafts',
-            label: t('草稿箱'),
-            icon: 'document-text-outline',
-            route: 'HarborDrafts',
-            badge: draftCount,
-        },
-    ];
+        [ensureMounted],
+    );
 
-    const handleActionPress = action => {
-        trigger();
-        if (action.route) {
-            navigation.navigate(action.route, action.params);
+    const handlePageSelected = React.useCallback(
+        event => {
+            const index = event.nativeEvent.position;
+            const page = PAGE_CONFIG[index];
+            if (!page) {
+                return;
+            }
+            ensureMounted(page.key);
+            setCurrentIndex(index);
+        },
+        [ensureMounted],
+    );
+
+    React.useEffect(() => {
+        const page = PAGE_CONFIG[currentIndex];
+        const layout = page ? tabLayouts[page.key] : null;
+        if (!layout || !tabsViewportWidth) {
             return;
         }
-        navigation.navigate('HarborActivity', {
-            kind: action.kind,
-            title: action.label,
-        });
+        const nextOffset = Math.max(
+            0,
+            Math.min(
+                layout.x + layout.width / 2 - tabsViewportWidth / 2,
+                Math.max(0, tabsContentWidth - tabsViewportWidth),
+            ),
+        );
+        tabsRef.current?.scrollTo({ x: nextOffset, animated: true });
+    }, [
+        currentIndex,
+        tabLayouts,
+        tabsContentWidth,
+        tabsViewportWidth,
+    ]);
+
+    const renderPage = page => {
+        if (!mountedPages[page.key]) {
+            return (
+                <View style={styles.pageLoading}>
+                    <ActivityIndicator color={theme.themeColor} />
+                </View>
+            );
+        }
+
+        if (page.key === 'unread') {
+            return (
+                <HarborInboxPage
+                    navigation={navigation}
+                    embedded
+                    combined
+                    contentBottomInset={contentBottomInset}
+                    onProfileRefresh={onProfileRefresh}
+                />
+            );
+        }
+        if (page.kind) {
+            return (
+                <HarborActivityPage
+                    navigation={navigation}
+                    kind={page.kind}
+                    title={t(page.label)}
+                    embedded
+                    contentBottomInset={contentBottomInset}
+                    onProfileRefresh={onProfileRefresh}
+                />
+            );
+        }
+        if (page.key === 'drafts') {
+            return (
+                <HarborDraftsPage
+                    navigation={navigation}
+                    embedded
+                    contentBottomInset={contentBottomInset}
+                    onProfileRefresh={onProfileRefresh}
+                />
+            );
+        }
+        return (
+            <HarborStatsPane
+                user={user}
+                navigation={navigation}
+                contentBottomInset={contentBottomInset}
+                isRefreshing={isRefreshing}
+                onRefresh={onProfileRefresh}
+            />
+        );
     };
 
     return (
         <View style={styles.container}>
-            <HarborProfileCard
-                user={user}
-                onPress={() => navigation.navigate('HarborAccountSettings')}
-            />
+            <View style={styles.profileContent}>
+                <HarborProfileCard
+                    user={user}
+                    onPress={() => navigation.navigate('HarborAccountSettings')}
+                />
+            </View>
             {user.partialProfile ? (
                 <View
                     style={[
@@ -178,145 +222,150 @@ const HarborDashboard = ({ user, navigation }) => {
 
             <View
                 style={[
-                    styles.actionsCard,
+                    styles.tabsCard,
                     { backgroundColor: theme.white },
                 ]}>
-                <HarborSectionHeader title={t('我的 Harbor')} />
-                <View style={styles.actionsGrid}>
-                    {actions.map(action => (
-                        <TouchableScale
-                            key={action.key}
-                            accessibilityRole="button"
-                            accessibilityLabel={
-                                action.badge
-                                    ? `${action.badge} ${action.label}`
-                                    : action.label
-                            }
-                            activeScale={0.94}
-                            style={styles.actionItem}
-                            onPress={() => handleActionPress(action)}>
-                            <View
-                                style={[
-                                    styles.actionIcon,
-                                    { backgroundColor: theme.tonal.primary15 },
-                                ]}>
-                                <Ionicons
-                                    name={action.icon}
-                                    size={scale(23)}
-                                    color={theme.themeColor}
-                                />
-                                {action.badge ? (
-                                    <View
-                                        style={[
-                                            styles.actionBadge,
-                                            { backgroundColor: theme.unread },
-                                        ]}>
-                                        <Text
-                                            style={[
-                                                styles.actionBadgeText,
-                                                { color: theme.trueWhite },
-                                            ]}>
-                                            {action.badge > 99
-                                                ? '99+'
-                                                : action.badge}
-                                        </Text>
-                                    </View>
-                                ) : null}
-                            </View>
-                            <Text
-                                numberOfLines={1}
-                                style={[
-                                    styles.actionLabel,
-                                    { color: theme.black.second },
-                                ]}>
-                                {action.label}
-                            </Text>
-                        </TouchableScale>
-                    ))}
-                </View>
-            </View>
-
-            <HarborStatsCard
-                title={t('我的貢獻')}
-                items={user.contributions}
-            />
-
-            <View
-                style={[
-                    styles.badgesCard,
-                    { backgroundColor: theme.white },
-                ]}>
-                <HarborSectionHeader
-                    title={t('社群成就')}
-                    actionLabel={t('查看全部')}
-                    onAction={() => navigation.navigate('HarborBadges')}
-                />
-                <View style={styles.badgesRow}>
-                    {user.badges?.length ? (
-                        user.badges.slice(0, 3).map(badge => (
-                            <View key={badge.id} style={styles.badgeItem}>
-                                <View
-                                    style={[
-                                        styles.badgeIcon,
-                                        {
+                <Animated.ScrollView
+                    ref={tabsRef}
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    bounces={false}
+                    onLayout={event =>
+                        setTabsViewportWidth(event.nativeEvent.layout.width)
+                    }
+                    onContentSizeChange={width => setTabsContentWidth(width)}
+                    contentContainerStyle={styles.tabsScrollContent}>
+                    <View style={styles.tabsContent}>
+                        {PAGE_CONFIG.map((page, index) => {
+                            const isSelected = currentIndex === index;
+                            const badge =
+                                page.key === 'unread' ? unreadCount : 0;
+                            return (
+                                <Pressable
+                                    key={page.key}
+                                    accessibilityRole="tab"
+                                    accessibilityState={{
+                                        selected: isSelected,
+                                    }}
+                                    accessibilityLabel={
+                                        badge
+                                            ? `${badge} ${t(page.label)}`
+                                            : t(page.label)
+                                    }
+                                    onLayout={event => {
+                                        const { x, width } =
+                                            event.nativeEvent.layout;
+                                        setTabLayouts(current =>
+                                            current[page.key]?.x === x &&
+                                            current[page.key]?.width === width
+                                                ? current
+                                                : {
+                                                    ...current,
+                                                    [page.key]: { x, width },
+                                                },
+                                        );
+                                    }}
+                                    onPress={() => {
+                                        trigger();
+                                        selectPage(index);
+                                    }}
+                                    style={({ pressed }) => [
+                                        styles.tab,
+                                        pressed && {
                                             backgroundColor:
-                                                theme.tonal.secondary15,
+                                                theme.tonal.primary15,
                                         },
                                     ]}>
-                                    {badge.imageUrl ? (
-                                        <Image
-                                            source={{ uri: badge.imageUrl }}
-                                            style={styles.badgeImage}
-                                            contentFit="contain"
-                                        />
-                                    ) : (
-                                        <MaterialCommunityIcons
-                                            name="medal-outline"
-                                            size={scale(23)}
-                                            color={theme.secondThemeColor}
-                                        />
-                                    )}
-                                </View>
-                                <Text
-                                    numberOfLines={2}
-                                    style={[
-                                        styles.badgeName,
-                                        { color: theme.black.second },
-                                    ]}>
-                                    {badge.name}
-                                </Text>
-                            </View>
-                        ))
-                    ) : (
-                        <View style={styles.badgeEmpty}>
-                            <MaterialCommunityIcons
-                                name="medal-outline"
-                                size={scale(22)}
-                                color={theme.black.third}
-                            />
-                            <Text
-                                style={[
-                                    styles.compactEmptyText,
-                                    { color: theme.black.third },
-                                ]}>
-                                {t('繼續參與社群即可解鎖徽章')}
-                            </Text>
-                        </View>
-                    )}
-                </View>
+                                    <Text
+                                        numberOfLines={1}
+                                        style={[
+                                            styles.tabLabel,
+                                            {
+                                                color: isSelected
+                                                    ? theme.black.main
+                                                    : theme.black.third,
+                                            },
+                                            isSelected &&
+                                            styles.tabLabelSelected,
+                                        ]}>
+                                        {t(page.label)}
+                                    </Text>
+                                    {badge ? (
+                                        <View
+                                            style={[
+                                                styles.tabBadge,
+                                                {
+                                                    backgroundColor:
+                                                        theme.unread,
+                                                },
+                                            ]}>
+                                            <Text
+                                                style={[
+                                                    styles.tabBadgeText,
+                                                    {
+                                                        color:
+                                                            theme.trueWhite,
+                                                    },
+                                                ]}>
+                                                {badge > 99 ? '99+' : badge}
+                                            </Text>
+                                        </View>
+                                    ) : null}
+                                </Pressable>
+                            );
+                        })}
+                        <Animated.View
+                            pointerEvents="none"
+                            style={[
+                                styles.tabIndicator,
+                                hasMeasuredTabs
+                                    ? styles.tabIndicatorVisible
+                                    : styles.tabIndicatorHidden,
+                                {
+                                    backgroundColor: theme.themeColor,
+                                    transform: [
+                                        {
+                                            translateX: indicatorTranslateX,
+                                        },
+                                    ],
+                                },
+                            ]}
+                        />
+                    </View>
+                </Animated.ScrollView>
             </View>
 
-            <HarborStatsCard title={t('閱讀概況')} items={user.stats} />
+            <AnimatedPagerView
+                ref={pagerRef}
+                style={[
+                    styles.pager,
+                    { backgroundColor: theme.white },
+                ]}
+                initialPage={0}
+                onPageScroll={handlePageScroll}
+                onPageSelected={handlePageSelected}>
+                {PAGE_CONFIG.map(page => (
+                    <View
+                        key={page.key}
+                        style={styles.page}
+                        collapsable={false}>
+                        {renderPage(page)}
+                    </View>
+                ))}
+            </AnimatedPagerView>
         </View>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
-        gap: verticalScale(8),
+        flex: 1,
+        minHeight: 0,
     },
     partialProfile: {
         borderRadius: scale(10),
+        marginHorizontal: scale(10),
+        marginTop: verticalScale(8),
         paddingHorizontal: scale(14),
         paddingVertical: verticalScale(9),
     },
@@ -326,97 +375,76 @@ const styles = StyleSheet.create({
         lineHeight: verticalScale(14),
         textAlign: 'center',
     },
-    actionsCard: {
-        borderRadius: scale(10),
-        paddingBottom: verticalScale(3),
+    tabsCard: {
+        overflow: 'hidden',
     },
-    actionsGrid: {
+    profileContent: {
+        paddingHorizontal: scale(10),
+    },
+    tabsScrollContent: {
+        minWidth: '100%',
+    },
+    tabsContent: {
+        height: verticalScale(39),
         flexDirection: 'row',
-        flexWrap: 'wrap',
-        paddingTop: verticalScale(8),
+        position: 'relative',
     },
-    actionItem: {
-        width: '33.333%',
-        alignItems: 'center',
-        paddingHorizontal: scale(4),
-        paddingBottom: verticalScale(16),
-    },
-    actionIcon: {
-        width: scale(48),
-        height: scale(48),
-        borderRadius: scale(12),
+    tab: {
+        minWidth: scale(48),
+        height: verticalScale(39),
+        borderRadius: scale(8),
+        flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        marginBottom: verticalScale(7),
+        paddingHorizontal: scale(12),
     },
-    actionBadge: {
-        position: 'absolute',
-        top: scale(-4),
-        right: scale(-4),
-        minWidth: scale(18),
-        height: scale(18),
-        borderRadius: scale(9),
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingHorizontal: scale(4),
-    },
-    actionBadgeText: {
-        ...uiStyle.defaultText,
-        fontSize: scale(9),
-        fontWeight: '800',
-    },
-    actionLabel: {
+    tabLabel: {
         ...uiStyle.defaultText,
         fontSize: scale(12),
-        fontWeight: '600',
-        textAlign: 'center',
+        fontWeight: '500',
     },
-    compactEmptyText: {
-        ...uiStyle.defaultText,
-        fontSize: scale(11),
-        textAlign: 'center',
+    tabLabelSelected: {
+        fontWeight: '760',
     },
-    badgesCard: {
-        borderRadius: scale(10),
-        paddingBottom: verticalScale(16),
-    },
-    badgesRow: {
-        minHeight: verticalScale(96),
-        flexDirection: 'row',
-        alignItems: 'flex-start',
-        paddingHorizontal: scale(12),
-        paddingTop: verticalScale(8),
-    },
-    badgeItem: {
-        flex: 1,
-        alignItems: 'center',
-        paddingHorizontal: scale(4),
-    },
-    badgeIcon: {
-        width: scale(46),
-        height: scale(46),
-        borderRadius: scale(10),
+    tabBadge: {
+        minWidth: scale(16),
+        height: scale(16),
+        borderRadius: scale(8),
         alignItems: 'center',
         justifyContent: 'center',
-        marginBottom: verticalScale(7),
+        marginLeft: scale(4),
+        paddingHorizontal: scale(3),
     },
-    badgeImage: {
-        width: scale(30),
-        height: scale(30),
-    },
-    badgeName: {
+    tabBadgeText: {
         ...uiStyle.defaultText,
-        fontSize: scale(10),
-        fontWeight: '600',
-        lineHeight: verticalScale(14),
-        textAlign: 'center',
+        fontSize: scale(8),
+        fontWeight: '800',
     },
-    badgeEmpty: {
+    tabIndicator: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        width: TAB_INDICATOR_WIDTH,
+        height: verticalScale(2),
+        borderRadius: scale(1),
+    },
+    tabIndicatorVisible: {
+        opacity: 1,
+    },
+    tabIndicatorHidden: {
+        opacity: 0,
+    },
+    pager: {
         flex: 1,
-        minHeight: verticalScale(76),
+        minHeight: 0,
+    },
+    page: {
+        flex: 1,
+    },
+    pageLoading: {
+        flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
-        gap: verticalScale(8),
     },
 });
 

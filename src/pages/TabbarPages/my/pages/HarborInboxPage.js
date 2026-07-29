@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 
 import {isLiquidGlassSupported} from '@callstack/liquid-glass';
-import {useHeaderHeight} from '@react-navigation/elements';
+import {HeaderHeightContext} from '@react-navigation/elements';
 import {FlashList} from '@shopify/flash-list';
 import {useTranslation} from 'react-i18next';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -26,17 +26,27 @@ import {
 import {trigger} from '../../../../utils/trigger';
 import {HarborInlineRetry} from '../../arkHarbor/components/HarborListStates';
 import HarborEmptyState from '../components/HarborEmptyState';
-import {formatRelativeTime} from '../utils/harborUi';
+import {
+    formatRelativeTime,
+    mergeHarborUnreadItems,
+} from '../utils/harborUi';
 
 const ListSeparator = () => <View style={styles.separator} />;
 
-const HarborInboxPage = ({route, navigation}) => {
+const HarborInboxPage = ({
+    route,
+    navigation,
+    embedded = false,
+    combined = false,
+    contentBottomInset = verticalScale(32),
+    onProfileRefresh,
+}) => {
     const {theme} = useTheme();
     const {t, i18n} = useTranslation('my');
     const {user} = useHarborSession();
-    const headerHeight = useHeaderHeight();
+    const headerHeight = React.useContext(HeaderHeightContext) || 0;
     const username = user?.username || '';
-    const initialTab = route.params?.initialTab === 'messages' ? 1 : 0;
+    const initialTab = route?.params?.initialTab === 'messages' ? 1 : 0;
     const [selectedIndex, setSelectedIndex] = React.useState(initialTab);
     const [items, setItems] = React.useState([]);
     const [isLoading, setIsLoading] = React.useState(true);
@@ -49,8 +59,10 @@ const HarborInboxPage = ({route, navigation}) => {
     ];
 
     React.useEffect(() => {
-        navigation.setOptions({headerTitle: t('Harbor 收件匣')});
-    }, [navigation, t]);
+        if (!embedded) {
+            navigation.setOptions({headerTitle: t('Harbor 收件匣')});
+        }
+    }, [embedded, navigation, t]);
 
     const loadItems = React.useCallback(
         async ({refresh = false} = {}) => {
@@ -65,14 +77,30 @@ const HarborInboxPage = ({route, navigation}) => {
             setLoadError(false);
 
             try {
-                const nextItems =
-                    selectedIndex === 0
-                        ? await fetchHarborNotifications({
-                              signal: controller.signal,
-                          })
-                        : await fetchHarborMessages(username, {
-                              signal: controller.signal,
-                          });
+                let nextItems;
+                if (combined) {
+                    const [notifications, messages] = await Promise.all([
+                        fetchHarborNotifications({
+                            signal: controller.signal,
+                        }),
+                        fetchHarborMessages(username, {
+                            signal: controller.signal,
+                        }),
+                    ]);
+                    nextItems = mergeHarborUnreadItems(
+                        notifications,
+                        messages,
+                    );
+                } else {
+                    nextItems =
+                        selectedIndex === 0
+                            ? await fetchHarborNotifications({
+                                  signal: controller.signal,
+                              })
+                            : await fetchHarborMessages(username, {
+                                  signal: controller.signal,
+                              });
+                }
                 if (!controller.signal.aborted) {
                     setItems(nextItems);
                 }
@@ -88,7 +116,7 @@ const HarborInboxPage = ({route, navigation}) => {
                 }
             }
         },
-        [selectedIndex, username],
+        [combined, selectedIndex, username],
     );
 
     React.useEffect(() => {
@@ -102,19 +130,28 @@ const HarborInboxPage = ({route, navigation}) => {
 
     const handlePress = item => {
         trigger();
-        if (selectedIndex === 0 && !item.isRead) {
+        const isNotification = combined
+            ? item.inboxType === 'notification'
+            : selectedIndex === 0;
+        if (isNotification && !item.isRead) {
             setItems(currentItems =>
-                currentItems.map(currentItem =>
-                    currentItem.id === item.id
-                        ? {...currentItem, isRead: true}
-                        : currentItem,
-                ),
+                combined
+                    ? currentItems.filter(
+                        currentItem =>
+                            (currentItem.listId || currentItem.id) !==
+                            (item.listId || item.id),
+                    )
+                    : currentItems.map(currentItem =>
+                        currentItem.id === item.id
+                            ? {...currentItem, isRead: true}
+                            : currentItem,
+                    ),
             );
             markHarborNotificationRead(item.id).catch(() => undefined);
         }
 
         if (!item.topicId) {
-            if (selectedIndex === 0 && item.badgeId) {
+            if (isNotification && item.badgeId) {
                 navigation.navigate('HarborBadges');
             }
             return;
@@ -128,12 +165,16 @@ const HarborInboxPage = ({route, navigation}) => {
     };
 
     const renderItem = ({item}) => {
+        const isNotification = combined
+            ? item.inboxType === 'notification'
+            : selectedIndex === 0;
         const isActionable =
-            selectedIndex === 1 || Boolean(item.topicId || item.badgeId);
-        const unread =
-            selectedIndex === 0 ? !item.isRead : item.unreadCount > 0;
+            combined ||
+            !isNotification ||
+            Boolean(item.topicId || item.badgeId);
+        const unread = isNotification ? !item.isRead : item.unreadCount > 0;
         const fallbackExcerpt =
-            selectedIndex === 1
+            !isNotification
                 ? t('點擊開啟私人對話')
                 : item.badgeId
                   ? t('點擊查看獲得的徽章')
@@ -166,7 +207,7 @@ const HarborInboxPage = ({route, navigation}) => {
                     ]}>
                     <Ionicons
                         name={
-                            selectedIndex === 0
+                            isNotification
                                 ? 'notifications-outline'
                                 : 'mail-outline'
                         }
@@ -217,22 +258,35 @@ const HarborInboxPage = ({route, navigation}) => {
         );
     };
 
+    const handleRefresh = () => {
+        trigger();
+        loadItems({refresh: true});
+        onProfileRefresh?.();
+    };
+
     return (
         <View
             style={[
                 styles.container,
-                {backgroundColor: theme.bg_color},
+                {
+                    backgroundColor: embedded
+                        ? theme.white
+                        : theme.bg_color,
+                },
+                !embedded &&
                 isLiquidGlassSupported && {paddingTop: headerHeight},
             ]}>
-            <View style={styles.segmentWrap}>
-                <SegmentControl
-                    options={options}
-                    selectedIndex={selectedIndex}
-                    onChange={setSelectedIndex}
-                    style={styles.segment}
-                    trackBackgroundColor={theme.white}
-                />
-            </View>
+            {combined ? null : (
+                <View style={styles.segmentWrap}>
+                    <SegmentControl
+                        options={options}
+                        selectedIndex={selectedIndex}
+                        onChange={setSelectedIndex}
+                        style={styles.segment}
+                        trackBackgroundColor={theme.white}
+                    />
+                </View>
+            )}
             {isLoading ? (
                 <View style={styles.loading}>
                     <ActivityIndicator size="large" color={theme.themeColor} />
@@ -240,11 +294,16 @@ const HarborInboxPage = ({route, navigation}) => {
             ) : (
                 <FlashList
                     data={items}
-                    keyExtractor={item => item.id}
+                    keyExtractor={item => item.listId || item.id}
                     contentInsetAdjustmentBehavior={
-                        isLiquidGlassSupported ? 'never' : 'automatic'
+                        embedded || isLiquidGlassSupported
+                            ? 'never'
+                            : 'automatic'
                     }
-                    contentContainerStyle={styles.content}
+                    contentContainerStyle={[
+                        styles.content,
+                        {paddingBottom: contentBottomInset},
+                    ]}
                     showsVerticalScrollIndicator={false}
                     renderItem={renderItem}
                     ItemSeparatorComponent={ListSeparator}
@@ -264,7 +323,7 @@ const HarborInboxPage = ({route, navigation}) => {
                             icon={
                                 loadError
                                     ? 'cloud-offline-outline'
-                                    : selectedIndex === 0
+                                    : combined || selectedIndex === 0
                                     ? 'notifications-off-outline'
                                     : 'mail-open-outline'
                             }
@@ -293,10 +352,7 @@ const HarborInboxPage = ({route, navigation}) => {
                             refreshing={isRefreshing}
                             tintColor={theme.themeColor}
                             colors={[theme.themeColor]}
-                            onRefresh={() => {
-                                trigger();
-                                loadItems({refresh: true});
-                            }}
+                            onRefresh={handleRefresh}
                         />
                     }
                 />

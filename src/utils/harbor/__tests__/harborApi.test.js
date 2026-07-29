@@ -179,7 +179,6 @@ describe('Harbor API 資料正規化', () => {
                 {key: 'topicsRead', value: '45'},
                 {key: 'postsRead', value: '678'},
             ],
-            activity: [{id: 'activity-1'}],
             badges: [{id: 'badge-1'}],
         };
         getSpy
@@ -200,8 +199,6 @@ describe('Harbor API 資料正規化', () => {
                 },
             })
             .mockRejectedValueOnce(new Error('summary unavailable'))
-            .mockResolvedValueOnce({data: {notifications: []}})
-            .mockRejectedValueOnce(new Error('activity unavailable'))
             .mockRejectedValueOnce(new Error('badges unavailable'));
 
         const result = await fetchCurrentHarborUser(
@@ -221,15 +218,19 @@ describe('Harbor API 資料正規化', () => {
             '45',
             '678',
         ]);
-        expect(result.activity).toEqual(previousUser.activity);
         expect(result.badges).toEqual(previousUser.badges);
         expect(result.partialProfile).toBe(true);
         expect(result.usedPreviousProfileData).toBe(true);
         expect(result.unavailableProfileSections).toEqual([
             'summary',
-            'activity',
             'badges',
         ]);
+        expect(getSpy.mock.calls.map(([path]) => path)).not.toContain(
+            '/user_actions.json',
+        );
+        expect(getSpy.mock.calls.map(([path]) => path)).not.toContain(
+            '/notifications.json',
+        );
     });
 
     it('沒有上次資料時以未知狀態取代 Secondary API 的假 0', async () => {

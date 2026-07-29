@@ -4,6 +4,7 @@ import React, {
     useMemo,
     useRef,
     useState,
+    useContext,
 } from 'react';
 import {
     ActivityIndicator,
@@ -15,7 +16,7 @@ import {
 } from 'react-native';
 
 import {isLiquidGlassSupported} from '@callstack/liquid-glass';
-import {useHeaderHeight} from '@react-navigation/elements';
+import {HeaderHeightContext} from '@react-navigation/elements';
 import {FlashList} from '@shopify/flash-list';
 import {useFocusEffect} from '@react-navigation/native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -77,10 +78,15 @@ const getDraftContext = draft => {
     };
 };
 
-const HarborDraftsPage = ({navigation}) => {
+const HarborDraftsPage = ({
+    navigation,
+    embedded = false,
+    contentBottomInset = verticalScale(40),
+    onProfileRefresh,
+}) => {
     const {theme} = useTheme();
     const {t} = useTranslation('harbor');
-    const headerHeight = useHeaderHeight();
+    const headerHeight = useContext(HeaderHeightContext) || 0;
     const {
         login,
         status: sessionStatus,
@@ -94,19 +100,24 @@ const HarborDraftsPage = ({navigation}) => {
     const accountId = getHarborDraftAccountId(user);
 
     useEffect(() => {
-        navigation.setOptions({headerTitle: t('草稿箱')});
-    }, [navigation, t]);
+        if (!embedded) {
+            navigation.setOptions({headerTitle: t('草稿箱')});
+        }
+    }, [embedded, navigation, t]);
 
     // iOS 26 液態玻璃透明導覽列：內容需手動避開 header
     const pageStyle = useMemo(
         () => [
             styles.container,
             {
-                backgroundColor: theme.bg_color,
-                paddingTop: isLiquidGlassSupported ? headerHeight : 0,
+                backgroundColor: embedded
+                    ? theme.white
+                    : theme.bg_color,
+                paddingTop:
+                    !embedded && isLiquidGlassSupported ? headerHeight : 0,
             },
         ],
-        [headerHeight, theme.bg_color],
+        [embedded, headerHeight, theme.bg_color, theme.white],
     );
 
     const loadDrafts = useCallback(async ({refreshing = false} = {}) => {
@@ -366,7 +377,11 @@ const HarborDraftsPage = ({navigation}) => {
             <View
                 style={[
                     styles.centered,
-                    {backgroundColor: theme.bg_color},
+                    {
+                        backgroundColor: embedded
+                            ? theme.white
+                            : theme.bg_color,
+                    },
                 ]}>
                 <ActivityIndicator size="large" color={theme.themeColor} />
                 <Text
@@ -385,7 +400,11 @@ const HarborDraftsPage = ({navigation}) => {
             <View
                 style={[
                     styles.centered,
-                    {backgroundColor: theme.bg_color},
+                    {
+                        backgroundColor: embedded
+                            ? theme.white
+                            : theme.bg_color,
+                    },
                 ]}>
                 <MaterialCommunityIcons
                     name="account-lock-outline"
@@ -436,7 +455,11 @@ const HarborDraftsPage = ({navigation}) => {
             <View
                 style={[
                     styles.centered,
-                    {backgroundColor: theme.bg_color},
+                    {
+                        backgroundColor: embedded
+                            ? theme.white
+                            : theme.bg_color,
+                    },
                 ]}>
                 <ActivityIndicator size="large" color={theme.themeColor} />
                 <Text
@@ -474,12 +497,19 @@ const HarborDraftsPage = ({navigation}) => {
                 data={drafts}
                 keyExtractor={item => item.draftKey}
                 renderItem={renderDraft}
-                contentContainerStyle={styles.listContent}
+                contentContainerStyle={[
+                    styles.listContent,
+                    {paddingBottom: contentBottomInset},
+                ]}
                 contentInsetAdjustmentBehavior={
-                    isLiquidGlassSupported ? 'never' : 'automatic'
+                    embedded || isLiquidGlassSupported ? 'never' : 'automatic'
                 }
                 refreshing={isRefreshing}
-                onRefresh={() => loadDrafts({refreshing: true})}
+                onRefresh={() => {
+                    trigger();
+                    loadDrafts({refreshing: true});
+                    onProfileRefresh?.();
+                }}
                 showsVerticalScrollIndicator={false}
                 ListEmptyComponent={
                     <View style={styles.emptyState}>

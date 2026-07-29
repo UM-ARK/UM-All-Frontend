@@ -1106,8 +1106,6 @@ function normalizeProfile(
     currentUser,
     profileData,
     summaryData,
-    notificationData,
-    actionData,
     badgeData,
     availability,
     previousUser,
@@ -1140,21 +1138,9 @@ function normalizeProfile(
         role = 'Harbor 會員';
     }
 
-    const notifications = availability.notifications
-        ? (notificationData?.notifications || []).map(normalizeNotification)
-        : [];
-    const recentActivity = availability.activity
-        ? (actionData?.user_actions || [])
-            .map(normalizeAction)
-            .filter(action => action.topicId)
-            .slice(0, 3)
-        : matchingPreviousUser?.activity || [];
     const badges = availability.badges
         ? normalizeBadges(badgeData)
         : matchingPreviousUser?.badges || [];
-    const unreadNotificationCount = notifications.filter(
-        notification => !notification.isRead,
-    ).length;
     const previousMetric = (collection, key) =>
         matchingPreviousUser?.[collection]?.find(item => item.key === key)
             ?.value;
@@ -1195,9 +1181,7 @@ function normalizeProfile(
         joinedAt,
         unreadNotifications: currentUnreadNotifications != null
             ? currentUnreadNotifications
-            : availability.notifications
-                ? unreadNotificationCount
-                : Number(matchingPreviousUser?.unreadNotifications || 0),
+            : Number(matchingPreviousUser?.unreadNotifications || 0),
         unreadMessages: currentUnreadMessages != null
             ? currentUnreadMessages
             : Number(matchingPreviousUser?.unreadMessages || 0),
@@ -1278,7 +1262,6 @@ function normalizeProfile(
                 label: '已讀貼文',
             },
         ],
-        activity: recentActivity,
         badges,
         partialProfile: unavailableProfileSections.length > 0,
         usedPreviousProfileData: Boolean(
@@ -2373,28 +2356,15 @@ export async function fetchCurrentHarborUser(credentials, previousUser = null) {
     const [
         profileResult,
         summaryResult,
-        notificationResult,
-        actionResult,
         badgeResult,
     ] = await Promise.allSettled([
         harborApi.get(`/u/${username}.json`, requestConfig),
         harborApi.get(`/u/${username}/summary.json`, requestConfig),
-        harborApi.get('/notifications.json', requestConfig),
-        harborApi.get('/user_actions.json', {
-            ...requestConfig,
-            params: {
-                offset: 0,
-                username: currentUser.username,
-                filter: USER_ACTION_FILTERS.all,
-            },
-        }),
         harborApi.get(`/user-badges/${username}.json`, requestConfig),
     ]);
     const availability = {
         profile: profileResult.status === 'fulfilled',
         summary: summaryResult.status === 'fulfilled',
-        notifications: notificationResult.status === 'fulfilled',
-        activity: actionResult.status === 'fulfilled',
         badges: badgeResult.status === 'fulfilled',
     };
 
@@ -2402,10 +2372,6 @@ export async function fetchCurrentHarborUser(credentials, previousUser = null) {
         currentUser,
         availability.profile ? profileResult.value.data : null,
         availability.summary ? summaryResult.value.data : null,
-        availability.notifications
-            ? notificationResult.value.data
-            : null,
-        availability.activity ? actionResult.value.data : null,
         availability.badges ? badgeResult.value.data : null,
         availability,
         previousUser,

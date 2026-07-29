@@ -1,4 +1,7 @@
-import {formatRelativeTime} from '../harborUi';
+import {
+    formatRelativeTime,
+    mergeHarborUnreadItems,
+} from '../harborUi';
 
 describe('Harbor 相對時間格式', () => {
     const now = new Date('2026-07-21T10:00:00Z').getTime();
@@ -26,5 +29,47 @@ describe('Harbor 相對時間格式', () => {
             '剛剛',
         );
         expect(formatRelativeTime('invalid', 'tc', now)).toBe('');
+    });
+});
+
+describe('Harbor 未讀收件匣', () => {
+    it('合併未讀通知與站內訊息並按時間排序', () => {
+        const result = mergeHarborUnreadItems(
+            [
+                {
+                    id: '1',
+                    isRead: false,
+                    createdAt: '2026-07-21T09:00:00Z',
+                },
+                {
+                    id: '2',
+                    isRead: true,
+                    createdAt: '2026-07-21T10:00:00Z',
+                },
+            ],
+            [
+                {
+                    id: '1',
+                    unreadCount: 2,
+                    createdAt: '2026-07-21T11:00:00Z',
+                },
+                {
+                    id: '3',
+                    unreadCount: 0,
+                    createdAt: '2026-07-21T12:00:00Z',
+                },
+            ],
+        );
+
+        expect(result).toEqual([
+            expect.objectContaining({
+                listId: 'message-1',
+                inboxType: 'message',
+            }),
+            expect.objectContaining({
+                listId: 'notification-1',
+                inboxType: 'notification',
+            }),
+        ]);
     });
 });

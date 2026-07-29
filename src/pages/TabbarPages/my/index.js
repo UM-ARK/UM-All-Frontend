@@ -36,6 +36,7 @@ const MyScreen = ({ navigation }) => {
     const insets = useSafeAreaInsets();
     const { width } = useWindowDimensions();
     const contentWidth = Math.min(width - scale(20), scale(680));
+    const signedInWidth = Math.min(width, scale(700));
     const contentTopInset = insets.top + verticalScale(8);
     const [isRefreshing, setIsRefreshing] = React.useState(false);
 
@@ -153,6 +154,71 @@ const MyScreen = ({ navigation }) => {
         }
     };
 
+    const harborError = error ? (
+        <View
+            style={[
+                styles.harborError,
+                {
+                    backgroundColor: theme.tonal.unread15,
+                    borderColor: theme.tonal.unread30,
+                },
+            ]}>
+            <Text
+                style={[
+                    styles.harborErrorText,
+                    { color: theme.black.second },
+                ]}>
+                {error.code === 'HARBOR_SESSION_EXPIRED'
+                    ? t('Harbor 登入已失效，請重新登入。', {
+                        ns: 'my',
+                    })
+                    : t(
+                        '無法完成 Harbor 操作，請稍後再試。',
+                        { ns: 'my' },
+                    )}
+            </Text>
+        </View>
+    ) : null;
+
+    if (status === 'signedIn' && user) {
+        return (
+            <View
+                style={[
+                    styles.container,
+                    styles.signedInContainer,
+                    { backgroundColor: theme.bg_color },
+                ]}>
+                <View
+                    style={[
+                        styles.signedInContent,
+                        {
+                            width: signedInWidth,
+                            paddingTop: contentTopInset,
+                        },
+                    ]}>
+                    <View style={styles.signedInHeaderContent}>
+                        <HarborPageHeader
+                            onFeedbackAction={handleFeedbackAction}
+                            onSettingsPress={() =>
+                                navigation.navigate('SettingPage')
+                            }
+                        />
+                        {harborError}
+                    </View>
+                    <HarborDashboard
+                        user={user}
+                        navigation={navigation}
+                        contentBottomInset={
+                            insets.bottom + verticalScale(92)
+                        }
+                        isRefreshing={isRefreshing}
+                        onProfileRefresh={handleRefresh}
+                    />
+                </View>
+            </View>
+        );
+    }
+
     return (
         <View style={[styles.container, { backgroundColor: theme.bg_color }]}>
             <ScrollView
@@ -183,35 +249,9 @@ const MyScreen = ({ navigation }) => {
                             navigation.navigate('SettingPage')
                         }
                     />
-                    {error ? (
-                        <View
-                            style={[
-                                styles.harborError,
-                                {
-                                    backgroundColor: theme.tonal.unread15,
-                                    borderColor: theme.tonal.unread30,
-                                },
-                            ]}>
-                            <Text
-                                style={[
-                                    styles.harborErrorText,
-                                    { color: theme.black.second },
-                                ]}>
-                                {error.code === 'HARBOR_SESSION_EXPIRED'
-                                    ? t('Harbor 登入已失效，請重新登入。', {
-                                        ns: 'my',
-                                    })
-                                    : t(
-                                        '無法完成 Harbor 操作，請稍後再試。',
-                                        { ns: 'my' },
-                                    )}
-                            </Text>
-                        </View>
-                    ) : null}
+                    {harborError}
                     {status === 'restoring' ? (
                         <HarborRestoringState />
-                    ) : status === 'signedIn' && user ? (
-                        <HarborDashboard user={user} navigation={navigation} />
                     ) : (
                         <HarborGuestState
                             isAuthorizing={status === 'authorizing'}
@@ -228,6 +268,16 @@ const MyScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+    },
+    signedInContainer: {
+        alignItems: 'center',
+    },
+    signedInContent: {
+        flex: 1,
+        minHeight: 0,
+    },
+    signedInHeaderContent: {
+        paddingHorizontal: scale(10),
     },
     scrollContent: {
         alignItems: 'center',

@@ -7,7 +7,7 @@ import {
 } from 'react-native';
 
 import {isLiquidGlassSupported} from '@callstack/liquid-glass';
-import {useHeaderHeight} from '@react-navigation/elements';
+import {HeaderHeightContext} from '@react-navigation/elements';
 import {FlashList} from '@shopify/flash-list';
 import {useTranslation} from 'react-i18next';
 import {scale, verticalScale} from 'react-native-size-matters';
@@ -22,13 +22,21 @@ import HarborEmptyState from '../components/HarborEmptyState';
 
 const ListSeparator = () => <View style={styles.separator} />;
 
-const HarborActivityPage = ({route, navigation}) => {
+const HarborActivityPage = ({
+    route,
+    navigation,
+    kind: embeddedKind,
+    title: embeddedTitle,
+    embedded = false,
+    contentBottomInset = verticalScale(32),
+    onProfileRefresh,
+}) => {
     const {theme} = useTheme();
     const {t} = useTranslation('my');
     const {user} = useHarborSession();
-    const headerHeight = useHeaderHeight();
-    const kind = route.params?.kind || 'all';
-    const title = route.params?.title || t('所有活動');
+    const headerHeight = React.useContext(HeaderHeightContext) || 0;
+    const kind = embeddedKind || route?.params?.kind || 'all';
+    const title = embeddedTitle || route?.params?.title || t('所有活動');
     const username = user?.username || '';
     const controllerRef = React.useRef(null);
     const loadingMoreRef = React.useRef(false);
@@ -42,8 +50,10 @@ const HarborActivityPage = ({route, navigation}) => {
     const [loadMoreError, setLoadMoreError] = React.useState(false);
 
     React.useEffect(() => {
-        navigation.setOptions({headerTitle: title});
-    }, [navigation, title]);
+        if (!embedded) {
+            navigation.setOptions({headerTitle: title});
+        }
+    }, [embedded, navigation, title]);
 
     const loadFirstPage = React.useCallback(
         async ({refresh = false} = {}) => {
@@ -142,16 +152,38 @@ const HarborActivityPage = ({route, navigation}) => {
         [navigation],
     );
 
+    const handleRefresh = React.useCallback(() => {
+        trigger();
+        loadFirstPage({refresh: true});
+        onProfileRefresh?.();
+    }, [loadFirstPage, onProfileRefresh]);
+
     if (isLoading) {
         return (
-            <View style={[styles.loading, {backgroundColor: theme.bg_color}]}>
+            <View
+                style={[
+                    styles.loading,
+                    {
+                        backgroundColor: embedded
+                            ? theme.white
+                            : theme.bg_color,
+                    },
+                ]}>
                 <ActivityIndicator size="large" color={theme.themeColor} />
             </View>
         );
     }
 
     return (
-        <View style={[styles.container, {backgroundColor: theme.bg_color}]}>
+        <View
+            style={[
+                styles.container,
+                {
+                    backgroundColor: embedded
+                        ? theme.white
+                        : theme.bg_color,
+                },
+            ]}>
             <FlashList
                 data={items}
                 keyExtractor={item => item.id}
@@ -159,11 +191,12 @@ const HarborActivityPage = ({route, navigation}) => {
                     isLiquidGlassSupported ? {top: headerHeight} : undefined
                 }
                 contentInsetAdjustmentBehavior={
-                    isLiquidGlassSupported ? 'never' : 'automatic'
+                    embedded || isLiquidGlassSupported ? 'never' : 'automatic'
                 }
                 contentContainerStyle={[
                     styles.content,
-                    isLiquidGlassSupported && {
+                    {paddingBottom: contentBottomInset},
+                    !embedded && isLiquidGlassSupported && {
                         paddingTop: headerHeight + verticalScale(12),
                     },
                 ]}
@@ -239,10 +272,7 @@ const HarborActivityPage = ({route, navigation}) => {
                         refreshing={isRefreshing}
                         tintColor={theme.themeColor}
                         colors={[theme.themeColor]}
-                        onRefresh={() => {
-                            trigger();
-                            loadFirstPage({refresh: true});
-                        }}
+                        onRefresh={handleRefresh}
                     />
                 }
                 onEndReached={loadMore}

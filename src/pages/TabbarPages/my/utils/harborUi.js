@@ -21,6 +21,30 @@ export const activityMeta = {
     },
 };
 
+export function mergeHarborUnreadItems(notifications, messages) {
+    return [
+        ...(notifications || [])
+            .filter(item => !item.isRead)
+            .map(item => ({
+                ...item,
+                inboxType: 'notification',
+                listId: `notification-${item.id}`,
+            })),
+        ...(messages || [])
+            .filter(item => item.unreadCount > 0)
+            .map(item => ({
+                ...item,
+                inboxType: 'message',
+                listId: `message-${item.id}`,
+            })),
+    ].sort((left, right) => {
+        const rightTime = new Date(right.createdAt).getTime();
+        const leftTime = new Date(left.createdAt).getTime();
+        return (Number.isNaN(rightTime) ? 0 : rightTime) -
+            (Number.isNaN(leftTime) ? 0 : leftTime);
+    });
+}
+
 export function formatRelativeTime(value, language = 'tc', now = Date.now()) {
     const date = new Date(value);
     if (Number.isNaN(date.getTime())) {
