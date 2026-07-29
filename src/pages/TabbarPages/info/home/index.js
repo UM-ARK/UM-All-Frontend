@@ -476,7 +476,9 @@ const HomeScreen = ({ navigation }) => {
         const {layoutMeasurement, contentOffset, contentSize} = event.nativeEvent;
 
         if (isLoading || isLoadMore) {return;}
-        const isCloseToBottom = layoutMeasurement.height + contentOffset.y >= contentSize.height - verticalScale(100);
+        // 僅 ARK 活動時瀑布流較短，提前約一屏觸發預載，避免滑到底才開始請求
+        const bottomThreshold = Math.max(layoutMeasurement.height, verticalScale(400));
+        const isCloseToBottom = layoutMeasurement.height + contentOffset.y >= contentSize.height - bottomThreshold;
 
         // 接近底部時，獲取更多數據
         if (isCloseToBottom && !isLoadMore && !isLoading) {
