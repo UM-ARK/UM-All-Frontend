@@ -226,6 +226,43 @@ const LocalCourseOfferingMenuCard = ({ navigation, slots, variant }) => {
                     },
                     animatedStyle,
                 ]}>
+                {variant === 'section' && (
+                    <View
+                        style={{
+                            width: '100%',
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            marginBottom: scale(4),
+                        }}>
+                        <View
+                            style={{
+                                width: scale(3),
+                                height: scale(14),
+                                borderRadius: scale(2),
+                                backgroundColor: themeColor,
+                                marginRight: scale(8),
+                            }}
+                        />
+                        <Text
+                            style={{
+                                ...uiStyle.defaultText,
+                                flex: 1,
+                                fontSize: scale(13),
+                                fontWeight: '700',
+                                color: black.second,
+                            }}>
+                            Section {courseRow.Section}
+                        </Text>
+                        <Text
+                            style={{
+                                ...uiStyle.defaultText,
+                                fontSize: scale(10),
+                                color: black.third,
+                            }}>
+                            {courseRow['Medium of Instruction']}
+                        </Text>
+                    </View>
+                )}
                 {variant !== 'section' && (
                     <View style={{ flexDirection: 'row' }}>
                         <Text
@@ -241,7 +278,12 @@ const LocalCourseOfferingMenuCard = ({ navigation, slots, variant }) => {
                     </View>
                 )}
                 {isPE && (
-                    <View style={{ alignItems: 'center' }}>
+                    <View
+                        style={{
+                            alignItems: 'center',
+                            flexDirection:
+                                variant === 'section' ? 'row' : 'column',
+                        }}>
                         <Text
                             style={{
                                 ...uiStyle.defaultText,
@@ -253,6 +295,16 @@ const LocalCourseOfferingMenuCard = ({ navigation, slots, variant }) => {
                                 courseRow['Course Title'],
                             )}
                         </Text>
+                        {variant === 'section' ? (
+                            <Text
+                                style={{
+                                    ...uiStyle.defaultText,
+                                    fontSize: scale(13),
+                                    color: black.third,
+                                }}>
+                                {' · '}
+                            </Text>
+                        ) : null}
                         <Text
                             style={{
                                 ...uiStyle.defaultText,
@@ -301,31 +353,17 @@ const LocalCourseOfferingMenuCard = ({ navigation, slots, variant }) => {
                                               sameSection.Classroom
                                     }
                                     style={{
-                                        width: '50%',
-                                        paddingVertical: scale(5),
+                                        width:
+                                            variant === 'section'
+                                                ? '100%'
+                                                : '50%',
+                                        paddingVertical:
+                                            variant === 'section'
+                                                ? scale(2)
+                                                : scale(5),
                                         alignItems: 'center',
                                     }}>
-                                    <Text
-                                        style={{
-                                            ...uiStyle.defaultText,
-                                            fontSize: scale(10),
-                                            color: black.third,
-                                        }}>
-                                        {sameSection.Day}
-                                    </Text>
-                                    {'Classroom' in sameSection &&
-                                    sameSection.Classroom ? (
-                                        <Text
-                                            style={{
-                                                ...uiStyle.defaultText,
-                                                fontSize: scale(10),
-                                                color: black.third,
-                                            }}>
-                                            {sameSection.Classroom}
-                                        </Text>
-                                    ) : null}
-                                    {'Time From' in sameSection &&
-                                    sameSection['Time From'] ? (
+                                    {variant === 'section' ? (
                                         <Text
                                             style={{
                                                 ...uiStyle.defaultText,
@@ -334,10 +372,51 @@ const LocalCourseOfferingMenuCard = ({ navigation, slots, variant }) => {
                                             }}
                                             numberOfLines={1}
                                             adjustsFontSizeToFit>
-                                            {sameSection['Time From']} ~{' '}
-                                            {sameSection['Time To']}
+                                            {sameSection.Day}
+                                            {sameSection.Classroom
+                                                ? ` · ${sameSection.Classroom}`
+                                                : ''}
+                                            {sameSection['Time From']
+                                                ? ` · ${sameSection['Time From']} ~ ${sameSection['Time To']}`
+                                                : ''}
                                         </Text>
-                                    ) : null}
+                                    ) : (
+                                        <>
+                                            <Text
+                                                style={{
+                                                    ...uiStyle.defaultText,
+                                                    fontSize: scale(10),
+                                                    color: black.third,
+                                                }}>
+                                                {sameSection.Day}
+                                            </Text>
+                                            {'Classroom' in sameSection &&
+                                            sameSection.Classroom ? (
+                                                <Text
+                                                    style={{
+                                                        ...uiStyle.defaultText,
+                                                        fontSize: scale(10),
+                                                        color: black.third,
+                                                    }}>
+                                                    {sameSection.Classroom}
+                                                </Text>
+                                            ) : null}
+                                            {'Time From' in sameSection &&
+                                            sameSection['Time From'] ? (
+                                                <Text
+                                                    style={{
+                                                        ...uiStyle.defaultText,
+                                                        fontSize: scale(10),
+                                                        color: black.third,
+                                                    }}
+                                                    numberOfLines={1}
+                                                    adjustsFontSizeToFit>
+                                                    {sameSection['Time From']} ~{' '}
+                                                    {sameSection['Time To']}
+                                                </Text>
+                                            ) : null}
+                                        </>
+                                    )}
                                 </View>
                             ))}
                         </View>

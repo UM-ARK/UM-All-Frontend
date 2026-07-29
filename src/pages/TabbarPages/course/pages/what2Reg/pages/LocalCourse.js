@@ -318,20 +318,15 @@ const LocalCourse = (props) => {
         </View>
     );
 
-    // 渲染可選 section（每個班別一組標題 + 卡片，視覺對齊 ClubPage SectionList）
+    // 渲染可選 section；班別與授課語言收進卡片，減少重複區塊的垂直留白
     const renderSchedules = (schedulesObj) => {
         const schedulesArr = Object.keys(schedulesObj);
         return (
             <>
-                {schedulesArr.map((itm, index) => {
+                {schedulesArr.map(itm => {
                     const slots = daySort([...(schedulesObj[itm] ?? [])]);
-                    const medium = slots[0]?.['Medium of Instruction'];
-                    const sectionHeaderTitle = medium
-                        ? `Section ${itm} - ${medium}`
-                        : `Section ${itm}`;
                     return (
                         <View key={itm}>
-                            {renderClubStyleSectionHeader(sectionHeaderTitle, index === 0)}
                             <View style={{ alignItems: 'center' }}>
                                 <LocalCourseOfferingMenuCard
                                     navigation={navigation}
