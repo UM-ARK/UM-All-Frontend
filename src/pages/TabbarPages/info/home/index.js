@@ -547,25 +547,19 @@ const HomeScreen = ({ navigation }) => {
                         marginTop: verticalScale(5),
                         paddingHorizontal: scale(10),
                     }}>
-                    <View
-                        style={{
-                            backgroundColor: white,
-                            borderRadius: scale(10),
-                        }}>
-                        <FlatGrid
-                            itemContainerStyle={{
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                            }}
-                            maxItemsPerRow={5}
-                            itemDimension={scale(50)}
-                            spacing={scale(10)}
-                            data={functionArray}
-                            renderItem={({ item }) => renderQuickFeature(item)}
-                            showsVerticalScrollIndicator={false}
-                            scrollEnabled={false}
-                        />
-                    </View>
+                    <FlatGrid
+                        itemContainerStyle={{
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                        }}
+                        maxItemsPerRow={5}
+                        itemDimension={scale(50)}
+                        spacing={scale(10)}
+                        data={functionArray}
+                        renderItem={({ item }) => renderQuickFeature(item)}
+                        showsVerticalScrollIndicator={false}
+                        scrollEnabled={false}
+                    />
                 </View>
 
                 {/* 更新提示 */}
