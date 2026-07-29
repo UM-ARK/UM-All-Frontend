@@ -11,6 +11,7 @@ import { logToFirebase } from '../../../../../../utils/firebaseAnalytics';
 import { openLink } from '../../../../../../utils/browser';
 import { trigger } from '../../../../../../utils/trigger';
 import { navigateToCourseTab } from '../../../../../../utils/courseNavigation';
+import { getCourseDisplayTitle } from '../utils/courseTitle';
 
 import { scale } from 'react-native-size-matters';
 import { NavigationContext } from '@react-navigation/native';
@@ -320,7 +321,7 @@ const CourseCard = memo(
                                 fontSize: scale(11),
                                 color: black.second,
                             }}>
-                            {title}
+                            {getCourseDisplayTitle(courseCode, title)}
                         </Text>
                         {'courseTitleChi' in item &&
                             item.courseTitleChi.length > 0 ? (
@@ -330,7 +331,7 @@ const CourseCard = memo(
                                     fontSize: scale(11),
                                     color: black.second,
                                 }}>
-                                {item.courseTitleChi}
+                                {getCourseDisplayTitle(courseCode, item.courseTitleChi)}
                             </Text>
                         ) : null}
                         {'Course Title Chi' in item &&
@@ -341,7 +342,7 @@ const CourseCard = memo(
                                     fontSize: scale(11),
                                     color: black.second,
                                 }}>
-                                {item['Course Title Chi']}
+                                {getCourseDisplayTitle(courseCode, item['Course Title Chi'])}
                             </Text>
                         ) : null}
                     </View>

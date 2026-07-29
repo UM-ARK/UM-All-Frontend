@@ -34,6 +34,7 @@ import SearchBarSection from './components/SearchBarSection';
 import FirstLetterNav from './components/FirstLetterNav';
 import { unitMap, depaMap, geClassMap } from './constants/maps';
 import { adpeMap, CMGEList, dayList, defaultFilterOptions, defaultTimeFilter, modeENStr } from './constants/options';
+import { getCourseDisplayTitle } from './utils/courseTitle';
 import TouchableScale from '../../../../../components/TouchableScale';
 
 const itemHeight = scale(75);
@@ -52,12 +53,13 @@ const getVisualTextLength = text => Array.from(String(text || '')).reduce((lengt
 }, 0);
 
 const getCourseCardSpan = item => {
+    const courseCode = item['Course Code'] || item.New_code;
     const titleCandidates = [
         item['Course Title'],
         item['Course Title Chi'],
         item.courseTitleEng,
         item.courseTitleChi,
-    ].filter(Boolean);
+    ].map(title => getCourseDisplayTitle(courseCode, title)).filter(Boolean);
     const titleLength = Math.max(
         ...titleCandidates.map(getVisualTextLength),
         0,

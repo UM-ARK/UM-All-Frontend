@@ -20,6 +20,7 @@ import { useUmehHost } from '../../../../../../utils/umehHost';
 import { openLink } from '../../../../../../utils/browser';
 import { logToFirebase } from '../../../../../../utils/firebaseAnalytics';
 import { navigateToCourseTab } from '../../../../../../utils/courseNavigation';
+import { getCourseSectionDisplayTitle } from '../utils/courseTitle';
 
 /** 與 LocalCourse 列表左右內距一致 */
 const TEACHER_LIST_SIDE_INSET = scale(10);
@@ -247,7 +248,10 @@ const LocalCourseOfferingMenuCard = ({ navigation, slots, variant }) => {
                                 fontSize: scale(13),
                                 color: black.third,
                             }}>
-                            {courseRow['Course Title']}
+                            {getCourseSectionDisplayTitle(
+                                courseRow['Course Code'],
+                                courseRow['Course Title'],
+                            )}
                         </Text>
                         <Text
                             style={{
@@ -255,7 +259,10 @@ const LocalCourseOfferingMenuCard = ({ navigation, slots, variant }) => {
                                 fontSize: scale(13),
                                 color: black.third,
                             }}>
-                            {courseRow['Course Title Chi']}
+                            {getCourseSectionDisplayTitle(
+                                courseRow['Course Code'],
+                                courseRow['Course Title Chi'],
+                            )}
                         </Text>
                     </View>
                 )}

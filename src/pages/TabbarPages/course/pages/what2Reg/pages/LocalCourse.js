@@ -15,6 +15,7 @@ import groupBy from 'lodash/groupBy';
 import lodash from 'lodash';
 
 import LocalCourseOfferingMenuCard from '../components/LocalCourseOfferingMenuCard';
+import { getCourseDisplayTitle } from '../utils/courseTitle';
 
 /** 與 ClubPage Section 標題列對齊的左右內距 */
 const LOCAL_SECTION_HORIZONTAL_PADDING = scale(10);
@@ -440,8 +441,8 @@ const LocalCourse = (props) => {
                     {/* 課程基礎信息 */}
                     {courseInfo ? (
                         <View style={{ alignItems: 'center' }}>
-                            <Text style={{ ...uiStyle.defaultText, fontSize: scale(13), color: black.main, textAlign: 'center' }}>{courseInfo['Course Title']}</Text>
-                            <Text style={{ ...uiStyle.defaultText, fontSize: scale(13), color: black.third, textAlign: 'center' }}>{courseInfo['Course Title Chi']}</Text>
+                            <Text style={{ ...uiStyle.defaultText, fontSize: scale(13), color: black.main, textAlign: 'center' }}>{getCourseDisplayTitle(courseCode, courseInfo['Course Title'])}</Text>
+                            <Text style={{ ...uiStyle.defaultText, fontSize: scale(13), color: black.third, textAlign: 'center' }}>{getCourseDisplayTitle(courseCode, courseInfo['Course Title Chi'])}</Text>
                             <Text style={{ ...uiStyle.defaultText, fontSize: scale(10), color: black.third }}>
                                 {courseInfo['Offering Unit']}
                                 {courseInfo['Offering Department'] ? <Text>{' - ' + courseInfo['Offering Department']}</Text> : null}
