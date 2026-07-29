@@ -18,7 +18,6 @@ import {
     mergeHarborDrafts,
 } from '../../../../utils/harbor/harborDrafts';
 import { trigger } from '../../../../utils/trigger';
-import HarborActivityRow from './HarborActivityRow';
 import HarborProfileCard from './HarborProfileCard';
 import HarborSectionHeader from './HarborSectionHeader';
 import HarborStatsCard from './HarborStatsCard';
@@ -153,18 +152,6 @@ const HarborDashboard = ({ user, navigation }) => {
         });
     };
 
-    const handleActivityPress = activity => {
-        if (activity.topicId) {
-            navigation.navigate('HarborTopicDetail', {
-                topicId: activity.topicId,
-                postNumber: activity.postNumber,
-                topicTitle: activity.title,
-            });
-            return;
-        }
-        navigation.navigate('HarborActivity', { kind: 'all' });
-    };
-
     return (
         <View style={styles.container}>
             <HarborProfileCard
@@ -247,40 +234,6 @@ const HarborDashboard = ({ user, navigation }) => {
                         </TouchableScale>
                     ))}
                 </View>
-            </View>
-
-            <View
-                style={[
-                    styles.activityCard,
-                    { backgroundColor: theme.white },
-                ]}>
-                <HarborSectionHeader
-                    title={t('最近活動')}
-                    actionLabel={t('全部')}
-                    onAction={() =>
-                        navigation.navigate('HarborActivity', { kind: 'all' })
-                    }
-                />
-                {user.activity?.length ? (
-                    user.activity.map((activity, index) => (
-                        <HarborActivityRow
-                            key={activity.id}
-                            item={activity}
-                            showDivider={index < user.activity.length - 1}
-                            onPress={handleActivityPress}
-                        />
-                    ))
-                ) : (
-                    <View style={styles.compactEmpty}>
-                        <Text
-                            style={[
-                                styles.compactEmptyText,
-                                { color: theme.black.third },
-                            ]}>
-                            {t('暫時沒有最近活動')}
-                        </Text>
-                    </View>
-                )}
             </View>
 
             <HarborStatsCard
@@ -417,16 +370,6 @@ const styles = StyleSheet.create({
         fontSize: scale(12),
         fontWeight: '600',
         textAlign: 'center',
-    },
-    activityCard: {
-        borderRadius: scale(10),
-        overflow: 'hidden',
-    },
-    compactEmpty: {
-        minHeight: verticalScale(76),
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: scale(16),
     },
     compactEmptyText: {
         ...uiStyle.defaultText,
