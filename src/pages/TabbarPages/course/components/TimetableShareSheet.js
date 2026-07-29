@@ -12,14 +12,13 @@ import {
     Alert,
     Image,
     Pressable,
-    ScrollView,
     StyleSheet,
     Text,
     View,
     useWindowDimensions,
 } from 'react-native';
 
-import ActionSheet from 'react-native-actions-sheet';
+import ActionSheet, { ScrollView } from 'react-native-actions-sheet';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { scale, verticalScale } from 'react-native-size-matters';
 import { useTranslation } from 'react-i18next';
@@ -577,6 +576,7 @@ const TimetableShareSheet = forwardRef(({ courseVersion }, ref) => {
             ref={actionSheetRef}
             containerStyle={styles.sheetContainer}
             onClose={handleSheetClose}
+            enableGesturesInScrollView={false}
             gestureEnabled={!isGenerating}>
             <Text style={styles.heading}>
                 {t('課表分享預覽', { ns: 'timetable' })}
