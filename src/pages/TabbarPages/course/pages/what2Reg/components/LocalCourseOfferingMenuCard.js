@@ -37,7 +37,12 @@ const COURSE_CARD_SPRING = {
 };
 
 // 單一 offering（section）卡片與長按選單：Section／Teacher 分組共用。
-const LocalCourseOfferingMenuCard = ({ navigation, slots, variant }) => {
+const LocalCourseOfferingMenuCard = ({
+    navigation,
+    slots,
+    variant,
+    isRecommended = false,
+}) => {
     const { width: windowWidth } = useWindowDimensions();
     // Section 單卡置中：用螢幕寬扣除左右邊距
     // Teacher 橫滑：約兩卡寬 + peek，讓下一張露出一截
@@ -53,7 +58,7 @@ const LocalCourseOfferingMenuCard = ({ navigation, slots, variant }) => {
             : Math.max(scale(130), teacherCardWidth);
     const { theme } = useTheme();
     const { baseHost } = useUmehHost();
-    const { themeColor, black, white } = theme;
+    const { themeColor, black, white, tonal } = theme;
 
     // 原生 UIButton 會吃掉子層 pressIn，故縮放回饋改由選單開合驅動
     // hook 必須在 courseRow 提前 return 之前呼叫
@@ -218,8 +223,12 @@ const LocalCourseOfferingMenuCard = ({ navigation, slots, variant }) => {
                 style={[
                     {
                         width: cardWidth,
-                        backgroundColor: white,
+                        backgroundColor: isRecommended
+                            ? tonal.primary08
+                            : white,
                         borderRadius: scale(16),
+                        borderWidth: isRecommended ? scale(1) : 0,
+                        borderColor: themeColor,
                         paddingVertical: scale(5),
                         paddingHorizontal: scale(8),
                         alignItems: 'center',
@@ -261,6 +270,18 @@ const LocalCourseOfferingMenuCard = ({ navigation, slots, variant }) => {
                             }}>
                             {courseRow['Medium of Instruction']}
                         </Text>
+                        {isRecommended ? (
+                            <Text
+                                style={{
+                                    ...uiStyle.defaultText,
+                                    marginLeft: scale(8),
+                                    fontSize: scale(10),
+                                    fontWeight: '700',
+                                    color: themeColor,
+                                }}>
+                                {t('不衝突', { ns: 'catalog' })}
+                            </Text>
+                        ) : null}
                     </View>
                 )}
                 {variant !== 'section' && (
@@ -274,6 +295,15 @@ const LocalCourseOfferingMenuCard = ({ navigation, slots, variant }) => {
                             {courseRow.Section +
                                 ' - ' +
                                 courseRow['Medium of Instruction']}
+                            {isRecommended ? (
+                                <Text
+                                    style={{
+                                        color: themeColor,
+                                        fontWeight: '700',
+                                    }}>
+                                    {` · ${t('不衝突', { ns: 'catalog' })}`}
+                                </Text>
+                            ) : null}
                         </Text>
                     </View>
                 )}

@@ -54,6 +54,30 @@ export const isSlotWithinTimeFilter = (slot, timeFilter) => {
 };
 
 /**
+ * 判斷單一 Section 是否時間完整、符合時段條件且不與目前課表衝突。
+ */
+export const isSectionRecommended = ({
+    sectionSlots = [],
+    planSlots = [],
+    timeFilter = defaultTimeFilter,
+}) => {
+    const hasCompleteSchedule = sectionSlots.length > 0 &&
+        sectionSlots.every(slot => {
+            const timeFrom = parseTimeToMinutes(slot['Time From']);
+            const timeTo = parseTimeToMinutes(slot['Time To']);
+
+            return Boolean(slot.Day) &&
+                timeFrom !== null &&
+                timeTo !== null &&
+                timeFrom < timeTo;
+        });
+
+    return hasCompleteSchedule &&
+        sectionSlots.some(slot => isSlotWithinTimeFilter(slot, timeFilter)) &&
+        getSectionConflicts(sectionSlots, planSlots).length === 0;
+};
+
+/**
  * 判斷某課程是否至少有一個可安全排入目前課表的 Section。
  * 已加入的課程，以及時間未完整公佈的 Section，均不列入建議。
  */
@@ -73,22 +97,13 @@ export const isCourseRecommended = ({
         'Section',
     );
 
-    return Object.values(slotsBySection).some(sectionSlots => {
-        const hasCompleteSchedule = sectionSlots.length > 0 &&
-            sectionSlots.every(slot => {
-                const timeFrom = parseTimeToMinutes(slot['Time From']);
-                const timeTo = parseTimeToMinutes(slot['Time To']);
-
-                return Boolean(slot.Day) &&
-                    timeFrom !== null &&
-                    timeTo !== null &&
-                    timeFrom < timeTo;
-            });
-
-        return hasCompleteSchedule &&
-            sectionSlots.some(slot => isSlotWithinTimeFilter(slot, timeFilter)) &&
-            getSectionConflicts(sectionSlots, planSlots).length === 0;
-    });
+    return Object.values(slotsBySection).some(sectionSlots =>
+        isSectionRecommended({
+            sectionSlots,
+            planSlots,
+            timeFilter,
+        }),
+    );
 };
 
 /**

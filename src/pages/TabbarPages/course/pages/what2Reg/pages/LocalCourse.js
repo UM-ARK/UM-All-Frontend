@@ -229,7 +229,20 @@ const LocalCourse = (props) => {
     const { navigation } = props;
 
     // 狀態管理
-    const [courseCode] = useState(props.route.params);
+    const routeParams = props.route.params;
+    const [courseCode] = useState(
+        typeof routeParams === 'string'
+            ? routeParams
+            : routeParams?.courseCode,
+    );
+    const recommendedSectionSet = useMemo(
+        () => new Set(
+            Array.isArray(routeParams?.recommendedSections)
+                ? routeParams.recommendedSections
+                : [],
+        ),
+        [routeParams],
+    );
     const [isLoading, setIsLoading] = useState(true);
     const [s_coursePlanTime, setSCoursePlanTime] = useState(coursePlanTime);
     const [groupChoice, setGroupChoice] = useState('section');
@@ -332,6 +345,7 @@ const LocalCourse = (props) => {
                                     navigation={navigation}
                                     slots={slots}
                                     variant="section"
+                                    isRecommended={recommendedSectionSet.has(itm)}
                                 />
                             </View>
                         </View>
@@ -394,6 +408,7 @@ const LocalCourse = (props) => {
                                             navigation={navigation}
                                             slots={slots}
                                             variant="teacher"
+                                            isRecommended={recommendedSectionSet.has(itm)}
                                         />
                                     );
                                 }}

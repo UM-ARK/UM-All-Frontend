@@ -1,5 +1,11 @@
+jest.mock('../../../constants', () => ({
+    DEFAULT_TIME_FROM: '00:00',
+    DEFAULT_TIME_TO: '23:59',
+}));
+
 import {
     isCourseRecommended,
+    isSectionRecommended,
     isSlotWithinTimeFilter,
 } from '../hooks/useCourseFiltering';
 
@@ -127,6 +133,27 @@ describe('isCourseRecommended', () => {
                 from: '17:50',
                 to: '23:59',
             },
+        })).toBe(true);
+    });
+});
+
+describe('isSectionRecommended', () => {
+    it('只高亮時間完整且不衝突的 Section', () => {
+        const planSlots = [
+            makeSlot('PLAN1000', '001', 'MON', '09:00', '10:00'),
+        ];
+
+        expect(isSectionRecommended({
+            sectionSlots: [
+                makeSlot('TEST1000', '001', 'MON', '09:30', '10:30'),
+            ],
+            planSlots,
+        })).toBe(false);
+        expect(isSectionRecommended({
+            sectionSlots: [
+                makeSlot('TEST1000', '002', 'TUE', '09:30', '10:30'),
+            ],
+            planSlots,
         })).toBe(true);
     });
 });

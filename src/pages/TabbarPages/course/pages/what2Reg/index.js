@@ -2,6 +2,7 @@ import React, {
     useCallback,
     useContext,
     useEffect,
+    useMemo,
     useRef,
     useState,
 } from 'react';
@@ -26,7 +27,9 @@ import { useCoursePlan } from '../../context/CoursePlanContext';
 import PlanCapsule from '../../components/PlanCapsule';
 
 import CourseCard from './components/CourseCard';
-import useCourseFiltering from './hooks/useCourseFiltering';
+import useCourseFiltering, {
+    isSectionRecommended,
+} from './hooks/useCourseFiltering';
 import useCourseSearch from './hooks/useCourseSearch';
 import useFirstLetterNav from './hooks/useFirstLetterNav';
 import FilterPanel from './components/FilterPanel';
@@ -131,7 +134,12 @@ const groupCourseCardsByRow = list => {
     return rows.map(fillCourseCardRow);
 };
 
-const CourseCardRow = ({ entries, availableWidth, courseMode }) => {
+const CourseCardRow = ({
+    entries,
+    availableWidth,
+    courseMode,
+    recommendedSectionsByCourseCode,
+}) => {
     const [measuredHeights, setMeasuredHeights] = useState({});
     const isRowMeasured = entries.every(entry => measuredHeights[entry.key] > 0);
     const rowHeight = isRowMeasured
@@ -158,6 +166,11 @@ const CourseCardRow = ({ entries, availableWidth, courseMode }) => {
                     cardWidth={getCourseCardWidth(entry.span, availableWidth)}
                     cardHeight={rowHeight}
                     onMeasureHeight={height => handleMeasureHeight(entry.key, height)}
+                    recommendedSections={
+                        recommendedSectionsByCourseCode?.[
+                            entry.item['Course Code'] || entry.item.New_code
+                        ]
+                    }
                 />
             ))}
         </View>
@@ -218,6 +231,40 @@ const What2Reg = () => {
         planCourseCodes,
         planSlots,
     });
+
+    const recommendedSectionsByCourseCode = useMemo(() => {
+        if (!isRecommendationFilterActive) {
+            return {};
+        }
+
+        const slotsByCourseCode = lodash.groupBy(
+            coursePlanTimeData?.Courses || [],
+            'Course Code',
+        );
+        return filterCourseList.reduce((result, course) => {
+            const courseCode = course['Course Code'];
+            const courseSlots = slotsByCourseCode[courseCode] || [];
+            result[courseCode] = Object.entries(
+                lodash.groupBy(courseSlots, 'Section'),
+            )
+                .filter(([, sectionSlots]) => isSectionRecommended({
+                    sectionSlots,
+                    planSlots,
+                    timeFilter: isTimeFilterActive
+                        ? timeFilter
+                        : defaultTimeFilter,
+                }))
+                .map(([section]) => section);
+            return result;
+        }, {});
+    }, [
+        coursePlanTimeData,
+        filterCourseList,
+        isRecommendationFilterActive,
+        isTimeFilterActive,
+        planSlots,
+        timeFilter,
+    ]);
 
     const {
         inputText,
@@ -346,7 +393,7 @@ const What2Reg = () => {
      * 每行量測所有卡片的自然高度後統一使用最大值，避免 Expo MenuView
      * 的 SwiftUI Host 無法繼承 React Native Flexbox 拉伸高度。
      */
-    const renderCourseCards = useCallback(list => (
+    const renderCourseCards = useCallback((list, showRecommendations = false) => (
         <View
             style={{
                 rowGap: COURSE_CARD_GAP,
@@ -367,11 +414,16 @@ const What2Reg = () => {
                         entries={entries}
                         availableWidth={courseGridWidth}
                         courseMode={courseMode}
+                        recommendedSectionsByCourseCode={
+                            showRecommendations
+                                ? recommendedSectionsByCourseCode
+                                : null
+                        }
                     />
                 ))
                 : null}
         </View>
-    ), [courseGridWidth, courseMode]);
+    ), [courseGridWidth, courseMode, recommendedSectionsByCourseCode]);
 
     // 搜尋結果不套用星期／時段篩選：此時 FilterPanel 不渲染，使用者既看不到也無法清除該篩選
     const hasSearchResult = searchFilterCourse?.length > 0;
@@ -444,7 +496,10 @@ const What2Reg = () => {
                         />
 
                         {filterCourseList?.length > 0
-                            ? renderCourseCards(filterCourseList)
+                            ? renderCourseCards(
+                                filterCourseList,
+                                isRecommendationFilterActive,
+                            )
                             : null}
 
                         {(isTimeFilterActive || isRecommendationFilterActive) &&
