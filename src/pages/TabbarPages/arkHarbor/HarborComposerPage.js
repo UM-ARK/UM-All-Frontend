@@ -29,6 +29,9 @@ import {
 } from '../../../utils/pathMap';
 import {trigger} from '../../../utils/trigger';
 import HarborComposerForm from './composer/HarborComposerForm';
+import HarborReplyComposerForm, {
+    HarborReplyComposerState,
+} from './composer/HarborReplyComposerForm';
 import {useHarborComposer} from './composer/useHarborComposer';
 import {useHarborDraft} from './composer/useHarborDraft';
 import {useHarborComposerImages} from './composer/useHarborComposerImages';
@@ -495,10 +498,25 @@ const HarborComposerPage = ({route, navigation}) => {
         tagSheetRef.current?.expand();
     }, []);
 
+    const closeReplyComposer = useCallback(() => {
+        trigger();
+        Keyboard.dismiss();
+        navigation.goBack();
+    }, [navigation]);
+
     if (
         sessionStatus === 'restoring' ||
         sessionStatus === 'authorizing'
     ) {
+        if (isReply) {
+            return (
+                <HarborReplyComposerState
+                    description={t('正在確認 Harbor 登入狀態…')}
+                    isLoading
+                    onClose={closeReplyComposer}
+                />
+            );
+        }
         return (
             <View
                 style={[
@@ -518,6 +536,21 @@ const HarborComposerPage = ({route, navigation}) => {
     }
 
     if (sessionStatus !== 'signedIn') {
+        if (isReply) {
+            return (
+                <HarborReplyComposerState
+                    actionLabel={t('登入 Harbor')}
+                    description={
+                        loadError ||
+                        t('登入後可建立話題、回覆及編輯自己的貼文。')
+                    }
+                    icon="account-lock-outline"
+                    onAction={handleLogin}
+                    onClose={closeReplyComposer}
+                    title={t('登入後即可使用 Harbor Composer')}
+                />
+            );
+        }
         return (
             <View
                 style={[
@@ -576,6 +609,15 @@ const HarborComposerPage = ({route, navigation}) => {
     }
 
     if (isLoading || isDraftLoading) {
+        if (isReply) {
+            return (
+                <HarborReplyComposerState
+                    description={t('正在準備 Composer…')}
+                    isLoading
+                    onClose={closeReplyComposer}
+                />
+            );
+        }
         return (
             <View
                 style={[
@@ -597,6 +639,21 @@ const HarborComposerPage = ({route, navigation}) => {
     }
 
     if (loadError) {
+        if (isReply) {
+            return (
+                <HarborReplyComposerState
+                    actionLabel={t('重試')}
+                    description={loadError}
+                    icon="cloud-alert-outline"
+                    onAction={() => {
+                        trigger();
+                        loadComposerData();
+                    }}
+                    onClose={closeReplyComposer}
+                    title={t('Composer 載入失敗')}
+                />
+            );
+        }
         return (
             <View
                 style={[
@@ -647,6 +704,38 @@ const HarborComposerPage = ({route, navigation}) => {
                     </Text>
                 </Pressable>
             </View>
+        );
+    }
+
+    if (isReply) {
+        return (
+            <HarborReplyComposerForm
+                composer={{
+                    composerSettings,
+                    maximumPostLength,
+                    raw,
+                    setRaw,
+                    visibleTextLength,
+                }}
+                imagesState={{
+                    handleAddImages,
+                    handleRemoveImage,
+                    handleRetryImage,
+                    hasReachedImageLimit,
+                    images,
+                    isPreparingImages,
+                    isUploadingImages,
+                }}
+                onClose={closeReplyComposer}
+                route={route}
+                submit={{
+                    handleSubmit,
+                    isPostLengthValid,
+                    isSubmitDisabled,
+                    isSubmitting,
+                    submitError,
+                }}
+            />
         );
     }
 

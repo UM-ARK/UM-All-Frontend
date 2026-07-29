@@ -327,6 +327,19 @@ const Nav = () => {
                     <Stack.Screen
                         name="HarborComposer"
                         component={HarborComposerPage}
+                        options={({ route }) =>
+                            route.params?.mode === 'reply'
+                                ? {
+                                    animation: 'fade',
+                                    contentStyle: {
+                                        backgroundColor: 'transparent',
+                                    },
+                                    gestureEnabled: false,
+                                    headerShown: false,
+                                    presentation: 'transparentModal',
+                                }
+                                : {}
+                        }
                     />
                     <Stack.Screen
                         name="HarborDrafts"

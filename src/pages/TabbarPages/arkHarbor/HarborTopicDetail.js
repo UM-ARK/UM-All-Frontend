@@ -490,6 +490,10 @@ const HarborTopicDetail = ({ route, navigation }) => {
                 topicTitle: topic?.title || initialTopicTitle,
                 categoryId: topic?.category_id,
                 replyToPostNumber: post.post_number,
+                replyToUsername:
+                    post.username ||
+                    post.display_username ||
+                    post.name,
             });
         },
         [
@@ -519,6 +523,10 @@ const HarborTopicDetail = ({ route, navigation }) => {
                 topicTitle: topic?.title || initialTopicTitle,
                 categoryId: topic?.category_id,
                 replyToPostNumber: post.post_number,
+                replyToUsername:
+                    post.username ||
+                    post.display_username ||
+                    post.name,
                 quoteRaw,
             });
         },
