@@ -57,6 +57,50 @@ const normalizeSearchText = value =>
             .toLowerCase(),
     );
 
+const escapeRegExp = value =>
+    String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+// 依關鍵詞切出需高亮的文字片段（相容簡繁與大小寫）
+const buildHighlightParts = (text, query) => {
+    const source = String(text || '');
+    const trimmedQuery = String(query || '').trim();
+    if (!source || !trimmedQuery) {
+        return [{ text: source, highlight: false }];
+    }
+
+    const candidates = Array.from(
+        new Set([trimmedQuery, converter(trimmedQuery)].filter(Boolean)),
+    );
+    const pattern = new RegExp(
+        `(${candidates.map(escapeRegExp).join('|')})`,
+        'gi',
+    );
+    const parts = [];
+    let lastIndex = 0;
+    let match = pattern.exec(source);
+
+    while (match) {
+        if (match.index > lastIndex) {
+            parts.push({
+                text: source.slice(lastIndex, match.index),
+                highlight: false,
+            });
+        }
+        parts.push({ text: match[0], highlight: true });
+        lastIndex = match.index + match[0].length;
+        if (match[0].length === 0) {
+            pattern.lastIndex += 1;
+        }
+        match = pattern.exec(source);
+    }
+
+    if (lastIndex < source.length) {
+        parts.push({ text: source.slice(lastIndex), highlight: false });
+    }
+
+    return parts.length > 0 ? parts : [{ text: source, highlight: false }];
+};
+
 const SearchScreen = ({ navigation }) => {
     const { theme } = useTheme();
     const {
@@ -303,6 +347,25 @@ const SearchScreen = ({ navigation }) => {
         </View>
     );
 
+    const renderHighlightedText = (text, baseStyle, numberOfLines = 1) => (
+        <Text numberOfLines={numberOfLines} style={baseStyle}>
+            {buildHighlightParts(text, query).map((part, index) => (
+                <Text
+                    key={`${part.text}-${index}`}
+                    style={
+                        part.highlight
+                            ? {
+                                  color: themeColor,
+                                  fontWeight: '700',
+                              }
+                            : null
+                    }>
+                    {part.text}
+                </Text>
+            ))}
+        </Text>
+    );
+
     const renderHistory = () => {
         if (history.length === 0) {
             return (
@@ -521,24 +584,22 @@ const SearchScreen = ({ navigation }) => {
                 ]}>
                 <FeatureIcon item={item} />
                 <View style={styles.rowText}>
-                    <Text
-                        numberOfLines={1}
-                        style={[
+                    {renderHighlightedText(
+                        item.fn_name,
+                        [
                             uiStyle.defaultText,
                             styles.resultTitle,
                             { color: black.main },
-                        ]}>
-                        {item.fn_name}
-                    </Text>
-                    <Text
-                        numberOfLines={1}
-                        style={[
+                        ],
+                    )}
+                    {renderHighlightedText(
+                        item.describe,
+                        [
                             uiStyle.defaultText,
                             styles.rowDescription,
                             { color: black.third },
-                        ]}>
-                        {item.describe}
-                    </Text>
+                        ],
+                    )}
                 </View>
                 <Ionicons
                     name="chevron-forward"
@@ -559,44 +620,6 @@ const SearchScreen = ({ navigation }) => {
 
     const renderResults = () => (
         <>
-            {renderSectionHeader(t('相關服務', { ns: 'home' }))}
-            <View style={[styles.card, { backgroundColor: white }, viewShadow]}>
-                {localResults.length > 0 ? (
-                    localResults.map(renderResultRow)
-                ) : (
-                    <View style={styles.noResults}>
-                        <View
-                            style={[
-                                styles.emptyIcon,
-                                { backgroundColor: tonal.primary15 },
-                            ]}>
-                            <Ionicons
-                                name="search-outline"
-                                size={scale(25)}
-                                color={themeColor}
-                            />
-                        </View>
-                        <Text
-                            style={[
-                                uiStyle.defaultText,
-                                styles.noResultsTitle,
-                                { color: black.main },
-                            ]}>
-                            {t('沒有找到相關服務', { ns: 'home' })}
-                        </Text>
-                        <Text
-                            style={[
-                                uiStyle.defaultText,
-                                styles.emptyDescription,
-                                { color: black.third },
-                            ]}>
-                            {t('試試其他關鍵詞，或搜索澳大網頁。', {
-                                ns: 'home',
-                            })}
-                        </Text>
-                    </View>
-                )}
-            </View>
             <Pressable
                 onPress={handleWebSearch}
                 accessibilityRole="button"
@@ -637,6 +660,44 @@ const SearchScreen = ({ navigation }) => {
                     color={themeColor}
                 />
             </Pressable>
+            {renderSectionHeader(t('相關服務', { ns: 'home' }))}
+            <View style={[styles.card, { backgroundColor: white }, viewShadow]}>
+                {localResults.length > 0 ? (
+                    localResults.map(renderResultRow)
+                ) : (
+                    <View style={styles.noResults}>
+                        <View
+                            style={[
+                                styles.emptyIcon,
+                                { backgroundColor: tonal.primary15 },
+                            ]}>
+                            <Ionicons
+                                name="search-outline"
+                                size={scale(25)}
+                                color={themeColor}
+                            />
+                        </View>
+                        <Text
+                            style={[
+                                uiStyle.defaultText,
+                                styles.noResultsTitle,
+                                { color: black.main },
+                            ]}>
+                            {t('沒有找到相關服務', { ns: 'home' })}
+                        </Text>
+                        <Text
+                            style={[
+                                uiStyle.defaultText,
+                                styles.emptyDescription,
+                                { color: black.third },
+                            ]}>
+                            {t('試試其他關鍵詞，或搜索澳大網頁。', {
+                                ns: 'home',
+                            })}
+                        </Text>
+                    </View>
+                )}
+            </View>
         </>
     );
 
@@ -894,7 +955,7 @@ const styles = StyleSheet.create({
     },
     webSearchButton: {
         minHeight: verticalScale(58),
-        marginTop: verticalScale(12),
+        marginBottom: verticalScale(4),
         borderRadius: scale(18),
         paddingHorizontal: scale(12),
         paddingVertical: verticalScale(9),
