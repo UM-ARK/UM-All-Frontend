@@ -2589,9 +2589,12 @@ E11-0000
         // 矮卡改單行課號／時間，優先保留課室與時段
         const tiny = frame.height < verticalScale(40);
         const classroom = course.Classroom?.trim?.() || '';
+        const inlineTime = frame.width >= scale(48);
         const timeLine = tiny
             ? `${course['Time From']}-${course['Time To']}`
-            : `${course['Time From']}\n${course['Time To']}`;
+            : inlineTime
+              ? `${course['Time From']} - ${course['Time To']}`
+              : `${course['Time From']}\n${course['Time To']}`;
 
         return (
             <CourseActionMenuCard
@@ -2631,8 +2634,8 @@ E11-0000
                         ...uiStyle.defaultText,
                         color: black.main,
                         opacity: 0.8,
-                        fontSize: scale(tiny ? 8 : compact ? 8 : 10),
-                        lineHeight: scale(tiny ? 9 : compact ? 9 : 11),
+                        fontSize: scale(tiny ? 8 : compact ? 9 : 10),
+                        lineHeight: scale(tiny ? 9 : compact ? 10 : 11),
                         textAlign: 'center',
                         fontWeight: 'bold',
                     }}
@@ -2662,8 +2665,8 @@ E11-0000
                             ...uiStyle.defaultText,
                             color: black.main,
                             opacity: 0.7,
-                            fontSize: scale(tiny ? 6 : compact ? 6 : 7),
-                            lineHeight: scale(tiny ? 7 : compact ? 7 : 8),
+                            fontSize: scale(tiny ? 6 : 7),
+                            lineHeight: scale(tiny ? 7 : 8),
                             textAlign: 'center',
                             fontWeight: '600',
                         }}
@@ -2676,12 +2679,12 @@ E11-0000
                         ...uiStyle.defaultText,
                         color: black.main,
                         opacity: 0.75,
-                        fontSize: scale(tiny ? 6 : compact ? 6 : 7),
-                        lineHeight: scale(tiny ? 7 : compact ? 7 : 8),
+                        fontSize: scale(6.5),
+                        lineHeight: scale(tiny ? 7 : 8),
                         textAlign: 'center',
                         fontWeight: '600',
                     }}
-                    numberOfLines={tiny ? 1 : 2}>
+                    numberOfLines={tiny || inlineTime ? 1 : 2}>
                     {timeLine}
                 </Text>
             </CourseActionMenuCard>
