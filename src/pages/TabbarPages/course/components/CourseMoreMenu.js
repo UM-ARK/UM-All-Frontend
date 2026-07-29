@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useRef } from 'react';
-import { Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import ActionSheet from 'react-native-actions-sheet';
 import { scale, verticalScale } from 'react-native-size-matters';
@@ -8,6 +8,7 @@ import { t } from 'i18next';
 import { useTheme, uiStyle } from '../../../../components/ThemeContext';
 import { trigger } from '../../../../utils/trigger';
 import TouchableScale from '../../../../components/TouchableScale';
+import TimetableShareSheet from './TimetableShareSheet';
 
 /**
  * 選課頁次要操作選單（⋯）。
@@ -33,6 +34,7 @@ const CourseMoreMenu = ({
     const { themeColor, tonal, black, bg_color, unread } = theme;
 
     const actionSheetRef = useRef(null);
+    const shareSheetRef = useRef(null);
     // sheet 關閉動畫結束前不可再開 WebBrowser / 另一個 sheet，否則 iOS modal 競態會卡死
     const pendingActionRef = useRef(null);
 
@@ -72,6 +74,9 @@ const CourseMoreMenu = ({
                 fontWeight: 'bold',
                 fontSize: scale(15),
             }),
+            actionButtonPressed: {
+                opacity: 0.7,
+            },
         }),
         [bg_color, black.third, tonal.primary15],
     );
@@ -152,6 +157,27 @@ const CourseMoreMenu = ({
                     </TouchableScale>
 
                     {canClear ? (
+                        <Pressable
+                            accessibilityRole="button"
+                            accessibilityLabel={t('分享課表', {
+                                ns: 'timetable',
+                            })}
+                            onPress={() =>
+                                runAction(() =>
+                                    shareSheetRef.current?.show(),
+                                )
+                            }
+                            style={({ pressed }) => [
+                                styles.actionButton(tonal.primary15),
+                                pressed && styles.actionButtonPressed,
+                            ]}>
+                            <Text style={styles.actionButtonText(themeColor)}>
+                                {t('分享課表', { ns: 'timetable' })}
+                            </Text>
+                        </Pressable>
+                    ) : null}
+
+                    {canClear ? (
                         <TouchableScale
                             style={styles.actionButton(tonal.unread15)}
                             onPress={() => runAction(onClearPress)}>
@@ -174,6 +200,10 @@ const CourseMoreMenu = ({
                     </TouchableScale>
                 </View>
             </ActionSheet>
+            <TimetableShareSheet
+                ref={shareSheetRef}
+                courseVersion={courseVersion}
+            />
         </>
     );
 };

@@ -70,6 +70,17 @@ import SegmentControl from '../../../../../components/SegmentControl';
 import { COURSE_SEARCH_SEGMENT } from '../../../../../utils/courseNavigation';
 import { getReplacementCourses } from './utils/replacementCourses';
 import { computeOverviewCourseFrames } from './utils/overviewLayout';
+import {
+    OVERVIEW_ALIGNMENT_MINUTES,
+    OVERVIEW_COURSE_H_GAP,
+    OVERVIEW_COURSE_H_PADDING,
+    OVERVIEW_COURSE_V_GAP,
+    OVERVIEW_HOUR_HEIGHT,
+    OVERVIEW_MAX_COURSE_HEIGHT,
+    OVERVIEW_MIN_COURSE_HEIGHT,
+    OVERVIEW_RESERVED_HEIGHT,
+} from './utils/overviewConfig';
+import OverviewCourseCardContent from './components/OverviewCourseCardContent';
 
 const converter = OpenCC.Converter({ from: 'cn', to: 'tw' }); // 簡體轉繁體
 
@@ -78,20 +89,6 @@ const DAY_COLUMN_WIDTH = scale(135);
 /** 課程卡片左右邊距 */
 const COURSE_CARD_MARGIN = scale(5);
 const COURSE_CARD_WIDTH = DAY_COLUMN_WIDTH - COURSE_CARD_MARGIN * 2;
-/** 概覽模式每小時的顯示高度 */
-const OVERVIEW_HOUR_HEIGHT = verticalScale(62);
-/** 概覽模式課程卡片的最大高度 */
-const OVERVIEW_MAX_COURSE_HEIGHT = verticalScale(120);
-/** 概覽課卡可讀最小高度；同欄有空檔時可擴展至此以顯示課室／時間 */
-const OVERVIEW_MIN_COURSE_HEIGHT = verticalScale(56);
-/** 預留頂欄、星期列、切換器及底部提示所需高度 */
-const OVERVIEW_RESERVED_HEIGHT = verticalScale(180);
-/** 開始時間相差不超過 30 分鐘的課節對齊到同一列 */
-const OVERVIEW_ALIGNMENT_MINUTES = 30;
-/** 概覽課卡水平／垂直間距，避免相鄰或並排課卡貼合 */
-const OVERVIEW_COURSE_H_PADDING = scale(2);
-const OVERVIEW_COURSE_H_GAP = scale(2);
-const OVERVIEW_COURSE_V_GAP = verticalScale(3);
 const dayList = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
 const timeFrom = '00:00';
 const timeTo = '23:59';
@@ -2586,15 +2583,6 @@ E11-0000
             frame.laneCount > 1 ||
             frame.width < scale(48) ||
             frame.height < verticalScale(52);
-        // 矮卡改單行課號／時間，優先保留課室與時段
-        const tiny = frame.height < verticalScale(40);
-        const classroom = course.Classroom?.trim?.() || '';
-        const inlineTime = frame.width >= scale(48);
-        const timeLine = tiny
-            ? `${course['Time From']}-${course['Time To']}`
-            : inlineTime
-              ? `${course['Time From']} - ${course['Time To']}`
-              : `${course['Time From']}\n${course['Time To']}`;
 
         return (
             <CourseActionMenuCard
@@ -2629,64 +2617,7 @@ E11-0000
                     alignItems: 'center',
                     justifyContent: 'center',
                 }}>
-                <Text
-                    style={{
-                        ...uiStyle.defaultText,
-                        color: black.main,
-                        opacity: 0.8,
-                        fontSize: scale(tiny ? 8 : compact ? 9 : 10),
-                        lineHeight: scale(tiny ? 9 : compact ? 10 : 11),
-                        textAlign: 'center',
-                        fontWeight: 'bold',
-                    }}
-                    numberOfLines={tiny ? 1 : 2}>
-                    {tiny
-                        ? course['Course Code']
-                        : `${course['Course Code'].substring(0, 4)}\n${course['Course Code'].substring(4, 8)}`}
-                </Text>
-                {!tiny && course.Section ? (
-                    <Text
-                        style={{
-                            ...uiStyle.defaultText,
-                            color: black.main,
-                            opacity: 0.55,
-                            fontSize: scale(compact ? 6 : 7),
-                            lineHeight: scale(compact ? 7 : 8),
-                            textAlign: 'center',
-                            fontWeight: '700',
-                        }}
-                        numberOfLines={1}>
-                        {course.Section}
-                    </Text>
-                ) : null}
-                {classroom ? (
-                    <Text
-                        style={{
-                            ...uiStyle.defaultText,
-                            color: black.main,
-                            opacity: 0.7,
-                            fontSize: scale(tiny ? 6 : 7),
-                            lineHeight: scale(tiny ? 7 : 8),
-                            textAlign: 'center',
-                            fontWeight: '600',
-                        }}
-                        numberOfLines={1}>
-                        {classroom}
-                    </Text>
-                ) : null}
-                <Text
-                    style={{
-                        ...uiStyle.defaultText,
-                        color: black.main,
-                        opacity: 0.75,
-                        fontSize: scale(6.5),
-                        lineHeight: scale(tiny ? 7 : 8),
-                        textAlign: 'center',
-                        fontWeight: '600',
-                    }}
-                    numberOfLines={tiny || inlineTime ? 1 : 2}>
-                    {timeLine}
-                </Text>
+                <OverviewCourseCardContent course={course} frame={frame} />
             </CourseActionMenuCard>
         );
     };
