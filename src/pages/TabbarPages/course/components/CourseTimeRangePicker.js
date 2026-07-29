@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {
     Alert,
     Modal,
@@ -40,11 +40,17 @@ const ITEM_HEIGHT = 40;
 const VISIBLE_COUNT = 5;
 const WHEEL_HEIGHT = ITEM_HEIGHT * VISIBLE_COUNT;
 const WHEEL_PADDING = ITEM_HEIGHT * Math.floor(VISIBLE_COUNT / 2);
+/** 奇數份複本，初始落在中段，邊緣再無動畫回中以模擬循環 */
+const LOOP_COPIES = 5;
+const MIDDLE_COPY = Math.floor(LOOP_COPIES / 2);
 
 const OPEN_MS = 220;
 const CLOSE_MS = 200;
 const SHEET_TRANSLATE = 320;
 const BACKDROP_OPACITY = 0.45;
+
+const wrapIndex = (index, length) =>
+    ((index % length) + length) % length;
 
 /**
  * 將 HH:mm 對齊到 5 分鐘刻度（結束時間 23:59 視為 23:55）。
@@ -82,19 +88,31 @@ const joinTime = (hour, minute, options = {}) => {
 };
 
 /**
- * 可滑動的時／分滾輪（僅在慣性結束時回寫，避免 scrollTo 迴圈）。
+ * 可滑動的時／分滾輪（循環列表；僅在慣性結束時回寫，避免 scrollTo 迴圈）。
  */
 const TimeWheelColumn = ({values, value, onChange, textColor, accentColor}) => {
     const scrollRef = useRef(null);
     const suppressEndRef = useRef(true);
     const valueRef = useRef(value);
-    const selectedIndex = Math.max(0, values.indexOf(value));
+    const length = values.length;
+    const baseIndex = Math.max(0, values.indexOf(value));
+
+    const loopedValues = useMemo(() => {
+        const result = [];
+        for (let copy = 0; copy < LOOP_COPIES; copy += 1) {
+            for (let i = 0; i < length; i += 1) {
+                result.push(values[i]);
+            }
+        }
+        return result;
+    }, [length, values]);
 
     valueRef.current = value;
 
+    // 選中項變更時對齊到中段複本，避免滾到列表兩端後無法繼續循環
     useEffect(() => {
         suppressEndRef.current = true;
-        const offset = selectedIndex * ITEM_HEIGHT;
+        const offset = (MIDDLE_COPY * length + baseIndex) * ITEM_HEIGHT;
         const frame = requestAnimationFrame(() => {
             scrollRef.current?.scrollTo({y: offset, animated: false});
             setTimeout(() => {
@@ -102,20 +120,35 @@ const TimeWheelColumn = ({values, value, onChange, textColor, accentColor}) => {
             }, 80);
         });
         return () => cancelAnimationFrame(frame);
-    }, [selectedIndex]);
-
-    const resolveIndex = y =>
-        Math.min(
-            values.length - 1,
-            Math.max(0, Math.round(y / ITEM_HEIGHT)),
-        );
+    }, [baseIndex, length]);
 
     const handleMomentumScrollEnd = event => {
         if (suppressEndRef.current) {
             return;
         }
-        const index = resolveIndex(event.nativeEvent.contentOffset.y);
-        const next = values[index];
+        const rawIndex = Math.round(
+            event.nativeEvent.contentOffset.y / ITEM_HEIGHT,
+        );
+        const clampedIndex = Math.min(
+            loopedValues.length - 1,
+            Math.max(0, rawIndex),
+        );
+        const realIndex = wrapIndex(clampedIndex, length);
+        const next = values[realIndex];
+
+        // 滾到首／末份複本時無動畫回到中段，維持可繼續循環
+        const copyIndex = Math.floor(clampedIndex / length);
+        if (copyIndex === 0 || copyIndex === LOOP_COPIES - 1) {
+            suppressEndRef.current = true;
+            scrollRef.current?.scrollTo({
+                y: (MIDDLE_COPY * length + realIndex) * ITEM_HEIGHT,
+                animated: false,
+            });
+            setTimeout(() => {
+                suppressEndRef.current = false;
+            }, 80);
+        }
+
         if (next !== valueRef.current) {
             onChange(next);
         }
@@ -151,12 +184,13 @@ const TimeWheelColumn = ({values, value, onChange, textColor, accentColor}) => {
                 decelerationRate="fast"
                 bounces={false}
                 onMomentumScrollEnd={handleMomentumScrollEnd}
-                contentContainerStyle={{paddingVertical: WHEEL_PADDING}}>
-                {values.map(item => {
-                    const isActive = item === value;
+                contentContainerStyle={{paddingVertical: WHEEL_PADDING}}
+            >
+                {loopedValues.map((item, index) => {
+                    const isActive = wrapIndex(index, length) === baseIndex;
                     return (
                         <View
-                            key={item}
+                            key={`${index}-${item}`}
                             style={{
                                 height: ITEM_HEIGHT,
                                 alignItems: 'center',
