@@ -2626,30 +2626,13 @@ E11-0000
                     alignItems: 'center',
                     justifyContent: 'center',
                 }}>
-                {course.Section ? (
-                    <Text
-                        style={{
-                            ...uiStyle.defaultText,
-                            position: 'absolute',
-                            top: verticalScale(compact ? 1 : 2),
-                            right: scale(compact ? 2 : 3),
-                            color: black.main,
-                            opacity: 0.55,
-                            fontSize: scale(tiny ? 6 : 7),
-                            lineHeight: scale(tiny ? 7 : 8),
-                            fontWeight: '700',
-                        }}
-                        numberOfLines={1}>
-                        {course.Section}
-                    </Text>
-                ) : null}
                 <Text
                     style={{
                         ...uiStyle.defaultText,
                         color: black.main,
                         opacity: 0.8,
-                        fontSize: scale(tiny ? 8 : compact ? 9 : 10),
-                        lineHeight: scale(tiny ? 9 : compact ? 10 : 11),
+                        fontSize: scale(tiny ? 8 : compact ? 8 : 10),
+                        lineHeight: scale(tiny ? 9 : compact ? 9 : 11),
                         textAlign: 'center',
                         fontWeight: 'bold',
                     }}
@@ -2658,14 +2641,29 @@ E11-0000
                         ? course['Course Code']
                         : `${course['Course Code'].substring(0, 4)}\n${course['Course Code'].substring(4, 8)}`}
                 </Text>
+                {!tiny && course.Section ? (
+                    <Text
+                        style={{
+                            ...uiStyle.defaultText,
+                            color: black.main,
+                            opacity: 0.55,
+                            fontSize: scale(compact ? 6 : 7),
+                            lineHeight: scale(compact ? 7 : 8),
+                            textAlign: 'center',
+                            fontWeight: '700',
+                        }}
+                        numberOfLines={1}>
+                        {course.Section}
+                    </Text>
+                ) : null}
                 {classroom ? (
                     <Text
                         style={{
                             ...uiStyle.defaultText,
                             color: black.main,
                             opacity: 0.7,
-                            fontSize: scale(tiny ? 6 : 7),
-                            lineHeight: scale(tiny ? 7 : 8),
+                            fontSize: scale(tiny ? 6 : compact ? 6 : 7),
+                            lineHeight: scale(tiny ? 7 : compact ? 7 : 8),
                             textAlign: 'center',
                             fontWeight: '600',
                         }}
@@ -2678,8 +2676,8 @@ E11-0000
                         ...uiStyle.defaultText,
                         color: black.main,
                         opacity: 0.75,
-                        fontSize: scale(tiny ? 6 : 7),
-                        lineHeight: scale(tiny ? 7 : 8),
+                        fontSize: scale(tiny ? 6 : compact ? 6 : 7),
+                        lineHeight: scale(tiny ? 7 : compact ? 7 : 8),
                         textAlign: 'center',
                         fontWeight: '600',
                     }}
