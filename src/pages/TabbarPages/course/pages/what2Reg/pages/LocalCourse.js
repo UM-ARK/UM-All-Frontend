@@ -235,12 +235,11 @@ const LocalCourse = (props) => {
             ? routeParams
             : routeParams?.courseCode,
     );
-    const recommendedSectionSet = useMemo(
-        () => new Set(
-            Array.isArray(routeParams?.recommendedSections)
-                ? routeParams.recommendedSections
-                : [],
-        ),
+    const sectionStatuses = useMemo(
+        () => routeParams?.sectionStatuses &&
+            typeof routeParams.sectionStatuses === 'object'
+            ? routeParams.sectionStatuses
+            : {},
         [routeParams],
     );
     const [isLoading, setIsLoading] = useState(true);
@@ -345,7 +344,7 @@ const LocalCourse = (props) => {
                                     navigation={navigation}
                                     slots={slots}
                                     variant="section"
-                                    isRecommended={recommendedSectionSet.has(itm)}
+                                    highlightStatus={sectionStatuses[itm]}
                                 />
                             </View>
                         </View>
@@ -408,7 +407,7 @@ const LocalCourse = (props) => {
                                             navigation={navigation}
                                             slots={slots}
                                             variant="teacher"
-                                            isRecommended={recommendedSectionSet.has(itm)}
+                                            highlightStatus={sectionStatuses[itm]}
                                         />
                                     );
                                 }}

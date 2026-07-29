@@ -25,7 +25,7 @@ export const parseTimeToMinutes = time => {
 };
 
 /**
- * 判斷課節是否完整落在指定星期與時段內。
+ * 判斷課節是否與指定星期及時段有實際重疊；僅在邊界相接不算命中。
  */
 export const isSlotWithinTimeFilter = (slot, timeFilter) => {
     if (!timeFilter?.day) {
@@ -50,13 +50,16 @@ export const isSlotWithinTimeFilter = (slot, timeFilter) => {
         return false;
     }
 
-    return slotFrom >= filterFrom && slotTo <= filterTo;
+    return slotFrom < slotTo &&
+        filterFrom < filterTo &&
+        slotFrom < filterTo &&
+        filterFrom < slotTo;
 };
 
 /**
- * 判斷單一 Section 是否時間完整、符合時段條件且不與目前課表衝突。
+ * 取得單一 Section 在目前時段及課表下的狀態。
  */
-export const isSectionRecommended = ({
+export const getSectionFilterStatus = ({
     sectionSlots = [],
     planSlots = [],
     timeFilter = defaultTimeFilter,
@@ -72,9 +75,22 @@ export const isSectionRecommended = ({
                 timeFrom < timeTo;
         });
 
-    return hasCompleteSchedule &&
-        sectionSlots.some(slot => isSlotWithinTimeFilter(slot, timeFilter)) &&
-        getSectionConflicts(sectionSlots, planSlots).length === 0;
+    if (!sectionSlots.some(slot => isSlotWithinTimeFilter(slot, timeFilter))) {
+        return null;
+    }
+
+    if (getSectionConflicts(sectionSlots, planSlots).length > 0) {
+        return 'conflict';
+    }
+
+    return hasCompleteSchedule ? 'match' : 'time';
+};
+
+/**
+ * 判斷單一 Section 是否時間完整、符合時段條件且不與目前課表衝突。
+ */
+export const isSectionRecommended = options => {
+    return getSectionFilterStatus(options) === 'match';
 };
 
 /**

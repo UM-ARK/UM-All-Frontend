@@ -28,7 +28,7 @@ import PlanCapsule from '../../components/PlanCapsule';
 
 import CourseCard from './components/CourseCard';
 import useCourseFiltering, {
-    isSectionRecommended,
+    getSectionFilterStatus,
 } from './hooks/useCourseFiltering';
 import useCourseSearch from './hooks/useCourseSearch';
 import useFirstLetterNav from './hooks/useFirstLetterNav';
@@ -138,7 +138,7 @@ const CourseCardRow = ({
     entries,
     availableWidth,
     courseMode,
-    recommendedSectionsByCourseCode,
+    sectionStatusesByCourseCode,
 }) => {
     const [measuredHeights, setMeasuredHeights] = useState({});
     const isRowMeasured = entries.every(entry => measuredHeights[entry.key] > 0);
@@ -166,8 +166,8 @@ const CourseCardRow = ({
                     cardWidth={getCourseCardWidth(entry.span, availableWidth)}
                     cardHeight={rowHeight}
                     onMeasureHeight={height => handleMeasureHeight(entry.key, height)}
-                    recommendedSections={
-                        recommendedSectionsByCourseCode?.[
+                    sectionStatuses={
+                        sectionStatusesByCourseCode?.[
                             entry.item['Course Code'] || entry.item.New_code
                         ]
                     }
@@ -232,8 +232,8 @@ const What2Reg = () => {
         planSlots,
     });
 
-    const recommendedSectionsByCourseCode = useMemo(() => {
-        if (!isRecommendationFilterActive) {
+    const sectionStatusesByCourseCode = useMemo(() => {
+        if (!isTimeFilterActive && !isRecommendationFilterActive) {
             return {};
         }
 
@@ -244,17 +244,37 @@ const What2Reg = () => {
         return filterCourseList.reduce((result, course) => {
             const courseCode = course['Course Code'];
             const courseSlots = slotsByCourseCode[courseCode] || [];
-            result[courseCode] = Object.entries(
-                lodash.groupBy(courseSlots, 'Section'),
-            )
-                .filter(([, sectionSlots]) => isSectionRecommended({
-                    sectionSlots,
-                    planSlots,
-                    timeFilter: isTimeFilterActive
-                        ? timeFilter
-                        : defaultTimeFilter,
-                }))
-                .map(([section]) => section);
+            result[courseCode] = Object.fromEntries(
+                Object.entries(lodash.groupBy(courseSlots, 'Section'))
+                    .map(([section, sectionSlots]) => {
+                        const status = getSectionFilterStatus({
+                            sectionSlots,
+                            planSlots,
+                            timeFilter: isTimeFilterActive
+                                ? timeFilter
+                                : defaultTimeFilter,
+                        });
+
+                        if (!status) {
+                            return null;
+                        }
+                        if (
+                            status === 'time' &&
+                            isRecommendationFilterActive
+                        ) {
+                            return null;
+                        }
+                        return [
+                            section,
+                            status === 'conflict'
+                                ? 'conflict'
+                                : isRecommendationFilterActive
+                                    ? 'recommended'
+                                    : 'time',
+                        ];
+                    })
+                    .filter(Boolean),
+            );
             return result;
         }, {});
     }, [
@@ -393,7 +413,7 @@ const What2Reg = () => {
      * 每行量測所有卡片的自然高度後統一使用最大值，避免 Expo MenuView
      * 的 SwiftUI Host 無法繼承 React Native Flexbox 拉伸高度。
      */
-    const renderCourseCards = useCallback((list, showRecommendations = false) => (
+    const renderCourseCards = useCallback((list, showSectionStatuses = false) => (
         <View
             style={{
                 rowGap: COURSE_CARD_GAP,
@@ -414,16 +434,16 @@ const What2Reg = () => {
                         entries={entries}
                         availableWidth={courseGridWidth}
                         courseMode={courseMode}
-                        recommendedSectionsByCourseCode={
-                            showRecommendations
-                                ? recommendedSectionsByCourseCode
+                        sectionStatusesByCourseCode={
+                            showSectionStatuses
+                                ? sectionStatusesByCourseCode
                                 : null
                         }
                     />
                 ))
                 : null}
         </View>
-    ), [courseGridWidth, courseMode, recommendedSectionsByCourseCode]);
+    ), [courseGridWidth, courseMode, sectionStatusesByCourseCode]);
 
     // 搜尋結果不套用星期／時段篩選：此時 FilterPanel 不渲染，使用者既看不到也無法清除該篩選
     const hasSearchResult = searchFilterCourse?.length > 0;
@@ -498,7 +518,8 @@ const What2Reg = () => {
                         {filterCourseList?.length > 0
                             ? renderCourseCards(
                                 filterCourseList,
-                                isRecommendationFilterActive,
+                                isTimeFilterActive ||
+                                    isRecommendationFilterActive,
                             )
                             : null}
 

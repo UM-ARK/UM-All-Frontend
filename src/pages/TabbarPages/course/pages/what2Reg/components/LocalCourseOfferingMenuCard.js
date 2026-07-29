@@ -41,7 +41,7 @@ const LocalCourseOfferingMenuCard = ({
     navigation,
     slots,
     variant,
-    isRecommended = false,
+    highlightStatus,
 }) => {
     const { width: windowWidth } = useWindowDimensions();
     // Section 單卡置中：用螢幕寬扣除左右邊距
@@ -58,7 +58,15 @@ const LocalCourseOfferingMenuCard = ({
             : Math.max(scale(130), teacherCardWidth);
     const { theme } = useTheme();
     const { baseHost } = useUmehHost();
-    const { themeColor, black, white, tonal } = theme;
+    const { themeColor, black, white, tonal, warning } = theme;
+    const isHighlighted = Boolean(highlightStatus);
+    const isConflict = highlightStatus === 'conflict';
+    const highlightColor = isConflict ? warning : themeColor;
+    const highlightLabel = isConflict
+        ? t('有衝突', { ns: 'catalog' })
+        : highlightStatus === 'time'
+            ? t('符合時段', { ns: 'catalog' })
+            : t('不衝突', { ns: 'catalog' });
 
     // 原生 UIButton 會吃掉子層 pressIn，故縮放回饋改由選單開合驅動
     // hook 必須在 courseRow 提前 return 之前呼叫
@@ -223,12 +231,12 @@ const LocalCourseOfferingMenuCard = ({
                 style={[
                     {
                         width: cardWidth,
-                        backgroundColor: isRecommended
+                        backgroundColor: isHighlighted && !isConflict
                             ? tonal.primary08
                             : white,
                         borderRadius: scale(16),
-                        borderWidth: isRecommended ? scale(1) : 0,
-                        borderColor: themeColor,
+                        borderWidth: isHighlighted ? scale(1) : 0,
+                        borderColor: highlightColor,
                         paddingVertical: scale(5),
                         paddingHorizontal: scale(8),
                         alignItems: 'center',
@@ -248,7 +256,7 @@ const LocalCourseOfferingMenuCard = ({
                                 width: scale(3),
                                 height: scale(14),
                                 borderRadius: scale(2),
-                                backgroundColor: themeColor,
+                                backgroundColor: highlightColor,
                                 marginRight: scale(8),
                             }}
                         />
@@ -270,16 +278,16 @@ const LocalCourseOfferingMenuCard = ({
                             }}>
                             {courseRow['Medium of Instruction']}
                         </Text>
-                        {isRecommended ? (
+                        {isHighlighted ? (
                             <Text
                                 style={{
                                     ...uiStyle.defaultText,
                                     marginLeft: scale(8),
                                     fontSize: scale(10),
                                     fontWeight: '700',
-                                    color: themeColor,
+                                    color: highlightColor,
                                 }}>
-                                {t('不衝突', { ns: 'catalog' })}
+                                {highlightLabel}
                             </Text>
                         ) : null}
                     </View>
@@ -295,13 +303,13 @@ const LocalCourseOfferingMenuCard = ({
                             {courseRow.Section +
                                 ' - ' +
                                 courseRow['Medium of Instruction']}
-                            {isRecommended ? (
+                            {isHighlighted ? (
                                 <Text
                                     style={{
-                                        color: themeColor,
+                                        color: highlightColor,
                                         fontWeight: '700',
                                     }}>
-                                    {` · ${t('不衝突', { ns: 'catalog' })}`}
+                                    {` · ${highlightLabel}`}
                                 </Text>
                             ) : null}
                         </Text>

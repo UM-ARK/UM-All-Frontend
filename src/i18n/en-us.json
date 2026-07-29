@@ -602,6 +602,8 @@
         "該時段沒有符合的課程，可調整或清除星期與時段篩選。": "No course matches this time range. Adjust or clear the day and time filter.",
         "只看不衝突": "No conflicts only",
         "不衝突": "No conflict",
+        "有衝突": "Conflict",
+        "符合時段": "Matches time",
         "目前沒有可排入且不衝突的課程，可調整篩選或已排課表。": "No course currently fits without conflicts. Adjust the filters or your timetable."
     },
     "timetable": {

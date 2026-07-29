@@ -4,6 +4,7 @@ jest.mock('../../../constants', () => ({
 }));
 
 import {
+    getSectionFilterStatus,
     isCourseRecommended,
     isSectionRecommended,
     isSlotWithinTimeFilter,
@@ -20,22 +21,26 @@ const makeSlot = (courseCode, section, day, timeFrom, timeTo) => ({
 describe('isSlotWithinTimeFilter', () => {
     const timeFilter = {
         day: 'MON',
-        from: '17:50',
-        to: '23:59',
+        from: '12:00',
+        to: '13:00',
     };
 
-    it('課節開始時間早於篩選起點時不列入', () => {
+    it('課節與篩選時段部分重疊時列入', () => {
         expect(isSlotWithinTimeFilter(
-            makeSlot('TEST1000', '001', 'MON', '17:30', '18:45'),
-            timeFilter,
-        )).toBe(false);
-    });
-
-    it('課節剛好在篩選起點開始時列入', () => {
-        expect(isSlotWithinTimeFilter(
-            makeSlot('TEST1000', '001', 'MON', '17:50', '18:45'),
+            makeSlot('TEST1000', '001', 'MON', '11:30', '12:45'),
             timeFilter,
         )).toBe(true);
+    });
+
+    it('課節只與篩選時段邊界相接時不列入', () => {
+        expect(isSlotWithinTimeFilter(
+            makeSlot('TEST1000', '001', 'MON', '11:00', '12:00'),
+            timeFilter,
+        )).toBe(false);
+        expect(isSlotWithinTimeFilter(
+            makeSlot('TEST1000', '001', 'MON', '13:00', '14:00'),
+            timeFilter,
+        )).toBe(false);
     });
 });
 
@@ -155,5 +160,42 @@ describe('isSectionRecommended', () => {
             ],
             planSlots,
         })).toBe(true);
+    });
+
+    it('符合時段但撞課時回傳 conflict 狀態', () => {
+        expect(getSectionFilterStatus({
+            sectionSlots: [
+                makeSlot('TEST1000', '001', 'MON', '11:30', '12:45'),
+            ],
+            planSlots: [
+                makeSlot('PLAN1000', '001', 'MON', '12:00', '13:00'),
+            ],
+            timeFilter: {
+                day: 'MON',
+                from: '12:00',
+                to: '13:00',
+            },
+        })).toBe('conflict');
+    });
+
+    it('時間未完整的 Section 仍可標示符合時段，但不列為不衝突', () => {
+        const sectionSlots = [
+            makeSlot('TEST1000', '001', 'MON', '11:30', '12:45'),
+            makeSlot('TEST1000', '001', '', '', ''),
+        ];
+        const timeFilter = {
+            day: 'MON',
+            from: '12:00',
+            to: '13:00',
+        };
+
+        expect(getSectionFilterStatus({
+            sectionSlots,
+            timeFilter,
+        })).toBe('time');
+        expect(isSectionRecommended({
+            sectionSlots,
+            timeFilter,
+        })).toBe(false);
     });
 });

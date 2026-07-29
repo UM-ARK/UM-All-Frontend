@@ -40,7 +40,7 @@ const styles = StyleSheet.create({
 });
 
 const CourseCard = memo(
-    ({ item, mode, prof_info, courseMode = 'ad', cardWidth, cardHeight, onMeasureHeight, recommendedSections }) => {
+    ({ item, mode, prof_info, courseMode = 'ad', cardWidth, cardHeight, onMeasureHeight, sectionStatuses }) => {
         // const { item, mode, prof_info, courseMode = 'ad' } = props;
         const navigation = useContext(NavigationContext);
         const { theme } = useTheme();
@@ -253,8 +253,8 @@ const CourseCard = memo(
                     });
                     navigation.navigate(
                         'LocalCourse',
-                        recommendedSections
-                            ? { courseCode, recommendedSections }
+                        sectionStatuses
+                            ? { courseCode, sectionStatuses }
                             : courseCode,
                     );
                     break;
