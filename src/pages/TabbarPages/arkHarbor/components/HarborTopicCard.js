@@ -389,9 +389,13 @@ const HarborTopicCard = ({
                         color={theme.black.third}
                     />
                     <Metric
-                        icon="heart-outline"
+                        icon={topic.liked ? 'heart' : 'heart-outline'}
                         value={topic.likeCount || 0}
-                        color={theme.themeColor}
+                        color={
+                            topic.liked
+                                ? theme.themeColor
+                                : theme.black.third
+                        }
                     />
                 </View>
                 {lastReadPostNumber > 0 ? (

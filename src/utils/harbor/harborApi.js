@@ -663,6 +663,8 @@ function normalizeTopicSummary(topic, context) {
         replyCount: Math.max(toCount(topic?.reply_count), postCount - 1, 0),
         viewCount: toCount(topic?.views),
         likeCount: toCount(topic?.like_count),
+        // Discourse 登入後列表會帶 liked（TopicUser.liked）
+        liked: Boolean(topic?.liked),
         createdAt: topic?.created_at || '',
         lastPostedAt: topic?.last_posted_at || '',
         activityAt:

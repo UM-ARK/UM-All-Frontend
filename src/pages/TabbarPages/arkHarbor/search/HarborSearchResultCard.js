@@ -184,14 +184,26 @@ const HarborSearchResultCard = memo(
                     {item.likeCount > 0 ? (
                         <View style={styles.inlineMeta}>
                             <MaterialCommunityIcons
-                                name="heart-outline"
+                                name={
+                                    item.topic?.liked
+                                        ? 'heart'
+                                        : 'heart-outline'
+                                }
                                 size={scale(13)}
-                                color={theme.themeColor}
+                                color={
+                                    item.topic?.liked
+                                        ? theme.themeColor
+                                        : theme.black.third
+                                }
                             />
                             <Text
                                 style={[
                                     styles.inlineMetaText,
-                                    {color: theme.themeColor},
+                                    {
+                                        color: item.topic?.liked
+                                            ? theme.themeColor
+                                            : theme.black.third,
+                                    },
                                 ]}>
                                 {item.likeCount}
                             </Text>
