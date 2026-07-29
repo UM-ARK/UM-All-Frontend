@@ -59,17 +59,17 @@ export default function NewsScreen() {
                 }}
                 initialRouteName="HomePage">
                 <Tab.Screen
-                    name="HomePage"
-                    component={HomePage}
-                    options={{ title: t('TOPTAB_MAIN') }}
+                    name="ClubPage"
+                    component={ClubPage}
+                    options={{ title: t('TOPTAB_CLUB') }}
                     listeners={() => ({
                         tabPress: () => trigger(),
                     })}
                 />
                 <Tab.Screen
-                    name="ClubPage"
-                    component={ClubPage}
-                    options={{ title: t('TOPTAB_CLUB') }}
+                    name="HomePage"
+                    component={HomePage}
+                    options={{ title: t('TOPTAB_MAIN') }}
                     listeners={() => ({
                         tabPress: () => trigger(),
                     })}
