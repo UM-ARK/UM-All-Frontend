@@ -107,6 +107,7 @@ function buildOverviewRows(planSlots) {
  * @param {Set<string>} props.conflictSlotKeys 衝突課節 key
  * @param {Object} props.courseVersion 課程資料版本
  * @param {number} props.width 輸出寬度
+ * @param {number} props.height 輸出最小高度
  * @param {number} props.overviewMaxHeight 畫面概覽可用高度
  * @param {'detail'|'overview'} props.mode 分享課表模式
  * @param {Object} props.captureTargetRef 截圖內容 ref
@@ -117,6 +118,7 @@ const TimetableSharePreview = ({
     conflictSlotKeys,
     courseVersion,
     width,
+    height,
     overviewMaxHeight,
     mode,
     captureTargetRef,
@@ -197,6 +199,8 @@ const TimetableSharePreview = ({
             StyleSheet.create({
                 preview: {
                     width: previewWidth,
+                    minHeight: height,
+                    justifyContent: 'center',
                     backgroundColor: bg_color,
                 },
                 header: {
@@ -343,6 +347,7 @@ const TimetableSharePreview = ({
             black.main,
             black.third,
             dayColumnWidth,
+            height,
             overviewHeight,
             previewWidth,
             themeColor,
@@ -832,6 +837,7 @@ const TimetableShareSheet = forwardRef(({ courseVersion }, ref) => {
                         conflictSlotKeys={conflictSlotKeys}
                         courseVersion={courseVersion}
                         width={windowWidth}
+                        height={windowHeight}
                         overviewMaxHeight={overviewMaxHeight}
                         mode={shareMode}
                         captureTargetRef={previewCaptureRef}
