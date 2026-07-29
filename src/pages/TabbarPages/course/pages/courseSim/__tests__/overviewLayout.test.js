@@ -186,13 +186,14 @@ describe('computeOverviewCourseFrames', () => {
         const socy = frames.get(getSlotKey(courses[0]));
         const port = frames.get(getSlotKey(courses[1]));
 
-        // 時間比例約 34.5，可向 15 分鐘空檔略擴，但仍須與 PORT 留 vGap
+        // 時間比例約 34.5，僅向下擴展，仍須與 PORT 留 vGap；top 不變
+        expect(socy.top).toBe(0);
         expect(socy.height).toBeGreaterThan(34.5);
         expect(socy.top + socy.height + 3).toBeLessThanOrEqual(port.top + 0.01);
     });
 
-    it('同欄上下有空檔時矮卡擴展至可讀高度', () => {
-        // PORT 15:45 結束後到畫布底部皆空，LAWS 17:00-17:50 應能長高
+    it('同欄下方有空檔時矮卡僅向下擴展至可讀高度', () => {
+        // PORT 15:45 結束後到畫布底部皆空，LAWS 17:00-17:50 應能向下長高
         const courses = [
             makeSlot('PORT2013', '001', 'MON', '14:30', '15:45'),
             makeSlot('LAWS2007', '001', 'MON', '17:00', '17:50'),
@@ -211,14 +212,44 @@ describe('computeOverviewCourseFrames', () => {
 
         const laws = frames.get(getSlotKey(courses[1]));
         const port = frames.get(getSlotKey(courses[0]));
+        const lawsTimelineTop = ((17 * 60 - 13 * 60) / 60) * 40;
 
-        // 50 分鐘 × 40/60 ≈ 33.3，扣 vGap 後遠低於 56，應擴到接近 minHeight
+        // 50 分鐘 × 40/60 ≈ 33.3，扣 vGap 後遠低於 56，應向下擴到接近 minHeight
+        expect(laws.top).toBe(lawsTimelineTop);
         expect(laws.height).toBeGreaterThanOrEqual(55);
         expect(laws.height).toBeLessThanOrEqual(56);
-        // 不可侵入上方 PORT
+        // 不可侵入上方 PORT（top 未上移）
         expect(port.top + port.height + 3).toBeLessThanOrEqual(laws.top + 0.01);
         // 不可超出畫布
         expect(laws.top + laws.height).toBeLessThanOrEqual(8 * 40);
+    });
+
+    it('同開始時間的並排課卡擴展後仍對齊同一 top', () => {
+        const courses = [
+            makeSlot('LAWS2006', '101', 'MON', '10:00', '12:45'),
+            makeSlot('PORT2013', '004', 'MON', '10:00', '11:15'),
+        ];
+
+        const frames = computeOverviewCourseFrames({
+            overviewStart: 10 * 60,
+            hourHeight: 40,
+            dayWidth: 100,
+            vGap: 3,
+            maxHeight: 120,
+            minHeight: 56,
+            canvasBottom: 4 * 40,
+            courses,
+        });
+
+        const laws = frames.get(getSlotKey(courses[0]));
+        const port = frames.get(getSlotKey(courses[1]));
+
+        expect(laws.top).toBe(0);
+        expect(port.top).toBe(0);
+        expect(laws.lane).not.toBe(port.lane);
+        // PORT 較短，可向下長高，但不得改 top
+        expect(port.height).toBeGreaterThanOrEqual(55);
+        expect(port.height).toBeLessThanOrEqual(56);
     });
 
     it('maxHeight 會限制過長課卡', () => {

@@ -89,56 +89,47 @@ function horizontalOverlap(a, b) {
 }
 
 /**
- * 計算課卡尚可向上／下擴展的像素空間。
- * 僅受「水平重疊」的其他課卡阻擋，並排衝突卡互不限制垂直擴展。
+ * 計算課卡尚可向下擴展的像素空間。
+ * 僅受「水平重疊」的下方課卡阻擋，並排衝突卡互不限制垂直擴展。
+ * 不計算上方空檔，以維持同開始時間課卡對齊時間軸頂部。
  *
  * @param {Object} frame 目標課卡
  * @param {Array<Object>} others 同天其他課卡
  * @param {number} vGap 垂直間距
- * @param {number} canvasTop 畫布頂部
  * @param {number} canvasBottom 畫布底部
- * @returns {{up: number, down: number}}
+ * @returns {number} 可向下擴展的像素
  */
-export function getExpandRoom(frame, others, vGap, canvasTop, canvasBottom) {
-    let up = frame.top - canvasTop;
+export function getExpandRoomDown(frame, others, vGap, canvasBottom) {
     let down = canvasBottom - (frame.top + frame.height);
 
     others.forEach(other => {
         if (!horizontalOverlap(frame, other)) {
             return;
         }
-        const otherBottom = other.top + other.height;
         const frameBottom = frame.top + frame.height;
-
-        if (otherBottom <= frame.top + 0.01) {
-            up = Math.min(up, frame.top - otherBottom - vGap);
-        } else if (other.top >= frameBottom - 0.01) {
+        if (other.top >= frameBottom - 0.01) {
             down = Math.min(down, other.top - frameBottom - vGap);
         }
     });
 
-    return {
-        up: Math.max(0, up),
-        down: Math.max(0, down),
-    };
+    return Math.max(0, down);
 }
 
 /**
- * 將低於可讀高度的課卡，向同欄空檔擴展（可上移 top、加高 height）。
- * 優先滿足 deficit 較大者；上下空檔各取一半，不足再向另一側補。
+ * 將低於可讀高度的課卡，僅向下吃同欄空檔加高（不改 top）。
+ * 優先滿足 deficit 較大者，讓課室／時間可讀且不侵入下方課卡。
  *
  * @param {Map<string, Object>} frames
  * @param {Object} options
  * @param {number} options.minHeight 可讀最小高度
  * @param {number} options.maxHeight 單卡上限
  * @param {number} options.vGap 課卡間距
- * @param {number} [options.canvasTop=0]
  * @param {number} options.canvasBottom
  * @returns {Map<string, Object>}
  */
 export function expandFramesIntoGaps(
     frames,
-    { minHeight, maxHeight, vGap, canvasTop = 0, canvasBottom },
+    { minHeight, maxHeight, vGap, canvasBottom },
 ) {
     if (!(frames instanceof Map) || frames.size === 0 || !(minHeight > 0)) {
         return frames;
@@ -175,34 +166,18 @@ export function expandFramesIntoGaps(
         const others = [...frames.entries()]
             .filter(([otherKey]) => otherKey !== key)
             .map(([, other]) => other);
-        const room = getExpandRoom(
-            frame,
-            others,
-            vGap,
-            canvasTop,
-            bottomBound,
+        const takeDown = Math.min(
+            getExpandRoomDown(frame, others, vGap, bottomBound),
+            deficit,
         );
 
-        let takeUp = Math.min(room.up, Math.ceil(deficit / 2));
-        let takeDown = Math.min(room.down, deficit - takeUp);
-        const stillNeed = deficit - takeUp - takeDown;
-        if (stillNeed > 0) {
-            const extraUp = Math.min(room.up - takeUp, stillNeed);
-            takeUp += extraUp;
-            takeDown += Math.min(
-                room.down - takeDown,
-                stillNeed - extraUp,
-            );
-        }
-
-        if (takeUp <= 0 && takeDown <= 0) {
+        if (takeDown <= 0) {
             return;
         }
 
         frames.set(key, {
             ...frame,
-            top: frame.top - takeUp,
-            height: frame.height + takeUp + takeDown,
+            height: frame.height + takeDown,
         });
     });
 
@@ -213,7 +188,7 @@ export function expandFramesIntoGaps(
  * 計算概覽模式課卡的絕對定位 frame。
  *
  * 1. 先依時間比例定位
- * 2. 再把過矮的課卡擴展進同欄空檔，讓課室／時間可讀，且不侵入相鄰課卡
+ * 2. 再把過矮的課卡僅向下擴展進同欄空檔，讓課室／時間可讀，且不改 top、不侵入下方課卡
  *
  * @param {Object} options
  * @param {Array<Object>} options.courses 同一天課節
@@ -276,7 +251,6 @@ export function computeOverviewCourseFrames({
         minHeight,
         maxHeight,
         vGap,
-        canvasTop: 0,
         canvasBottom: resolvedBottom,
     });
 }

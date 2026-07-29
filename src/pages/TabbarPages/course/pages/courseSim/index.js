@@ -78,8 +78,6 @@ const DAY_COLUMN_WIDTH = scale(135);
 /** 課程卡片左右邊距 */
 const COURSE_CARD_MARGIN = scale(5);
 const COURSE_CARD_WIDTH = DAY_COLUMN_WIDTH - COURSE_CARD_MARGIN * 2;
-/** 概覽模式的時間欄寬 */
-const OVERVIEW_TIME_COLUMN_WIDTH = scale(40);
 /** 概覽模式每小時的顯示高度 */
 const OVERVIEW_HOUR_HEIGHT = verticalScale(62);
 /** 概覽模式課程卡片的最大高度 */
@@ -108,13 +106,6 @@ function toDateTime(time) {
 function toMinutes(time) {
     const [hours, minutes] = time.split(':').map(Number);
     return hours * 60 + minutes;
-}
-
-/** 將當日分鐘數格式化為 HH:mm。 */
-function formatMinutes(minutes) {
-    return `${String(Math.floor(minutes / 60)).padStart(2, '0')}:${String(
-        minutes % 60,
-    ).padStart(2, '0')}`;
 }
 
 const daySorter = {
@@ -457,8 +448,7 @@ function CourseSim({ route, navigation }) {
         );
         return dayList.slice(0, Math.max(lastCourseDayIndex ?? 4, 4) + 1);
     }, [planSlots]);
-    const overviewDayColumnWidth =
-        (windowWidth - OVERVIEW_TIME_COLUMN_WIDTH) / overviewDays.length;
+    const overviewDayColumnWidth = windowWidth / overviewDays.length;
     const overviewStart = overviewRows[0]?.start ?? 0;
     const overviewEnd =
         lodash.max(planSlots.map(course => toMinutes(course['Time To']))) ??
@@ -2710,7 +2700,6 @@ E11-0000
         return (
             <View>
                 <View style={{ flexDirection: 'row' }}>
-                    <View style={{ width: OVERVIEW_TIME_COLUMN_WIDTH }} />
                     {overviewDays.map(day => (
                         <Text
                             key={day}
@@ -2731,39 +2720,16 @@ E11-0000
                     ))}
                 </View>
                 <View style={{ flexDirection: 'row' }}>
-                    <View
-                        style={{
-                            width: OVERVIEW_TIME_COLUMN_WIDTH,
-                            height: overviewHeight,
-                        }}>
-                        {overviewRows.map(row => (
-                            <Text
-                                key={row.start}
-                                style={{
-                                    ...uiStyle.defaultText,
-                                    position: 'absolute',
-                                    top:
-                                        ((row.start - overviewStart) / 60) *
-                                            overviewHourHeight +
-                                        verticalScale(7),
-                                    width: '100%',
-                                    color: black.third,
-                                    fontSize: scale(8),
-                                    textAlign: 'center',
-                                }}>
-                                {row.start === row.end
-                                    ? formatMinutes(row.start)
-                                    : `${formatMinutes(row.start)}\n–${formatMinutes(row.end)}`}
-                            </Text>
-                        ))}
-                    </View>
                     {overviewDays.map(day => (
                         <View
                             key={day}
                             style={{
                                 width: overviewDayColumnWidth,
                                 height: overviewHeight,
-                                borderLeftWidth: StyleSheet.hairlineWidth,
+                                borderLeftWidth:
+                                    day === overviewDays[0]
+                                        ? 0
+                                        : StyleSheet.hairlineWidth,
                                 borderColor: themeColorUltraLight,
                             }}>
                             {overviewRows.map(row => (
