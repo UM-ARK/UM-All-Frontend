@@ -1,6 +1,7 @@
 import {
     replaceHarborEmojiImages,
     replaceHarborEmojiShortcodes,
+    stripTrailingEmptyHarborHtml,
 } from '../harborHtml';
 
 describe('replaceHarborEmojiImages', () => {
@@ -33,6 +34,23 @@ describe('replaceHarborEmojiImages', () => {
         const html = '<img class="emoji" title=":wave:">';
 
         expect(replaceHarborEmojiImages(html)).toBe(':wave:');
+    });
+});
+
+describe('stripTrailingEmptyHarborHtml', () => {
+    it('去掉尾部空段落與換行', () => {
+        expect(
+            stripTrailingEmptyHarborHtml('<p>测试回复</p><p></p><p><br></p>'),
+        ).toBe('<p>测试回复</p>');
+        expect(stripTrailingEmptyHarborHtml('<p>测试回复</p><br><br>')).toBe(
+            '<p>测试回复</p>',
+        );
+    });
+
+    it('保留有內容的段落', () => {
+        expect(stripTrailingEmptyHarborHtml('<p>第一段</p><p>第二段</p>')).toBe(
+            '<p>第一段</p><p>第二段</p>',
+        );
     });
 });
 

@@ -59,3 +59,22 @@ export const replaceHarborEmojiImages = html => {
         return `<harbor-emoji src="${src}" alt="${label}">\u200b</harbor-emoji>`;
     });
 };
+
+// Discourse cooked 常帶尾部空段落／換行，RenderHTML 會多佔一行高度
+export const stripTrailingEmptyHarborHtml = html => {
+    if (!html || typeof html !== 'string') {
+        return '';
+    }
+
+    let next = html;
+    let previous;
+    do {
+        previous = next;
+        next = next
+            .replace(/(?:\s*<p>(?:\s|&nbsp;|\u00a0|<br\s*\/?>)*<\/p>)+$/gi, '')
+            .replace(/(?:\s*<br\s*\/?>)+$/gi, '')
+            .replace(/(?:\s|&nbsp;|\u00a0)+$/gi, '');
+    } while (next !== previous);
+
+    return next;
+};

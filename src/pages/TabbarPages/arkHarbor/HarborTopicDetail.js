@@ -767,11 +767,9 @@ const HarborTopicDetail = ({ route, navigation }) => {
                         topic={isFirstPost ? topic : null}
                         contentWidth={
                             contentWidth -
-                            Math.min(
-                                Number(item.__harborNestedDepth || 0),
-                                3,
-                            ) *
-                            scale(14)
+                            (Number(item.__harborNestedDepth || 0) > 0
+                                ? scale(38)
+                                : 0)
                         }
                         imageUrls={imageUrls}
                         onOpenImage={openImage}

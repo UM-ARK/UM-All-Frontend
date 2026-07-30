@@ -27,7 +27,10 @@ import { useTranslation } from 'react-i18next';
 
 import { uiStyle, useTheme } from '../../../../components/ThemeContext';
 import { openLink } from '../../../../utils/browser';
-import { replaceHarborEmojiImages } from '../../../../utils/harbor/harborHtml';
+import {
+    replaceHarborEmojiImages,
+    stripTrailingEmptyHarborHtml,
+} from '../../../../utils/harbor/harborHtml';
 import { hasHarborInteractiveContent } from '../../../../utils/harbor/harborPostEvent';
 import { ARK_HARBOR } from '../../../../utils/pathMap';
 import { trigger } from '../../../../utils/trigger';
@@ -162,7 +165,9 @@ const HarborPostContent = memo(
         const { t } = useTranslation('harbor');
         const { black, disabled, themeColor, tonal, white } = theme;
         const normalizedCooked = useMemo(() => {
-            return replaceHarborEmojiImages(cooked || '');
+            return stripTrailingEmptyHarborHtml(
+                replaceHarborEmojiImages(cooked || ''),
+            );
         }, [cooked]);
         const requiresInteractiveFallback = useMemo(() => {
             return (
@@ -171,7 +176,8 @@ const HarborPostContent = memo(
         }, [cooked, forceInteractiveFallback]);
 
         const bodyFontSize = scale(compact ? 13 : 14);
-        const bodyLineHeight = scale(compact ? 19 : 21);
+        // compact 回覆用更緊行高，避免短文下方被撐出大塊空白
+        const bodyLineHeight = scale(compact ? 17 : 21);
 
         const baseStyle = useMemo(
             () => ({
@@ -179,6 +185,8 @@ const HarborPostContent = memo(
                 color: black.second,
                 fontSize: bodyFontSize,
                 lineHeight: bodyLineHeight,
+                margin: 0,
+                padding: 0,
             }),
             [black.second, bodyFontSize, bodyLineHeight],
         );
@@ -187,10 +195,17 @@ const HarborPostContent = memo(
             () => ({
                 body: {
                     color: black.second,
+                    margin: 0,
+                    padding: 0,
+                },
+                div: {
+                    marginTop: 0,
+                    marginBottom: 0,
                 },
                 p: {
                     marginTop: 0,
-                    marginBottom: compact ? verticalScale(1) : verticalScale(4),
+                    // compact 去掉段底距，避免短回覆下方被撐高
+                    marginBottom: compact ? 0 : verticalScale(4),
                 },
                 a: {
                     color: themeColor,

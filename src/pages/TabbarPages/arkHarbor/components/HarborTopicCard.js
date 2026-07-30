@@ -124,9 +124,7 @@ const HarborTopicCard = ({
     const { theme } = useTheme();
     const { t } = useTranslation('harbor');
     const author = topic.author || {};
-    const lastPoster = topic.lastPoster || null;
     const authorId = resolveUserId(author, t('Harbor 會員'));
-    const lastPosterId = resolveUserId(lastPoster);
     const avatarTemplate = author.avatarTemplate || author.avatar_template;
     const avatarUrl =
         author.avatarUrl ||
@@ -152,7 +150,6 @@ const HarborTopicCard = ({
     const unreadCount = Number(topic.unreadCount || 0);
     const lastReadPostNumber = Number(topic.lastReadPostNumber || 0);
     const replyCount = Number(topic.replyCount || 0);
-    const showLastPosterTeaser = Boolean(lastPosterId) && replyCount > 0;
     const isNewReply =
         topic.newContentType === 'reply' ||
         (!topic.newContentType && unreadCount > 0);
@@ -272,41 +269,8 @@ const HarborTopicCard = ({
                 </Text>
             ) : null}
 
-            {category || tags.length > 0 ? (
+            {tags.length > 0 ? (
                 <View style={styles.taxonomyRow}>
-                    {category ? (
-                        <Pressable
-                            accessibilityRole="button"
-                            onPress={event =>
-                                stopAndRun(
-                                    event,
-                                    () => onCategoryPress(category),
-                                    isPressAllowed,
-                                )
-                            }
-                            style={({ pressed }) => [
-                                styles.categoryChip,
-                                {
-                                    backgroundColor: pressed
-                                        ? theme.tonal.secondary30
-                                        : theme.tonal.secondary15,
-                                },
-                            ]}>
-                            <HarborCategoryIcon
-                                category={category}
-                                color={theme.secondThemeColor}
-                                size={scale(12)}
-                            />
-                            <Text
-                                numberOfLines={1}
-                                style={[
-                                    styles.categoryText,
-                                    { color: theme.secondThemeColor },
-                                ]}>
-                                {category.name}
-                            </Text>
-                        </Pressable>
-                    ) : null}
                     {tags.map(tag => (
                         <Pressable
                             key={tag.slug}
@@ -347,35 +311,10 @@ const HarborTopicCard = ({
                 </View>
             ) : null}
 
-            {showLastPosterTeaser ? (
-                <View
-                    style={[
-                        styles.lastPosterBox,
-                        { backgroundColor: theme.bg_color },
-                    ]}>
-                    <Text numberOfLines={2} style={styles.lastPosterLine}>
-                        <Text
-                            style={[
-                                styles.lastPosterId,
-                                { color: theme.black.second },
-                            ]}>
-                            {`${lastPosterId}: `}
-                        </Text>
-                        <Text
-                            style={[
-                                styles.lastPosterTeaser,
-                                { color: theme.black.third },
-                            ]}>
-                            ...
-                        </Text>
-                    </Text>
-                </View>
-            ) : null}
-
             <View
                 style={[
                     styles.footer,
-                    { borderTopColor: theme.themeColorUltraLight },
+                    { borderTopColor: theme.disabled },
                 ]}>
                 <View style={styles.metrics}>
                     <Metric
@@ -397,6 +336,36 @@ const HarborTopicCard = ({
                                 : theme.black.third
                         }
                     />
+                    {category ? (
+                        <Pressable
+                            accessibilityRole="button"
+                            onPress={event =>
+                                stopAndRun(
+                                    event,
+                                    () => onCategoryPress(category),
+                                    isPressAllowed,
+                                )
+                            }
+                            style={({ pressed }) => [
+                                styles.categoryChip,
+                                styles.footerCategoryChip,
+                                pressed && styles.categoryChipPressed,
+                            ]}>
+                            <HarborCategoryIcon
+                                category={category}
+                                color={theme.themeColor}
+                                size={scale(12)}
+                            />
+                            <Text
+                                numberOfLines={1}
+                                style={[
+                                    styles.categoryText,
+                                    { color: theme.themeColor },
+                                ]}>
+                                {category.name}
+                            </Text>
+                        </Pressable>
+                    ) : null}
                 </View>
                 {lastReadPostNumber > 0 ? (
                     <Text
@@ -483,26 +452,6 @@ const styles = StyleSheet.create({
         lineHeight: scale(17),
         marginTop: verticalScale(5),
     },
-    lastPosterBox: {
-        borderRadius: scale(8),
-        marginTop: verticalScale(8),
-        paddingHorizontal: scale(10),
-        paddingVertical: verticalScale(8),
-    },
-    lastPosterLine: {
-        ...uiStyle.defaultText,
-        fontSize: scale(11),
-        lineHeight: scale(16),
-    },
-    lastPosterId: {
-        ...uiStyle.defaultText,
-        fontSize: scale(11),
-        fontWeight: '600',
-    },
-    lastPosterTeaser: {
-        ...uiStyle.defaultText,
-        fontSize: scale(11),
-    },
     taxonomyRow: {
         flexDirection: 'row',
         flexWrap: 'wrap',
@@ -526,6 +475,15 @@ const styles = StyleSheet.create({
         fontSize: scale(10),
         fontWeight: '600',
         marginLeft: scale(4),
+    },
+    footerCategoryChip: {
+        flexShrink: 1,
+        marginBottom: 0,
+        paddingHorizontal: 0,
+        paddingVertical: 0,
+    },
+    categoryChipPressed: {
+        opacity: 0.6,
     },
     tagChip: {
         maxWidth: scale(110),
@@ -569,6 +527,8 @@ const styles = StyleSheet.create({
         marginTop: verticalScale(6),
     },
     metrics: {
+        flexShrink: 1,
+        minWidth: 0,
         flexDirection: 'row',
         alignItems: 'center',
     },

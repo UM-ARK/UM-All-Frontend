@@ -344,6 +344,16 @@ const styles = StyleSheet.create({
         height: scale(30),
         borderRadius: scale(15),
     },
+    // 展開回覆頭像：略小於頂層
+    nestedAvatar: {
+        width: scale(20),
+        height: scale(20),
+        borderRadius: scale(10),
+    },
+    // 展開回覆：對齊頂層時間列（頭像 scale(30) + replyMain margin scale(8)）
+    nestedReplyCard: {
+        marginLeft: scale(38),
+    },
     authorArea: {
         flex: 1,
         marginLeft: scale(8),
@@ -382,14 +392,11 @@ const styles = StyleSheet.create({
         ...uiStyle.defaultText,
         flexShrink: 1,
         fontSize: scale(10),
-        marginRight: scale(8),
     },
     postMetaRow: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        marginTop: verticalScale(1),
-        marginBottom: verticalScale(1),
     },
     postMetaActions: {
         flexDirection: 'row',
@@ -399,13 +406,13 @@ const styles = StyleSheet.create({
         columnGap: scale(2),
     },
     postMetaIconMenu: {
-        width: scale(26),
-        height: scale(26),
+        width: scale(22),
+        height: scale(22),
         flexShrink: 0,
     },
     postMetaIconButton: {
-        width: scale(26),
-        height: scale(26),
+        width: scale(22),
+        height: scale(22),
         alignItems: 'center',
         justifyContent: 'center',
     },
@@ -442,9 +449,6 @@ const styles = StyleSheet.create({
         alignSelf: 'stretch',
         flexDirection: 'row',
         alignItems: 'center',
-        minHeight: verticalScale(22),
-        marginTop: verticalScale(2),
-        marginBottom: verticalScale(4),
     },
     nestedRepliesLine: {
         flex: 1,

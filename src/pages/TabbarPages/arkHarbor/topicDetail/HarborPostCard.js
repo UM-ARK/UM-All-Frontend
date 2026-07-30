@@ -6,7 +6,6 @@ import {
     ActivityIndicator,
     Platform,
     Pressable,
-    StyleSheet,
     Text,
     View,
 } from 'react-native';
@@ -38,6 +37,7 @@ import {
 import styles from './styles';
 
 const AVATAR_SIZE = 60;
+const NESTED_AVATAR_SIZE = 40;
 // 24 小時內顯示相對時間（分鐘／小時前）
 const RECENT_POST_HOURS = 24;
 
@@ -226,18 +226,11 @@ const HarborPostCard = memo(
         } = theme;
         // 分割線／邊框統一用淺灰
         const dividerColor = disabled;
-        const nestedIndent = Math.min(
-            Math.max(Number(nestedDepth || 0), 0),
-            3,
-        ) * scale(14);
-        const nestedContainerStyle =
-            nestedIndent > 0
-                ? {
-                    borderColor: dividerColor,
-                    borderLeftWidth: StyleSheet.hairlineWidth,
-                    marginLeft: nestedIndent,
-                }
-                : null;
+        // 展開回覆一律對齊頂層時間列，不再依深度往裡縮
+        const isNestedReply = Number(nestedDepth || 0) > 0;
+        const nestedContainerStyle = isNestedReply
+            ? styles.nestedReplyCard
+            : null;
         const nestedReplyBatchCount = Math.min(
             NESTED_REPLY_BATCH_SIZE,
             Math.max(
@@ -275,7 +268,7 @@ const HarborPostCard = memo(
         );
         const avatarUrl = ARK_HARBOR_AVATAR_TEMPLATE(
             post.avatar_template,
-            AVATAR_SIZE,
+            isNestedReply ? NESTED_AVATAR_SIZE : AVATAR_SIZE,
         );
         const displayName = post.name || post.display_username || post.username;
         const wasEdited =
@@ -963,7 +956,9 @@ const HarborPostCard = memo(
                             <Image
                                 source={{ uri: avatarUrl }}
                                 style={[
-                                    styles.avatar,
+                                    isNestedReply
+                                        ? styles.nestedAvatar
+                                        : styles.avatar,
                                     { backgroundColor: tonal.primary15 },
                                 ]}
                                 contentFit="cover"
@@ -1070,7 +1065,12 @@ const HarborPostCard = memo(
                             <View style={styles.replyBody}>
                                 <HarborPostContent
                                     cooked={post.cooked}
-                                    contentWidth={contentWidth - scale(38)}
+                                    contentWidth={
+                                        contentWidth -
+                                        (isNestedReply
+                                            ? scale(28)
+                                            : scale(38))
+                                    }
                                     imageUrls={imageUrls}
                                     onOpenImage={onOpenImage}
                                     onPressLink={onPressLink}
