@@ -13,6 +13,7 @@ import {
     fetchHarborTopic,
     saveHarborTopicTimings,
 } from '../../../../utils/harbor/harborApi';
+import { publishHarborTopicUpdate } from '../../../../utils/harbor/harborTopicUpdates';
 import {
     isCanceledRequest,
     mergeTopicWindow,
@@ -95,8 +96,32 @@ const useHarborTopicReading = ({
                 timeMs: now - lastTimingsAtRef.current,
                 topicTimeMs: now - lastTimingsAtRef.current,
             }).catch(() => { });
+
+            // 返回列表時就地更新該帖已讀狀態，避免整表刷新
+            const previousLastRead = Number(
+                latestTopicRef.current?.last_read_post_number || 0,
+            );
+            const nextLastRead = Math.max(previousLastRead, lastPostNumber);
+            const highestPostNumber = Number(
+                latestTopicRef.current?.highest_post_number ||
+                    latestTopicRef.current?.posts_count ||
+                    nextLastRead,
+            );
+            const unreadCount = Math.max(0, highestPostNumber - nextLastRead);
+            if (latestTopicRef.current) {
+                latestTopicRef.current.last_read_post_number = nextLastRead;
+                latestTopicRef.current.unread_posts = unreadCount;
+            }
+            publishHarborTopicUpdate(topicId, {
+                lastReadPostNumber: nextLastRead,
+                unreadCount,
+                isUnread: unreadCount > 0,
+                isNew: false,
+                // 已讀完時讓 unread／new 視圖軟刷新以移出該帖
+                ...(unreadCount === 0 ? { reloadLists: true } : {}),
+            });
         }
-    }, [sessionStatusRef, topicId]);
+    }, [latestTopicRef, sessionStatusRef, topicId]);
 
     useEffect(() => {
         return () => disposeTopicReading();
