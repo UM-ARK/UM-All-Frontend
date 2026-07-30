@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { isLiquidGlassSupported } from '@callstack/liquid-glass';
@@ -18,6 +18,7 @@ const HarborTopicListPage = ({ route, navigation }) => {
     const categoryName = route.params?.categoryName;
     const tag = route.params?.tag;
     const isTagPage = Boolean(tag);
+    const blockTopicPressUntilRef = useRef(0);
 
     const source = useMemo(
         () =>
@@ -39,6 +40,38 @@ const HarborTopicListPage = ({ route, navigation }) => {
         });
     }, [categoryName, isTagPage, navigation, t, tag]);
 
+    useEffect(() => {
+        const blockTopicPress = () => {
+            blockTopicPressUntilRef.current = Number.POSITIVE_INFINITY;
+        };
+        const releaseTopicPress = () => {
+            blockTopicPressUntilRef.current = Date.now() + 180;
+        };
+        const unsubscribeGestureStart = navigation.addListener(
+            'gestureStart',
+            blockTopicPress,
+        );
+        const unsubscribeGestureEnd = navigation.addListener(
+            'gestureEnd',
+            releaseTopicPress,
+        );
+        const unsubscribeGestureCancel = navigation.addListener(
+            'gestureCancel',
+            releaseTopicPress,
+        );
+
+        return () => {
+            unsubscribeGestureStart();
+            unsubscribeGestureEnd();
+            unsubscribeGestureCancel();
+        };
+    }, [navigation]);
+
+    const isTopicPressAllowed = useCallback(
+        () => Date.now() >= blockTopicPressUntilRef.current,
+        [],
+    );
+
     const contentStyle = useMemo(
         () => ({
             paddingTop: isLiquidGlassSupported
@@ -53,6 +86,7 @@ const HarborTopicListPage = ({ route, navigation }) => {
             <HarborTopicList
                 source={source}
                 navigation={navigation}
+                isTopicPressAllowed={isTopicPressAllowed}
                 contentContainerStyle={contentStyle}
                 contentInsetAdjustmentBehavior={
                     isLiquidGlassSupported ? 'never' : 'automatic'
