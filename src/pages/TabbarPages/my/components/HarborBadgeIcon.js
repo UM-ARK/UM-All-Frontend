@@ -8,14 +8,28 @@ import {scale, verticalScale} from 'react-native-size-matters';
 
 import {useTheme} from '../../../../components/ThemeContext';
 
-const getBadgeColors = (theme, badgeTypeId) => {
-    if (badgeTypeId === 1) {
+// 紀念日／慶典型徽章：Discourse 常標為銀級，視覺改用金色更喜慶
+const FESTIVE_BADGE_ICONS = new Set([
+    'cake-candles',
+    'cake',
+    'birthday-cake',
+    'gift',
+    'party-horn',
+    'champagne-glasses',
+]);
+
+const isFestiveBadge = badge =>
+    FESTIVE_BADGE_ICONS.has(badge?.icon) ||
+    /anniversary|紀念日|生日/i.test(badge?.name || '');
+
+const getBadgeColors = (theme, badge) => {
+    if (badge.badgeTypeId === 1 || isFestiveBadge(badge)) {
         return {
             backgroundColor: theme.achievement.goldTonal,
             color: theme.achievement.gold,
         };
     }
-    if (badgeTypeId === 2) {
+    if (badge.badgeTypeId === 2) {
         return {
             backgroundColor: theme.achievement.silverTonal,
             color: theme.achievement.silver,
@@ -29,7 +43,7 @@ const getBadgeColors = (theme, badgeTypeId) => {
 
 const HarborBadgeIcon = ({badge, compact = false}) => {
     const {theme} = useTheme();
-    const colors = getBadgeColors(theme, badge.badgeTypeId);
+    const colors = getBadgeColors(theme, badge);
     const hasApiIcon =
         badge.icon && FontAwesome6.hasIcon(badge.icon, 'solid');
 
