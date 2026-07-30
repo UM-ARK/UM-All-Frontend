@@ -1,4 +1,5 @@
 import {
+    clearHarborComposerMetadataCache,
     clearHarborDiscoveryCache,
     createHarborPostBookmark,
     deleteHarborBookmark,
@@ -19,12 +20,15 @@ import {
     fetchHarborUnreadNotificationCount,
     fetchHarborForumBadgeSnapshot,
     fetchHarborUserActions,
+    fetchCachedHarborFlagTypes,
+    flagHarborPost,
     getHarborTopicViews,
     HARBOR_TOPIC_NOTIFICATION_LEVELS,
     harborApi,
     likeHarborPost,
     markHarborTopicUnread,
     markHarborNotificationRead,
+    normalizeHarborFlagTypes,
     saveHarborTopicTimings,
     setActiveHarborCredentials,
     setHarborCredentialRejectedHandler,
@@ -48,6 +52,7 @@ describe('Harbor API 資料正規化', () => {
 
     beforeEach(() => {
         clearHarborDiscoveryCache();
+        clearHarborComposerMetadataCache();
         getSpy = jest.spyOn(harborApi, 'get');
         postSpy = jest.spyOn(harborApi, 'post');
         putSpy = jest.spyOn(harborApi, 'put');
@@ -964,6 +969,113 @@ describe('Harbor API 資料正規化', () => {
         expect(deleteSpy).toHaveBeenCalledWith('/post_actions/12.json', {
             data: {post_action_type_id: 2},
         });
+    });
+
+    it('透過 Discourse Core API 檢舉帖子並可附帶說明', async () => {
+        postSpy.mockResolvedValue({data: {id: 12, success: 'OK'}});
+
+        await expect(
+            flagHarborPost(12, {postActionTypeId: 8}),
+        ).resolves.toEqual({id: 12, success: 'OK'});
+        await expect(
+            flagHarborPost(12, {
+                postActionTypeId: 7,
+                message: '  請協助處理  ',
+            }),
+        ).resolves.toEqual({id: 12, success: 'OK'});
+
+        expect(postSpy).toHaveBeenNthCalledWith(1, '/post_actions.json', {
+            id: 12,
+            post_action_type_id: 8,
+            flag_topic: false,
+        });
+        expect(postSpy).toHaveBeenNthCalledWith(2, '/post_actions.json', {
+            id: 12,
+            post_action_type_id: 7,
+            flag_topic: false,
+            message: '請協助處理',
+        });
+        await expect(flagHarborPost(0, {postActionTypeId: 8})).rejects.toThrow(
+            'Invalid Harbor post id',
+        );
+        await expect(flagHarborPost(12, {postActionTypeId: 0})).rejects.toThrow(
+            'Invalid Harbor post action type id',
+        );
+    });
+
+    it('從 site.json 正規化並快取旗標類型', async () => {
+        getSpy.mockResolvedValue({
+            data: {
+                post_action_types: [
+                    {
+                        id: 2,
+                        name_key: 'like',
+                        name: '讚好',
+                        is_flag: false,
+                    },
+                    {
+                        id: 3,
+                        name_key: 'off_topic',
+                        name: '偏離主題',
+                        description: '與討論無關',
+                        is_flag: true,
+                    },
+                    {
+                        id: 7,
+                        name_key: 'notify_moderators',
+                        name: '通知管理員',
+                        short_description: '需要管理員協助',
+                        is_flag: true,
+                    },
+                    {
+                        id: 9,
+                        name_key: 'custom_something',
+                        name: '其他原因',
+                        is_flag: true,
+                        is_custom_flag: true,
+                    },
+                ],
+            },
+        });
+
+        const flagTypes = await fetchCachedHarborFlagTypes();
+        await fetchCachedHarborFlagTypes();
+
+        expect(getSpy).toHaveBeenCalledTimes(1);
+        expect(getSpy).toHaveBeenCalledWith('/site.json', {
+            signal: undefined,
+        });
+        expect(flagTypes).toEqual([
+            {
+                id: 3,
+                name: '偏離主題',
+                description: '與討論無關',
+                nameKey: 'off_topic',
+                requiresMessage: false,
+                isCustomFlag: false,
+            },
+            {
+                id: 7,
+                name: '通知管理員',
+                description: '需要管理員協助',
+                nameKey: 'notify_moderators',
+                requiresMessage: true,
+                isCustomFlag: false,
+            },
+            {
+                id: 9,
+                name: '其他原因',
+                description: '',
+                nameKey: 'custom_something',
+                requiresMessage: true,
+                isCustomFlag: true,
+            },
+        ]);
+        expect(
+            normalizeHarborFlagTypes({
+                post_action_types: [{id: 2, is_flag: false}],
+            }),
+        ).toEqual([]);
     });
 
     it('透過 Discourse Core API 刪除帖子', async () => {

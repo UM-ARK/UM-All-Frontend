@@ -832,6 +832,20 @@ const styles = StyleSheet.create({
         paddingHorizontal: scale(11),
         paddingVertical: verticalScale(8),
     },
+    flagReasonList: {
+        maxHeight: verticalScale(260),
+    },
+    flagMessageInput: {
+        ...uiStyle.defaultText,
+        borderWidth: StyleSheet.hairlineWidth,
+        borderRadius: scale(9),
+        fontSize: scale(13),
+        minHeight: verticalScale(88),
+        marginBottom: verticalScale(4),
+        paddingHorizontal: scale(11),
+        paddingVertical: verticalScale(8),
+        textAlignVertical: 'top',
+    },
     bookmarkReminderRow: {
         flexDirection: 'row',
         alignItems: 'center',

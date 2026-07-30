@@ -334,7 +334,10 @@ const Nav = () => {
                                     headerShown: false,
                                     presentation: 'transparentModal',
                                 }
-                                : {}
+                                : {
+                                    // 發佈／編輯話題使用一般堆疊頁，避免 iOS Modal 半屏上推
+                                    presentation: 'card',
+                                }
                         }
                     />
                     <Stack.Screen

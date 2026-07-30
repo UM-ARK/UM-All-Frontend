@@ -6,9 +6,14 @@ jest.mock('../../../../../utils/pathMap', () => ({
 }));
 
 import {
+    canFlagPost,
+    canShowFlagMenu,
     canUpdatePostReaction,
     flattenNestedPosts,
+    getFlagActions,
+    mergeAvailableFlagTypes,
     updateNestedPostTree,
+    updateOptimisticFlag,
 } from '../harborTopicModels';
 
 describe('canUpdatePostReaction', () => {
@@ -46,6 +51,138 @@ describe('canUpdatePostReaction', () => {
                 },
             }),
         ).toBe(false);
+    });
+});
+
+describe('Flag 資料模型', () => {
+    const flagTypes = [
+        { id: 3, name: '偏離主題', requiresMessage: false },
+        { id: 7, name: '通知管理員', requiresMessage: true },
+        { id: 8, name: '垃圾訊息', requiresMessage: false },
+    ];
+
+    it('取得可檢舉的 actions_summary 項目', () => {
+        expect(
+            getFlagActions({
+                actions_summary: [
+                    { id: 2, can_act: true },
+                    { id: 3, can_act: true },
+                    { id: 7, can_act: false },
+                    { id: 8, can_act: true },
+                ],
+            }),
+        ).toEqual([
+            { id: 3, can_act: true },
+            { id: 8, can_act: true },
+        ]);
+        expect(
+            getFlagActions(
+                {
+                    actions_summary: [
+                        { id: 3, can_act: true },
+                        { id: 8, can_act: true },
+                    ],
+                },
+                [3],
+            ),
+        ).toEqual([{ id: 3, can_act: true }]);
+    });
+
+    it('未登入可顯示舉報；自己的帖子不顯示', () => {
+        expect(
+            canShowFlagMenu({ username: 'alice', actions_summary: [] }, null),
+        ).toBe(true);
+        expect(
+            canShowFlagMenu(
+                { username: 'alice', actions_summary: [] },
+                'alice',
+            ),
+        ).toBe(false);
+        expect(
+            canShowFlagMenu(
+                {
+                    username: 'bob',
+                    actions_summary: [{ id: 3, can_act: true }],
+                },
+                'alice',
+            ),
+        ).toBe(true);
+    });
+
+    it('依 can_act 判斷是否可送出檢舉', () => {
+        expect(
+            canFlagPost(
+                {
+                    username: 'bob',
+                    actions_summary: [{ id: 3, can_act: true }],
+                },
+                'alice',
+            ),
+        ).toBe(true);
+        expect(
+            canFlagPost(
+                {
+                    username: 'alice',
+                    actions_summary: [{ id: 3, can_act: true }],
+                },
+                'alice',
+            ),
+        ).toBe(false);
+        expect(
+            canFlagPost(
+                {
+                    username: 'bob',
+                    actions_summary: [{ id: 3, can_act: false }],
+                },
+                'alice',
+            ),
+        ).toBe(false);
+    });
+
+    it('合併站點旗標類型與帖子 can_act', () => {
+        expect(
+            mergeAvailableFlagTypes(flagTypes, {
+                actions_summary: [
+                    { id: 3, can_act: true },
+                    { id: 7, can_act: false },
+                    { id: 8, can_act: true },
+                ],
+            }),
+        ).toEqual([
+            { id: 3, name: '偏離主題', requiresMessage: false },
+            { id: 8, name: '垃圾訊息', requiresMessage: false },
+        ]);
+        expect(
+            mergeAvailableFlagTypes(flagTypes, {
+                actions_summary: [{ id: 7, can_act: false }],
+            }),
+        ).toEqual([]);
+    });
+
+    it('樂觀更新已檢舉狀態', () => {
+        expect(
+            updateOptimisticFlag(
+                {
+                    id: 12,
+                    actions_summary: [
+                        { id: 2, can_act: true },
+                        { id: 3, can_act: true },
+                    ],
+                },
+                3,
+            ),
+        ).toEqual({
+            id: 12,
+            actions_summary: [
+                { id: 2, can_act: true },
+                {
+                    id: 3,
+                    can_act: false,
+                    acted: true,
+                    can_undo: false,
+                },
+            ],
+        });
     });
 });
 

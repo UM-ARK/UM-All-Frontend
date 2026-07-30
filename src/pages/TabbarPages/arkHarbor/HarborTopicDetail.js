@@ -49,6 +49,7 @@ import HarborTopicActionBar from './topicDetail/HarborTopicActionBar';
 import HarborTopicDetailOverlays from './topicDetail/HarborTopicDetailOverlays';
 import HarborTopicDetailSkeleton from './topicDetail/HarborTopicDetailSkeleton';
 import {
+    canShowFlagMenu,
     canUpdatePostReaction,
     getLikeAction,
     getReactionCount,
@@ -225,17 +226,21 @@ const HarborTopicDetail = ({ route, navigation }) => {
         changeNotificationLevel,
         deletePost,
         explainPostReactionDisabled,
+        flagEditor,
         isBookmarkReminderVisible,
         isNotificationVisible,
         openBookmarkEditor,
+        openFlagEditor,
         openNotificationLevels,
         pendingMutations,
         removePostBookmark,
         savePostBookmark,
         selectPostReaction,
         setBookmarkEditor,
+        setFlagEditor,
         setIsBookmarkReminderVisible,
         setIsNotificationVisible,
+        submitPostFlag,
         togglePostLike,
     } = useHarborTopicActions({
         currentTrustLevel: harborUser?.trustLevel,
@@ -732,6 +737,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
                         onPressCopy={copyPostPermalink}
                         onPressDelete={confirmDeletePost}
                         onPressEdit={openPostEditComposer}
+                        onPressFlag={openFlagEditor}
                         onPressLike={togglePostLike}
                         onPressLink={openHarborLink}
                         onPressOpenNotifications={openNotificationLevels}
@@ -747,6 +753,10 @@ const HarborTopicDetail = ({ route, navigation }) => {
                         }
                         onSelectReaction={selectPostReaction}
                         canReply={canReplyToTopic}
+                        canShowFlag={canShowFlagMenu(
+                            item,
+                            harborUser?.username,
+                        )}
                         nestedDepth={item.__harborNestedDepth}
                         nestedRepliesExpanded={
                             Number(
@@ -776,6 +786,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
                         pendingDelete={
                             pendingMutations[`delete:${item.id}`]
                         }
+                        pendingFlag={pendingMutations[`flag:${item.id}`]}
                         pendingLike={pendingMutations[`like:${item.id}`]}
                         pendingNotification={
                             pendingMutations[`notification:${topicId}`]
@@ -802,9 +813,11 @@ const HarborTopicDetail = ({ route, navigation }) => {
             copyPostPermalink,
             confirmDeletePost,
             explainPostReactionDisabled,
+            harborUser?.username,
             openAuthor,
             openBookmarkEditor,
             openCategory,
+            openFlagEditor,
             openHarborLink,
             openImage,
             openNotificationLevels,
@@ -1043,16 +1056,23 @@ const HarborTopicDetail = ({ route, navigation }) => {
             <HarborTopicDetailOverlays
                 bookmarkEditor={bookmarkEditor}
                 changeNotificationLevel={changeNotificationLevel}
+                flagEditor={flagEditor}
                 imageUrls={imageUrls}
                 imageViewerRef={imageViewerRef}
                 isBookmarkReminderVisible={isBookmarkReminderVisible}
                 isNotificationVisible={isNotificationVisible}
                 notificationOptions={TOPIC_NOTIFICATION_OPTIONS}
+                pendingFlag={Boolean(
+                    flagEditor?.post?.id &&
+                        pendingMutations[`flag:${flagEditor.post.id}`],
+                )}
                 removePostBookmark={removePostBookmark}
                 savePostBookmark={savePostBookmark}
                 setBookmarkEditor={setBookmarkEditor}
+                setFlagEditor={setFlagEditor}
                 setIsBookmarkReminderVisible={setIsBookmarkReminderVisible}
                 setIsNotificationVisible={setIsNotificationVisible}
+                submitPostFlag={submitPostFlag}
                 topic={topic}
             />
         </View>

@@ -114,6 +114,7 @@ const composerMetadataCache = {
     categories: {value: null, expiresAt: 0, request: null, generation: 0},
     tags: {value: null, expiresAt: 0, request: null, generation: 0},
     settings: {value: null, expiresAt: 0, request: null, generation: 0},
+    flagTypes: {value: null, expiresAt: 0, request: null, generation: 0},
 };
 
 harborApi.interceptors.request.use(config => {
@@ -1660,6 +1661,69 @@ export async function fetchHarborSiteCapabilities({ signal } = {}) {
     return normalizeSiteCapabilities(response.data);
 }
 
+function flagTypeRequiresMessage(type) {
+    if (type?.is_custom_flag) {
+        return true;
+    }
+    const nameKey =
+        typeof type?.name_key === 'string' ? type.name_key.toLowerCase() : '';
+    return (
+        nameKey.includes('notify') ||
+        nameKey === 'illegal' ||
+        nameKey === 'something_else'
+    );
+}
+
+function normalizeHarborFlagType(type) {
+    const id = Number(type?.id);
+    if (!Number.isInteger(id) || id <= 0 || !type?.is_flag) {
+        return null;
+    }
+    const nameKey =
+        typeof type.name_key === 'string' ? type.name_key.trim() : '';
+    const name =
+        typeof type.name === 'string' && type.name.trim()
+            ? type.name.trim()
+            : nameKey || String(id);
+    const description =
+        typeof type.description === 'string' ? type.description.trim() : '';
+    const shortDescription =
+        typeof type.short_description === 'string'
+            ? type.short_description.trim()
+            : '';
+    return {
+        id,
+        name,
+        description: description || shortDescription,
+        nameKey,
+        requiresMessage: flagTypeRequiresMessage(type),
+        isCustomFlag: Boolean(type.is_custom_flag),
+    };
+}
+
+export function normalizeHarborFlagTypes(data) {
+    const rawTypes = Array.isArray(data?.post_action_types)
+        ? data.post_action_types
+        : Array.isArray(data)
+            ? data
+            : [];
+    return rawTypes.map(normalizeHarborFlagType).filter(Boolean);
+}
+
+export async function fetchHarborFlagTypes({ signal } = {}) {
+    const response = await harborApi.get('/site.json', { signal });
+    return normalizeHarborFlagTypes(response.data);
+}
+
+export function fetchCachedHarborFlagTypes({ forceRefresh = false } = {}) {
+    return getCachedComposerMetadata(
+        'flagTypes',
+        () => fetchHarborFlagTypes(),
+        COMPOSER_METADATA_TTL,
+        forceRefresh,
+    );
+}
+
 export async function fetchHarborUserActions(
     username,
     { kind = 'all', offset = 0, signal } = {},
@@ -2559,6 +2623,27 @@ export async function unlikeHarborPost(postId) {
     const response = await harborApi.delete(`/post_actions/${id}.json`, {
         data: { post_action_type_id: 2 },
     });
+    return response.data;
+}
+
+export async function flagHarborPost(
+    postId,
+    { postActionTypeId, message } = {},
+) {
+    const id = normalizeHarborMutationId(postId, 'post id');
+    const typeId = normalizeHarborMutationId(
+        postActionTypeId,
+        'post action type id',
+    );
+    const payload = {
+        id,
+        post_action_type_id: typeId,
+        flag_topic: false,
+    };
+    if (typeof message === 'string' && message.trim()) {
+        payload.message = message.trim();
+    }
+    const response = await harborApi.post('/post_actions.json', payload);
     return response.data;
 }
 

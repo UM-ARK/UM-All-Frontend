@@ -188,6 +188,7 @@ const HarborPostCard = memo(
         onPressDelete,
         onPressDisabledReaction,
         onPressEdit,
+        onPressFlag,
         onPressLike,
         onPressLink,
         onPressOpenNotifications,
@@ -198,6 +199,7 @@ const HarborPostCard = memo(
         onSelectReaction,
         onToggleNestedReplies,
         canReply,
+        canShowFlag,
         nestedDepth,
         nestedRepliesAllVisible,
         nestedRepliesExpanded,
@@ -206,6 +208,7 @@ const HarborPostCard = memo(
         nestedVisibleReplyCount,
         pendingBookmark,
         pendingDelete,
+        pendingFlag,
         pendingLike,
         pendingNotification,
         pendingReaction,
@@ -344,6 +347,19 @@ const HarborPostCard = memo(
                     },
                 });
             }
+            // 與圖示回覆並存，避免用戶找不到回覆入口
+            if (canReply) {
+                actions.push({
+                    id: 'reply',
+                    title: t('回覆'),
+                    image: Platform.select({
+                        ios: 'bubble.left',
+                        android: 'ic_menu_revert',
+                    }),
+                    imageColor: black.third,
+                    titleColor: black.third,
+                });
+            }
             if (post.can_edit) {
                 actions.push({
                     id: 'edit',
@@ -398,6 +414,22 @@ const HarborPostCard = memo(
                 imageColor: black.third,
                 titleColor: black.third,
             });
+            if (canShowFlag) {
+                actions.push({
+                    id: 'flag',
+                    title: t('舉報'),
+                    image: Platform.select({
+                        ios: 'flag',
+                        android: 'ic_menu_report_image',
+                    }),
+                    imageColor: unread,
+                    titleColor: unread,
+                    attributes: {
+                        destructive: true,
+                        disabled: Boolean(pendingFlag),
+                    },
+                });
+            }
             actions.push({
                 id: 'share',
                 title: t('分享'),
@@ -411,9 +443,12 @@ const HarborPostCard = memo(
             return actions;
         }, [
             black.third,
+            canReply,
+            canShowFlag,
             isFirstPost,
             pendingBookmark,
             pendingDelete,
+            pendingFlag,
             pendingNotification,
             post.bookmarked,
             post.can_delete,
@@ -486,6 +521,10 @@ const HarborPostCard = memo(
                 onPressOpenNotifications?.();
                 return;
             }
+            if (actionId === 'reply') {
+                onPressComposeReply?.(post);
+                return;
+            }
             if (actionId === 'edit') {
                 onPressEdit(post);
                 return;
@@ -504,6 +543,10 @@ const HarborPostCard = memo(
             }
             if (actionId === 'share') {
                 onPressShare(post);
+                return;
+            }
+            if (actionId === 'flag') {
+                onPressFlag?.(post);
             }
         };
 

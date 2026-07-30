@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     Modal,
     Pressable,
+    ScrollView,
     StyleSheet,
     Text,
     TextInput,
@@ -20,19 +21,30 @@ import { useTheme } from '../../../../components/ThemeContext';
 import { trigger } from '../../../../utils/trigger';
 import styles from './styles';
 
+const stripHarborHtml = value => {
+    if (typeof value !== 'string' || !value) {
+        return '';
+    }
+    return value.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+};
+
 const HarborTopicDetailOverlays = ({
     bookmarkEditor,
     changeNotificationLevel,
+    flagEditor,
     imageUrls,
     imageViewerRef,
     isBookmarkReminderVisible,
     isNotificationVisible,
     notificationOptions: TOPIC_NOTIFICATION_OPTIONS,
+    pendingFlag,
     removePostBookmark,
     savePostBookmark,
     setBookmarkEditor,
+    setFlagEditor,
     setIsBookmarkReminderVisible,
     setIsNotificationVisible,
+    submitPostFlag,
     topic,
 }) => {
     const { theme } = useTheme();
@@ -43,7 +55,30 @@ const HarborTopicDetailOverlays = ({
         themeColor,
         tonal,
         trueWhite,
+        unread,
     } = theme;
+    const [selectedFlagTypeId, setSelectedFlagTypeId] = useState(null);
+    const [flagMessage, setFlagMessage] = useState('');
+
+    useEffect(() => {
+        if (!flagEditor) {
+            setSelectedFlagTypeId(null);
+            setFlagMessage('');
+            return;
+        }
+        const firstTypeId = Number(flagEditor.flagTypes?.[0]?.id) || null;
+        setSelectedFlagTypeId(firstTypeId);
+        setFlagMessage('');
+    }, [flagEditor]);
+
+    const selectedFlagType = (flagEditor?.flagTypes || []).find(
+        type => Number(type?.id) === Number(selectedFlagTypeId),
+    );
+    const flagRequiresMessage = Boolean(selectedFlagType?.requiresMessage);
+    const canSubmitFlag =
+        Boolean(selectedFlagType) &&
+        (!flagRequiresMessage || flagMessage.trim().length > 0) &&
+        !pendingFlag;
 
     return (
         <>
@@ -238,6 +273,194 @@ const HarborTopicDetailOverlays = ({
                                         { color: trueWhite },
                                     ]}>
                                     {t('儲存')}
+                                </Text>
+                            </Pressable>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
+
+            <Modal
+                transparent
+                visible={Boolean(flagEditor)}
+                animationType="fade"
+                onRequestClose={() => setFlagEditor(null)}>
+                <View style={styles.modalPage}>
+                    <Pressable
+                        style={[
+                            StyleSheet.absoluteFill,
+                            styles.modalBackdrop,
+                            { backgroundColor: theme.trueBlack },
+                        ]}
+                        onPress={() => {
+                            trigger();
+                            if (!pendingFlag) {
+                                setFlagEditor(null);
+                            }
+                        }}
+                    />
+                    <View
+                        style={[
+                            styles.actionDialog,
+                            { backgroundColor: theme.white },
+                        ]}>
+                        <Text
+                            style={[
+                                styles.actionDialogTitle,
+                                { color: black.main },
+                            ]}>
+                            {t('舉報帖子')}
+                        </Text>
+                        <Text
+                            style={[
+                                styles.actionDialogLabel,
+                                { color: black.second },
+                            ]}>
+                            {t('選擇原因')}
+                        </Text>
+                        <ScrollView
+                            style={styles.flagReasonList}
+                            keyboardShouldPersistTaps="handled">
+                            {(flagEditor?.flagTypes || []).map(type => {
+                                const selected =
+                                    Number(selectedFlagTypeId) ===
+                                    Number(type.id);
+                                const description = stripHarborHtml(
+                                    type.description,
+                                );
+                                return (
+                                    <Pressable
+                                        key={type.id}
+                                        disabled={Boolean(pendingFlag)}
+                                        onPress={() => {
+                                            trigger();
+                                            setSelectedFlagTypeId(type.id);
+                                        }}
+                                        style={({ pressed }) => [
+                                            styles.notificationOption,
+                                            {
+                                                backgroundColor:
+                                                    selected || pressed
+                                                        ? tonal.primary15
+                                                        : theme.white,
+                                                borderTopColor: disabled,
+                                            },
+                                        ]}>
+                                        <MaterialCommunityIcons
+                                            name="flag-outline"
+                                            size={scale(19)}
+                                            color={
+                                                selected ? unread : themeColor
+                                            }
+                                        />
+                                        <View style={styles.notificationContent}>
+                                            <Text
+                                                style={[
+                                                    styles.notificationLabel,
+                                                    { color: black.main },
+                                                ]}>
+                                                {type.name}
+                                            </Text>
+                                            {description ? (
+                                                <Text
+                                                    style={[
+                                                        styles.notificationDescription,
+                                                        { color: black.third },
+                                                    ]}>
+                                                    {description}
+                                                </Text>
+                                            ) : null}
+                                        </View>
+                                        {selected ? (
+                                            <MaterialCommunityIcons
+                                                name="check"
+                                                size={scale(18)}
+                                                color={themeColor}
+                                            />
+                                        ) : null}
+                                    </Pressable>
+                                );
+                            })}
+                        </ScrollView>
+                        {flagRequiresMessage ? (
+                            <>
+                                <Text
+                                    style={[
+                                        styles.actionDialogLabel,
+                                        {
+                                            color: black.second,
+                                            marginTop: scale(10),
+                                        },
+                                    ]}>
+                                    {t('補充說明')}
+                                </Text>
+                                <TextInput
+                                    value={flagMessage}
+                                    onChangeText={setFlagMessage}
+                                    editable={!pendingFlag}
+                                    multiline
+                                    maxLength={1000}
+                                    placeholder={t('請說明舉報原因')}
+                                    placeholderTextColor={black.third}
+                                    style={[
+                                        styles.flagMessageInput,
+                                        {
+                                            color: black.main,
+                                            backgroundColor: tonal.primary08,
+                                            borderColor: themeColor,
+                                        },
+                                    ]}
+                                />
+                            </>
+                        ) : null}
+                        <View style={styles.actionDialogActions}>
+                            <Pressable
+                                disabled={Boolean(pendingFlag)}
+                                onPress={() => {
+                                    trigger();
+                                    setFlagEditor(null);
+                                }}
+                                style={({ pressed }) => [
+                                    styles.actionDialogButton,
+                                    {
+                                        backgroundColor: pressed
+                                            ? tonal.primary15
+                                            : tonal.primary08,
+                                    },
+                                ]}>
+                                <Text
+                                    style={[
+                                        styles.actionDialogButtonText,
+                                        { color: black.second },
+                                    ]}>
+                                    {t('取消')}
+                                </Text>
+                            </Pressable>
+                            <Pressable
+                                disabled={!canSubmitFlag}
+                                onPress={() => {
+                                    trigger();
+                                    submitPostFlag({
+                                        postActionTypeId: selectedFlagTypeId,
+                                        message: flagMessage,
+                                    });
+                                }}
+                                style={({ pressed }) => [
+                                    styles.actionDialogButton,
+                                    {
+                                        backgroundColor: !canSubmitFlag
+                                            ? disabled
+                                            : pressed
+                                                ? tonal.primary50
+                                                : unread,
+                                    },
+                                ]}>
+                                <Text
+                                    style={[
+                                        styles.actionDialogButtonText,
+                                        { color: trueWhite },
+                                    ]}>
+                                    {pendingFlag ? t('送出中…') : t('送出檢舉')}
                                 </Text>
                             </Pressable>
                         </View>

@@ -10,6 +10,8 @@ import {
     createHarborPostBookmark,
     deleteHarborBookmark,
     deleteHarborPost,
+    fetchCachedHarborFlagTypes,
+    flagHarborPost,
     HARBOR_TOPIC_NOTIFICATION_LEVELS,
     likeHarborPost,
     setHarborTopicNotificationLevel,
@@ -23,6 +25,9 @@ import {
     canUpdatePostReaction,
     getHarborMutationError,
     getLikeAction,
+    isOwnHarborPost,
+    mergeAvailableFlagTypes,
+    updateOptimisticFlag,
     updateOptimisticLike,
     updateOptimisticReaction,
 } from './harborTopicModels';
@@ -98,6 +103,7 @@ const useHarborTopicActions = ({
 }) => {
     const pendingMutationsRef = useRef(new Set());
     const [bookmarkEditor, setBookmarkEditor] = useState(null);
+    const [flagEditor, setFlagEditor] = useState(null);
     const [isBookmarkReminderVisible, setIsBookmarkReminderVisible] =
         useState(false);
     const [isNotificationVisible, setIsNotificationVisible] = useState(false);
@@ -658,6 +664,120 @@ const useHarborTopicActions = ({
         }
     }, [requireHarborSignIn]);
 
+    const openFlagEditor = useCallback(
+        async post => {
+            if (!(await requireHarborSignIn(post?.post_number))) {
+                return;
+            }
+            if (isOwnHarborPost(post, currentUsername)) {
+                Toast.show(t('不能舉報自己的帖子'));
+                return;
+            }
+
+            const latestPost =
+                latestTopicRef.current?.post_stream?.posts?.find(
+                    item => Number(item?.id) === Number(post?.id),
+                ) || post;
+
+            try {
+                const flagTypes = await fetchCachedHarborFlagTypes();
+                const availableTypes = mergeAvailableFlagTypes(
+                    flagTypes,
+                    latestPost,
+                );
+                if (availableTypes.length === 0) {
+                    Toast.show(t('你目前無法舉報這篇帖子'));
+                    return;
+                }
+                setFlagEditor({
+                    post: latestPost,
+                    flagTypes: availableTypes,
+                });
+            } catch (error) {
+                showMutationFailure(error, { rolledBack: false });
+            }
+        },
+        [
+            currentUsername,
+            latestTopicRef,
+            requireHarborSignIn,
+            showMutationFailure,
+            t,
+        ],
+    );
+
+    const submitPostFlag = useCallback(
+        async ({ postActionTypeId, message } = {}) => {
+            const editor = flagEditor;
+            const post = editor?.post;
+            if (!post?.id) {
+                return false;
+            }
+
+            const typeId = Number(postActionTypeId);
+            const selectedType = (editor.flagTypes || []).find(
+                type => Number(type?.id) === typeId,
+            );
+            if (!selectedType) {
+                Toast.show(t('請選擇舉報原因'));
+                return false;
+            }
+            const trimmedMessage =
+                typeof message === 'string' ? message.trim() : '';
+            if (selectedType.requiresMessage && !trimmedMessage) {
+                Toast.show(t('請填寫舉報說明'));
+                return false;
+            }
+
+            const key = `flag:${post.id}`;
+            if (!beginMutation(key)) {
+                return false;
+            }
+
+            try {
+                await flagHarborPost(post.id, {
+                    postActionTypeId: typeId,
+                    message: trimmedMessage,
+                });
+                updateTopicPost(post.id, current =>
+                    updateOptimisticFlag(current, typeId),
+                );
+                setFlagEditor(null);
+                Toast.show(t('已送出檢舉'));
+                return true;
+            } catch (error) {
+                await handleMutationFailure(
+                    error,
+                    {
+                        action: 'flag',
+                        sessionStatus: sessionStatusRef.current,
+                        postActionTypeId: typeId,
+                        ...getPostActionDiagnostics(
+                            post,
+                            currentUsername,
+                            currentTrustLevel,
+                        ),
+                    },
+                    { rolledBack: false },
+                );
+                return false;
+            } finally {
+                finishMutation(key);
+            }
+        },
+        [
+            beginMutation,
+            currentTrustLevel,
+            currentUsername,
+            finishMutation,
+            flagEditor,
+            handleMutationFailure,
+            sessionStatusRef,
+            t,
+            updateTopicPost,
+        ],
+    );
+
     const changeNotificationLevel = useCallback(
         async level => {
             setIsNotificationVisible(false);
@@ -727,17 +847,21 @@ const useHarborTopicActions = ({
         changeNotificationLevel,
         deletePost,
         explainPostReactionDisabled,
+        flagEditor,
         isBookmarkReminderVisible,
         isNotificationVisible,
         openBookmarkEditor,
+        openFlagEditor,
         openNotificationLevels,
         pendingMutations,
         removePostBookmark,
         savePostBookmark,
         selectPostReaction,
         setBookmarkEditor,
+        setFlagEditor,
         setIsBookmarkReminderVisible,
         setIsNotificationVisible,
+        submitPostFlag,
         togglePostLike,
     };
 };

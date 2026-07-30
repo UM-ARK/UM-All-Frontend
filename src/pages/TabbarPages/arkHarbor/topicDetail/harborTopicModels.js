@@ -75,6 +75,93 @@ const getLikeAction = post => {
     return post?.actions_summary?.find(action => action?.id === LIKE_ACTION_ID);
 };
 
+const getFlagActions = (post, flagTypeIds = null) => {
+    const summary = Array.isArray(post?.actions_summary)
+        ? post.actions_summary
+        : [];
+    const allowedIds =
+        flagTypeIds instanceof Set
+            ? flagTypeIds
+            : Array.isArray(flagTypeIds)
+                ? new Set(flagTypeIds.map(Number).filter(id => id > 0))
+                : null;
+    return summary.filter(action => {
+        const id = Number(action?.id);
+        if (!Number.isInteger(id) || id <= 0 || id === LIKE_ACTION_ID) {
+            return false;
+        }
+        if (allowedIds && allowedIds.size > 0 && !allowedIds.has(id)) {
+            return false;
+        }
+        return action?.can_act === true;
+    });
+};
+
+const isOwnHarborPost = (post, currentUsername) => {
+    const normalizedCurrentUsername =
+        typeof currentUsername === 'string'
+            ? currentUsername.trim().toLowerCase()
+            : '';
+    const normalizedPostUsername =
+        typeof post?.username === 'string'
+            ? post.username.trim().toLowerCase()
+            : '';
+    return Boolean(
+        normalizedCurrentUsername &&
+            normalizedPostUsername &&
+            normalizedCurrentUsername === normalizedPostUsername,
+    );
+};
+
+// 未登入也顯示入口；已登入則隱藏自己的帖，並優先依 can_act 判斷
+const canShowFlagMenu = (post, currentUsername) => {
+    if (isOwnHarborPost(post, currentUsername)) {
+        return false;
+    }
+    if (!currentUsername) {
+        return true;
+    }
+    const flagActions = getFlagActions(post);
+    if (flagActions.length > 0) {
+        return true;
+    }
+    // 已登入但 summary 尚未帶 can_act 時仍顯示，進入口再驗證
+    const hasExplicitFlagDenial = (post?.actions_summary || []).some(
+        action => {
+            const id = Number(action?.id);
+            return (
+                Number.isInteger(id) &&
+                id > 0 &&
+                id !== LIKE_ACTION_ID &&
+                action?.can_act === false &&
+                action?.acted
+            );
+        },
+    );
+    return !hasExplicitFlagDenial;
+};
+
+const canFlagPost = (post, currentUsername, flagTypeIds = null) => {
+    if (isOwnHarborPost(post, currentUsername)) {
+        return false;
+    }
+    return getFlagActions(post, flagTypeIds).length > 0;
+};
+
+const mergeAvailableFlagTypes = (flagTypes, post) => {
+    const types = Array.isArray(flagTypes) ? flagTypes : [];
+    const actionableIds = new Set(
+        getFlagActions(
+            post,
+            types.map(type => type?.id),
+        ).map(action => Number(action.id)),
+    );
+    if (actionableIds.size === 0) {
+        return [];
+    }
+    return types.filter(type => actionableIds.has(Number(type?.id)));
+};
+
 const canUpdatePostReaction = post => {
     if (post?.current_user_reaction) {
         return post.current_user_reaction.can_undo !== false;
@@ -113,6 +200,33 @@ const updateOptimisticLike = (post, liked) => {
         actions_summary: [
             ...(post.actions_summary || []).filter(
                 action => action?.id !== LIKE_ACTION_ID,
+            ),
+            nextAction,
+        ],
+    };
+};
+
+const updateOptimisticFlag = (post, typeId) => {
+    const flagTypeId = Number(typeId);
+    if (!Number.isInteger(flagTypeId) || flagTypeId <= 0) {
+        return post;
+    }
+    const currentAction =
+        (post?.actions_summary || []).find(
+            action => Number(action?.id) === flagTypeId,
+        ) || { id: flagTypeId };
+    const nextAction = {
+        ...currentAction,
+        id: flagTypeId,
+        acted: true,
+        can_act: false,
+        can_undo: false,
+    };
+    return {
+        ...post,
+        actions_summary: [
+            ...(post.actions_summary || []).filter(
+                action => Number(action?.id) !== flagTypeId,
             ),
             nextAction,
         ],
@@ -341,10 +455,13 @@ const updateNestedPostTree = (posts, postId, updater) => {
 
 export {
     appendTopicPosts,
+    canFlagPost,
+    canShowFlagMenu,
     canUpdatePostReaction,
     collectNestedPosts,
     extractPostImages,
     flattenNestedPosts,
+    getFlagActions,
     getHarborMutationError,
     getLikeAction,
     getNestedReplyCount,
@@ -352,9 +469,12 @@ export {
     getReactionCount,
     getTagLabel,
     isCanceledRequest,
+    isOwnHarborPost,
+    mergeAvailableFlagTypes,
     mergeTopicWindow,
     NESTED_REPLY_BATCH_SIZE,
     normalizeHtmlUrl,
+    updateOptimisticFlag,
     updateOptimisticLike,
     updateOptimisticReaction,
     updateNestedPostTree,
