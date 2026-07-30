@@ -13,10 +13,23 @@ import {
     formatHarborFlagTypesForPost,
     getFlagActions,
     interpolateHarborI18nTemplate,
+    isHarborPostDeleted,
     mergeAvailableFlagTypes,
     updateNestedPostTree,
     updateOptimisticFlag,
 } from '../harborTopicModels';
+
+describe('isHarborPostDeleted', () => {
+    it('辨識 deleted_at、user_deleted 與巢狀刪除佔位', () => {
+        expect(isHarborPostDeleted({ deleted_at: '2026-01-01' })).toBe(true);
+        expect(isHarborPostDeleted({ user_deleted: true })).toBe(true);
+        expect(
+            isHarborPostDeleted({ deleted_post_placeholder: true }),
+        ).toBe(true);
+        expect(isHarborPostDeleted({ post_number: 2 })).toBe(false);
+        expect(isHarborPostDeleted(null)).toBe(false);
+    });
+});
 
 describe('canUpdatePostReaction', () => {
     it('允許對可讚好的帖子新增回應', () => {

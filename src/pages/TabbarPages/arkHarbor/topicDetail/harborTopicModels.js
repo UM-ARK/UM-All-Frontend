@@ -113,6 +113,14 @@ const isOwnHarborPost = (post, currentUsername) => {
     );
 };
 
+// 巢狀 API 對一般成員只回傳 deleted_post_placeholder，不會帶 deleted_at
+const isHarborPostDeleted = post =>
+    Boolean(
+        post?.deleted_at ||
+            post?.user_deleted ||
+            post?.deleted_post_placeholder,
+    );
+
 // 未登入也顯示入口；已登入則隱藏自己的帖，並優先依 can_act 判斷
 const canShowFlagMenu = (post, currentUsername) => {
     if (isOwnHarborPost(post, currentUsername)) {
@@ -496,6 +504,7 @@ export {
     getTagLabel,
     interpolateHarborI18nTemplate,
     isCanceledRequest,
+    isHarborPostDeleted,
     isOwnHarborPost,
     mergeAvailableFlagTypes,
     mergeTopicWindow,

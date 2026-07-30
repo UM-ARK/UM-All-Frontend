@@ -32,6 +32,7 @@ import {
     getLikeAction,
     getReactionCount,
     getTagLabel,
+    isHarborPostDeleted,
     NESTED_REPLY_BATCH_SIZE,
 } from './harborTopicModels';
 import styles from './styles';
@@ -289,7 +290,7 @@ const HarborPostCard = memo(
             post.created_at &&
             moment(post.updated_at).diff(moment(post.created_at), 'seconds') >
             60;
-        const isDeleted = Boolean(post.deleted_at || post.user_deleted);
+        const isDeleted = isHarborPostDeleted(post);
         const isHidden = Boolean(post.hidden);
         const isNotice = Boolean(
             post.action_code ||
