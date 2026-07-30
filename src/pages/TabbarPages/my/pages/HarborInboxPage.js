@@ -91,7 +91,7 @@ const HarborInboxPage = ({
 
     React.useEffect(() => {
         if (!embedded) {
-            navigation.setOptions({headerTitle: t('Harbor 收件匣')});
+            navigation.setOptions({headerTitle: t('消息中心')});
         }
     }, [embedded, navigation, t]);
 

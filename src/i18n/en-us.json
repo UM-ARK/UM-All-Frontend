@@ -568,7 +568,7 @@
         "你在 Harbor 的新活動會顯示在這裡。": "Your new Harbor activity will appear here.",
         "活動載入失敗": "Unable to Load Activity",
         "無法取得 Harbor 活動，請檢查網絡後再試。": "Unable to load Harbor activity. Check your connection and try again.",
-        "Harbor 收件匣": "Harbor Inbox",
+        "消息中心": "Message Center",
         "收件匣載入失敗": "Unable to Load Inbox",
         "無法取得 Harbor 消息，請檢查網絡後再試。": "Unable to load Harbor messages. Check your connection and try again.",
         "Harbor 通知": "Harbor Notification",
