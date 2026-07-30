@@ -680,15 +680,12 @@ const HarborPostCard = memo(
                                 { color: black.third },
                             ]}>
                             {isHidden
-                                ? t('此帖子已被隱藏')
-                                : t('此帖子已被刪除')}
-                        </Text>
-                        <Text
-                            style={[
-                                styles.postStateNumber,
-                                { color: black.third },
-                            ]}>
-                            #{post.post_number}
+                                ? t('#{{postNumber}} 帖子已被隱藏', {
+                                    postNumber: post.post_number,
+                                })
+                                : t('#{{postNumber}} 帖子已被刪除', {
+                                    postNumber: post.post_number,
+                                })}
                         </Text>
                     </View>
                     {nestedRepliesButton}
@@ -1066,6 +1063,7 @@ const HarborPostCard = memo(
                                     onOpenImage={onOpenImage}
                                     onPressLink={onPressLink}
                                     postUrl={postUrl}
+                                    compact
                                     forceInteractiveFallback={Boolean(
                                         postEvent,
                                     )}>

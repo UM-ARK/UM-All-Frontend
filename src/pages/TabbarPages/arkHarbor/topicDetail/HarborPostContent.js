@@ -154,6 +154,8 @@ const HarborPostContent = memo(
         onPressLink,
         postUrl,
         forceInteractiveFallback = false,
+        // 回覆帖用較小字級，主帖維持預設
+        compact = false,
         children,
     }) => {
         const { theme } = useTheme();
@@ -168,14 +170,17 @@ const HarborPostContent = memo(
             );
         }, [cooked, forceInteractiveFallback]);
 
+        const bodyFontSize = scale(compact ? 13 : 14);
+        const bodyLineHeight = scale(compact ? 19 : 21);
+
         const baseStyle = useMemo(
             () => ({
                 ...uiStyle.defaultText,
                 color: black.second,
-                fontSize: scale(14),
-                lineHeight: scale(21),
+                fontSize: bodyFontSize,
+                lineHeight: bodyLineHeight,
             }),
-            [black.second],
+            [black.second, bodyFontSize, bodyLineHeight],
         );
 
         const tagsStyles = useMemo(
@@ -189,6 +194,8 @@ const HarborPostContent = memo(
                 },
                 a: {
                     color: themeColor,
+                    fontSize: scale(12),
+                    lineHeight: scale(18),
                     textDecorationLine: 'underline',
                 },
                 h1: {

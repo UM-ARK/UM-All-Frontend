@@ -212,13 +212,13 @@ const styles = StyleSheet.create({
     },
     postStateCard: {
         borderWidth: StyleSheet.hairlineWidth,
-        borderRadius: scale(12),
+        borderRadius: scale(10),
         flexDirection: 'row',
-        alignItems: 'flex-start',
+        alignItems: 'center',
         marginHorizontal: scale(12),
-        marginVertical: verticalScale(6),
-        paddingHorizontal: scale(12),
-        paddingVertical: verticalScale(12),
+        marginVertical: verticalScale(4),
+        paddingHorizontal: scale(10),
+        paddingVertical: verticalScale(7),
     },
     postStateText: {
         ...uiStyle.defaultText,
