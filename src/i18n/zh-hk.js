@@ -56,6 +56,8 @@ export default {
         'User Agreement': '用戶協議',
         Donate: '捐贈支持',
         Feedback: '問題反饋',
+        'Forum Feedback': '論壇反饋',
+        'GitHub Issues': 'GitHub Issues',
         'Update Plan': '更新計劃',
         Activity: '開發動態',
         Contact: '聯繫我們',

@@ -10,6 +10,7 @@ import {
     Platform,
 } from 'react-native';
 import { useTheme, uiStyle } from '../../components/ThemeContext';
+import { useHarborSession } from '../../contexts/HarborSessionContext';
 import { openLink } from '../../utils/browser';
 import { trigger } from '../../utils/trigger';
 import { setLocalStorage } from '../../utils/storageKits';
@@ -30,6 +31,8 @@ import {
     GITHUB_UPDATE_PLAN,
     ARK_WIKI_ABOUT_ARK,
     GITHUB_ACTIVITY,
+    ARK_HARBOR_FEEDBACK_CATEGORY_ID,
+    ARK_HARBOR_FEEDBACK_CATEGORY_SLUG,
 } from '../../utils/pathMap';
 import { scale, verticalScale } from 'react-native-size-matters';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -145,13 +148,20 @@ const SettingItem = ({
 }) => {
     const { theme } = useTheme();
     const { white, black, viewShadow } = theme;
+    // 無 onPress 時用 View，供 MenuView 作為觸發錨點（避免內層 Touchable 搶手勢）
+    const Container = onPress ? TouchableOpacity : View;
 
     return (
-        <TouchableOpacity
-            onPress={() => {
-                trigger();
-                onPress?.();
-            }}
+        <Container
+            {...(onPress
+                ? {
+                    onPress: () => {
+                        trigger();
+                        onPress();
+                    },
+                    activeOpacity: 0.7,
+                }
+                : {})}
             style={{
                 flexDirection: 'row',
                 alignItems: 'center',
@@ -166,8 +176,7 @@ const SettingItem = ({
                         marginBottom: verticalScale(8),
                         ...viewShadow,
                     }),
-            }}
-            activeOpacity={0.7}>
+            }}>
             {/* 圖標 */}
             {icon && (
                 <View
@@ -220,7 +229,7 @@ const SettingItem = ({
                     style={{ marginLeft: scale(8) }}
                 />
             )}
-        </TouchableOpacity>
+        </Container>
     );
 };
 
@@ -230,8 +239,9 @@ const SettingItem = ({
  */
 const SettingPage = ({ navigation }) => {
     const { theme, themeMode, setThemeMode } = useTheme();
-    const { bg_color, black } = theme;
-    const { t, i18n } = useTranslation(['setting', 'about', 'common']);
+    const { bg_color, black, themeColor } = theme;
+    const { t, i18n } = useTranslation(['setting', 'about', 'common', 'my']);
+    const { status, login } = useHarborSession();
     const [umehHostPref, setUmehHostPrefState] = useState('auto');
 
     useEffect(() => {
@@ -244,6 +254,102 @@ const SettingPage = ({ navigation }) => {
      */
     const handleThemeChange = async index => {
         await setThemeMode(index);
+    };
+
+    /**
+     * 顯示 Harbor 操作錯誤
+     * @param {Object} sessionError - Harbor session 錯誤
+     */
+    const presentHarborError = useCallback(
+        sessionError => {
+            if (!sessionError) {
+                return;
+            }
+
+            const message =
+                sessionError.code === 'HARBOR_SESSION_EXPIRED'
+                    ? t('Harbor 登入已失效，請重新登入。', { ns: 'my' })
+                    : t('無法完成 Harbor 操作，請稍後再試。', { ns: 'my' });
+            Alert.alert(
+                t('Harbor 操作失敗', { ns: 'my' }),
+                message,
+                [
+                    {
+                        text: t('確定', { ns: 'my' }),
+                        onPress: () => trigger(),
+                    },
+                ],
+                { cancelable: false },
+            );
+        },
+        [t],
+    );
+
+    /**
+     * 開啟 Harbor 論壇反饋發帖頁
+     */
+    const openHarborFeedbackComposer = useCallback(() => {
+        navigation.navigate('HarborComposer', {
+            mode: 'newTopic',
+            categoryId: ARK_HARBOR_FEEDBACK_CATEGORY_ID,
+            categorySlug: ARK_HARBOR_FEEDBACK_CATEGORY_SLUG,
+        });
+    }, [navigation]);
+
+    /**
+     * 問題反饋 Menu：論壇反饋 / GitHub Issues
+     * @param {Object} event - MenuView onPressAction 事件
+     */
+    const handleFeedbackAction = event => {
+        trigger();
+        switch (event.nativeEvent.event) {
+            case 'harbor':
+                if (status === 'signedIn') {
+                    openHarborFeedbackComposer();
+                    break;
+                }
+                Alert.alert(
+                    t('需要登入 Harbor', { ns: 'my' }),
+                    t('登入後即可在論壇提交反饋。', { ns: 'my' }),
+                    [
+                        {
+                            text: t('取消'),
+                            style: 'cancel',
+                            onPress: () => trigger(),
+                        },
+                        {
+                            text: t('登入 Harbor', { ns: 'my' }),
+                            onPress: async () => {
+                                trigger();
+                                try {
+                                    const signedIn = await login({
+                                        routeName: 'HarborComposer',
+                                        params: {
+                                            mode: 'newTopic',
+                                            categoryId:
+                                                ARK_HARBOR_FEEDBACK_CATEGORY_ID,
+                                            categorySlug:
+                                                ARK_HARBOR_FEEDBACK_CATEGORY_SLUG,
+                                        },
+                                    });
+                                    if (signedIn) {
+                                        openHarborFeedbackComposer();
+                                    }
+                                } catch (sessionError) {
+                                    presentHarborError(sessionError);
+                                }
+                            },
+                        },
+                    ],
+                    { cancelable: true },
+                );
+                break;
+            case 'github':
+                openLink(GITHUB_UPDATE_PLAN);
+                break;
+            default:
+                break;
+        }
     };
 
     /**
@@ -515,16 +621,6 @@ const SettingPage = ({ navigation }) => {
                     />
                     <SettingItem
                         grouped
-                        icon="chatbubble-ellipses"
-                        iconColor="#34C759"
-                        title={t('setting:Feedback')}
-                        onPress={() => {
-                            trigger();
-                            openLink(GITHUB_UPDATE_PLAN);
-                        }}
-                    />
-                    <SettingItem
-                        grouped
                         icon="pulse"
                         iconColor="#FF9500"
                         title={t('setting:Activity')}
@@ -549,6 +645,34 @@ const SettingPage = ({ navigation }) => {
                 <SettingSection title={t('setting:Contact')} icon="mail" />
 
                 <SettingSectionCard>
+                    <MenuView
+                        actions={[
+                            {
+                                id: 'harbor',
+                                title: t('setting:Forum Feedback'),
+                                image: 'bubble.left.and.bubble.right',
+                                imageColor: themeColor,
+                                titleColor: themeColor,
+                            },
+                            {
+                                id: 'github',
+                                title: t('setting:GitHub Issues'),
+                                image: 'chevron.left.forwardslash.chevron.right',
+                                imageColor: themeColor,
+                                titleColor: themeColor,
+                            },
+                        ]}
+                        onOpenMenu={() => trigger()}
+                        onPressAction={handleFeedbackAction}
+                        shouldOpenOnLongPress={false}
+                        style={{ width: '100%' }}>
+                        <SettingItem
+                            grouped
+                            icon="chatbubble-ellipses"
+                            iconColor="#34C759"
+                            title={t('setting:Feedback')}
+                        />
+                    </MenuView>
                     <SettingItem
                         grouped
                         icon="globe"
