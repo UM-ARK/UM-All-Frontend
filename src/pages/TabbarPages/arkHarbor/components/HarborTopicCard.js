@@ -225,17 +225,18 @@ const HarborTopicCard = ({
                             {t('{{count}} 新回覆', { count: unreadCount })}
                         </Text>
                     </View>
-                ) : isNewTopic ? (
-                    <View
-                        accessible
-                        accessibilityLabel={t('新話題')}
-                        style={[
-                            styles.newTopicDot,
-                            { backgroundColor: theme.unread },
-                        ]}
-                    />
                 ) : null}
             </View>
+            {isNewTopic && !isNewReply ? (
+                <View
+                    accessible
+                    accessibilityLabel={t('新話題')}
+                    style={[
+                        styles.newTopicDot,
+                        { backgroundColor: theme.unread },
+                    ]}
+                />
+            ) : null}
 
             <Text
                 selectable
@@ -383,10 +384,12 @@ const styles = StyleSheet.create({
         fontWeight: '700',
     },
     newTopicDot: {
+        position: 'absolute',
+        top: verticalScale(8),
+        right: scale(8),
         width: scale(8),
         height: scale(8),
         borderRadius: scale(4),
-        marginLeft: scale(8),
     },
     title: {
         ...uiStyle.defaultText,
