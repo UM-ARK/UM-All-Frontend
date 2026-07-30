@@ -21,7 +21,7 @@ import HarborProfileCard from './HarborProfileCard';
 import HarborStatsPane from './HarborStatsPane';
 
 const PAGE_CONFIG = [
-    { key: 'unread', label: '未讀' },
+    { key: 'messages', label: '消息' },
     { key: 'topics', label: '發佈', kind: 'topics' },
     { key: 'replies', label: '評論', kind: 'replies' },
     { key: 'bookmarks', label: '收藏', kind: 'bookmarks' },
@@ -50,18 +50,17 @@ const HarborDashboard = ({
     const pageScrollPosition = React.useRef(new Animated.Value(0)).current;
     const internalScrollY = React.useRef(new Animated.Value(0)).current;
     const activeScrollY = scrollY || internalScrollY;
-    const pageOffsets = React.useRef({ unread: 0 });
+    const pageOffsets = React.useRef({ messages: 0 });
     const [currentIndex, setCurrentIndex] = React.useState(0);
-    const [mountedPages, setMountedPages] = React.useState({ unread: true });
+    const [mountedPages, setMountedPages] = React.useState({ messages: true });
     const [tabLayouts, setTabLayouts] = React.useState({});
     const [tabsViewportWidth, setTabsViewportWidth] = React.useState(0);
     const [tabsContentWidth, setTabsContentWidth] = React.useState(0);
     const [collapseDistance, setCollapseDistance] = React.useState(
         DEFAULT_COLLAPSE_DISTANCE,
     );
-    const unreadCount =
-        (Number(user.unreadNotifications) || 0) +
-        (Number(user.unreadMessages) || 0);
+    const [unreadCount, setUnreadCount] = React.useState(0);
+    const usernameRef = React.useRef(user.username);
     const pagePosition = React.useMemo(
         () => Animated.add(pageScrollPosition, pageScrollOffset),
         [pageScrollOffset, pageScrollPosition],
@@ -102,6 +101,13 @@ const HarborDashboard = ({
         extrapolate: 'clamp',
     });
     const contentTopInset = collapseDistance + TAB_HEIGHT;
+
+    React.useEffect(() => {
+        if (usernameRef.current !== user.username) {
+            usernameRef.current = user.username;
+            setUnreadCount(0);
+        }
+    }, [user.username]);
 
     const verticalScrollHandlers = React.useMemo(
         () =>
@@ -187,7 +193,7 @@ const HarborDashboard = ({
             );
         }
 
-        if (page.key === 'unread') {
+        if (page.key === 'messages') {
             return (
                 <HarborInboxPage
                     navigation={navigation}
@@ -196,6 +202,7 @@ const HarborDashboard = ({
                     contentBottomInset={contentBottomInset}
                     contentTopInset={contentTopInset}
                     onProfileRefresh={onProfileRefresh}
+                    onUnreadCountChange={setUnreadCount}
                     onScroll={verticalScrollHandlers[page.key]}
                 />
             );
@@ -323,7 +330,7 @@ const HarborDashboard = ({
                             {PAGE_CONFIG.map((page, index) => {
                                 const isSelected = currentIndex === index;
                                 const badge =
-                                    page.key === 'unread' ? unreadCount : 0;
+                                    page.key === 'messages' ? unreadCount : 0;
                                 return (
                                     <Pressable
                                         key={page.key}

@@ -21,28 +21,195 @@ export const activityMeta = {
     },
 };
 
-export function mergeHarborUnreadItems(notifications, messages) {
-    return [
-        ...(notifications || [])
-            .filter(item => !item.isRead)
-            .map(item => ({
-                ...item,
-                inboxType: 'notification',
-                listId: `notification-${item.id}`,
-            })),
-        ...(messages || [])
-            .filter(item => item.unreadCount > 0)
-            .map(item => ({
-                ...item,
-                inboxType: 'message',
-                listId: `message-${item.id}`,
-            })),
-    ].sort((left, right) => {
-        const rightTime = new Date(right.createdAt).getTime();
-        const leftTime = new Date(left.createdAt).getTime();
-        return (Number.isNaN(rightTime) ? 0 : rightTime) -
-            (Number.isNaN(leftTime) ? 0 : leftTime);
-    });
+const notificationMeta = {
+    mentioned: {icon: 'at-outline', label: '提及'},
+    group_mentioned: {icon: 'people-outline', label: '提及'},
+    replied: {icon: 'arrow-undo-outline', label: '回覆'},
+    quoted: {icon: 'chatbox-outline', label: '引用'},
+    edited: {icon: 'create-outline', label: '內容更新'},
+    liked: {icon: 'heart-outline', label: '讚好'},
+    liked_consolidated: {icon: 'heart-outline', label: '讚好'},
+    reaction: {icon: 'happy-outline', label: '反應'},
+    boost: {icon: 'rocket-outline', label: '反應'},
+    private_message: {icon: 'mail-outline', label: '私人訊息'},
+    invited_to_private_message: {icon: 'mail-unread-outline', label: '邀請'},
+    invitee_accepted: {icon: 'person-add-outline', label: '邀請'},
+    invited_to_topic: {icon: 'person-add-outline', label: '邀請'},
+    event_invitation: {icon: 'calendar-outline', label: '邀請'},
+    group_message_summary: {icon: 'people-outline', label: '群組消息'},
+    granted_badge: {icon: 'ribbon-outline', label: '徽章'},
+    topic_reminder: {icon: 'alarm-outline', label: '提醒'},
+    bookmark_reminder: {icon: 'bookmark-outline', label: '提醒'},
+    event_reminder: {icon: 'calendar-outline', label: '提醒'},
+    posted: {icon: 'chatbubble-outline', label: '新內容'},
+    watching_first_post: {icon: 'eye-outline', label: '新內容'},
+    watching_category_or_tag: {icon: 'eye-outline', label: '新內容'},
+    following_created_topic: {icon: 'person-outline', label: '社群動態'},
+    following_replied: {icon: 'person-outline', label: '社群動態'},
+    following: {icon: 'person-add-outline', label: '社群動態'},
+    circles_activity: {icon: 'people-circle-outline', label: '社群動態'},
+    linked: {icon: 'link-outline', label: '內容更新'},
+    linked_consolidated: {icon: 'link-outline', label: '內容更新'},
+    moved_post: {icon: 'swap-horizontal-outline', label: '內容更新'},
+    post_approved: {icon: 'checkmark-circle-outline', label: '內容更新'},
+    code_review_commit_approved: {
+        icon: 'checkmark-circle-outline',
+        label: '內容更新',
+    },
+    votes_released: {icon: 'ticket-outline', label: '內容更新'},
+    question_answer_user_commented: {
+        icon: 'help-circle-outline',
+        label: '回覆',
+    },
+    suggested_edit_created: {icon: 'document-text-outline', label: '內容更新'},
+    suggested_edit_accepted: {icon: 'document-text-outline', label: '內容更新'},
+    membership_request_accepted: {
+        icon: 'people-outline',
+        label: '群組消息',
+    },
+    membership_request_consolidated: {
+        icon: 'people-outline',
+        label: '群組消息',
+    },
+    chat_mention: {icon: 'chatbubbles-outline', label: 'Chat 消息'},
+    chat_message: {icon: 'chatbubbles-outline', label: 'Chat 消息'},
+    chat_invitation: {icon: 'chatbubbles-outline', label: 'Chat 消息'},
+    chat_group_mention: {icon: 'chatbubbles-outline', label: 'Chat 消息'},
+    chat_quoted: {icon: 'chatbubbles-outline', label: 'Chat 消息'},
+    chat_watched_thread: {icon: 'chatbubbles-outline', label: 'Chat 消息'},
+    assigned: {icon: 'person-circle-outline', label: '指派'},
+};
+const defaultNotificationMeta = {
+    icon: 'notifications-outline',
+    label: '系統通知',
+};
+const chatNotificationTypes = new Set([
+    'chat_mention',
+    'chat_message',
+    'chat_invitation',
+    'chat_group_mention',
+    'chat_quoted',
+    'chat_watched_thread',
+]);
+
+export function getHarborNotificationPresentation(item, translate = value => value) {
+    const meta = notificationMeta[item?.typeName] || defaultNotificationMeta;
+    const label = translate(meta.label);
+    const actor = item?.actingUsername || '';
+    const title = item?.title || actor || label;
+    const excerpt =
+        item?.excerpt ||
+        (actor && title !== actor ? `${actor} · ${label}` : label);
+
+    return {
+        icon: meta.icon,
+        title,
+        excerpt,
+    };
+}
+
+export function getHarborNotificationTarget(item, username) {
+    if (item?.topicId) {
+        return {kind: 'topic'};
+    }
+    if (item?.badgeId) {
+        return {kind: 'badges'};
+    }
+
+    const data = item?.data || {};
+    const explicitPath =
+        data.url ||
+        data.path ||
+        data.link ||
+        data.bookmarkable_url;
+    if (typeof explicitPath === 'string' && explicitPath.trim()) {
+        return {kind: 'web', path: explicitPath.trim()};
+    }
+    if (
+        item?.typeName === 'group_message_summary' &&
+        data.group_name &&
+        username
+    ) {
+        return {
+            kind: 'web',
+            path:
+                `/u/${encodeURIComponent(username)}/messages/group/` +
+                encodeURIComponent(data.group_name),
+        };
+    }
+    if (item?.typeName === 'invitee_accepted' && item.actingUsername) {
+        return {
+            kind: 'web',
+            path: `/u/${encodeURIComponent(item.actingUsername)}`,
+        };
+    }
+    if (
+        item?.typeName === 'membership_request_accepted' &&
+        data.group_name
+    ) {
+        return {
+            kind: 'web',
+            path: `/g/${encodeURIComponent(data.group_name)}`,
+        };
+    }
+    if (
+        item?.typeName === 'membership_request_consolidated' &&
+        username
+    ) {
+        return {
+            kind: 'web',
+            path: `/u/${encodeURIComponent(username)}/messages`,
+        };
+    }
+    if (item?.typeName === 'new_features') {
+        return {kind: 'web', path: '/admin/whats-new'};
+    }
+    if (item?.typeName === 'admin_problems') {
+        return {kind: 'web', path: '/admin'};
+    }
+    if (
+        item?.typeName === 'upcoming_change_available' ||
+        item?.typeName === 'upcoming_change_automatically_promoted'
+    ) {
+        const changeNames = (
+            data.upcoming_change_names || [data.upcoming_change_name]
+        ).filter(Boolean);
+        return {
+            kind: 'web',
+            path:
+                '/admin/config/upcoming-changes' +
+                (changeNames.length > 0
+                    ? `?changeNamesFilter=${encodeURIComponent(
+                        changeNames.join(','),
+                    )}`
+                    : ''),
+        };
+    }
+    if (chatNotificationTypes.has(item?.typeName)) {
+        const channelId = Number(
+            data.chat_channel_id || data.channel_id,
+        );
+        const messageId = Number(
+            data.chat_message_id || data.message_id,
+        );
+        if (Number.isInteger(channelId) && channelId > 0) {
+            return {
+                kind: 'web',
+                path:
+                    `/chat/c/-/${channelId}` +
+                    (Number.isInteger(messageId) && messageId > 0
+                        ? `/${messageId}`
+                        : ''),
+            };
+        }
+    }
+
+    return {
+        kind: 'web',
+        path: username
+            ? `/u/${encodeURIComponent(username)}/notifications`
+            : '/notifications',
+    };
 }
 
 export function formatRelativeTime(value, language = 'tc', now = Date.now()) {

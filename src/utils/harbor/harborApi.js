@@ -15,6 +15,7 @@ import {
 const REQUEST_TIMEOUT = 15000;
 const TOPIC_POST_BATCH_SIZE = 20;
 const USER_ACTION_PAGE_SIZE = 30;
+const NOTIFICATION_PAGE_SIZE = 30;
 const REACTION_GIVEN_PAGE_SIZE = 20;
 const DEFAULT_TOPIC_PAGE_SIZE = 30;
 const COMPOSER_METADATA_TTL = 5 * 60 * 1000;
@@ -22,6 +23,58 @@ const COMPOSER_SETTINGS_TTL = 30 * 60 * 1000;
 const SESSION_VALIDATION_COOLDOWN = 30 * 1000;
 const TOPIC_VIEWS = ['latest', 'top', 'new', 'unread'];
 const PUBLIC_TOPIC_VIEWS = ['latest', 'top'];
+
+const HARBOR_NOTIFICATION_TYPES = Object.freeze({
+    1: 'mentioned',
+    2: 'replied',
+    3: 'quoted',
+    4: 'edited',
+    5: 'liked',
+    6: 'private_message',
+    7: 'invited_to_private_message',
+    8: 'invitee_accepted',
+    9: 'posted',
+    10: 'moved_post',
+    11: 'linked',
+    12: 'granted_badge',
+    13: 'invited_to_topic',
+    14: 'custom',
+    15: 'group_mentioned',
+    16: 'group_message_summary',
+    17: 'watching_first_post',
+    18: 'topic_reminder',
+    19: 'liked_consolidated',
+    20: 'post_approved',
+    21: 'code_review_commit_approved',
+    22: 'membership_request_accepted',
+    23: 'membership_request_consolidated',
+    24: 'bookmark_reminder',
+    25: 'reaction',
+    26: 'votes_released',
+    27: 'event_reminder',
+    28: 'event_invitation',
+    29: 'chat_mention',
+    30: 'chat_message',
+    31: 'chat_invitation',
+    32: 'chat_group_mention',
+    33: 'chat_quoted',
+    34: 'assigned',
+    35: 'question_answer_user_commented',
+    36: 'watching_category_or_tag',
+    37: 'new_features',
+    38: 'admin_problems',
+    39: 'linked_consolidated',
+    40: 'chat_watched_thread',
+    41: 'upcoming_change_available',
+    42: 'upcoming_change_automatically_promoted',
+    43: 'boost',
+    44: 'suggested_edit_created',
+    45: 'suggested_edit_accepted',
+    800: 'following',
+    801: 'following_created_topic',
+    802: 'following_replied',
+    900: 'circles_activity',
+});
 
 const USER_ACTION_FILTERS = {
     all: '1,2,3,4,5,6,7,9,11,12,13',
@@ -1073,21 +1126,34 @@ function normalizeBookmark(bookmark, index) {
 
 function normalizeNotification(notification, index) {
     const data = notification.data || {};
+    const type = Number(notification.notification_type) || 0;
     return {
         id: String(notification.id || `notification-${index}`),
-        title:
+        title: stripHtml(
             data.topic_title ||
+            notification.fancy_title ||
             data.badge_name ||
+            data.title ||
             data.display_username ||
             data.username ||
             '',
+        ),
         excerpt: stripHtml(data.excerpt || data.message),
         createdAt: notification.created_at || '',
         isRead: Boolean(notification.read),
-        type: Number(notification.notification_type) || 0,
+        type,
+        typeName: HARBOR_NOTIFICATION_TYPES[type] || 'unknown',
+        highPriority: Boolean(notification.high_priority),
         topicId: Number(notification.topic_id) || null,
         postNumber: Number(notification.post_number) || null,
         badgeId: Number(data.badge_id) || null,
+        slug: notification.slug || '',
+        actingUsername:
+            data.display_username ||
+            data.username ||
+            notification.acting_user_name ||
+            '',
+        data,
     };
 }
 
@@ -1712,6 +1778,53 @@ export async function fetchHarborUserActions(
 export async function fetchHarborNotifications({ signal } = {}) {
     const response = await harborApi.get('/notifications.json', { signal });
     return (response.data?.notifications || []).map(normalizeNotification);
+}
+
+export async function fetchHarborNotificationPage({
+    filter,
+    offset = 0,
+    limit = NOTIFICATION_PAGE_SIZE,
+    signal,
+} = {}) {
+    const normalizedOffset = Math.max(0, Math.floor(Number(offset) || 0));
+    const normalizedLimit = Math.min(
+        60,
+        Math.max(1, Math.floor(Number(limit) || NOTIFICATION_PAGE_SIZE)),
+    );
+    const params = {
+        offset: normalizedOffset,
+        limit: normalizedLimit,
+    };
+    if (filter === 'read' || filter === 'unread') {
+        params.filter = filter;
+    }
+    const response = await harborApi.get('/notifications.json', {
+        params,
+        signal,
+    });
+    const items = (response.data?.notifications || []).map(
+        normalizeNotification,
+    );
+    const totalCount = Number(response.data?.total_rows_notifications);
+    const normalizedTotalCount = Number.isFinite(totalCount)
+        ? totalCount
+        : normalizedOffset + items.length;
+
+    return {
+        items,
+        totalCount: normalizedTotalCount,
+        hasMore: normalizedOffset + items.length < normalizedTotalCount,
+        nextOffset: normalizedOffset + items.length,
+    };
+}
+
+export async function fetchHarborUnreadNotificationCount({ signal } = {}) {
+    const page = await fetchHarborNotificationPage({
+        filter: 'unread',
+        limit: 1,
+        signal,
+    });
+    return page.totalCount;
 }
 
 export async function markHarborNotificationRead(notificationId) {

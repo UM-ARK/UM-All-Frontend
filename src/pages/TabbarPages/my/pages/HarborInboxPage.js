@@ -12,23 +12,28 @@ import {isLiquidGlassSupported} from '@callstack/liquid-glass';
 import {HeaderHeightContext} from '@react-navigation/elements';
 import {FlashList} from '@shopify/flash-list';
 import {useTranslation} from 'react-i18next';
+import Toast from 'react-native-simple-toast';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {scale, verticalScale} from 'react-native-size-matters';
 
 import SegmentControl from '../../../../components/SegmentControl';
 import {uiStyle, useTheme} from '../../../../components/ThemeContext';
 import {useHarborSession} from '../../../../contexts/HarborSessionContext';
+import {openLink} from '../../../../utils/browser';
 import {
     fetchHarborMessages,
-    fetchHarborNotifications,
+    fetchHarborNotificationPage,
+    fetchHarborUnreadNotificationCount,
     markHarborNotificationRead,
 } from '../../../../utils/harbor/harborApi';
+import {ARK_HARBOR_ABSOLUTE_URL} from '../../../../utils/pathMap';
 import {trigger} from '../../../../utils/trigger';
 import {HarborInlineRetry} from '../../arkHarbor/components/HarborListStates';
 import HarborEmptyState from '../components/HarborEmptyState';
 import {
     formatRelativeTime,
-    mergeHarborUnreadItems,
+    getHarborNotificationPresentation,
+    getHarborNotificationTarget,
 } from '../utils/harborUi';
 
 const ListSeparator = () => <View style={styles.separator} />;
@@ -41,6 +46,7 @@ const HarborInboxPage = ({
     contentBottomInset = verticalScale(32),
     contentTopInset = 0,
     onProfileRefresh,
+    onUnreadCountChange,
     onScroll,
 }) => {
     const {theme} = useTheme();
@@ -50,15 +56,38 @@ const HarborInboxPage = ({
     const username = user?.username || '';
     const initialTab = route?.params?.initialTab === 'messages' ? 1 : 0;
     const [selectedIndex, setSelectedIndex] = React.useState(initialTab);
+    const [notificationFilterIndex, setNotificationFilterIndex] =
+        React.useState(0);
     const [items, setItems] = React.useState([]);
     const [isLoading, setIsLoading] = React.useState(true);
     const [isRefreshing, setIsRefreshing] = React.useState(false);
+    const [isLoadingMore, setIsLoadingMore] = React.useState(false);
     const [loadError, setLoadError] = React.useState(false);
+    const [hasMore, setHasMore] = React.useState(false);
     const controllerRef = React.useRef(null);
+    const loadingMoreRef = React.useRef(false);
+    const nextOffsetRef = React.useRef(0);
+    const markingIdsRef = React.useRef(new Set());
+    const unreadCountRef = React.useRef(0);
+    const unreadCountRequestRef = React.useRef(0);
     const options = [
         {key: 'notifications', label: t('通知')},
         {key: 'messages', label: t('站內訊息')},
     ];
+    const filterOptions = [
+        {key: 'all', label: t('全部消息')},
+        {key: 'unread', label: t('未讀')},
+    ];
+    const notificationFilter =
+        combined && notificationFilterIndex === 1 ? 'unread' : undefined;
+    const publishUnreadCount = React.useCallback(
+        count => {
+            const normalizedCount = Math.max(0, Number(count) || 0);
+            unreadCountRef.current = normalizedCount;
+            onUnreadCountChange?.(normalizedCount);
+        },
+        [onUnreadCountChange],
+    );
 
     React.useEffect(() => {
         if (!embedded) {
@@ -67,11 +96,28 @@ const HarborInboxPage = ({
     }, [embedded, navigation, t]);
 
     const loadItems = React.useCallback(
-        async ({refresh = false} = {}) => {
-            controllerRef.current?.abort();
+        async ({refresh = false, append = false} = {}) => {
+            if (append && loadingMoreRef.current) {
+                return;
+            }
+            if (!append) {
+                controllerRef.current?.abort();
+                loadingMoreRef.current = false;
+                setIsLoadingMore(false);
+            }
             const controller = new AbortController();
             controllerRef.current = controller;
-            if (refresh) {
+            const unreadCountRequestId =
+                combined && !append
+                    ? unreadCountRequestRef.current + 1
+                    : null;
+            if (unreadCountRequestId != null) {
+                unreadCountRequestRef.current = unreadCountRequestId;
+            }
+            if (append) {
+                loadingMoreRef.current = true;
+                setIsLoadingMore(true);
+            } else if (refresh) {
                 setIsRefreshing(true);
             } else {
                 setIsLoading(true);
@@ -79,32 +125,60 @@ const HarborInboxPage = ({
             setLoadError(false);
 
             try {
+                const isNotificationList = combined || selectedIndex === 0;
                 let nextItems;
-                if (combined) {
-                    const [notifications, messages] = await Promise.all([
-                        fetchHarborNotifications({
-                            signal: controller.signal,
-                        }),
-                        fetchHarborMessages(username, {
-                            signal: controller.signal,
-                        }),
-                    ]);
-                    nextItems = mergeHarborUnreadItems(
-                        notifications,
-                        messages,
-                    );
+                if (isNotificationList) {
+                    const pageRequest = fetchHarborNotificationPage({
+                        filter: notificationFilter,
+                        offset: append ? nextOffsetRef.current : 0,
+                        signal: controller.signal,
+                    });
+                    const [page, unreadCount] =
+                        combined && !notificationFilter && !append
+                            ? await Promise.all([
+                                pageRequest,
+                                fetchHarborUnreadNotificationCount({
+                                    signal: controller.signal,
+                                }),
+                            ])
+                            : [await pageRequest, null];
+                    nextItems = page.items;
+                    nextOffsetRef.current = page.nextOffset;
+                    setHasMore(page.hasMore);
+                    if (
+                        combined &&
+                        !append &&
+                        unreadCountRequestRef.current ===
+                            unreadCountRequestId
+                    ) {
+                        publishUnreadCount(
+                            notificationFilter
+                                ? page.totalCount
+                                : unreadCount,
+                        );
+                    }
                 } else {
-                    nextItems =
-                        selectedIndex === 0
-                            ? await fetchHarborNotifications({
-                                  signal: controller.signal,
-                              })
-                            : await fetchHarborMessages(username, {
-                                  signal: controller.signal,
-                              });
+                    nextItems = await fetchHarborMessages(username, {
+                        signal: controller.signal,
+                    });
+                    nextOffsetRef.current = 0;
+                    setHasMore(false);
                 }
                 if (!controller.signal.aborted) {
-                    setItems(nextItems);
+                    setItems(currentItems =>
+                        append
+                            ? [
+                                ...currentItems,
+                                ...nextItems.filter(
+                                    nextItem =>
+                                        !currentItems.some(
+                                            currentItem =>
+                                                currentItem.id === nextItem.id,
+                                        ),
+                                ),
+                            ]
+                            : nextItems,
+                    );
                 }
             } catch (error) {
                 if (!controller.signal.aborted) {
@@ -114,11 +188,19 @@ const HarborInboxPage = ({
                 if (!controller.signal.aborted) {
                     setIsLoading(false);
                     setIsRefreshing(false);
+                    loadingMoreRef.current = false;
+                    setIsLoadingMore(false);
                     controllerRef.current = null;
                 }
             }
         },
-        [combined, selectedIndex, username],
+        [
+            combined,
+            notificationFilter,
+            publishUnreadCount,
+            selectedIndex,
+            username,
+        ],
     );
 
     React.useEffect(() => {
@@ -132,61 +214,83 @@ const HarborInboxPage = ({
 
     const handlePress = item => {
         trigger();
-        const isNotification = combined
-            ? item.inboxType === 'notification'
-            : selectedIndex === 0;
-        if (isNotification && !item.isRead) {
+        const isNotification = combined || selectedIndex === 0;
+        const presentation = isNotification
+            ? getHarborNotificationPresentation(item, t)
+            : null;
+        if (
+            isNotification &&
+            !item.isRead &&
+            !markingIdsRef.current.has(item.id)
+        ) {
+            markingIdsRef.current.add(item.id);
             setItems(currentItems =>
-                combined
-                    ? currentItems.filter(
-                        currentItem =>
-                            (currentItem.listId || currentItem.id) !==
-                            (item.listId || item.id),
-                    )
-                    : currentItems.map(currentItem =>
-                        currentItem.id === item.id
-                            ? {...currentItem, isRead: true}
-                            : currentItem,
-                    ),
+                currentItems.map(currentItem =>
+                    currentItem.id === item.id
+                        ? {...currentItem, isRead: true}
+                        : currentItem,
+                ),
             );
-            markHarborNotificationRead(item.id).catch(() => undefined);
+            markHarborNotificationRead(item.id)
+                .then(() => {
+                    unreadCountRequestRef.current += 1;
+                    publishUnreadCount(unreadCountRef.current - 1);
+                })
+                .catch(() => {
+                    setItems(currentItems =>
+                        currentItems.map(currentItem =>
+                            currentItem.id === item.id
+                                ? {...currentItem, isRead: false}
+                                : currentItem,
+                        ),
+                    );
+                    Toast.show(
+                        t('通知已讀狀態更新失敗，請稍後再試。'),
+                    );
+                })
+                .finally(() => {
+                    markingIdsRef.current.delete(item.id);
+                });
         }
 
-        if (!item.topicId) {
-            if (isNotification && item.badgeId) {
-                navigation.navigate('HarborBadges');
-            }
+        if (!isNotification) {
+            navigation.navigate('HarborTopicDetail', {
+                topicId: item.topicId,
+                topicTitle: item.title,
+            });
             return;
         }
 
-        navigation.navigate('HarborTopicDetail', {
-            topicId: item.topicId,
-            postNumber: item.postNumber,
-            topicTitle: item.title,
-        });
+        const target = getHarborNotificationTarget(item, username);
+        if (target.kind === 'topic') {
+            navigation.navigate('HarborTopicDetail', {
+                topicId: item.topicId,
+                postNumber: item.postNumber,
+                topicTitle: presentation.title,
+            });
+        } else if (target.kind === 'badges') {
+            navigation.navigate('HarborBadges');
+        } else {
+            openLink({
+                URL: ARK_HARBOR_ABSOLUTE_URL(target.path),
+                mode: 'fullScreen',
+            });
+        }
     };
 
     const renderItem = ({item}) => {
-        const isNotification = combined
-            ? item.inboxType === 'notification'
-            : selectedIndex === 0;
-        const isActionable =
-            combined ||
-            !isNotification ||
-            Boolean(item.topicId || item.badgeId);
+        const isNotification = combined || selectedIndex === 0;
+        const presentation = isNotification
+            ? getHarborNotificationPresentation(item, t)
+            : null;
         const unread = isNotification ? !item.isRead : item.unreadCount > 0;
         const fallbackExcerpt =
             !isNotification
                 ? t('點擊開啟私人對話')
-                : item.badgeId
-                  ? t('點擊查看獲得的徽章')
-                  : item.topicId
-                    ? t('點擊查看相關內容')
-                    : t('此通知沒有可查看的相關內容');
+                : presentation.excerpt;
         return (
             <Pressable
-                accessibilityRole={isActionable ? 'button' : undefined}
-                disabled={!isActionable}
+                accessibilityRole="button"
                 style={({pressed}) => [
                     styles.row,
                     {
@@ -210,7 +314,7 @@ const HarborInboxPage = ({
                     <Ionicons
                         name={
                             isNotification
-                                ? 'notifications-outline'
+                                ? presentation.icon
                                 : 'mail-outline'
                         }
                         size={scale(20)}
@@ -226,7 +330,9 @@ const HarborInboxPage = ({
                                 {color: theme.black.main},
                                 unread && styles.unreadTitle,
                             ]}>
-                            {item.title || t('Harbor 通知')}
+                            {isNotification
+                                ? presentation.title
+                                : item.title || t('Harbor 通知')}
                         </Text>
                         <Text
                             style={[
@@ -239,7 +345,9 @@ const HarborInboxPage = ({
                     <Text
                         numberOfLines={2}
                         style={[styles.rowExcerpt, {color: theme.black.third}]}>
-                        {item.excerpt || fallbackExcerpt}
+                        {isNotification
+                            ? presentation.excerpt
+                            : item.excerpt || fallbackExcerpt}
                     </Text>
                 </View>
                 {unread ? (
@@ -249,13 +357,13 @@ const HarborInboxPage = ({
                             {backgroundColor: theme.unread},
                         ]}
                     />
-                ) : isActionable ? (
+                ) : (
                     <Ionicons
                         name="chevron-forward"
                         size={scale(17)}
                         color={theme.black.third}
                     />
-                ) : null}
+                )}
             </Pressable>
         );
     };
@@ -264,6 +372,16 @@ const HarborInboxPage = ({
         trigger();
         loadItems({refresh: true});
         onProfileRefresh?.();
+    };
+
+    const handleLoadMore = () => {
+        if (
+            hasMore &&
+            !isLoadingMore &&
+            (combined || selectedIndex === 0)
+        ) {
+            loadItems({append: true});
+        }
     };
 
     return (
@@ -313,17 +431,39 @@ const HarborInboxPage = ({
                     showsVerticalScrollIndicator={false}
                     onScroll={onScroll}
                     scrollEventThrottle={16}
+                    onEndReached={handleLoadMore}
+                    onEndReachedThreshold={0.35}
                     renderItem={renderItem}
                     ItemSeparatorComponent={ListSeparator}
                     ListHeaderComponent={
-                        loadError && items.length > 0 ? (
-                            <HarborInlineRetry
-                                message={t(
-                                    '無法取得 Harbor 消息，請檢查網絡後再試。',
-                                )}
-                                actionLabel={t('重試')}
-                                onRetry={() => loadItems({refresh: true})}
-                            />
+                        combined || (loadError && items.length > 0) ? (
+                            <View style={styles.listHeader}>
+                                {combined ? (
+                                    <SegmentControl
+                                        compact
+                                        options={filterOptions}
+                                        selectedIndex={
+                                            notificationFilterIndex
+                                        }
+                                        onChange={setNotificationFilterIndex}
+                                        style={styles.filterSegment}
+                                        trackBackgroundColor={
+                                            theme.tonal.primary08
+                                        }
+                                    />
+                                ) : null}
+                                {loadError && items.length > 0 ? (
+                                    <HarborInlineRetry
+                                        message={t(
+                                            '無法取得 Harbor 消息，請檢查網絡後再試。',
+                                        )}
+                                        actionLabel={t('重試')}
+                                        onRetry={() =>
+                                            loadItems({refresh: true})
+                                        }
+                                    />
+                                ) : null}
+                            </View>
                         ) : null
                     }
                     ListEmptyComponent={
@@ -338,7 +478,10 @@ const HarborInboxPage = ({
                             title={
                                 loadError
                                     ? t('收件匣載入失敗')
-                                    : t('目前沒有新消息')
+                                    : combined &&
+                                      notificationFilterIndex === 1
+                                    ? t('目前沒有未讀消息')
+                                    : t('目前沒有消息')
                             }
                             description={
                                 loadError
@@ -346,7 +489,9 @@ const HarborInboxPage = ({
                                         '無法取得 Harbor 消息，請檢查網絡後再試。',
                                     )
                                     : t(
-                                        'Harbor 的通知與站內訊息會集中顯示在這裡。',
+                                        combined
+                                            ? 'Harbor 的通知會集中顯示在這裡，已讀消息仍可再次查看。'
+                                            : 'Harbor 的通知與站內訊息會集中顯示在這裡。',
                                     )
                             }
                             actionLabel={loadError ? t('重試') : undefined}
@@ -363,6 +508,14 @@ const HarborInboxPage = ({
                             progressViewOffset={contentTopInset}
                             onRefresh={handleRefresh}
                         />
+                    }
+                    ListFooterComponent={
+                        isLoadingMore ? (
+                            <ActivityIndicator
+                                style={styles.loadingMore}
+                                color={theme.themeColor}
+                            />
+                        ) : null
                     }
                 />
             )}
@@ -381,6 +534,14 @@ const styles = StyleSheet.create({
         paddingBottom: verticalScale(4),
     },
     segment: {
+        alignSelf: 'center',
+    },
+    listHeader: {
+        alignItems: 'center',
+        gap: verticalScale(8),
+        paddingBottom: verticalScale(10),
+    },
+    filterSegment: {
         alignSelf: 'center',
     },
     loading: {
@@ -445,6 +606,9 @@ const styles = StyleSheet.create({
     },
     separator: {
         height: verticalScale(10),
+    },
+    loadingMore: {
+        paddingVertical: verticalScale(16),
     },
 });
 

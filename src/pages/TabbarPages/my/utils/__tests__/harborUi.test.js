@@ -1,6 +1,7 @@
 import {
     formatRelativeTime,
-    mergeHarborUnreadItems,
+    getHarborNotificationPresentation,
+    getHarborNotificationTarget,
 } from '../harborUi';
 
 describe('Harbor 相對時間格式', () => {
@@ -32,44 +33,93 @@ describe('Harbor 相對時間格式', () => {
     });
 });
 
-describe('Harbor 未讀收件匣', () => {
-    it('合併未讀通知與站內訊息並按時間排序', () => {
-        const result = mergeHarborUnreadItems(
-            [
+describe('Harbor 消息中心', () => {
+    it('為通知類型提供可辨識內容與原生目標', () => {
+        expect(
+            getHarborNotificationPresentation(
                 {
-                    id: '1',
-                    isRead: false,
-                    createdAt: '2026-07-21T09:00:00Z',
+                    typeName: 'reaction',
+                    actingUsername: 'reader',
+                    title: '測試話題',
                 },
-                {
-                    id: '2',
-                    isRead: true,
-                    createdAt: '2026-07-21T10:00:00Z',
-                },
-            ],
-            [
-                {
-                    id: '1',
-                    unreadCount: 2,
-                    createdAt: '2026-07-21T11:00:00Z',
-                },
-                {
-                    id: '3',
-                    unreadCount: 0,
-                    createdAt: '2026-07-21T12:00:00Z',
-                },
-            ],
-        );
+                value => `t:${value}`,
+            ),
+        ).toEqual({
+            icon: 'happy-outline',
+            title: '測試話題',
+            excerpt: 'reader · t:反應',
+        });
+        expect(
+            getHarborNotificationTarget(
+                {topicId: 31, postNumber: 2},
+                'ark-user',
+            ),
+        ).toEqual({kind: 'topic'});
+        expect(
+            getHarborNotificationTarget({badgeId: 3}, 'ark-user'),
+        ).toEqual({kind: 'badges'});
+    });
 
-        expect(result).toEqual([
-            expect.objectContaining({
-                listId: 'message-1',
-                inboxType: 'message',
-            }),
-            expect.objectContaining({
-                listId: 'notification-1',
-                inboxType: 'notification',
-            }),
-        ]);
+    it('為群組、Chat 與未知通知提供 Web fallback', () => {
+        expect(
+            getHarborNotificationTarget(
+                {
+                    typeName: 'group_message_summary',
+                    data: {group_name: 'course helpers'},
+                },
+                'ark user',
+            ),
+        ).toEqual({
+            kind: 'web',
+            path: '/u/ark%20user/messages/group/course%20helpers',
+        });
+        expect(
+            getHarborNotificationTarget(
+                {
+                    typeName: 'chat_mention',
+                    data: {
+                        chat_channel_id: 4,
+                        chat_message_id: 9,
+                    },
+                },
+                'ark-user',
+            ),
+        ).toEqual({
+            kind: 'web',
+            path: '/chat/c/-/4/9',
+        });
+        expect(
+            getHarborNotificationTarget(
+                {typeName: 'unknown', data: {}},
+                'ark-user',
+            ),
+        ).toEqual({
+            kind: 'web',
+            path: '/u/ark-user/notifications',
+        });
+        expect(
+            getHarborNotificationTarget(
+                {
+                    typeName: 'membership_request_accepted',
+                    data: {group_name: 'course helpers'},
+                },
+                'ark-user',
+            ),
+        ).toEqual({
+            kind: 'web',
+            path: '/g/course%20helpers',
+        });
+        expect(
+            getHarborNotificationTarget(
+                {
+                    typeName: 'bookmark_reminder',
+                    data: {bookmarkable_url: '/chat/c/-/4/9'},
+                },
+                'ark-user',
+            ),
+        ).toEqual({
+            kind: 'web',
+            path: '/chat/c/-/4/9',
+        });
     });
 });

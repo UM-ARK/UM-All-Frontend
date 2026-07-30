@@ -7,6 +7,7 @@ import {
     fetchHarborCategories,
     fetchCurrentHarborUser,
     fetchHarborMessages,
+    fetchHarborNotificationPage,
     fetchHarborNestedPostChildren,
     fetchHarborNotifications,
     fetchHarborSearch,
@@ -15,6 +16,7 @@ import {
     fetchHarborTopic,
     fetchHarborTopicList,
     fetchHarborTopicPosts,
+    fetchHarborUnreadNotificationCount,
     fetchHarborUserActions,
     getHarborTopicViews,
     HARBOR_TOPIC_NOTIFICATION_LEVELS,
@@ -439,10 +441,16 @@ describe('Harbor API 資料正規化', () => {
                         {
                             id: 8,
                             read: false,
+                            high_priority: true,
                             topic_id: 20,
                             post_number: 2,
                             created_at: '2026-07-21T08:00:00Z',
-                            data: {topic_title: '新回覆'},
+                            notification_type: 2,
+                            slug: 'new-reply',
+                            data: {
+                                topic_title: '新回覆',
+                                display_username: 'reader',
+                            },
                         },
                         {
                             id: 9,
@@ -481,6 +489,13 @@ describe('Harbor API 資料正規化', () => {
                 title: '新回覆',
                 isRead: false,
                 topicId: 20,
+                typeName: 'replied',
+                highPriority: true,
+                slug: 'new-reply',
+                actingUsername: 'reader',
+                data: expect.objectContaining({
+                    display_username: 'reader',
+                }),
             }),
         );
         expect(notifications[1]).toEqual(
@@ -498,6 +513,69 @@ describe('Harbor API 資料正規化', () => {
                 unreadCount: 2,
             }),
         );
+    });
+
+    it('載入通知分頁及未讀總數', async () => {
+        getSpy
+            .mockResolvedValueOnce({
+                data: {
+                    notifications: [
+                        {
+                            id: 31,
+                            read: false,
+                            notification_type: 29,
+                            data: {chat_channel_id: 4},
+                        },
+                    ],
+                    total_rows_notifications: 62,
+                },
+            })
+            .mockResolvedValueOnce({
+                data: {
+                    notifications: [{id: 32, read: false}],
+                    total_rows_notifications: 7,
+                },
+            });
+        const controller = new AbortController();
+
+        const page = await fetchHarborNotificationPage({
+            filter: 'unread',
+            offset: 30,
+            limit: 30,
+            signal: controller.signal,
+        });
+        const unreadCount = await fetchHarborUnreadNotificationCount({
+            signal: controller.signal,
+        });
+
+        expect(page).toEqual({
+            items: [
+                expect.objectContaining({
+                    id: '31',
+                    typeName: 'chat_mention',
+                }),
+            ],
+            totalCount: 62,
+            hasMore: true,
+            nextOffset: 31,
+        });
+        expect(unreadCount).toBe(7);
+        expect(getSpy).toHaveBeenNthCalledWith(1, '/notifications.json', {
+            params: {
+                offset: 30,
+                limit: 30,
+                filter: 'unread',
+            },
+            signal: controller.signal,
+        });
+        expect(getSpy).toHaveBeenNthCalledWith(2, '/notifications.json', {
+            params: {
+                offset: 0,
+                limit: 1,
+                filter: 'unread',
+            },
+            signal: controller.signal,
+        });
     });
 
     it('透過已授權 API 將單一通知標為已讀', async () => {
