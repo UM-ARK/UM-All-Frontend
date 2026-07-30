@@ -297,10 +297,6 @@ const Nav = () => {
                         component={UMEventDetail}
                     />
                     <Stack.Screen
-                        name="HarborTopicDetail"
-                        component={HarborTopicDetail}
-                    />
-                    <Stack.Screen
                         name="HarborExplore"
                         component={HarborExplorePage}
                     />
@@ -356,6 +352,10 @@ const Nav = () => {
                     screenOptions={{
                         headerTitle: '',
                     }}>
+                    <Stack.Screen
+                        name="HarborTopicDetail"
+                        component={HarborTopicDetail}
+                    />
                     <Stack.Screen
                         name="Search"
                         component={SearchScreen}

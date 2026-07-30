@@ -22,7 +22,6 @@ import Clipboard from '@react-native-clipboard/clipboard';
 import { FlashList } from '@shopify/flash-list';
 import { isLiquidGlassSupported } from '@callstack/liquid-glass';
 import { useHeaderHeight } from '@react-navigation/elements';
-import { Image } from 'expo-image';
 import Toast from 'react-native-simple-toast';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { scale, verticalScale } from 'react-native-size-matters';
@@ -41,7 +40,6 @@ import {
 } from '../../../utils/harbor/harborNavigation';
 import {
     ARK_HARBOR,
-    ARK_HARBOR_AVATAR_TEMPLATE,
     ARK_HARBOR_TOPIC_URL,
 } from '../../../utils/pathMap';
 import { trigger } from '../../../utils/trigger';
@@ -100,45 +98,6 @@ const TOPIC_NOTIFICATION_OPTIONS = [
     },
 ];
 
-const HarborTopicNavigationTitle = ({
-    authorId,
-    avatarUrl,
-    blackMain,
-    imagePlaceholder,
-    onPress,
-    tonalPrimary15,
-}) => (
-    <Pressable
-        disabled={!onPress}
-        onPress={() => {
-            trigger();
-            onPress?.();
-        }}
-        style={({ pressed }) => [
-            styles.headerAuthor,
-            pressed ? styles.pressedLink : null,
-        ]}>
-        {avatarUrl ? (
-            <Image
-                source={{ uri: avatarUrl }}
-                style={[
-                    styles.headerAvatar,
-                    { backgroundColor: tonalPrimary15 },
-                ]}
-                contentFit="cover"
-                placeholder={imagePlaceholder}
-                placeholderContentFit="cover"
-                transition={200}
-            />
-        ) : null}
-        <Text
-            numberOfLines={1}
-            style={[styles.headerAuthorId, { color: blackMain }]}>
-            {authorId}
-        </Text>
-    </Pressable>
-);
-
 const HarborTopicShareButton = ({
     accessibilityLabel,
     onPress,
@@ -158,10 +117,6 @@ const HarborTopicShareButton = ({
             color={themeColor}
         />
     </Pressable>
-);
-
-const createHarborTopicNavigationTitle = props => () => (
-    <HarborTopicNavigationTitle {...props} />
 );
 
 const createHarborTopicShareButton = props => () => (
@@ -428,28 +383,8 @@ const HarborTopicDetail = ({ route, navigation }) => {
     }, [currentPostNumber, t, topic?.title, topicId]);
 
     useLayoutEffect(() => {
-        const topicAuthor =
-            posts.find(post => Number(post.post_number) === 1) || posts[0];
-        const authorId =
-            topicAuthor?.username ||
-            topicAuthor?.display_username ||
-            topicAuthor?.name ||
-            'Harbor';
-        const avatarUrl = topicAuthor?.avatar_template
-            ? ARK_HARBOR_AVATAR_TEMPLATE(topicAuthor.avatar_template, 72)
-            : null;
-
         navigation.setOptions({
-            headerTitle: createHarborTopicNavigationTitle({
-                authorId,
-                avatarUrl,
-                blackMain: black.main,
-                imagePlaceholder: theme.imagePlaceholder,
-                onPress: topicAuthor?.username
-                    ? () => openAuthor(topicAuthor.username)
-                    : null,
-                tonalPrimary15: tonal.primary15,
-            }),
+            headerTitle: '',
             // iOS：原生 UIBarButtonItem，液態玻璃下才是標準圓形
             headerRight:
                 Platform.OS === 'ios'
@@ -479,17 +414,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
                       ]
                     : undefined,
         });
-    }, [
-        black.main,
-        navigation,
-        openAuthor,
-        posts,
-        shareCurrentPost,
-        t,
-        theme.imagePlaceholder,
-        themeColor,
-        tonal.primary15,
-    ]);
+    }, [navigation, shareCurrentPost, t, themeColor]);
 
     const openTopicReplyComposer = useCallback(() => {
         openHarborComposer(navigation, {

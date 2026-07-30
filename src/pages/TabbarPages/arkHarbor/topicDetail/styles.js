@@ -8,23 +8,6 @@ const styles = StyleSheet.create({
     page: {
         flex: 1,
     },
-    headerAuthor: {
-        maxWidth: scale(190),
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    headerAvatar: {
-        width: scale(30),
-        height: scale(30),
-        borderRadius: scale(15),
-        marginRight: scale(8),
-    },
-    headerAuthorId: {
-        ...uiStyle.defaultText,
-        flexShrink: 1,
-        fontSize: scale(14),
-        fontWeight: '600',
-    },
     headerShareButton: {
         width: scale(36),
         height: scale(36),
