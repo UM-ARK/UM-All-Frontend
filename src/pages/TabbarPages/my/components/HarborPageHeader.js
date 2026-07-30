@@ -91,7 +91,7 @@ const styles = StyleSheet.create({
     },
     compactContainer: {
         justifyContent: 'flex-end',
-        minHeight: scale(42),
+        minHeight: scale(24),
         marginBottom: 0,
     },
     compactAvatarWrap: {

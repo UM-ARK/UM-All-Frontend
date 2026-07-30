@@ -285,12 +285,7 @@ const HarborDashboard = ({
                     }}
                     style={{backgroundColor: theme.bg_color}}>
                     <View style={styles.profileContent}>
-                        <HarborProfileCard
-                            user={user}
-                            onPress={() =>
-                                navigation.navigate('HarborAccountSettings')
-                            }
-                        />
+                        <HarborProfileCard user={user} />
                     </View>
                     {user.partialProfile ? (
                         <View

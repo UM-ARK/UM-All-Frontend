@@ -241,7 +241,7 @@ const SettingPage = ({ navigation }) => {
     const { theme, themeMode, setThemeMode } = useTheme();
     const { bg_color, black, themeColor } = theme;
     const { t, i18n } = useTranslation(['setting', 'about', 'common', 'my']);
-    const { status, login } = useHarborSession();
+    const { status, user, login } = useHarborSession();
     const [umehHostPref, setUmehHostPrefState] = useState('auto');
 
     useEffect(() => {
@@ -437,6 +437,30 @@ const SettingPage = ({ navigation }) => {
     return (
         <View style={{ flex: 1, backgroundColor: bg_color }}>
             <ScrollView contentInsetAdjustmentBehavior="automatic">
+                {status === 'signedIn' && user ? (
+                    <>
+                        <SettingSection
+                            title="Harbor"
+                            icon="person-circle"
+                        />
+
+                        <SettingSectionCard>
+                            <SettingItem
+                                grouped
+                                icon="person-circle-outline"
+                                iconColor={themeColor}
+                                title={t('帳戶設定', { ns: 'my' })}
+                                subtitle={`@${user.username}`}
+                                onPress={() =>
+                                    navigation.navigate(
+                                        'HarborAccountSettings',
+                                    )
+                                }
+                            />
+                        </SettingSectionCard>
+                    </>
+                ) : null}
+
                 {/* 外觀設置分區 */}
                 <SettingSection
                     title={t('setting:Appearance')}

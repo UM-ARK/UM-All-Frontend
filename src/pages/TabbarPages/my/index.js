@@ -212,6 +212,7 @@ const styles = StyleSheet.create({
         minHeight: 0,
     },
     signedInHeaderContent: {
+        marginBottom: verticalScale(-12),
         paddingHorizontal: scale(10),
         position: 'relative',
         zIndex: 2,

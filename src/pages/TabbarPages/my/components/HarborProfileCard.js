@@ -8,30 +8,21 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import {scale, verticalScale} from 'react-native-size-matters';
 
 import {uiStyle, useTheme} from '../../../../components/ThemeContext';
-import TouchableScale from '../../../../components/TouchableScale';
-import {trigger} from '../../../../utils/trigger';
 import {formatJoinedAt} from '../utils/harborUi';
 
 const AVATAR_SOURCE = require('../../../../static/img/logo_round.png');
 
-const HarborProfileCard = ({user, onPress}) => {
+const HarborProfileCard = ({user}) => {
     const {theme} = useTheme();
     const {t, i18n} = useTranslation('my');
     const joinedAt = formatJoinedAt(user.joinedAt, i18n.language);
 
     return (
-        <TouchableScale
-            accessibilityRole="button"
-            accessibilityLabel={t('帳戶設定')}
-            activeScale={0.98}
+        <View
             style={[
                 styles.container,
                 {backgroundColor: theme.bg_color},
-            ]}
-            onPress={() => {
-                trigger();
-                onPress();
-            }}>
+            ]}>
             <View
                 style={[
                     styles.avatarRing,
@@ -115,22 +106,7 @@ const HarborProfileCard = ({user, onPress}) => {
                 ) : null}
             </View>
 
-            <View style={styles.accountEntry}>
-                <Text
-                    numberOfLines={1}
-                    style={[
-                        styles.accountEntryText,
-                        {color: theme.black.second},
-                    ]}>
-                    {t('帳戶設定')}
-                </Text>
-                <Ionicons
-                    name="chevron-forward"
-                    size={scale(16)}
-                    color={theme.black.third}
-                />
-            </View>
-        </TouchableScale>
+        </View>
     );
 };
 
@@ -169,16 +145,6 @@ const styles = StyleSheet.create({
     identity: {
         flex: 1,
         minWidth: 0,
-    },
-    accountEntry: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginLeft: scale(8),
-    },
-    accountEntryText: {
-        ...uiStyle.defaultText,
-        fontSize: scale(11),
-        fontWeight: '600',
     },
     nameRow: {
         flexDirection: 'row',
