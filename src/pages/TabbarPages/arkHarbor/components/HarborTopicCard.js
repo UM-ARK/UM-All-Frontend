@@ -104,21 +104,10 @@ const StatusChip = ({ status }) => {
     );
 };
 
-const normalizeTag = tag => {
-    if (typeof tag === 'string') {
-        return { name: tag, slug: tag };
-    }
-    return {
-        name: tag?.name || tag?.id || tag?.slug || '',
-        slug: tag?.slug || tag?.name || tag?.id || '',
-    };
-};
-
 const HarborTopicCard = ({
     topic,
     onPress,
     onCategoryPress,
-    onTagPress,
     isPressAllowed,
 }) => {
     const { theme } = useTheme();
@@ -132,12 +121,6 @@ const HarborTopicCard = ({
             ? ARK_HARBOR_AVATAR_TEMPLATE(avatarTemplate, 72)
             : null);
     const category = topic.category?.name ? topic.category : null;
-    const tags = Array.isArray(topic.tags)
-        ? topic.tags
-            .map(normalizeTag)
-            .filter(tag => tag.name)
-            .slice(0, 3)
-        : [];
     const statuses = Object.keys(STATUS_CONFIG).filter(status => {
         if (status === 'pinned') {
             return topic.pinned || topic.pinnedGlobally;
@@ -267,40 +250,6 @@ const HarborTopicCard = ({
                     style={[styles.excerpt, { color: theme.black.third }]}>
                     {topic.excerpt}
                 </Text>
-            ) : null}
-
-            {tags.length > 0 ? (
-                <View style={styles.taxonomyRow}>
-                    {tags.map(tag => (
-                        <Pressable
-                            key={tag.slug}
-                            accessibilityRole="button"
-                            onPress={event =>
-                                stopAndRun(
-                                    event,
-                                    () => onTagPress(tag),
-                                    isPressAllowed,
-                                )
-                            }
-                            style={({ pressed }) => [
-                                styles.tagChip,
-                                {
-                                    backgroundColor: pressed
-                                        ? theme.tonal.primary30
-                                        : theme.tonal.primary15,
-                                },
-                            ]}>
-                            <Text
-                                numberOfLines={1}
-                                style={[
-                                    styles.tagText,
-                                    { color: theme.themeColor },
-                                ]}>
-                                #{tag.name}
-                            </Text>
-                        </Pressable>
-                    ))}
-                </View>
             ) : null}
 
             {statuses.length > 0 ? (
@@ -443,20 +392,14 @@ const styles = StyleSheet.create({
         ...uiStyle.defaultText,
         fontSize: scale(14),
         lineHeight: scale(19),
-        fontWeight: '700',
-        marginTop: verticalScale(9),
+        fontWeight: '600',
+        marginTop: verticalScale(6),
     },
     excerpt: {
         ...uiStyle.defaultText,
         fontSize: scale(11),
         lineHeight: scale(17),
-        marginTop: verticalScale(5),
-    },
-    taxonomyRow: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        alignItems: 'center',
-        marginTop: verticalScale(9),
+        marginTop: verticalScale(3),
     },
     categoryChip: {
         maxWidth: scale(150),
@@ -474,7 +417,6 @@ const styles = StyleSheet.create({
         flexShrink: 1,
         fontSize: scale(10),
         fontWeight: '600',
-        marginLeft: scale(4),
     },
     footerCategoryChip: {
         flexShrink: 1,
@@ -484,19 +426,6 @@ const styles = StyleSheet.create({
     },
     categoryChipPressed: {
         opacity: 0.6,
-    },
-    tagChip: {
-        maxWidth: scale(110),
-        borderRadius: scale(7),
-        marginRight: scale(6),
-        marginBottom: verticalScale(5),
-        paddingHorizontal: scale(7),
-        paddingVertical: verticalScale(4),
-    },
-    tagText: {
-        ...uiStyle.defaultText,
-        fontSize: scale(10),
-        fontWeight: '600',
     },
     statusRow: {
         flexDirection: 'row',

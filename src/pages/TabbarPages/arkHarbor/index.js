@@ -694,7 +694,7 @@ const styles = StyleSheet.create({
         opacity: 0,
     },
     searchBarRow: {
-        paddingHorizontal: scale(10),
+        paddingHorizontal: scale(6),
         paddingVertical: verticalScale(4),
     },
     searchBar: {

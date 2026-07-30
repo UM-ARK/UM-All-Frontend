@@ -551,28 +551,17 @@ const HarborTopicList = ({
         [navigation],
     );
 
-    const handleTagPress = useCallback(
-        tag => {
-            navigation.navigate('HarborTagTopics', {
-                tag: tag.name || tag.slug,
-            });
-        },
-        [navigation],
-    );
-
     const renderTopic = useCallback(
         ({ item }) => (
             <HarborTopicCard
                 topic={item}
                 onPress={handleTopicPress}
                 onCategoryPress={handleCategoryPress}
-                onTagPress={handleTagPress}
                 isPressAllowed={isTopicPressAllowed}
             />
         ),
         [
             handleCategoryPress,
-            handleTagPress,
             handleTopicPress,
             isTopicPressAllowed,
         ],
