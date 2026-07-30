@@ -259,6 +259,8 @@ const HarborPostContent = memo(
                 img: {
                     borderRadius: scale(8),
                     marginVertical: verticalScale(5),
+                    // 限制單圖高度，避免多圖／直圖把帖子撐得過長
+                    maxHeight: verticalScale(200),
                 },
                 hr: {
                     backgroundColor: disabled,
