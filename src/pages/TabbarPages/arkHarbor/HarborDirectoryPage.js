@@ -341,7 +341,9 @@ const HarborDirectoryPane = ({
                 setItems(
                     isCategory
                         ? result.items
-                        : result.items.filter(tag => !tag.pmOnly),
+                        : result.items
+                            .filter(tag => !tag.pmOnly)
+                            .sort((a, b) => b.topicCount - a.topicCount),
                 );
             } catch (error) {
                 if (!controller.signal.aborted) {
