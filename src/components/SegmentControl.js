@@ -18,7 +18,7 @@ const getLabelStyle = (isSelected, accent, inactive) => ({
 
 /**
  * 分段控制元件（膠囊樣式，用於設定列、篩選等）
- * @param {{ key: string, label: string }[]} options - 選項配置
+ * @param {{ key: string, label: string, showDot?: boolean, dotColor?: string }[]} options - 選項配置
  * @param {number} selectedIndex - 當前選中索引
  * @param {(index: number) => void} onChange - 變更回調
  * @param {object} [style] - 外層容器額外樣式
@@ -44,7 +44,7 @@ const SegmentControl = ({
     compact,
 }) => {
     const { theme } = useTheme();
-    const { themeColor, bg_color, black } = theme;
+    const { themeColor, bg_color, black, unread } = theme;
     const accent = accentColor ?? themeColor;
     const track = trackBackgroundColor ?? bg_color;
     const selectedBackground = selectedBackgroundColor ?? `${accent}15`;
@@ -75,14 +75,27 @@ const SegmentControl = ({
                             compact && styles.compactOption,
                             getOptionStyle(isSelected, selectedBackground),
                         ]}>
-                        <Text
-                            style={[
-                                styles.label,
-                                { fontSize: labelSize },
-                                getLabelStyle(isSelected, accent, inactive),
-                            ]}>
-                            {option.label}
-                        </Text>
+                        <View style={styles.labelRow}>
+                            <Text
+                                style={[
+                                    styles.label,
+                                    { fontSize: labelSize },
+                                    getLabelStyle(isSelected, accent, inactive),
+                                ]}>
+                                {option.label}
+                            </Text>
+                            {option.showDot ? (
+                                <View
+                                    style={[
+                                        styles.dot,
+                                        {
+                                            backgroundColor:
+                                                option.dotColor ?? unread,
+                                        },
+                                    ]}
+                                />
+                            ) : null}
+                        </View>
                     </TouchableScale>
                 );
             })}
@@ -116,8 +129,18 @@ const styles = StyleSheet.create({
         paddingHorizontal: scale(8),
         paddingVertical: verticalScale(3),
     },
+    labelRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: scale(4),
+    },
     label: {
         ...uiStyle.defaultText,
+    },
+    dot: {
+        width: scale(5),
+        height: scale(5),
+        borderRadius: scale(3),
     },
 });
 
