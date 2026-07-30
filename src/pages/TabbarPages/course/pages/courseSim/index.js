@@ -17,6 +17,7 @@ import {
     Keyboard,
     Platform,
     useWindowDimensions,
+    LayoutAnimation,
 } from 'react-native';
 
 import { scale, verticalScale } from 'react-native-size-matters';
@@ -272,7 +273,6 @@ function CourseSim({ route, navigation }) {
     const {
         themeColor,
         themeColorUltraLight,
-        secondThemeColor,
         tonal,
         black,
         white,
@@ -399,11 +399,11 @@ function CourseSim({ route, navigation }) {
             fontSize: scale(11),
             textAlign: 'center',
         },
+        // 與搵課 FilterPanel classItmStyle 對齊
         filterButtonContainer: {
-            paddingHorizontal: scale(5),
-            paddingVertical: verticalScale(2),
-            borderRadius: verticalScale(5),
-            marginHorizontal: scale(2.5),
+            borderRadius: scale(10),
+            borderColor: black.third,
+            marginHorizontal: scale(2),
         },
         searchResultText: {
             ...uiStyle.defaultText,
@@ -1433,31 +1433,61 @@ E11-0000
         return (
             <View
                 style={{
+                    flexDirection: 'row',
+                    flexWrap: 'wrap',
                     alignItems: 'center',
                     justifyContent: 'center',
                     marginVertical: verticalScale(5),
-                    flexDirection: 'row',
                 }}>
+                {dayFilterChoice ? (
+                    <TouchableScale
+                        style={{
+                            ...s.filterButtonContainer,
+                            paddingHorizontal: scale(4),
+                            paddingVertical: scale(3),
+                            backgroundColor: tonal.primary15,
+                            marginRight: scale(2),
+                        }}
+                        onPress={() => {
+                            trigger();
+                            LayoutAnimation.configureNext(
+                                LayoutAnimation.Presets.spring,
+                            );
+                            // 清空星期與時段，隱藏下方時段篩選列
+                            setDayFilterChoice(null);
+                            setTimeFilterFrom(timeFrom);
+                            setTimeFilterTo(timeTo);
+                        }}
+                        accessibilityRole="button"
+                        accessibilityLabel={t('清除', { ns: 'timetable' })}>
+                        <Ionicons
+                            name="close"
+                            size={scale(14)}
+                            color={themeColor}
+                        />
+                    </TouchableScale>
+                ) : null}
                 {dayList.map(day => {
                     const isSelected = day === dayFilterChoice;
 
                     return (
-                        <TouchableOpacity
+                        <TouchableScale
                             key={day}
                             style={{
                                 ...s.filterButtonContainer,
+                                paddingHorizontal: scale(5),
+                                paddingVertical: scale(3),
                                 backgroundColor: isSelected
-                                    ? secondThemeColor
-                                    : white,
-                                borderWidth: scale(1),
-                                borderColor: isSelected
-                                    ? secondThemeColor
-                                    : themeColor,
+                                    ? tonal.primary15
+                                    : null,
                             }}
                             onPress={() => {
                                 trigger();
+                                LayoutAnimation.configureNext(
+                                    LayoutAnimation.Presets.spring,
+                                );
                                 if (isSelected) {
-                                    // 還原時間篩選
+                                    // 取消星期時一併還原時段
                                     setDayFilterChoice(null);
                                     setTimeFilterFrom(timeFrom);
                                     setTimeFilterTo(timeTo);
@@ -1468,11 +1498,15 @@ E11-0000
                             <Text
                                 style={{
                                     ...uiStyle.defaultText,
-                                    color: isSelected ? white : themeColor,
+                                    color: isSelected
+                                        ? themeColor
+                                        : black.third,
+                                    fontWeight: isSelected ? '900' : 'normal',
+                                    fontSize: scale(12),
                                 }}>
                                 {day}
                             </Text>
-                        </TouchableOpacity>
+                        </TouchableScale>
                     );
                 })}
             </View>
@@ -1480,37 +1514,39 @@ E11-0000
     };
 
     const renderTimeFilter = () => {
-        const timeButton = mode => {
-            let backgroundColor = null;
-            let textColor = black.third;
+        const isTimeRangeDefault =
+            timeFilterFrom === timeFrom && timeFilterTo === timeTo;
 
-            if (mode === 'from') {
-                backgroundColor =
-                    timeFilterFrom === timeFrom ? null : themeColor;
-                textColor = timeFilterFrom === timeFrom ? black.third : white;
-            } else {
-                backgroundColor = timeFilterTo === timeTo ? null : themeColor;
-                textColor = timeFilterTo === timeTo ? black.third : white;
-            }
+        const renderTimeButton = mode => {
+            const isDefault =
+                mode === 'from'
+                    ? timeFilterFrom === timeFrom
+                    : timeFilterTo === timeTo;
 
             return (
-                <TouchableOpacity
+                <TouchableScale
                     style={{
-                        flexDirection: 'row',
                         ...s.filterButtonContainer,
-                        backgroundColor,
-                        borderWidth: scale(1),
-                        borderColor: themeColor,
-                        borderRadius: scale(5),
+                        paddingHorizontal: scale(8),
+                        paddingVertical: scale(3),
+                        backgroundColor: isDefault
+                            ? tonal.primary15
+                            : tonal.primary30,
                     }}
                     onPress={() => {
                         trigger();
                         setShowTimePicker(true);
                     }}>
-                    <Text style={{ ...uiStyle.defaultText, color: textColor }}>
+                    <Text
+                        style={{
+                            ...uiStyle.defaultText,
+                            color: isDefault ? black.third : themeColor,
+                            fontWeight: isDefault ? 'normal' : '900',
+                            fontSize: scale(12),
+                        }}>
                         {mode === 'from' ? timeFilterFrom : timeFilterTo}
                     </Text>
-                </TouchableOpacity>
+                </TouchableScale>
             );
         };
 
@@ -1530,16 +1566,15 @@ E11-0000
                             timeFilterFrom === preset.from &&
                             timeFilterTo === preset.to;
                         return (
-                            <TouchableOpacity
+                            <TouchableScale
                                 key={preset.id}
                                 style={{
                                     ...s.filterButtonContainer,
+                                    paddingHorizontal: scale(8),
+                                    paddingVertical: scale(3),
                                     backgroundColor: isSelected
-                                        ? themeColor
-                                        : null,
-                                    borderWidth: scale(1),
-                                    borderColor: themeColor,
-                                    borderRadius: scale(5),
+                                        ? tonal.primary30
+                                        : tonal.primary15,
                                     marginHorizontal: scale(3),
                                 }}
                                 onPress={() => {
@@ -1556,49 +1591,63 @@ E11-0000
                                 <Text
                                     style={{
                                         ...uiStyle.defaultText,
-                                        color: isSelected ? white : themeColor,
+                                        color: isSelected
+                                            ? themeColor
+                                            : black.third,
+                                        fontWeight: isSelected
+                                            ? '900'
+                                            : 'normal',
+                                        fontSize: scale(12),
                                     }}>
                                     {t(preset.labelKey, { ns: 'timetable' })}
                                 </Text>
-                            </TouchableOpacity>
+                            </TouchableScale>
                         );
                     })}
                 </View>
 
                 <View
                     style={{
+                        flexDirection: 'row',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        flexDirection: 'row',
                     }}>
-                    {/* 還原時間篩選 */}
-                    {(timeFilterFrom !== timeFrom || timeFilterTo !== timeTo) && (
-                        <TouchableOpacity
+                    {isTimeRangeDefault ? null : (
+                        <TouchableScale
                             style={{
                                 ...s.filterButtonContainer,
-                                backgroundColor: themeColorUltraLight,
+                                paddingHorizontal: scale(4),
+                                paddingVertical: scale(3),
+                                backgroundColor: tonal.primary15,
+                                marginRight: scale(4),
                             }}
                             onPress={() => {
                                 trigger();
                                 setTimeFilterFrom(timeFrom);
                                 setTimeFilterTo(timeTo);
-                            }}>
-                            <Text
-                                style={{
-                                    ...uiStyle.defaultText,
-                                    color: themeColor,
-                                }}>
-                                {t('清除', { ns: 'timetable' })}
-                            </Text>
-                        </TouchableOpacity>
+                            }}
+                            accessibilityRole="button"
+                            accessibilityLabel={t('清除', {
+                                ns: 'timetable',
+                            })}>
+                            <Ionicons
+                                name="close"
+                                size={scale(14)}
+                                color={themeColor}
+                            />
+                        </TouchableScale>
                     )}
 
-                    {/* 時間選項 */}
-                    {timeButton('from')}
-                    <Text style={{ ...uiStyle.defaultText, color: black.third }}>
+                    {renderTimeButton('from')}
+                    <Text
+                        style={{
+                            ...uiStyle.defaultText,
+                            color: black.third,
+                            fontSize: scale(12),
+                        }}>
                         {' - '}
                     </Text>
-                    {timeButton('to')}
+                    {renderTimeButton('to')}
                 </View>
 
                 <CourseTimeRangePicker
