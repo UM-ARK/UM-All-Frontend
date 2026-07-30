@@ -1,7 +1,8 @@
 import React from 'react';
-import {Animated, StyleSheet, Text, View} from 'react-native';
+import {StyleSheet, Text, View} from 'react-native';
+// import {Animated, StyleSheet, Text, View} from 'react-native';
 
-import {Image} from 'expo-image';
+// import {Image} from 'expo-image';
 import {useTranslation} from 'react-i18next';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {scale, verticalScale} from 'react-native-size-matters';
@@ -10,36 +11,41 @@ import {uiStyle, useTheme} from '../../../../components/ThemeContext';
 import TouchableScale from '../../../../components/TouchableScale';
 import {trigger} from '../../../../utils/trigger';
 
-const AVATAR_SOURCE = require('../../../../static/img/logo_round.png');
+// const AVATAR_SOURCE = require('../../../../static/img/logo_round.png');
 
 const HarborPageHeader = ({
     compact = false,
-    user,
-    scrollY,
+    // user,
+    // scrollY,
     onSettingsPress,
 }) => {
     const {theme} = useTheme();
     const {t} = useTranslation(['common', 'my']);
-    const avatarOpacity = scrollY
-        ? scrollY.interpolate({
-            inputRange: [verticalScale(28), verticalScale(72)],
-            outputRange: [0, 1],
-            extrapolate: 'clamp',
-        })
-        : 0;
+    // 暫時關閉下滑顯示頂部頭像動畫
+    // const avatarOpacity = scrollY
+    //     ? scrollY.interpolate({
+    //         inputRange: [verticalScale(28), verticalScale(72)],
+    //         outputRange: [0, 1],
+    //         extrapolate: 'clamp',
+    //     })
+    //     : 0;
+
+    // 已登入時 header 僅承載頂部頭像動畫，暫時無內容可渲染
+    if (compact) {
+        return null;
+    }
 
     return (
-        <View style={[styles.container, compact && styles.compactContainer]}>
-            {compact ? null : (
-                <View>
-                    <Text style={[styles.eyebrow, {color: theme.themeColor}]}>
-                        ARK ALL · HARBOR
-                    </Text>
-                    <Text style={[styles.title, {color: theme.black.main}]}>
-                        {t('個人中心', {ns: 'my'})}
-                    </Text>
-                </View>
-            )}
+        <View style={styles.container}>
+            <View>
+                <Text style={[styles.eyebrow, {color: theme.themeColor}]}>
+                    ARK ALL · HARBOR
+                </Text>
+                <Text style={[styles.title, {color: theme.black.main}]}>
+                    {t('個人中心', {ns: 'my'})}
+                </Text>
+            </View>
+            {/* 暫時關閉下滑頂部頭像
             {compact && user ? (
                 <Animated.View
                     pointerEvents="none"
@@ -58,14 +64,13 @@ const HarborPageHeader = ({
                     />
                 </Animated.View>
             ) : null}
+            */}
             <View style={styles.actions}>
                 <TouchableScale
                     accessibilityRole="button"
                     accessibilityLabel={t('設置')}
-                    style={[
-                        styles.button,
-                        {backgroundColor: theme.tonal.primary15},
-                    ]}
+                    hitSlop={scale(8)}
+                    style={styles.button}
                     onPress={() => {
                         trigger();
                         onSettingsPress();
@@ -73,7 +78,7 @@ const HarborPageHeader = ({
                     <Ionicons
                         name="settings-outline"
                         size={verticalScale(18)}
-                        color={theme.themeColor}
+                        color={theme.black.third}
                     />
                 </TouchableScale>
             </View>
@@ -90,9 +95,16 @@ const styles = StyleSheet.create({
         marginBottom: verticalScale(12),
     },
     compactContainer: {
-        justifyContent: 'flex-end',
-        minHeight: scale(24),
+        position: 'absolute',
+        top: verticalScale(4),
+        left: 0,
+        right: 0,
+        zIndex: 1,
+        justifyContent: 'center',
+        minHeight: scale(30),
+        height: scale(30),
         marginBottom: 0,
+        pointerEvents: 'none',
     },
     compactAvatarWrap: {
         position: 'absolute',

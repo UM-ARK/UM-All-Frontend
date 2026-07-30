@@ -3,7 +3,6 @@ import {
     Alert,
     Animated,
     RefreshControl,
-    ScrollView,
     StyleSheet,
     Text,
     View,
@@ -17,9 +16,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { uiStyle, useTheme } from '../../../components/ThemeContext';
 import { useHarborSession } from '../../../contexts/HarborSessionContext';
 import { trigger } from '../../../utils/trigger';
-import HarborDashboard from './components/HarborDashboard';
 import HarborGuestState from './components/HarborGuestState';
 import HarborPageHeader from './components/HarborPageHeader';
+import HarborProfileOverview from './components/HarborProfileOverview';
 import HarborRestoringState from './components/HarborRestoringState';
 
 const MyScreen = ({ navigation }) => {
@@ -29,11 +28,11 @@ const MyScreen = ({ navigation }) => {
     const insets = useSafeAreaInsets();
     const { width } = useWindowDimensions();
     const contentWidth = Math.min(width - scale(20), scale(680));
-    const signedInWidth = Math.min(width, scale(700));
     const contentTopInset = insets.top + verticalScale(8);
-    const signedInTopInset = insets.top + verticalScale(2);
     const [isRefreshing, setIsRefreshing] = React.useState(false);
-    const dashboardScrollY = React.useRef(new Animated.Value(0)).current;
+    // 暫時關閉下滑頂部頭像動畫
+    // const scrollY = React.useRef(new Animated.Value(0)).current;
+    const isSignedIn = status === 'signedIn' && !!user;
 
     const presentHarborError = React.useCallback(
         sessionError => {
@@ -87,6 +86,16 @@ const MyScreen = ({ navigation }) => {
         }
     };
 
+    // 暫時關閉下滑頂部頭像動畫
+    // const handleScroll = React.useMemo(
+    //     () =>
+    //         Animated.event(
+    //             [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+    //             { useNativeDriver: false },
+    //         ),
+    //     [scrollY],
+    // );
+
     const harborError = error ? (
         <View
             style={[
@@ -113,53 +122,13 @@ const MyScreen = ({ navigation }) => {
         </View>
     ) : null;
 
-    if (status === 'signedIn' && user) {
-        return (
-            <View
-                style={[
-                    styles.container,
-                    styles.signedInContainer,
-                    { backgroundColor: theme.bg_color },
-                ]}>
-                <View
-                    style={[
-                        styles.signedInContent,
-                        {
-                            width: signedInWidth,
-                            paddingTop: signedInTopInset,
-                        },
-                    ]}>
-                    <View style={styles.signedInHeaderContent}>
-                        <HarborPageHeader
-                            compact
-                            user={user}
-                            scrollY={dashboardScrollY}
-                            onSettingsPress={() =>
-                                navigation.navigate('SettingPage')
-                            }
-                        />
-                        {harborError}
-                    </View>
-                    <HarborDashboard
-                        user={user}
-                        navigation={navigation}
-                        contentBottomInset={
-                            insets.bottom + verticalScale(92)
-                        }
-                        isRefreshing={isRefreshing}
-                        onProfileRefresh={handleRefresh}
-                        scrollY={dashboardScrollY}
-                    />
-                </View>
-            </View>
-        );
-    }
-
     return (
         <View style={[styles.container, { backgroundColor: theme.bg_color }]}>
-            <ScrollView
+            <Animated.ScrollView
                 contentInsetAdjustmentBehavior="never"
                 showsVerticalScrollIndicator={false}
+                // onScroll={handleScroll}
+                // scrollEventThrottle={16}
                 contentContainerStyle={[
                     styles.scrollContent,
                     {
@@ -168,7 +137,7 @@ const MyScreen = ({ navigation }) => {
                     },
                 ]}
                 refreshControl={
-                    status === 'signedIn' ? (
+                    isSignedIn ? (
                         <RefreshControl
                             refreshing={isRefreshing}
                             tintColor={theme.themeColor}
@@ -180,12 +149,23 @@ const MyScreen = ({ navigation }) => {
                 }>
                 <View style={{ width: contentWidth }}>
                     <HarborPageHeader
+                        compact={isSignedIn}
+                        // user={isSignedIn ? user : undefined}
+                        // scrollY={scrollY}
                         onSettingsPress={() =>
                             navigation.navigate('SettingPage')
                         }
                     />
                     {harborError}
-                    {status === 'restoring' ? (
+                    {isSignedIn ? (
+                        <HarborProfileOverview
+                            user={user}
+                            navigation={navigation}
+                            onSettingsPress={() =>
+                                navigation.navigate('SettingPage')
+                            }
+                        />
+                    ) : status === 'restoring' ? (
                         <HarborRestoringState />
                     ) : (
                         <HarborGuestState
@@ -195,7 +175,7 @@ const MyScreen = ({ navigation }) => {
                         />
                     )}
                 </View>
-            </ScrollView>
+            </Animated.ScrollView>
         </View>
     );
 };
@@ -203,19 +183,6 @@ const MyScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-    },
-    signedInContainer: {
-        alignItems: 'center',
-    },
-    signedInContent: {
-        flex: 1,
-        minHeight: 0,
-    },
-    signedInHeaderContent: {
-        marginBottom: verticalScale(-12),
-        paddingHorizontal: scale(10),
-        position: 'relative',
-        zIndex: 2,
     },
     scrollContent: {
         alignItems: 'center',

@@ -39,7 +39,7 @@ const HarborBadgesPage = ({navigation}) => {
     const controllerRef = React.useRef(null);
 
     React.useEffect(() => {
-        navigation.setOptions({headerTitle: t('社群成就')});
+        navigation.setOptions({headerTitle: t('論壇成就')});
     }, [navigation, t]);
 
     const loadBadges = React.useCallback(

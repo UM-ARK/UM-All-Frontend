@@ -8,11 +8,13 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import {scale, verticalScale} from 'react-native-size-matters';
 
 import {uiStyle, useTheme} from '../../../../components/ThemeContext';
+import TouchableScale from '../../../../components/TouchableScale';
+import {trigger} from '../../../../utils/trigger';
 import {formatJoinedAt} from '../utils/harborUi';
 
 const AVATAR_SOURCE = require('../../../../static/img/logo_round.png');
 
-const HarborProfileCard = ({user}) => {
+const HarborProfileCard = ({user, onSettingsPress}) => {
     const {theme} = useTheme();
     const {t, i18n} = useTranslation('my');
     const joinedAt = formatJoinedAt(user.joinedAt, i18n.language);
@@ -76,6 +78,23 @@ const HarborProfileCard = ({user}) => {
                             {t('已連接')}
                         </Text>
                     </View>
+                    {onSettingsPress ? (
+                        <TouchableScale
+                            accessibilityRole="button"
+                            accessibilityLabel={t('設置')}
+                            hitSlop={scale(8)}
+                            style={styles.settingsButton}
+                            onPress={() => {
+                                trigger();
+                                onSettingsPress();
+                            }}>
+                            <Ionicons
+                                name="settings-outline"
+                                size={verticalScale(18)}
+                                color={theme.black.third}
+                            />
+                        </TouchableScale>
+                    ) : null}
                 </View>
                 <Text style={[styles.handle, {color: theme.black.third}]}>
                     @{user.username}
@@ -116,7 +135,15 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         paddingHorizontal: scale(7),
-        paddingVertical: verticalScale(15),
+        paddingTop: verticalScale(4),
+        paddingBottom: verticalScale(12),
+    },
+    settingsButton: {
+        marginLeft: 'auto',
+        width: scale(28),
+        height: scale(28),
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     avatarRing: {
         width: scale(66),

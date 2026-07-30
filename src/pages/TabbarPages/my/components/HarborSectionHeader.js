@@ -43,13 +43,13 @@ const HarborSectionHeader = ({title, actionLabel, onAction}) => {
 
 const styles = StyleSheet.create({
     container: {
-        minHeight: verticalScale(36),
+        minHeight: verticalScale(30),
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
         paddingHorizontal: scale(14),
-        paddingTop: verticalScale(12),
-        paddingBottom: verticalScale(4),
+        paddingTop: verticalScale(10),
+        paddingBottom: verticalScale(2),
     },
     title: {
         ...uiStyle.defaultText,
