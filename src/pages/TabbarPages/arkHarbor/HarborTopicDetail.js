@@ -284,7 +284,6 @@ const HarborTopicDetail = ({ route, navigation }) => {
         explainPostReactionDisabled,
         isBookmarkReminderVisible,
         isNotificationVisible,
-        markTopicUnread,
         openBookmarkEditor,
         openNotificationLevels,
         pendingMutations,
@@ -298,15 +297,12 @@ const HarborTopicDetail = ({ route, navigation }) => {
     } = useHarborTopicActions({
         currentTrustLevel: harborUser?.trustLevel,
         currentUsername: harborUser?.username,
-        highestPostNumber,
         latestTopicRef,
         login,
         sessionStatusRef,
         setTopic,
-        setUnreadAfterPostNumber,
         t,
         topicId,
-        unreadAfterPostNumber,
         updateTopicPost,
     });
 
@@ -715,14 +711,10 @@ const HarborTopicDetail = ({ route, navigation }) => {
                     <View>
                         <HarborTopicHeader
                             topic={topic}
-                            onMarkUnread={markTopicUnread}
                             onOpenNotifications={openNotificationLevels}
                             onOpenOriginal={openOriginalTopic}
                             onPressCategory={openCategory}
                             onPressTag={openTag}
-                            pendingMarkUnread={
-                                pendingMutations[`unread:${topicId}`]
-                            }
                             pendingNotification={
                                 pendingMutations[`notification:${topicId}`]
                             }
@@ -855,7 +847,6 @@ const HarborTopicDetail = ({ route, navigation }) => {
             copyPostPermalink,
             confirmDeletePost,
             explainPostReactionDisabled,
-            markTopicUnread,
             openAuthor,
             openBookmarkEditor,
             openCategory,

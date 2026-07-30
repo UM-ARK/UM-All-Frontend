@@ -12,7 +12,6 @@ import {
     deleteHarborPost,
     HARBOR_TOPIC_NOTIFICATION_LEVELS,
     likeHarborPost,
-    markHarborTopicUnread,
     setHarborTopicNotificationLevel,
     toggleHarborPostReaction,
     unlikeHarborPost,
@@ -89,15 +88,12 @@ const getMutationErrorDiagnostics = error => ({
 const useHarborTopicActions = ({
     currentTrustLevel,
     currentUsername,
-    highestPostNumber,
     latestTopicRef,
     login,
     sessionStatusRef,
     setTopic,
-    setUnreadAfterPostNumber,
     t,
     topicId,
-    unreadAfterPostNumber,
     updateTopicPost,
 }) => {
     const pendingMutationsRef = useRef(new Set());
@@ -726,74 +722,6 @@ const useHarborTopicActions = ({
         ],
     );
 
-    const markTopicUnread = useCallback(async () => {
-        if (!(await requireHarborSignIn())) {
-            return;
-        }
-        const key = `unread:${topicId}`;
-        if (!beginMutation(key)) {
-            return;
-        }
-        const currentTopic = latestTopicRef.current;
-        const previous = {
-            last_read_post_number: currentTopic?.last_read_post_number,
-            unread_posts: currentTopic?.unread_posts,
-            new_posts: currentTopic?.new_posts,
-            unread: currentTopic?.unread,
-        };
-        const previousUnreadAfterPostNumber = unreadAfterPostNumber;
-        setUnreadAfterPostNumber(0);
-        setTopic(current => ({
-            ...current,
-            last_read_post_number: 0,
-            unread_posts: highestPostNumber,
-            unread: true,
-        }));
-        publishHarborTopicUpdate(topicId, {
-            unreadCount: highestPostNumber,
-            lastReadPostNumber: 0,
-            isUnread: true,
-        });
-
-        try {
-            await markHarborTopicUnread(topicId);
-            publishHarborTopicUpdate(topicId, { reloadLists: true });
-            Toast.show(t('話題已標為未讀'));
-        } catch (error) {
-            setUnreadAfterPostNumber(previousUnreadAfterPostNumber);
-            setTopic(current => ({ ...current, ...previous }));
-            publishHarborTopicUpdate(topicId, {
-                unreadCount: Math.max(
-                    Number(previous.unread_posts ?? previous.new_posts ?? 0),
-                    0,
-                ),
-                lastReadPostNumber:
-                    Number(previous.last_read_post_number) || null,
-                isUnread: Boolean(
-                    previous.unread ||
-                        Number(
-                            previous.unread_posts ?? previous.new_posts ?? 0,
-                        ) > 0,
-                ),
-            });
-            showMutationFailure(error);
-        } finally {
-            finishMutation(key);
-        }
-    }, [
-        beginMutation,
-        finishMutation,
-        highestPostNumber,
-        latestTopicRef,
-        requireHarborSignIn,
-        setTopic,
-        setUnreadAfterPostNumber,
-        showMutationFailure,
-        t,
-        topicId,
-        unreadAfterPostNumber,
-    ]);
-
     return {
         bookmarkEditor,
         changeNotificationLevel,
@@ -801,7 +729,6 @@ const useHarborTopicActions = ({
         explainPostReactionDisabled,
         isBookmarkReminderVisible,
         isNotificationVisible,
-        markTopicUnread,
         openBookmarkEditor,
         openNotificationLevels,
         pendingMutations,
