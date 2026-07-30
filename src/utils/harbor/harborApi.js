@@ -107,9 +107,9 @@ let sessionValidationRequest = null;
 let sessionValidationAt = 0;
 let sessionValidationResult = null;
 let sessionValidationError = null;
-let publicCategoryCache = null;
-let publicCategoryRequest = null;
-let publicCategoryCacheGeneration = 0;
+let discoveryCategoryCache = null;
+let discoveryCategoryRequest = null;
+let discoveryCategoryCacheGeneration = 0;
 const composerMetadataCache = {
     categories: {value: null, expiresAt: 0, request: null, generation: 0},
     tags: {value: null, expiresAt: 0, request: null, generation: 0},
@@ -161,6 +161,7 @@ export function setActiveHarborCredentials(credentials) {
         sessionValidationAt = 0;
         sessionValidationResult = null;
         sessionValidationError = null;
+        clearHarborDiscoveryCache();
         clearHarborComposerMetadataCache();
     }
 }
@@ -170,9 +171,9 @@ export function setHarborCredentialRejectedHandler(handler) {
 }
 
 export function clearHarborDiscoveryCache() {
-    publicCategoryCacheGeneration += 1;
-    publicCategoryCache = null;
-    publicCategoryRequest = null;
+    discoveryCategoryCacheGeneration += 1;
+    discoveryCategoryCache = null;
+    discoveryCategoryRequest = null;
 }
 
 export function clearHarborComposerMetadataCache() {
@@ -517,34 +518,37 @@ function normalizeCategories(data) {
     });
 }
 
-function fetchPublicHarborCategories() {
-    if (publicCategoryCache) {
-        return Promise.resolve(publicCategoryCache);
+function fetchHarborDiscoveryCategories() {
+    if (discoveryCategoryCache) {
+        return Promise.resolve(discoveryCategoryCache);
     }
-    if (publicCategoryRequest) {
-        return publicCategoryRequest;
+    if (discoveryCategoryRequest) {
+        return discoveryCategoryRequest;
     }
 
-    const requestGeneration = publicCategoryCacheGeneration;
+    const requestGeneration = discoveryCategoryCacheGeneration;
+    const credentials = activeCredentials;
     const request = harborApi
         .get('/categories.json', {
             params: { include_subcategories: true },
-            skipHarborCredentials: true,
+            ...(credentials
+                ? { harborCredentials: credentials }
+                : { skipHarborCredentials: true }),
         })
         .then(response => {
             const categories = normalizeCategories(response.data);
-            if (requestGeneration === publicCategoryCacheGeneration) {
-                publicCategoryCache = categories;
+            if (requestGeneration === discoveryCategoryCacheGeneration) {
+                discoveryCategoryCache = categories;
             }
             return categories;
         })
         .finally(() => {
-            if (publicCategoryRequest === request) {
-                publicCategoryRequest = null;
+            if (discoveryCategoryRequest === request) {
+                discoveryCategoryRequest = null;
             }
         });
-    publicCategoryRequest = request;
-    return publicCategoryRequest;
+    discoveryCategoryRequest = request;
+    return discoveryCategoryRequest;
 }
 
 async function resolveTopicCategory(topic) {
@@ -566,7 +570,7 @@ async function resolveTopicCategory(topic) {
     }
 
     try {
-        const categories = await fetchPublicHarborCategories();
+        const categories = await fetchHarborDiscoveryCategories();
         const cached = categories.find(category => category.id === categoryId);
         if (cached) {
             return {
@@ -576,7 +580,7 @@ async function resolveTopicCategory(topic) {
             };
         }
     } catch {
-        // 公開分類快取失敗時退回 topic 內嵌資料
+        // 分類快取失敗時退回 topic 內嵌資料
     }
     return inlineCategory;
 }
@@ -1407,13 +1411,9 @@ export async function fetchHarborTopicList({
     }
 
     let categories = normalizeCategories(response.data);
-    if (
-        normalizedPage === 0 &&
-        rawTopics.length > 0 &&
-        categories.length === 0
-    ) {
+    if (rawTopics.length > 0 && categories.length === 0) {
         try {
-            categories = await fetchPublicHarborCategories();
+            categories = await fetchHarborDiscoveryCategories();
         } catch {
             categories = [];
         }
@@ -1507,7 +1507,7 @@ export async function fetchHarborSearch({
     let categories = normalizeCategories(data);
     if (data.topics?.length > 0 && categories.length === 0) {
         try {
-            categories = await fetchPublicHarborCategories();
+            categories = await fetchHarborDiscoveryCategories();
         } catch {
             categories = [];
         }

@@ -986,6 +986,99 @@ describe('Harbor API 資料正規化', () => {
         );
     });
 
+    it('已登入時補齊受限分類並在登出後清除分類快取', async () => {
+        const credentials = {
+            userApiKey: 'staff-key',
+            clientId: 'session-client',
+        };
+        setActiveHarborCredentials(credentials);
+        getSpy.mockImplementation((path, config) => {
+            if (path === '/categories.json') {
+                const isSignedIn =
+                    config?.harborCredentials?.userApiKey ===
+                    credentials.userApiKey;
+                return Promise.resolve({
+                    data: {
+                        category_list: {
+                            categories: isSignedIn
+                                ? [
+                                    {
+                                        id: 3,
+                                        name: 'Staff',
+                                        slug: 'staff',
+                                        read_restricted: true,
+                                    },
+                                ]
+                                : [],
+                        },
+                    },
+                });
+            }
+
+            return Promise.resolve({
+                data: {
+                    topic_list: {
+                        more_topics_url: null,
+                        topics: [
+                            {
+                                id: 43,
+                                title: '受限話題',
+                                category_id: 3,
+                            },
+                        ],
+                    },
+                },
+            });
+        });
+
+        const signedInResult = await fetchHarborTopicList();
+        const signedInNextPageResult = await fetchHarborTopicList({page: 1});
+        setActiveHarborCredentials(null);
+        const signedOutResult = await fetchHarborTopicList();
+        const categoryRequests = getSpy.mock.calls.filter(
+            ([path]) => path === '/categories.json',
+        );
+
+        expect(signedInResult.items[0].category).toEqual(
+            expect.objectContaining({
+                id: 3,
+                name: 'Staff',
+                slug: 'staff',
+                readRestricted: true,
+            }),
+        );
+        expect(signedInNextPageResult.items[0].category).toEqual(
+            expect.objectContaining({
+                id: 3,
+                name: 'Staff',
+                slug: 'staff',
+            }),
+        );
+        expect(signedOutResult.items[0].category).toEqual(
+            expect.objectContaining({
+                id: 3,
+                name: '',
+                slug: '',
+            }),
+        );
+        expect(categoryRequests).toEqual([
+            [
+                '/categories.json',
+                {
+                    params: {include_subcategories: true},
+                    harborCredentials: credentials,
+                },
+            ],
+            [
+                '/categories.json',
+                {
+                    params: {include_subcategories: true},
+                    skipHarborCredentials: true,
+                },
+            ],
+        ]);
+    });
+
     it('用公開分類 cache 補齊 Topic Detail 的分類資料', async () => {
         getSpy
             .mockResolvedValueOnce({
