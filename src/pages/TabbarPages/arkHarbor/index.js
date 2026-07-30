@@ -13,6 +13,14 @@ import {
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { useIsFocused } from '@react-navigation/native';
 import PagerView from 'react-native-pager-view';
+import Reanimated, {
+    Easing,
+    Extrapolation,
+    interpolate,
+    useAnimatedStyle,
+    useSharedValue,
+    withTiming,
+} from 'react-native-reanimated';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { moderateScale, scale, verticalScale } from 'react-native-size-matters';
 import { SafeAreaView } from 'react-native-screens/experimental';
@@ -38,10 +46,27 @@ const VIEW_CONFIG = {
 };
 // 對齊資訊頁 Top Tab（~30），並預留搜尋列高度
 const STICKY_TOOLBAR_HEIGHT = verticalScale(36);
-const DEFAULT_STICKY_HEADER_HEIGHT = verticalScale(74);
+const SEARCH_BAR_ROW_HEIGHT = verticalScale(38);
+const TOP_VISIBILITY_THRESHOLD = verticalScale(4);
+const DIRECTION_CHANGE_THRESHOLD = verticalScale(10);
+const SEARCH_SHOW_TIMING = {
+    duration: 280,
+    easing: Easing.bezier(0.22, 1, 0.36, 1),
+};
+const SEARCH_HIDE_TIMING = {
+    duration: 220,
+    easing: Easing.bezier(0.4, 0, 0.2, 1),
+};
 const HARBOR_TAB_INDICATOR_WIDTH = moderateScale(25, 0.1);
 const Drawer = createDrawerNavigator();
 const AnimatedPagerView = Animated.createAnimatedComponent(PagerView);
+
+const createScrollState = () => ({
+    lastOffset: 0,
+    anchorOffset: 0,
+    direction: null,
+    searchVisible: true,
+});
 
 const HarborFeedTabs = ({ options, selectedIndex, position, onChange }) => {
     const { theme } = useTheme();
@@ -139,7 +164,10 @@ const HarborStickyToolbar = ({
     onMenuPress,
     onComposePress,
     onSearchPress,
-    onLayout,
+    onToolbarLayout,
+    searchBarCollapseStyle,
+    searchBarContentStyle,
+    isSearchInteractive,
 }) => {
     const { theme } = useTheme();
     const { t } = useTranslation('harbor');
@@ -147,9 +175,8 @@ const HarborStickyToolbar = ({
 
     return (
         <View
-            onLayout={onLayout}
             style={[styles.stickyHeader, { backgroundColor: theme.bg_color }]}>
-            <View style={styles.stickyToolbar}>
+            <View onLayout={onToolbarLayout} style={styles.stickyToolbar}>
                 <View style={styles.toolbarSide}>
                     <Pressable
                         accessibilityRole="button"
@@ -239,39 +266,44 @@ const HarborStickyToolbar = ({
                     </View>
                 </View>
             </View>
-            <View style={styles.searchBarRow}>
-                <Pressable
-                    accessibilityRole="button"
-                    accessibilityLabel={t('搜尋 Harbor')}
-                    onPress={() => {
-                        trigger();
-                        onSearchPress();
-                    }}
-                    style={({ pressed }) => [
-                        styles.searchBar,
-                        {
-                            backgroundColor: theme.white,
-                            borderColor: theme.themeColorUltraLight,
-                        },
-                        pressed && {
-                            backgroundColor: theme.tonal.primary15,
-                        },
-                    ]}>
-                    <MaterialCommunityIcons
-                        name="magnify"
-                        size={scale(16)}
-                        color={theme.black.third}
-                    />
-                    <Text
-                        numberOfLines={1}
-                        style={[
-                            styles.searchBarText,
-                            { color: theme.black.third },
+            <Reanimated.View
+                pointerEvents={isSearchInteractive ? 'auto' : 'none'}
+                style={[styles.searchBarCollapse, searchBarCollapseStyle]}>
+                <Reanimated.View
+                    style={[styles.searchBarRow, searchBarContentStyle]}>
+                    <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel={t('搜尋 Harbor')}
+                        onPress={() => {
+                            trigger();
+                            onSearchPress();
+                        }}
+                        style={({ pressed }) => [
+                            styles.searchBar,
+                            {
+                                backgroundColor: theme.white,
+                                borderColor: theme.themeColorUltraLight,
+                            },
+                            pressed && {
+                                backgroundColor: theme.tonal.primary15,
+                            },
                         ]}>
-                        {t('搜尋 Harbor')}
-                    </Text>
-                </Pressable>
-            </View>
+                        <MaterialCommunityIcons
+                            name="magnify"
+                            size={scale(16)}
+                            color={theme.black.third}
+                        />
+                        <Text
+                            numberOfLines={1}
+                            style={[
+                                styles.searchBarText,
+                                { color: theme.black.third },
+                            ]}>
+                            {t('搜尋 Harbor')}
+                        </Text>
+                    </Pressable>
+                </Reanimated.View>
+            </Reanimated.View>
         </View>
     );
 };
@@ -284,6 +316,7 @@ const HarborFeedPane = ({
     contentContainerStyle,
     refreshProgressViewOffset,
     isActive,
+    onScroll,
 }) => {
     const source = useMemo(() => ({ view }), [view]);
 
@@ -297,6 +330,7 @@ const HarborFeedPane = ({
                 contentContainerStyle={contentContainerStyle}
                 refreshProgressViewOffset={refreshProgressViewOffset}
                 isActive={isActive}
+                onScroll={onScroll}
             />
         </View>
     );
@@ -317,20 +351,107 @@ const ForumPage = ({ navigation }) => {
     const blockTopicPressUntilRef = useRef(0);
     const capabilitiesRef = useRef(null);
     const capabilitiesControllerRef = useRef(null);
+    const searchVisibleRef = useRef(true);
+    const scrollStatesRef = useRef({});
     const [currentIndex, setCurrentIndex] = useState(0);
-    const [stickyHeaderHeight, setStickyHeaderHeight] = useState(
-        DEFAULT_STICKY_HEADER_HEIGHT,
-    );
+    const [toolbarHeight, setToolbarHeight] = useState(STICKY_TOOLBAR_HEIGHT);
+    const [isSearchInteractive, setIsSearchInteractive] = useState(true);
+    const [searchVisible, setSearchVisibleState] = useState(true);
     const [capabilities, setCapabilities] = useState(null);
     const [capabilitiesUnavailable, setCapabilitiesUnavailable] = useState(false);
     const [mountedViews, setMountedViews] = useState({
         latest: true,
         top: false,
     });
+    const searchProgress = useSharedValue(1);
 
     useEffect(() => {
         logToFirebase('openPage', { page: 'HarborNativeHome' });
     }, []);
+
+    const getScrollState = useCallback(view => {
+        if (!scrollStatesRef.current[view]) {
+            scrollStatesRef.current[view] = createScrollState();
+        }
+        return scrollStatesRef.current[view];
+    }, []);
+
+    const setSearchVisible = useCallback(
+        visible => {
+            if (searchVisibleRef.current === visible) {
+                return;
+            }
+            searchVisibleRef.current = visible;
+            setSearchVisibleState(visible);
+            setIsSearchInteractive(visible);
+            searchProgress.value = withTiming(
+                visible ? 1 : 0,
+                visible ? SEARCH_SHOW_TIMING : SEARCH_HIDE_TIMING,
+            );
+        },
+        [searchProgress],
+    );
+
+    const showSearchForView = useCallback(
+        view => {
+            const scrollState = getScrollState(view);
+            scrollState.anchorOffset = scrollState.lastOffset;
+            scrollState.direction = null;
+            scrollState.searchVisible = true;
+            setSearchVisible(true);
+        },
+        [getScrollState, setSearchVisible],
+    );
+
+    const onContentScroll = useCallback(
+        (view, offsetY) => {
+            const nextOffset = Math.max(0, offsetY);
+            const scrollState = getScrollState(view);
+
+            if (nextOffset <= TOP_VISIBILITY_THRESHOLD) {
+                scrollState.lastOffset = nextOffset;
+                scrollState.anchorOffset = nextOffset;
+                scrollState.direction = null;
+                scrollState.searchVisible = true;
+                if (currentViewRef.current === view) {
+                    setSearchVisible(true);
+                }
+                return;
+            }
+
+            const nextDirection =
+                nextOffset > scrollState.lastOffset
+                    ? 'down'
+                    : nextOffset < scrollState.lastOffset
+                        ? 'up'
+                        : scrollState.direction;
+
+            if (nextDirection !== scrollState.direction) {
+                scrollState.direction = nextDirection;
+                scrollState.anchorOffset = scrollState.lastOffset;
+            }
+
+            if (
+                nextDirection === 'down' &&
+                nextOffset - scrollState.anchorOffset >=
+                    DIRECTION_CHANGE_THRESHOLD
+            ) {
+                scrollState.searchVisible = false;
+            } else if (
+                nextDirection === 'up' &&
+                scrollState.anchorOffset - nextOffset >=
+                    DIRECTION_CHANGE_THRESHOLD
+            ) {
+                scrollState.searchVisible = true;
+            }
+
+            scrollState.lastOffset = nextOffset;
+            if (currentViewRef.current === view) {
+                setSearchVisible(scrollState.searchVisible);
+            }
+        },
+        [getScrollState, setSearchVisible],
+    );
 
     const loadCapabilities = useCallback(() => {
         capabilitiesControllerRef.current?.abort();
@@ -419,6 +540,40 @@ const ForumPage = ({ navigation }) => {
             ),
         [pageScrollOffset, pageScrollPosition],
     );
+    const searchBarCollapseStyle = useAnimatedStyle(() => ({
+        height: interpolate(
+            searchProgress.value,
+            [0, 1],
+            [0, SEARCH_BAR_ROW_HEIGHT],
+            Extrapolation.CLAMP,
+        ),
+    }));
+    const searchBarContentStyle = useAnimatedStyle(() => ({
+        opacity: interpolate(
+            searchProgress.value,
+            [0, 0.35, 1],
+            [0, 0.2, 1],
+            Extrapolation.CLAMP,
+        ),
+        transform: [
+            {
+                translateY: interpolate(
+                    searchProgress.value,
+                    [0, 1],
+                    [-SEARCH_BAR_ROW_HEIGHT * 0.6, 0],
+                    Extrapolation.CLAMP,
+                ),
+            },
+            {
+                scale: interpolate(
+                    searchProgress.value,
+                    [0, 1],
+                    [0.96, 1],
+                    Extrapolation.CLAMP,
+                ),
+            },
+        ],
+    }));
 
     const ensureMounted = useCallback(view => {
         setMountedViews(current =>
@@ -448,12 +603,13 @@ const ForumPage = ({ navigation }) => {
             ensureMounted(view);
             currentViewRef.current = view;
             setCurrentIndex(index);
+            showSearchForView(view);
             pagerRef.current?.setPage(index);
             logToFirebase('harbor_feed_view', {
                 view: VIEW_CONFIG[view].analytics,
             });
         },
-        [enabledViews, ensureMounted],
+        [enabledViews, ensureMounted, showSearchForView],
     );
 
     const handlePageSelected = useCallback(
@@ -466,11 +622,12 @@ const ForumPage = ({ navigation }) => {
             ensureMounted(view);
             currentViewRef.current = view;
             setCurrentIndex(index);
+            showSearchForView(view);
             logToFirebase('harbor_feed_view', {
                 view: VIEW_CONFIG[view].analytics,
             });
         },
-        [enabledViews, ensureMounted],
+        [enabledViews, ensureMounted, showSearchForView],
     );
 
     useEffect(() => {
@@ -522,6 +679,8 @@ const ForumPage = ({ navigation }) => {
                 ? t('登入中…')
                 : t('登入');
 
+    const stickyHeaderHeight =
+        toolbarHeight + (searchVisible ? SEARCH_BAR_ROW_HEIGHT : 0);
     const contentContainerStyle = useMemo(
         () => ({
             paddingTop: stickyHeaderHeight + verticalScale(4),
@@ -530,9 +689,9 @@ const ForumPage = ({ navigation }) => {
     );
     const refreshProgressViewOffset = stickyHeaderHeight + verticalScale(8);
 
-    const handleStickyHeaderLayout = useCallback(event => {
+    const handleToolbarLayout = useCallback(event => {
         const nextHeight = Math.ceil(event.nativeEvent.layout.height);
-        setStickyHeaderHeight(currentHeight =>
+        setToolbarHeight(currentHeight =>
             currentHeight === nextHeight ? currentHeight : nextHeight,
         );
     }, []);
@@ -575,6 +734,12 @@ const ForumPage = ({ navigation }) => {
                                     refreshProgressViewOffset
                                 }
                                 isActive={enabledViews[currentIndex] === view}
+                                onScroll={event =>
+                                    onContentScroll(
+                                        view,
+                                        event.nativeEvent.contentOffset.y,
+                                    )
+                                }
                             />
                         ) : null}
                     </View>
@@ -596,7 +761,10 @@ const ForumPage = ({ navigation }) => {
                         })
                     }
                     onSearchPress={() => navigation.navigate('HarborSearch')}
-                    onLayout={handleStickyHeaderLayout}
+                    onToolbarLayout={handleToolbarLayout}
+                    searchBarCollapseStyle={searchBarCollapseStyle}
+                    searchBarContentStyle={searchBarContentStyle}
+                    isSearchInteractive={isSearchInteractive}
                 />
             </View>
         </SafeAreaView>
@@ -608,7 +776,6 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     stickyHeader: {
-        minHeight: DEFAULT_STICKY_HEADER_HEIGHT,
         zIndex: 2,
     },
     stickyToolbar: {
@@ -693,9 +860,14 @@ const styles = StyleSheet.create({
     feedTabIndicatorHidden: {
         opacity: 0,
     },
+    searchBarCollapse: {
+        overflow: 'hidden',
+    },
     searchBarRow: {
+        height: SEARCH_BAR_ROW_HEIGHT,
+        justifyContent: 'center',
         paddingHorizontal: scale(6),
-        paddingVertical: verticalScale(4),
+        transformOrigin: 'top',
     },
     searchBar: {
         minHeight: verticalScale(30),
