@@ -32,7 +32,6 @@ import HarborPostEventCard from './HarborPostEventCard';
 import {
     getLikeAction,
     getNotificationLevelLabel,
-    getReactionCount,
     getTagLabel,
     NESTED_REPLY_BATCH_SIZE,
 } from './harborTopicModels';
@@ -245,16 +244,6 @@ const HarborPostCard = memo(
                 0,
             ),
         );
-        const reactionCount = getReactionCount(post);
-        const reactionSummary = (
-            Array.isArray(post?.reactions) ? post.reactions : []
-        ).filter(reaction => reaction?.id && Number(reaction?.count) > 0);
-        const displayedReactions =
-            reactionSummary.length > 0
-                ? reactionSummary
-                : !reactionsEnabled && reactionCount > 0
-                    ? [{ id: 'heart', count: reactionCount }]
-                    : [];
         const likeAction = getLikeAction(post);
         const isLiked = Boolean(likeAction?.acted);
         const currentReaction = post?.current_user_reaction?.id;
@@ -445,41 +434,6 @@ const HarborPostCard = memo(
             topic?.details?.notification_level,
             unread,
         ]);
-        const reactionButton = (
-            <View
-                style={[
-                    styles.postActionButton,
-                    styles.reactionMenuButton,
-                    reactionDisabled ? styles.disabledAction : null,
-                    { backgroundColor: tonal.primary15 },
-                ]}>
-                {pendingReaction ? (
-                    <ActivityIndicator
-                        size="small"
-                        color={themeColor}
-                    />
-                ) : currentReaction ? (
-                    <HarborReactionIcon
-                        name={currentReaction}
-                        size={scale(16)}
-                    />
-                ) : (
-                    <MaterialCommunityIcons
-                        name="emoticon-outline"
-                        size={scale(15)}
-                        color={themeColor}
-                    />
-                )}
-                <Text
-                    numberOfLines={1}
-                    style={[
-                        styles.postActionText,
-                        { color: themeColor },
-                    ]}>
-                    {t('回應')}
-                </Text>
-            </View>
-        );
         const nestedRepliesButton =
             nestedReplyCount > 0 ? (
                 <Pressable
@@ -574,33 +528,131 @@ const HarborPostCard = memo(
                 shouldOpenOnLongPress={false}
                 style={
                     isFirstPost
-                        ? styles.firstPostMoreMenu
-                        : styles.composerMenuView
+                        ? { flexShrink: 0 }
+                        : styles.postMetaIconMenu
                 }>
                 <View
                     style={[
+                        styles.postMetaIconButton,
                         isFirstPost
-                            ? styles.firstPostMoreButton
-                            : styles.postActionButton,
-                        isFirstPost ? null : styles.reactionMenuButton,
-                        { backgroundColor: tonal.primary15 },
+                            ? {
+                                width: undefined,
+                                height: undefined,
+                                minHeight: scale(26),
+                                flexDirection: 'row',
+                                backgroundColor: tonal.primary15,
+                                borderRadius: scale(7),
+                                paddingHorizontal: scale(8),
+                            }
+                            : null,
                     ]}>
                     <MaterialCommunityIcons
-                        name="dots-horizontal"
+                        name={
+                            isFirstPost
+                                ? 'dots-horizontal'
+                                : 'dots-vertical'
+                        }
                         size={scale(isFirstPost ? 14 : 16)}
-                        color={themeColor}
+                        color={isFirstPost ? themeColor : black.third}
                     />
-                    <Text
-                        numberOfLines={1}
-                        style={[
-                            styles.postActionText,
-                            { color: themeColor },
-                        ]}>
-                        {t('更多')}
-                    </Text>
+                    {isFirstPost ? (
+                        <Text
+                            numberOfLines={1}
+                            style={[
+                                styles.postActionText,
+                                { color: themeColor },
+                            ]}>
+                            {t('更多')}
+                        </Text>
+                    ) : null}
                 </View>
             </MenuView>
         );
+
+        // 右側操作圖示統一尺寸，搭配固定按鈕框對齊
+        const metaIconSize = scale(16);
+        const reactionIcon = pendingReaction || pendingLike ? (
+            <ActivityIndicator size="small" color={themeColor} />
+        ) : reactionsEnabled && currentReaction ? (
+            <HarborReactionIcon name={currentReaction} size={metaIconSize} />
+        ) : reactionsEnabled ? (
+            <MaterialCommunityIcons
+                name="emoticon-outline"
+                size={metaIconSize}
+                color={black.third}
+            />
+        ) : (
+            <MaterialCommunityIcons
+                name={isLiked ? 'heart' : 'heart-outline'}
+                size={metaIconSize}
+                color={isLiked ? themeColor : black.third}
+            />
+        );
+
+        const reactionControl =
+            reactionsEnabled && reactionDisabled ? (
+                <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={t('回應')}
+                    hitSlop={8}
+                    onPress={() => {
+                        trigger();
+                        onPressDisabledReaction(post.id);
+                    }}
+                    style={[
+                        styles.postMetaIconButton,
+                        reactionDisabled ? styles.disabledAction : null,
+                    ]}>
+                    {reactionIcon}
+                </Pressable>
+            ) : reactionsEnabled ? (
+                <MenuView
+                    actions={reactionMenuActions}
+                    onOpenMenu={() => trigger()}
+                    onPressAction={event => {
+                        trigger();
+                        onSelectReaction(post.id, event.nativeEvent.event);
+                    }}
+                    shouldOpenOnLongPress={false}
+                    style={styles.postMetaIconMenu}>
+                    <View style={styles.postMetaIconButton}>
+                        {reactionIcon}
+                    </View>
+                </MenuView>
+            ) : (
+                <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={
+                        isLiked ? t('取消讚好') : t('讚好')
+                    }
+                    disabled={pendingLike}
+                    hitSlop={8}
+                    onPress={() => {
+                        trigger();
+                        onPressLike(post);
+                    }}
+                    style={styles.postMetaIconButton}>
+                    {reactionIcon}
+                </Pressable>
+            );
+
+        const replyControl = canReply ? (
+            <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('回覆')}
+                hitSlop={8}
+                onPress={() => {
+                    trigger();
+                    onPressComposeReply(post);
+                }}
+                style={styles.postMetaIconButton}>
+                <MaterialCommunityIcons
+                    name="comment-outline"
+                    size={metaIconSize}
+                    color={black.third}
+                />
+            </Pressable>
+        ) : null;
 
         if (isDeleted || isHidden) {
             return (
@@ -709,427 +761,346 @@ const HarborPostCard = memo(
                     { backgroundColor: white, borderColor: themeColorUltraLight },
                 ]}>
                 {isFirstPost ? (
-                    <View style={styles.firstPostHeader}>
-                        <Pressable
-                            accessibilityRole="link"
-                            accessibilityLabel={displayName}
-                            onPress={() => {
-                                trigger();
-                                onPressAuthor(post.username);
-                            }}
-                            style={({ pressed }) => [
-                                styles.authorLink,
-                                pressed ? styles.pressedLink : null,
-                            ]}>
-                            <Image
-                                source={{ uri: avatarUrl }}
-                                style={[
-                                    styles.avatar,
-                                    { backgroundColor: tonal.primary15 },
-                                ]}
-                                contentFit="cover"
-                                placeholder={theme.imagePlaceholder}
-                                placeholderContentFit="cover"
-                                transition={200}
-                            />
-                            <View style={styles.authorArea}>
-                                <View style={styles.authorNameRow}>
-                                    <Text
-                                        style={[
-                                            styles.authorName,
-                                            { color: black.third },
-                                        ]}
-                                        numberOfLines={1}>
-                                        {displayName}
-                                    </Text>
-                                    {post.user_title ? (
-                                        <Text
-                                            style={[
-                                                styles.userTitle,
-                                                { color: themeColor },
-                                            ]}
-                                            numberOfLines={1}>
-                                            {post.user_title}
-                                        </Text>
-                                    ) : null}
-                                    {post.staff ? (
-                                        <Text
-                                            style={[
-                                                styles.staffBadge,
-                                                {
-                                                    color: themeColor,
-                                                    backgroundColor:
-                                                        tonal.primary15,
-                                                },
-                                            ]}>
-                                            Staff
-                                        </Text>
-                                    ) : null}
-                                </View>
-                            </View>
-                        </Pressable>
-                        <Text
-                            selectable
-                            style={[
-                                styles.firstPostTitle,
-                                { color: black.main },
-                            ]}>
-                            {topic?.title || ''}
-                        </Text>
-                    </View>
-                ) : (
-                    <View style={styles.postHeader}>
-                        <Pressable
-                            accessibilityRole="link"
-                            accessibilityLabel={displayName}
-                            onPress={() => {
-                                trigger();
-                                onPressAuthor(post.username);
-                            }}
-                            style={({ pressed }) => [
-                                styles.authorLink,
-                                pressed ? styles.pressedLink : null,
-                            ]}>
-                            <Image
-                                source={{ uri: avatarUrl }}
-                                style={[
-                                    styles.avatar,
-                                    { backgroundColor: tonal.primary15 },
-                                ]}
-                                contentFit="cover"
-                                placeholder={theme.imagePlaceholder}
-                                placeholderContentFit="cover"
-                                transition={200}
-                            />
-                            <View style={styles.authorArea}>
-                                <View style={styles.authorNameRow}>
-                                    <Text
-                                        style={[
-                                            styles.authorName,
-                                            { color: black.third },
-                                        ]}
-                                        numberOfLines={1}>
-                                        {displayName}
-                                    </Text>
-                                    {post.user_title ? (
-                                        <Text
-                                            style={[
-                                                styles.userTitle,
-                                                { color: themeColor },
-                                            ]}
-                                            numberOfLines={1}>
-                                            {post.user_title}
-                                        </Text>
-                                    ) : null}
-                                    {post.staff ? (
-                                        <Text
-                                            style={[
-                                                styles.staffBadge,
-                                                {
-                                                    color: themeColor,
-                                                    backgroundColor:
-                                                        tonal.primary15,
-                                                },
-                                            ]}>
-                                            Staff
-                                        </Text>
-                                    ) : null}
-                                </View>
-                            </View>
-                        </Pressable>
-                        <View style={styles.headerMeta}>
-                            {post.reply_to_post_number ? (
-                                <Pressable
-                                    onPress={() => {
-                                        trigger();
-                                        onPressReply(post.reply_to_post_number);
-                                    }}
-                                    style={({ pressed }) => [
-                                        styles.replyBadge,
-                                        {
-                                            backgroundColor: pressed
-                                                ? tonal.primary30
-                                                : tonal.primary15,
-                                        },
-                                    ]}>
-                                    <MaterialCommunityIcons
-                                        name="reply-outline"
-                                        size={scale(12)}
-                                        color={themeColor}
-                                    />
-                                    <Text
-                                        style={[
-                                            styles.replyText,
-                                            { color: themeColor },
-                                        ]}>
-                                        {t('回覆樓層', {
-                                            postNumber: post.reply_to_post_number,
-                                        })}
-                                    </Text>
-                                </Pressable>
-                            ) : null}
-                            <Text
-                                style={[
-                                    styles.postNumber,
-                                    { color: black.third },
+                    <>
+                        <View style={styles.firstPostHeader}>
+                            <Pressable
+                                accessibilityRole="link"
+                                accessibilityLabel={displayName}
+                                onPress={() => {
+                                    trigger();
+                                    onPressAuthor(post.username);
+                                }}
+                                style={({ pressed }) => [
+                                    styles.authorLink,
+                                    pressed ? styles.pressedLink : null,
                                 ]}>
-                                #{post.post_number}
+                                <Image
+                                    source={{ uri: avatarUrl }}
+                                    style={[
+                                        styles.avatar,
+                                        { backgroundColor: tonal.primary15 },
+                                    ]}
+                                    contentFit="cover"
+                                    placeholder={theme.imagePlaceholder}
+                                    placeholderContentFit="cover"
+                                    transition={200}
+                                />
+                                <View style={styles.authorArea}>
+                                    <View style={styles.authorNameRow}>
+                                        <Text
+                                            style={[
+                                                styles.authorName,
+                                                { color: black.third },
+                                            ]}
+                                            numberOfLines={1}>
+                                            {displayName}
+                                        </Text>
+                                        {post.user_title ? (
+                                            <Text
+                                                style={[
+                                                    styles.userTitle,
+                                                    { color: themeColor },
+                                                ]}
+                                                numberOfLines={1}>
+                                                {post.user_title}
+                                            </Text>
+                                        ) : null}
+                                        {post.staff ? (
+                                            <Text
+                                                style={[
+                                                    styles.staffBadge,
+                                                    {
+                                                        color: themeColor,
+                                                        backgroundColor:
+                                                            tonal.primary15,
+                                                    },
+                                                ]}>
+                                                Staff
+                                            </Text>
+                                        ) : null}
+                                    </View>
+                                </View>
+                            </Pressable>
+                            <Text
+                                selectable
+                                style={[
+                                    styles.firstPostTitle,
+                                    { color: black.main },
+                                ]}>
+                                {topic?.title || ''}
                             </Text>
                         </View>
-                    </View>
-                )}
 
-                <View
-                    style={[
-                        styles.postBody,
-                        isFirstPost ? styles.firstPostBody : null,
-                    ]}>
-                    <HarborPostContent
-                        cooked={post.cooked}
-                        contentWidth={contentWidth}
-                        imageUrls={imageUrls}
-                        onOpenImage={onOpenImage}
-                        onPressLink={onPressLink}
-                        postUrl={postUrl}
-                        forceInteractiveFallback={Boolean(postEvent)}>
-                        {postEvent ? (
-                            <HarborPostEventCard
-                                event={postEvent}
+                        <View
+                            style={[
+                                styles.postBody,
+                                styles.firstPostBody,
+                            ]}>
+                            <HarborPostContent
+                                cooked={post.cooked}
+                                contentWidth={contentWidth}
+                                imageUrls={imageUrls}
+                                onOpenImage={onOpenImage}
+                                onPressLink={onPressLink}
                                 postUrl={postUrl}
-                            />
-                        ) : null}
-                    </HarborPostContent>
-                </View>
+                                forceInteractiveFallback={Boolean(postEvent)}>
+                                {postEvent ? (
+                                    <HarborPostEventCard
+                                        event={postEvent}
+                                        postUrl={postUrl}
+                                    />
+                                ) : null}
+                            </HarborPostContent>
+                        </View>
 
-                {hasTopicTags ? (
-                    <View
-                        style={[
-                            styles.plainTagRow,
-                            isFirstPost ? styles.firstPostPlainTagRow : null,
-                        ]}>
-                        {Number.isInteger(topicCategoryId) &&
-                        topicCategoryId > 0 ? (
-                            <Pressable
-                                accessibilityRole="link"
-                                onPress={() => {
-                                    trigger();
-                                    onPressCategory?.({
-                                        categoryId: topicCategoryId,
-                                        categorySlug: topicCategorySlug,
-                                        categoryName: topicCategoryName,
-                                    });
-                                }}
-                                style={({ pressed }) => [
-                                    styles.plainTag,
-                                    pressed ? styles.pressedLink : null,
+                        {hasTopicTags ? (
+                            <View
+                                style={[
+                                    styles.plainTagRow,
+                                    styles.firstPostPlainTagRow,
                                 ]}>
-                                <HarborCategoryIcon
-                                    category={
-                                        topic.category || {
-                                            id: topicCategoryId,
-                                            name: topicCategoryName,
-                                            slug: topicCategorySlug,
-                                        }
-                                    }
-                                    color={themeColor}
-                                    size={scale(12)}
-                                />
-                                <Text
-                                    style={[
-                                        styles.plainTagText,
-                                        { color: themeColor },
-                                    ]}>
-                                    {topicCategoryName ||
-                                        `分類 #${topicCategoryId}`}
-                                </Text>
-                            </Pressable>
+                                {Number.isInteger(topicCategoryId) &&
+                                topicCategoryId > 0 ? (
+                                    <Pressable
+                                        accessibilityRole="link"
+                                        onPress={() => {
+                                            trigger();
+                                            onPressCategory?.({
+                                                categoryId: topicCategoryId,
+                                                categorySlug: topicCategorySlug,
+                                                categoryName: topicCategoryName,
+                                            });
+                                        }}
+                                        style={({ pressed }) => [
+                                            styles.plainTag,
+                                            pressed ? styles.pressedLink : null,
+                                        ]}>
+                                        <HarborCategoryIcon
+                                            category={
+                                                topic.category || {
+                                                    id: topicCategoryId,
+                                                    name: topicCategoryName,
+                                                    slug: topicCategorySlug,
+                                                }
+                                            }
+                                            color={themeColor}
+                                            size={scale(12)}
+                                        />
+                                        <Text
+                                            style={[
+                                                styles.plainTagText,
+                                                { color: themeColor },
+                                            ]}>
+                                            {topicCategoryName ||
+                                                `分類 #${topicCategoryId}`}
+                                        </Text>
+                                    </Pressable>
+                                ) : null}
+                                {topicTags.map(tag => (
+                                    <Pressable
+                                        key={tag}
+                                        accessibilityRole="link"
+                                        onPress={() => {
+                                            trigger();
+                                            onPressTag?.(tag);
+                                        }}
+                                        style={({ pressed }) => [
+                                            styles.plainTag,
+                                            pressed ? styles.pressedLink : null,
+                                        ]}>
+                                        <Text
+                                            style={[
+                                                styles.plainTagText,
+                                                { color: themeColor },
+                                            ]}>
+                                            #{tag}
+                                        </Text>
+                                    </Pressable>
+                                ))}
+                            </View>
                         ) : null}
-                        {topicTags.map(tag => (
-                            <Pressable
-                                key={tag}
-                                accessibilityRole="link"
-                                onPress={() => {
-                                    trigger();
-                                    onPressTag?.(tag);
-                                }}
-                                style={({ pressed }) => [
-                                    styles.plainTag,
-                                    pressed ? styles.pressedLink : null,
-                                ]}>
-                                <Text
-                                    style={[
-                                        styles.plainTagText,
-                                        { color: themeColor },
-                                    ]}>
-                                    #{tag}
-                                </Text>
-                            </Pressable>
-                        ))}
-                    </View>
-                ) : null}
 
-                <View
-                    style={[
-                        styles.postMetaRow,
-                        isFirstPost ? styles.firstPostMetaRow : null,
-                    ]}>
-                    <Text
-                        style={[styles.postTime, { color: black.third }]}
-                        numberOfLines={1}>
-                        {formatHarborPostTime(post.created_at, i18n.language)}
-                        {wasEdited ? ` · ${t('已編輯')}` : ''}
-                    </Text>
-                    {isFirstPost ? (
-                        moreMenu
-                    ) : (
-                        <View style={styles.postMetaStats}>
-                            <MetaItem
-                                icon="comment-outline"
-                                value={post.reply_count}
-                                color={black.third}
-                                style={styles.postMetaComment}
+                        <View
+                            style={[
+                                styles.postMetaRow,
+                                styles.firstPostMetaRow,
+                            ]}>
+                            <Text
+                                style={[styles.postTime, { color: black.third }]}
+                                numberOfLines={1}>
+                                {formatHarborPostTime(
+                                    post.created_at,
+                                    i18n.language,
+                                )}
+                                {wasEdited ? ` · ${t('已編輯')}` : ''}
+                            </Text>
+                            {moreMenu}
+                        </View>
+                        {nestedRepliesButton}
+                    </>
+                ) : (
+                    <View style={styles.replyLayout}>
+                        <Pressable
+                            accessibilityRole="link"
+                            accessibilityLabel={displayName}
+                            onPress={() => {
+                                trigger();
+                                onPressAuthor(post.username);
+                            }}
+                            style={({ pressed }) => [
+                                styles.replyAvatarPressable,
+                                pressed ? styles.pressedLink : null,
+                            ]}>
+                            <Image
+                                source={{ uri: avatarUrl }}
+                                style={[
+                                    styles.avatar,
+                                    { backgroundColor: tonal.primary15 },
+                                ]}
+                                contentFit="cover"
+                                placeholder={theme.imagePlaceholder}
+                                placeholderContentFit="cover"
+                                transition={200}
                             />
-                            {displayedReactions.length > 0 ? (
-                                <View style={styles.reactionSummary}>
-                                    {displayedReactions.map(reaction => (
-                                        <View
-                                            key={reaction.id}
-                                            accessible
-                                            accessibilityLabel={`${t(
-                                                HARBOR_REACTION_LABEL[
-                                                    normalizeHarborReactionName(
-                                                        reaction.id,
-                                                    )
-                                                ] ||
-                                                    normalizeHarborReactionName(
-                                                        reaction.id,
-                                                    ).replace(/_/g, ' '),
-                                            )} ${reaction.count}`}
-                                            style={styles.reactionSummaryItem}>
-                                            <HarborReactionIcon
-                                                name={reaction.id}
-                                                size={scale(14)}
+                        </Pressable>
+                        <View style={styles.replyMain}>
+                            <View style={styles.replyHeader}>
+                                <Pressable
+                                    accessibilityRole="link"
+                                    accessibilityLabel={displayName}
+                                    onPress={() => {
+                                        trigger();
+                                        onPressAuthor(post.username);
+                                    }}
+                                    style={({ pressed }) => [
+                                        styles.replyAuthorPressable,
+                                        pressed ? styles.pressedLink : null,
+                                    ]}>
+                                    <View style={styles.authorNameRow}>
+                                        <Text
+                                            style={[
+                                                styles.authorName,
+                                                styles.replyAuthorName,
+                                                {
+                                                    color: black.third,
+                                                    opacity: 0.72,
+                                                },
+                                            ]}
+                                            numberOfLines={1}>
+                                            {displayName}
+                                        </Text>
+                                        {post.user_title ? (
+                                            <Text
+                                                style={[
+                                                    styles.userTitle,
+                                                    { color: themeColor },
+                                                ]}
+                                                numberOfLines={1}>
+                                                {post.user_title}
+                                            </Text>
+                                        ) : null}
+                                        {post.staff ? (
+                                            <Text
+                                                style={[
+                                                    styles.staffBadge,
+                                                    {
+                                                        color: themeColor,
+                                                        backgroundColor:
+                                                            tonal.primary15,
+                                                    },
+                                                ]}>
+                                                Staff
+                                            </Text>
+                                        ) : null}
+                                    </View>
+                                </Pressable>
+                                <View style={styles.headerMeta}>
+                                    {post.reply_to_post_number ? (
+                                        <Pressable
+                                            onPress={() => {
+                                                trigger();
+                                                onPressReply(
+                                                    post.reply_to_post_number,
+                                                );
+                                            }}
+                                            style={({ pressed }) => [
+                                                styles.replyBadge,
+                                                {
+                                                    backgroundColor: pressed
+                                                        ? tonal.primary30
+                                                        : tonal.primary15,
+                                                },
+                                            ]}>
+                                            <MaterialCommunityIcons
+                                                name="reply-outline"
+                                                size={scale(12)}
+                                                color={themeColor}
                                             />
                                             <Text
                                                 style={[
-                                                    styles.reactionSummaryText,
+                                                    styles.replyText,
                                                     { color: themeColor },
                                                 ]}>
-                                                {reaction.count}
+                                                {t('回覆樓層', {
+                                                    postNumber:
+                                                        post.reply_to_post_number,
+                                                })}
                                             </Text>
-                                        </View>
-                                    ))}
+                                        </Pressable>
+                                    ) : null}
+                                    <Text
+                                        style={[
+                                            styles.postNumber,
+                                            { color: black.third },
+                                        ]}>
+                                        #{post.post_number}
+                                    </Text>
                                 </View>
-                            ) : null}
-                        </View>
-                    )}
-                </View>
-                {canReply && !isFirstPost ? (
-                    <View style={styles.composerActionRow}>
-                        <Pressable
-                            onPress={() => {
-                                trigger();
-                                onPressComposeReply(post);
-                            }}
-                            style={({ pressed }) => [
-                                styles.postActionButton,
-                                styles.reactionMenuButton,
-                                {
-                                    backgroundColor: pressed
-                                        ? tonal.primary30
-                                        : tonal.primary15,
-                                },
-                            ]}>
-                            <MaterialCommunityIcons
-                                name="reply-outline"
-                                size={scale(15)}
-                                color={themeColor}
-                            />
-                            <Text
-                                numberOfLines={1}
-                                style={[
-                                    styles.postActionText,
-                                    { color: themeColor },
-                                ]}>
-                                {t('回覆')}
-                            </Text>
-                        </Pressable>
-                    </View>
-                ) : null}
-                {!isFirstPost ? (
-                    <View style={styles.postActionRow}>
-                        {reactionsEnabled && reactionDisabled ? (
-                            <Pressable
-                                accessibilityRole="button"
-                                accessibilityLabel={t('回應')}
-                                onPress={() => {
-                                    trigger();
-                                    onPressDisabledReaction(post.id);
-                                }}
-                                style={styles.reactionMenuView}>
-                                {reactionButton}
-                            </Pressable>
-                        ) : reactionsEnabled ? (
-                            <MenuView
-                                actions={reactionMenuActions}
-                                onOpenMenu={() => trigger()}
-                                onPressAction={event => {
-                                    trigger();
-                                    onSelectReaction(
-                                        post.id,
-                                        event.nativeEvent.event,
-                                    );
-                                }}
-                                shouldOpenOnLongPress={false}
-                                style={styles.reactionMenuView}>
-                                {reactionButton}
-                            </MenuView>
-                        ) : (
-                            <Pressable
-                                disabled={pendingLike}
-                                onPress={() => {
-                                    trigger();
-                                    onPressLike(post);
-                                }}
-                                style={({ pressed }) => [
-                                    styles.postActionButton,
-                                    styles.reactionMenuView,
-                                    {
-                                        backgroundColor: pressed
-                                            ? tonal.primary30
-                                            : tonal.primary15,
-                                    },
-                                ]}>
-                                {pendingLike ? (
-                                    <ActivityIndicator
-                                        size="small"
-                                        color={themeColor}
-                                    />
-                                ) : (
-                                    <MaterialCommunityIcons
-                                        name={
-                                            isLiked
-                                                ? 'heart'
-                                                : 'heart-outline'
-                                        }
-                                        size={scale(15)}
-                                        color={themeColor}
-                                    />
-                                )}
+                            </View>
+
+                            <View style={styles.replyBody}>
+                                <HarborPostContent
+                                    cooked={post.cooked}
+                                    contentWidth={contentWidth - scale(38)}
+                                    imageUrls={imageUrls}
+                                    onOpenImage={onOpenImage}
+                                    onPressLink={onPressLink}
+                                    postUrl={postUrl}
+                                    forceInteractiveFallback={Boolean(
+                                        postEvent,
+                                    )}>
+                                    {postEvent ? (
+                                        <HarborPostEventCard
+                                            event={postEvent}
+                                            postUrl={postUrl}
+                                        />
+                                    ) : null}
+                                </HarborPostContent>
+                            </View>
+
+                            <View style={styles.postMetaRow}>
                                 <Text
-                                    numberOfLines={1}
                                     style={[
-                                        styles.postActionText,
-                                        { color: themeColor },
-                                    ]}>
-                                    {isLiked ? t('取消讚好') : t('讚好')}
+                                        styles.postTime,
+                                        { color: black.third },
+                                    ]}
+                                    numberOfLines={1}>
+                                    {formatHarborPostTime(
+                                        post.created_at,
+                                        i18n.language,
+                                    )}
+                                    {wasEdited ? ` · ${t('已編輯')}` : ''}
                                 </Text>
-                            </Pressable>
-                        )}
-                        {moreMenu}
+                                <View style={styles.postMetaActions}>
+                                    {reactionControl}
+                                    {replyControl}
+                                    {moreMenu}
+                                </View>
+                            </View>
+                            {nestedRepliesButton}
+                        </View>
                     </View>
-                ) : null}
-                {nestedRepliesButton}
+                )}
             </View>
         );
     },

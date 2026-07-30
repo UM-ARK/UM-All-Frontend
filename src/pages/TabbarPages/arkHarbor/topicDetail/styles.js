@@ -245,6 +245,35 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
     },
+    // 回覆帖：頭像左側，ID／正文／操作列右側對齊
+    replyLayout: {
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+    },
+    replyAvatarPressable: {
+        flexShrink: 0,
+        marginTop: verticalScale(1),
+    },
+    replyMain: {
+        flex: 1,
+        marginLeft: scale(8),
+        minWidth: 0,
+    },
+    replyHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: verticalScale(2),
+    },
+    replyAuthorPressable: {
+        flex: 1,
+        minWidth: 0,
+    },
+    replyAuthorName: {
+        fontWeight: '400',
+    },
+    replyBody: {
+        marginTop: 0,
+    },
     firstPostCard: {
         paddingTop: verticalScale(12),
         paddingBottom: verticalScale(10),
@@ -268,18 +297,6 @@ const styles = StyleSheet.create({
     firstPostMetaRow: {
         marginTop: verticalScale(6),
         marginBottom: 0,
-    },
-    firstPostMoreMenu: {
-        flexShrink: 0,
-        marginLeft: scale(8),
-    },
-    firstPostMoreButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderRadius: scale(7),
-        paddingHorizontal: scale(8),
-        paddingVertical: verticalScale(4),
     },
     plainTagRow: {
         flexDirection: 'row',
@@ -363,8 +380,26 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        marginTop: verticalScale(8),
-        marginBottom: verticalScale(2),
+        marginTop: verticalScale(4),
+        marginBottom: verticalScale(4),
+    },
+    postMetaActions: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        flexShrink: 0,
+        marginLeft: scale(8),
+        columnGap: scale(2),
+    },
+    postMetaIconMenu: {
+        width: scale(26),
+        height: scale(26),
+        flexShrink: 0,
+    },
+    postMetaIconButton: {
+        width: scale(26),
+        height: scale(26),
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     postMetaStats: {
         flexDirection: 'row',

@@ -185,7 +185,7 @@ const HarborPostContent = memo(
                 },
                 p: {
                     marginTop: 0,
-                    marginBottom: verticalScale(8),
+                    marginBottom: verticalScale(4),
                 },
                 a: {
                     color: themeColor,
