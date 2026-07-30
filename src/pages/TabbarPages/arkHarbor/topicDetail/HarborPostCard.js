@@ -30,7 +30,7 @@ import HarborPostContent from './HarborPostContent';
 import HarborPostEventCard from './HarborPostEventCard';
 import {
     getLikeAction,
-    getNotificationLevelLabel,
+    getReactionCount,
     getTagLabel,
     NESTED_REPLY_BATCH_SIZE,
 } from './harborTopicModels';
@@ -242,6 +242,17 @@ const HarborPostCard = memo(
         const likeAction = getLikeAction(post);
         const isLiked = Boolean(likeAction?.acted);
         const currentReaction = post?.current_user_reaction?.id;
+        // 已獲 reaction／讚摘要（1 樓操作在底部欄，卡片改展示已獲計數）
+        const reactionCount = getReactionCount(post);
+        const reactionSummary = (
+            Array.isArray(post?.reactions) ? post.reactions : []
+        ).filter(reaction => reaction?.id && Number(reaction?.count) > 0);
+        const displayedReactions =
+            reactionSummary.length > 0
+                ? reactionSummary
+                : !reactionsEnabled && reactionCount > 0
+                    ? [{ id: 'heart', count: reactionCount }]
+                    : [];
         // 1 樓操作改由頁面底部欄承接，卡片僅保留「更多」；標題併入本卡
         const isFirstPost = Number(post.post_number) === 1;
         const topicTags = useMemo(() => {
@@ -322,11 +333,7 @@ const HarborPostCard = memo(
                 });
                 actions.push({
                     id: 'notifications',
-                    title: t(
-                        getNotificationLevelLabel(
-                            topic?.details?.notification_level,
-                        ),
-                    ),
+                    title: t('通知設定'),
                     image: Platform.select({
                         ios: 'bell',
                         android: 'ic_menu_info_details',
@@ -426,7 +433,6 @@ const HarborPostCard = memo(
             post.can_delete,
             post.can_edit,
             t,
-            topic?.details?.notification_level,
             unread,
         ]);
         const nestedRepliesButton =
@@ -567,6 +573,38 @@ const HarborPostCard = memo(
                 </View>
             </MenuView>
         );
+
+        const reactionSummaryView =
+            displayedReactions.length > 0 ? (
+                <View style={styles.reactionSummary}>
+                    {displayedReactions.map(reaction => (
+                        <View
+                            key={reaction.id}
+                            accessible
+                            accessibilityLabel={`${t(
+                                HARBOR_REACTION_LABEL[
+                                    normalizeHarborReactionName(reaction.id)
+                                ] ||
+                                    normalizeHarborReactionName(
+                                        reaction.id,
+                                    ).replace(/_/g, ' '),
+                            )} ${reaction.count}`}
+                            style={styles.reactionSummaryItem}>
+                            <HarborReactionIcon
+                                name={reaction.id}
+                                size={scale(14)}
+                            />
+                            <Text
+                                style={[
+                                    styles.reactionSummaryText,
+                                    { color: themeColor },
+                                ]}>
+                                {reaction.count}
+                            </Text>
+                        </View>
+                    ))}
+                </View>
+            ) : null;
 
         // 右側操作圖示統一尺寸，搭配固定按鈕框對齊
         const metaIconSize = scale(16);
@@ -930,7 +968,10 @@ const HarborPostCard = memo(
                                 )}
                                 {wasEdited ? ` · ${t('已編輯')}` : ''}
                             </Text>
-                            {moreMenu}
+                            <View style={styles.postMetaActions}>
+                                {reactionSummaryView}
+                                {moreMenu}
+                            </View>
                         </View>
                         {nestedRepliesButton}
                         <View

@@ -569,6 +569,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         flexWrap: 'wrap',
+        marginRight: scale(8),
     },
     reactionSummaryItem: {
         flexDirection: 'row',
