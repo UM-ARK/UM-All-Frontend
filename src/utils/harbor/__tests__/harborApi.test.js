@@ -1,4 +1,5 @@
 import {
+    calculateHarborInboxUnreadCount,
     clearHarborComposerMetadataCache,
     clearHarborDiscoveryCache,
     createHarborPostBookmark,
@@ -7,6 +8,7 @@ import {
     fetchHarborBadges,
     fetchHarborCategories,
     fetchCurrentHarborUser,
+    fetchHarborInboxUnreadCount,
     fetchHarborMessages,
     fetchHarborNotificationPage,
     fetchHarborNestedPostChildren,
@@ -607,6 +609,38 @@ describe('Harbor API 資料正規化', () => {
             },
             signal: controller.signal,
         });
+    });
+
+    it('以消息中心相同口徑聚合通知及私人訊息未讀數', async () => {
+        getSpy
+            .mockResolvedValueOnce({
+                data: {
+                    notifications: [{id: 32, read: false}],
+                    total_rows_notifications: 4,
+                },
+            })
+            .mockResolvedValueOnce({
+                data: {
+                    topic_list: {
+                        topics: [
+                            {id: 41, unread_posts: 2},
+                            {id: 42, unread_posts: 0},
+                            {id: 43, new_posts: 1},
+                        ],
+                    },
+                },
+            });
+
+        await expect(
+            fetchHarborInboxUnreadCount('ark-user'),
+        ).resolves.toBe(6);
+        expect(
+            calculateHarborInboxUnreadCount(4, [
+                {unreadCount: 2},
+                {unreadCount: 0},
+                {unreadCount: 1},
+            ]),
+        ).toBe(6);
     });
 
     it('透過已授權 API 將單一通知標為已讀', async () => {

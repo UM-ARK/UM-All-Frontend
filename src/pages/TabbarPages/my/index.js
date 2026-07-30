@@ -24,7 +24,15 @@ import HarborRestoringState from './components/HarborRestoringState';
 const MyScreen = ({ navigation }) => {
     const { theme } = useTheme();
     const { t } = useTranslation(['common', 'my']);
-    const { status, user, login, error, refresh } = useHarborSession();
+    const {
+        status,
+        user,
+        login,
+        error,
+        inboxUnreadCount,
+        refresh,
+        refreshInboxUnreadCount,
+    } = useHarborSession();
     const insets = useSafeAreaInsets();
     const { width } = useWindowDimensions();
     const contentWidth = Math.min(width - scale(20), scale(680));
@@ -78,7 +86,10 @@ const MyScreen = ({ navigation }) => {
         trigger();
         setIsRefreshing(true);
         try {
-            await refresh();
+            await Promise.all([
+                refresh(),
+                refreshInboxUnreadCount().catch(() => null),
+            ]);
         } catch (sessionError) {
             presentHarborError(sessionError);
         } finally {
@@ -160,6 +171,7 @@ const MyScreen = ({ navigation }) => {
                     {isSignedIn ? (
                         <HarborProfileOverview
                             user={user}
+                            unreadCount={inboxUnreadCount}
                             navigation={navigation}
                             onSettingsPress={() =>
                                 navigation.navigate('SettingPage')

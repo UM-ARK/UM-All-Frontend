@@ -1882,6 +1882,30 @@ export async function fetchHarborUnreadNotificationCount({ signal } = {}) {
     return page.totalCount;
 }
 
+export function calculateHarborInboxUnreadCount(
+    unreadNotificationCount,
+    messages = [],
+) {
+    return (
+        Math.max(0, Number(unreadNotificationCount) || 0) +
+        messages.filter(message => message.unreadCount > 0).length
+    );
+}
+
+export async function fetchHarborInboxUnreadCount(
+    username,
+    { signal } = {},
+) {
+    const [unreadNotificationCount, messages] = await Promise.all([
+        fetchHarborUnreadNotificationCount({ signal }),
+        fetchHarborMessages(username, { signal }),
+    ]);
+    return calculateHarborInboxUnreadCount(
+        unreadNotificationCount,
+        messages,
+    );
+}
+
 /**
  * 論壇 Tab 角標用：計算指定時間後有新貼文的話題數。
  * 首次建立基準時只讀取第一頁；既有基準最多掃描 100 個更新話題。

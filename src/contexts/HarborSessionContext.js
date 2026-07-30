@@ -19,6 +19,7 @@ import {
 } from '../utils/harbor/harborAuth';
 import {
     fetchCurrentHarborUser,
+    fetchHarborInboxUnreadCount,
     isHarborCredentialRejected,
     revokeHarborCredentials,
     setActiveHarborCredentials,
@@ -75,10 +76,12 @@ export const HarborSessionProvider = ({ children }) => {
     const [status, setStatus] = useState('restoring');
     const [user, setUser] = useState(null);
     const [error, setError] = useState(null);
+    const [inboxUnreadCount, setInboxUnreadCount] = useState(0);
     const [pendingLoginIntent, setPendingLoginIntent] = useState(null);
     const credentialsRef = useRef(null);
     const userRef = useRef(null);
     const mountedRef = useRef(true);
+    const inboxUnreadRequestRef = useRef(0);
     const lastValidationRef = useRef(0);
     const lastValidationAttemptRef = useRef(0);
     const validationInFlightRef = useRef(null);
@@ -94,9 +97,11 @@ export const HarborSessionProvider = ({ children }) => {
         lastValidationRef.current = 0;
         lastValidationAttemptRef.current = 0;
         validationInFlightRef.current = null;
+        inboxUnreadRequestRef.current += 1;
         setActiveHarborCredentials(null);
         if (mountedRef.current) {
             setUser(null);
+            setInboxUnreadCount(0);
             setStatus(nextStatus);
         }
     }, []);
@@ -107,7 +112,11 @@ export const HarborSessionProvider = ({ children }) => {
         lastValidationRef.current = 0;
         lastValidationAttemptRef.current = 0;
         validationInFlightRef.current = null;
+        inboxUnreadRequestRef.current += 1;
         setActiveHarborCredentials(credentials);
+        if (mountedRef.current) {
+            setInboxUnreadCount(0);
+        }
         return sessionGenerationRef.current;
     }, []);
 
@@ -117,6 +126,34 @@ export const HarborSessionProvider = ({ children }) => {
             sessionGenerationRef.current === generation &&
             credentialsRef.current?.userApiKey === credentials.userApiKey
         );
+    }, []);
+
+    const patchInboxUnreadCount = useCallback(count => {
+        const normalizedCount = Math.max(0, Number(count) || 0);
+        inboxUnreadRequestRef.current += 1;
+        if (mountedRef.current) {
+            setInboxUnreadCount(normalizedCount);
+        }
+        return normalizedCount;
+    }, []);
+
+    const refreshInboxUnreadCount = useCallback(async () => {
+        const username = userRef.current?.username;
+        if (!username || !credentialsRef.current) {
+            return null;
+        }
+
+        const requestId = inboxUnreadRequestRef.current + 1;
+        inboxUnreadRequestRef.current = requestId;
+        const nextCount = await fetchHarborInboxUnreadCount(username);
+        if (
+            mountedRef.current &&
+            inboxUnreadRequestRef.current === requestId &&
+            userRef.current?.username === username
+        ) {
+            setInboxUnreadCount(nextCount);
+        }
+        return nextCount;
     }, []);
 
     const expireSession = useCallback(
@@ -315,6 +352,12 @@ export const HarborSessionProvider = ({ children }) => {
     ]);
 
     useEffect(() => {
+        if (status === 'signedIn' && user?.username) {
+            refreshInboxUnreadCount().catch(() => {});
+        }
+    }, [refreshInboxUnreadCount, status, user?.username]);
+
+    useEffect(() => {
         const subscription = AppState.addEventListener('change', nextState => {
             const credentials = credentialsRef.current;
             const lastValidationTime = Math.max(
@@ -339,10 +382,13 @@ export const HarborSessionProvider = ({ children }) => {
                     }
                 });
             }
+            if (nextState === 'active' && credentials) {
+                refreshInboxUnreadCount().catch(() => {});
+            }
         });
 
         return () => subscription.remove();
-    }, [refreshProfile]);
+    }, [refreshInboxUnreadCount, refreshProfile]);
 
     const login = useCallback(async intent => {
         const startedAt = Date.now();
@@ -435,10 +481,13 @@ export const HarborSessionProvider = ({ children }) => {
             status,
             user,
             error,
+            inboxUnreadCount,
             login,
             logout,
             pendingLoginIntent,
             consumeLoginIntent,
+            patchInboxUnreadCount,
+            refreshInboxUnreadCount,
             refresh: () =>
                 credentialsRef.current
                     ? refreshProfile(
@@ -450,9 +499,12 @@ export const HarborSessionProvider = ({ children }) => {
         [
             consumeLoginIntent,
             error,
+            inboxUnreadCount,
             login,
             logout,
+            patchInboxUnreadCount,
             pendingLoginIntent,
+            refreshInboxUnreadCount,
             refreshProfile,
             status,
             user,

@@ -300,7 +300,13 @@ const Tabbar = () => {
     const { theme } = useTheme();
     const { t } = useTranslation(['common', 'home']);
     const { width, height } = useWindowDimensions();
-    const { status, user, refresh } = useHarborSession();
+    const {
+        status,
+        user,
+        inboxUnreadCount,
+        refresh,
+        refreshInboxUnreadCount,
+    } = useHarborSession();
     const [forumBadgeState, setForumBadgeState] = useState(() =>
         createHarborForumBadgeState(),
     );
@@ -326,8 +332,7 @@ const Tabbar = () => {
     const labelFontSize = isLandscape ? verticalScale(10) : scale(10);
 
     const myUnreadTotal = isSignedIn
-        ? Number(user.unreadNotifications || 0) +
-          Number(user.unreadMessages || 0)
+        ? inboxUnreadCount
         : 0;
 
     const refreshForumBadge = useCallback(
@@ -504,7 +509,10 @@ const Tabbar = () => {
             MyTabbar: {
                 focus: () => {
                     if (isSignedIn) {
-                        refresh().catch(() => {});
+                        Promise.allSettled([
+                            refresh(),
+                            refreshInboxUnreadCount(),
+                        ]);
                     }
                 },
             },
@@ -513,6 +521,7 @@ const Tabbar = () => {
             acknowledgeForumBadge,
             isSignedIn,
             refresh,
+            refreshInboxUnreadCount,
             refreshForumBadge,
         ],
     );

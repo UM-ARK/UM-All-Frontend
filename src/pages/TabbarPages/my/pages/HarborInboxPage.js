@@ -21,6 +21,7 @@ import {uiStyle, useTheme} from '../../../../components/ThemeContext';
 import {useHarborSession} from '../../../../contexts/HarborSessionContext';
 import {openLink} from '../../../../utils/browser';
 import {
+    calculateHarborInboxUnreadCount,
     fetchHarborMessages,
     fetchHarborNotificationPage,
     fetchHarborUnreadNotificationCount,
@@ -55,7 +56,11 @@ const HarborInboxPage = ({
 }) => {
     const {theme} = useTheme();
     const {t, i18n} = useTranslation('my');
-    const {user} = useHarborSession();
+    const {
+        user,
+        inboxUnreadCount,
+        patchInboxUnreadCount,
+    } = useHarborSession();
     const headerHeight = React.useContext(HeaderHeightContext) || 0;
     const username = user?.username || '';
     const [notificationFilterIndex, setNotificationFilterIndex] =
@@ -66,19 +71,18 @@ const HarborInboxPage = ({
     const [isLoadingMore, setIsLoadingMore] = React.useState(false);
     const [loadError, setLoadError] = React.useState(false);
     const [hasMore, setHasMore] = React.useState(false);
-    const [unreadCount, setUnreadCount] = React.useState(0);
     const controllerRef = React.useRef(null);
     const loadingMoreRef = React.useRef(false);
     const nextOffsetRef = React.useRef(0);
     const markingIdsRef = React.useRef(new Set());
-    const unreadCountRef = React.useRef(0);
+    const unreadCountRef = React.useRef(inboxUnreadCount);
     const unreadCountRequestRef = React.useRef(0);
     const filterOptions = [
         {key: 'all', label: t('全部消息')},
         {
             key: 'unread',
             label: t('未讀'),
-            showDot: unreadCount > 0,
+            showDot: inboxUnreadCount > 0,
         },
     ];
     const notificationFilter =
@@ -87,11 +91,15 @@ const HarborInboxPage = ({
         count => {
             const normalizedCount = Math.max(0, Number(count) || 0);
             unreadCountRef.current = normalizedCount;
-            setUnreadCount(normalizedCount);
+            patchInboxUnreadCount(normalizedCount);
             onUnreadCountChange?.(normalizedCount);
         },
-        [onUnreadCountChange],
+        [onUnreadCountChange, patchInboxUnreadCount],
     );
+
+    React.useEffect(() => {
+        unreadCountRef.current = inboxUnreadCount;
+    }, [inboxUnreadCount]);
 
     React.useEffect(() => {
         if (!embedded) {
@@ -190,7 +198,12 @@ const HarborInboxPage = ({
                     nextOffsetRef.current = page.nextOffset;
                     setHasMore(page.hasMore);
                     setLoadError(messagesResult.status === 'rejected');
+                    const canPublishUnreadCount =
+                        messagesResult.status === 'fulfilled' &&
+                        (notificationFilter ||
+                            unreadCountResult.status === 'fulfilled');
                     if (
+                        canPublishUnreadCount &&
                         unreadCountRequestRef.current ===
                             unreadCountRequestId
                     ) {
@@ -200,12 +213,12 @@ const HarborInboxPage = ({
                                 : unreadCountResult.status === 'fulfilled'
                                 ? unreadCountResult.value
                                 : 0;
-                        publishUnreadCount(
-                            unreadNotificationCount +
-                                messages.filter(
-                                    item => item.unreadCount > 0,
-                                ).length,
-                        );
+                        const nextUnreadCount =
+                            calculateHarborInboxUnreadCount(
+                                unreadNotificationCount,
+                                messages,
+                            );
+                        publishUnreadCount(nextUnreadCount);
                     }
                 }
                 if (!controller.signal.aborted) {

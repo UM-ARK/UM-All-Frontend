@@ -28,12 +28,14 @@ const QUICK_ACTION_ROUTES = {
     drafts: navigation => navigation.navigate('HarborDrafts'),
 };
 
-const HarborProfileOverview = ({user, navigation, onSettingsPress}) => {
+const HarborProfileOverview = ({
+    user,
+    unreadCount,
+    navigation,
+    onSettingsPress,
+}) => {
     const {theme} = useTheme();
     const {t} = useTranslation('my');
-    const unreadCount =
-        Number(user.unreadNotifications || 0) +
-        Number(user.unreadMessages || 0);
 
     const openBadges = React.useCallback(() => {
         navigation.navigate('HarborBadges');
