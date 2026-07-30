@@ -279,7 +279,6 @@ function CourseSim({ route, navigation }) {
         bg_color,
         unread,
         success,
-        warning,
         TIME_TABLE_COLOR,
         isLight,
     } = theme;
@@ -419,8 +418,15 @@ function CourseSim({ route, navigation }) {
             borderWidth: 1,
             borderColor: themeColorUltraLight,
         },
+        // 衝突：紅底 + 紅框，比單色邊框更易辨識
         conflictCourseCard: {
-            borderColor: warning,
+            backgroundColor: tonal.unread15,
+            borderColor: unread,
+        },
+        // 可選：綠底 + 綠框，對應無衝突 Section
+        successCourseCard: {
+            backgroundColor: tonal.success15,
+            borderColor: success,
         },
         sectionSearchCard: {
             width: '45%',
@@ -2229,7 +2235,7 @@ E11-0000
                                             s.courseCard,
                                             hasCourseConflict
                                                 ? s.conflictCourseCard
-                                                : null,
+                                                : s.successCourseCard,
                                         ]}
                                         onPress={() => {
                                             trigger();
@@ -2243,7 +2249,9 @@ E11-0000
                                             style={{
                                                 ...s.searchResultText,
                                                 fontSize: scale(15),
-                                                color: black.third,
+                                                color: hasCourseConflict
+                                                    ? unread
+                                                    : success,
                                                 fontWeight: 'bold',
                                             }}>
                                             {item['Course Code']}
@@ -2312,7 +2320,7 @@ E11-0000
                                             s.courseCard,
                                             hasCourseConflict
                                                 ? s.conflictCourseCard
-                                                : null,
+                                                : s.successCourseCard,
                                         ]}
                                         onPress={() => {
                                             trigger();
@@ -2332,7 +2340,9 @@ E11-0000
                                             style={{
                                                 ...s.searchResultText,
                                                 fontSize: scale(15),
-                                                color: themeColor,
+                                                color: hasCourseConflict
+                                                    ? unread
+                                                    : success,
                                                 fontWeight: 'bold',
                                             }}>
                                             {i['Course Code']}
@@ -2395,7 +2405,7 @@ E11-0000
                                                             s.sectionSearchCard,
                                                             hasSectionConflict
                                                                 ? s.conflictCourseCard
-                                                                : null,
+                                                                : s.successCourseCard,
                                                         ]}
                                                         onPress={() => {
                                                             trigger();
@@ -2439,7 +2449,9 @@ E11-0000
                                                         <Text
                                                             style={{
                                                                 ...s.searchResultText,
-                                                                color: themeColor,
+                                                                color: hasSectionConflict
+                                                                    ? unread
+                                                                    : success,
                                                                 fontSize:
                                                                     scale(15),
                                                                 fontWeight:
