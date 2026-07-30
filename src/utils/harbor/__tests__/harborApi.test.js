@@ -472,6 +472,22 @@ describe('Harbor API 資料正規化', () => {
                                 title: '私人對話',
                                 unread_posts: 2,
                             },
+                            {
+                                id: 32,
+                                slug: 'viewed-private-topic',
+                                title: '已讀私人對話',
+                                unread_posts: 0,
+                                new_posts: 0,
+                                unseen: true,
+                            },
+                            {
+                                id: 33,
+                                slug: 'new-private-topic',
+                                title: '新私人對話',
+                                unread_posts: 0,
+                                new_posts: 1,
+                                unseen: true,
+                            },
                         ],
                     },
                 },
@@ -508,6 +524,18 @@ describe('Harbor API 資料正規化', () => {
                 id: '31',
                 slug: 'private-topic',
                 unreadCount: 2,
+            }),
+        );
+        expect(messages[1]).toEqual(
+            expect.objectContaining({
+                id: '32',
+                unreadCount: 0,
+            }),
+        );
+        expect(messages[2]).toEqual(
+            expect.objectContaining({
+                id: '33',
+                unreadCount: 1,
             }),
         );
     });

@@ -20,6 +20,32 @@ import {
 
 const LIST_POST_INDEX_OFFSET = 0;
 const TIMINGS_REPORT_INTERVAL = 10000;
+const TOPIC_END_TOLERANCE = verticalScale(2);
+
+export const getReadingPostNumber = ({
+    atTopicEnd,
+    firstItemOffset,
+    getLayout,
+    readingLineOffset,
+    visiblePosts,
+}) => {
+    if (visiblePosts.length === 0) {
+        return null;
+    }
+    const readingPost = atTopicEnd
+        ? visiblePosts[visiblePosts.length - 1]
+        : visiblePosts.find(viewableItem => {
+            const layout = getLayout(Number(viewableItem.index));
+            return (
+                layout &&
+                layout.y +
+                firstItemOffset +
+                layout.height >
+                readingLineOffset
+            );
+        }) || visiblePosts[visiblePosts.length - 1];
+    return Number(readingPost.item.post_number);
+};
 
 const useHarborTopicReading = ({
     composerRefreshAt,
@@ -39,6 +65,7 @@ const useHarborTopicReading = ({
     const pendingScrollRef = useRef(null);
     const latestVisiblePostRef = useRef(0);
     const viewablePostsRef = useRef([]);
+    const isAtTopicEndRef = useRef(false);
     const lastTimingsAtRef = useRef(Date.now());
     const handledPostRequestRef = useRef(null);
     // 主動跳樓後忽略 viewability，避免短帖同屏時被最高可見樓層蓋回
@@ -52,6 +79,7 @@ const useHarborTopicReading = ({
         });
         pendingScrollRef.current = null;
         latestVisiblePostRef.current = 1;
+        isAtTopicEndRef.current = false;
         setCurrentPostNumber(1);
     }, [listRef]);
 
@@ -288,22 +316,13 @@ const useHarborTopicReading = ({
                 Number(listRef.current?.getFirstItemOffset?.()) || 0;
             const readingLineOffset =
                 scrollOffset - getPostScrollViewOffset();
-            const readingPost =
-                visiblePosts.find(viewableItem => {
-                    const layout = listRef.current?.getLayout?.(
-                        Number(viewableItem.index),
-                    );
-                    return (
-                        layout &&
-                        layout.y +
-                        firstItemOffset +
-                        layout.height >
-                        readingLineOffset
-                    );
-                }) || visiblePosts[visiblePosts.length - 1];
-            updateReadingPost(
-                Number(readingPost.item.post_number),
-            );
+            updateReadingPost(getReadingPostNumber({
+                atTopicEnd: isAtTopicEndRef.current,
+                firstItemOffset,
+                getLayout: index => listRef.current?.getLayout?.(index),
+                readingLineOffset,
+                visiblePosts,
+            }));
         },
         [getPostScrollViewOffset, listRef, updateReadingPost],
     );
@@ -327,8 +346,18 @@ const useHarborTopicReading = ({
 
     const handleScroll = useCallback(
         event => {
+            const contentOffsetY =
+                Number(event.nativeEvent.contentOffset.y) || 0;
+            const contentHeight =
+                Number(event.nativeEvent.contentSize.height) || 0;
+            const viewportHeight =
+                Number(event.nativeEvent.layoutMeasurement.height) || 0;
+            isAtTopicEndRef.current =
+                contentHeight > 0 &&
+                contentOffsetY + viewportHeight >=
+                    contentHeight - TOPIC_END_TOLERANCE;
             updateReadingPostFromOffset(
-                Number(event.nativeEvent.contentOffset.y || 0),
+                contentOffsetY,
             );
         },
         [updateReadingPostFromOffset],

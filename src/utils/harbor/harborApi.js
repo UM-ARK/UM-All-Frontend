@@ -1167,7 +1167,7 @@ function normalizeMessage(topic, index) {
         title: topic.title || '',
         excerpt: stripHtml(topic.excerpt),
         createdAt: topic.last_posted_at || topic.created_at || '',
-        unreadCount: Number(topic.unread_posts || topic.unseen || 0),
+        unreadCount: Number(topic.unread_posts || topic.new_posts || 0),
         topicId: Number(topic.id) || null,
         slug: topic.slug || '',
     };
