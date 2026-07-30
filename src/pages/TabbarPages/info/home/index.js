@@ -495,7 +495,7 @@ const HomeScreen = ({ navigation }) => {
                     alignItems: 'center', justifyContent: 'center',
                     alignSelf: 'center',
                     width: screenWidth * 0.8,
-                    marginTop: verticalScale(1),
+                    marginTop: verticalScale(6),
                 }}>
                     <TouchableScale
                         style={{ width: '100%' }}
@@ -511,8 +511,9 @@ const HomeScreen = ({ navigation }) => {
                                 alignItems: 'center', justifyContent: 'center',
                                 gap: scale(3),
                                 backgroundColor: `${themeColor}15`,
-                                paddingHorizontal: scale(20), paddingVertical: scale(10),
-                                borderRadius: scale(5),
+                                paddingHorizontal: scale(20),
+                                paddingVertical: verticalScale(6),
+                                borderRadius: scale(10),
                             }}>
                                 <Text style={{ ...uiStyle.defaultText, color: black.main, opacity: 0.7, fontWeight: 'bold' }}>{`⏰${t('下節課：', { ns: 'timetable' })}`}</Text>
                                 <Text style={{ ...uiStyle.defaultText, color: black.main, opacity: 0.7 }}>{upcomingCourse['Course Code']}</Text>
@@ -525,10 +526,10 @@ const HomeScreen = ({ navigation }) => {
                                 width: '100%',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                paddingVertical: verticalScale(8),
+                                paddingVertical: verticalScale(6),
                                 backgroundColor: `${theme.disabled}70`,
                                 opacity: 0.7,
-                                borderRadius: scale(5),
+                                borderRadius: scale(10),
                             }}>
                                 <Text style={{
                                     ...uiStyle.defaultText,
@@ -544,14 +545,13 @@ const HomeScreen = ({ navigation }) => {
                 <View
                     style={{
                         width: '100%',
-                        marginTop: verticalScale(2),
+                        marginTop: verticalScale(6),
                         paddingHorizontal: scale(10),
                     }}>
                     <FlatGrid
                         style={{
                             // FlatGrid spacing 會在上下多出一圈 padding，用負 margin 收緊
-                            marginTop: verticalScale(-4),
-                            marginBottom: verticalScale(-8),
+                            marginVertical: verticalScale(-4),
                         }}
                         itemContainerStyle={{
                             alignItems: 'center',

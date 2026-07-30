@@ -169,45 +169,48 @@ const CalendarBar = ({ refreshTrigger = 0 }) => {
                         justifyContent: 'center',
                         flexDirection: 'row',
                         marginTop: verticalScale(5),
+                        paddingHorizontal: scale(4),
                     }}
                 >
+                    {/* 側邊裝飾：用 margin 錯位，避免 \n\n 撐高整列 */}
                     <Text
                         style={{
                             ...uiStyle.defaultText,
-                            textAlign: 'center',
                             fontSize: verticalScale(12),
+                            marginRight: scale(2),
+                            marginBottom: verticalScale(10),
                         }}
                     >
-                        {VERSION_EMOJI.ve_Left + '\n\n'}
+                        {VERSION_EMOJI.ve_Left}
                     </Text>
 
                     <View
                         style={{
-                            paddingVertical: verticalScale(2),
-                            paddingHorizontal: scale(5),
+                            paddingVertical: verticalScale(6),
+                            paddingHorizontal: scale(8),
                             width: screenWidth * 0.8,
                             backgroundColor: `${themeColor}15`,
-                            borderRadius: scale(5),
+                            borderRadius: scale(10),
                             borderWidth: 1,
                             borderColor: themeColorUltraLight,
                         }}
                     >
                         <Text
                             selectable
-                            style={{ ...uiStyle.defaultText, color: themeColor, textAlign: 'center', fontSize: verticalScale(12) }}
+                            style={{
+                                ...uiStyle.defaultText,
+                                color: themeColor,
+                                textAlign: 'center',
+                                fontSize: verticalScale(10),
+                                lineHeight: verticalScale(14),
+                            }}
                         >
-                            {/* <Text style={{ ...uiStyle.defaultText, fontSize: verticalScale(10), fontWeight: 'bold' }}>
-                                {'📅 校曆 Upcoming:' + '\n'}
-                            </Text> */}
-
-                            <Text style={{ ...uiStyle.defaultText, fontSize: verticalScale(10), fontWeight: 'bold' }}>
-                                {moment(cal[selectDay].endDate).diff(cal[selectDay].startDate, 'day') > 1
-                                    ? `${moment(cal[selectDay].startDate).format('YYYY-MM-DD')} ~ ${moment(cal[selectDay].endDate).subtract(1, 'days').format('YYYY-MM-DD')}\n`
-                                    : null}
-                            </Text>
-
-                            <Text style={{ fontSize: verticalScale(10) }}>{cal[selectDay].summary}</Text>
-
+                            {moment(cal[selectDay].endDate).diff(cal[selectDay].startDate, 'day') > 1 ? (
+                                <Text style={{ fontWeight: 'bold' }}>
+                                    {`${moment(cal[selectDay].startDate).format('YYYY-MM-DD')} ~ ${moment(cal[selectDay].endDate).subtract(1, 'days').format('YYYY-MM-DD')}\n`}
+                                </Text>
+                            ) : null}
+                            {cal[selectDay].summary}
                             {'summary_cn' in cal[selectDay] ? `\n${cal[selectDay].summary_cn}` : null}
                         </Text>
                     </View>
@@ -215,11 +218,12 @@ const CalendarBar = ({ refreshTrigger = 0 }) => {
                     <Text
                         style={{
                             ...uiStyle.defaultText,
-                            textAlign: 'center',
                             fontSize: verticalScale(12),
+                            marginLeft: scale(2),
+                            marginTop: verticalScale(10),
                         }}
                     >
-                        {'\n\n' + VERSION_EMOJI.ve_Right}
+                        {VERSION_EMOJI.ve_Right}
                     </Text>
                 </View>
             ) : null}
