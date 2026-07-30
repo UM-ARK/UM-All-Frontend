@@ -30,7 +30,7 @@ const PAGE_CONFIG = [
     { key: 'stats', label: '統計' },
 ];
 const TAB_INDICATOR_WIDTH = moderateScale(24, 0.1);
-const TAB_HEIGHT = scale(36);
+const TAB_HEIGHT = verticalScale(25);
 const DEFAULT_COLLAPSE_DISTANCE = verticalScale(120);
 const AnimatedPagerView = Animated.createAnimatedComponent(PagerView);
 
@@ -264,7 +264,10 @@ const HarborDashboard = ({
                 pointerEvents="box-none"
                 style={[
                     styles.stickyHeader,
-                    {transform: [{translateY: headerTranslateY}]},
+                    {
+                        backgroundColor: theme.bg_color,
+                        transform: [{translateY: headerTranslateY}],
+                    },
                 ]}>
                 <View
                     onLayout={event => {
@@ -466,6 +469,7 @@ const styles = StyleSheet.create({
         minWidth: scale(48),
         height: TAB_HEIGHT,
         borderRadius: scale(8),
+        position: 'relative',
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
@@ -480,12 +484,14 @@ const styles = StyleSheet.create({
         fontWeight: '760',
     },
     tabBadge: {
-        minWidth: scale(16),
-        height: scale(16),
+        position: 'absolute',
+        top: verticalScale(1),
+        right: verticalScale(1),
+        width: verticalScale(10),
+        height: verticalScale(10),
         borderRadius: scale(8),
         alignItems: 'center',
         justifyContent: 'center',
-        marginLeft: scale(4),
         paddingHorizontal: scale(3),
     },
     tabBadgeText: {
