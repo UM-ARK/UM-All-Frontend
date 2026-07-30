@@ -17,6 +17,7 @@ import {
     fetchHarborTopicList,
     fetchHarborTopicPosts,
     fetchHarborUnreadNotificationCount,
+    fetchHarborForumBadgeSnapshot,
     fetchHarborUserActions,
     getHarborTopicViews,
     HARBOR_TOPIC_NOTIFICATION_LEVELS,
@@ -611,6 +612,141 @@ describe('Harbor API 資料正規化', () => {
         expect(putSpy).toHaveBeenCalledWith('/notifications/mark-read.json', {
             id: 8,
         });
+    });
+
+    it('首次建立論壇角標基準時只讀取最新一頁', async () => {
+        getSpy.mockResolvedValueOnce({
+            data: {
+                topic_list: {
+                    topics: [
+                        {
+                            id: 1,
+                            last_posted_at: '2026-07-31T08:00:00Z',
+                        },
+                        {
+                            id: 2,
+                            last_posted_at: '2026-07-31T09:00:00Z',
+                        },
+                    ],
+                    more_topics_url: '/latest?page=1',
+                },
+            },
+        });
+
+        const snapshot = await fetchHarborForumBadgeSnapshot();
+
+        expect(snapshot).toEqual({
+            latestAt: '2026-07-31T09:00:00.000Z',
+            topicCount: 0,
+        });
+        expect(getSpy).toHaveBeenCalledTimes(1);
+        expect(getSpy).toHaveBeenCalledWith('/latest.json', {
+            params: {page: 0},
+            signal: undefined,
+        });
+    });
+
+    it('按話題去重計算上次進入論壇後的新貼文', async () => {
+        getSpy
+            .mockResolvedValueOnce({
+                data: {
+                    topic_list: {
+                        topics: [
+                            {
+                                id: 1,
+                                last_posted_at: '2026-07-31T10:00:00Z',
+                            },
+                            {
+                                id: 2,
+                                last_posted_at: '2026-07-31T09:00:00Z',
+                            },
+                        ],
+                        more_topics_url: '/latest?page=1',
+                    },
+                },
+            })
+            .mockResolvedValueOnce({
+                data: {
+                    topic_list: {
+                        topics: [
+                            {
+                                id: 2,
+                                last_posted_at: '2026-07-31T09:00:00Z',
+                            },
+                            {
+                                id: 3,
+                                last_posted_at: '2026-07-31T07:00:00Z',
+                            },
+                        ],
+                        more_topics_url: '/latest?page=2',
+                    },
+                },
+            })
+            .mockResolvedValueOnce({
+                data: {
+                    topic_list: {
+                        topics: [
+                            {
+                                id: 4,
+                                last_posted_at: '2026-07-30T23:00:00Z',
+                            },
+                        ],
+                        more_topics_url: '/latest?page=3',
+                    },
+                },
+            });
+
+        const snapshot = await fetchHarborForumBadgeSnapshot({
+            since: '2026-07-31T08:00:00Z',
+        });
+
+        expect(snapshot).toEqual({
+            latestAt: '2026-07-31T10:00:00.000Z',
+            topicCount: 2,
+        });
+        expect(getSpy).toHaveBeenNthCalledWith(1, '/latest.json', {
+            params: {page: 0},
+            signal: undefined,
+        });
+        expect(getSpy).toHaveBeenNthCalledWith(2, '/latest.json', {
+            params: {page: 1},
+            signal: undefined,
+        });
+        expect(getSpy).toHaveBeenNthCalledWith(3, '/latest.json', {
+            params: {page: 2},
+            signal: undefined,
+        });
+    });
+
+    it('論壇角標最多計算 100 個更新話題', async () => {
+        getSpy.mockResolvedValueOnce({
+            data: {
+                topic_list: {
+                    topics: Array.from({length: 120}, (_, index) => ({
+                        id: index + 1,
+                        last_posted_at: '2026-07-31T10:00:00Z',
+                    })),
+                    more_topics_url: null,
+                },
+            },
+        });
+
+        await expect(
+            fetchHarborForumBadgeSnapshot({
+                since: '2026-07-31T08:00:00Z',
+            }),
+        ).resolves.toEqual({
+            latestAt: '2026-07-31T10:00:00.000Z',
+            topicCount: 100,
+        });
+    });
+
+    it('論壇角標回應格式錯誤時拒絕更新舊狀態', async () => {
+        getSpy.mockResolvedValueOnce({data: {}});
+
+        await expect(fetchHarborForumBadgeSnapshot()).rejects.toThrow(
+            'Invalid Harbor forum badge response',
+        );
     });
 
     it('透過已授權 API 從指定樓層載入首窗話題內容', async () => {

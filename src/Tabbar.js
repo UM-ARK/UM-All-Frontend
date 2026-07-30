@@ -1,4 +1,5 @@
-import { Platform, useWindowDimensions, View } from 'react-native';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { AppState, Platform, useWindowDimensions, View } from 'react-native';
 
 import { useTheme } from './components/ThemeContext';
 
@@ -20,6 +21,17 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import { trigger } from './utils/trigger';
 import { uiStyle } from './components/ThemeContext';
 import { isLiquidGlassSupported } from '@callstack/liquid-glass';
+import { useHarborSession } from './contexts/HarborSessionContext';
+import { fetchHarborForumBadgeSnapshot } from './utils/harbor/harborApi';
+import {
+    acknowledgeHarborForumBadgeState,
+    createHarborForumBadgeState,
+    formatHarborTabBadge,
+    getHarborForumBadgeCount,
+    loadHarborForumBadgeState,
+    saveHarborForumBadgeState,
+    updateHarborForumBadgeState,
+} from './utils/harbor/harborBadge';
 
 // 圖示說明
 const tabIconDescription = {
@@ -58,6 +70,9 @@ const androidTabIconConfig = {
     MyTabbar: 'account-circle',
 };
 
+// 論壇更新角標輪詢間隔
+const FORUM_BADGE_POLL_MS = 60 * 1000;
+
 // 保持 Navigator 元件穩定，避免視窗縮放時重設目前分頁
 const IOSNativeTabs = createNativeBottomTabNavigator();
 const AndroidBottomTabs = createBottomTabNavigator();
@@ -87,8 +102,20 @@ const getTabBarStyle = theme => {
 
 // iOS Tab Bar 類別
 class IOSTabbar {
-    constructor(t, insets, theme, isLandscape, labelFontSize, useSidebar) {
+    constructor(
+        t,
+        insets,
+        theme,
+        isLandscape,
+        labelFontSize,
+        useSidebar,
+        badges,
+        badgeListeners,
+    ) {
         this.Tabs = IOSNativeTabs;
+        this.theme = theme;
+        this.badges = badges || {};
+        this.badgeListeners = badgeListeners || {};
         this.getTabbarIcon = (routeName, focused) => {
             let baseName = iosTabIconConfig[routeName] || 'questionmark.circle';
             if (focused) {
@@ -100,11 +127,22 @@ class IOSTabbar {
             };
         };
         this.createTabScreen = name => {
+            const tabBarBadge = this.badges[name];
+            const listeners = this.badgeListeners[name];
             return (
                 <this.Tabs.Screen
                     name={name}
                     component={tabScreen[name]}
-                    options={{ title: t(tabIconDescription[name]) }}
+                    options={{
+                        title: t(tabIconDescription[name]),
+                        tabBarBadge,
+                        tabBarBadgeStyle: {
+                            backgroundColor: this.theme.unread,
+                        },
+                    }}
+                    listeners={
+                        listeners ? () => listeners : undefined
+                    }
                 />
             );
         };
@@ -143,8 +181,20 @@ class IOSTabbar {
 
 // Android Tab Bar 類別
 class AndroidTabbar {
-    constructor(t, insets, theme, isLandscape, labelFontSize) {
+    constructor(
+        t,
+        insets,
+        theme,
+        isLandscape,
+        labelFontSize,
+        useSidebar,
+        badges,
+        badgeListeners,
+    ) {
         this.Tabs = AndroidBottomTabs;
+        this.theme = theme;
+        this.badges = badges || {};
+        this.badgeListeners = badgeListeners || {};
 
         this.getTabbarIcon = (routeName, focused, color) => {
             let baseName = androidTabIconConfig[routeName] || 'help-circle';
@@ -161,6 +211,8 @@ class AndroidTabbar {
         };
 
         this.createTabScreen = name => {
+            const tabBarBadge = this.badges[name];
+            const listeners = this.badgeListeners[name];
             return (
                 <this.Tabs.Screen
                     name={name}
@@ -169,8 +221,18 @@ class AndroidTabbar {
                         tabBarIcon: ({ focused, color }) =>
                             this.getTabbarIcon(name, focused, color),
                         title: t(tabIconDescription[name]),
+                        tabBarBadge,
+                        tabBarBadgeStyle: {
+                            backgroundColor: this.theme.unread,
+                        },
                     }}
-                    listeners={() => ({ tabPress: () => trigger() })}
+                    listeners={() => ({
+                        tabPress: event => {
+                            trigger();
+                            listeners?.tabPress?.(event);
+                        },
+                        ...(listeners?.focus ? { focus: listeners.focus } : {}),
+                    })}
                 />
             );
         };
@@ -212,6 +274,8 @@ export const tabbarFactory = (
     isLandscape,
     labelFontSize,
     useSidebar,
+    badges,
+    badgeListeners,
 ) => {
     let tabbarClass = null;
     if (platform === 'ios') {
@@ -227,6 +291,8 @@ export const tabbarFactory = (
         isLandscape,
         labelFontSize,
         useSidebar,
+        badges,
+        badgeListeners,
     ).createTabbar();
 };
 
@@ -234,6 +300,19 @@ const Tabbar = () => {
     const { theme } = useTheme();
     const { t } = useTranslation(['common', 'home']);
     const { width, height } = useWindowDimensions();
+    const { status, user, refresh } = useHarborSession();
+    const [forumBadgeState, setForumBadgeState] = useState(() =>
+        createHarborForumBadgeState(),
+    );
+    const forumBadgeRequestRef = useRef(0);
+    const forumBadgeStateRef = useRef(forumBadgeState);
+    const forumBadgeStorageReadyRef = useRef(false);
+    const forumBadgeAcknowledgePendingRef = useRef(false);
+    const forumBadgeAcknowledgeUsernameRef = useRef('');
+    const [forumBadgeStorageReady, setForumBadgeStorageReady] =
+        useState(false);
+    const isSignedIn = status === 'signedIn' && !!user;
+    const signedInUsername = isSignedIn ? user.username : '';
 
     // 跟隨 iPad Stage Manager 與 Mac 視窗大小即時切換導覽模式
     const isLandscape = width > height;
@@ -246,6 +325,198 @@ const Tabbar = () => {
     // 字體大小
     const labelFontSize = isLandscape ? verticalScale(10) : scale(10);
 
+    const myUnreadTotal = isSignedIn
+        ? Number(user.unreadNotifications || 0) +
+          Number(user.unreadMessages || 0)
+        : 0;
+
+    const refreshForumBadge = useCallback(
+        async ({ acknowledge = false } = {}) => {
+            if (!signedInUsername || !forumBadgeStorageReadyRef.current) {
+                if (acknowledge) {
+                    forumBadgeAcknowledgePendingRef.current = true;
+                    forumBadgeAcknowledgeUsernameRef.current =
+                        signedInUsername;
+                }
+                return;
+            }
+
+            const shouldAcknowledge =
+                acknowledge ||
+                (forumBadgeAcknowledgePendingRef.current &&
+                    forumBadgeAcknowledgeUsernameRef.current ===
+                        signedInUsername);
+            const currentState = forumBadgeStateRef.current;
+            const requestId = forumBadgeRequestRef.current + 1;
+            forumBadgeRequestRef.current = requestId;
+            try {
+                const snapshot = await fetchHarborForumBadgeSnapshot({
+                    since: shouldAcknowledge
+                        ? undefined
+                        : currentState.acknowledgedAt,
+                });
+                if (forumBadgeRequestRef.current === requestId) {
+                    setForumBadgeState(previousState => {
+                        const nextState = updateHarborForumBadgeState(
+                            previousState,
+                            signedInUsername,
+                            snapshot,
+                            { acknowledge: shouldAcknowledge },
+                        );
+                        forumBadgeStateRef.current = nextState;
+                        return nextState;
+                    });
+                    forumBadgeAcknowledgePendingRef.current = false;
+                    forumBadgeAcknowledgeUsernameRef.current = '';
+                }
+            } catch {
+                // 角標失敗時保留上次數值，避免閃爍消失
+            }
+        },
+        [signedInUsername],
+    );
+
+    useEffect(() => {
+        let active = true;
+        forumBadgeRequestRef.current += 1;
+        forumBadgeStorageReadyRef.current = false;
+        if (
+            forumBadgeAcknowledgeUsernameRef.current !==
+            signedInUsername
+        ) {
+            forumBadgeAcknowledgePendingRef.current = false;
+            forumBadgeAcknowledgeUsernameRef.current = '';
+        }
+        setForumBadgeStorageReady(false);
+
+        if (!signedInUsername) {
+            const nextState = createHarborForumBadgeState();
+            forumBadgeStateRef.current = nextState;
+            setForumBadgeState(nextState);
+            return () => {
+                active = false;
+            };
+        }
+
+        loadHarborForumBadgeState(signedInUsername).then(restoredState => {
+            if (!active) {
+                return;
+            }
+            const nextState =
+                forumBadgeAcknowledgePendingRef.current &&
+                forumBadgeAcknowledgeUsernameRef.current ===
+                    signedInUsername
+                ? acknowledgeHarborForumBadgeState(
+                      restoredState,
+                      signedInUsername,
+                  )
+                : restoredState;
+            forumBadgeStateRef.current = nextState;
+            setForumBadgeState(nextState);
+            forumBadgeStorageReadyRef.current = true;
+            setForumBadgeStorageReady(true);
+        });
+
+        return () => {
+            active = false;
+        };
+    }, [signedInUsername]);
+
+    useEffect(() => {
+        if (!forumBadgeStorageReady || !signedInUsername) {
+            return undefined;
+        }
+
+        refreshForumBadge();
+        const intervalId = setInterval(refreshForumBadge, FORUM_BADGE_POLL_MS);
+        const subscription = AppState.addEventListener('change', nextState => {
+            if (nextState === 'active') {
+                refreshForumBadge();
+            }
+        });
+
+        return () => {
+            forumBadgeRequestRef.current += 1;
+            clearInterval(intervalId);
+            subscription.remove();
+        };
+    }, [
+        forumBadgeStorageReady,
+        refreshForumBadge,
+        signedInUsername,
+    ]);
+
+    useEffect(() => {
+        forumBadgeStateRef.current = forumBadgeState;
+        if (
+            forumBadgeStorageReady &&
+            forumBadgeState.username === signedInUsername
+        ) {
+            saveHarborForumBadgeState(forumBadgeState).catch(() => {});
+        }
+    }, [
+        forumBadgeState,
+        forumBadgeStorageReady,
+        signedInUsername,
+    ]);
+
+    const acknowledgeForumBadge = useCallback(() => {
+        if (!signedInUsername) {
+            return;
+        }
+        forumBadgeRequestRef.current += 1;
+        forumBadgeAcknowledgePendingRef.current = true;
+        forumBadgeAcknowledgeUsernameRef.current = signedInUsername;
+        setForumBadgeState(currentState => {
+            const nextState = acknowledgeHarborForumBadgeState(
+                currentState,
+                signedInUsername,
+            );
+            forumBadgeStateRef.current = nextState;
+            return nextState;
+        });
+    }, [signedInUsername]);
+
+    const forumUpdatesSinceEntry = getHarborForumBadgeCount(
+        forumBadgeState,
+        signedInUsername,
+    );
+
+    const badges = useMemo(
+        () => ({
+            ForumTabbar: formatHarborTabBadge(
+                isSignedIn ? forumUpdatesSinceEntry : 0,
+            ),
+            MyTabbar: formatHarborTabBadge(myUnreadTotal),
+        }),
+        [forumUpdatesSinceEntry, isSignedIn, myUnreadTotal],
+    );
+
+    const badgeListeners = useMemo(
+        () => ({
+            ForumTabbar: {
+                tabPress: acknowledgeForumBadge,
+                focus: () => {
+                    acknowledgeForumBadge();
+                    refreshForumBadge({ acknowledge: true });
+                },
+            },
+            MyTabbar: {
+                focus: () => {
+                    if (isSignedIn) {
+                        refresh().catch(() => {});
+                    }
+                },
+            },
+        }),
+        [
+            acknowledgeForumBadge,
+            isSignedIn,
+            refresh,
+            refreshForumBadge,
+        ],
+    );
+
     const TabbarComponent = tabbarFactory(
         Platform.OS,
         t,
@@ -254,6 +525,8 @@ const Tabbar = () => {
         isLandscape,
         labelFontSize,
         useSidebar,
+        badges,
+        badgeListeners,
     );
 
     return TabbarComponent;

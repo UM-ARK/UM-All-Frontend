@@ -1818,6 +1818,90 @@ export async function fetchHarborUnreadNotificationCount({ signal } = {}) {
     return page.totalCount;
 }
 
+/**
+ * 論壇 Tab 角標用：計算指定時間後有新貼文的話題數。
+ * 首次建立基準時只讀取第一頁；既有基準最多掃描 100 個更新話題。
+ */
+export async function fetchHarborForumBadgeSnapshot({
+    since,
+    signal,
+} = {}) {
+    const sinceTimestamp = Date.parse(since);
+    const hasValidSince = Number.isFinite(sinceTimestamp);
+    const updatedTopicIds = new Set();
+    let latestTimestamp = null;
+    let page = 0;
+    let scannedPages = 0;
+    let hasMore = false;
+    let pageHasUpdates = false;
+
+    do {
+        const response = await harborApi.get('/latest.json', {
+            params: {page},
+            signal,
+        });
+        const topicList = response.data?.topic_list;
+        const topics = topicList?.topics;
+        if (!topicList || !Array.isArray(topics)) {
+            throw new Error('Invalid Harbor forum badge response');
+        }
+
+        pageHasUpdates = false;
+        topics.forEach(topic => {
+            const topicId = toNumberOrNull(topic?.id);
+            const postedAt =
+                topic?.last_posted_at || topic?.created_at || '';
+            const postedTimestamp = Date.parse(postedAt);
+            if (!Number.isFinite(postedTimestamp)) {
+                return;
+            }
+            latestTimestamp = Math.max(
+                latestTimestamp ?? postedTimestamp,
+                postedTimestamp,
+            );
+            if (
+                hasValidSince &&
+                postedTimestamp > sinceTimestamp &&
+                topicId != null
+            ) {
+                pageHasUpdates = true;
+                updatedTopicIds.add(topicId);
+            }
+        });
+
+        const pageInfo = getTopicPageInfo(
+            topicList,
+            page,
+            topics.length,
+        );
+        hasMore = pageInfo.hasMore;
+        page = pageInfo.nextPage;
+        scannedPages += 1;
+    } while (
+        hasValidSince &&
+        hasMore &&
+        pageHasUpdates &&
+        updatedTopicIds.size < 100 &&
+        scannedPages < 10
+    );
+
+    const reachedScanLimit =
+        hasValidSince &&
+        hasMore &&
+        pageHasUpdates &&
+        scannedPages >= 10;
+
+    return {
+        latestAt:
+            latestTimestamp == null
+                ? ''
+                : new Date(latestTimestamp).toISOString(),
+        topicCount: reachedScanLimit
+            ? 100
+            : Math.min(100, updatedTopicIds.size),
+    };
+}
+
 export async function markHarborNotificationRead(notificationId) {
     const id = Number(notificationId);
     if (!Number.isInteger(id) || id <= 0) {
