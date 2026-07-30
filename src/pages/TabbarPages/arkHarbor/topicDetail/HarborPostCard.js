@@ -530,6 +530,78 @@ const HarborPostCard = memo(
                 </Pressable>
             ) : null;
 
+        const handleMoreMenuAction = event => {
+            trigger();
+            const actionId = event.nativeEvent.event;
+            if (actionId === 'openOriginal') {
+                onPressOpenOriginal?.();
+                return;
+            }
+            if (actionId === 'notifications') {
+                onPressOpenNotifications?.();
+                return;
+            }
+            if (actionId === 'edit') {
+                onPressEdit(post);
+                return;
+            }
+            if (actionId === 'quote') {
+                onPressQuote(post);
+                return;
+            }
+            if (actionId === 'delete') {
+                onPressDelete(post);
+                return;
+            }
+            if (actionId === 'bookmark') {
+                onPressBookmark(post);
+                return;
+            }
+            if (actionId === 'copy') {
+                onPressCopy(post);
+                return;
+            }
+            if (actionId === 'share') {
+                onPressShare(post);
+            }
+        };
+
+        const moreMenu = (
+            <MenuView
+                actions={moreMenuActions}
+                onOpenMenu={() => trigger()}
+                onPressAction={handleMoreMenuAction}
+                shouldOpenOnLongPress={false}
+                style={
+                    isFirstPost
+                        ? styles.firstPostMoreMenu
+                        : styles.composerMenuView
+                }>
+                <View
+                    style={[
+                        isFirstPost
+                            ? styles.firstPostMoreButton
+                            : styles.postActionButton,
+                        isFirstPost ? null : styles.reactionMenuButton,
+                        { backgroundColor: tonal.primary15 },
+                    ]}>
+                    <MaterialCommunityIcons
+                        name="dots-horizontal"
+                        size={scale(isFirstPost ? 14 : 16)}
+                        color={themeColor}
+                    />
+                    <Text
+                        numberOfLines={1}
+                        style={[
+                            styles.postActionText,
+                            { color: themeColor },
+                        ]}>
+                        {t('更多')}
+                    </Text>
+                </View>
+            </MenuView>
+        );
+
         if (isDeleted || isHidden) {
             return (
                 <View style={nestedContainerStyle}>
@@ -632,6 +704,7 @@ const HarborPostCard = memo(
             <View
                 style={[
                     styles.postCard,
+                    isFirstPost ? styles.firstPostCard : null,
                     nestedContainerStyle,
                     { backgroundColor: white, borderColor: themeColorUltraLight },
                 ]}>
@@ -645,6 +718,7 @@ const HarborPostCard = memo(
                                 onPressAuthor(post.username);
                             }}
                             style={({ pressed }) => [
+                                styles.authorLink,
                                 pressed ? styles.pressedLink : null,
                             ]}>
                             <Image
@@ -658,6 +732,41 @@ const HarborPostCard = memo(
                                 placeholderContentFit="cover"
                                 transition={200}
                             />
+                            <View style={styles.authorArea}>
+                                <View style={styles.authorNameRow}>
+                                    <Text
+                                        style={[
+                                            styles.authorName,
+                                            { color: black.third },
+                                        ]}
+                                        numberOfLines={1}>
+                                        {displayName}
+                                    </Text>
+                                    {post.user_title ? (
+                                        <Text
+                                            style={[
+                                                styles.userTitle,
+                                                { color: themeColor },
+                                            ]}
+                                            numberOfLines={1}>
+                                            {post.user_title}
+                                        </Text>
+                                    ) : null}
+                                    {post.staff ? (
+                                        <Text
+                                            style={[
+                                                styles.staffBadge,
+                                                {
+                                                    color: themeColor,
+                                                    backgroundColor:
+                                                        tonal.primary15,
+                                                },
+                                            ]}>
+                                            Staff
+                                        </Text>
+                                    ) : null}
+                                </View>
+                            </View>
                         </Pressable>
                         <Text
                             selectable
@@ -770,7 +879,11 @@ const HarborPostCard = memo(
                     </View>
                 )}
 
-                <View style={styles.postBody}>
+                <View
+                    style={[
+                        styles.postBody,
+                        isFirstPost ? styles.firstPostBody : null,
+                    ]}>
                     <HarborPostContent
                         cooked={post.cooked}
                         contentWidth={contentWidth}
@@ -789,7 +902,11 @@ const HarborPostCard = memo(
                 </View>
 
                 {hasTopicTags ? (
-                    <View style={styles.plainTagRow}>
+                    <View
+                        style={[
+                            styles.plainTagRow,
+                            isFirstPost ? styles.firstPostPlainTagRow : null,
+                        ]}>
                         {Number.isInteger(topicCategoryId) &&
                         topicCategoryId > 0 ? (
                             <Pressable
@@ -851,14 +968,20 @@ const HarborPostCard = memo(
                     </View>
                 ) : null}
 
-                <View style={styles.postMetaRow}>
+                <View
+                    style={[
+                        styles.postMetaRow,
+                        isFirstPost ? styles.firstPostMetaRow : null,
+                    ]}>
                     <Text
                         style={[styles.postTime, { color: black.third }]}
                         numberOfLines={1}>
                         {formatHarborPostTime(post.created_at, i18n.language)}
                         {wasEdited ? ` · ${t('已編輯')}` : ''}
                     </Text>
-                    {!isFirstPost ? (
+                    {isFirstPost ? (
+                        moreMenu
+                    ) : (
                         <View style={styles.postMetaStats}>
                             <MetaItem
                                 icon="comment-outline"
@@ -899,7 +1022,7 @@ const HarborPostCard = memo(
                                 </View>
                             ) : null}
                         </View>
-                    ) : null}
+                    )}
                 </View>
                 {canReply && !isFirstPost ? (
                     <View style={styles.composerActionRow}>
@@ -933,133 +1056,79 @@ const HarborPostCard = memo(
                         </Pressable>
                     </View>
                 ) : null}
-                <View style={styles.postActionRow}>
-                    {!isFirstPost && reactionsEnabled && reactionDisabled ? (
-                        <Pressable
-                            accessibilityRole="button"
-                            accessibilityLabel={t('回應')}
-                            onPress={() => {
-                                trigger();
-                                onPressDisabledReaction(post.id);
-                            }}
-                            style={styles.reactionMenuView}>
-                            {reactionButton}
-                        </Pressable>
-                    ) : !isFirstPost && reactionsEnabled ? (
-                        <MenuView
-                            actions={reactionMenuActions}
-                            onOpenMenu={() => trigger()}
-                            onPressAction={event => {
-                                trigger();
-                                onSelectReaction(
-                                    post.id,
-                                    event.nativeEvent.event,
-                                );
-                            }}
-                            shouldOpenOnLongPress={false}
-                            style={styles.reactionMenuView}>
-                            {reactionButton}
-                        </MenuView>
-                    ) : !isFirstPost ? (
-                        <Pressable
-                            disabled={pendingLike}
-                            onPress={() => {
-                                trigger();
-                                onPressLike(post);
-                            }}
-                            style={({ pressed }) => [
-                                styles.postActionButton,
-                                styles.reactionMenuView,
-                                {
-                                    backgroundColor: pressed
-                                        ? tonal.primary30
-                                        : tonal.primary15,
-                                },
-                            ]}>
-                            {pendingLike ? (
-                                <ActivityIndicator
-                                    size="small"
-                                    color={themeColor}
-                                />
-                            ) : (
-                                <MaterialCommunityIcons
-                                    name={isLiked ? 'heart' : 'heart-outline'}
-                                    size={scale(15)}
-                                    color={themeColor}
-                                />
-                            )}
-                            <Text
-                                numberOfLines={1}
-                                style={[
-                                    styles.postActionText,
-                                    { color: themeColor },
+                {!isFirstPost ? (
+                    <View style={styles.postActionRow}>
+                        {reactionsEnabled && reactionDisabled ? (
+                            <Pressable
+                                accessibilityRole="button"
+                                accessibilityLabel={t('回應')}
+                                onPress={() => {
+                                    trigger();
+                                    onPressDisabledReaction(post.id);
+                                }}
+                                style={styles.reactionMenuView}>
+                                {reactionButton}
+                            </Pressable>
+                        ) : reactionsEnabled ? (
+                            <MenuView
+                                actions={reactionMenuActions}
+                                onOpenMenu={() => trigger()}
+                                onPressAction={event => {
+                                    trigger();
+                                    onSelectReaction(
+                                        post.id,
+                                        event.nativeEvent.event,
+                                    );
+                                }}
+                                shouldOpenOnLongPress={false}
+                                style={styles.reactionMenuView}>
+                                {reactionButton}
+                            </MenuView>
+                        ) : (
+                            <Pressable
+                                disabled={pendingLike}
+                                onPress={() => {
+                                    trigger();
+                                    onPressLike(post);
+                                }}
+                                style={({ pressed }) => [
+                                    styles.postActionButton,
+                                    styles.reactionMenuView,
+                                    {
+                                        backgroundColor: pressed
+                                            ? tonal.primary30
+                                            : tonal.primary15,
+                                    },
                                 ]}>
-                                {isLiked ? t('取消讚好') : t('讚好')}
-                            </Text>
-                        </Pressable>
-                    ) : null}
-                    <MenuView
-                        actions={moreMenuActions}
-                        onOpenMenu={() => trigger()}
-                        onPressAction={event => {
-                            trigger();
-                            const actionId = event.nativeEvent.event;
-                            if (actionId === 'openOriginal') {
-                                onPressOpenOriginal?.();
-                                return;
-                            }
-                            if (actionId === 'notifications') {
-                                onPressOpenNotifications?.();
-                                return;
-                            }
-                            if (actionId === 'edit') {
-                                onPressEdit(post);
-                                return;
-                            }
-                            if (actionId === 'quote') {
-                                onPressQuote(post);
-                                return;
-                            }
-                            if (actionId === 'delete') {
-                                onPressDelete(post);
-                                return;
-                            }
-                            if (actionId === 'bookmark') {
-                                onPressBookmark(post);
-                                return;
-                            }
-                            if (actionId === 'copy') {
-                                onPressCopy(post);
-                                return;
-                            }
-                            if (actionId === 'share') {
-                                onPressShare(post);
-                            }
-                        }}
-                        shouldOpenOnLongPress={false}
-                        style={styles.composerMenuView}>
-                        <View
-                            style={[
-                                styles.postActionButton,
-                                styles.reactionMenuButton,
-                                { backgroundColor: tonal.primary15 },
-                            ]}>
-                            <MaterialCommunityIcons
-                                name="dots-horizontal"
-                                size={scale(16)}
-                                color={themeColor}
-                            />
-                            <Text
-                                numberOfLines={1}
-                                style={[
-                                    styles.postActionText,
-                                    { color: themeColor },
-                                ]}>
-                                {t('更多')}
-                            </Text>
-                        </View>
-                    </MenuView>
-                </View>
+                                {pendingLike ? (
+                                    <ActivityIndicator
+                                        size="small"
+                                        color={themeColor}
+                                    />
+                                ) : (
+                                    <MaterialCommunityIcons
+                                        name={
+                                            isLiked
+                                                ? 'heart'
+                                                : 'heart-outline'
+                                        }
+                                        size={scale(15)}
+                                        color={themeColor}
+                                    />
+                                )}
+                                <Text
+                                    numberOfLines={1}
+                                    style={[
+                                        styles.postActionText,
+                                        { color: themeColor },
+                                    ]}>
+                                    {isLiked ? t('取消讚好') : t('讚好')}
+                                </Text>
+                            </Pressable>
+                        )}
+                        {moreMenu}
+                    </View>
+                ) : null}
                 {nestedRepliesButton}
             </View>
         );

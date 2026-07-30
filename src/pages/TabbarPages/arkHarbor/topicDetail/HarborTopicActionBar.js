@@ -145,7 +145,7 @@ const HarborTopicActionBar = memo(
                 ) : (
                     <MaterialCommunityIcons
                         name={likeIconName}
-                        size={scale(22)}
+                        size={scale(20)}
                         color={likeActive ? themeColor : black.main}
                     />
                 )}
@@ -177,7 +177,7 @@ const HarborTopicActionBar = memo(
                         borderTopColor: themeColorUltraLight,
                         paddingBottom: Math.max(
                             insets.bottom,
-                            verticalScale(8),
+                            verticalScale(4),
                         ),
                     },
                 ]}>
@@ -200,7 +200,7 @@ const HarborTopicActionBar = memo(
                     ]}>
                     <MaterialCommunityIcons
                         name="pencil-outline"
-                        size={scale(16)}
+                        size={scale(14)}
                         color={black.third}
                     />
                     <Text
@@ -273,7 +273,7 @@ const HarborTopicActionBar = memo(
                                         ? 'star'
                                         : 'star-outline'
                                 }
-                                size={scale(22)}
+                                size={scale(20)}
                                 color={
                                     bookmarked ? themeColor : black.main
                                 }
@@ -291,7 +291,7 @@ const HarborTopicActionBar = memo(
                         style={styles.topicActionIconButton}>
                         <MaterialCommunityIcons
                             name="comment-outline"
-                            size={scale(22)}
+                            size={scale(20)}
                             color={black.main}
                         />
                         {formatCount(commentCount) ? (

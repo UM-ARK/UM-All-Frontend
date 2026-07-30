@@ -267,7 +267,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
 
     const contentWidth = Math.max(width - scale(32), scale(220));
     const [topicActionBarHeight, setTopicActionBarHeight] = useState(
-        verticalScale(56),
+        verticalScale(48),
     );
 
     const firstPost = useMemo(
