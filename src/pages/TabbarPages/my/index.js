@@ -2,7 +2,6 @@ import React from 'react';
 import {
     Alert,
     Animated,
-    Linking,
     RefreshControl,
     ScrollView,
     StyleSheet,
@@ -11,19 +10,12 @@ import {
     useWindowDimensions,
 } from 'react-native';
 
-import Clipboard from '@react-native-clipboard/clipboard';
 import { useTranslation } from 'react-i18next';
 import { scale, verticalScale } from 'react-native-size-matters';
-import Toast from 'react-native-simple-toast';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { uiStyle, useTheme } from '../../../components/ThemeContext';
 import { useHarborSession } from '../../../contexts/HarborSessionContext';
-import {
-    ARK_HARBOR_FEEDBACK_CATEGORY_ID,
-    ARK_HARBOR_FEEDBACK_CATEGORY_SLUG,
-    MAIL,
-} from '../../../utils/pathMap';
 import { trigger } from '../../../utils/trigger';
 import HarborDashboard from './components/HarborDashboard';
 import HarborGuestState from './components/HarborGuestState';
@@ -67,68 +59,6 @@ const MyScreen = ({ navigation }) => {
         },
         [t],
     );
-
-    const openHarborFeedbackComposer = React.useCallback(() => {
-        navigation.navigate('HarborComposer', {
-            mode: 'newTopic',
-            categoryId: ARK_HARBOR_FEEDBACK_CATEGORY_ID,
-            categorySlug: ARK_HARBOR_FEEDBACK_CATEGORY_SLUG,
-        });
-    }, [navigation]);
-
-    const handleFeedbackAction = event => {
-        trigger();
-        switch (event.nativeEvent.event) {
-            case 'harbor':
-                if (status === 'signedIn') {
-                    openHarborFeedbackComposer();
-                    break;
-                }
-                Alert.alert(
-                    t('需要登入 Harbor', { ns: 'my' }),
-                    t('登入後即可在論壇提交反饋。', { ns: 'my' }),
-                    [
-                        {
-                            text: t('取消'),
-                            style: 'cancel',
-                            onPress: () => trigger(),
-                        },
-                        {
-                            text: t('登入 Harbor', { ns: 'my' }),
-                            onPress: async () => {
-                                trigger();
-                                try {
-                                    const signedIn = await login({
-                                        routeName: 'HarborComposer',
-                                        params: {
-                                            mode: 'newTopic',
-                                            categoryId:
-                                                ARK_HARBOR_FEEDBACK_CATEGORY_ID,
-                                            categorySlug:
-                                                ARK_HARBOR_FEEDBACK_CATEGORY_SLUG,
-                                        },
-                                    });
-                                    if (signedIn) {
-                                        openHarborFeedbackComposer();
-                                    }
-                                } catch (sessionError) {
-                                    presentHarborError(sessionError);
-                                }
-                            },
-                        },
-                    ],
-                    { cancelable: true },
-                );
-                break;
-            case 'email':
-                Clipboard.setString(MAIL);
-                Toast.show(t('已複製Mail到剪貼板！'));
-                Linking.openURL(`mailto:${MAIL}?subject=ARK功能反饋`);
-                break;
-            default:
-                break;
-        }
-    };
 
     const handleLogin = async () => {
         try {
@@ -204,7 +134,6 @@ const MyScreen = ({ navigation }) => {
                             compact
                             user={user}
                             scrollY={dashboardScrollY}
-                            onFeedbackAction={handleFeedbackAction}
                             onSettingsPress={() =>
                                 navigation.navigate('SettingPage')
                             }
@@ -251,7 +180,6 @@ const MyScreen = ({ navigation }) => {
                 }>
                 <View style={{ width: contentWidth }}>
                     <HarborPageHeader
-                        onFeedbackAction={handleFeedbackAction}
                         onSettingsPress={() =>
                             navigation.navigate('SettingPage')
                         }

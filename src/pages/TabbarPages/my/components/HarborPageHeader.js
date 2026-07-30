@@ -1,7 +1,6 @@
 import React from 'react';
 import {Animated, StyleSheet, Text, View} from 'react-native';
 
-import {MenuView} from '@expo/ui/community/menu';
 import {Image} from 'expo-image';
 import {useTranslation} from 'react-i18next';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -17,7 +16,6 @@ const HarborPageHeader = ({
     compact = false,
     user,
     scrollY,
-    onFeedbackAction,
     onSettingsPress,
 }) => {
     const {theme} = useTheme();
@@ -29,22 +27,6 @@ const HarborPageHeader = ({
             extrapolate: 'clamp',
         })
         : 0;
-    const feedbackActions = [
-        {
-            id: 'harbor',
-            title: 'Harbor ⭐️',
-            image: 'star.fill',
-            imageColor: theme.themeColor,
-            titleColor: theme.themeColor,
-        },
-        {
-            id: 'email',
-            title: 'Email',
-            image: 'envelope',
-            imageColor: theme.themeColor,
-            titleColor: theme.themeColor,
-        },
-    ];
 
     return (
         <View style={[styles.container, compact && styles.compactContainer]}>
@@ -77,26 +59,6 @@ const HarborPageHeader = ({
                 </Animated.View>
             ) : null}
             <View style={styles.actions}>
-                <MenuView
-                    actions={feedbackActions}
-                    onOpenMenu={() => trigger()}
-                    onPressAction={onFeedbackAction}
-                    shouldOpenOnLongPress={false}
-                    style={styles.button}>
-                    <TouchableScale
-                        accessibilityRole="button"
-                        accessibilityLabel={t('反饋')}
-                        style={[
-                            styles.button,
-                            {backgroundColor: theme.tonal.primary15},
-                        ]}>
-                        <Ionicons
-                            name="chatbubble-ellipses-outline"
-                            size={verticalScale(18)}
-                            color={theme.themeColor}
-                        />
-                    </TouchableScale>
-                </MenuView>
                 <TouchableScale
                     accessibilityRole="button"
                     accessibilityLabel={t('設置')}
