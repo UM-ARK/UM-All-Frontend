@@ -102,8 +102,9 @@ const HarborTopicActionBar = memo(
         const insets = useSafeAreaInsets();
         const {
             black,
+            bg_color,
+            disabled,
             themeColor,
-            themeColorUltraLight,
             tonal,
             white,
         } = theme;
@@ -174,7 +175,7 @@ const HarborTopicActionBar = memo(
                     styles.topicActionBar,
                     {
                         backgroundColor: white,
-                        borderTopColor: themeColorUltraLight,
+                        borderTopColor: disabled,
                         paddingBottom: Math.max(
                             insets.bottom,
                             verticalScale(4),
@@ -194,7 +195,7 @@ const HarborTopicActionBar = memo(
                         {
                             backgroundColor: pressed
                                 ? tonal.primary30
-                                : tonal.primary08,
+                                : bg_color,
                             opacity: canReply ? 1 : 0.5,
                         },
                     ]}>

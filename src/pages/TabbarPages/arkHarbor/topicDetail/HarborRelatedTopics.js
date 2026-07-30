@@ -18,7 +18,7 @@ import styles from './styles';
 const HarborRelatedTopics = memo(({ topics, onPressTopic }) => {
     const { theme } = useTheme();
     const { t } = useTranslation('harbor');
-    const { black, themeColor, themeColorUltraLight, tonal, white } = theme;
+    const { black, disabled, themeColor, tonal, white } = theme;
 
     if (!Array.isArray(topics) || topics.length === 0) {
         return <View style={styles.listFooter} />;
@@ -28,10 +28,10 @@ const HarborRelatedTopics = memo(({ topics, onPressTopic }) => {
         <View
             style={[
                 styles.relatedTopics,
-                { backgroundColor: white, borderColor: themeColorUltraLight },
+                { backgroundColor: white, borderColor: disabled },
             ]}>
             <Text style={[styles.relatedTitle, { color: black.main }]}>
-                {t('相關話題')}
+                {t('推薦話題')}
             </Text>
             {topics.map(relatedTopic => (
                 <Pressable
@@ -46,7 +46,7 @@ const HarborRelatedTopics = memo(({ topics, onPressTopic }) => {
                             backgroundColor: pressed
                                 ? tonal.primary15
                                 : white,
-                            borderTopColor: themeColorUltraLight,
+                            borderTopColor: disabled,
                         },
                     ]}>
                     <Text

@@ -218,12 +218,14 @@ const HarborPostCard = memo(
         const { t, i18n } = useTranslation('harbor');
         const {
             black,
+            disabled,
             themeColor,
-            themeColorUltraLight,
             tonal,
             unread,
             white,
         } = theme;
+        // 分割線／邊框統一用淺灰
+        const dividerColor = disabled;
         const nestedIndent = Math.min(
             Math.max(Number(nestedDepth || 0), 0),
             3,
@@ -231,7 +233,7 @@ const HarborPostCard = memo(
         const nestedContainerStyle =
             nestedIndent > 0
                 ? {
-                    borderColor: themeColorUltraLight,
+                    borderColor: dividerColor,
                     borderLeftWidth: StyleSheet.hairlineWidth,
                     marginLeft: nestedIndent,
                 }
@@ -450,37 +452,41 @@ const HarborPostCard = memo(
                         styles.nestedRepliesButton,
                         pressed ? styles.pressedLink : null,
                     ]}>
+                    <View
+                        style={[
+                            styles.nestedRepliesLine,
+                            { backgroundColor: dividerColor },
+                        ]}
+                    />
                     {nestedRepliesLoading ? (
                         <ActivityIndicator
                             size="small"
-                            color={themeColor}
+                            color={black.third}
+                            style={styles.nestedRepliesText}
                         />
                     ) : (
-                        <MaterialCommunityIcons
-                            name={
-                                nestedRepliesAllVisible
-                                    ? 'minus'
-                                    : 'plus'
-                            }
-                            size={scale(14)}
-                            color={themeColor}
-                        />
+                        <Text
+                            style={[
+                                styles.nestedRepliesText,
+                                { color: black.third },
+                            ]}>
+                            {nestedRepliesAllVisible
+                                ? t('收合回覆')
+                                : nestedRepliesExpanded
+                                    ? t('再展開 {{count}} 則回覆', {
+                                        count: nestedReplyBatchCount,
+                                    })
+                                    : t('展開 {{count}} 則回覆', {
+                                        count: nestedReplyBatchCount,
+                                    })}
+                        </Text>
                     )}
-                    <Text
+                    <View
                         style={[
-                            styles.nestedRepliesText,
-                            { color: themeColor },
-                        ]}>
-                        {nestedRepliesAllVisible
-                            ? t('收合回覆')
-                            : nestedRepliesExpanded
-                                ? t('再展開 {{count}} 則回覆', {
-                                    count: nestedReplyBatchCount,
-                                })
-                                : t('展開 {{count}} 則回覆', {
-                                    count: nestedReplyBatchCount,
-                                })}
-                    </Text>
+                            styles.nestedRepliesLine,
+                            { backgroundColor: dividerColor },
+                        ]}
+                    />
                 </Pressable>
             ) : null;
 
@@ -662,7 +668,7 @@ const HarborPostCard = memo(
                             styles.postStateCard,
                             {
                                 backgroundColor: tonal.primary08,
-                                borderColor: themeColorUltraLight,
+                                borderColor: dividerColor,
                             },
                         ]}>
                         <MaterialCommunityIcons
@@ -700,7 +706,7 @@ const HarborPostCard = memo(
                         styles.postStateCard,
                         {
                             backgroundColor: tonal.primary08,
-                            borderColor: themeColorUltraLight,
+                            borderColor: dividerColor,
                         },
                     ]}>
                     <MaterialCommunityIcons
@@ -755,7 +761,7 @@ const HarborPostCard = memo(
                     styles.postCard,
                     isFirstPost ? styles.firstPostCard : null,
                     nestedContainerStyle,
-                    { backgroundColor: white, borderColor: themeColorUltraLight },
+                    { backgroundColor: white },
                 ]}>
                 {isFirstPost ? (
                     <>
@@ -934,6 +940,12 @@ const HarborPostCard = memo(
                             {moreMenu}
                         </View>
                         {nestedRepliesButton}
+                        <View
+                            style={[
+                                styles.firstPostDivider,
+                                { backgroundColor: dividerColor },
+                            ]}
+                        />
                     </>
                 ) : (
                     <View style={styles.replyLayout}>

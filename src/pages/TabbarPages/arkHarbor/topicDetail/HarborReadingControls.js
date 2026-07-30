@@ -34,7 +34,7 @@ const HarborReadingControls = memo(
     }) => {
         const { theme } = useTheme();
         const { t } = useTranslation('harbor');
-        const { black, themeColor, themeColorUltraLight, tonal, white } = theme;
+        const { black, disabled, themeColor, tonal, white } = theme;
         const maxPostNumber = Math.max(Number(highestPostNumber) || 1, 1);
         const syncedPostNumber = Math.min(
             Math.max(Number(currentPostNumber) || 1, 1),
@@ -107,7 +107,7 @@ const HarborReadingControls = memo(
                 style={[
                     styles.readingControls,
                     theme.viewShadow,
-                    { backgroundColor: white, borderColor: themeColorUltraLight },
+                    { backgroundColor: white, borderColor: disabled },
                 ]}>
                 <View style={styles.progressHeader}>
                     <Text style={[styles.progressText, { color: black.second }]}>

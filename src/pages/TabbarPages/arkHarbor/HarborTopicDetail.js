@@ -744,20 +744,20 @@ const HarborTopicDetail = ({ route, navigation }) => {
                             <View
                                 style={[
                                     styles.unreadDividerLine,
-                                    { backgroundColor: themeColor },
+                                    { backgroundColor: theme.disabled },
                                 ]}
                             />
                             <Text
                                 style={[
                                     styles.unreadDividerText,
-                                    { color: themeColor },
+                                    { color: black.third },
                                 ]}>
                                 {t('未讀回覆')}
                             </Text>
                             <View
                                 style={[
                                     styles.unreadDividerLine,
-                                    { backgroundColor: themeColor },
+                                    { backgroundColor: theme.disabled },
                                 ]}
                             />
                         </View>

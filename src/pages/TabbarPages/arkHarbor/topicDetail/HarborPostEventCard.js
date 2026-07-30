@@ -52,9 +52,9 @@ const HarborPostEventCard = memo(({ event, postUrl }) => {
     const { t } = useTranslation('harbor');
     const {
         black,
+        disabled,
         success,
         themeColor,
-        themeColorUltraLight,
         tonal,
         unread,
         white,
@@ -109,7 +109,7 @@ const HarborPostEventCard = memo(({ event, postUrl }) => {
                 styles.eventCard,
                 {
                     backgroundColor: pressed ? tonal.primary15 : white,
-                    borderColor: themeColorUltraLight,
+                    borderColor: disabled,
                 },
             ]}>
             <View

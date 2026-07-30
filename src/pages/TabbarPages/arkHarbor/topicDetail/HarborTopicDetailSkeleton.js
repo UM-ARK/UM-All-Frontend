@@ -13,13 +13,13 @@ const HarborSkeletonBlock = ({ color, style }) => (
 );
 
 const HarborPostSkeleton = ({ theme, compact = false }) => {
-    const { themeColorUltraLight, tonal, white, viewShadow } = theme;
+    const { disabled, tonal, white, viewShadow } = theme;
 
     return (
         <View
             style={[
                 styles.postCard,
-                { backgroundColor: white, borderColor: themeColorUltraLight },
+                { backgroundColor: white, borderColor: disabled },
                 viewShadow,
             ]}>
             <View style={styles.postHeader}>
@@ -98,7 +98,7 @@ const HarborPostSkeleton = ({ theme, compact = false }) => {
 
 const HarborTopicDetailSkeleton = ({ headerHeight, insets, theme }) => {
     const {
-        themeColorUltraLight,
+        disabled,
         tonal,
         white,
         viewShadow,
@@ -119,7 +119,6 @@ const HarborTopicDetailSkeleton = ({ headerHeight, insets, theme }) => {
                         styles.topicHeader,
                         {
                             backgroundColor: white,
-                            borderColor: themeColorUltraLight,
                         },
                         viewShadow,
                     ]}>
@@ -172,6 +171,12 @@ const HarborTopicDetailSkeleton = ({ headerHeight, insets, theme }) => {
                         />
                     </View>
                 </View>
+                <View
+                    style={[
+                        styles.topicHeaderDivider,
+                        { backgroundColor: disabled },
+                    ]}
+                />
 
                 <HarborPostSkeleton theme={theme} />
                 <HarborPostSkeleton theme={theme} compact />
@@ -193,7 +198,7 @@ const HarborTopicDetailSkeleton = ({ headerHeight, insets, theme }) => {
                         viewShadow,
                         {
                             backgroundColor: white,
-                            borderColor: themeColorUltraLight,
+                            borderColor: disabled,
                         },
                     ]}>
                     <View style={styles.progressHeader}>

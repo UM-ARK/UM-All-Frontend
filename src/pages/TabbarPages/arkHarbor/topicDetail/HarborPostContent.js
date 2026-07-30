@@ -160,7 +160,7 @@ const HarborPostContent = memo(
     }) => {
         const { theme } = useTheme();
         const { t } = useTranslation('harbor');
-        const { black, themeColor, themeColorUltraLight, tonal, white } = theme;
+        const { black, disabled, themeColor, tonal, white } = theme;
         const normalizedCooked = useMemo(() => {
             return replaceHarborEmojiImages(cooked || '');
         }, [cooked]);
@@ -190,7 +190,7 @@ const HarborPostContent = memo(
                 },
                 p: {
                     marginTop: 0,
-                    marginBottom: verticalScale(4),
+                    marginBottom: compact ? verticalScale(1) : verticalScale(4),
                 },
                 a: {
                     color: themeColor,
@@ -230,7 +230,7 @@ const HarborPostContent = memo(
                 pre: {
                     color: black.second,
                     backgroundColor: tonal.primary08,
-                    borderColor: themeColorUltraLight,
+                    borderColor: disabled,
                     borderWidth: StyleSheet.hairlineWidth,
                     borderRadius: scale(8),
                     padding: scale(10),
@@ -246,26 +246,26 @@ const HarborPostContent = memo(
                     marginVertical: verticalScale(5),
                 },
                 hr: {
-                    backgroundColor: themeColorUltraLight,
+                    backgroundColor: disabled,
                     height: StyleSheet.hairlineWidth,
                     marginVertical: verticalScale(10),
                 },
                 table: {
-                    borderColor: themeColorUltraLight,
+                    borderColor: disabled,
                     borderWidth: StyleSheet.hairlineWidth,
                     marginVertical: verticalScale(8),
                 },
                 th: {
                     color: black.main,
                     backgroundColor: tonal.primary15,
-                    borderColor: themeColorUltraLight,
+                    borderColor: disabled,
                     borderWidth: StyleSheet.hairlineWidth,
                     padding: scale(6),
                 },
                 td: {
                     color: black.second,
                     backgroundColor: white,
-                    borderColor: themeColorUltraLight,
+                    borderColor: disabled,
                     borderWidth: StyleSheet.hairlineWidth,
                     padding: scale(6),
                 },
@@ -273,8 +273,9 @@ const HarborPostContent = memo(
             [
                 black.main,
                 black.second,
+                compact,
+                disabled,
                 themeColor,
-                themeColorUltraLight,
                 tonal.primary08,
                 tonal.primary15,
                 white,
@@ -286,7 +287,7 @@ const HarborPostContent = memo(
                 meta: { display: 'none' },
                 onebox: {
                     backgroundColor: tonal.primary08,
-                    borderColor: themeColorUltraLight,
+                    borderColor: disabled,
                     borderWidth: StyleSheet.hairlineWidth,
                     borderRadius: scale(10),
                     padding: scale(10),
@@ -300,7 +301,7 @@ const HarborPostContent = memo(
                     marginVertical: verticalScale(8),
                 },
             }),
-            [themeColor, themeColorUltraLight, tonal.primary08],
+            [disabled, themeColor, tonal.primary08],
         );
 
         const renderersProps = useMemo(

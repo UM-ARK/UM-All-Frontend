@@ -22,9 +22,13 @@ const styles = StyleSheet.create({
         paddingHorizontal: scale(28),
     },
     topicHeader: {
-        borderBottomWidth: StyleSheet.hairlineWidth,
         paddingHorizontal: scale(16),
         paddingVertical: verticalScale(16),
+    },
+    // 頂部板塊底部分割線：內縮不貼螢幕邊緣
+    topicHeaderDivider: {
+        height: StyleSheet.hairlineWidth,
+        marginHorizontal: scale(16),
     },
     topicTitle: {
         ...uiStyle.defaultText,
@@ -205,10 +209,14 @@ const styles = StyleSheet.create({
         marginHorizontal: scale(6),
     },
     postCard: {
-        borderBottomWidth: StyleSheet.hairlineWidth,
         paddingHorizontal: scale(16),
         paddingTop: verticalScale(16),
         overflow: 'hidden',
+    },
+    // 1 樓底部內縮分割線（相對貼文內容區，不貼螢幕邊）
+    firstPostDivider: {
+        height: StyleSheet.hairlineWidth,
+        marginTop: verticalScale(8),
     },
     postStateCard: {
         borderWidth: StyleSheet.hairlineWidth,
@@ -380,8 +388,8 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        marginTop: verticalScale(4),
-        marginBottom: verticalScale(4),
+        marginTop: verticalScale(1),
+        marginBottom: verticalScale(1),
     },
     postMetaActions: {
         flexDirection: 'row',
@@ -429,19 +437,24 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         marginLeft: scale(3),
     },
+    // 展開回覆：左右分割線與日期列同寬（在 replyMain / 1 樓內容區內）
     nestedRepliesButton: {
-        alignSelf: 'flex-start',
+        alignSelf: 'stretch',
         flexDirection: 'row',
         alignItems: 'center',
-        minHeight: verticalScale(30),
-        marginBottom: verticalScale(6),
-        paddingHorizontal: scale(4),
+        minHeight: verticalScale(22),
+        marginTop: verticalScale(2),
+        marginBottom: verticalScale(4),
+    },
+    nestedRepliesLine: {
+        flex: 1,
+        height: StyleSheet.hairlineWidth,
     },
     nestedRepliesText: {
         ...uiStyle.defaultText,
         fontSize: scale(11),
         fontWeight: '600',
-        marginLeft: scale(5),
+        marginHorizontal: scale(8),
     },
     postBody: {
         marginTop: verticalScale(8),

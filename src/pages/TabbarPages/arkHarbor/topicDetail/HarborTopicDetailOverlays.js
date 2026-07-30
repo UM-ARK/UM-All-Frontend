@@ -45,8 +45,8 @@ const HarborTopicDetailOverlays = ({
     const { t } = useTranslation('harbor');
     const {
         black,
+        disabled,
         themeColor,
-        themeColorUltraLight,
         tonal,
         trueWhite,
     } = theme;
@@ -399,8 +399,7 @@ const HarborTopicDetailOverlays = ({
                                                 selected || pressed
                                                     ? tonal.primary15
                                                     : theme.white,
-                                            borderTopColor:
-                                                themeColorUltraLight,
+                                            borderTopColor: disabled,
                                         },
                                     ]}>
                                     <MaterialCommunityIcons
