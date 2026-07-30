@@ -379,6 +379,10 @@ const HarborPostContent = memo(
                     <Pressable
                         onPress={() => {
                             trigger();
+                            console.warn(
+                                '[HarborPostContent] Web fallback link:',
+                                postUrl,
+                            );
                             openLink({ URL: postUrl, mode: 'fullScreen' });
                         }}
                         style={({ pressed }) => [

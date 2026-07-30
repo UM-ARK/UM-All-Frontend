@@ -78,6 +78,27 @@ const notificationMeta = {
     chat_quoted: {icon: 'chatbubbles-outline', label: 'Chat 消息'},
     chat_watched_thread: {icon: 'chatbubbles-outline', label: 'Chat 消息'},
     assigned: {icon: 'person-circle-outline', label: '指派'},
+    custom: {icon: 'notifications-outline', label: 'Harbor 通知'},
+    new_features: {
+        icon: 'sparkles-outline',
+        label: '新內容',
+        isAdmin: true,
+    },
+    admin_problems: {
+        icon: 'warning-outline',
+        label: '系統通知',
+        isAdmin: true,
+    },
+    upcoming_change_available: {
+        icon: 'time-outline',
+        label: '內容更新',
+        isAdmin: true,
+    },
+    upcoming_change_automatically_promoted: {
+        icon: 'time-outline',
+        label: '內容更新',
+        isAdmin: true,
+    },
 };
 const defaultNotificationMeta = {
     icon: 'notifications-outline',
@@ -91,18 +112,102 @@ const chatNotificationTypes = new Set([
     'chat_quoted',
     'chat_watched_thread',
 ]);
+const messageNotificationTypes = new Set([
+    'private_message',
+    'invited_to_private_message',
+    'group_message_summary',
+    'membership_request_consolidated',
+]);
+
+function decodeHarborPathPart(value) {
+    try {
+        return decodeURIComponent(value);
+    } catch {
+        return value;
+    }
+}
+
+function getHarborPathTarget(value) {
+    if (typeof value !== 'string' || !value.trim()) {
+        return null;
+    }
+
+    const path = value
+        .trim()
+        .replace(/^https?:\/\/[^/]+/i, '')
+        .split('#')[0];
+    const topicMatch = path.match(
+        /^\/t\/(?:[^/?#]+\/)?(\d+)(?:\/(\d+))?/,
+    );
+    if (topicMatch) {
+        return {
+            kind: 'topic',
+            topicId: Number(topicMatch[1]),
+            postNumber: Number(topicMatch[2]) || null,
+        };
+    }
+
+    const categoryMatch = path.match(
+        /^\/c\/(?:[^/?#]+\/)*([^/?#]+)\/(\d+)/,
+    );
+    if (categoryMatch) {
+        return {
+            kind: 'category',
+            categorySlug: decodeHarborPathPart(categoryMatch[1]),
+            categoryId: Number(categoryMatch[2]),
+        };
+    }
+
+    const tagMatch = path.match(/^\/tag\/([^/?#]+)/);
+    if (tagMatch) {
+        return {
+            kind: 'tag',
+            tag: decodeHarborPathPart(tagMatch[1]),
+        };
+    }
+
+    const query = path.match(/[?&]q=([^&#]+)/)?.[1];
+    if (path.startsWith('/search') && query) {
+        return {
+            kind: 'search',
+            query: decodeHarborPathPart(query.replace(/\+/g, ' ')),
+        };
+    }
+    if (/^\/u\/[^/?#]+\/messages(?:[/?#]|$)/.test(path)) {
+        return {kind: 'messages'};
+    }
+
+    return null;
+}
 
 export function getHarborNotificationPresentation(item, translate = value => value) {
     const meta = notificationMeta[item?.typeName] || defaultNotificationMeta;
     const label = translate(meta.label);
     const actor = item?.actingUsername || '';
-    const title = item?.title || actor || label;
+    const context = actor || item?.data?.group_name || '';
+    const link =
+        item?.data?.url ||
+        item?.data?.path ||
+        item?.data?.link ||
+        item?.data?.bookmarkable_url ||
+        '';
+    const isAdmin =
+        Boolean(meta.isAdmin) ||
+        /^(?:https?:\/\/[^/]+)?\/admin(?:[/?#]|$)/i.test(link);
+    const title =
+        item?.title ||
+        context ||
+        (meta === defaultNotificationMeta
+            ? translate('Harbor 通知')
+            : label);
     const excerpt =
         item?.excerpt ||
-        (actor && title !== actor ? `${actor} · ${label}` : label);
+        (context && title !== context ? context : '');
 
     return {
         icon: meta.icon,
+        isAdmin,
+        label,
         title,
         excerpt,
     };
@@ -110,10 +215,17 @@ export function getHarborNotificationPresentation(item, translate = value => val
 
 export function getHarborNotificationTarget(item, username) {
     if (item?.topicId) {
-        return {kind: 'topic'};
+        return {
+            kind: 'topic',
+            topicId: item.topicId,
+            postNumber: item.postNumber,
+        };
     }
     if (item?.badgeId) {
         return {kind: 'badges'};
+    }
+    if (messageNotificationTypes.has(item?.typeName)) {
+        return {kind: 'messages'};
     }
 
     const data = item?.data || {};
@@ -123,19 +235,11 @@ export function getHarborNotificationTarget(item, username) {
         data.link ||
         data.bookmarkable_url;
     if (typeof explicitPath === 'string' && explicitPath.trim()) {
+        const nativeTarget = getHarborPathTarget(explicitPath);
+        if (nativeTarget) {
+            return nativeTarget;
+        }
         return {kind: 'web', path: explicitPath.trim()};
-    }
-    if (
-        item?.typeName === 'group_message_summary' &&
-        data.group_name &&
-        username
-    ) {
-        return {
-            kind: 'web',
-            path:
-                `/u/${encodeURIComponent(username)}/messages/group/` +
-                encodeURIComponent(data.group_name),
-        };
     }
     if (item?.typeName === 'invitee_accepted' && item.actingUsername) {
         return {
@@ -150,15 +254,6 @@ export function getHarborNotificationTarget(item, username) {
         return {
             kind: 'web',
             path: `/g/${encodeURIComponent(data.group_name)}`,
-        };
-    }
-    if (
-        item?.typeName === 'membership_request_consolidated' &&
-        username
-    ) {
-        return {
-            kind: 'web',
-            path: `/u/${encodeURIComponent(username)}/messages`,
         };
     }
     if (item?.typeName === 'new_features') {
@@ -204,12 +299,7 @@ export function getHarborNotificationTarget(item, username) {
         }
     }
 
-    return {
-        kind: 'web',
-        path: username
-            ? `/u/${encodeURIComponent(username)}/notifications`
-            : '/notifications',
-    };
+    return {kind: 'none'};
 }
 
 export function formatRelativeTime(value, language = 'tc', now = Date.now()) {

@@ -264,17 +264,38 @@ const HarborInboxPage = ({
         const target = getHarborNotificationTarget(item, username);
         if (target.kind === 'topic') {
             navigation.navigate('HarborTopicDetail', {
-                topicId: item.topicId,
-                postNumber: item.postNumber,
+                topicId: target.topicId,
+                postNumber: target.postNumber,
                 topicTitle: presentation.title,
             });
         } else if (target.kind === 'badges') {
             navigation.navigate('HarborBadges');
-        } else {
+        } else if (target.kind === 'messages') {
+            if (!combined) {
+                setSelectedIndex(1);
+            } else {
+                navigation.navigate('HarborInbox', {
+                    initialTab: 'messages',
+                });
+            }
+        } else if (target.kind === 'category') {
+            navigation.navigate('HarborCategoryTopics', {
+                categoryId: target.categoryId,
+                categorySlug: target.categorySlug,
+            });
+        } else if (target.kind === 'tag') {
+            navigation.navigate('HarborTagTopics', {tag: target.tag});
+        } else if (target.kind === 'search') {
+            navigation.navigate('HarborSearch', {query: target.query});
+        } else if (target.kind === 'web') {
+            const url = ARK_HARBOR_ABSOLUTE_URL(target.path);
+            console.warn('[HarborInbox] Web fallback link:', url);
             openLink({
-                URL: ARK_HARBOR_ABSOLUTE_URL(target.path),
+                URL: url,
                 mode: 'fullScreen',
             });
+        } else {
+            Toast.show(t('此通知沒有可查看的相關內容'));
         }
     };
 
@@ -288,6 +309,10 @@ const HarborInboxPage = ({
             !isNotification
                 ? t('點擊開啟私人對話')
                 : presentation.excerpt;
+        const accentColor =
+            isNotification && presentation.isAdmin
+                ? theme.warning
+                : theme.themeColor;
         return (
             <Pressable
                 accessibilityRole="button"
@@ -297,7 +322,6 @@ const HarborInboxPage = ({
                         backgroundColor: theme.white,
                         borderColor: theme.themeColorUltraLight,
                     },
-                    theme.viewShadow,
                     unread && {borderColor: theme.themeColor},
                     pressed && {backgroundColor: theme.tonal.primary08},
                 ]}
@@ -318,7 +342,7 @@ const HarborInboxPage = ({
                                 : 'mail-outline'
                         }
                         size={scale(20)}
-                        color={theme.themeColor}
+                        color={accentColor}
                     />
                 </View>
                 <View style={styles.rowContent}>
@@ -343,12 +367,29 @@ const HarborInboxPage = ({
                         </Text>
                     </View>
                     <Text
-                        numberOfLines={2}
-                        style={[styles.rowExcerpt, {color: theme.black.third}]}>
+                        numberOfLines={1}
+                        style={[
+                            styles.rowType,
+                            {color: accentColor},
+                        ]}>
                         {isNotification
-                            ? presentation.excerpt
-                            : item.excerpt || fallbackExcerpt}
+                            ? presentation.isAdmin
+                                ? `${t('管理員')} · ${presentation.label}`
+                                : presentation.label
+                            : t('私人訊息')}
                     </Text>
+                    {isNotification && !presentation.excerpt ? null : (
+                        <Text
+                            numberOfLines={2}
+                            style={[
+                                styles.rowExcerpt,
+                                {color: theme.black.third},
+                            ]}>
+                            {isNotification
+                                ? presentation.excerpt
+                                : item.excerpt || fallbackExcerpt}
+                        </Text>
+                    )}
                 </View>
                 {unread ? (
                     <View
@@ -593,11 +634,17 @@ const styles = StyleSheet.create({
         ...uiStyle.defaultText,
         fontSize: scale(9),
     },
+    rowType: {
+        ...uiStyle.defaultText,
+        fontSize: scale(9),
+        fontWeight: '600',
+        marginTop: verticalScale(4),
+    },
     rowExcerpt: {
         ...uiStyle.defaultText,
         fontSize: scale(11),
         lineHeight: verticalScale(16),
-        marginTop: verticalScale(5),
+        marginTop: verticalScale(2),
     },
     unreadDot: {
         width: scale(8),

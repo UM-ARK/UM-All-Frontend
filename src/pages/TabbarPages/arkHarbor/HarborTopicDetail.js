@@ -319,8 +319,13 @@ const HarborTopicDetail = ({ route, navigation }) => {
                 return;
             }
 
+            const fallbackUrl = target?.url || url;
+            console.warn(
+                '[HarborPostContent] Web fallback link:',
+                fallbackUrl,
+            );
             openLink({
-                URL: target?.url || url,
+                URL: fallbackUrl,
                 mode: 'fullScreen',
             });
         },

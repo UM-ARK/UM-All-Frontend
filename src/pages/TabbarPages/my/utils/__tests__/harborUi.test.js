@@ -46,21 +46,53 @@ describe('Harbor 消息中心', () => {
             ),
         ).toEqual({
             icon: 'happy-outline',
+            isAdmin: false,
+            label: 't:反應',
             title: '測試話題',
-            excerpt: 'reader · t:反應',
+            excerpt: 'reader',
         });
         expect(
             getHarborNotificationTarget(
                 {topicId: 31, postNumber: 2},
                 'ark-user',
             ),
-        ).toEqual({kind: 'topic'});
+        ).toEqual({
+            kind: 'topic',
+            topicId: 31,
+            postNumber: 2,
+        });
         expect(
             getHarborNotificationTarget({badgeId: 3}, 'ark-user'),
         ).toEqual({kind: 'badges'});
     });
 
-    it('為群組、Chat 與未知通知提供 Web fallback', () => {
+    it('清楚標示管理員通知', () => {
+        expect(
+            getHarborNotificationPresentation(
+                {
+                    typeName: 'upcoming_change_available',
+                },
+                value => `t:${value}`,
+            ),
+        ).toEqual({
+            icon: 'time-outline',
+            isAdmin: true,
+            label: 't:內容更新',
+            title: 't:內容更新',
+            excerpt: '',
+        });
+        expect(
+            getHarborNotificationPresentation(
+                {
+                    typeName: 'custom',
+                    data: {path: '/admin/plugins'},
+                },
+                value => `t:${value}`,
+            ).isAdmin,
+        ).toBe(true);
+    });
+
+    it('為私人訊息與通知連結提供原生目標', () => {
         expect(
             getHarborNotificationTarget(
                 {
@@ -69,10 +101,69 @@ describe('Harbor 消息中心', () => {
                 },
                 'ark user',
             ),
+        ).toEqual({kind: 'messages'});
+        expect(
+            getHarborNotificationTarget(
+                {
+                    typeName: 'bookmark_reminder',
+                    data: {bookmarkable_url: '/t/topic-name/31/4'},
+                },
+                'ark-user',
+            ),
         ).toEqual({
-            kind: 'web',
-            path: '/u/ark%20user/messages/group/course%20helpers',
+            kind: 'topic',
+            topicId: 31,
+            postNumber: 4,
         });
+        expect(
+            getHarborNotificationTarget(
+                {
+                    typeName: 'custom',
+                    data: {path: '/tag/campus-life'},
+                },
+                'ark-user',
+            ),
+        ).toEqual({
+            kind: 'tag',
+            tag: 'campus-life',
+        });
+        expect(
+            getHarborNotificationTarget(
+                {
+                    typeName: 'custom',
+                    data: {url: '/c/campus/activities/8'},
+                },
+                'ark-user',
+            ),
+        ).toEqual({
+            kind: 'category',
+            categorySlug: 'activities',
+            categoryId: 8,
+        });
+        expect(
+            getHarborNotificationTarget(
+                {
+                    typeName: 'custom',
+                    data: {link: '/search?q=course+review'},
+                },
+                'ark-user',
+            ),
+        ).toEqual({
+            kind: 'search',
+            query: 'course review',
+        });
+        expect(
+            getHarborNotificationTarget(
+                {
+                    typeName: 'custom',
+                    data: {path: '/u/ark-user/messages/group/helpers'},
+                },
+                'ark-user',
+            ),
+        ).toEqual({kind: 'messages'});
+    });
+
+    it('只為有明確目標的通知提供 Web fallback', () => {
         expect(
             getHarborNotificationTarget(
                 {
@@ -93,10 +184,7 @@ describe('Harbor 消息中心', () => {
                 {typeName: 'unknown', data: {}},
                 'ark-user',
             ),
-        ).toEqual({
-            kind: 'web',
-            path: '/u/ark-user/notifications',
-        });
+        ).toEqual({kind: 'none'});
         expect(
             getHarborNotificationTarget(
                 {
