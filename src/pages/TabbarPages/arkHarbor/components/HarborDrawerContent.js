@@ -612,11 +612,13 @@ const HarborDrawerContent = ({ navigation }) => {
         () => (
             <View style={styles.drawerFooter}>
                 <DrawerSectionTitle icon="chevron-down" title={t('標籤')} />
-                <DrawerMenuItem
-                    icon="tag-multiple-outline"
-                    label={t('熱門標籤')}
-                    onPress={() => navigateFromDrawer('HarborTagList')}
-                />
+                <View style={styles.footerMenuGroup}>
+                    <DrawerMenuItem
+                        icon="tag-multiple-outline"
+                        label={t('熱門標籤')}
+                        onPress={() => navigateFromDrawer('HarborTagList')}
+                    />
+                </View>
             </View>
         ),
         [navigateFromDrawer, t],
@@ -712,7 +714,7 @@ const styles = StyleSheet.create({
         paddingTop: verticalScale(8),
     },
     menuItem: {
-        minHeight: verticalScale(40),
+        minHeight: verticalScale(35),
         borderRadius: scale(11),
         flexDirection: 'row',
         alignItems: 'center',
@@ -729,18 +731,18 @@ const styles = StyleSheet.create({
         marginLeft: scale(12),
     },
     sectionTitle: {
-        minHeight: verticalScale(40),
+        minHeight: verticalScale(35),
         flexDirection: 'row',
         alignItems: 'center',
         paddingHorizontal: scale(16),
-        paddingTop: verticalScale(8),
+        paddingVertical: verticalScale(4),
     },
     sectionTitleButton: {
         marginHorizontal: scale(8),
-        marginTop: verticalScale(4),
+        marginTop: verticalScale(2),
         paddingHorizontal: scale(8),
-        paddingTop: verticalScale(6),
-        paddingBottom: verticalScale(6),
+        paddingTop: verticalScale(4),
+        paddingBottom: verticalScale(4),
         borderRadius: scale(11),
     },
     sectionTitleText: {
@@ -769,14 +771,14 @@ const styles = StyleSheet.create({
         paddingLeft: scale(8),
     },
     categoryRow: {
-        minHeight: verticalScale(43),
+        minHeight: verticalScale(35),
         borderRadius: scale(11),
         flexDirection: 'row',
         alignItems: 'center',
         marginHorizontal: scale(8),
         marginBottom: verticalScale(2),
         paddingHorizontal: scale(10),
-        paddingVertical: verticalScale(6),
+        paddingVertical: verticalScale(4),
     },
     subcategoryRow: {
         marginLeft: scale(30),
@@ -828,8 +830,11 @@ const styles = StyleSheet.create({
         paddingVertical: verticalScale(22),
     },
     drawerFooter: {
+        paddingTop: verticalScale(2),
+    },
+    // 與 menuGroup 同左右內距，避免疊加在 sectionTitle 上導致與「分類」錯位
+    footerMenuGroup: {
         paddingHorizontal: scale(8),
-        paddingTop: verticalScale(6),
     },
 });
 
