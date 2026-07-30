@@ -136,6 +136,8 @@ const HarborTopicList = ({
     onCapabilities,
     isTopicPressAllowed,
     onScroll,
+    onScrollEndDrag,
+    onMomentumScrollEnd,
     emptyTitle,
     emptyDescription,
     isActive = true,
@@ -520,20 +522,8 @@ const HarborTopicList = ({
 
     const handleTopicPress = useCallback(
         topic => {
-            const lastReadPostNumber = Number(topic.lastReadPostNumber || 0);
-            const unreadCount = Number(topic.unreadCount || 0);
-            const highestPostNumber = Number(topic.highestPostNumber || 0);
-            const resumePostNumber =
-                lastReadPostNumber > 0
-                    ? Math.min(
-                        lastReadPostNumber + (unreadCount > 0 ? 1 : 0),
-                        highestPostNumber || lastReadPostNumber,
-                    )
-                    : undefined;
-
             navigation.navigate('HarborTopicDetail', {
                 topicId: topic.id,
-                postNumber: resumePostNumber,
                 topicTitle: topic.title,
             });
         },
@@ -777,6 +767,8 @@ const HarborTopicList = ({
                 scrollIndicatorInsets={scrollIndicatorInsets}
                 showsVerticalScrollIndicator={true}
                 onScroll={onScroll}
+                onScrollEndDrag={onScrollEndDrag}
+                onMomentumScrollEnd={onMomentumScrollEnd}
                 scrollEventThrottle={16}
             />
         );
@@ -795,6 +787,8 @@ const HarborTopicList = ({
             scrollIndicatorInsets={scrollIndicatorInsets}
             showsVerticalScrollIndicator={true}
             onScroll={onScroll}
+            onScrollEndDrag={onScrollEndDrag}
+            onMomentumScrollEnd={onMomentumScrollEnd}
             scrollEventThrottle={16}
             refreshControl={
                 <RefreshControl
