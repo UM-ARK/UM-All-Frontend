@@ -34,6 +34,9 @@ const getColorDiy = (isLight) => {
     const secondThemeColorValue = '#FF8627';
     const successValue = '#27ae60';
     const unreadValue = '#f75353';
+    const achievementGoldValue = isLight ? '#B77900' : '#F2C14E';
+    const achievementSilverValue = isLight ? '#6F7C87' : '#C2CBD3';
+    const achievementBronzeValue = isLight ? '#A85D32' : '#D9915B';
 
     return {
         isLight: isLight,
@@ -72,6 +75,16 @@ const getColorDiy = (isLight) => {
             third: isLight ? '#666666' : '#e1e1e3',
         },
         trueBlack,
+
+        // Harbor 成就等級配色
+        achievement: {
+            gold: achievementGoldValue,
+            goldTonal: `${achievementGoldValue}18`,
+            silver: achievementSilverValue,
+            silverTonal: `${achievementSilverValue}18`,
+            bronze: achievementBronzeValue,
+            bronzeTonal: `${achievementBronzeValue}18`,
+        },
 
         // 當想用純白，或其他顏色背景，白色文字時用white的色值
         white: whiteColor,

@@ -96,10 +96,10 @@ const styles = StyleSheet.create({
         paddingBottom: verticalScale(8),
     },
     containerWithoutTitle: {
-        paddingTop: verticalScale(10),
+        paddingTop: verticalScale(14),
     },
     statsRow: {
-        minHeight: verticalScale(52),
+        minHeight: verticalScale(64),
         flexDirection: 'row',
         alignItems: 'center',
     },
@@ -109,26 +109,26 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         borderRadius: scale(8),
         paddingHorizontal: scale(3),
-        paddingVertical: verticalScale(2),
+        paddingVertical: verticalScale(4),
     },
     value: {
         ...uiStyle.defaultText,
-        fontSize: scale(17),
+        fontSize: scale(20),
         fontWeight: '760',
         textAlign: 'center',
     },
     label: {
         ...uiStyle.defaultText,
-        fontSize: scale(9),
-        lineHeight: verticalScale(12),
+        fontSize: scale(11),
+        lineHeight: verticalScale(14),
         textAlign: 'center',
-        marginTop: verticalScale(3),
+        marginTop: verticalScale(4),
     },
     divider: {
         position: 'absolute',
         right: 0,
         width: StyleSheet.hairlineWidth,
-        height: verticalScale(28),
+        height: verticalScale(34),
     },
 });
 

@@ -1,13 +1,13 @@
 import React from 'react';
 import {Pressable, StyleSheet, Text, View} from 'react-native';
 
-import {Image} from 'expo-image';
 import {useTranslation} from 'react-i18next';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {scale, verticalScale} from 'react-native-size-matters';
 
 import {uiStyle, useTheme} from '../../../../components/ThemeContext';
 import {trigger} from '../../../../utils/trigger';
+import HarborBadgeIcon from './HarborBadgeIcon';
 import HarborProfileCard from './HarborProfileCard';
 import HarborQuickActions from './HarborQuickActions';
 import HarborSectionHeader from './HarborSectionHeader';
@@ -107,50 +107,28 @@ const HarborProfileOverview = ({user, navigation, onSettingsPress}) => {
 
             <HarborStatsCard items={contributionItems} />
 
-            <View
+            <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('論壇成就')}
                 style={[
                     styles.badgesCard,
                     {backgroundColor: theme.white},
-                ]}>
+                ]}
+                onPress={() => {
+                    trigger();
+                    openBadges();
+                }}>
                 <HarborSectionHeader
                     title={t('論壇成就')}
-                    actionLabel={t('查看全部')}
-                    onAction={openBadges}
+                    showAction
                 />
                 <View style={styles.badgesRow}>
                     {user.badges?.length ? (
                         user.badges.slice(0, 3).map(badge => (
-                            <Pressable
+                            <View
                                 key={badge.id}
-                                accessibilityRole="button"
-                                accessibilityLabel={badge.name}
-                                style={styles.badgeItem}
-                                onPress={() => {
-                                    trigger();
-                                    openBadges();
-                                }}>
-                                <View
-                                    style={[
-                                        styles.badgeIcon,
-                                        {
-                                            backgroundColor:
-                                                theme.tonal.secondary15,
-                                        },
-                                    ]}>
-                                    {badge.imageUrl ? (
-                                        <Image
-                                            source={{uri: badge.imageUrl}}
-                                            style={styles.badgeImage}
-                                            contentFit="contain"
-                                        />
-                                    ) : (
-                                        <MaterialCommunityIcons
-                                            name="medal-outline"
-                                            size={scale(23)}
-                                            color={theme.secondThemeColor}
-                                        />
-                                    )}
-                                </View>
+                                style={styles.badgeItem}>
+                                <HarborBadgeIcon badge={badge} compact />
                                 <Text
                                     numberOfLines={2}
                                     style={[
@@ -159,7 +137,7 @@ const HarborProfileOverview = ({user, navigation, onSettingsPress}) => {
                                     ]}>
                                     {badge.name}
                                 </Text>
-                            </Pressable>
+                            </View>
                         ))
                     ) : (
                         <View style={styles.badgeEmpty}>
@@ -178,9 +156,7 @@ const HarborProfileOverview = ({user, navigation, onSettingsPress}) => {
                         </View>
                     )}
                 </View>
-            </View>
-
-            <HarborStatsCard title={t('閱讀概況')} items={user.stats} />
+            </Pressable>
         </View>
     );
 };
@@ -215,18 +191,6 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'center',
         paddingHorizontal: scale(4),
-    },
-    badgeIcon: {
-        width: scale(42),
-        height: scale(42),
-        borderRadius: scale(10),
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginBottom: verticalScale(5),
-    },
-    badgeImage: {
-        width: scale(28),
-        height: scale(28),
     },
     badgeName: {
         ...uiStyle.defaultText,

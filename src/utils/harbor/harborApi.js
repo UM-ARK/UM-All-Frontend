@@ -1199,7 +1199,7 @@ function normalizeBadges(data) {
             return {
                 id: String(userBadge.id || `badge-${index}`),
                 name: badge.name || '',
-                description: badge.description || '',
+                description: stripHtml(badge.description),
                 imageUrl: badge.image_url || null,
                 icon: badge.icon || '',
                 badgeTypeId: Number(badge.badge_type_id) || 3,
@@ -1364,16 +1364,7 @@ function normalizeProfile(
                     'topicsRead',
                     summary.topics_entered,
                 ),
-                label: '瀏覽話題',
-            },
-            {
-                key: 'postsRead',
-                value: summaryMetric(
-                    'stats',
-                    'postsRead',
-                    summary.posts_read_count,
-                ),
-                label: '已讀貼文',
+                label: '已讀話題',
             },
         ],
         badges,

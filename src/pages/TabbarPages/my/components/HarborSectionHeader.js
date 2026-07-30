@@ -7,35 +7,41 @@ import {scale, verticalScale} from 'react-native-size-matters';
 import {uiStyle, useTheme} from '../../../../components/ThemeContext';
 import {trigger} from '../../../../utils/trigger';
 
-const HarborSectionHeader = ({title, actionLabel, onAction}) => {
+const HarborSectionHeader = ({
+    title,
+    actionLabel,
+    onAction,
+    showAction = false,
+}) => {
     const {theme} = useTheme();
-    const hasAction = Boolean(actionLabel && onAction);
+    const hasAction = Boolean(onAction || showAction);
+    const actionIcon = (
+        <Ionicons
+            name="chevron-forward"
+            size={scale(14)}
+            color={theme.black.third}
+        />
+    );
 
     return (
         <View style={styles.container}>
             <Text style={[styles.title, {color: theme.black.main}]}>
                 {title}
             </Text>
-            {hasAction ? (
+            {onAction ? (
                 <Pressable
                     accessibilityRole="button"
-                    accessibilityLabel={actionLabel}
+                    accessibilityLabel={actionLabel || title}
                     hitSlop={scale(8)}
                     style={styles.action}
                     onPress={() => {
                         trigger();
                         onAction();
                     }}>
-                    <Text
-                        style={[styles.actionText, {color: theme.black.third}]}>
-                        {actionLabel}
-                    </Text>
-                    <Ionicons
-                        name="chevron-forward"
-                        size={scale(14)}
-                        color={theme.black.third}
-                    />
+                    {actionIcon}
                 </Pressable>
+            ) : hasAction ? (
+                <View style={styles.action}>{actionIcon}</View>
             ) : null}
         </View>
     );
@@ -55,19 +61,12 @@ const styles = StyleSheet.create({
         ...uiStyle.defaultText,
         flexShrink: 1,
         fontSize: scale(14),
-        fontWeight: '700',
     },
     action: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: scale(2),
         paddingVertical: verticalScale(2),
         marginLeft: scale(8),
-    },
-    actionText: {
-        ...uiStyle.defaultText,
-        fontSize: scale(12),
-        fontWeight: '500',
     },
 });
 

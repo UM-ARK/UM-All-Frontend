@@ -10,10 +10,8 @@ import {
 import {isLiquidGlassSupported} from '@callstack/liquid-glass';
 import {useHeaderHeight} from '@react-navigation/elements';
 import {FlashList} from '@shopify/flash-list';
-import {Image} from 'expo-image';
 import {useTranslation} from 'react-i18next';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {scale, verticalScale} from 'react-native-size-matters';
 
 import {uiStyle, useTheme} from '../../../../components/ThemeContext';
@@ -21,6 +19,7 @@ import {useHarborSession} from '../../../../contexts/HarborSessionContext';
 import {fetchHarborBadges} from '../../../../utils/harbor/harborApi';
 import {trigger} from '../../../../utils/trigger';
 import {HarborInlineRetry} from '../../arkHarbor/components/HarborListStates';
+import HarborBadgeIcon from '../components/HarborBadgeIcon';
 import HarborEmptyState from '../components/HarborEmptyState';
 
 const ListSeparator = () => <View style={styles.separator} />;
@@ -116,36 +115,8 @@ const HarborBadgesPage = ({navigation}) => {
                         style={[
                             styles.badgeCard,
                             {backgroundColor: theme.white},
-                            theme.viewShadow,
                         ]}>
-                        <View
-                            style={[
-                                styles.badgeIcon,
-                                {
-                                    backgroundColor:
-                                        item.badgeTypeId === 1
-                                            ? theme.tonal.secondary30
-                                            : theme.tonal.primary15,
-                                },
-                            ]}>
-                            {item.imageUrl ? (
-                                <Image
-                                    source={{uri: item.imageUrl}}
-                                    style={styles.badgeImage}
-                                    contentFit="contain"
-                                />
-                            ) : (
-                                <MaterialCommunityIcons
-                                    name="medal-outline"
-                                    size={scale(27)}
-                                    color={
-                                        item.badgeTypeId === 1
-                                            ? theme.secondThemeColor
-                                            : theme.themeColor
-                                    }
-                                />
-                            )}
-                        </View>
+                        <HarborBadgeIcon badge={item} />
                         <View style={styles.badgeContent}>
                             <View style={styles.badgeTitleRow}>
                                 <Text
@@ -272,17 +243,6 @@ const styles = StyleSheet.create({
         gap: scale(13),
         paddingHorizontal: scale(16),
         paddingVertical: verticalScale(14),
-    },
-    badgeIcon: {
-        width: scale(58),
-        height: scale(58),
-        borderRadius: scale(19),
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    badgeImage: {
-        width: scale(39),
-        height: scale(39),
     },
     badgeContent: {
         flex: 1,

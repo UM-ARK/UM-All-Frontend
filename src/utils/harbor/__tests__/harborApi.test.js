@@ -179,7 +179,6 @@ describe('Harbor API 資料正規化', () => {
                 {key: 'daysVisited', value: '90'},
                 {key: 'readTime', value: '120'},
                 {key: 'topicsRead', value: '45'},
-                {key: 'postsRead', value: '678'},
             ],
             badges: [{id: 'badge-1'}],
         };
@@ -218,7 +217,6 @@ describe('Harbor API 資料正規化', () => {
             '90',
             '120',
             '45',
-            '678',
         ]);
         expect(result.badges).toEqual(previousUser.badges);
         expect(result.partialProfile).toBe(true);
@@ -265,7 +263,6 @@ describe('Harbor API 資料正規化', () => {
             '—',
         ]);
         expect(result.stats.map(item => item.value)).toEqual([
-            '—',
             '—',
             '—',
             '—',
@@ -1693,7 +1690,12 @@ describe('Harbor API 資料正規化', () => {
         getSpy.mockResolvedValue({
             data: {
                 badges: [
-                    {id: 1, name: '首次分享', badge_type_id: 3},
+                    {
+                        id: 1,
+                        name: '首次分享',
+                        description: '<a href="/guidelines">授與</a>社群功能',
+                        badge_type_id: 3,
+                    },
                     {id: 2, name: '熱心回覆', badge_type_id: 2},
                 ],
                 user_badges: [
@@ -1718,5 +1720,6 @@ describe('Harbor API 資料正規化', () => {
             '熱心回覆',
             '首次分享',
         ]);
+        expect(badges[1].description).toBe('授與 社群功能');
     });
 });
