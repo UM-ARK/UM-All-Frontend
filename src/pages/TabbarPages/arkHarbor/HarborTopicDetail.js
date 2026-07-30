@@ -9,6 +9,7 @@ import {
     ActivityIndicator,
     Alert,
     InteractionManager,
+    Platform,
     Pressable,
     RefreshControl,
     Share,
@@ -449,11 +450,34 @@ const HarborTopicDetail = ({ route, navigation }) => {
                     : null,
                 tonalPrimary15: tonal.primary15,
             }),
-            headerRight: createHarborTopicShareButton({
-                accessibilityLabel: t('分享'),
-                onPress: shareCurrentPost,
-                themeColor,
-            }),
+            // iOS：原生 UIBarButtonItem，液態玻璃下才是標準圓形
+            headerRight:
+                Platform.OS === 'ios'
+                    ? undefined
+                    : createHarborTopicShareButton({
+                          accessibilityLabel: t('分享'),
+                          onPress: shareCurrentPost,
+                          themeColor,
+                      }),
+            unstable_headerRightItems:
+                Platform.OS === 'ios'
+                    ? () => [
+                          {
+                              type: 'button',
+                              label: t('分享'),
+                              accessibilityLabel: t('分享'),
+                              icon: {
+                                  type: 'sfSymbol',
+                                  name: 'square.and.arrow.up',
+                              },
+                              tintColor: themeColor,
+                              onPress: () => {
+                                  trigger();
+                                  shareCurrentPost();
+                              },
+                          },
+                      ]
+                    : undefined,
         });
     }, [
         black.main,
