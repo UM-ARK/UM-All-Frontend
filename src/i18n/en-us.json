@@ -415,6 +415,7 @@
         "回覆這個話題": "Reply to this topic",
         "完成": "Done",
         "建立話題": "Create Topic",
+        "發佈話題": "Publish Topic",
         "引用": "Quote",
         "操作太頻繁，請在 {{count}} 秒後再試。": "Too many requests. Try again in {{count}} seconds.",
         "標題": "Title",

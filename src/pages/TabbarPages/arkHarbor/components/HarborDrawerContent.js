@@ -524,6 +524,15 @@ const HarborDrawerContent = ({ navigation }) => {
                         active
                     />
                     <DrawerMenuItem
+                        icon="plus-box-outline"
+                        label={t('發佈話題')}
+                        onPress={() =>
+                            navigateFromDrawer('HarborComposer', {
+                                mode: 'newTopic',
+                            })
+                        }
+                    />
+                    <DrawerMenuItem
                         icon="account-outline"
                         label={t('個人中心')}
                         onPress={handleMyPress}
@@ -703,13 +712,13 @@ const styles = StyleSheet.create({
         paddingTop: verticalScale(8),
     },
     menuItem: {
-        minHeight: verticalScale(43),
+        minHeight: verticalScale(40),
         borderRadius: scale(11),
         flexDirection: 'row',
         alignItems: 'center',
         marginBottom: verticalScale(2),
         paddingHorizontal: scale(12),
-        paddingVertical: verticalScale(7),
+        paddingVertical: verticalScale(4),
     },
     menuLabel: {
         ...uiStyle.defaultText,

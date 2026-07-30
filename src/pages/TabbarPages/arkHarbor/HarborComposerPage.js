@@ -175,7 +175,7 @@ const HarborComposerPage = ({route, navigation}) => {
             hasDraftContent;
         navigation.setOptions({
             headerTitle: isNewTopic
-                ? t('建立話題')
+                ? t('發佈話題')
                 : isReply
                     ? t('回覆話題')
                     : t('編輯貼文'),
