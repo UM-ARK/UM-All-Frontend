@@ -50,7 +50,6 @@ import HarborTopicDetailOverlays from './topicDetail/HarborTopicDetailOverlays';
 import HarborTopicDetailSkeleton from './topicDetail/HarborTopicDetailSkeleton';
 import {
     canUpdatePostReaction,
-    extractPostQuoteText,
     getLikeAction,
     getReactionCount,
 } from './topicDetail/harborTopicModels';
@@ -592,40 +591,6 @@ const HarborTopicDetail = ({ route, navigation }) => {
         topicId,
     ]);
 
-    const openPostQuoteComposer = useCallback(
-        post => {
-            const username = String(
-                post.username || post.display_username || '',
-            ).replace(/["\r\n]/g, '');
-            const quoteText = extractPostQuoteText(post.cooked).replace(
-                /\[\/quote\]/gi,
-                '[／quote]',
-            );
-            const quoteRaw =
-                `[quote="${username}, post:${post.post_number}, topic:${topicId}"]\n` +
-                `${quoteText}\n[/quote]\n\n`;
-            openHarborComposer(navigation, {
-                mode: 'reply',
-                topicId,
-                topicTitle: topic?.title || initialTopicTitle,
-                categoryId: topic?.category_id,
-                replyToPostNumber: post.post_number,
-                replyToUsername:
-                    post.username ||
-                    post.display_username ||
-                    post.name,
-                quoteRaw,
-            });
-        },
-        [
-            initialTopicTitle,
-            navigation,
-            topic?.category_id,
-            topic?.title,
-            topicId,
-        ],
-    );
-
     const openPostEditComposer = useCallback(
         post => {
             openHarborComposer(navigation, {
@@ -773,7 +738,6 @@ const HarborTopicDetail = ({ route, navigation }) => {
                         onPressOpenOriginal={
                             isFirstPost ? openOriginalTopic : undefined
                         }
-                        onPressQuote={openPostQuoteComposer}
                         onPressReply={scrollToPost}
                         onPressShare={sharePost}
                         onPressTag={openTag}
@@ -846,7 +810,6 @@ const HarborTopicDetail = ({ route, navigation }) => {
             openNotificationLevels,
             openOriginalTopic,
             openPostEditComposer,
-            openPostQuoteComposer,
             openPostReplyComposer,
             openTag,
             pendingMutations,

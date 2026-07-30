@@ -58,45 +58,6 @@ const extractPostImages = html => {
     return [...new Set(images)];
 };
 
-const extractPostQuoteText = html => {
-    if (!html || typeof html !== 'string') {
-        return '';
-    }
-
-    return html
-        .replace(/<(script|style)\b[^>]*>[\s\S]*?<\/\1>/gi, '')
-        .replace(/<br\s*\/?>/gi, '\n')
-        .replace(/<\/(?:blockquote|div|h[1-6]|li|p|pre)>/gi, '\n')
-        .replace(/<li\b[^>]*>/gi, '• ')
-        .replace(/<[^>]*>/g, '')
-        .replace(/&nbsp;/gi, ' ')
-        .replace(/&hellip;/gi, '…')
-        .replace(/&apos;/gi, "'")
-        .replace(/&amp;/gi, '&')
-        .replace(/&lt;/gi, '<')
-        .replace(/&gt;/gi, '>')
-        .replace(/&#39;/gi, "'")
-        .replace(/&quot;/gi, '"')
-        .replace(/&#x([0-9a-f]+);/gi, (match, entityValue) => {
-            const codePoint = Number.parseInt(entityValue, 16);
-            return Number.isFinite(codePoint) && codePoint <= 0x10ffff
-                ? String.fromCodePoint(codePoint)
-                : match;
-        })
-        .replace(/&#([0-9]+);/g, (match, entityValue) => {
-            const codePoint = Number.parseInt(entityValue, 10);
-            return Number.isFinite(codePoint) && codePoint <= 0x10ffff
-                ? String.fromCodePoint(codePoint)
-                : match;
-        })
-        .replace(/\r\n?/g, '\n')
-        .replace(/[ \t]+\n/g, '\n')
-        .replace(/\n[ \t]+/g, '\n')
-        .replace(/[ \t]{2,}/g, ' ')
-        .replace(/\n{3,}/g, '\n\n')
-        .trim();
-};
-
 const getReactionCount = post => {
     if (Number.isFinite(post?.reaction_users_count)) {
         return post.reaction_users_count;
@@ -383,7 +344,6 @@ export {
     canUpdatePostReaction,
     collectNestedPosts,
     extractPostImages,
-    extractPostQuoteText,
     flattenNestedPosts,
     getHarborMutationError,
     getLikeAction,

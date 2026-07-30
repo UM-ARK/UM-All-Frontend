@@ -192,7 +192,6 @@ const HarborPostCard = memo(
         onPressLink,
         onPressOpenNotifications,
         onPressOpenOriginal,
-        onPressQuote,
         onPressReply,
         onPressShare,
         onPressTag,
@@ -345,18 +344,6 @@ const HarborPostCard = memo(
                     },
                 });
             }
-            if (canReply) {
-                actions.push({
-                    id: 'quote',
-                    title: t('引用'),
-                    image: Platform.select({
-                        ios: 'quote.bubble',
-                        android: 'ic_menu_revert',
-                    }),
-                    imageColor: black.third,
-                    titleColor: black.third,
-                });
-            }
             if (post.can_edit) {
                 actions.push({
                     id: 'edit',
@@ -424,7 +411,6 @@ const HarborPostCard = memo(
             return actions;
         }, [
             black.third,
-            canReply,
             isFirstPost,
             pendingBookmark,
             pendingDelete,
@@ -502,10 +488,6 @@ const HarborPostCard = memo(
             }
             if (actionId === 'edit') {
                 onPressEdit(post);
-                return;
-            }
-            if (actionId === 'quote') {
-                onPressQuote(post);
                 return;
             }
             if (actionId === 'delete') {
