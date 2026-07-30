@@ -41,9 +41,6 @@ import HarborTopicList from './components/HarborTopicList';
 const VIEW_CONFIG = {
     latest: { label: '最新', analytics: 'latest' },
     top: { label: '熱門', analytics: 'top' },
-    newContent: { label: '新內容', analytics: 'new_content' },
-    new: { label: '新話題', analytics: 'new' },
-    unread: { label: '未讀', analytics: 'unread' },
 };
 // 對齊資訊頁 Top Tab（~30），並預留搜尋列高度
 const STICKY_TOOLBAR_HEIGHT = verticalScale(36);
@@ -525,15 +522,10 @@ const ForumPage = ({ navigation }) => {
             signedIn: status === 'signedIn',
             unavailable: capabilitiesUnavailable,
         });
-        if (
-            availableViews.includes('new') &&
-            availableViews.includes('unread')
-        ) {
-            return availableViews
-                .map(view => (view === 'new' ? 'newContent' : view))
-                .filter(view => view !== 'unread');
-        }
-        return availableViews;
+        // 不提供新話題／未讀分頁；錯過即略過，角標仍獨立計算
+        return availableViews.filter(
+            view => view !== 'new' && view !== 'unread',
+        );
     }, [capabilities, capabilitiesUnavailable, status]);
 
     const segmentOptions = useMemo(

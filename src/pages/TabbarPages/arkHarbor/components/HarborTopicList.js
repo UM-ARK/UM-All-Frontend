@@ -72,58 +72,7 @@ const getSourceKey = source =>
             : source.tag?.name || source.tag?.slug || '',
     ].join(':');
 
-const fetchTopicListPage = async source => {
-    if (source.view !== 'newContent') {
-        return fetchHarborTopicList(source);
-    }
-
-    const [unreadResult, newResult] = await Promise.all([
-        fetchHarborTopicList({ ...source, view: 'unread' }),
-        fetchHarborTopicList({ ...source, view: 'new' }),
-    ]);
-    const unreadIds = new Set(unreadResult.items.map(item => item.id));
-    const items = [
-        ...unreadResult.items.map(item => ({
-            ...item,
-            newContentType: 'reply',
-        })),
-        ...newResult.items
-            .filter(item => !unreadIds.has(item.id))
-            .map(item => ({
-                ...item,
-                newContentType: 'topic',
-            })),
-    ];
-
-    return {
-        ...unreadResult,
-        items,
-        hasMore: unreadResult.hasMore || newResult.hasMore,
-        nextPage:
-            unreadResult.hasMore || newResult.hasMore
-                ? Math.max(
-                    Number(unreadResult.nextPage || 0),
-                    Number(newResult.nextPage || 0),
-                )
-                : null,
-        capabilities: {
-            canCreateTopic:
-                unreadResult.capabilities.canCreateTopic ||
-                newResult.capabilities.canCreateTopic,
-            solved:
-                unreadResult.capabilities.solved ||
-                newResult.capabilities.solved,
-        },
-    };
-};
-
-const orderNewContentItems = items =>
-    items.sort((first, second) => {
-        return (
-            Number(second.newContentType === 'reply') -
-            Number(first.newContentType === 'reply')
-        );
-    });
+const fetchTopicListPage = source => fetchHarborTopicList(source);
 
 const HarborTopicList = ({
     source,
@@ -364,9 +313,7 @@ const HarborTopicList = ({
             });
             if (
                 reloadLists &&
-                ['new', 'unread', 'newContent'].includes(
-                    sourceRef.current?.view,
-                )
+                ['new', 'unread'].includes(sourceRef.current?.view)
             ) {
                 loadFirstPage({ refresh: true, showIndicator: false });
             }
@@ -439,10 +386,10 @@ const HarborTopicList = ({
                     return;
                 }
                 const seenIds = new Set(itemsRef.current.map(item => item.id));
-                const nextItems = orderNewContentItems([
+                const nextItems = [
                     ...itemsRef.current,
                     ...result.items.filter(item => !seenIds.has(item.id)),
-                ]);
+                ];
                 replaceItems(nextItems);
                 setHasMore(result.hasMore);
                 setNextPage(result.nextPage);
