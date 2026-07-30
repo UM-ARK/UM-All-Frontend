@@ -299,26 +299,45 @@ const Nav = () => {
                     <Stack.Screen
                         name="HarborExplore"
                         component={HarborExplorePage}
+                        options={{
+                            // Harbor 瀏覽／搜尋改為一般堆疊，避免再進詳情時變成 Modal 根頁無返回鈕
+                            presentation: 'card',
+                        }}
                     />
                     <Stack.Screen
                         name="HarborCategoryList"
                         component={HarborCategoryListPage}
+                        options={{
+                            presentation: 'card',
+                        }}
                     />
                     <Stack.Screen
                         name="HarborCategoryTopics"
                         component={HarborTopicListPage}
+                        options={{
+                            presentation: 'card',
+                        }}
                     />
                     <Stack.Screen
                         name="HarborTagList"
                         component={HarborTagListPage}
+                        options={{
+                            presentation: 'card',
+                        }}
                     />
                     <Stack.Screen
                         name="HarborTagTopics"
                         component={HarborTopicListPage}
+                        options={{
+                            presentation: 'card',
+                        }}
                     />
                     <Stack.Screen
                         name="HarborSearch"
                         component={HarborSearchPage}
+                        options={{
+                            presentation: 'card',
+                        }}
                     />
                     <Stack.Screen
                         name="HarborComposer"
@@ -362,6 +381,10 @@ const Nav = () => {
                     <Stack.Screen
                         name="HarborTopicDetail"
                         component={HarborTopicDetail}
+                        options={{
+                            // 帖子詳情一律左右推入，不用 Modal
+                            presentation: 'card',
+                        }}
                     />
                     <Stack.Screen
                         name="Search"
