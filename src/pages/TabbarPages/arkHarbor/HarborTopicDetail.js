@@ -26,7 +26,6 @@ import { useHeaderHeight } from '@react-navigation/elements';
 import Toast from 'react-native-simple-toast';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { scale, verticalScale } from 'react-native-size-matters';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '../../../components/ThemeContext';
@@ -45,7 +44,6 @@ import {
 } from '../../../utils/pathMap';
 import { trigger } from '../../../utils/trigger';
 import HarborPostCard from './topicDetail/HarborPostCard';
-import HarborReadingControls from './topicDetail/HarborReadingControls';
 import HarborRelatedTopics from './topicDetail/HarborRelatedTopics';
 import HarborTopicActionBar from './topicDetail/HarborTopicActionBar';
 import HarborTopicDetailOverlays from './topicDetail/HarborTopicDetailOverlays';
@@ -136,7 +134,6 @@ const HarborTopicDetail = ({ route, navigation }) => {
     } = useHarborSession();
     const { width } = useWindowDimensions();
     const headerHeight = useHeaderHeight();
-    const insets = useSafeAreaInsets();
     const {
         black,
         bg_color,
@@ -164,7 +161,6 @@ const HarborTopicDetail = ({ route, navigation }) => {
     const {
         canReplyToTopic,
         errorMessage,
-        firstUnreadPostNumber,
         highestPostNumber,
         imageUrls,
         isLoading,
@@ -181,8 +177,6 @@ const HarborTopicDetail = ({ route, navigation }) => {
         posts,
         setIsLoadingNext,
         setTopic,
-        setUnreadAfterPostNumber,
-        showReadingControls,
         topic,
         toggleNestedReplies,
         unreadAfterPostNumber,
@@ -202,21 +196,12 @@ const HarborTopicDetail = ({ route, navigation }) => {
         handleScroll,
         handleScrollBeginDrag,
         handleViewableItemsChanged,
-        isJumpVisible,
-        jumpPostNumber,
-        readingControlsDockHeight,
         resetTopicReading: resetReading,
         revealNewReplies: revealReplies,
         scrollToPost,
-        seekReadingProgress,
-        setIsJumpVisible,
-        setJumpPostNumber,
-        setReadingControlsDockHeight,
-        submitPostJump,
     } = useHarborTopicReading({
         composerRefreshAt,
         headerHeight,
-        highestPostNumber,
         latestTopicRef,
         listRef,
         loadTopic,
@@ -286,10 +271,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
     const commentCount = Math.max(Number(topic?.posts_count || 1) - 1, 0);
 
     const listBottomInset =
-        topicActionBarHeight +
-        (showReadingControls
-            ? readingControlsDockHeight + verticalScale(8)
-            : verticalScale(8));
+        topicActionBarHeight + verticalScale(8);
 
     const listContentContainerStyle = useMemo(
         () => ({
@@ -844,6 +826,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
         },
         [
             canReplyToTopic,
+            black.third,
             contentWidth,
             imageUrls,
             isLoadingPrevious,
@@ -870,6 +853,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
             sharePost,
             t,
             themeColor,
+            theme.disabled,
             togglePostLike,
             topic,
             topicId,
@@ -883,7 +867,6 @@ const HarborTopicDetail = ({ route, navigation }) => {
         return (
             <HarborTopicDetailSkeleton
                 headerHeight={headerHeight}
-                insets={insets}
                 theme={theme}
             />
         );
@@ -978,7 +961,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
                             bottom: listBottomInset,
                         }
                 }
-                showsVerticalScrollIndicator={false}
+                showsVerticalScrollIndicator={true}
                 drawDistance={700}
                 ListFooterComponent={
                     <View>
@@ -1020,35 +1003,6 @@ const HarborTopicDetail = ({ route, navigation }) => {
                 }
             />
 
-            {showReadingControls ? (
-                <View
-                    pointerEvents="box-none"
-                    style={[
-                        styles.readingControlsDock,
-                        {
-                            bottom: topicActionBarHeight,
-                            paddingBottom: verticalScale(8),
-                        },
-                    ]}>
-                    <HarborReadingControls
-                        currentPostNumber={currentPostNumber}
-                        highestPostNumber={highestPostNumber}
-                        onFirst={() => scrollToPost(1)}
-                        onJump={() => {
-                            setJumpPostNumber(String(currentPostNumber || 1));
-                            setIsJumpVisible(true);
-                        }}
-                        onLatest={() => scrollToPost(highestPostNumber)}
-                        onUnread={() => scrollToPost(firstUnreadPostNumber)}
-                        onSeek={seekReadingProgress}
-                        unreadPostNumber={firstUnreadPostNumber}
-                        onLayoutHeight={height => {
-                            setReadingControlsDockHeight(height);
-                        }}
-                    />
-                </View>
-            ) : null}
-
             <HarborTopicActionBar
                 bookmarkPending={
                     firstPost
@@ -1088,12 +1042,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
                     style={({ pressed }) => [
                         styles.newRepliesButton,
                         {
-                            bottom:
-                                topicActionBarHeight +
-                                (showReadingControls
-                                    ? readingControlsDockHeight +
-                                      verticalScale(10)
-                                    : verticalScale(10)),
+                            bottom: topicActionBarHeight + verticalScale(10),
                             backgroundColor: pressed
                                 ? tonal.primary50
                                 : themeColor,
@@ -1126,22 +1075,16 @@ const HarborTopicDetail = ({ route, navigation }) => {
             <HarborTopicDetailOverlays
                 bookmarkEditor={bookmarkEditor}
                 changeNotificationLevel={changeNotificationLevel}
-                highestPostNumber={highestPostNumber}
                 imageUrls={imageUrls}
                 imageViewerRef={imageViewerRef}
                 isBookmarkReminderVisible={isBookmarkReminderVisible}
-                isJumpVisible={isJumpVisible}
                 isNotificationVisible={isNotificationVisible}
-                jumpPostNumber={jumpPostNumber}
                 notificationOptions={TOPIC_NOTIFICATION_OPTIONS}
                 removePostBookmark={removePostBookmark}
                 savePostBookmark={savePostBookmark}
                 setBookmarkEditor={setBookmarkEditor}
                 setIsBookmarkReminderVisible={setIsBookmarkReminderVisible}
-                setIsJumpVisible={setIsJumpVisible}
                 setIsNotificationVisible={setIsNotificationVisible}
-                setJumpPostNumber={setJumpPostNumber}
-                submitPostJump={submitPostJump}
                 topic={topic}
             />
         </View>

@@ -98,44 +98,6 @@ const useHarborTopicData = ({
         );
     }, [posts, topic?.highest_post_number, topic?.posts_count]);
 
-    const firstUnreadPostNumber = useMemo(() => {
-        const unreadCount = Math.max(
-            Number(topic?.unread_posts ?? topic?.new_posts ?? 0),
-            0,
-        );
-        if (unreadCount <= 0) {
-            return 0;
-        }
-        const lastReadPostNumber = Number(
-            topic?.last_read_post_number || 0,
-        );
-        const inferredUnreadPostNumber = Math.max(
-            highestPostNumber - unreadCount + 1,
-            1,
-        );
-        return Math.min(
-            lastReadPostNumber > 0
-                ? lastReadPostNumber + 1
-                : inferredUnreadPostNumber,
-            highestPostNumber,
-        );
-    }, [
-        highestPostNumber,
-        topic?.last_read_post_number,
-        topic?.new_posts,
-        topic?.unread_posts,
-    ]);
-
-    // 僅一層樓時無需閱讀進度導航
-    const showReadingControls = useMemo(() => {
-        if (topic?.is_nested_view) {
-            return false;
-        }
-        return (
-            posts.length > 1 || Number(topic?.posts_count || 0) > 1
-        );
-    }, [posts.length, topic?.is_nested_view, topic?.posts_count]);
-
     const canReplyToTopic =
         !topic?.closed &&
         !topic?.archived &&
@@ -623,7 +585,6 @@ const useHarborTopicData = ({
     return {
         canReplyToTopic,
         errorMessage,
-        firstUnreadPostNumber,
         highestPostNumber,
         imageUrls,
         isLoading,
@@ -640,8 +601,6 @@ const useHarborTopicData = ({
         posts,
         setIsLoadingNext,
         setTopic,
-        setUnreadAfterPostNumber,
-        showReadingControls,
         topic,
         toggleNestedReplies,
         unreadAfterPostNumber,

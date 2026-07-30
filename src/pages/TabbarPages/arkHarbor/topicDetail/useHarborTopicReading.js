@@ -13,7 +13,6 @@ import {
     fetchHarborTopic,
     saveHarborTopicTimings,
 } from '../../../../utils/harbor/harborApi';
-import { trigger } from '../../../../utils/trigger';
 import {
     isCanceledRequest,
     mergeTopicWindow,
@@ -25,7 +24,6 @@ const TIMINGS_REPORT_INTERVAL = 10000;
 const useHarborTopicReading = ({
     composerRefreshAt,
     headerHeight,
-    highestPostNumber,
     latestTopicRef,
     listRef,
     loadTopic,
@@ -45,13 +43,7 @@ const useHarborTopicReading = ({
     const handledPostRequestRef = useRef(null);
     // 主動跳樓後忽略 viewability，避免短帖同屏時被最高可見樓層蓋回
     const ignoreViewabilityFromSeekRef = useRef(false);
-    // 底部懸浮閱讀進度高度（含 safe area），供列表底部留白
-    const [readingControlsDockHeight, setReadingControlsDockHeight] = useState(
-        verticalScale(120),
-    );
     const [currentPostNumber, setCurrentPostNumber] = useState(1);
-    const [isJumpVisible, setIsJumpVisible] = useState(false);
-    const [jumpPostNumber, setJumpPostNumber] = useState('');
 
     const resetTopicReading = useCallback(() => {
         listRef.current?.scrollToOffset({
@@ -264,18 +256,6 @@ const useHarborTopicReading = ({
         topicId,
     ]);
 
-    // 閱讀進度 Slider：鬆手後只執行一次跳轉，避免多個非同步滾動互相覆蓋
-    const seekReadingProgress = useCallback(
-        (postNumber, options = {}) => {
-            const scrubbing = Boolean(options.scrubbing);
-            return scrollToPost(postNumber, {
-                animated: !scrubbing,
-                allowFetch: !scrubbing,
-            });
-        },
-        [scrollToPost],
-    );
-
     useEffect(() => {
         const targetPostNumber = pendingScrollRef.current;
         if (!targetPostNumber || posts.length === 0) {
@@ -358,37 +338,14 @@ const useHarborTopicReading = ({
         ignoreViewabilityFromSeekRef.current = false;
     }, []);
 
-    const submitPostJump = useCallback(() => {
-        const nextPostNumber = Number(jumpPostNumber);
-        if (
-            !Number.isInteger(nextPostNumber) ||
-            nextPostNumber <= 0 ||
-            nextPostNumber > highestPostNumber
-        ) {
-            Toast.show(t('請輸入有效樓層'));
-            return;
-        }
-        trigger();
-        setIsJumpVisible(false);
-        scrollToPost(nextPostNumber);
-    }, [highestPostNumber, jumpPostNumber, scrollToPost, t]);
-
     return {
         currentPostNumber,
         handleScroll,
         handleScrollBeginDrag,
         handleViewableItemsChanged,
-        isJumpVisible,
-        jumpPostNumber,
-        readingControlsDockHeight,
         resetTopicReading,
         revealNewReplies,
         scrollToPost,
-        seekReadingProgress,
-        setIsJumpVisible,
-        setJumpPostNumber,
-        setReadingControlsDockHeight,
-        submitPostJump,
     };
 };
 

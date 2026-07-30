@@ -4,7 +4,6 @@ import {
 } from 'react-native';
 
 import { isLiquidGlassSupported } from '@callstack/liquid-glass';
-import { verticalScale } from 'react-native-size-matters';
 
 import styles from './styles';
 
@@ -96,7 +95,7 @@ const HarborPostSkeleton = ({ theme, compact = false }) => {
     );
 };
 
-const HarborTopicDetailSkeleton = ({ headerHeight, insets, theme }) => {
+const HarborTopicDetailSkeleton = ({ headerHeight, theme }) => {
     const {
         disabled,
         tonal,
@@ -182,63 +181,6 @@ const HarborTopicDetailSkeleton = ({ headerHeight, insets, theme }) => {
                 <HarborPostSkeleton theme={theme} compact />
             </View>
 
-            <View
-                style={[
-                    styles.readingControlsDock,
-                    {
-                        paddingBottom: Math.max(
-                            insets.bottom,
-                            verticalScale(8),
-                        ),
-                    },
-                ]}>
-                <View
-                    style={[
-                        styles.readingControls,
-                        viewShadow,
-                        {
-                            backgroundColor: white,
-                            borderColor: disabled,
-                        },
-                    ]}>
-                    <View style={styles.progressHeader}>
-                        <HarborSkeletonBlock
-                            color={tonal.primary15}
-                            style={styles.skeletonProgressLabel}
-                        />
-                        <HarborSkeletonBlock
-                            color={tonal.primary15}
-                            style={styles.skeletonProgressPercent}
-                        />
-                    </View>
-                    <View
-                        style={[
-                            styles.skeletonProgressTrack,
-                            { backgroundColor: tonal.primary15 },
-                        ]}>
-                        <View
-                            style={[
-                                styles.skeletonProgressFill,
-                                { backgroundColor: tonal.primary30 },
-                            ]}
-                        />
-                    </View>
-                    <View style={styles.controlRow}>
-                        <HarborSkeletonBlock
-                            color={tonal.primary15}
-                            style={styles.skeletonControlButton}
-                        />
-                        <HarborSkeletonBlock
-                            color={tonal.primary15}
-                            style={styles.skeletonControlButton}
-                        />
-                        <HarborSkeletonBlock
-                            color={tonal.primary15}
-                            style={styles.skeletonControlButton}
-                        />
-                    </View>
-                </View>
-            </View>
         </View>
     );
 };

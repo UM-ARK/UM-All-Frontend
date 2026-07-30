@@ -23,22 +23,16 @@ import styles from './styles';
 const HarborTopicDetailOverlays = ({
     bookmarkEditor,
     changeNotificationLevel,
-    highestPostNumber,
     imageUrls,
     imageViewerRef,
     isBookmarkReminderVisible,
-    isJumpVisible,
     isNotificationVisible,
-    jumpPostNumber,
     notificationOptions: TOPIC_NOTIFICATION_OPTIONS,
     removePostBookmark,
     savePostBookmark,
     setBookmarkEditor,
     setIsBookmarkReminderVisible,
-    setIsJumpVisible,
     setIsNotificationVisible,
-    setJumpPostNumber,
-    submitPostJump,
     topic,
 }) => {
     const { theme } = useTheme();
@@ -53,107 +47,6 @@ const HarborTopicDetailOverlays = ({
 
     return (
         <>
-            <Modal
-                transparent
-                visible={isJumpVisible}
-                animationType="fade"
-                onRequestClose={() => setIsJumpVisible(false)}>
-                <View style={styles.modalPage}>
-                    <Pressable
-                        style={[
-                            StyleSheet.absoluteFill,
-                            styles.modalBackdrop,
-                            { backgroundColor: theme.trueBlack },
-                        ]}
-                        onPress={() => {
-                            trigger();
-                            setIsJumpVisible(false);
-                        }}
-                    />
-                    <View
-                        style={[
-                            styles.jumpDialog,
-                            { backgroundColor: theme.white },
-                        ]}>
-                        <Text
-                            style={[
-                                styles.jumpDialogTitle,
-                                { color: black.main },
-                            ]}>
-                            {t('跳至樓層')}
-                        </Text>
-                        <Text
-                            style={[
-                                styles.jumpDialogHint,
-                                { color: black.third },
-                            ]}>
-                            {t('樓層範圍：{{first}}–{{last}}', {
-                                first: 1,
-                                last: highestPostNumber,
-                            })}
-                        </Text>
-                        <TextInput
-                            value={jumpPostNumber}
-                            onChangeText={setJumpPostNumber}
-                            keyboardType="number-pad"
-                            returnKeyType="go"
-                            onSubmitEditing={submitPostJump}
-                            autoFocus
-                            selectTextOnFocus
-                            style={[
-                                styles.jumpInput,
-                                {
-                                    color: black.main,
-                                    backgroundColor: tonal.primary08,
-                                    borderColor: themeColor,
-                                },
-                            ]}
-                        />
-                        <View style={styles.jumpDialogActions}>
-                            <Pressable
-                                onPress={() => {
-                                    trigger();
-                                    setIsJumpVisible(false);
-                                }}
-                                style={({ pressed }) => [
-                                    styles.jumpDialogButton,
-                                    {
-                                        backgroundColor: pressed
-                                            ? tonal.primary30
-                                            : tonal.primary15,
-                                    },
-                                ]}>
-                                <Text
-                                    style={[
-                                        styles.jumpDialogButtonText,
-                                        { color: themeColor },
-                                    ]}>
-                                    {t('取消')}
-                                </Text>
-                            </Pressable>
-                            <Pressable
-                                onPress={submitPostJump}
-                                style={({ pressed }) => [
-                                    styles.jumpDialogButton,
-                                    {
-                                        backgroundColor: pressed
-                                            ? tonal.primary50
-                                            : themeColor,
-                                    },
-                                ]}>
-                                <Text
-                                    style={[
-                                        styles.jumpDialogButtonText,
-                                        { color: trueWhite },
-                                    ]}>
-                                    {t('前往')}
-                                </Text>
-                            </Pressable>
-                        </View>
-                    </View>
-                </View>
-            </Modal>
-
             <Modal
                 transparent
                 visible={Boolean(bookmarkEditor)}

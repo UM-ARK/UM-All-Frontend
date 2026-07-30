@@ -36,13 +36,6 @@ const styles = StyleSheet.create({
         lineHeight: scale(29),
         fontWeight: '700',
     },
-    readingControlsDock: {
-        position: 'absolute',
-        left: 0,
-        right: 0,
-        bottom: 0,
-        zIndex: 20,
-    },
     topicActionBar: {
         position: 'absolute',
         left: 0,
@@ -86,59 +79,6 @@ const styles = StyleSheet.create({
     topicActionCount: {
         ...uiStyle.defaultText,
         fontSize: scale(11),
-        fontWeight: '600',
-        marginLeft: scale(3),
-    },
-    readingControls: {
-        borderWidth: StyleSheet.hairlineWidth,
-        borderRadius: scale(14),
-        marginHorizontal: scale(12),
-        marginTop: verticalScale(8),
-        paddingHorizontal: scale(12),
-        paddingVertical: verticalScale(10),
-    },
-    progressHeader: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-    },
-    progressText: {
-        ...uiStyle.defaultText,
-        fontSize: scale(11),
-        fontWeight: '600',
-    },
-    progressPercent: {
-        ...uiStyle.defaultText,
-        fontSize: scale(11),
-        fontWeight: '700',
-    },
-    progressSlider: {
-        width: '100%',
-        height: verticalScale(28),
-        marginTop: verticalScale(2),
-    },
-    controlRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        marginTop: verticalScale(4),
-    },
-    unreadButton: {
-        alignSelf: 'center',
-        marginTop: verticalScale(2),
-        paddingHorizontal: scale(10),
-    },
-    controlButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderRadius: scale(7),
-        paddingHorizontal: scale(7),
-        paddingVertical: verticalScale(5),
-    },
-    controlButtonText: {
-        ...uiStyle.defaultText,
-        fontSize: scale(9),
         fontWeight: '600',
         marginLeft: scale(3),
     },
@@ -769,30 +709,6 @@ const styles = StyleSheet.create({
         borderRadius: scale(8),
         marginRight: scale(6),
     },
-    skeletonProgressLabel: {
-        width: '28%',
-        height: verticalScale(11),
-    },
-    skeletonProgressPercent: {
-        width: '10%',
-        height: verticalScale(11),
-    },
-    skeletonProgressTrack: {
-        height: verticalScale(8),
-        borderRadius: scale(999),
-        marginTop: verticalScale(12),
-        overflow: 'hidden',
-    },
-    skeletonProgressFill: {
-        width: '34%',
-        height: '100%',
-        borderRadius: scale(999),
-    },
-    skeletonControlButton: {
-        width: '29%',
-        height: verticalScale(30),
-        borderRadius: scale(8),
-    },
     unreadDivider: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -886,49 +802,6 @@ const styles = StyleSheet.create({
     },
     modalBackdrop: {
         opacity: 0.55,
-    },
-    jumpDialog: {
-        width: '100%',
-        borderRadius: scale(16),
-        paddingHorizontal: scale(18),
-        paddingVertical: verticalScale(16),
-    },
-    jumpDialogTitle: {
-        ...uiStyle.defaultText,
-        fontSize: scale(17),
-        fontWeight: '700',
-    },
-    jumpDialogHint: {
-        ...uiStyle.defaultText,
-        fontSize: scale(11),
-        marginTop: verticalScale(4),
-    },
-    jumpInput: {
-        ...uiStyle.defaultText,
-        borderWidth: StyleSheet.hairlineWidth,
-        borderRadius: scale(9),
-        fontSize: scale(16),
-        marginTop: verticalScale(12),
-        paddingHorizontal: scale(11),
-        paddingVertical: verticalScale(8),
-    },
-    jumpDialogActions: {
-        flexDirection: 'row',
-        justifyContent: 'flex-end',
-        marginTop: verticalScale(12),
-    },
-    jumpDialogButton: {
-        minWidth: scale(72),
-        alignItems: 'center',
-        borderRadius: scale(8),
-        marginLeft: scale(8),
-        paddingHorizontal: scale(12),
-        paddingVertical: verticalScale(8),
-    },
-    jumpDialogButtonText: {
-        ...uiStyle.defaultText,
-        fontSize: scale(12),
-        fontWeight: '700',
     },
     actionDialog: {
         width: '100%',
