@@ -4,6 +4,7 @@ import React, {
     useLayoutEffect,
     useMemo,
     useRef,
+    useState,
 } from 'react';
 import {
     ActivityIndicator,
@@ -46,20 +47,22 @@ import { trigger } from '../../../utils/trigger';
 import HarborPostCard from './topicDetail/HarborPostCard';
 import HarborReadingControls from './topicDetail/HarborReadingControls';
 import HarborRelatedTopics from './topicDetail/HarborRelatedTopics';
+import HarborTopicActionBar from './topicDetail/HarborTopicActionBar';
 import HarborTopicDetailOverlays from './topicDetail/HarborTopicDetailOverlays';
 import HarborTopicDetailSkeleton from './topicDetail/HarborTopicDetailSkeleton';
-import HarborTopicHeader from './topicDetail/HarborTopicHeader';
 import {
     canUpdatePostReaction,
     extractPostQuoteText,
+    getLikeAction,
+    getReactionCount,
 } from './topicDetail/harborTopicModels';
 import styles from './topicDetail/styles';
 import useHarborTopicActions from './topicDetail/useHarborTopicActions';
 import useHarborTopicReading from './topicDetail/useHarborTopicReading';
 import useHarborTopicData from './topicDetail/useHarborTopicData';
 
-// 列表前綴：話題標題
-const LIST_POST_INDEX_OFFSET = 1;
+// 列表即帖子序列（話題標題已併入 1 樓）
+const LIST_POST_INDEX_OFFSET = 0;
 const TOPIC_VIEWABILITY_CONFIG = {
     // 保留所有仍在畫面的樓層，再以標題下緣判斷目前閱讀樓層
     itemVisiblePercentThreshold: 1,
@@ -263,16 +266,36 @@ const HarborTopicDetail = ({ route, navigation }) => {
     });
 
     const contentWidth = Math.max(width - scale(32), scale(220));
+    const [topicActionBarHeight, setTopicActionBarHeight] = useState(
+        verticalScale(56),
+    );
 
-    const listBottomInset = showReadingControls
-        ? readingControlsDockHeight + verticalScale(8)
-        : verticalScale(12);
+    const firstPost = useMemo(
+        () =>
+            posts.find(post => Number(post.post_number) === 1) || posts[0] || null,
+        [posts],
+    );
+    const firstPostLikeAction = getLikeAction(firstPost);
+    const firstPostLiked = Boolean(firstPostLikeAction?.acted);
+    const firstPostReactionCount = getReactionCount(firstPost);
+    const firstPostBookmarked = Boolean(firstPost?.bookmarked);
+    const firstPostReactionDisabled =
+        sessionStatus === 'signedIn' &&
+        firstPost &&
+        !canUpdatePostReaction(firstPost);
+    const commentCount = Math.max(Number(topic?.posts_count || 1) - 1, 0);
+
+    const listBottomInset =
+        topicActionBarHeight +
+        (showReadingControls
+            ? readingControlsDockHeight + verticalScale(8)
+            : verticalScale(8));
 
     const listContentContainerStyle = useMemo(
         () => ({
             // 液態玻璃透明導覽列下的頂部留白
             paddingTop: isLiquidGlassSupported ? headerHeight : 0,
-            // 有進度條時預留底部懸浮高度；單層樓僅保留小間距
+            // 預留底部操作欄與閱讀控制高度
             paddingBottom: listBottomInset,
         }),
         [headerHeight, listBottomInset],
@@ -430,6 +453,45 @@ const HarborTopicDetail = ({ route, navigation }) => {
         topic?.title,
         topicId,
     ]);
+
+    const jumpToComments = useCallback(() => {
+        if (highestPostNumber < 2) {
+            Toast.show(t('暫無回覆'));
+            return;
+        }
+        scrollToPost(2);
+    }, [highestPostNumber, scrollToPost, t]);
+
+    const handleFirstPostLike = useCallback(() => {
+        if (!firstPost) {
+            return;
+        }
+        togglePostLike(firstPost);
+    }, [firstPost, togglePostLike]);
+
+    const handleFirstPostBookmark = useCallback(() => {
+        if (!firstPost) {
+            return;
+        }
+        openBookmarkEditor(firstPost);
+    }, [firstPost, openBookmarkEditor]);
+
+    const handleFirstPostReaction = useCallback(
+        reactionId => {
+            if (!firstPost?.id) {
+                return;
+            }
+            selectPostReaction(firstPost.id, reactionId);
+        },
+        [firstPost?.id, selectPostReaction],
+    );
+
+    const handleFirstPostDisabledReaction = useCallback(() => {
+        if (!firstPost?.id) {
+            return;
+        }
+        explainPostReactionDisabled(firstPost.id);
+    }, [explainPostReactionDisabled, firstPost?.id]);
 
     const openPostReplyComposer = useCallback(
         post => {
@@ -655,30 +717,6 @@ const HarborTopicDetail = ({ route, navigation }) => {
 
     const renderPost = useCallback(
         ({ item, index }) => {
-            if (item?.__harborItemType === 'topicHeader') {
-                return (
-                    <View>
-                        <HarborTopicHeader
-                            topic={topic}
-                            onOpenNotifications={openNotificationLevels}
-                            onOpenOriginal={openOriginalTopic}
-                            onPressCategory={openCategory}
-                            onPressTag={openTag}
-                            pendingNotification={
-                                pendingMutations[`notification:${topicId}`]
-                            }
-                        />
-                        {isLoadingPrevious ? (
-                            <ActivityIndicator
-                                size="small"
-                                color={themeColor}
-                                style={styles.edgeLoader}
-                            />
-                        ) : null}
-                    </View>
-                );
-            }
-
             const postIndex = index - LIST_POST_INDEX_OFFSET;
             const previousPostNumber =
                 postIndex > 0
@@ -690,9 +728,17 @@ const HarborTopicDetail = ({ route, navigation }) => {
                 Number(item.post_number) > unreadAfterPostNumber &&
                 (postIndex === 0 ||
                     previousPostNumber <= unreadAfterPostNumber);
+            const isFirstPost = Number(item.post_number) === 1;
 
             return (
                 <View>
+                    {isFirstPost && isLoadingPrevious ? (
+                        <ActivityIndicator
+                            size="small"
+                            color={themeColor}
+                            style={styles.edgeLoader}
+                        />
+                    ) : null}
                     {showUnreadDivider ? (
                         <View style={styles.unreadDivider}>
                             <View
@@ -718,6 +764,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
                     ) : null}
                     <HarborPostCard
                         post={item}
+                        topic={isFirstPost ? topic : null}
                         contentWidth={
                             contentWidth -
                             Math.min(
@@ -730,15 +777,21 @@ const HarborTopicDetail = ({ route, navigation }) => {
                         onOpenImage={openImage}
                         onPressAuthor={openAuthor}
                         onPressBookmark={openBookmarkEditor}
+                        onPressCategory={openCategory}
                         onPressComposeReply={openPostReplyComposer}
                         onPressCopy={copyPostPermalink}
                         onPressDelete={confirmDeletePost}
                         onPressEdit={openPostEditComposer}
                         onPressLike={togglePostLike}
                         onPressLink={openHarborLink}
+                        onPressOpenNotifications={openNotificationLevels}
+                        onPressOpenOriginal={
+                            isFirstPost ? openOriginalTopic : undefined
+                        }
                         onPressQuote={openPostQuoteComposer}
                         onPressReply={scrollToPost}
                         onPressShare={sharePost}
+                        onPressTag={openTag}
                         onToggleNestedReplies={toggleNestedReplies}
                         onPressDisabledReaction={
                             explainPostReactionDisabled
@@ -775,6 +828,9 @@ const HarborTopicDetail = ({ route, navigation }) => {
                             pendingMutations[`delete:${item.id}`]
                         }
                         pendingLike={pendingMutations[`like:${item.id}`]}
+                        pendingNotification={
+                            pendingMutations[`notification:${topicId}`]
+                        }
                         pendingReaction={
                             pendingMutations[`reaction:${item.id}`]
                         }
@@ -904,15 +960,9 @@ const HarborTopicDetail = ({ route, navigation }) => {
                 data={listData}
                 renderItem={renderPost}
                 keyExtractor={item => {
-                    if (item?.__harborItemType === 'topicHeader') {
-                        return 'harbor-topic-header';
-                    }
                     return `harbor-post-${item.id}`;
                 }}
                 getItemType={item => {
-                    if (item?.__harborItemType === 'topicHeader') {
-                        return 'topicHeader';
-                    }
                     return 'post';
                 }}
                 contentContainerStyle={listContentContainerStyle}
@@ -924,14 +974,10 @@ const HarborTopicDetail = ({ route, navigation }) => {
                     isLiquidGlassSupported
                         ? {
                             top: headerHeight,
-                            bottom: showReadingControls
-                                ? readingControlsDockHeight
-                                : 0,
+                            bottom: listBottomInset,
                         }
                         : {
-                            bottom: showReadingControls
-                                ? readingControlsDockHeight
-                                : 0,
+                            bottom: listBottomInset,
                         }
                 }
                 showsVerticalScrollIndicator={false}
@@ -944,34 +990,6 @@ const HarborTopicDetail = ({ route, navigation }) => {
                                 color={themeColor}
                                 style={styles.edgeLoader}
                             />
-                        ) : null}
-                        {canReplyToTopic ? (
-                            <Pressable
-                                onPress={() => {
-                                    trigger();
-                                    openTopicReplyComposer();
-                                }}
-                                style={({ pressed }) => [
-                                    styles.topicReplyButton,
-                                    {
-                                        backgroundColor: pressed
-                                            ? tonal.primary50
-                                            : themeColor,
-                                    },
-                                ]}>
-                                <MaterialCommunityIcons
-                                    name="reply-outline"
-                                    size={scale(18)}
-                                    color={trueWhite}
-                                />
-                                <Text
-                                    style={[
-                                        styles.topicReplyButtonText,
-                                        { color: trueWhite },
-                                    ]}>
-                                    {t('回覆話題')}
-                                </Text>
-                            </Pressable>
                         ) : null}
                         <HarborRelatedTopics
                             topics={topic.suggested_topics}
@@ -1010,10 +1028,8 @@ const HarborTopicDetail = ({ route, navigation }) => {
                     style={[
                         styles.readingControlsDock,
                         {
-                            paddingBottom: Math.max(
-                                insets.bottom,
-                                verticalScale(8),
-                            ),
+                            bottom: topicActionBarHeight,
+                            paddingBottom: verticalScale(8),
                         },
                     ]}>
                     <HarborReadingControls
@@ -1029,15 +1045,41 @@ const HarborTopicDetail = ({ route, navigation }) => {
                         onSeek={seekReadingProgress}
                         unreadPostNumber={firstUnreadPostNumber}
                         onLayoutHeight={height => {
-                            setReadingControlsDockHeight(
-                                height +
-                                Math.max(insets.bottom, verticalScale(8)) +
-                                verticalScale(8),
-                            );
+                            setReadingControlsDockHeight(height);
                         }}
                     />
                 </View>
             ) : null}
+
+            <HarborTopicActionBar
+                bookmarkPending={
+                    firstPost
+                        ? pendingMutations[`bookmark:${firstPost.id}`]
+                        : false
+                }
+                bookmarked={firstPostBookmarked}
+                canReply={canReplyToTopic}
+                commentCount={commentCount}
+                currentReaction={firstPost?.current_user_reaction?.id}
+                likeCount={firstPostReactionCount}
+                liked={firstPostLiked}
+                onJumpToComments={jumpToComments}
+                onLayoutHeight={setTopicActionBarHeight}
+                onPressBookmark={handleFirstPostBookmark}
+                onPressCompose={openTopicReplyComposer}
+                onPressDisabledReaction={handleFirstPostDisabledReaction}
+                onPressLike={handleFirstPostLike}
+                onSelectReaction={handleFirstPostReaction}
+                reactionDisabled={firstPostReactionDisabled}
+                reactionPending={
+                    firstPost
+                        ? pendingMutations[`like:${firstPost.id}`] ||
+                          pendingMutations[`reaction:${firstPost.id}`]
+                        : false
+                }
+                reactions={validReactions}
+                reactionsEnabled={validReactions.length > 0}
+            />
 
             {pendingNewPostIds.length > 0 ? (
                 <Pressable
@@ -1048,9 +1090,12 @@ const HarborTopicDetail = ({ route, navigation }) => {
                     style={({ pressed }) => [
                         styles.newRepliesButton,
                         {
-                            bottom: showReadingControls
-                                ? readingControlsDockHeight + verticalScale(10)
-                                : Math.max(insets.bottom, verticalScale(18)),
+                            bottom:
+                                topicActionBarHeight +
+                                (showReadingControls
+                                    ? readingControlsDockHeight +
+                                      verticalScale(10)
+                                    : verticalScale(10)),
                             backgroundColor: pressed
                                 ? tonal.primary50
                                 : themeColor,

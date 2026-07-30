@@ -27,10 +27,6 @@ import {
 } from './harborTopicModels';
 
 const TOPIC_POST_BATCH_SIZE = 20;
-const TOPIC_HEADER_ITEM = Object.freeze({
-    __harborItemType: 'topicHeader',
-    id: 'topic-header',
-});
 
 const useHarborTopicData = ({
     onNewRepliesLoaded,
@@ -90,7 +86,8 @@ const useHarborTopicData = ({
         if (!topic) {
             return [];
         }
-        return [TOPIC_HEADER_ITEM, ...posts];
+        // 話題標題已併入 1 樓卡片，列表僅渲染帖子
+        return posts;
     }, [posts, topic]);
 
     const highestPostNumber = useMemo(() => {

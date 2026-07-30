@@ -19,7 +19,7 @@ import {
     mergeTopicWindow,
 } from './harborTopicModels';
 
-const LIST_POST_INDEX_OFFSET = 1;
+const LIST_POST_INDEX_OFFSET = 0;
 const TIMINGS_REPORT_INTERVAL = 10000;
 
 const useHarborTopicReading = ({
@@ -143,7 +143,7 @@ const useHarborTopicReading = ({
     const scrollToLoadedPost = useCallback(
         (postNumber, animated = true) => {
             const normalizedPostNumber = Number(postNumber);
-            // 第一層回到列表頂部，保留話題頭卡與發帖人資訊
+            // 第一層回到列表頂部（標題已併入 1 樓）
             if (normalizedPostNumber === 1) {
                 listRef.current?.scrollToOffset({
                     offset: 0,
@@ -158,7 +158,6 @@ const useHarborTopicReading = ({
             if (postIndex < 0) {
                 return false;
             }
-            // 列表前綴為話題標題，帖子索引需偏移
             const listIndex = postIndex + LIST_POST_INDEX_OFFSET;
             // 預留頂部導覽列高度，讓目標樓層出現在可見區域上方
             const viewOffset = getPostScrollViewOffset();

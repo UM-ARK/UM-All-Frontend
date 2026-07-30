@@ -26,11 +26,14 @@ import {
     ARK_HARBOR_TOPIC_URL,
 } from '../../../../utils/pathMap';
 import { trigger } from '../../../../utils/trigger';
+import HarborCategoryIcon from '../components/HarborCategoryIcon';
 import HarborPostContent from './HarborPostContent';
 import HarborPostEventCard from './HarborPostEventCard';
 import {
     getLikeAction,
+    getNotificationLevelLabel,
     getReactionCount,
+    getTagLabel,
     NESTED_REPLY_BATCH_SIZE,
 } from './harborTopicModels';
 import styles from './styles';
@@ -174,11 +177,13 @@ const MetaItem = ({ icon, value, color, style }) => {
 const HarborPostCard = memo(
     ({
         post,
+        topic,
         contentWidth,
         imageUrls,
         onOpenImage,
         onPressAuthor,
         onPressBookmark,
+        onPressCategory,
         onPressComposeReply,
         onPressCopy,
         onPressDelete,
@@ -186,9 +191,12 @@ const HarborPostCard = memo(
         onPressEdit,
         onPressLike,
         onPressLink,
+        onPressOpenNotifications,
+        onPressOpenOriginal,
         onPressQuote,
         onPressReply,
         onPressShare,
+        onPressTag,
         onSelectReaction,
         onToggleNestedReplies,
         canReply,
@@ -201,6 +209,7 @@ const HarborPostCard = memo(
         pendingBookmark,
         pendingDelete,
         pendingLike,
+        pendingNotification,
         pendingReaction,
         reactionDisabled,
         reactions,
@@ -249,6 +258,25 @@ const HarborPostCard = memo(
         const likeAction = getLikeAction(post);
         const isLiked = Boolean(likeAction?.acted);
         const currentReaction = post?.current_user_reaction?.id;
+        // 1 樓操作改由頁面底部欄承接，卡片僅保留「更多」；標題併入本卡
+        const isFirstPost = Number(post.post_number) === 1;
+        const topicTags = useMemo(() => {
+            if (!isFirstPost || !topic) {
+                return [];
+            }
+            return Array.isArray(topic.tags)
+                ? topic.tags.map(getTagLabel).filter(Boolean)
+                : [];
+        }, [isFirstPost, topic]);
+        const topicCategoryId = Number(topic?.category_id);
+        const topicCategorySlug =
+            topic?.category_slug || topic?.category?.slug;
+        const topicCategoryName =
+            topic?.category_name || topic?.category?.name;
+        const hasTopicTags =
+            isFirstPost &&
+            ((Number.isInteger(topicCategoryId) && topicCategoryId > 0) ||
+                topicTags.length > 0);
         const postEvent = useMemo(() => parseHarborPostEvent(post), [post]);
         const postUrl = ARK_HARBOR_TOPIC_URL(
             post.topic_id,
@@ -297,6 +325,35 @@ const HarborPostCard = memo(
         const moreMenuActions = useMemo(() => {
             // @react-native-menu/menu：iOS 用 SF Symbol；Android 用系統 drawable 名稱
             const actions = [];
+            if (isFirstPost) {
+                actions.push({
+                    id: 'openOriginal',
+                    title: t('查看 Web 原文'),
+                    image: Platform.select({
+                        ios: 'safari',
+                        android: 'ic_menu_view',
+                    }),
+                    imageColor: black.third,
+                    titleColor: black.third,
+                });
+                actions.push({
+                    id: 'notifications',
+                    title: t(
+                        getNotificationLevelLabel(
+                            topic?.details?.notification_level,
+                        ),
+                    ),
+                    image: Platform.select({
+                        ios: 'bell',
+                        android: 'ic_menu_info_details',
+                    }),
+                    imageColor: black.third,
+                    titleColor: black.third,
+                    attributes: {
+                        disabled: Boolean(pendingNotification),
+                    },
+                });
+            }
             if (canReply) {
                 actions.push({
                     id: 'quote',
@@ -337,19 +394,22 @@ const HarborPostCard = memo(
                     },
                 });
             }
-            actions.push({
-                id: 'bookmark',
-                title: post.bookmarked ? t('已收藏') : t('收藏'),
-                image: Platform.select({
-                    ios: post.bookmarked ? 'bookmark.fill' : 'bookmark',
-                    android: 'ic_menu_save',
-                }),
-                imageColor: black.third,
-                titleColor: black.third,
-                attributes: {
-                    disabled: Boolean(pendingBookmark),
-                },
-            });
+            // 1 樓收藏改由底部欄操作，避免選單重複
+            if (!isFirstPost) {
+                actions.push({
+                    id: 'bookmark',
+                    title: post.bookmarked ? t('已收藏') : t('收藏'),
+                    image: Platform.select({
+                        ios: post.bookmarked ? 'bookmark.fill' : 'bookmark',
+                        android: 'ic_menu_save',
+                    }),
+                    imageColor: black.third,
+                    titleColor: black.third,
+                    attributes: {
+                        disabled: Boolean(pendingBookmark),
+                    },
+                });
+            }
             actions.push({
                 id: 'copy',
                 title: t('複製連結'),
@@ -374,12 +434,15 @@ const HarborPostCard = memo(
         }, [
             black.third,
             canReply,
+            isFirstPost,
             pendingBookmark,
             pendingDelete,
+            pendingNotification,
             post.bookmarked,
             post.can_delete,
             post.can_edit,
             t,
+            topic?.details?.notification_level,
             unread,
         ]);
         const reactionButton = (
@@ -572,102 +635,140 @@ const HarborPostCard = memo(
                     nestedContainerStyle,
                     { backgroundColor: white, borderColor: themeColorUltraLight },
                 ]}>
-                <View style={styles.postHeader}>
-                    <Pressable
-                        accessibilityRole="link"
-                        accessibilityLabel={displayName}
-                        onPress={() => {
-                            trigger();
-                            onPressAuthor(post.username);
-                        }}
-                        style={({ pressed }) => [
-                            styles.authorLink,
-                            pressed ? styles.pressedLink : null,
-                        ]}>
-                        <Image
-                            source={{ uri: avatarUrl }}
-                            style={[
-                                styles.avatar,
-                                { backgroundColor: tonal.primary15 },
-                            ]}
-                            contentFit="cover"
-                            placeholder={theme.imagePlaceholder}
-                            placeholderContentFit="cover"
-                            transition={200}
-                        />
-                        <View style={styles.authorArea}>
-                            <View style={styles.authorNameRow}>
-                                <Text
-                                    style={[
-                                        styles.authorName,
-                                        { color: black.third },
-                                    ]}
-                                    numberOfLines={1}>
-                                    {displayName}
-                                </Text>
-                                {post.user_title ? (
-                                    <Text
-                                        style={[
-                                            styles.userTitle,
-                                            { color: themeColor },
-                                        ]}
-                                        numberOfLines={1}>
-                                        {post.user_title}
-                                    </Text>
-                                ) : null}
-                                {post.staff ? (
-                                    <Text
-                                        style={[
-                                            styles.staffBadge,
-                                            {
-                                                color: themeColor,
-                                                backgroundColor:
-                                                    tonal.primary15,
-                                            },
-                                        ]}>
-                                        Staff
-                                    </Text>
-                                ) : null}
-                            </View>
-                        </View>
-                    </Pressable>
-                    <View style={styles.headerMeta}>
-                        {post.reply_to_post_number ? (
-                            <Pressable
-                                onPress={() => {
-                                    trigger();
-                                    onPressReply(post.reply_to_post_number);
-                                }}
-                                style={({ pressed }) => [
-                                    styles.replyBadge,
-                                    {
-                                        backgroundColor: pressed
-                                            ? tonal.primary30
-                                            : tonal.primary15,
-                                    },
-                                ]}>
-                                <MaterialCommunityIcons
-                                    name="reply-outline"
-                                    size={scale(12)}
-                                    color={themeColor}
-                                />
-                                <Text
-                                    style={[
-                                        styles.replyText,
-                                        { color: themeColor },
-                                    ]}>
-                                    {t('回覆樓層', {
-                                        postNumber: post.reply_to_post_number,
-                                    })}
-                                </Text>
-                            </Pressable>
-                        ) : null}
+                {isFirstPost ? (
+                    <View style={styles.firstPostHeader}>
+                        <Pressable
+                            accessibilityRole="link"
+                            accessibilityLabel={displayName}
+                            onPress={() => {
+                                trigger();
+                                onPressAuthor(post.username);
+                            }}
+                            style={({ pressed }) => [
+                                pressed ? styles.pressedLink : null,
+                            ]}>
+                            <Image
+                                source={{ uri: avatarUrl }}
+                                style={[
+                                    styles.avatar,
+                                    { backgroundColor: tonal.primary15 },
+                                ]}
+                                contentFit="cover"
+                                placeholder={theme.imagePlaceholder}
+                                placeholderContentFit="cover"
+                                transition={200}
+                            />
+                        </Pressable>
                         <Text
-                            style={[styles.postNumber, { color: black.third }]}>
-                            #{post.post_number}
+                            selectable
+                            style={[
+                                styles.firstPostTitle,
+                                { color: black.main },
+                            ]}>
+                            {topic?.title || ''}
                         </Text>
                     </View>
-                </View>
+                ) : (
+                    <View style={styles.postHeader}>
+                        <Pressable
+                            accessibilityRole="link"
+                            accessibilityLabel={displayName}
+                            onPress={() => {
+                                trigger();
+                                onPressAuthor(post.username);
+                            }}
+                            style={({ pressed }) => [
+                                styles.authorLink,
+                                pressed ? styles.pressedLink : null,
+                            ]}>
+                            <Image
+                                source={{ uri: avatarUrl }}
+                                style={[
+                                    styles.avatar,
+                                    { backgroundColor: tonal.primary15 },
+                                ]}
+                                contentFit="cover"
+                                placeholder={theme.imagePlaceholder}
+                                placeholderContentFit="cover"
+                                transition={200}
+                            />
+                            <View style={styles.authorArea}>
+                                <View style={styles.authorNameRow}>
+                                    <Text
+                                        style={[
+                                            styles.authorName,
+                                            { color: black.third },
+                                        ]}
+                                        numberOfLines={1}>
+                                        {displayName}
+                                    </Text>
+                                    {post.user_title ? (
+                                        <Text
+                                            style={[
+                                                styles.userTitle,
+                                                { color: themeColor },
+                                            ]}
+                                            numberOfLines={1}>
+                                            {post.user_title}
+                                        </Text>
+                                    ) : null}
+                                    {post.staff ? (
+                                        <Text
+                                            style={[
+                                                styles.staffBadge,
+                                                {
+                                                    color: themeColor,
+                                                    backgroundColor:
+                                                        tonal.primary15,
+                                                },
+                                            ]}>
+                                            Staff
+                                        </Text>
+                                    ) : null}
+                                </View>
+                            </View>
+                        </Pressable>
+                        <View style={styles.headerMeta}>
+                            {post.reply_to_post_number ? (
+                                <Pressable
+                                    onPress={() => {
+                                        trigger();
+                                        onPressReply(post.reply_to_post_number);
+                                    }}
+                                    style={({ pressed }) => [
+                                        styles.replyBadge,
+                                        {
+                                            backgroundColor: pressed
+                                                ? tonal.primary30
+                                                : tonal.primary15,
+                                        },
+                                    ]}>
+                                    <MaterialCommunityIcons
+                                        name="reply-outline"
+                                        size={scale(12)}
+                                        color={themeColor}
+                                    />
+                                    <Text
+                                        style={[
+                                            styles.replyText,
+                                            { color: themeColor },
+                                        ]}>
+                                        {t('回覆樓層', {
+                                            postNumber: post.reply_to_post_number,
+                                        })}
+                                    </Text>
+                                </Pressable>
+                            ) : null}
+                            <Text
+                                style={[
+                                    styles.postNumber,
+                                    { color: black.third },
+                                ]}>
+                                #{post.post_number}
+                            </Text>
+                        </View>
+                    </View>
+                )}
 
                 <View style={styles.postBody}>
                     <HarborPostContent
@@ -687,6 +788,69 @@ const HarborPostCard = memo(
                     </HarborPostContent>
                 </View>
 
+                {hasTopicTags ? (
+                    <View style={styles.plainTagRow}>
+                        {Number.isInteger(topicCategoryId) &&
+                        topicCategoryId > 0 ? (
+                            <Pressable
+                                accessibilityRole="link"
+                                onPress={() => {
+                                    trigger();
+                                    onPressCategory?.({
+                                        categoryId: topicCategoryId,
+                                        categorySlug: topicCategorySlug,
+                                        categoryName: topicCategoryName,
+                                    });
+                                }}
+                                style={({ pressed }) => [
+                                    styles.plainTag,
+                                    pressed ? styles.pressedLink : null,
+                                ]}>
+                                <HarborCategoryIcon
+                                    category={
+                                        topic.category || {
+                                            id: topicCategoryId,
+                                            name: topicCategoryName,
+                                            slug: topicCategorySlug,
+                                        }
+                                    }
+                                    color={themeColor}
+                                    size={scale(12)}
+                                />
+                                <Text
+                                    style={[
+                                        styles.plainTagText,
+                                        { color: themeColor },
+                                    ]}>
+                                    {topicCategoryName ||
+                                        `分類 #${topicCategoryId}`}
+                                </Text>
+                            </Pressable>
+                        ) : null}
+                        {topicTags.map(tag => (
+                            <Pressable
+                                key={tag}
+                                accessibilityRole="link"
+                                onPress={() => {
+                                    trigger();
+                                    onPressTag?.(tag);
+                                }}
+                                style={({ pressed }) => [
+                                    styles.plainTag,
+                                    pressed ? styles.pressedLink : null,
+                                ]}>
+                                <Text
+                                    style={[
+                                        styles.plainTagText,
+                                        { color: themeColor },
+                                    ]}>
+                                    #{tag}
+                                </Text>
+                            </Pressable>
+                        ))}
+                    </View>
+                ) : null}
+
                 <View style={styles.postMetaRow}>
                     <Text
                         style={[styles.postTime, { color: black.third }]}
@@ -694,48 +858,50 @@ const HarborPostCard = memo(
                         {formatHarborPostTime(post.created_at, i18n.language)}
                         {wasEdited ? ` · ${t('已編輯')}` : ''}
                     </Text>
-                    <View style={styles.postMetaStats}>
-                        <MetaItem
-                            icon="comment-outline"
-                            value={post.reply_count}
-                            color={black.third}
-                            style={styles.postMetaComment}
-                        />
-                        {displayedReactions.length > 0 ? (
-                            <View style={styles.reactionSummary}>
-                                {displayedReactions.map(reaction => (
-                                    <View
-                                        key={reaction.id}
-                                        accessible
-                                        accessibilityLabel={`${t(
-                                            HARBOR_REACTION_LABEL[
-                                                normalizeHarborReactionName(
-                                                    reaction.id,
-                                                )
-                                            ] ||
-                                                normalizeHarborReactionName(
-                                                    reaction.id,
-                                                ).replace(/_/g, ' '),
-                                        )} ${reaction.count}`}
-                                        style={styles.reactionSummaryItem}>
-                                        <HarborReactionIcon
-                                            name={reaction.id}
-                                            size={scale(14)}
-                                        />
-                                        <Text
-                                            style={[
-                                                styles.reactionSummaryText,
-                                                { color: themeColor },
-                                            ]}>
-                                            {reaction.count}
-                                        </Text>
-                                    </View>
-                                ))}
-                            </View>
-                        ) : null}
-                    </View>
+                    {!isFirstPost ? (
+                        <View style={styles.postMetaStats}>
+                            <MetaItem
+                                icon="comment-outline"
+                                value={post.reply_count}
+                                color={black.third}
+                                style={styles.postMetaComment}
+                            />
+                            {displayedReactions.length > 0 ? (
+                                <View style={styles.reactionSummary}>
+                                    {displayedReactions.map(reaction => (
+                                        <View
+                                            key={reaction.id}
+                                            accessible
+                                            accessibilityLabel={`${t(
+                                                HARBOR_REACTION_LABEL[
+                                                    normalizeHarborReactionName(
+                                                        reaction.id,
+                                                    )
+                                                ] ||
+                                                    normalizeHarborReactionName(
+                                                        reaction.id,
+                                                    ).replace(/_/g, ' '),
+                                            )} ${reaction.count}`}
+                                            style={styles.reactionSummaryItem}>
+                                            <HarborReactionIcon
+                                                name={reaction.id}
+                                                size={scale(14)}
+                                            />
+                                            <Text
+                                                style={[
+                                                    styles.reactionSummaryText,
+                                                    { color: themeColor },
+                                                ]}>
+                                                {reaction.count}
+                                            </Text>
+                                        </View>
+                                    ))}
+                                </View>
+                            ) : null}
+                        </View>
+                    ) : null}
                 </View>
-                {canReply ? (
+                {canReply && !isFirstPost ? (
                     <View style={styles.composerActionRow}>
                         <Pressable
                             onPress={() => {
@@ -768,7 +934,7 @@ const HarborPostCard = memo(
                     </View>
                 ) : null}
                 <View style={styles.postActionRow}>
-                    {reactionsEnabled && reactionDisabled ? (
+                    {!isFirstPost && reactionsEnabled && reactionDisabled ? (
                         <Pressable
                             accessibilityRole="button"
                             accessibilityLabel={t('回應')}
@@ -779,7 +945,7 @@ const HarborPostCard = memo(
                             style={styles.reactionMenuView}>
                             {reactionButton}
                         </Pressable>
-                    ) : reactionsEnabled ? (
+                    ) : !isFirstPost && reactionsEnabled ? (
                         <MenuView
                             actions={reactionMenuActions}
                             onOpenMenu={() => trigger()}
@@ -794,7 +960,7 @@ const HarborPostCard = memo(
                             style={styles.reactionMenuView}>
                             {reactionButton}
                         </MenuView>
-                    ) : (
+                    ) : !isFirstPost ? (
                         <Pressable
                             disabled={pendingLike}
                             onPress={() => {
@@ -831,13 +997,21 @@ const HarborPostCard = memo(
                                 {isLiked ? t('取消讚好') : t('讚好')}
                             </Text>
                         </Pressable>
-                    )}
+                    ) : null}
                     <MenuView
                         actions={moreMenuActions}
                         onOpenMenu={() => trigger()}
                         onPressAction={event => {
                             trigger();
                             const actionId = event.nativeEvent.event;
+                            if (actionId === 'openOriginal') {
+                                onPressOpenOriginal?.();
+                                return;
+                            }
+                            if (actionId === 'notifications') {
+                                onPressOpenNotifications?.();
+                                return;
+                            }
                             if (actionId === 'edit') {
                                 onPressEdit(post);
                                 return;
