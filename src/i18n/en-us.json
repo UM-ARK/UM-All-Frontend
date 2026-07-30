@@ -388,6 +388,7 @@
         "草稿放棄失敗，請稍後再試。": "Unable to discard the draft. Try again later.",
         "草稿箱是空的": "No Drafts",
         "離開 Composer 時，有內容的草稿會自動保存在這裡。": "Drafts with content are saved here automatically when you leave the Composer.",
+        "本機草稿只保存在此裝置；清除 App 快取或重新安裝會失去草稿。": "Local drafts are stored only on this device. Clearing the app cache or reinstalling the app will remove them.",
         "登入後查看草稿箱": "Sign In to View Drafts",
         "正在載入草稿…": "Loading drafts…",
         "Harbor 草稿暫時無法同步，已顯示本機草稿。": "Harbor drafts could not sync. Local drafts are shown.",
@@ -415,11 +416,13 @@
         "回覆這個話題": "Reply to this topic",
         "完成": "Done",
         "建立話題": "Create Topic",
+        "發佈": "Publish",
         "發佈話題": "Publish Topic",
         "引用": "Quote",
         "操作太頻繁，請在 {{count}} 秒後再試。": "Too many requests. Try again in {{count}} seconds.",
         "標題": "Title",
         "正在提交…": "Submitting…",
+        "正在上傳圖片…": "Uploading images…",
         "正在準備 Composer…": "Preparing Composer…",
         "正在確認 Harbor 登入狀態…": "Checking your Harbor session…",
         "正在編輯第 {{count}} 樓": "Editing post #{{count}}",
@@ -456,7 +459,9 @@
         "此分類不接受已選擇的部分標籤，請重新選擇。": "Some selected tags are not allowed in this category. Choose the tags again.",
         "每個話題最多只能選擇 {{count}} 個標籤。": "A topic can have at most {{count}} tags.",
         "正文至少需要 {{count}} 個字。": "The body must be at least {{count}} characters.",
-        "正文最多只能有 {{count}} 個字。": "The body can contain at most {{count}} characters."
+        "正文最多只能有 {{count}} 個字。": "The body can contain at most {{count}} characters.",
+        "已準備好上傳": "Ready to upload",
+        "部分圖片上傳失敗，請重試或移除後再發布。": "Some images could not be uploaded. Retry or remove them before publishing."
     },
     "my": {
         "個人中心": "Profile",

@@ -101,6 +101,7 @@ const HarborComposerPage = ({route, navigation}) => {
         isPreparingImages,
         isUploadingImages,
         restoreDraftImages,
+        uploadImages,
     } = useHarborComposerImages({composerSettings, t});
 
     const {
@@ -478,6 +479,7 @@ const HarborComposerPage = ({route, navigation}) => {
         t,
         title,
         titleLength,
+        uploadImages,
         draftKey,
     });
 

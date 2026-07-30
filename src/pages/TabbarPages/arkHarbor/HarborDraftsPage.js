@@ -495,6 +495,29 @@ const HarborDraftsPage = ({
                     </Text>
                 </View>
             ) : null}
+            <View
+                style={[
+                    styles.storageNotice,
+                    {
+                        backgroundColor: theme.tonal.primary08,
+                        borderColor: theme.themeColorUltraLight,
+                    },
+                ]}>
+                <MaterialCommunityIcons
+                    name="cellphone-information"
+                    size={scale(18)}
+                    color={theme.themeColor}
+                />
+                <Text
+                    style={[
+                        styles.storageNoticeText,
+                        {color: theme.black.second},
+                    ]}>
+                    {t(
+                        '本機草稿只保存在此裝置；清除 App 快取或重新安裝會失去草稿。',
+                    )}
+                </Text>
+            </View>
             <FlashList
                 data={drafts}
                 keyExtractor={item => item.draftKey}
@@ -641,6 +664,23 @@ const styles = StyleSheet.create({
         fontWeight: '700',
         marginTop: verticalScale(14),
         textAlign: 'center',
+    },
+    storageNotice: {
+        alignItems: 'center',
+        borderRadius: scale(11),
+        borderWidth: StyleSheet.hairlineWidth,
+        flexDirection: 'row',
+        gap: scale(8),
+        marginHorizontal: scale(14),
+        marginTop: verticalScale(10),
+        paddingHorizontal: scale(12),
+        paddingVertical: verticalScale(9),
+    },
+    storageNoticeText: {
+        ...uiStyle.defaultText,
+        flex: 1,
+        fontSize: scale(11),
+        lineHeight: scale(16),
     },
     warning: {
         borderRadius: scale(11),

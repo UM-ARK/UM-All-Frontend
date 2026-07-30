@@ -52,6 +52,7 @@ export function useHarborComposerSubmit({
     t,
     title,
     titleLength,
+    uploadImages,
 }) {
     const submittingRef = useRef(false);
     const [submitError, setSubmitError] = useState('');
@@ -61,18 +62,24 @@ export function useHarborComposerSubmit({
         : raw;
     const rawLength = composedRaw.trim().length;
     const isPostLengthValid =
-        rawLength >= minimumPostLength &&
+        (rawLength >= minimumPostLength ||
+            (supportsImages && images.length > 0)) &&
         (maximumPostLength == null || rawLength <= maximumPostLength);
     const isSubmitDisabled =
         isSubmitting ||
         isPreparingImages ||
         isUploadingImages;
 
-    const validateForm = useCallback(() => {
+    const validateForm = useCallback(({
+        beforeUpload = false,
+        contentRaw = composedRaw,
+        unreadyImages = hasUnreadyImages,
+    } = {}) => {
+        const contentLength = contentRaw.trim().length;
         if (publishRestriction) {
             return publishRestriction;
         }
-        if (supportsImages && hasUnreadyImages) {
+        if (supportsImages && unreadyImages && !beforeUpload) {
             return t('請等待圖片上傳完成，或移除上傳失敗的圖片。');
         }
         if (
@@ -112,14 +119,17 @@ export function useHarborComposerSubmit({
                 count: maximumTagCount,
             });
         }
-        if (rawLength < minimumPostLength) {
+        if (
+            contentLength < minimumPostLength &&
+            !(beforeUpload && supportsImages && images.length > 0)
+        ) {
             return t('正文至少需要 {{count}} 個字。', {
                 count: minimumPostLength,
             });
         }
         if (
             maximumPostLength != null &&
-            rawLength > maximumPostLength
+            contentLength > maximumPostLength
         ) {
             return t('正文最多只能有 {{count}} 個字。', {
                 count: maximumPostLength,
@@ -129,7 +139,9 @@ export function useHarborComposerSubmit({
     }, [
         areSelectedTagsAllowed,
         categoryId,
+        composedRaw,
         hasUnreadyImages,
+        images.length,
         isEditingFirstPost,
         isNewTopic,
         maximumPostLength,
@@ -139,7 +151,6 @@ export function useHarborComposerSubmit({
         minimumTagCount,
         minimumTitleLength,
         publishRestriction,
-        rawLength,
         requiresCategory,
         selectedTags.length,
         supportsImages,
@@ -157,7 +168,7 @@ export function useHarborComposerSubmit({
             return;
         }
 
-        const validationError = validateForm();
+        const validationError = validateForm({beforeUpload: true});
         if (validationError) {
             setSubmitError(validationError);
             Toast.show(validationError);
@@ -169,6 +180,35 @@ export function useHarborComposerSubmit({
         setSubmitError('');
 
         try {
+            const submissionImages =
+                supportsImages && hasUnreadyImages
+                    ? await uploadImages()
+                    : images;
+            const stillUnready =
+                supportsImages &&
+                submissionImages.some(
+                    image => image.status !== 'uploaded',
+                );
+            if (stillUnready) {
+                const uploadError = t(
+                    '部分圖片上傳失敗，請重試或移除後再發布。',
+                );
+                setSubmitError(uploadError);
+                Toast.show(uploadError);
+                return;
+            }
+            const submissionRaw = supportsImages
+                ? buildHarborComposerRaw(raw, submissionImages)
+                : raw;
+            const finalValidationError = validateForm({
+                contentRaw: submissionRaw,
+                unreadyImages: false,
+            });
+            if (finalValidationError) {
+                setSubmitError(finalValidationError);
+                Toast.show(finalValidationError);
+                return;
+            }
             const result = isEdit
                 ? await updateHarborPost(route.params?.postId, {
                     raw,
@@ -188,7 +228,7 @@ export function useHarborComposerSubmit({
                         : {}),
                 })
                 : await createHarborPost({
-                    raw: composedRaw,
+                    raw: submissionRaw,
                     draftKey,
                     ...(isNewTopic
                         ? {
@@ -289,9 +329,10 @@ export function useHarborComposerSubmit({
         }
     }, [
         categoryId,
-        composedRaw,
         draftKey,
         editMetadata,
+        hasUnreadyImages,
+        images,
         isEdit,
         isEditingFirstPost,
         isNewTopic,
@@ -305,8 +346,10 @@ export function useHarborComposerSubmit({
         route.params,
         selectedTags,
         sessionStatus,
+        supportsImages,
         t,
         title,
+        uploadImages,
         validateForm,
     ]);
 

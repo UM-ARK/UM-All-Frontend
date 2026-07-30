@@ -343,6 +343,10 @@ const Nav = () => {
                     <Stack.Screen
                         name="HarborDrafts"
                         component={HarborDraftsPage}
+                        options={{
+                            // 草稿箱使用一般堆疊頁，避免 iOS Modal 半屏上推
+                            presentation: 'card',
+                        }}
                     />
                     <Stack.Screen name="AllEvents" component={AllEvents} />
 

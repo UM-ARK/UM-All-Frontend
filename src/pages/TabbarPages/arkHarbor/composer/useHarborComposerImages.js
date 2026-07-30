@@ -20,9 +20,8 @@ import {
 
 export function useHarborComposerImages({composerSettings, t}) {
     const uploadControllersRef = useRef(new Map());
-    const uploadQueueRef = useRef([]);
-    const activeUploadCountRef = useRef(0);
-    const drainUploadQueueRef = useRef(null);
+    const uploadBatchRef = useRef(null);
+    const imagesRef = useRef([]);
     const [images, setImages] = useState([]);
     const [isPreparingImages, setIsPreparingImages] = useState(false);
     const maximumConcurrentUploads = Math.max(
@@ -47,20 +46,25 @@ export function useHarborComposerImages({composerSettings, t}) {
     useEffect(() => {
         const uploadControllers = uploadControllersRef.current;
         return () => {
-            uploadQueueRef.current = [];
-            drainUploadQueueRef.current = null;
             uploadControllers.forEach(controller => controller.abort());
             uploadControllers.clear();
         };
     }, []);
 
+    const updateImages = useCallback(updater => {
+        const nextImages = updater(imagesRef.current);
+        imagesRef.current = nextImages;
+        setImages(nextImages);
+        return nextImages;
+    }, []);
+
     const uploadImage = useCallback(async image => {
         if (uploadControllersRef.current.has(image.id)) {
-            return;
+            return image;
         }
         const controller = new AbortController();
         uploadControllersRef.current.set(image.id, controller);
-        setImages(current =>
+        updateImages(current =>
             current.map(item =>
                 item.id === image.id
                     ? {
@@ -86,7 +90,7 @@ export function useHarborComposerImages({composerSettings, t}) {
                         const progress = event.total
                             ? event.loaded / event.total
                             : 0;
-                        setImages(current =>
+                        updateImages(current =>
                             current.map(item =>
                                 item.id === image.id
                                     ? {...item, progress}
@@ -96,82 +100,66 @@ export function useHarborComposerImages({composerSettings, t}) {
                     },
                 },
             );
-            setImages(current =>
+            const uploadedImage = {
+                ...image,
+                uploadId: upload.id,
+                shortUrl: upload.shortUrl,
+                remoteUrl: upload.remoteUrl,
+                progress: 1,
+                status: 'uploaded',
+                error: '',
+            };
+            updateImages(current =>
                 current.map(item =>
                     item.id === image.id
-                        ? {
-                            ...item,
-                            uploadId: upload.id,
-                            shortUrl: upload.shortUrl,
-                            remoteUrl: upload.remoteUrl,
-                            progress: 1,
-                            status: 'uploaded',
-                        }
+                        ? uploadedImage
                         : item,
                 ),
             );
+            return uploadedImage;
         } catch (error) {
             if (controller.signal.aborted) {
-                return;
+                return image;
             }
-            setImages(current =>
+            const failedImage = {
+                ...image,
+                status: 'failed',
+                error: getUploadErrorMessage(error, t),
+            };
+            updateImages(current =>
                 current.map(item =>
                     item.id === image.id
-                        ? {
-                            ...item,
-                            status: 'failed',
-                            error: getUploadErrorMessage(error, t),
-                        }
+                        ? failedImage
                         : item,
                 ),
             );
+            return failedImage;
         } finally {
             uploadControllersRef.current.delete(image.id);
         }
-    }, [t]);
+    }, [t, updateImages]);
 
-    const drainUploadQueue = useCallback(() => {
-        while (
-            activeUploadCountRef.current <
-                maximumConcurrentUploads &&
-            uploadQueueRef.current.length > 0
-        ) {
-            const image = uploadQueueRef.current.shift();
-            activeUploadCountRef.current += 1;
-            uploadImage(image).finally(() => {
-                activeUploadCountRef.current = Math.max(
-                    0,
-                    activeUploadCountRef.current - 1,
-                );
-                drainUploadQueueRef.current?.();
-            });
+    const uploadImages = useCallback(nextImages => {
+        if (uploadBatchRef.current) {
+            return uploadBatchRef.current;
         }
-    }, [maximumConcurrentUploads, uploadImage]);
-
-    useEffect(() => {
-        drainUploadQueueRef.current = drainUploadQueue;
-        drainUploadQueue();
-        return () => {
-            drainUploadQueueRef.current = null;
-        };
-    }, [drainUploadQueue]);
-
-    const enqueueImages = useCallback(nextImages => {
-        const queuedIds = new Set(
-            uploadQueueRef.current.map(image => image.id),
+        const currentImageIds = new Set(
+            imagesRef.current.map(image => image.id),
         );
-        const imagesToQueue = nextImages.filter(
+        const imagesToUpload = (
+            Array.isArray(nextImages) ? nextImages : imagesRef.current
+        ).filter(
             image =>
-                !queuedIds.has(image.id) &&
-                !uploadControllersRef.current.has(image.id),
+                image.status !== 'uploaded' &&
+                currentImageIds.has(image.id),
         );
-        if (imagesToQueue.length === 0) {
-            return;
+        if (imagesToUpload.length === 0) {
+            return Promise.resolve(imagesRef.current);
         }
 
-        setImages(current =>
+        updateImages(current =>
             current.map(image =>
-                imagesToQueue.some(item => item.id === image.id)
+                imagesToUpload.some(item => item.id === image.id)
                     ? {
                         ...image,
                         progress: 0,
@@ -181,9 +169,34 @@ export function useHarborComposerImages({composerSettings, t}) {
                     : image,
             ),
         );
-        uploadQueueRef.current.push(...imagesToQueue);
-        drainUploadQueue();
-    }, [drainUploadQueue]);
+
+        const batch = (async () => {
+            let nextIndex = 0;
+            const uploadNext = async () => {
+                while (nextIndex < imagesToUpload.length) {
+                    const image = imagesToUpload[nextIndex];
+                    nextIndex += 1;
+                    await uploadImage(image);
+                }
+            };
+            await Promise.all(
+                Array.from(
+                    {
+                        length: Math.min(
+                            maximumConcurrentUploads,
+                            imagesToUpload.length,
+                        ),
+                    },
+                    uploadNext,
+                ),
+            );
+            return imagesRef.current;
+        })();
+        uploadBatchRef.current = batch.finally(() => {
+            uploadBatchRef.current = null;
+        });
+        return uploadBatchRef.current;
+    }, [maximumConcurrentUploads, updateImages, uploadImage]);
 
     const handleAddImages = useCallback(async () => {
         trigger();
@@ -256,7 +269,7 @@ export function useHarborComposerImages({composerSettings, t}) {
                         id: imageId,
                         ...compressedImage,
                         progress: 0,
-                        status: 'pending',
+                        status: 'ready',
                     });
                 } catch {
                     compressionFailureCount += 1;
@@ -288,8 +301,7 @@ export function useHarborComposerImages({composerSettings, t}) {
                 return;
             }
 
-            setImages(current => [...current, ...nextImages]);
-            enqueueImages(nextImages);
+            updateImages(current => [...current, ...nextImages]);
         } catch {
             Toast.show(t('無法開啟相片圖庫，請稍後再試。'));
         } finally {
@@ -297,28 +309,25 @@ export function useHarborComposerImages({composerSettings, t}) {
         }
     }, [
         composerSettings,
-        enqueueImages,
         hasReachedImageLimit,
         images.length,
         t,
+        updateImages,
     ]);
 
     const handleRemoveImage = useCallback(imageId => {
         trigger();
-        uploadQueueRef.current = uploadQueueRef.current.filter(
-            image => image.id !== imageId,
-        );
         uploadControllersRef.current.get(imageId)?.abort();
         uploadControllersRef.current.delete(imageId);
-        setImages(current =>
+        updateImages(current =>
             current.filter(image => image.id !== imageId),
         );
-    }, []);
+    }, [updateImages]);
 
     const handleRetryImage = useCallback(image => {
         trigger();
-        enqueueImages([image]);
-    }, [enqueueImages]);
+        uploadImages([image]);
+    }, [uploadImages]);
 
     const restoreDraftImages = useCallback(draftImages => {
         const restoredImages = (
@@ -353,15 +362,13 @@ export function useHarborComposerImages({composerSettings, t}) {
                     remoteUrl,
                     shortUrl,
                     progress: shortUrl ? 1 : 0,
-                    status: shortUrl ? 'uploaded' : 'pending',
+                    status: shortUrl ? 'uploaded' : 'ready',
                 };
             })
             .filter(Boolean);
+        imagesRef.current = restoredImages;
         setImages(restoredImages);
-        enqueueImages(
-            restoredImages.filter(image => image.status === 'pending'),
-        );
-    }, [enqueueImages]);
+    }, []);
 
     return {
         images,
@@ -373,5 +380,6 @@ export function useHarborComposerImages({composerSettings, t}) {
         isPreparingImages,
         isUploadingImages,
         restoreDraftImages,
+        uploadImages,
     };
 }

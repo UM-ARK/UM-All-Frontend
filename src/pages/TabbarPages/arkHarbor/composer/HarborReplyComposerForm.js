@@ -252,7 +252,9 @@ const HarborReplyComposerForm = ({
                                         source={{uri: image.localUri}}
                                         style={styles.image}
                                     />
-                                    {image.status !== 'uploaded' ? (
+                                    {image.status === 'pending' ||
+                                    image.status === 'uploading' ||
+                                    image.status === 'failed' ? (
                                         <Pressable
                                             accessibilityLabel={
                                                 image.status === 'failed'
@@ -421,7 +423,11 @@ const HarborReplyComposerForm = ({
                                     styles.sendText,
                                     {color: theme.trueWhite},
                                 ]}>
-                                {t('發布回覆')}
+                                {isUploadingImages
+                                    ? t('正在上傳圖片…')
+                                    : isSubmitting
+                                        ? t('正在提交…')
+                                        : t('發布回覆')}
                             </Text>
                         </Pressable>
                     </View>

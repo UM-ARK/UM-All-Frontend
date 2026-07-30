@@ -463,7 +463,12 @@ const HarborComposerForm = ({
                                                         : image.status ===
                                                             'pending'
                                                             ? t('等待上傳…')
-                                                            : t('正在上傳…')}
+                                                            : image.status ===
+                                                                'uploading'
+                                                                ? t('正在上傳…')
+                                                                : t(
+                                                                    '已準備好上傳',
+                                                                )}
                                             </Text>
                                             {image.status === 'uploading' ? (
                                                 <SimpleProgressBar
@@ -659,17 +664,17 @@ const HarborComposerForm = ({
                             styles.submitButtonText,
                             {color: theme.trueWhite},
                         ]}>
-                        {isSubmitting
-                            ? t('正在提交…')
-                            : isPreparingImages
-                                ? t('正在處理圖片…')
-                                : isUploadingImages
-                                    ? t('正在上傳圖片…')
-                                : isEdit
-                                    ? t('儲存修改')
-                                    : isReply
-                                        ? t('發布回覆')
-                                        : t('建立話題')}
+                        {isUploadingImages
+                            ? t('正在上傳圖片…')
+                            : isSubmitting
+                                ? t('正在提交…')
+                                : isPreparingImages
+                                    ? t('正在處理圖片…')
+                                    : isEdit
+                                        ? t('儲存修改')
+                                        : isReply
+                                            ? t('發布回覆')
+                                            : t('發佈')}
                     </Text>
                 </Pressable>
                 {isEdit && editMetadata.canDelete ? (
