@@ -26,6 +26,7 @@ import {
     getHarborMutationError,
     getLikeAction,
     isOwnHarborPost,
+    formatHarborFlagTypesForPost,
     mergeAvailableFlagTypes,
     updateOptimisticFlag,
     updateOptimisticLike,
@@ -681,8 +682,8 @@ const useHarborTopicActions = ({
 
             try {
                 const flagTypes = await fetchCachedHarborFlagTypes();
-                const availableTypes = mergeAvailableFlagTypes(
-                    flagTypes,
+                const availableTypes = formatHarborFlagTypesForPost(
+                    mergeAvailableFlagTypes(flagTypes, latestPost),
                     latestPost,
                 );
                 if (availableTypes.length === 0) {

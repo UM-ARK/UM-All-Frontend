@@ -162,6 +162,31 @@ const mergeAvailableFlagTypes = (flagTypes, post) => {
     return types.filter(type => actionableIds.has(Number(type?.id)));
 };
 
+// Discourse site.json 旗標文案使用 Ruby I18n 佔位符（如 %{username}）
+const interpolateHarborI18nTemplate = (template, vars = {}) => {
+    if (typeof template !== 'string' || !template) {
+        return '';
+    }
+    return template.replace(/%\{(\w+)\}/g, (match, key) => {
+        if (!Object.prototype.hasOwnProperty.call(vars, key)) {
+            return match;
+        }
+        const value = vars[key];
+        return value == null ? '' : String(value);
+    });
+};
+
+const formatHarborFlagTypesForPost = (flagTypes, post) => {
+    const username =
+        typeof post?.username === 'string' ? post.username.trim() : '';
+    const vars = { username };
+    return (Array.isArray(flagTypes) ? flagTypes : []).map(type => ({
+        ...type,
+        name: interpolateHarborI18nTemplate(type?.name, vars) || type?.name,
+        description: interpolateHarborI18nTemplate(type?.description, vars),
+    }));
+};
+
 const canUpdatePostReaction = post => {
     if (post?.current_user_reaction) {
         return post.current_user_reaction.can_undo !== false;
@@ -461,6 +486,7 @@ export {
     collectNestedPosts,
     extractPostImages,
     flattenNestedPosts,
+    formatHarborFlagTypesForPost,
     getFlagActions,
     getHarborMutationError,
     getLikeAction,
@@ -468,6 +494,7 @@ export {
     getNotificationLevelLabel,
     getReactionCount,
     getTagLabel,
+    interpolateHarborI18nTemplate,
     isCanceledRequest,
     isOwnHarborPost,
     mergeAvailableFlagTypes,

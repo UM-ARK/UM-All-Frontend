@@ -10,7 +10,9 @@ import {
     canShowFlagMenu,
     canUpdatePostReaction,
     flattenNestedPosts,
+    formatHarborFlagTypesForPost,
     getFlagActions,
+    interpolateHarborI18nTemplate,
     mergeAvailableFlagTypes,
     updateNestedPostTree,
     updateOptimisticFlag,
@@ -183,6 +185,34 @@ describe('Flag 資料模型', () => {
                 },
             ],
         });
+    });
+
+    it('替換旗標文案中的 Discourse %{username} 佔位符', () => {
+        expect(
+            interpolateHarborI18nTemplate('給 @%{username} 送出一則訊息', {
+                username: 'alice',
+            }),
+        ).toBe('給 @alice 送出一則訊息');
+        expect(
+            formatHarborFlagTypesForPost(
+                [
+                    {
+                        id: 6,
+                        name: '給 @%{username} 送出一則訊息',
+                        description: '直接和 %{username} 溝通',
+                        requiresMessage: true,
+                    },
+                ],
+                { username: 'bob' },
+            ),
+        ).toEqual([
+            {
+                id: 6,
+                name: '給 @bob 送出一則訊息',
+                description: '直接和 bob 溝通',
+                requiresMessage: true,
+            },
+        ]);
     });
 });
 

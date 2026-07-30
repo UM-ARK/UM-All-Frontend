@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
     Modal,
     Pressable,
@@ -66,9 +66,31 @@ const HarborTopicDetailOverlays = ({
             setFlagMessage('');
             return;
         }
-        const firstTypeId = Number(flagEditor.flagTypes?.[0]?.id) || null;
-        setSelectedFlagTypeId(firstTypeId);
+        const flagTypes = flagEditor.flagTypes || [];
+        const offTopic = flagTypes.find(
+            type => type?.nameKey === 'off_topic',
+        );
+        const defaultTypeId =
+            Number(offTopic?.id) || Number(flagTypes[0]?.id) || null;
+        setSelectedFlagTypeId(defaultTypeId);
         setFlagMessage('');
+    }, [flagEditor]);
+
+    const flagTypesForDisplay = useMemo(() => {
+        const flagTypes = flagEditor?.flagTypes || [];
+        if (flagTypes.length === 0) {
+            return [];
+        }
+        const offTopicIndex = flagTypes.findIndex(
+            type => type?.nameKey === 'off_topic',
+        );
+        if (offTopicIndex <= 0) {
+            return flagTypes;
+        }
+        const next = flagTypes.slice();
+        const [offTopic] = next.splice(offTopicIndex, 1);
+        next.unshift(offTopic);
+        return next;
     }, [flagEditor]);
 
     const selectedFlagType = (flagEditor?.flagTypes || []).find(
@@ -321,7 +343,7 @@ const HarborTopicDetailOverlays = ({
                         <ScrollView
                             style={styles.flagReasonList}
                             keyboardShouldPersistTaps="handled">
-                            {(flagEditor?.flagTypes || []).map(type => {
+                            {(flagTypesForDisplay || []).map(type => {
                                 const selected =
                                     Number(selectedFlagTypeId) ===
                                     Number(type.id);
@@ -460,7 +482,7 @@ const HarborTopicDetailOverlays = ({
                                         styles.actionDialogButtonText,
                                         { color: trueWhite },
                                     ]}>
-                                    {pendingFlag ? t('送出中…') : t('送出檢舉')}
+                                    {pendingFlag ? t('送出中…') : t('發送')}
                                 </Text>
                             </Pressable>
                         </View>
