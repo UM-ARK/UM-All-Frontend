@@ -30,6 +30,8 @@ const PAGE_CONFIG = [
     { key: 'stats', label: '統計' },
 ];
 const TAB_INDICATOR_WIDTH = moderateScale(24, 0.1);
+const TAB_HEIGHT = scale(36);
+const DEFAULT_COLLAPSE_DISTANCE = verticalScale(120);
 const AnimatedPagerView = Animated.createAnimatedComponent(PagerView);
 
 const HarborDashboard = ({
@@ -38,6 +40,7 @@ const HarborDashboard = ({
     contentBottomInset,
     isRefreshing,
     onProfileRefresh,
+    scrollY,
 }) => {
     const { theme } = useTheme();
     const { t } = useTranslation('my');
@@ -45,11 +48,17 @@ const HarborDashboard = ({
     const tabsRef = React.useRef(null);
     const pageScrollOffset = React.useRef(new Animated.Value(0)).current;
     const pageScrollPosition = React.useRef(new Animated.Value(0)).current;
+    const internalScrollY = React.useRef(new Animated.Value(0)).current;
+    const activeScrollY = scrollY || internalScrollY;
+    const pageOffsets = React.useRef({ unread: 0 });
     const [currentIndex, setCurrentIndex] = React.useState(0);
     const [mountedPages, setMountedPages] = React.useState({ unread: true });
     const [tabLayouts, setTabLayouts] = React.useState({});
     const [tabsViewportWidth, setTabsViewportWidth] = React.useState(0);
     const [tabsContentWidth, setTabsContentWidth] = React.useState(0);
+    const [collapseDistance, setCollapseDistance] = React.useState(
+        DEFAULT_COLLAPSE_DISTANCE,
+    );
     const unreadCount =
         (Number(user.unreadNotifications) || 0) +
         (Number(user.unreadMessages) || 0);
@@ -87,6 +96,32 @@ const HarborDashboard = ({
             ),
         [pageScrollOffset, pageScrollPosition],
     );
+    const headerTranslateY = activeScrollY.interpolate({
+        inputRange: [0, collapseDistance],
+        outputRange: [0, -collapseDistance],
+        extrapolate: 'clamp',
+    });
+    const contentTopInset = collapseDistance + TAB_HEIGHT;
+
+    const verticalScrollHandlers = React.useMemo(
+        () =>
+            PAGE_CONFIG.reduce((handlers, page) => {
+                handlers[page.key] = event => {
+                    const offset = event.nativeEvent.contentOffset.y;
+                    pageOffsets.current[page.key] = offset;
+                    activeScrollY.setValue(offset);
+                };
+                return handlers;
+            }, {}),
+        [activeScrollY],
+    );
+
+    const activatePageScroll = React.useCallback(
+        pageKey => {
+            activeScrollY.setValue(pageOffsets.current[pageKey] || 0);
+        },
+        [activeScrollY],
+    );
 
     const ensureMounted = React.useCallback(pageKey => {
         setMountedPages(current =>
@@ -102,9 +137,10 @@ const HarborDashboard = ({
             }
             ensureMounted(page.key);
             setCurrentIndex(index);
+            activatePageScroll(page.key);
             pagerRef.current?.setPage(index);
         },
-        [ensureMounted],
+        [activatePageScroll, ensureMounted],
     );
 
     const handlePageSelected = React.useCallback(
@@ -116,8 +152,9 @@ const HarborDashboard = ({
             }
             ensureMounted(page.key);
             setCurrentIndex(index);
+            activatePageScroll(page.key);
         },
-        [ensureMounted],
+        [activatePageScroll, ensureMounted],
     );
 
     React.useEffect(() => {
@@ -157,7 +194,9 @@ const HarborDashboard = ({
                     embedded
                     combined
                     contentBottomInset={contentBottomInset}
+                    contentTopInset={contentTopInset}
                     onProfileRefresh={onProfileRefresh}
+                    onScroll={verticalScrollHandlers[page.key]}
                 />
             );
         }
@@ -169,7 +208,9 @@ const HarborDashboard = ({
                     title={t(page.label)}
                     embedded
                     contentBottomInset={contentBottomInset}
+                    contentTopInset={contentTopInset}
                     onProfileRefresh={onProfileRefresh}
+                    onScroll={verticalScrollHandlers[page.key]}
                 />
             );
         }
@@ -179,7 +220,9 @@ const HarborDashboard = ({
                     navigation={navigation}
                     embedded
                     contentBottomInset={contentBottomInset}
+                    contentTopInset={contentTopInset}
                     onProfileRefresh={onProfileRefresh}
+                    onScroll={verticalScrollHandlers[page.key]}
                 />
             );
         }
@@ -188,153 +231,16 @@ const HarborDashboard = ({
                 user={user}
                 navigation={navigation}
                 contentBottomInset={contentBottomInset}
+                contentTopInset={contentTopInset}
                 isRefreshing={isRefreshing}
                 onRefresh={onProfileRefresh}
+                onScroll={verticalScrollHandlers[page.key]}
             />
         );
     };
 
     return (
         <View style={styles.container}>
-            <View style={styles.profileContent}>
-                <HarborProfileCard
-                    user={user}
-                    onPress={() => navigation.navigate('HarborAccountSettings')}
-                />
-            </View>
-            {user.partialProfile ? (
-                <View
-                    style={[
-                        styles.partialProfile,
-                        { backgroundColor: theme.tonal.secondary15 },
-                    ]}>
-                    <Text
-                        style={[
-                            styles.partialProfileText,
-                            { color: theme.black.second },
-                        ]}>
-                        {user.usedPreviousProfileData
-                            ? t('部分資料暫時無法更新，已保留上次成功資料。')
-                            : t('部分資料暫時無法更新，未知統計暫不顯示。')}
-                    </Text>
-                </View>
-            ) : null}
-
-            <View
-                style={[
-                    styles.tabsCard,
-                    { backgroundColor: theme.white },
-                ]}>
-                <Animated.ScrollView
-                    ref={tabsRef}
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    bounces={false}
-                    onLayout={event =>
-                        setTabsViewportWidth(event.nativeEvent.layout.width)
-                    }
-                    onContentSizeChange={width => setTabsContentWidth(width)}
-                    contentContainerStyle={styles.tabsScrollContent}>
-                    <View style={styles.tabsContent}>
-                        {PAGE_CONFIG.map((page, index) => {
-                            const isSelected = currentIndex === index;
-                            const badge =
-                                page.key === 'unread' ? unreadCount : 0;
-                            return (
-                                <Pressable
-                                    key={page.key}
-                                    accessibilityRole="tab"
-                                    accessibilityState={{
-                                        selected: isSelected,
-                                    }}
-                                    accessibilityLabel={
-                                        badge
-                                            ? `${badge} ${t(page.label)}`
-                                            : t(page.label)
-                                    }
-                                    onLayout={event => {
-                                        const { x, width } =
-                                            event.nativeEvent.layout;
-                                        setTabLayouts(current =>
-                                            current[page.key]?.x === x &&
-                                            current[page.key]?.width === width
-                                                ? current
-                                                : {
-                                                    ...current,
-                                                    [page.key]: { x, width },
-                                                },
-                                        );
-                                    }}
-                                    onPress={() => {
-                                        trigger();
-                                        selectPage(index);
-                                    }}
-                                    style={({ pressed }) => [
-                                        styles.tab,
-                                        pressed && {
-                                            backgroundColor:
-                                                theme.tonal.primary15,
-                                        },
-                                    ]}>
-                                    <Text
-                                        numberOfLines={1}
-                                        style={[
-                                            styles.tabLabel,
-                                            {
-                                                color: isSelected
-                                                    ? theme.black.main
-                                                    : theme.black.third,
-                                            },
-                                            isSelected &&
-                                            styles.tabLabelSelected,
-                                        ]}>
-                                        {t(page.label)}
-                                    </Text>
-                                    {badge ? (
-                                        <View
-                                            style={[
-                                                styles.tabBadge,
-                                                {
-                                                    backgroundColor:
-                                                        theme.unread,
-                                                },
-                                            ]}>
-                                            <Text
-                                                style={[
-                                                    styles.tabBadgeText,
-                                                    {
-                                                        color:
-                                                            theme.trueWhite,
-                                                    },
-                                                ]}>
-                                                {badge > 99 ? '99+' : badge}
-                                            </Text>
-                                        </View>
-                                    ) : null}
-                                </Pressable>
-                            );
-                        })}
-                        <Animated.View
-                            pointerEvents="none"
-                            style={[
-                                styles.tabIndicator,
-                                hasMeasuredTabs
-                                    ? styles.tabIndicatorVisible
-                                    : styles.tabIndicatorHidden,
-                                {
-                                    backgroundColor: theme.themeColor,
-                                    transform: [
-                                        {
-                                            translateX: indicatorTranslateX,
-                                        },
-                                    ],
-                                },
-                            ]}
-                        />
-                    </View>
-                </Animated.ScrollView>
-            </View>
-
             <AnimatedPagerView
                 ref={pagerRef}
                 style={[
@@ -353,6 +259,163 @@ const HarborDashboard = ({
                     </View>
                 ))}
             </AnimatedPagerView>
+
+            <Animated.View
+                pointerEvents="box-none"
+                style={[
+                    styles.stickyHeader,
+                    {transform: [{translateY: headerTranslateY}]},
+                ]}>
+                <View
+                    onLayout={event => {
+                        const height = event.nativeEvent.layout.height;
+                        setCollapseDistance(current =>
+                            current === height ? current : height,
+                        );
+                    }}
+                    style={{backgroundColor: theme.bg_color}}>
+                    <View style={styles.profileContent}>
+                        <HarborProfileCard
+                            user={user}
+                            onPress={() =>
+                                navigation.navigate('HarborAccountSettings')
+                            }
+                        />
+                    </View>
+                    {user.partialProfile ? (
+                        <View
+                            style={[
+                                styles.partialProfile,
+                                { backgroundColor: theme.tonal.secondary15 },
+                            ]}>
+                            <Text
+                                style={[
+                                    styles.partialProfileText,
+                                    { color: theme.black.second },
+                                ]}>
+                                {user.usedPreviousProfileData
+                                    ? t('部分資料暫時無法更新，已保留上次成功資料。')
+                                    : t('部分資料暫時無法更新，未知統計暫不顯示。')}
+                            </Text>
+                        </View>
+                    ) : null}
+                </View>
+
+                <View
+                    style={[
+                        styles.tabsCard,
+                        { backgroundColor: theme.white },
+                    ]}>
+                    <Animated.ScrollView
+                        ref={tabsRef}
+                        horizontal
+                        showsHorizontalScrollIndicator={false}
+                        bounces={false}
+                        onLayout={event =>
+                            setTabsViewportWidth(event.nativeEvent.layout.width)
+                        }
+                        onContentSizeChange={width => setTabsContentWidth(width)}
+                        contentContainerStyle={styles.tabsScrollContent}>
+                        <View style={styles.tabsContent}>
+                            {PAGE_CONFIG.map((page, index) => {
+                                const isSelected = currentIndex === index;
+                                const badge =
+                                    page.key === 'unread' ? unreadCount : 0;
+                                return (
+                                    <Pressable
+                                        key={page.key}
+                                        accessibilityRole="tab"
+                                        accessibilityState={{
+                                            selected: isSelected,
+                                        }}
+                                        accessibilityLabel={
+                                            badge
+                                                ? `${badge} ${t(page.label)}`
+                                                : t(page.label)
+                                        }
+                                        onLayout={event => {
+                                            const { x, width } =
+                                                event.nativeEvent.layout;
+                                            setTabLayouts(current =>
+                                                current[page.key]?.x === x &&
+                                                current[page.key]?.width === width
+                                                    ? current
+                                                    : {
+                                                        ...current,
+                                                        [page.key]: { x, width },
+                                                    },
+                                            );
+                                        }}
+                                        onPress={() => {
+                                            trigger();
+                                            selectPage(index);
+                                        }}
+                                        style={({ pressed }) => [
+                                            styles.tab,
+                                            pressed && {
+                                                backgroundColor:
+                                                    theme.tonal.primary15,
+                                            },
+                                        ]}>
+                                        <Text
+                                            numberOfLines={1}
+                                            style={[
+                                                styles.tabLabel,
+                                                {
+                                                    color: isSelected
+                                                        ? theme.black.main
+                                                        : theme.black.third,
+                                                },
+                                                isSelected &&
+                                                styles.tabLabelSelected,
+                                            ]}>
+                                            {t(page.label)}
+                                        </Text>
+                                        {badge ? (
+                                            <View
+                                                style={[
+                                                    styles.tabBadge,
+                                                    {
+                                                        backgroundColor:
+                                                            theme.unread,
+                                                    },
+                                                ]}>
+                                                <Text
+                                                    style={[
+                                                        styles.tabBadgeText,
+                                                        {
+                                                            color:
+                                                                theme.trueWhite,
+                                                        },
+                                                    ]}>
+                                                    {badge > 99 ? '99+' : badge}
+                                                </Text>
+                                            </View>
+                                        ) : null}
+                                    </Pressable>
+                                );
+                            })}
+                            <Animated.View
+                                pointerEvents="none"
+                                style={[
+                                    styles.tabIndicator,
+                                    hasMeasuredTabs
+                                        ? styles.tabIndicatorVisible
+                                        : styles.tabIndicatorHidden,
+                                    {
+                                        backgroundColor: theme.themeColor,
+                                        transform: [
+                                            {
+                                                translateX: indicatorTranslateX,
+                                            },
+                                        ],
+                                    },
+                                ]}
+                            />
+                        </View>
+                    </Animated.ScrollView>
+                </View>
+            </Animated.View>
         </View>
     );
 };
@@ -361,6 +424,14 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         minHeight: 0,
+        overflow: 'hidden',
+    },
+    stickyHeader: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 1,
     },
     partialProfile: {
         borderRadius: scale(10),
@@ -376,6 +447,8 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
     tabsCard: {
+        borderTopLeftRadius: scale(14),
+        borderTopRightRadius: scale(14),
         overflow: 'hidden',
     },
     profileContent: {
@@ -385,13 +458,13 @@ const styles = StyleSheet.create({
         minWidth: '100%',
     },
     tabsContent: {
-        height: verticalScale(39),
+        height: TAB_HEIGHT,
         flexDirection: 'row',
         position: 'relative',
     },
     tab: {
         minWidth: scale(48),
-        height: verticalScale(39),
+        height: TAB_HEIGHT,
         borderRadius: scale(8),
         flexDirection: 'row',
         alignItems: 'center',

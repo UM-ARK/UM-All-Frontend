@@ -26,12 +26,10 @@ import styles from './styles';
 const HarborTopicHeader = memo(
     ({
         topic,
-        onMarkUnread,
         onOpenNotifications,
         onOpenOriginal,
         onPressCategory,
         onPressTag,
-        pendingMarkUnread,
         pendingNotification,
     }) => {
         const { theme } = useTheme();
@@ -201,7 +199,7 @@ const HarborTopicHeader = memo(
                             <ActivityIndicator size="small" color={themeColor} />
                         ) : (
                             <MaterialCommunityIcons
-                                name="bell-outline"
+                                name="star-outline"
                                 size={scale(16)}
                                 color={themeColor}
                             />
@@ -216,37 +214,6 @@ const HarborTopicHeader = memo(
                                     topic.details?.notification_level,
                                 ),
                             )}
-                        </Text>
-                    </Pressable>
-                    <Pressable
-                        disabled={pendingMarkUnread}
-                        onPress={() => {
-                            trigger();
-                            onMarkUnread();
-                        }}
-                        style={({ pressed }) => [
-                            styles.webOriginalButton,
-                            {
-                                backgroundColor: pressed
-                                    ? tonal.primary30
-                                    : tonal.primary15,
-                            },
-                        ]}>
-                        {pendingMarkUnread ? (
-                            <ActivityIndicator size="small" color={themeColor} />
-                        ) : (
-                            <MaterialCommunityIcons
-                                name="email-mark-as-unread"
-                                size={scale(16)}
-                                color={themeColor}
-                            />
-                        )}
-                        <Text
-                            style={[
-                                styles.webOriginalText,
-                                { color: themeColor },
-                            ]}>
-                            {t('標為未讀')}
                         </Text>
                     </Pressable>
                 </View>

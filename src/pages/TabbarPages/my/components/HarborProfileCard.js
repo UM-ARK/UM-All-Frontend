@@ -22,11 +22,11 @@ const HarborProfileCard = ({user, onPress}) => {
     return (
         <TouchableScale
             accessibilityRole="button"
-            accessibilityLabel={t('管理 Harbor 帳號')}
+            accessibilityLabel={t('帳戶設定')}
             activeScale={0.98}
             style={[
                 styles.container,
-                {backgroundColor: theme.white},
+                {backgroundColor: theme.bg_color},
             ]}
             onPress={() => {
                 trigger();
@@ -49,7 +49,7 @@ const HarborProfileCard = ({user, onPress}) => {
                         styles.connectedDot,
                         {
                             backgroundColor: theme.success,
-                            borderColor: theme.white,
+                            borderColor: theme.bg_color,
                         },
                     ]}>
                     <Ionicons
@@ -115,11 +115,21 @@ const HarborProfileCard = ({user, onPress}) => {
                 ) : null}
             </View>
 
-            <Ionicons
-                name="settings-outline"
-                size={scale(21)}
-                color={theme.themeColor}
-            />
+            <View style={styles.accountEntry}>
+                <Text
+                    numberOfLines={1}
+                    style={[
+                        styles.accountEntryText,
+                        {color: theme.black.second},
+                    ]}>
+                    {t('帳戶設定')}
+                </Text>
+                <Ionicons
+                    name="chevron-forward"
+                    size={scale(16)}
+                    color={theme.black.third}
+                />
+            </View>
         </TouchableScale>
     );
 };
@@ -127,16 +137,15 @@ const HarborProfileCard = ({user, onPress}) => {
 const styles = StyleSheet.create({
     container: {
         minHeight: verticalScale(112),
-        borderRadius: scale(10),
         flexDirection: 'row',
         alignItems: 'center',
-        paddingHorizontal: scale(17),
+        paddingHorizontal: scale(7),
         paddingVertical: verticalScale(15),
     },
     avatarRing: {
         width: scale(66),
         height: scale(66),
-        borderRadius: scale(12),
+        borderRadius: scale(33),
         alignItems: 'center',
         justifyContent: 'center',
         marginRight: scale(13),
@@ -144,7 +153,7 @@ const styles = StyleSheet.create({
     avatar: {
         width: scale(58),
         height: scale(58),
-        borderRadius: scale(10),
+        borderRadius: scale(29),
     },
     connectedDot: {
         position: 'absolute',
@@ -160,6 +169,16 @@ const styles = StyleSheet.create({
     identity: {
         flex: 1,
         minWidth: 0,
+    },
+    accountEntry: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginLeft: scale(8),
+    },
+    accountEntryText: {
+        ...uiStyle.defaultText,
+        fontSize: scale(11),
+        fontWeight: '600',
     },
     nameRow: {
         flexDirection: 'row',

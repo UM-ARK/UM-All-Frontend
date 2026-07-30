@@ -29,7 +29,9 @@ const HarborActivityPage = ({
     title: embeddedTitle,
     embedded = false,
     contentBottomInset = verticalScale(32),
+    contentTopInset = 0,
     onProfileRefresh,
+    onScroll,
 }) => {
     const {theme} = useTheme();
     const {t} = useTranslation('my');
@@ -195,12 +197,17 @@ const HarborActivityPage = ({
                 }
                 contentContainerStyle={[
                     styles.content,
-                    {paddingBottom: contentBottomInset},
+                    {
+                        paddingBottom: contentBottomInset,
+                        paddingTop: contentTopInset + verticalScale(12),
+                    },
                     !embedded && isLiquidGlassSupported && {
                         paddingTop: headerHeight + verticalScale(12),
                     },
                 ]}
                 showsVerticalScrollIndicator={false}
+                onScroll={onScroll}
+                scrollEventThrottle={16}
                 renderItem={({item}) => (
                     <View
                         style={[
@@ -272,6 +279,7 @@ const HarborActivityPage = ({
                         refreshing={isRefreshing}
                         tintColor={theme.themeColor}
                         colors={[theme.themeColor]}
+                        progressViewOffset={contentTopInset}
                         onRefresh={handleRefresh}
                     />
                 }

@@ -39,7 +39,9 @@ const HarborInboxPage = ({
     embedded = false,
     combined = false,
     contentBottomInset = verticalScale(32),
+    contentTopInset = 0,
     onProfileRefresh,
+    onScroll,
 }) => {
     const {theme} = useTheme();
     const {t, i18n} = useTranslation('my');
@@ -302,9 +304,15 @@ const HarborInboxPage = ({
                     }
                     contentContainerStyle={[
                         styles.content,
-                        {paddingBottom: contentBottomInset},
+                        {
+                            paddingBottom: contentBottomInset,
+                            paddingTop:
+                                contentTopInset + verticalScale(8),
+                        },
                     ]}
                     showsVerticalScrollIndicator={false}
+                    onScroll={onScroll}
+                    scrollEventThrottle={16}
                     renderItem={renderItem}
                     ItemSeparatorComponent={ListSeparator}
                     ListHeaderComponent={
@@ -352,6 +360,7 @@ const HarborInboxPage = ({
                             refreshing={isRefreshing}
                             tintColor={theme.themeColor}
                             colors={[theme.themeColor]}
+                            progressViewOffset={contentTopInset}
                             onRefresh={handleRefresh}
                         />
                     }

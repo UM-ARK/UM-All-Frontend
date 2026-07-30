@@ -82,7 +82,9 @@ const HarborDraftsPage = ({
     navigation,
     embedded = false,
     contentBottomInset = verticalScale(40),
+    contentTopInset = 0,
     onProfileRefresh,
+    onScroll,
 }) => {
     const {theme} = useTheme();
     const {t} = useTranslation('harbor');
@@ -499,18 +501,25 @@ const HarborDraftsPage = ({
                 renderItem={renderDraft}
                 contentContainerStyle={[
                     styles.listContent,
-                    {paddingBottom: contentBottomInset},
+                    {
+                        paddingBottom: contentBottomInset,
+                        paddingTop:
+                            contentTopInset + verticalScale(12),
+                    },
                 ]}
                 contentInsetAdjustmentBehavior={
                     embedded || isLiquidGlassSupported ? 'never' : 'automatic'
                 }
                 refreshing={isRefreshing}
+                progressViewOffset={contentTopInset}
                 onRefresh={() => {
                     trigger();
                     loadDrafts({refreshing: true});
                     onProfileRefresh?.();
                 }}
                 showsVerticalScrollIndicator={false}
+                onScroll={onScroll}
+                scrollEventThrottle={16}
                 ListEmptyComponent={
                     <View style={styles.emptyState}>
                         <MaterialCommunityIcons

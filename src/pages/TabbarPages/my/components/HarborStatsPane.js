@@ -19,8 +19,10 @@ import HarborStatsCard from './HarborStatsCard';
 const HarborStatsPane = ({
     user,
     contentBottomInset,
+    contentTopInset = 0,
     isRefreshing,
     onRefresh,
+    onScroll,
     navigation,
 }) => {
     const { theme } = useTheme();
@@ -31,15 +33,21 @@ const HarborStatsPane = ({
             style={{ backgroundColor: theme.white }}
             contentInsetAdjustmentBehavior="never"
             showsVerticalScrollIndicator={false}
+            onScroll={onScroll}
+            scrollEventThrottle={16}
             contentContainerStyle={[
                 styles.content,
-                { paddingBottom: contentBottomInset },
+                {
+                    paddingBottom: contentBottomInset,
+                    paddingTop: contentTopInset + verticalScale(8),
+                },
             ]}
             refreshControl={
                 <RefreshControl
                     refreshing={isRefreshing}
                     tintColor={theme.themeColor}
                     colors={[theme.themeColor]}
+                    progressViewOffset={contentTopInset}
                     onRefresh={onRefresh}
                 />
             }>

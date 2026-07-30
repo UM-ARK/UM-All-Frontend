@@ -1,6 +1,7 @@
 import React from 'react';
 import {
     Alert,
+    Animated,
     Linking,
     RefreshControl,
     ScrollView,
@@ -38,7 +39,9 @@ const MyScreen = ({ navigation }) => {
     const contentWidth = Math.min(width - scale(20), scale(680));
     const signedInWidth = Math.min(width, scale(700));
     const contentTopInset = insets.top + verticalScale(8);
+    const signedInTopInset = insets.top + verticalScale(2);
     const [isRefreshing, setIsRefreshing] = React.useState(false);
+    const dashboardScrollY = React.useRef(new Animated.Value(0)).current;
 
     const presentHarborError = React.useCallback(
         sessionError => {
@@ -193,11 +196,14 @@ const MyScreen = ({ navigation }) => {
                         styles.signedInContent,
                         {
                             width: signedInWidth,
-                            paddingTop: contentTopInset,
+                            paddingTop: signedInTopInset,
                         },
                     ]}>
                     <View style={styles.signedInHeaderContent}>
                         <HarborPageHeader
+                            compact
+                            user={user}
+                            scrollY={dashboardScrollY}
                             onFeedbackAction={handleFeedbackAction}
                             onSettingsPress={() =>
                                 navigation.navigate('SettingPage')
@@ -213,6 +219,7 @@ const MyScreen = ({ navigation }) => {
                         }
                         isRefreshing={isRefreshing}
                         onProfileRefresh={handleRefresh}
+                        scrollY={dashboardScrollY}
                     />
                 </View>
             </View>
@@ -278,6 +285,8 @@ const styles = StyleSheet.create({
     },
     signedInHeaderContent: {
         paddingHorizontal: scale(10),
+        position: 'relative',
+        zIndex: 2,
     },
     scrollContent: {
         alignItems: 'center',
