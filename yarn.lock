@@ -2785,6 +2785,13 @@
   resolved "https://registry.npmjs.org/@react-native-menu/menu/-/menu-2.0.0.tgz#21d3fcb15687df86386fee7815cc5ff79d26bc9e"
   integrity sha512-hb8Mirw6aKPGONhgo52IiNpwHtISVrgCT3rMdFX1qS7eOFNzOcQh8d2UDnaH5zVpxN+QuvWtaaiRMGFpIjzdtA==
 
+"@react-native-vector-icons/ant-design@^13.1.2":
+  version "13.1.2"
+  resolved "https://registry.npmjs.org/@react-native-vector-icons/ant-design/-/ant-design-13.1.2.tgz#05fa9e425aee66fd4f44a2dff171db63b717e83f"
+  integrity sha512-ugERUvjK8hX2o2IJGSoinotn/MNlhJq+pZ0T1qJ2i1FbrfcgFAdhaMmhcueIk6J6ZrEFzNJex9T7bS+AyikdXA==
+  dependencies:
+    "@react-native-vector-icons/common" "^13.0.1"
+
 "@react-native-vector-icons/common@^13.0.1":
   version "13.0.1"
   resolved "https://registry.npmjs.org/@react-native-vector-icons/common/-/common-13.0.1.tgz#040b88bde5361a13137e060036ad497503820d50"
@@ -2793,6 +2800,34 @@
     find-up "^8.0.0"
     picocolors "^1.1.1"
     plist "^3.1.0"
+
+"@react-native-vector-icons/evil-icons@^13.1.2":
+  version "13.1.2"
+  resolved "https://registry.npmjs.org/@react-native-vector-icons/evil-icons/-/evil-icons-13.1.2.tgz#379101432e2ffb4ab853ab88d8aefcdb2f381ee2"
+  integrity sha512-jw9nMulAzeJke6bqizzIJm2NVSajhEbyOxqx/UcY9GYFkr6RmUCuZ+TepGhltiik4MFk1N1Uq2b1zUMy07qI2Q==
+  dependencies:
+    "@react-native-vector-icons/common" "^13.0.1"
+
+"@react-native-vector-icons/feather@^13.1.2":
+  version "13.1.2"
+  resolved "https://registry.npmjs.org/@react-native-vector-icons/feather/-/feather-13.1.2.tgz#ab6d446e2c11963b9dd10029e378a9e0dff585cf"
+  integrity sha512-4wICYvJ+wF5ERKyVWpie+DFEZ6Jr2541T6E+EtVTEqdubxEjK2/RS9qtEU758BktlPlJUrAoZeW6Fl/iUKf0Vg==
+  dependencies:
+    "@react-native-vector-icons/common" "^13.0.1"
+
+"@react-native-vector-icons/fontawesome6@^13.1.2":
+  version "13.1.2"
+  resolved "https://registry.npmjs.org/@react-native-vector-icons/fontawesome6/-/fontawesome6-13.1.2.tgz#a15d34b7197948baeda200a6a294e0634ae313d4"
+  integrity sha512-oQvQeDE8kSXm3l+oRKQm/Jo4ewR9YdKW2gFDVVl3st1yY5Nml1ZS4m3lTp3a/KehT9w+Uiv2JNn3kG0VOo+AZw==
+  dependencies:
+    "@react-native-vector-icons/common" "^13.0.1"
+
+"@react-native-vector-icons/ionicons@^13.1.2":
+  version "13.1.2"
+  resolved "https://registry.npmjs.org/@react-native-vector-icons/ionicons/-/ionicons-13.1.2.tgz#89372a159c120d6711d4264875b0a1ee1f614776"
+  integrity sha512-8TaXKw41MgKADeesrrbUpA3FR81JNy96ogiGRjWgtE1djSEevDsOKMij7Jq/3TfiGaE0prEshU0TcW5qwsf0Ug==
+  dependencies:
+    "@react-native-vector-icons/common" "^13.0.1"
 
 "@react-native-vector-icons/material-design-icons@^13.1.2":
   version "13.1.2"
@@ -4195,15 +4230,6 @@ cli-spinners@^2.0.0:
   version "2.9.2"
   resolved "https://registry.npmjs.org/cli-spinners/-/cli-spinners-2.9.2.tgz#1773a8f4b9c4d6ac31563df53b3fc1d79462fe41"
   integrity sha512-ywqV+5MmyL4E7ybXgKys4DugZbX0FC6LnwrhjuykIjnK9k8OQacQ7axGKnjDXWNhns0xot3bZI5h55H8yo9cJg==
-
-cliui@^7.0.2:
-  version "7.0.4"
-  resolved "https://registry.npmjs.org/cliui/-/cliui-7.0.4.tgz#a0265ee655476fc807aea9df3df8df7783808b4f"
-  integrity sha512-OcRE68cOsVMXp1Yvonl/fzkQOyjLSu/8bhPDfQt0e0/Eb283TKP20Fs2MqoPsr9SwA595rRCA+QMzYc9nBP+JQ==
-  dependencies:
-    string-width "^4.2.0"
-    strip-ansi "^6.0.0"
-    wrap-ansi "^7.0.0"
 
 cliui@^8.0.1:
   version "8.0.1"
@@ -8260,14 +8286,6 @@ react-native-toast-message@^2.4.0:
   resolved "https://registry.npmjs.org/react-native-toast-message/-/react-native-toast-message-2.4.0.tgz#c2f0948fd43881feaabab67f4e047134ac000565"
   integrity sha512-Ip4sPpf9707Qmn06Jp1aGJrYLx2mwTYBRjXzP7ebPvmjABA6OCT9bEh62E0L6s5zc/KPZ3rix+OnBKW/pOJZ4g==
 
-react-native-vector-icons@^10.3.0:
-  version "10.3.0"
-  resolved "https://registry.npmjs.org/react-native-vector-icons/-/react-native-vector-icons-10.3.0.tgz#de440f2627a2ed1079ce3b99d5b9d4f86894df28"
-  integrity sha512-IFQ0RE57819hOUdFvgK4FowM5aMXg7C7XKsuGLevqXkkIJatc3QopN0wYrb2IrzUgmdpfP+QVIbI3S6h7M0btw==
-  dependencies:
-    prop-types "^15.7.2"
-    yargs "^16.1.1"
-
 react-native-view-shot@5.1.0:
   version "5.1.0"
   resolved "https://registry.npmjs.org/react-native-view-shot/-/react-native-view-shot-5.1.0.tgz#60c0728d70c941658e40cc965d9d304a8fdd8eb4"
@@ -9609,28 +9627,10 @@ yaml@^2.6.1:
   resolved "https://registry.npmjs.org/yaml/-/yaml-2.8.2.tgz#5694f25eca0ce9c3e7a9d9e00ce0ddabbd9e35c5"
   integrity sha512-mplynKqc1C2hTVYxd0PU2xQAc22TI1vShAYGksCCfxbn/dFwnHTNi1bvYsBTkhdUNtGIf5xNOg938rrSSYvS9A==
 
-yargs-parser@^20.2.2:
-  version "20.2.9"
-  resolved "https://registry.npmjs.org/yargs-parser/-/yargs-parser-20.2.9.tgz#2eb7dc3b0289718fc295f362753845c41a0c94ee"
-  integrity sha512-y11nGElTIV+CT3Zv9t7VKl+Q3hTQoT9a1Qzezhhl6Rp21gJ/IVTW7Z3y9EWXhuUBC2Shnf+DX0antecpAwSP8w==
-
 yargs-parser@^21.1.1:
   version "21.1.1"
   resolved "https://registry.npmjs.org/yargs-parser/-/yargs-parser-21.1.1.tgz#9096bceebf990d21bb31fa9516e0ede294a77d35"
   integrity sha512-tVpsJW7DdjecAiFpbIB1e3qxIQsE6NoPc5/eTdrbbIC4h0LVsWhnoa3g+m2HclBIujHzsxZ4VJVA+GUuc2/LBw==
-
-yargs@^16.1.1:
-  version "16.2.0"
-  resolved "https://registry.npmjs.org/yargs/-/yargs-16.2.0.tgz#1c82bf0f6b6a66eafce7ef30e376f49a12477f66"
-  integrity sha512-D1mvvtDG0L5ft/jGWkLpG1+m0eQxOfaBvTNELraWj22wSVUMWxZUvYgJYcKh6jGGIkJFhH4IZPQhR4TKpc8mBw==
-  dependencies:
-    cliui "^7.0.2"
-    escalade "^3.1.1"
-    get-caller-file "^2.0.5"
-    require-directory "^2.1.1"
-    string-width "^4.2.0"
-    y18n "^5.0.5"
-    yargs-parser "^20.2.2"
 
 yargs@^17.3.1, yargs@^17.6.2, yargs@^17.7.2:
   version "17.7.2"
