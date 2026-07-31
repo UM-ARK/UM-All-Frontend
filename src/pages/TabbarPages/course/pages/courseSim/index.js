@@ -243,6 +243,10 @@ function CourseSim({ route, navigation }) {
     const [replacementTarget, setReplacementTarget] = useState(null);
     const [replacementCourseCode, setReplacementCourseCode] = useState(null);
     const [replacementSearchText, setReplacementSearchText] = useState('');
+    const [overviewViewportHeight, setOverviewViewportHeight] = useState(0);
+    const [overviewWeekdayHeight, setOverviewWeekdayHeight] = useState(0);
+    const [overviewReminderHeight, setOverviewReminderHeight] = useState(0);
+    const [viewSwitcherHeight, setViewSwitcherHeight] = useState(0);
 
     useEffect(() => {
         let cancelled = false;
@@ -499,12 +503,26 @@ function CourseSim({ route, navigation }) {
         lodash.max(planSlots.map(course => toMinutes(course['Time To']))) ??
         overviewStart;
     const overviewDuration = Math.max(overviewEnd - overviewStart, 60);
+    const measuredOverviewMaxHeight =
+        overviewViewportHeight > 0 &&
+        overviewWeekdayHeight > 0 &&
+        overviewReminderHeight > 0 &&
+        viewSwitcherHeight > 0
+            ? overviewViewportHeight -
+              overviewWeekdayHeight -
+              overviewReminderHeight -
+              floatingBottom -
+              viewSwitcherHeight -
+              scale(5) -
+              verticalScale(10)
+            : null;
     const overviewMaxHeight = Math.max(
         OVERVIEW_HOUR_HEIGHT,
-        windowHeight -
-            insets.top -
-            tabBarHeight -
-            OVERVIEW_RESERVED_HEIGHT,
+        measuredOverviewMaxHeight ??
+            windowHeight -
+                insets.top -
+                tabBarHeight -
+                OVERVIEW_RESERVED_HEIGHT,
     );
     const overviewHourHeight = Math.min(
         OVERVIEW_HOUR_HEIGHT,
@@ -2615,6 +2633,9 @@ E11-0000
 
         return (
             <View
+                onLayout={({ nativeEvent }) =>
+                    setViewSwitcherHeight(nativeEvent.layout.height)
+                }
                 style={{
                     position: 'absolute',
                     bottom: floatingBottom,
@@ -2698,7 +2719,11 @@ E11-0000
 
         return (
             <View>
-                <View style={{ flexDirection: 'row' }}>
+                <View
+                    onLayout={({ nativeEvent }) =>
+                        setOverviewWeekdayHeight(nativeEvent.layout.height)
+                    }
+                    style={{ flexDirection: 'row' }}>
                     {overviewDays.map(day => (
                         <Text
                             key={day}
@@ -2766,6 +2791,9 @@ E11-0000
     const renderReminder = () => {
         return (
             <View
+                onLayout={({ nativeEvent }) =>
+                    setOverviewReminderHeight(nativeEvent.layout.height)
+                }
                 style={{
                     width: '100%',
                     alignItems: 'center',
@@ -2797,6 +2825,9 @@ E11-0000
     return (
         // 頂欄由 course/index.js 容器統一提供；頂部 insets 亦在容器處理，此處不可重複扣一次
         <View
+            onLayout={({ nativeEvent }) =>
+                setOverviewViewportHeight(nativeEvent.layout.height)
+            }
             style={{
                 flex: 1,
                 backgroundColor: bg_color,

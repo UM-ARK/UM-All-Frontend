@@ -1,7 +1,11 @@
 import React, { useMemo } from 'react';
 import { StyleSheet, Text } from 'react-native';
 
-import { scale, verticalScale } from 'react-native-size-matters';
+import {
+    moderateScale,
+    scale,
+    verticalScale,
+} from 'react-native-size-matters';
 
 import { useTheme, uiStyle } from '../../../../../../components/ThemeContext';
 
@@ -71,8 +75,10 @@ const OverviewCourseCardContent = ({ course, frame }) => {
                 style={[
                     styles.courseCode,
                     {
-                        fontSize: scale(tiny ? 8 : compact ? 9 : 10),
-                        lineHeight: scale(tiny ? 9 : compact ? 10 : 11),
+                        fontSize: moderateScale(tiny ? 8 : compact ? 9 : 10),
+                        lineHeight: moderateScale(
+                            tiny ? 9 : compact ? 10 : 11,
+                        ),
                     },
                 ]}
                 numberOfLines={tiny ? 1 : 2}>
@@ -85,8 +91,8 @@ const OverviewCourseCardContent = ({ course, frame }) => {
                     style={[
                         styles.sectionText,
                         {
-                            fontSize: scale(compact ? 6 : 7),
-                            lineHeight: scale(compact ? 7 : 8),
+                            fontSize: moderateScale(compact ? 6 : 7),
+                            lineHeight: moderateScale(compact ? 7 : 8),
                         },
                     ]}
                     numberOfLines={1}>
@@ -98,8 +104,8 @@ const OverviewCourseCardContent = ({ course, frame }) => {
                     style={[
                         styles.classroomText,
                         {
-                            fontSize: scale(tiny ? 6 : 7),
-                            lineHeight: scale(tiny ? 7 : 8),
+                            fontSize: moderateScale(tiny ? 6 : 7),
+                            lineHeight: moderateScale(tiny ? 7 : 8),
                         },
                     ]}
                     numberOfLines={1}>
@@ -110,8 +116,8 @@ const OverviewCourseCardContent = ({ course, frame }) => {
                 style={[
                     styles.timeText,
                     {
-                        fontSize: scale(6.5),
-                        lineHeight: scale(tiny ? 7 : 8),
+                        fontSize: moderateScale(6.5),
+                        lineHeight: moderateScale(tiny ? 7 : 8),
                     },
                 ]}
                 numberOfLines={tiny || inlineTime ? 1 : 2}>
