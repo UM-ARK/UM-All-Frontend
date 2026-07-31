@@ -11,6 +11,7 @@ import {
     AppState,
     Keyboard,
     FlatList,
+    useWindowDimensions,
 } from 'react-native';
 
 // 本地工具
@@ -33,7 +34,6 @@ import ModalBottom from '../../../../components/ModalBottom.js';
 import { setAPPInfo, handleLogout } from '../../../../utils/storageKits.js';
 import { getLocalAppVersion, isLocalAppOlderThanServer, showAppStoreUpdateAlert } from '../../../../utils/appUpdateKits.js';
 import HomeCard from './components/HomeCard.js';
-import { screenWidth } from '../../../../utils/stylesKits.js';
 import { trigger } from '../../../../utils/trigger.js';
 import { logToFirebase } from '../../../../utils/firebaseAnalytics.js';
 import { openLink } from '../../../../utils/browser.js';
@@ -95,6 +95,7 @@ const HomeScreen = ({ navigation }) => {
     const { theme } = useTheme();
     const { white, bg_color, black, themeColor, themeColorLight, themeColorUltraLight, viewShadow, TIME_TABLE_COLOR } = theme;
     const { t, i18n } = useTranslation(['common', 'home']);
+    const { width: windowWidth } = useWindowDimensions();
     const isTc = i18n.language === 'tc';
     const featureFontSize = isTc ? verticalScale(8) : verticalScale(7);
 
@@ -161,6 +162,9 @@ const HomeScreen = ({ navigation }) => {
             },
         },
     ], [navigation, t]);
+    // 快捷項固定寬度 + 固定間距，整組置中，兩側自然留白（不均分視窗寬）
+    const quickFeatureItemWidth = scale(56);
+    const quickFeatureGap = scale(20);
     const [calRefreshKey, setCalRefreshKey] = useState(0);
     const [isShowModal, setIsShowModal] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
@@ -338,6 +342,7 @@ const HomeScreen = ({ navigation }) => {
         item => (
             <TouchableScale
                 style={{
+                    width: quickFeatureItemWidth,
                     justifyContent: 'center',
                     alignItems: 'center',
                 }}
@@ -357,7 +362,7 @@ const HomeScreen = ({ navigation }) => {
                 </Text>
             </TouchableScale>
         ),
-        [black.second, featureFontSize],
+        [black.second, featureFontSize, quickFeatureItemWidth],
     );
 
     // 打開/關閉底部Modal
@@ -464,6 +469,7 @@ const HomeScreen = ({ navigation }) => {
     return (
         <View style={{ flex: 1, backgroundColor: bg_color, alignItems: 'center', justifyContent: 'center' }}>
             <ScrollView
+                style={{ width: windowWidth }}
                 contentInsetAdjustmentBehavior="automatic"
                 refreshControl={
                     <RefreshControl
@@ -493,7 +499,7 @@ const HomeScreen = ({ navigation }) => {
                     flexDirection: 'row',
                     alignItems: 'center', justifyContent: 'center',
                     alignSelf: 'center',
-                    width: screenWidth * 0.8,
+                    width: windowWidth * 0.8,
                     marginTop: verticalScale(6),
                 }}>
                     <TouchableScale
@@ -540,15 +546,16 @@ const HomeScreen = ({ navigation }) => {
                     </TouchableScale>
                 </View>
 
-                {/* 快捷功能圖標（樣式對齊服務頁 FeatureIcon；固定列數用 flex 置中，避免 FlatGrid 未滿列靠左） */}
+                {/* 快捷功能圖標（固定寬與間距，整組置中聚攏） */}
                 <View
                     style={{
-                        width: '100%',
+                        width: windowWidth,
+                        alignSelf: 'center',
                         marginTop: verticalScale(6),
-                        paddingHorizontal: scale(10),
                         flexDirection: 'row',
-                        justifyContent: 'space-evenly',
+                        justifyContent: 'center',
                         alignItems: 'center',
+                        gap: quickFeatureGap,
                     }}>
                     {functionArray.map(item => renderQuickFeature(item))}
                 </View>
