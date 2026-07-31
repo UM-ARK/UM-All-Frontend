@@ -11,21 +11,31 @@ import SegmentControl from '../../../../components/SegmentControl';
 import { Image } from 'expo-image';
 import { FlatGrid } from 'react-native-super-grid';
 import moment from 'moment-timezone';
-import HTMLView from 'react-native-htmlview';
+import RenderHTML from '@native-html/render';
 import { scale } from 'react-native-size-matters';
 import TouchableScale from '../../../../components/TouchableScale';
 
 // 正文字體：iOS 用 PingFang SC，Android 用 Noto Sans
 const BODY_FONT = Platform.select({ ios: 'PingFang SC', android: 'NotoSansCJK-Regular', default: undefined });
 
+// 澳大新聞 HTML 常帶表格固定 height／width，RenderHTML 會裁切文字；先清掉再渲染
+const NEWS_IGNORED_STYLES = ['height', 'width', 'minWidth', 'maxWidth'];
+
 // HTML正則篩數據，並在每個段落開頭插入全形空格實現首行縮進
 function repalceHtmlToText(str) {
+    // Word 書籤錨點：無 href 的 <a name/id>，勿當成可點連結
+    str = str.replace(/<a\b(?![^>]*\bhref\s*=)[^>]*>([\s\S]*?)<\/a>/gi, '$1');
     str = str.replace(/<br\s*\/?>/g, '');
     str = str.replace(/<p><\s*\/?p>/g, '');
     str = str.replace(/<div><\s*\/?div>/g, '');
     // 段首加兩個全形空格模擬縮進
     str = str.replace(/<p(\s[^>]*)?>/gi, '<p$1>\u3000\u3000');
     str = str.replace(/<div(\s[^>]*)?>/gi, '<div$1>\u3000\u3000');
+    // 移除聯繫資訊表格中的空白列，避免多餘大段空白
+    str = str.replace(
+        /<tr\b[^>]*>\s*(?:<td\b[^>]*>\s*(?:&nbsp;|\u00a0|\s)*<\/td>\s*){1,2}<\/tr>/gi,
+        '',
+    );
     return str;
 }
 
@@ -61,77 +71,86 @@ const NewsDetail = ({ route, navigation }) => {
             ...viewShadow,
         },
     });
-    const htmlStyles = StyleSheet.create({
-        p: {
-            ...uiStyle.defaultText,
-            fontFamily: BODY_FONT,
-            color: black.second,
-            lineHeight: scale(22),
-            marginBottom: scale(8),
-            textAlign: 'justify',
-        },
-        span: {
-            ...uiStyle.defaultText,
-            fontFamily: BODY_FONT,
-            color: black.second,
-            lineHeight: scale(22),
-        },
-        div: {
-            ...uiStyle.defaultText,
-            fontFamily: BODY_FONT,
-            color: black.second,
-            lineHeight: scale(22),
-            marginBottom: scale(8),
-            textAlign: 'justify',
-        },
-        td: {
-            ...uiStyle.defaultText,
-            fontFamily: BODY_FONT,
-            color: black.third,
-            lineHeight: scale(20),
-        },
-        a: {
-            ...uiStyle.defaultText,
-            fontFamily: BODY_FONT,
-            color: themeColor,
-            textDecorationLine: 'underline',
-        },
-        h1: {
-            fontFamily: BODY_FONT,
-            fontWeight: 'bold',
-            fontSize: scale(20),
-            color: black.first,
-            marginBottom: scale(8),
-            lineHeight: scale(28),
-        },
-        h2: {
-            fontFamily: BODY_FONT,
-            fontWeight: 'bold',
-            fontSize: scale(18),
-            color: black.first,
-            marginBottom: scale(6),
-            lineHeight: scale(26),
-        },
-        h3: {
-            fontFamily: BODY_FONT,
-            fontWeight: '600',
-            fontSize: scale(16),
-            color: black.first,
-            marginBottom: scale(6),
-            lineHeight: scale(24),
-        },
-        strong: {
-            fontFamily: BODY_FONT,
-            fontWeight: 'bold',
-            color: black.first,
-        },
-        li: {
-            fontFamily: BODY_FONT,
-            color: black.second,
-            lineHeight: scale(22),
-            marginBottom: scale(4),
-        },
-    });
+    // RenderHTML 的 tagsStyles 需為可讀取的 plain object（勿用 StyleSheet.create）
+    const htmlStyles = useMemo(
+        () => ({
+            p: {
+                ...uiStyle.defaultText,
+                fontFamily: BODY_FONT,
+                color: black.second,
+                lineHeight: scale(22),
+                marginBottom: scale(8),
+                textAlign: 'justify',
+            },
+            span: {
+                ...uiStyle.defaultText,
+                fontFamily: BODY_FONT,
+                color: black.second,
+                lineHeight: scale(22),
+            },
+            div: {
+                ...uiStyle.defaultText,
+                fontFamily: BODY_FONT,
+                color: black.second,
+                lineHeight: scale(22),
+                marginBottom: scale(8),
+                textAlign: 'justify',
+            },
+            table: {
+                width: '100%',
+                marginTop: scale(8),
+            },
+            td: {
+                ...uiStyle.defaultText,
+                fontFamily: BODY_FONT,
+                color: black.third,
+                lineHeight: scale(20),
+                paddingVertical: scale(2),
+            },
+            a: {
+                ...uiStyle.defaultText,
+                fontFamily: BODY_FONT,
+                color: themeColor,
+                textDecorationLine: 'underline',
+            },
+            h1: {
+                fontFamily: BODY_FONT,
+                fontWeight: 'bold',
+                fontSize: scale(20),
+                color: black.first,
+                marginBottom: scale(8),
+                lineHeight: scale(28),
+            },
+            h2: {
+                fontFamily: BODY_FONT,
+                fontWeight: 'bold',
+                fontSize: scale(18),
+                color: black.first,
+                marginBottom: scale(6),
+                lineHeight: scale(26),
+            },
+            h3: {
+                fontFamily: BODY_FONT,
+                fontWeight: '600',
+                fontSize: scale(16),
+                color: black.first,
+                marginBottom: scale(6),
+                lineHeight: scale(24),
+            },
+            strong: {
+                fontFamily: BODY_FONT,
+                fontWeight: 'bold',
+                color: black.first,
+            },
+            li: {
+                fontFamily: BODY_FONT,
+                color: black.second,
+                lineHeight: scale(22),
+                marginBottom: scale(4),
+            },
+        }),
+        [black.first, black.second, black.third, themeColor],
+    );
 
     const imageScrollViewer = useRef(null);
 
@@ -247,6 +266,9 @@ const NewsDetail = ({ route, navigation }) => {
     }, [languageSegmentOptions, chooseMode]);
 
     const handleHyperLink = (url) => {
+        if (!url || url.startsWith('#')) {
+            return;
+        }
         if (url.includes('mailto:')) {
             Linking.openURL(url);
         } else if (url.includes('http')) {
@@ -257,6 +279,27 @@ const NewsDetail = ({ route, navigation }) => {
     // 用数组存储内容，便于根据语言筛选条件显示
     const title = [data.title_cn, data.title_en, data.title_pt];
     const content = [data.content_cn, data.content_en, data.content_pt];
+    const chosenHtml = content[chooseMode] || '';
+    // 扣除內容容器左右 margin + padding，供 RenderHTML 計算寬度
+    const htmlContentWidth = PAGE_WIDTH - scale(10) * 2 - scale(15) * 2;
+    const htmlSource = useMemo(
+        () => ({html: repalceHtmlToText(chosenHtml)}),
+        [chosenHtml],
+    );
+    const htmlRenderersProps = useMemo(
+        () => ({
+            a: {
+                onPress: (_event, href) => {
+                    if (!href || href.startsWith('#')) {
+                        return;
+                    }
+                    trigger();
+                    handleHyperLink(href);
+                },
+            },
+        }),
+        [],
+    );
 
     return (
         <View style={{ backgroundColor: bg_color, flex: 1 }}>
@@ -330,11 +373,20 @@ const NewsDetail = ({ route, navigation }) => {
 
                 {/* 正文 */}
                 <View style={styles.contentContainer}>
-                    <HTMLView
-                        value={repalceHtmlToText(content[chooseMode])}
-                        onLinkPress={handleHyperLink}
-                        nodeComponentProps={{ selectable: true }}
-                        stylesheet={htmlStyles}
+                    <RenderHTML
+                        source={htmlSource}
+                        contentWidth={htmlContentWidth}
+                        baseStyle={{
+                            ...uiStyle.defaultText,
+                            fontFamily: BODY_FONT,
+                            color: black.second,
+                            lineHeight: scale(22),
+                        }}
+                        tagsStyles={htmlStyles}
+                        // 忽略後台寫死的表格高寬，避免文字被裁切、超出螢幕
+                        ignoredStyles={NEWS_IGNORED_STYLES}
+                        renderersProps={htmlRenderersProps}
+                        defaultTextProps={{selectable: true}}
                     />
                 </View>
 
