@@ -872,15 +872,13 @@ const styles = StyleSheet.create({
         marginLeft: scale(4),
     },
     feedTabs: {
-        height: verticalScale(30),
+        height: verticalScale(22),
         flexDirection: 'row',
         flexShrink: 0,
         marginHorizontal: scale(2),
         position: 'relative',
     },
     feedTab: {
-        minHeight: verticalScale(30),
-        borderRadius: scale(8),
         alignItems: 'center',
         justifyContent: 'center',
         paddingHorizontal: scale(8),
