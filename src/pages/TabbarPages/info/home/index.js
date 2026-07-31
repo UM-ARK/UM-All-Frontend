@@ -45,7 +45,6 @@ import CustomBottomSheet from '../../../../utils/BottomSheet';
 import HyperlinkText from '../../../../components/HyperlinkText.js';
 import SearchBar from './components/SearchBar.js';
 import CalendarBar from './components/CalendarBar';
-import { FlatGrid } from 'react-native-super-grid';
 import Toast from 'react-native-toast-message';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
@@ -541,30 +540,17 @@ const HomeScreen = ({ navigation }) => {
                     </TouchableScale>
                 </View>
 
-                {/* 快捷功能圖標（樣式對齊服務頁 FeatureIcon） */}
+                {/* 快捷功能圖標（樣式對齊服務頁 FeatureIcon；固定列數用 flex 置中，避免 FlatGrid 未滿列靠左） */}
                 <View
                     style={{
                         width: '100%',
                         marginTop: verticalScale(6),
                         paddingHorizontal: scale(10),
+                        flexDirection: 'row',
+                        justifyContent: 'space-evenly',
+                        alignItems: 'center',
                     }}>
-                    <FlatGrid
-                        style={{
-                            // FlatGrid spacing 會在上下多出一圈 padding，用負 margin 收緊
-                            marginVertical: verticalScale(-4),
-                        }}
-                        itemContainerStyle={{
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                        }}
-                        maxItemsPerRow={5}
-                        itemDimension={scale(50)}
-                        spacing={scale(8)}
-                        data={functionArray}
-                        renderItem={({ item }) => renderQuickFeature(item)}
-                        showsVerticalScrollIndicator={false}
-                        scrollEnabled={false}
-                    />
+                    {functionArray.map(item => renderQuickFeature(item))}
                 </View>
 
                 {/* 更新提示 */}

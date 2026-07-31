@@ -6,7 +6,7 @@ import React, {
     useRef,
     useState,
 } from 'react';
-import { Text, View } from 'react-native';
+import { Platform, Text, View } from 'react-native';
 import { KeyboardAwareScrollView, KeyboardToolbar } from 'react-native-keyboard-controller';
 import { useNavigation } from '@react-navigation/native';
 import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
@@ -196,6 +196,12 @@ const What2Reg = () => {
     // 與課表頁一致：優先讀 Tab Bar 實際高度，否則回退 safe area + 預設高度
     const tabBarHeight =
         useContext(BottomTabBarHeightContext) ?? insets.bottom + 49;
+    // Android：JS Bottom Tab 與內容分欄，場景底邊已在 Tab Bar 上方，勿再扣 tabBarHeight
+    // iOS：原生 Tab 多為半透明疊層，內容延伸至螢幕底，需扣 tabBarHeight 才不會被擋住
+    const floatingBottom =
+        Platform.OS === 'android'
+            ? verticalScale(10)
+            : tabBarHeight + verticalScale(10);
     // 頂部 insets 由 course/index.js 容器的 SafeAreaView + 頂欄統一處理，段落不可重複扣一次
 
     // 課程資料、模擬課表與衝突狀態一律取自容器的 CoursePlanProvider，
@@ -460,8 +466,8 @@ const What2Reg = () => {
             <KeyboardAwareScrollView
                 ref={scrollViewRef}
                 style={{ width: '100%', flex: 1 }}
-                scrollIndicatorInsets={{ bottom: tabBarHeight }}
-                contentContainerStyle={{ paddingBottom: tabBarHeight + verticalScale(50) }}
+                scrollIndicatorInsets={{ bottom: floatingBottom }}
+                contentContainerStyle={{ paddingBottom: floatingBottom + verticalScale(50) }}
                 stickyHeaderIndices={[0]}
                 keyboardDismissMode="on-drag"
                 contentInsetAdjustmentBehavior="never"
@@ -580,7 +586,7 @@ const What2Reg = () => {
 
             {/* 已排課程數與衝突提示，點擊切到課表段落 */}
             <PlanCapsule
-                bottom={tabBarHeight + verticalScale(10)}
+                bottom={floatingBottom}
                 onPress={handleOpenTimetable}
             />
 

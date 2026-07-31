@@ -260,6 +260,10 @@ const CourseTabContent = () => {
                             backgroundColor: bg_color,
                             height: TAB_BAR_HEIGHT,
                             overflow: 'hidden',
+                            // TabBar 預設 elevation:4；本頁 Tab 僅佔左側 flex，
+                            // Android 會在右側 ⋯ 交界投下垂直陰影，需關掉
+                            elevation: 0,
+                            shadowOpacity: 0,
                         },
                         tabBarItemStyle: {
                             minHeight: TAB_BAR_HEIGHT,

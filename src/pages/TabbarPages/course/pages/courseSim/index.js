@@ -286,6 +286,12 @@ function CourseSim({ route, navigation }) {
     const insets = useSafeAreaInsets();
     const { width: windowWidth, height: windowHeight } = useWindowDimensions();
     const tabBarHeight = useContext(BottomTabBarHeightContext) ?? insets.bottom + 49;
+    // Android：JS Bottom Tab 與內容分欄，場景底邊已在 Tab Bar 上方，勿再扣 tabBarHeight
+    // iOS：原生 Tab 多為半透明疊層，內容延伸至螢幕底，需扣 tabBarHeight 才不會被擋住
+    const floatingBottom =
+        Platform.OS === 'android'
+            ? verticalScale(10)
+            : tabBarHeight + verticalScale(10);
 
     const s = StyleSheet.create({
         firstUseText: {
@@ -2600,7 +2606,7 @@ E11-0000
         setLocalStorage(TIMETABLE_VIEW_STORAGE_KEY, nextView);
     }, []);
 
-    /** 底部具體／概覽切換；絕對定位並扣掉 Tab Bar，避免被遮擋。 */
+    /** 底部具體／概覽切換；絕對定位，bottom 見 floatingBottom。 */
     const renderViewSwitcher = () => {
         const viewOptions = [
             { key: 'detail', label: t('具體', { ns: 'timetable' }) },
@@ -2611,7 +2617,7 @@ E11-0000
             <View
                 style={{
                     position: 'absolute',
-                    bottom: tabBarHeight + verticalScale(10),
+                    bottom: floatingBottom,
                     alignSelf: 'center',
                     zIndex: 10,
                 }}>
@@ -2800,8 +2806,8 @@ E11-0000
                 keyboardDismissMode="on-drag"
                 contentInsetAdjustmentBehavior="never"
                 contentContainerStyle={{
-                    // 預留底部 SegmentControl + Tab Bar，避免最後一列被擋住
-                    paddingBottom: tabBarHeight + verticalScale(50),
+                    // 預留底部 SegmentControl；Android 場景底已在 Tab 上方，勿再扣 tabBarHeight
+                    paddingBottom: floatingBottom + verticalScale(50),
                 }}>
                 {/* 渲染課表或首次使用提示 */}
                 <View style={{ flex: 1 }}>
@@ -2826,7 +2832,7 @@ E11-0000
                 </View>
             </ScrollView>
 
-            {/* 有排課時才顯示具體／概覽切換；與 FAB 同層，bottom 扣掉 Tab Bar */}
+            {/* 有排課時才顯示具體／概覽切換；與 FAB 同層，bottom 見 floatingBottom */}
             {planSlots.length > 0 &&
             timetableView &&
             !hasOpenCourseSearch
@@ -2835,7 +2841,7 @@ E11-0000
 
             {/* sheet 展開時淡出 FAB；關閉動畫開始即淡入，避免等 onClose 才突然出現 */}
             <AddCourseFab
-                bottom={tabBarHeight + verticalScale(10)}
+                bottom={floatingBottom}
                 visible={!hasOpenCourseSearch}
                 onAddPress={openCourseSearch}
                 onSearchPress={() =>
