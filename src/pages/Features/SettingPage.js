@@ -57,29 +57,35 @@ const SettingSectionCard = ({ children }) => {
     const items = React.Children.toArray(children).filter(Boolean);
 
     return (
+        // 外層承載陰影；內層 overflow 裁切內容，避免陰影被裁掉
         <View
             style={{
                 marginHorizontal: scale(15),
                 marginBottom: verticalScale(8),
                 borderRadius: scale(16),
-                overflow: 'hidden',
                 backgroundColor: white,
                 ...viewShadow,
             }}>
-            {items.map((child, index) => (
-                <React.Fragment key={index}>
-                    {index > 0 ? (
-                        <View
-                            style={{
-                                height: verticalScale(2),
-                                width: '100%',
-                                backgroundColor: bg_color,
-                            }}
-                        />
-                    ) : null}
-                    {child}
-                </React.Fragment>
-            ))}
+            <View
+                style={{
+                    borderRadius: scale(16),
+                    overflow: 'hidden',
+                }}>
+                {items.map((child, index) => (
+                    <React.Fragment key={index}>
+                        {index > 0 ? (
+                            <View
+                                style={{
+                                    height: verticalScale(2),
+                                    width: '100%',
+                                    backgroundColor: bg_color,
+                                }}
+                            />
+                        ) : null}
+                        {child}
+                    </React.Fragment>
+                ))}
+            </View>
         </View>
     );
 };

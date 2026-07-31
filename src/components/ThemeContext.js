@@ -138,15 +138,18 @@ const getColorDiy = (isLight) => {
             bg_color: isLight ? '#fbfbfb' : trueBlack,
         },
 
-        // 陰影，IOS和Android要分開設置，shadow屬性只適用於IOS
+        // 跨平台陰影（RN New Architecture boxShadow，iOS / Android 視覺一致）
         viewShadow: {
-            shadowColor: blackMain,
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.08,
-            shadowRadius: 4,
-            elevation: 3,
-            // RN 0.76 後加入的css屬性，但需要新架構支持，新架構目前仍未在項目中啟用
-            // boxShadow: '1px 1px 3px 0px rgba(0,0,0,0.2)',
+            boxShadow: [
+                {
+                    offsetX: 0,
+                    offsetY: 2,
+                    blurRadius: 8,
+                    spreadDistance: 0,
+                    // 暗色模式略加深，避免陰影幾乎不可見
+                    color: rgba(trueBlack, isLight ? 0.1 : 0.45),
+                },
+            ],
         },
 
         barStyle: isLight ? 'dark-content' : 'light-content',
