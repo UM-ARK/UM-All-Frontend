@@ -41,13 +41,14 @@ const CourseMoreMenu = ({
     const styles = useMemo(
         () => ({
             moreButton: {
-                backgroundColor: tonal.primary15,
-                borderRadius: scale(8),
-                paddingHorizontal: scale(8),
-                paddingVertical: scale(4),
+                // 頂欄高度用 moderateScale／verticalScale；此處勿用 scale()，
+                // 否則 iPad 依寬度放大後會比 Tab 高、視覺上像沒對齊
+                borderRadius: verticalScale(8),
+                paddingHorizontal: verticalScale(8),
+                paddingVertical: verticalScale(4),
                 justifyContent: 'center',
                 alignItems: 'center',
-                marginRight: scale(10),
+                marginRight: verticalScale(10),
             },
             sheetContainer: {
                 borderRadius: scale(10),
@@ -101,7 +102,7 @@ const CourseMoreMenu = ({
                 textAlign: 'center',
             }),
         }),
-        [bg_color, black.third, tonal.primary15],
+        [bg_color, black.third],
     );
 
     const versionSummary = useMemo(() => {
@@ -146,10 +147,10 @@ const CourseMoreMenu = ({
             <TouchableScale
                 style={styles.moreButton}
                 onPress={handleOpenSheet}
-                hitSlop={scale(8)}>
+                hitSlop={verticalScale(8)}>
                 <Ionicons
                     name="ellipsis-horizontal"
-                    size={scale(16)}
+                    size={verticalScale(16)}
                     color={themeColor}
                 />
             </TouchableScale>
