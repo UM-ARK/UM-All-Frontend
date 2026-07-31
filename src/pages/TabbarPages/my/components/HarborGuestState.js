@@ -1,6 +1,7 @@
 import React from 'react';
 import {
     ActivityIndicator,
+    Image,
     Pressable,
     StyleSheet,
     Text,
@@ -48,17 +49,10 @@ const HarborGuestState = ({isAuthorizing, onLogin, onBrowse}) => {
                     styles.hero,
                     {backgroundColor: theme.white},
                 ]}>
-                <View
-                    style={[
-                        styles.heroIcon,
-                        {backgroundColor: theme.tonal.primary15},
-                    ]}>
-                    <MaterialCommunityIcons
-                        name="account-lock-outline"
-                        size={scale(44)}
-                        color={theme.themeColor}
-                    />
-                </View>
+                <Image
+                    source={require('../../../../static/img/logo.png')}
+                    style={styles.heroIcon}
+                />
                 <View
                     style={[
                         styles.harborPill,
@@ -74,7 +68,7 @@ const HarborGuestState = ({isAuthorizing, onLogin, onBrowse}) => {
                             styles.harborPillText,
                             {color: theme.secondThemeColor},
                         ]}>
-                        ARK Harbor
+                        ARK Harbor 職涯港
                     </Text>
                 </View>
                 <Text style={[styles.title, {color: theme.black.main}]}>
@@ -232,8 +226,6 @@ const styles = StyleSheet.create({
         width: scale(82),
         height: scale(82),
         borderRadius: scale(16),
-        alignItems: 'center',
-        justifyContent: 'center',
         marginBottom: verticalScale(14),
     },
     harborPill: {
