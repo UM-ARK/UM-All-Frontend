@@ -54,7 +54,6 @@ const HarborComposerForm = ({
         isNewTopic,
         isReply,
         isTagCountValid,
-        isTitleLengthValid,
         maximumPostLength,
         maximumTagCount,
         maximumTitleLength,
@@ -84,7 +83,6 @@ const HarborComposerForm = ({
     const {
         handleSubmit,
         isDeleting,
-        isPostLengthValid,
         isSubmitDisabled,
         isSubmitting,
         rawLength,
@@ -186,17 +184,14 @@ const HarborComposerForm = ({
                                 ]}>
                                 {t('標題')}
                             </Text>
-                            {composerSettings ? (
+                            {maximumTitleLength != null &&
+                            titleLength > maximumTitleLength ? (
                                 <Text
                                     style={[
                                         styles.requirementCounter,
-                                        {
-                                            color: isTitleLengthValid
-                                                ? theme.success
-                                                : theme.unread,
-                                        },
+                                        {color: theme.unread},
                                     ]}>
-                                    {`${titleLength}/${maximumTitleLength ?? '—'}`}
+                                    {`${titleLength}/${maximumTitleLength}`}
                                 </Text>
                             ) : null}
                         </View>
@@ -367,17 +362,16 @@ const HarborComposerForm = ({
                                 />
                             </Pressable>
                         </View>
-                        {composerSettings ? (
+                        {maximumPostLength != null &&
+                        (supportsImages
+                            ? visibleTextLength
+                            : rawLength) > maximumPostLength ? (
                             <Text
                                 style={[
                                     styles.requirementCounter,
-                                    {
-                                        color: isPostLengthValid
-                                            ? theme.success
-                                            : theme.unread,
-                                    },
+                                    {color: theme.unread},
                                 ]}>
-                                {`${supportsImages ? visibleTextLength : rawLength}/${maximumPostLength ?? '—'}`}
+                                {`${supportsImages ? visibleTextLength : rawLength}/${maximumPostLength}`}
                             </Text>
                         ) : null}
                     </View>

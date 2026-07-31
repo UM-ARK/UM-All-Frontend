@@ -120,7 +120,6 @@ const HarborReplyComposerForm = ({
     const insets = useSafeAreaInsets();
     const inputRef = useRef(null);
     const {
-        composerSettings,
         maximumPostLength,
         raw,
         setRaw,
@@ -378,17 +377,14 @@ const HarborReplyComposerForm = ({
                                 </Text>
                             ) : null}
                         </Pressable>
-                        {composerSettings ? (
+                        {maximumPostLength != null &&
+                        visibleTextLength > maximumPostLength ? (
                             <Text
                                 style={[
                                     styles.counter,
-                                    {
-                                        color: isPostLengthValid
-                                            ? theme.black.third
-                                            : theme.unread,
-                                    },
+                                    {color: theme.unread},
                                 ]}>
-                                {`${visibleTextLength}/${maximumPostLength ?? '—'}`}
+                                {`${visibleTextLength}/${maximumPostLength}`}
                             </Text>
                         ) : null}
                         <Pressable
