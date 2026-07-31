@@ -4,7 +4,7 @@ import {StyleSheet, Text, View} from 'react-native';
 
 // import {Image} from 'expo-image';
 import {useTranslation} from 'react-i18next';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from "@react-native-vector-icons/ionicons";
 import {scale, verticalScale} from 'react-native-size-matters';
 
 import {uiStyle, useTheme} from '../../../../components/ThemeContext';

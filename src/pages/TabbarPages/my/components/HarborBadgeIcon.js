@@ -2,8 +2,8 @@ import React from 'react';
 import {StyleSheet, View} from 'react-native';
 
 import {Image} from 'expo-image';
-import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
+import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import {scale, verticalScale} from 'react-native-size-matters';
 
 import {useTheme} from '../../../../components/ThemeContext';
@@ -62,7 +62,7 @@ const HarborBadgeIcon = ({badge, compact = false}) => {
             ) : hasApiIcon ? (
                 <FontAwesome6
                     name={badge.icon}
-                    solid
+                    iconStyle="solid"
                     size={scale(compact ? 21 : 26)}
                     color={colors.color}
                 />

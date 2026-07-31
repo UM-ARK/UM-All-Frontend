@@ -15,7 +15,7 @@ import {
 import {BottomSheetFlatList} from '@gorhom/bottom-sheet';
 import {useTranslation} from 'react-i18next';
 import {scale, verticalScale} from 'react-native-size-matters';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 import {useTheme} from '../../../../components/ThemeContext';

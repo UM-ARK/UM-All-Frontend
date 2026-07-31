@@ -1,7 +1,7 @@
 // 專門存放路由，其他頁面可使用this.props.navigation.navigate("對應下方創建棧的路由名")進行跳轉
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { Platform, TouchableOpacity } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from "@react-native-vector-icons/ionicons";
 import {
     NavigationContainer,
     useNavigationContainerRef,

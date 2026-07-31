@@ -38,7 +38,7 @@ import { scale, verticalScale } from 'react-native-size-matters';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { reloadAppAsync } from 'expo';
 import { useTranslation } from 'react-i18next';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from "@react-native-vector-icons/ionicons";
 import SegmentControl from '../../components/SegmentControl';
 import {
     fetchAppInfoFromServer,

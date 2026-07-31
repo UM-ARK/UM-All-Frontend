@@ -14,7 +14,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { isLiquidGlassSupported } from '@callstack/liquid-glass';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { scale, verticalScale } from 'react-native-size-matters';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from "@react-native-vector-icons/ionicons";
 import * as OpenCC from 'opencc-js';
 import { useTranslation } from 'react-i18next';
 

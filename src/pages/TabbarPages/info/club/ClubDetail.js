@@ -30,9 +30,9 @@ import DialogDIY from '../../../../components/DialogDIY';
 import { updateUserInfo } from '../../../../utils/storageKits';
 import { trigger } from '../../../../utils/trigger';
 
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import Feather from 'react-native-vector-icons/Feather';
-import EvilIcons from 'react-native-vector-icons/EvilIcons';
+import Ionicons from "@react-native-vector-icons/ionicons";
+import Feather from "@react-native-vector-icons/feather";
+import EvilIcons from "@react-native-vector-icons/evil-icons";
 import { ImageHeaderScrollView } from 'react-native-image-header-scroll-view';
 import { Image } from 'expo-image';
 import axios from 'axios';

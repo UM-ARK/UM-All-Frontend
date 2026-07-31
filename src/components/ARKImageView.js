@@ -4,7 +4,7 @@ import GalleryPreview from 'react-native-gallery-preview';
 import { Image } from 'expo-image';
 import { useTheme } from './ThemeContext';
 import { scale } from 'react-native-size-matters';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from "@react-native-vector-icons/ionicons";
 import { handleImageDownload } from '../utils/fileKits';
 import { trigger } from '../utils/trigger';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';

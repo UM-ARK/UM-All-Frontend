@@ -2089,6 +2089,11 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
+  - react-native-vector-icons-ant-design (13.1.2)
+  - react-native-vector-icons-evil-icons (13.1.2)
+  - react-native-vector-icons-feather (13.1.2)
+  - react-native-vector-icons-fontawesome6 (13.1.2)
+  - react-native-vector-icons-ionicons (13.1.2)
   - react-native-vector-icons-material-design-icons (13.1.2)
   - react-native-view-shot (5.1.0):
     - hermes-engine
@@ -2925,28 +2930,6 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
-  - RNVectorIcons (10.3.0):
-    - hermes-engine
-    - RCTRequired
-    - RCTTypeSafety
-    - React-Core
-    - React-Core-prebuilt
-    - React-debug
-    - React-Fabric
-    - React-featureflags
-    - React-graphics
-    - React-ImageManager
-    - React-jsi
-    - React-NativeModulesApple
-    - React-RCTFabric
-    - React-renderercss
-    - React-rendererdebug
-    - React-utils
-    - ReactCodegen
-    - ReactCommon/turbomodule/bridging
-    - ReactCommon/turbomodule/core
-    - ReactNativeDependencies
-    - Yoga
   - RNWorklets (0.10.1):
     - hermes-engine
     - RCTRequired
@@ -3109,6 +3092,11 @@ DEPENDENCIES:
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
   - react-native-simple-toast (from `../node_modules/react-native-simple-toast`)
   - "react-native-slider (from `../node_modules/@react-native-community/slider`)"
+  - "react-native-vector-icons-ant-design (from `../node_modules/@react-native-vector-icons/ant-design`)"
+  - "react-native-vector-icons-evil-icons (from `../node_modules/@react-native-vector-icons/evil-icons`)"
+  - "react-native-vector-icons-feather (from `../node_modules/@react-native-vector-icons/feather`)"
+  - "react-native-vector-icons-fontawesome6 (from `../node_modules/@react-native-vector-icons/fontawesome6`)"
+  - "react-native-vector-icons-ionicons (from `../node_modules/@react-native-vector-icons/ionicons`)"
   - "react-native-vector-icons-material-design-icons (from `../node_modules/@react-native-vector-icons/material-design-icons`)"
   - react-native-view-shot (from `../node_modules/react-native-view-shot`)
   - react-native-webview (from `../node_modules/react-native-webview`)
@@ -3159,7 +3147,6 @@ DEPENDENCIES:
   - RNScreens (from `../node_modules/react-native-screens`)
   - RNShare (from `../node_modules/react-native-share`)
   - RNSVG (from `../node_modules/react-native-svg`)
-  - RNVectorIcons (from `../node_modules/react-native-vector-icons`)
   - RNWorklets (from `../node_modules/react-native-worklets`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
@@ -3350,6 +3337,16 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-simple-toast"
   react-native-slider:
     :path: "../node_modules/@react-native-community/slider"
+  react-native-vector-icons-ant-design:
+    :path: "../node_modules/@react-native-vector-icons/ant-design"
+  react-native-vector-icons-evil-icons:
+    :path: "../node_modules/@react-native-vector-icons/evil-icons"
+  react-native-vector-icons-feather:
+    :path: "../node_modules/@react-native-vector-icons/feather"
+  react-native-vector-icons-fontawesome6:
+    :path: "../node_modules/@react-native-vector-icons/fontawesome6"
+  react-native-vector-icons-ionicons:
+    :path: "../node_modules/@react-native-vector-icons/ionicons"
   react-native-vector-icons-material-design-icons:
     :path: "../node_modules/@react-native-vector-icons/material-design-icons"
   react-native-view-shot:
@@ -3450,8 +3447,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-share"
   RNSVG:
     :path: "../node_modules/react-native-svg"
-  RNVectorIcons:
-    :path: "../node_modules/react-native-vector-icons"
   RNWorklets:
     :path: "../node_modules/react-native-worklets"
   Yoga:
@@ -3553,6 +3548,11 @@ SPEC CHECKSUMS:
   react-native-safe-area-context: ba7283e541a5f57c6b27a7e33f2c40b8977888c0
   react-native-simple-toast: e72b90b79229ed6a2744d1c9b4f23f7c51308e7f
   react-native-slider: b15258ac3d287a5951f76b11497d659ed20c0def
+  react-native-vector-icons-ant-design: 1af4ee95ea3e57e30ee09367fc9f563855e73802
+  react-native-vector-icons-evil-icons: feaa087cda680c55db051990a90703361d495f71
+  react-native-vector-icons-feather: 57093d5a5c8ff48c34032e03313103ef306e2d49
+  react-native-vector-icons-fontawesome6: 9014730aa0e219382da1f109d47d1a378215cbf8
+  react-native-vector-icons-ionicons: 6831196cf1486bfd26b715d749c5c9a7d67bc0eb
   react-native-vector-icons-material-design-icons: a4b6ec02814573c09203a725ee3767a7e8d5eb77
   react-native-view-shot: 6da2aaa0404b8d617ab1689550acdb251d759af9
   react-native-webview: 2a4da2e03d3ec2c731c4d1a389cb86aaa4902167
@@ -3603,7 +3603,6 @@ SPEC CHECKSUMS:
   RNScreens: 5b4b260e28d8263d97fddcb53e59649515797bcc
   RNShare: 26c9524aee8cc3eedbab6d6b98cacce2f5247893
   RNSVG: 68c366b996064ea99cee1e55da62b8feafb33a78
-  RNVectorIcons: bd88db8836a8611aff4b44f061364c07002a6c2a
   RNWorklets: 43af89f696342f91118a2f1f3a879056e2f47331
   SwiftUIIntrospect: fee9aa07293ee280373a591e1824e8ddc869ba5d
   Toast: 1f5ea13423a1e6674c4abdac5be53587ae481c4e

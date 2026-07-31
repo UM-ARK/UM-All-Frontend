@@ -3,8 +3,8 @@ import {View, StyleSheet} from 'react-native';
 
 import {Image} from 'expo-image';
 import {scale} from 'react-native-size-matters';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import Ionicons from "@react-native-vector-icons/ionicons";
+import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 
 import {useTheme} from '../../../../../../components/ThemeContext';
 

@@ -11,7 +11,7 @@ import {isLiquidGlassSupported} from '@callstack/liquid-glass';
 import {useHeaderHeight} from '@react-navigation/elements';
 import {FlashList} from '@shopify/flash-list';
 import {useTranslation} from 'react-i18next';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from "@react-native-vector-icons/ionicons";
 import {scale, verticalScale} from 'react-native-size-matters';
 
 import {uiStyle, useTheme} from '../../../../components/ThemeContext';

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Keyboard, Platform, Pressable, Text, TextInput, View } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from "@react-native-vector-icons/ionicons";
 // 不可用 @expo/ui MenuView（SwiftUI Host matchContents 會在 Tab 切換／版面提交時
 // 反寫 Fabric ShadowTree 並 abort）。改用 @react-native-menu/menu（原生 UIButton）。
 import { MenuView } from '@react-native-menu/menu';

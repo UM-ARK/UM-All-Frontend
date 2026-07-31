@@ -21,7 +21,7 @@ import {
 } from 'react-native';
 
 import { scale, verticalScale } from 'react-native-size-matters';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from "@react-native-vector-icons/ionicons";
 import Clipboard from '@react-native-clipboard/clipboard';
 import moment from 'moment';
 // 課表一次掛多張卡片：不可用 @expo/ui MenuView（SwiftUI Host matchContents

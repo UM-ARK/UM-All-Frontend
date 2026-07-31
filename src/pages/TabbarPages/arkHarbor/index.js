@@ -22,7 +22,7 @@ import Reanimated, {
     useSharedValue,
     withTiming,
 } from 'react-native-reanimated';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import { moderateScale, scale, verticalScale } from 'react-native-size-matters';
 import { SafeAreaView } from 'react-native-screens/experimental';
 import { useTranslation } from 'react-i18next';

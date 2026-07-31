@@ -9,7 +9,7 @@ import Animated, {
 
 import { ThemeContext } from './ThemeContext';
 import { trigger } from '../utils/trigger';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from "@react-native-vector-icons/ionicons";
 import { scale, verticalScale } from 'react-native-size-matters';
 import { isLiquidGlassSupported, LiquidGlassView } from '@callstack/liquid-glass';
 

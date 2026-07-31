@@ -19,7 +19,7 @@ import {
 } from 'react-native';
 
 import ActionSheet, { ScrollView } from 'react-native-actions-sheet';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from "@react-native-vector-icons/ionicons";
 import { scale, verticalScale } from 'react-native-size-matters';
 import { useTranslation } from 'react-i18next';
 import lodash from 'lodash';

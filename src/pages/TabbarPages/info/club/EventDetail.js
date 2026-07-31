@@ -21,8 +21,8 @@ import DialogDIY from '../../../../components/DialogDIY';
 import HyperlinkText from '../../../../components/HyperlinkText';
 import { EventDetailSkeleton } from '../components/DetailPageSkeleton';
 
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import EvilIcons from 'react-native-vector-icons/EvilIcons';
+import Ionicons from "@react-native-vector-icons/ionicons";
+import EvilIcons from "@react-native-vector-icons/evil-icons";
 import { ImageHeaderScrollView } from 'react-native-image-header-scroll-view';
 import { Image } from 'expo-image';
 import axios from 'axios';

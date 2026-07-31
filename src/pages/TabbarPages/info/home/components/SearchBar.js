@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { scale, verticalScale } from 'react-native-size-matters';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from "@react-native-vector-icons/ionicons";
 import { useTranslation } from 'react-i18next';
 
 import { useTheme, uiStyle } from '../../../../../components/ThemeContext';

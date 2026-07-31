@@ -10,8 +10,8 @@ import { trigger } from '../utils/trigger';
 import ModalBottom from '../components/ModalBottom';
 
 import { Header } from '@rneui/themed';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import Feather from 'react-native-vector-icons/Feather';
+import Ionicons from "@react-native-vector-icons/ionicons";
+import Feather from "@react-native-vector-icons/feather";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { scale } from 'react-native-size-matters';
 

@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from "@react-native-vector-icons/ionicons";
 import { scale, verticalScale } from 'react-native-size-matters';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import {

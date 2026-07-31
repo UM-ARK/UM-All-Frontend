@@ -19,7 +19,7 @@ import {isLiquidGlassSupported} from '@callstack/liquid-glass';
 import {HeaderHeightContext} from '@react-navigation/elements';
 import {FlashList} from '@shopify/flash-list';
 import {useFocusEffect} from '@react-navigation/native';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import {scale, verticalScale} from 'react-native-size-matters';
 import Toast from 'react-native-simple-toast';
 import {useTranslation} from 'react-i18next';

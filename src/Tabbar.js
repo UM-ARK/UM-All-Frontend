@@ -17,7 +17,7 @@ import ForumPage from './pages/TabbarPages/arkHarbor';
 import CourseTab from './pages/TabbarPages/course';
 import MyScreen from './pages/TabbarPages/my';
 
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import { trigger } from './utils/trigger';
 import { uiStyle } from './components/ThemeContext';
 import { isLiquidGlassSupported } from '@callstack/liquid-glass';

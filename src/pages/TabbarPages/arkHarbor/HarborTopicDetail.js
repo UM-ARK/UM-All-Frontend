@@ -24,7 +24,7 @@ import { FlashList } from '@shopify/flash-list';
 import { isLiquidGlassSupported } from '@callstack/liquid-glass';
 import { useHeaderHeight } from '@react-navigation/elements';
 import Toast from 'react-native-simple-toast';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import { scale, verticalScale } from 'react-native-size-matters';
 import { useTranslation } from 'react-i18next';
 

@@ -13,7 +13,7 @@ import {HeaderHeightContext} from '@react-navigation/elements';
 import {FlashList} from '@shopify/flash-list';
 import {useTranslation} from 'react-i18next';
 import Toast from 'react-native-simple-toast';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from "@react-native-vector-icons/ionicons";
 import {scale, verticalScale} from 'react-native-size-matters';
 
 import SegmentControl from '../../../../components/SegmentControl';

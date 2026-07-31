@@ -2,7 +2,7 @@ import React, {memo, useMemo} from 'react';
 import {StyleSheet, View} from 'react-native';
 
 import {Image} from 'expo-image';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import {scale} from 'react-native-size-matters';
 
 import {useTheme} from '../../../../components/ThemeContext';

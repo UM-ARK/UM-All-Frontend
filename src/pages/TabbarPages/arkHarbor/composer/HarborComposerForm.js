@@ -15,7 +15,7 @@ import {
     KeyboardAwareScrollView,
     KeyboardToolbar,
 } from 'react-native-keyboard-controller';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import {scale, verticalScale} from 'react-native-size-matters';
 import {useTranslation} from 'react-i18next';
 

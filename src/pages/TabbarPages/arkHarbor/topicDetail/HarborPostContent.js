@@ -20,7 +20,7 @@ import RenderHTML, {
     useIMGElementState,
     useRendererProps,
 } from '@native-html/render';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import { WebView } from 'react-native-webview';
 import { scale, verticalScale } from 'react-native-size-matters';
 import { useTranslation } from 'react-i18next';

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { FlatList, LayoutAnimation, Switch, Text, View } from 'react-native';
 import { scale, verticalScale } from 'react-native-size-matters';
 import { t } from 'i18next';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from "@react-native-vector-icons/ionicons";
 import { uiStyle } from '../../../../../../components/ThemeContext';
 import TouchableScale from '../../../../../../components/TouchableScale';
 import CourseTimeRangePicker from '../../../components/CourseTimeRangePicker';
