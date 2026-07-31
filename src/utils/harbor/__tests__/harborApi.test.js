@@ -5,6 +5,7 @@ import {
     createHarborPostBookmark,
     deleteHarborBookmark,
     deleteHarborPost,
+    deleteHarborTopic,
     fetchHarborBadges,
     fetchHarborCategories,
     fetchCurrentHarborUser,
@@ -1123,6 +1124,20 @@ describe('Harbor API 資料正規化', () => {
         expect(deleteSpy).toHaveBeenCalledWith('/posts/12.json', {signal});
         await expect(deleteHarborPost(0)).rejects.toThrow(
             'Invalid Harbor post id',
+        );
+    });
+
+    it('透過 Topic API 刪除整個話題', async () => {
+        const signal = new AbortController().signal;
+        deleteSpy.mockResolvedValue({data: null});
+
+        await expect(
+            deleteHarborTopic(31, {signal}),
+        ).resolves.toBeNull();
+
+        expect(deleteSpy).toHaveBeenCalledWith('/t/31', {signal});
+        await expect(deleteHarborTopic(0)).rejects.toThrow(
+            'Invalid Harbor topic id',
         );
     });
 

@@ -2626,6 +2626,12 @@ export async function deleteHarborPost(postId, { signal } = {}) {
     return response.data;
 }
 
+export async function deleteHarborTopic(topicId, { signal } = {}) {
+    const id = normalizeHarborMutationId(topicId, 'topic id');
+    const response = await harborApi.delete(`/t/${id}`, { signal });
+    return response.data;
+}
+
 function normalizeBookmarkFields({ name = '', reminderAt = null } = {}) {
     return {
         name: typeof name === 'string' ? name.trim() || null : null,

@@ -29,6 +29,7 @@ import HarborCategoryIcon from '../components/HarborCategoryIcon';
 import HarborPostContent from './HarborPostContent';
 import HarborPostEventCard from './HarborPostEventCard';
 import {
+    canDeleteHarborPost,
     getLikeAction,
     getReactionCount,
     getTagLabel,
@@ -373,7 +374,7 @@ const HarborPostCard = memo(
                     titleColor: black.third,
                 });
             }
-            if (post.can_delete) {
+            if (canDeleteHarborPost(post, topic)) {
                 actions.push({
                     id: 'delete',
                     title: t('刪除'),
@@ -451,10 +452,9 @@ const HarborPostCard = memo(
             pendingDelete,
             pendingFlag,
             pendingNotification,
-            post.bookmarked,
-            post.can_delete,
-            post.can_edit,
+            post,
             t,
+            topic,
             unread,
         ]);
         const nestedRepliesButton =

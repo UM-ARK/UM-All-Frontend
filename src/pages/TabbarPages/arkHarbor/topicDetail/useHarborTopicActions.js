@@ -10,6 +10,7 @@ import {
     createHarborPostBookmark,
     deleteHarborBookmark,
     deleteHarborPost,
+    deleteHarborTopic,
     fetchCachedHarborFlagTypes,
     flagHarborPost,
     HARBOR_TOPIC_NOTIFICATION_LEVELS,
@@ -22,6 +23,7 @@ import {
 } from '../../../../utils/harbor/harborApi';
 import { publishHarborTopicUpdate } from '../../../../utils/harbor/harborTopicUpdates';
 import {
+    canDeleteHarborPost,
     canUpdatePostReaction,
     getHarborMutationError,
     getLikeAction,
@@ -214,7 +216,7 @@ const useHarborTopicActions = ({
             if (!(await requireHarborSignIn(post?.post_number))) {
                 return false;
             }
-            if (!post?.can_delete) {
+            if (!canDeleteHarborPost(post, latestTopicRef.current)) {
                 Toast.show(t('你目前沒有權限刪除這篇帖子'));
                 return false;
             }
@@ -225,8 +227,10 @@ const useHarborTopicActions = ({
             }
 
             try {
-                const deletedPost = await deleteHarborPost(post.id);
                 const isFirstPost = Number(post.post_number) === 1;
+                const deletedPost = isFirstPost
+                    ? await deleteHarborTopic(topicId)
+                    : await deleteHarborPost(post.id);
                 if (isFirstPost) {
                     publishHarborTopicUpdate(topicId, {
                         reloadLists: true,

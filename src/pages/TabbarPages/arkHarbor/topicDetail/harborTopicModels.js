@@ -113,6 +113,16 @@ const isOwnHarborPost = (post, currentUsername) => {
     );
 };
 
+const canDeleteHarborPost = (post, topic) => {
+    if (post?.can_delete) {
+        return true;
+    }
+    return (
+        Number(post?.post_number) === 1 &&
+        topic?.details?.can_delete === true
+    );
+};
+
 // 巢狀 API 對一般成員只回傳 deleted_post_placeholder，不會帶 deleted_at
 const isHarborPostDeleted = post =>
     Boolean(
@@ -488,6 +498,7 @@ const updateNestedPostTree = (posts, postId, updater) => {
 
 export {
     appendTopicPosts,
+    canDeleteHarborPost,
     canFlagPost,
     canShowFlagMenu,
     canUpdatePostReaction,

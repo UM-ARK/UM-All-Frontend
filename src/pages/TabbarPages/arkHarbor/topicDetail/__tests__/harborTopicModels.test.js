@@ -6,6 +6,7 @@ jest.mock('../../../../../utils/pathMap', () => ({
 }));
 
 import {
+    canDeleteHarborPost,
     canFlagPost,
     canShowFlagMenu,
     canUpdatePostReaction,
@@ -18,6 +19,38 @@ import {
     updateNestedPostTree,
     updateOptimisticFlag,
 } from '../harborTopicModels';
+
+describe('canDeleteHarborPost', () => {
+    it('回覆只依帖子權限判斷', () => {
+        expect(
+            canDeleteHarborPost(
+                { post_number: 2, can_delete: false },
+                { details: { can_delete: true } },
+            ),
+        ).toBe(false);
+        expect(
+            canDeleteHarborPost(
+                { post_number: 2, can_delete: true },
+                { details: { can_delete: false } },
+            ),
+        ).toBe(true);
+    });
+
+    it('首帖可使用話題層刪除權限', () => {
+        expect(
+            canDeleteHarborPost(
+                { post_number: 1, can_delete: false },
+                { details: { can_delete: true } },
+            ),
+        ).toBe(true);
+        expect(
+            canDeleteHarborPost(
+                { post_number: 1, can_delete: false },
+                { details: { can_delete: false } },
+            ),
+        ).toBe(false);
+    });
+});
 
 describe('isHarborPostDeleted', () => {
     it('辨識 deleted_at、user_deleted 與巢狀刪除佔位', () => {
