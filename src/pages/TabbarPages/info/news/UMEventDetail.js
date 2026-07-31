@@ -1,988 +1,907 @@
-import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import React, {
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from 'react';
 import {
-    View,
-    Text,
-    StyleSheet,
     ActivityIndicator,
-    Dimensions,
     Pressable,
+    StyleSheet,
+    Text,
+    View,
 } from 'react-native';
 import { Image } from 'expo-image';
-import Animated, {
-    useSharedValue,
-    useAnimatedStyle,
-    useAnimatedScrollHandler,
-    interpolate,
-    Extrapolation,
-    withSpring,
-    FadeInUp,
-} from 'react-native-reanimated';
-import { BlurView } from 'expo-blur';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import moment from 'moment-timezone';
-import { scale, verticalScale, moderateScale } from 'react-native-size-matters';
-import { trigger } from '../../../../utils/trigger';
+import Animated, {
+    Extrapolation,
+    FadeInUp,
+    interpolate,
+    useAnimatedScrollHandler,
+    useAnimatedStyle,
+    useSharedValue,
+    withSpring,
+} from 'react-native-reanimated';
+import {
+    moderateScale,
+    scale,
+    verticalScale,
+} from 'react-native-size-matters';
+import { isLiquidGlassSupported } from '@callstack/liquid-glass';
 
-import { useTheme, themes, uiStyle } from '../../../../components/ThemeContext';
 import ARKImageView from '../../../../components/ARKImageView';
 import HyperlinkText from '../../../../components/HyperlinkText';
+import {
+    uiStyle,
+    useTheme,
+} from '../../../../components/ThemeContext';
 import { logToFirebase } from '../../../../utils/firebaseAnalytics';
-import { isLiquidGlassSupported, LiquidGlassView } from '@callstack/liquid-glass';
+import { trigger } from '../../../../utils/trigger';
 
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
-const HERO_HEIGHT = verticalScale(420);
-const HEADER_THRESHOLD = verticalScale(200);
+const HERO_HEIGHT = verticalScale(340);
 
-// 動畫配置常量
 const ANIMATION_CONFIG = {
-    spring: {
-        damping: 15,
-        stiffness: 150,
-        mass: 1,
-    },
-    timing: {
-        duration: 400,
-    },
+    damping: 18,
+    stiffness: 180,
+    mass: 0.8,
 };
 
-/**
- * 獲取動態樣式 - 使用主題變量
- */
-const getDynamicStyles = (theme) => {
-    const { white, black, themeColor } = theme;
+const LANGUAGE_LABELS = {
+    detailTitle: ['活動詳情', 'Event details', 'Detalhes do evento'],
+    contactTitle: ['聯絡方式', 'Contact', 'Contacto'],
+    date: ['日期', 'Date', 'Data'],
+    time: ['時間', 'Time', 'Horário'],
+    event: ['校園活動', 'Campus event', 'Evento no campus'],
+};
+
+const DETAIL_CONFIG = [
+    {
+        key: 'speaker',
+        icon: 'mic-outline',
+        labels: ['講者', 'Speaker', 'Orador'],
+        hyperlink: false,
+    },
+    {
+        key: 'venue',
+        icon: 'location-outline',
+        labels: ['地點', 'Venue', 'Local'],
+        hyperlink: true,
+    },
+    {
+        key: 'language',
+        icon: 'language-outline',
+        labels: ['語言', 'Language', 'Língua'],
+        tags: true,
+    },
+    {
+        key: 'targetAudience',
+        icon: 'people-outline',
+        labels: ['對象', 'Target audience', 'Audiência-alvo'],
+        hyperlink: false,
+    },
+    {
+        key: 'organiser',
+        icon: 'business-outline',
+        labels: ['主辦單位', 'Organiser', 'Organizador'],
+        hyperlink: false,
+    },
+    {
+        key: 'coorganiser',
+        icon: 'git-network-outline',
+        labels: ['協辦單位', 'Co-organiser', 'Co-organizador'],
+        hyperlink: false,
+    },
+    {
+        key: 'content',
+        icon: 'document-text-outline',
+        labels: ['詳情', 'Details', 'Detalhes'],
+        hyperlink: true,
+        expanded: true,
+    },
+    {
+        key: 'remark',
+        icon: 'information-circle-outline',
+        labels: ['備註', 'Remarks', 'Observação'],
+        hyperlink: false,
+        expanded: true,
+    },
+];
+
+const CONTACT_CONFIG = [
+    {
+        key: 'contactName',
+        icon: 'person-outline',
+        labels: ['名稱', 'Name', 'Nome'],
+        hyperlink: false,
+    },
+    {
+        key: 'contactPhone',
+        icon: 'call-outline',
+        labels: ['電話', 'Phone', 'Telefone'],
+        hyperlink: false,
+    },
+    {
+        key: 'contactFax',
+        icon: 'print-outline',
+        labels: ['傳真', 'Fax', 'Fax'],
+        hyperlink: false,
+    },
+    {
+        key: 'contactMail',
+        icon: 'mail-outline',
+        labels: ['電郵', 'E-mail', 'E-mail'],
+        hyperlink: true,
+    },
+];
+
+const createStyles = theme => {
+    const {
+        black,
+        themeColor,
+        tonal,
+        trueBlack,
+        viewShadow,
+        white,
+    } = theme;
 
     return StyleSheet.create({
-        // Hero 區域
-        heroTitle: {
+        page: {
+            flex: 1,
+            backgroundColor: theme.bg_color,
+        },
+        heroContainer: {
+            height: HERO_HEIGHT,
+            overflow: 'hidden',
+            backgroundColor: tonal.primary15,
+        },
+        heroImageWrapper: {
+            ...StyleSheet.absoluteFillObject,
+        },
+        heroPressable: {
+            width: '100%',
+            height: '100%',
+        },
+        heroImage: {
+            width: '100%',
+            height: '100%',
+        },
+        heroShade: {
+            ...StyleSheet.absoluteFillObject,
+            backgroundColor: `${trueBlack}18`,
+        },
+        heroLoadingOverlay: {
+            ...StyleSheet.absoluteFillObject,
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: `${trueBlack}30`,
+        },
+        contentWrapper: {
+            marginTop: verticalScale(-30),
+            paddingHorizontal: scale(14),
+        },
+        surfaceCard: {
+            overflow: 'hidden',
+            borderRadius: scale(18),
+            backgroundColor: white,
+            ...viewShadow,
+        },
+        titleCard: {
+            padding: scale(18),
+        },
+        titleTopRow: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: verticalScale(10),
+        },
+        eyebrow: {
+            ...uiStyle.defaultText,
+            color: themeColor,
+            fontSize: moderateScale(11),
+            fontWeight: '700',
+            letterSpacing: scale(0.4),
+        },
+        title: {
+            ...uiStyle.defaultText,
+            color: black.main,
             fontSize: moderateScale(22),
             fontWeight: '700',
-            color: white,
-            textShadowColor: 'rgba(0,0,0,0.5)',
-            textShadowOffset: { width: 0, height: 2 },
-            textShadowRadius: 4,
+            lineHeight: moderateScale(29),
         },
-
-        // 時間顯示
-        timeValue: {
-            fontSize: moderateScale(15),
+        languageTrack: {
+            position: 'relative',
+            flexDirection: 'row',
+            padding: scale(3),
+            borderRadius: scale(12),
+            backgroundColor: tonal.primary15,
+        },
+        languageIndicator: {
+            position: 'absolute',
+            top: scale(3),
+            bottom: scale(3),
+            borderRadius: scale(9),
+            backgroundColor: themeColor,
+        },
+        languageButton: {
+            minWidth: scale(40),
+            paddingHorizontal: scale(9),
+            paddingVertical: verticalScale(6),
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: scale(9),
+        },
+        languageText: {
+            ...uiStyle.defaultText,
+            fontSize: moderateScale(11),
+            fontWeight: '700',
+        },
+        scheduleCard: {
+            flexDirection: 'row',
+            marginTop: verticalScale(12),
+            paddingVertical: verticalScale(14),
+            paddingHorizontal: scale(14),
+        },
+        scheduleItem: {
+            flex: 1,
+            flexDirection: 'row',
+            alignItems: 'center',
+        },
+        scheduleDivider: {
+            width: StyleSheet.hairlineWidth,
+            marginHorizontal: scale(12),
+            backgroundColor: theme.themeColorUltraLight,
+        },
+        scheduleIcon: {
+            width: scale(36),
+            height: scale(36),
+            marginRight: scale(9),
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: scale(11),
+            backgroundColor: tonal.primary15,
+        },
+        scheduleText: {
+            flex: 1,
+            minWidth: 0,
+        },
+        scheduleLabel: {
+            ...uiStyle.defaultText,
+            marginBottom: verticalScale(2),
+            color: black.third,
+            fontSize: moderateScale(10),
             fontWeight: '600',
+        },
+        scheduleValue: {
+            ...uiStyle.defaultText,
             color: black.main,
-        },
-
-        // 詳情標籤
-        detailLabel: {
             fontSize: moderateScale(13),
-            fontWeight: '600',
-            color: black.secondary,
+            fontWeight: '700',
+            lineHeight: moderateScale(17),
         },
-        detailValue: {
+        sectionCard: {
+            marginTop: verticalScale(12),
+            paddingHorizontal: scale(16),
+            paddingTop: verticalScale(16),
+        },
+        sectionHeader: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingBottom: verticalScale(13),
+        },
+        sectionIcon: {
+            width: scale(32),
+            height: scale(32),
+            marginRight: scale(10),
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: scale(10),
+            backgroundColor: tonal.primary15,
+        },
+        sectionTitle: {
+            ...uiStyle.defaultText,
+            color: black.main,
+            fontSize: moderateScale(17),
+            fontWeight: '700',
+        },
+        infoRow: {
+            flexDirection: 'row',
+            paddingVertical: verticalScale(12),
+        },
+        infoRowExpanded: {
+            paddingBottom: verticalScale(15),
+        },
+        rowIcon: {
+            width: scale(30),
+            paddingTop: verticalScale(1),
+            alignItems: 'flex-start',
+        },
+        rowContent: {
+            flex: 1,
+            minWidth: 0,
+        },
+        rowLabel: {
+            ...uiStyle.defaultText,
+            marginBottom: verticalScale(3),
+            color: black.third,
+            fontSize: moderateScale(11),
+            fontWeight: '600',
+        },
+        rowValue: {
+            ...uiStyle.defaultText,
+            color: black.second,
             fontSize: moderateScale(14),
             fontWeight: '400',
-            color: black.main,
             lineHeight: moderateScale(20),
         },
-
-        // 聯絡人
-        contactLabel: {
-            fontSize: moderateScale(12),
-            fontWeight: '500',
-            color: black.secondary,
+        rowValueExpanded: {
+            lineHeight: moderateScale(22),
         },
-        contactValue: {
-            fontSize: moderateScale(14),
-            fontWeight: '400',
-            color: black.main,
+        separator: {
+            height: StyleSheet.hairlineWidth,
+            marginLeft: scale(30),
+            backgroundColor: theme.themeColorUltraLight,
+        },
+        tagContainer: {
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            gap: scale(6),
+        },
+        tag: {
+            paddingHorizontal: scale(9),
+            paddingVertical: verticalScale(4),
+            borderRadius: scale(8),
+            backgroundColor: tonal.primary15,
+        },
+        tagText: {
+            ...uiStyle.defaultText,
+            color: themeColor,
+            fontSize: moderateScale(11),
+            fontWeight: '600',
+        },
+        contactCard: {
+            marginBottom: verticalScale(18),
+        },
+        bottomSpacer: {
+            height: verticalScale(40),
         },
     });
 };
 
-/**
- * 玻璃擬態卡片組件
- * 使用BlurView實現半透明毛玻璃效果
- */
-const GlassmorphismCard = React.memo(({ children, style }) => {
+const SurfaceCard = React.memo(({ children, style }) => {
     const { theme } = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
 
-    return (
-        <View style={[
-            staticStyles.glassCardContainer,
-            { backgroundColor: theme.glassBg, borderColor: theme.glassBorder },
-            style,
-        ]}>
-            <View style={staticStyles.glassCardContent}>{children}</View>
-        </View>
-    );
+    return <View style={[styles.surfaceCard, style]}>{children}</View>;
 });
 
-/**
- * Hero區域組件
- * 包含視差滾動效果的海報圖片
- */
 const HeroSection = React.memo(
     ({
         imageUrl,
-        scrollY,
+        imageLoading,
         onImagePress,
-        imgLoading,
-        setImgLoading,
-        title,
-        themeColor,
-        dynamicStyles,
+        scrollY,
+        setImageLoading,
     }) => {
+        const { theme } = useTheme();
+        const styles = useMemo(() => createStyles(theme), [theme]);
 
-        // 視差動畫樣式
         const parallaxStyle = useAnimatedStyle(() => {
             const translateY = interpolate(
                 scrollY.value,
                 [0, HERO_HEIGHT],
-                [0, HERO_HEIGHT * 0.4],
+                [0, HERO_HEIGHT * 0.32],
                 Extrapolation.CLAMP,
             );
-            return {
-                transform: [{ translateY }],
-            };
-        });
 
-        // 標題淡入動畫
-        const titleStyle = useAnimatedStyle(() => {
-            const opacity = interpolate(
-                scrollY.value,
-                [0, HERO_HEIGHT * 0.5, HERO_HEIGHT * 0.8],
-                [1, 0.8, 0],
-                Extrapolation.CLAMP,
-            );
-            const translateY = interpolate(
-                scrollY.value,
-                [0, HERO_HEIGHT * 0.5],
-                [0, -30],
-                Extrapolation.CLAMP,
-            );
             return {
-                opacity,
                 transform: [{ translateY }],
             };
         });
 
         return (
-            <View style={[staticStyles.heroContainer, { height: HERO_HEIGHT }]}>
-                <Animated.View style={[staticStyles.heroImageWrapper, parallaxStyle]}>
-                    <Pressable onPress={onImagePress} style={staticStyles.heroPressable}>
+            <View style={styles.heroContainer}>
+                <Animated.View
+                    style={[styles.heroImageWrapper, parallaxStyle]}>
+                    <Pressable
+                        onPress={onImagePress}
+                        style={styles.heroPressable}>
                         <Image
                             source={imageUrl}
-                            style={staticStyles.heroImage}
+                            style={styles.heroImage}
                             contentFit="cover"
-                            onLoadStart={() => setImgLoading(true)}
-                            onLoad={() => setImgLoading(false)}
-                            transition={500}
+                            placeholder={theme.imagePlaceholder}
+                            placeholderContentFit="cover"
+                            onLoadStart={() => setImageLoading(true)}
+                            onLoad={() => setImageLoading(false)}
+                            transition={350}
                         />
-                        {imgLoading && (
-                            <View style={staticStyles.heroLoadingOverlay}>
-                                <ActivityIndicator size="large" color={themeColor} />
+                        <View
+                            pointerEvents="none"
+                            style={styles.heroShade}
+                        />
+                        {imageLoading ? (
+                            <View style={styles.heroLoadingOverlay}>
+                                <ActivityIndicator
+                                    color={theme.trueWhite}
+                                    size="large"
+                                />
                             </View>
-                        )}
+                        ) : null}
                     </Pressable>
                 </Animated.View>
-
-                {/* 漸變遮罩 */}
-                <View style={staticStyles.heroGradientOverlay} pointerEvents="none" />
-
-                {/* 浮動標題 */}
-                {title && (
-                    <Animated.View style={[staticStyles.heroTitleContainer, titleStyle]}>
-                        <BlurView intensity={25} tint="dark" style={staticStyles.heroTitleBlur}>
-                            <Text style={dynamicStyles.heroTitle}
-                            // numberOfLines={4}
-                            >
-                                {title}
-                            </Text>
-                        </BlurView>
-                    </Animated.View>
-                )}
             </View>
         );
     },
 );
 
-/**
- * 現代化語言選擇器
- * 使用動態按鈕和流暢過渡動畫
- */
 const LanguageSelector = React.memo(
-    ({ languageMode, chooseMode, onSelect, themeColor, white }) => {
+    ({ languageMode, onSelect, selectedIndex }) => {
+        const { theme } = useTheme();
+        const styles = useMemo(() => createStyles(theme), [theme]);
         const [buttonLayouts, setButtonLayouts] = useState({});
 
-        // 語言選擇器包裝樣式 - 使用主題色的柔和底色
-        const languageWrapperStyle = useMemo(() => ({
-            flexDirection: 'row',
-            backgroundColor: 'rgba(255,255,255,0.5)',
-            borderRadius: scale(25),
-            padding: scale(4),
-        }), [themeColor]);
-
-        // 計算指示器位置
         const indicatorStyle = useAnimatedStyle(() => {
-            const selectedLayout = buttonLayouts[chooseMode];
-            if (!selectedLayout) { return {}; }
+            const selectedLayout = buttonLayouts[selectedIndex];
+            if (!selectedLayout) {
+                return {};
+            }
 
             return {
+                width: withSpring(
+                    selectedLayout.width,
+                    ANIMATION_CONFIG,
+                ),
                 transform: [
-                    { translateX: withSpring(selectedLayout.x, ANIMATION_CONFIG.spring) },
+                    {
+                        translateX: withSpring(
+                            selectedLayout.x,
+                            ANIMATION_CONFIG,
+                        ),
+                    },
                 ],
-                width: withSpring(selectedLayout.width, ANIMATION_CONFIG.spring),
             };
         });
 
-        const handleLayout = useCallback((index) => (event) => {
-            const { x, width } = event.nativeEvent.layout;
-            setButtonLayouts(prev => ({ ...prev, [index]: { x, width } }));
-        }, []);
+        const handleLayout = useCallback(
+            index => event => {
+                const { width, x } = event.nativeEvent.layout;
+                setButtonLayouts(previous => ({
+                    ...previous,
+                    [index]: { width, x },
+                }));
+            },
+            [],
+        );
 
         return (
-            <View style={staticStyles.languageContainer}>
-                <View style={[languageWrapperStyle]}>
-                    {/* 動態指示器背景 */}
-                    <Animated.View
-                        style={[
-                            staticStyles.languageIndicator,
-                            { backgroundColor: themeColor },
-                            indicatorStyle,
-                        ]}
-                    />
-
-                    {languageMode.map((item, index) =>
-                        item.available ? (
-                            <Pressable
-                                key={index}
-                                onPress={() => onSelect(index)}
-                                style={staticStyles.languageButton}
-                                onLayout={handleLayout(index)}
-                            >
-                                <Text
-                                    style={[
-                                        staticStyles.languageText,
-                                        {
-                                            color:
-                                                chooseMode === index
-                                                    ? white
-                                                    : themeColor,
-                                        },
-                                    ]}>
-                                    {item.name}
-                                </Text>
-                            </Pressable>
-                        ) : null,
-                    )}
-                </View>
+            <View style={styles.languageTrack}>
+                <Animated.View
+                    pointerEvents="none"
+                    style={[styles.languageIndicator, indicatorStyle]}
+                />
+                {languageMode.map((item, index) => (
+                    item.available ? (
+                        <Pressable
+                            key={item.locale}
+                            onLayout={handleLayout(index)}
+                            onPress={() => onSelect(index)}
+                            style={styles.languageButton}>
+                            <Text
+                                style={[
+                                    styles.languageText,
+                                    {
+                                        color: selectedIndex === index
+                                            ? theme.trueWhite
+                                            : theme.themeColor,
+                                    },
+                                ]}>
+                                {item.name}
+                            </Text>
+                        </Pressable>
+                    ) : null
+                ))}
             </View>
         );
     },
 );
 
-/**
- * 時間軸式時間顯示組件
- * 現代化日期時間展示
- */
-const TimeDisplay = React.memo(({ dateFrom, dateTo, timeFrom, timeTo, mode, themeColor, dynamicStyles }) => {
-    const isSameDay = moment(dateFrom).format('MM-DD') === moment(dateTo).format('MM-DD');
-
-    const dateLabels = ['活動日期：', 'Date: ', 'Data: '];
-    const timeLabels = ['活動時間：', 'Time: ', 'Horário: '];
-
-    return (
-        <View style={staticStyles.timeContainer}>
-            {/* 日期區塊 */}
-            <View style={staticStyles.timeBlock}>
-                <View style={[staticStyles.timeIconContainer, { backgroundColor: `${themeColor}15` }]}>
-                    <Text style={[staticStyles.timeIcon, { color: themeColor }]}>📅</Text>
-                </View>
-                <View style={staticStyles.timeContent}>
-                    <Text style={[staticStyles.timeLabel, { color: themeColor }]}>
-                        {dateLabels[mode]}
-                    </Text>
-                    <Text style={dynamicStyles.timeValue}>
-                        {isSameDay
-                            ? moment(dateFrom).format('YYYY-MM-DD')
-                            : `${moment(dateFrom).format('MM-DD')} ~ ${moment(dateTo).format('MM-DD')}`}
-                    </Text>
-                </View>
-            </View>
-
-            {/* 時間區塊 */}
-            <View style={staticStyles.timeBlock}>
-                <View style={[staticStyles.timeIconContainer, { backgroundColor: `${themeColor}15` }]}>
-                    <Text style={[staticStyles.timeIcon, { color: themeColor }]}>🕐</Text>
-                </View>
-                <View style={staticStyles.timeContent}>
-                    <Text style={[staticStyles.timeLabel, { color: themeColor }]}>
-                        {timeLabels[mode]}
-                    </Text>
-                    <Text style={dynamicStyles.timeValue}>
-                        {`${moment(timeFrom).format('HH:mm')} ~ ${moment(timeTo).format('HH:mm')}`}
-                    </Text>
-                </View>
-            </View>
-        </View>
-    );
-});
-
-/**
- * 信息卡片組件
- * 統一的信息展示卡片
- */
-const InfoCard = React.memo(({ title, children, delay = 0, themeColor }) => {
-    return (
-        <Animated.View
-            entering={FadeInUp.delay(delay).duration(350)}>
-            <GlassmorphismCard style={staticStyles.infoCard}>
-                {title && (
-                    <View style={staticStyles.infoCardHeader}>
-                        <View
-                            style={[staticStyles.infoCardIndicator, { backgroundColor: themeColor }]}
-                        />
-                        <Text style={[staticStyles.infoCardTitle, { color: themeColor }]}>
-                            {title}
-                        </Text>
-                    </View>
-                )}
-                <View style={staticStyles.infoCardBody}>{children}</View>
-            </GlassmorphismCard>
-        </Animated.View>
-    );
-});
-
-/**
- * 聯絡人卡片組件
- */
-const ContactCard = React.memo(
-    ({
-        contactName,
-        contactPhone,
-        contactFax,
-        contactMail,
-        mode,
-        themeColor,
-        navigation,
-        dynamicStyles,
-    }) => {
-        const labels = ['聯絡人', 'Contact Person', 'Pessoa a Contactar'];
+const ScheduleCard = React.memo(
+    ({ dateFrom, dateTo, mode, timeFrom, timeTo }) => {
+        const { theme } = useTheme();
+        const styles = useMemo(() => createStyles(theme), [theme]);
+        const sameDay = moment(dateFrom).format('YYYY-MM-DD')
+            === moment(dateTo).format('YYYY-MM-DD');
+        const dateText = sameDay
+            ? moment(dateFrom).format('YYYY.MM.DD')
+            : `${moment(dateFrom).format('MM.DD')} – ${moment(dateTo).format('MM.DD')}`;
+        const timeText = `${moment(timeFrom).format('HH:mm')} – ${moment(timeTo).format('HH:mm')}`;
 
         return (
-            <Animated.View entering={FadeInUp.delay(400).duration(350)}>
-                <GlassmorphismCard style={staticStyles.contactCard}>
-                    <View style={staticStyles.contactHeader}>
-                        <View
-                            style={[staticStyles.contactIconContainer, { backgroundColor: themeColor }]}>
-                            <Text style={staticStyles.contactIcon}>👤</Text>
-                        </View>
-                        <Text style={[staticStyles.contactTitle, { color: themeColor }]}>
-                            {labels[mode]}
+            <SurfaceCard style={styles.scheduleCard}>
+                <View style={styles.scheduleItem}>
+                    <View style={styles.scheduleIcon}>
+                        <Ionicons
+                            color={theme.themeColor}
+                            name="calendar-clear-outline"
+                            size={scale(18)}
+                        />
+                    </View>
+                    <View style={styles.scheduleText}>
+                        <Text style={styles.scheduleLabel}>
+                            {LANGUAGE_LABELS.date[mode]}
+                        </Text>
+                        <Text style={styles.scheduleValue}>
+                            {dateText}
                         </Text>
                     </View>
-
-                    <View style={staticStyles.contactBody}>
-                        {contactName[mode] && (
-                            <View style={staticStyles.contactRow}>
-                                <Text style={dynamicStyles.contactLabel}>
-                                    {contactName[mode + 3]}
-                                </Text>
-                                <Text style={dynamicStyles.contactValue} selectable>
-                                    {contactName[mode]}
-                                </Text>
-                            </View>
-                        )}
-
-                        {contactPhone[mode] && (
-                            <View style={staticStyles.contactRow}>
-                                <Text style={dynamicStyles.contactLabel}>
-                                    {contactPhone[mode + 3]}
-                                </Text>
-                                <Text style={dynamicStyles.contactValue} selectable>
-                                    {contactPhone[mode]}
-                                </Text>
-                            </View>
-                        )}
-
-                        {contactFax[mode] && (
-                            <View style={staticStyles.contactRow}>
-                                <Text style={dynamicStyles.contactLabel}>
-                                    {contactFax[mode + 3]}
-                                </Text>
-                                <Text style={dynamicStyles.contactValue} selectable>
-                                    {contactFax[mode]}
-                                </Text>
-                            </View>
-                        )}
-
-                        {contactMail[mode] && (
-                            <View style={staticStyles.contactRow}>
-                                <Text style={dynamicStyles.contactLabel}>
-                                    {contactMail[mode + 3]}
-                                </Text>
-                                <HyperlinkText
-                                    linkStyle={{ color: themeColor }}
-                                    navigation={navigation}>
-                                    <Text style={[dynamicStyles.contactValue, { color: themeColor }]} selectable>
-                                        {contactMail[mode]}
-                                    </Text>
-                                </HyperlinkText>
-                            </View>
-                        )}
+                </View>
+                <View style={styles.scheduleDivider} />
+                <View style={styles.scheduleItem}>
+                    <View style={styles.scheduleIcon}>
+                        <Ionicons
+                            color={theme.themeColor}
+                            name="time-outline"
+                            size={scale(19)}
+                        />
                     </View>
-                </GlassmorphismCard>
+                    <View style={styles.scheduleText}>
+                        <Text style={styles.scheduleLabel}>
+                            {LANGUAGE_LABELS.time[mode]}
+                        </Text>
+                        <Text style={styles.scheduleValue}>
+                            {timeText}
+                        </Text>
+                    </View>
+                </View>
+            </SurfaceCard>
+        );
+    },
+);
+
+const SectionCard = React.memo(
+    ({ children, delay, icon, style, title }) => {
+        const { theme } = useTheme();
+        const styles = useMemo(() => createStyles(theme), [theme]);
+
+        return (
+            <Animated.View
+                entering={FadeInUp.delay(delay).duration(350)}>
+                <SurfaceCard style={[styles.sectionCard, style]}>
+                    <View style={styles.sectionHeader}>
+                        <View style={styles.sectionIcon}>
+                            <Ionicons
+                                color={theme.themeColor}
+                                name={icon}
+                                size={scale(18)}
+                            />
+                        </View>
+                        <Text style={styles.sectionTitle}>{title}</Text>
+                    </View>
+                    {children}
+                </SurfaceCard>
             </Animated.View>
         );
     },
 );
 
-/**
- * UMEventDetail 主組件
- * 2026 現代化重寫版本
- */
-const UMEventDetail = ({ route, navigation }) => {
+const InfoRow = React.memo(
+    ({
+        expanded,
+        hyperlink,
+        icon,
+        isLast,
+        label,
+        navigation,
+        tags,
+        value,
+    }) => {
+        const { theme } = useTheme();
+        const styles = useMemo(() => createStyles(theme), [theme]);
+        const normalizedTags = useMemo(() => {
+            if (!tags) {
+                return [];
+            }
+            if (Array.isArray(value)) {
+                return value.filter(Boolean);
+            }
+            return String(value)
+                .split(/[,、;；/]/)
+                .map(item => item.trim())
+                .filter(Boolean);
+        }, [tags, value]);
+
+        const valueContent = tags ? (
+            <View style={styles.tagContainer}>
+                {normalizedTags.map(item => (
+                    <View key={item} style={styles.tag}>
+                        <Text style={styles.tagText}>{item}</Text>
+                    </View>
+                ))}
+            </View>
+        ) : (
+            <Text
+                selectable
+                style={[
+                    styles.rowValue,
+                    expanded && styles.rowValueExpanded,
+                ]}>
+                {value}
+            </Text>
+        );
+
+        return (
+            <>
+                <View
+                    style={[
+                        styles.infoRow,
+                        expanded && styles.infoRowExpanded,
+                    ]}>
+                    <View style={styles.rowIcon}>
+                        <Ionicons
+                            color={theme.themeColor}
+                            name={icon}
+                            size={scale(17)}
+                        />
+                    </View>
+                    <View style={styles.rowContent}>
+                        <Text style={styles.rowLabel}>{label}</Text>
+                        {hyperlink && !tags ? (
+                            <HyperlinkText
+                                linkStyle={{ color: theme.themeColor }}
+                                navigation={navigation}>
+                                {valueContent}
+                            </HyperlinkText>
+                        ) : valueContent}
+                    </View>
+                </View>
+                {!isLast ? <View style={styles.separator} /> : null}
+            </>
+        );
+    },
+);
+
+const UMEventDetail = ({ navigation, route }) => {
     const { theme } = useTheme();
-    const { white, black, bg_color, themeColor } = theme;
-    const dynamicStyles = useMemo(() => getDynamicStyles(theme), [theme]);
-
+    const styles = useMemo(() => createStyles(theme), [theme]);
     const imageScrollViewer = useRef(null);
-    const scrollRef = useRef(null);
     const scrollY = useSharedValue(0);
+    const eventData = route.params.data;
 
-    // 滾動事件處理
+    const parsedData = useMemo(() => {
+        const result = {
+            dateFrom: eventData.common.dateFrom,
+            dateTo: eventData.common.dateTo,
+            imageUrls: eventData.common.posterUrl
+                ?.replace('http:', 'https:') || '',
+            timeFrom: eventData.common.timeFrom,
+            timeTo: eventData.common.timeTo,
+        };
+        const languages = ['cn', 'en', 'pt'];
+        const dataKeys = [
+            'title',
+            'content',
+            'organiser',
+            'coorganiser',
+            'venue',
+            'targetAudience',
+            'speaker',
+            'remark',
+            'language',
+            'contactName',
+            'contactPhone',
+            'contactFax',
+            'contactMail',
+        ];
+
+        languages.forEach(language => {
+            dataKeys.forEach(key => {
+                result[`${key}_${language}`] = '';
+            });
+        });
+
+        eventData.details.forEach(item => {
+            const language = {
+                en_US: 'en',
+                pt_PT: 'pt',
+                zh_TW: 'cn',
+            }[item.locale];
+            if (!language) {
+                return;
+            }
+
+            result[`title_${language}`] = item.title || '';
+            result[`content_${language}`] = item.content || '';
+            result[`organiser_${language}`] = item.organizedBys || '';
+            result[`coorganiser_${language}`] = item.coorganizers || '';
+            result[`venue_${language}`] = item.venues || '';
+            result[`targetAudience_${language}`]
+                = item.targetAudiences || '';
+            result[`speaker_${language}`] = item.speakers || '';
+            result[`remark_${language}`] = item.remark || '';
+            result[`language_${language}`] = item.languages || '';
+            result[`contactName_${language}`] = item.contactName || '';
+            result[`contactPhone_${language}`] = item.contactPhone || '';
+            result[`contactFax_${language}`] = item.contactFax || '';
+            result[`contactMail_${language}`] = item.contactEmail || '';
+        });
+
+        return result;
+    }, [eventData]);
+
+    const languageMode = useMemo(() => [
+        {
+            locale: 'cn',
+            available: Boolean(parsedData.title_cn),
+            name: '中',
+        },
+        {
+            locale: 'en',
+            available: Boolean(parsedData.title_en),
+            name: 'EN',
+        },
+        {
+            locale: 'pt',
+            available: Boolean(parsedData.title_pt),
+            name: 'PT',
+        },
+    ], [parsedData]);
+
+    const firstAvailableLanguage = useMemo(() => {
+        const index = languageMode.findIndex(item => item.available);
+        return index < 0 ? 0 : index;
+    }, [languageMode]);
+
+    const [selectedLanguage, setSelectedLanguage] = useState(
+        firstAvailableLanguage,
+    );
+    const [imageLoading, setImageLoading] = useState(true);
+    const locale = languageMode[selectedLanguage]?.locale || 'cn';
+
+    const details = useMemo(() => DETAIL_CONFIG
+        .map(item => ({
+            ...item,
+            label: item.labels[selectedLanguage],
+            value: parsedData[`${item.key}_${locale}`],
+        }))
+        .filter(item => (
+            Array.isArray(item.value)
+                ? item.value.length > 0
+                : Boolean(item.value)
+        )), [locale, parsedData, selectedLanguage]);
+
+    const contacts = useMemo(() => CONTACT_CONFIG
+        .map(item => ({
+            ...item,
+            label: item.labels[selectedLanguage],
+            value: parsedData[`${item.key}_${locale}`],
+        }))
+        .filter(item => Boolean(item.value)),
+        [locale, parsedData, selectedLanguage]);
+
     const scrollHandler = useAnimatedScrollHandler({
         onScroll: event => {
             scrollY.value = event.contentOffset.y;
         },
     });
 
-    const eventData = route.params.data;
+    const handleLanguageSelect = useCallback(index => {
+        trigger();
+        setSelectedLanguage(index);
+    }, []);
 
-    // 初始化狀態
-    const [state, setState] = useState(() => {
-        // 解析日期時間
-        const dateFrom = eventData.common.dateFrom;
-        const dateTo = eventData.common.dateTo;
-        const timeFrom = eventData.common.timeFrom;
-        const timeTo = eventData.common.timeTo;
-
-        // 初始化語言數據
-        const languages = ['cn', 'en', 'pt'];
-        const dataKeys = [
-            'title', 'content', 'organiser', 'coorganiser', 'venue',
-            'targetAudience', 'speaker', 'remark', 'language',
-            'contactName', 'contactPhone', 'contactFax', 'contactMail',
-        ];
-
-        const result = { dateFrom, dateTo, timeFrom, timeTo };
-
-        // 初始化各語言數據
-        languages.forEach(lang => {
-            dataKeys.forEach(key => {
-                result[`${key}_${lang}`] = '';
-            });
-        });
-
-        // 解析 eventData.details
-        eventData.details.forEach(item => {
-            const langMap = { en_US: 'en', pt_PT: 'pt', zh_TW: 'cn' };
-            const lang = langMap[item.locale];
-            if (!lang) { return; }
-
-            result[`title_${lang}`] = item.title || '';
-            result[`content_${lang}`] = item.content || '';
-            result[`organiser_${lang}`] = item.organizedBys || '';
-            result[`coorganiser_${lang}`] = item.coorganizers || '';
-            result[`venue_${lang}`] = item.venues || '';
-            result[`targetAudience_${lang}`] = item.targetAudiences || '';
-            result[`speaker_${lang}`] = item.speakers || '';
-            result[`remark_${lang}`] = item.remark || '';
-            result[`language_${lang}`] = item.languages || '';
-            result[`contactName_${lang}`] = item.contactName || '';
-            result[`contactPhone_${lang}`] = item.contactPhone || '';
-            result[`contactFax_${lang}`] = item.contactFax || '';
-            result[`contactMail_${lang}`] = item.contactEmail || '';
-        });
-
-        // 構建語言模式數組
-        const LanguageMode = [
-            { locale: 'cn', available: result.title_cn.length > 0, name: '中' },
-            { locale: 'en', available: result.title_en.length > 0, name: 'EN' },
-            { locale: 'pt', available: result.title_pt.length > 0, name: 'PT' },
-        ];
-
-        return {
-            LanguageMode,
-            chooseMode: 0,
-            data: {
-                ...result,
-                imageUrls: eventData.common.posterUrl?.replace('http:', 'https:') || '',
-            },
-            imgLoading: true,
-        };
-    });
+    const handleImagePress = useCallback(() => {
+        trigger();
+        imageScrollViewer.current?.handleOpenImage(0);
+    }, []);
 
     useEffect(() => {
         logToFirebase('openPage', { page: 'UMEvent' });
     }, []);
 
-    // 獲取當前語言的標題
-    const getCurrentTitle = useCallback(() => {
-        const locale = state.LanguageMode[state.chooseMode].locale;
-        return state.data[`title_${locale}`];
-    }, [state]);
-
-    // 處理語言切換
-    const handleLanguageSelect = useCallback(index => {
-        trigger();
-        setState(prev => ({ ...prev, chooseMode: index }));
-    }, []);
-
-    // 解構數據
-    const { LanguageMode, chooseMode } = state;
-    const { dateFrom, dateTo, timeFrom, timeTo, imageUrls } = state.data;
-
-    // 構建數組數據
-    const dataArrays = useMemo(() => ({
-        speaker: [state.data.speaker_cn, state.data.speaker_en, state.data.speaker_pt, '講者：', 'Speaker: ', 'Orador: '],
-        venue: [state.data.venue_cn, state.data.venue_en, state.data.venue_pt, '地點：', 'Venue: ', 'Local: '],
-        language: [state.data.language_cn, state.data.language_en, state.data.language_pt, '語言：', 'Language: ', 'Língua: '],
-        targetAudience: [state.data.targetAudience_cn, state.data.targetAudience_en, state.data.targetAudience_pt, '對象：', 'Target Audience: ', 'Audiência-alvo: '],
-        organiser: [state.data.organiser_cn, state.data.organiser_en, state.data.organiser_pt, '主辦單位：', 'Organiser: ', 'Organizador: '],
-        coorganiser: [state.data.coorganiser_cn, state.data.coorganiser_en, state.data.coorganiser_pt, '協辦單位：', 'Coorganiser: ', 'Co-organizador: '],
-        content: [state.data.content_cn, state.data.content_en, state.data.content_pt, '詳情：', 'Content: '],
-        remark: [state.data.remark_cn, state.data.remark_en, state.data.remark_pt, '備註：', 'Remark: ', 'Observação: '],
-        contactName: [state.data.contactName_cn, state.data.contactName_en, state.data.contactName_pt, '名稱：', 'Name: ', 'Nome: '],
-        contactPhone: [state.data.contactPhone_cn, state.data.contactPhone_en, state.data.contactPhone_pt, '電話：', 'Phone: ', 'Telefone: '],
-        contactFax: [state.data.contactFax_cn, state.data.contactFax_en, state.data.contactFax_pt, '傳真：', 'Fax: ', 'Fax: '],
-        contactMail: [state.data.contactMail_cn, state.data.contactMail_en, state.data.contactMail_pt, '電郵：', 'E-mail: ', 'E-mail: '],
-    }), [state.data]);
-
-    // 檢查內容是否存在
-    const hasCoorganiser = !!state.data.coorganiser_cn;
-    const hasContent = !!state.data.content_cn;
-    const hasRemark = !!state.data.remark_cn;
-
     return (
-        <View style={{ backgroundColor: bg_color, flex: 1 }}>
-            {/* 圖片查看器 */}
-            <ARKImageView ref={imageScrollViewer} imageUrls={imageUrls} />
-
-            {/* 主滾動內容 */}
+        <View style={styles.page}>
+            <ARKImageView
+                ref={imageScrollViewer}
+                imageUrls={parsedData.imageUrls}
+            />
             <Animated.ScrollView
-                ref={scrollRef}
+                contentInsetAdjustmentBehavior={
+                    isLiquidGlassSupported ? undefined : 'automatic'
+                }
                 onScroll={scrollHandler}
                 scrollEventThrottle={16}
-                showsVerticalScrollIndicator={false}
-                // 該頁面是圖片置頂，所以iOS26也無需調整inset
-                contentInsetAdjustmentBehavior={isLiquidGlassSupported ? null : "automatic"}
-            >
-                {/* Hero 區域 */}
+                showsVerticalScrollIndicator={false}>
                 <HeroSection
-                    imageUrl={imageUrls}
+                    imageLoading={imageLoading}
+                    imageUrl={parsedData.imageUrls}
+                    onImagePress={handleImagePress}
                     scrollY={scrollY}
-                    onImagePress={() => {
-                        trigger();
-                        imageScrollViewer.current?.handleOpenImage(0);
-                    }}
-                    imgLoading={state.imgLoading}
-                    setImgLoading={loading =>
-                        setState(prev => ({ ...prev, imgLoading: loading }))
-                    }
-                    title={getCurrentTitle()}
-                    themeColor={themeColor}
-                    dynamicStyles={dynamicStyles}
+                    setImageLoading={setImageLoading}
                 />
 
-                {/* 內容容器 */}
-                <View style={staticStyles.contentWrapper}>
-                    {/* 語言選擇器 */}
-                    <Animated.View entering={FadeInUp.delay(100).duration(350)}>
-                        <LanguageSelector
-                            languageMode={LanguageMode}
-                            chooseMode={chooseMode}
-                            onSelect={handleLanguageSelect}
-                            themeColor={themeColor}
-                            white={white}
+                <View style={styles.contentWrapper}>
+                    <Animated.View
+                        entering={FadeInUp.delay(80).duration(350)}>
+                        <SurfaceCard style={styles.titleCard}>
+                            <View style={styles.titleTopRow}>
+                                <Text style={styles.eyebrow}>
+                                    {LANGUAGE_LABELS.event[selectedLanguage]}
+                                </Text>
+                                <LanguageSelector
+                                    languageMode={languageMode}
+                                    onSelect={handleLanguageSelect}
+                                    selectedIndex={selectedLanguage}
+                                />
+                            </View>
+                            <Text selectable style={styles.title}>
+                                {parsedData[`title_${locale}`]}
+                            </Text>
+                        </SurfaceCard>
+                    </Animated.View>
+
+                    <Animated.View
+                        entering={FadeInUp.delay(140).duration(350)}>
+                        <ScheduleCard
+                            dateFrom={parsedData.dateFrom}
+                            dateTo={parsedData.dateTo}
+                            mode={selectedLanguage}
+                            timeFrom={parsedData.timeFrom}
+                            timeTo={parsedData.timeTo}
                         />
                     </Animated.View>
 
-                    {/* 時間顯示 */}
-                    <Animated.View entering={FadeInUp.delay(150).duration(350)}>
-                        <GlassmorphismCard style={staticStyles.timeCard}>
-                            <TimeDisplay
-                                dateFrom={dateFrom}
-                                dateTo={dateTo}
-                                timeFrom={timeFrom}
-                                timeTo={timeTo}
-                                mode={chooseMode}
-                                themeColor={themeColor}
-                                dynamicStyles={dynamicStyles}
-                            />
-                        </GlassmorphismCard>
-                    </Animated.View>
+                    {details.length > 0 ? (
+                        <SectionCard
+                            delay={200}
+                            icon="list-outline"
+                            title={
+                                LANGUAGE_LABELS.detailTitle[selectedLanguage]
+                            }>
+                            {details.map((item, index) => (
+                                <InfoRow
+                                    expanded={item.expanded}
+                                    hyperlink={item.hyperlink}
+                                    icon={item.icon}
+                                    isLast={index === details.length - 1}
+                                    key={item.key}
+                                    label={item.label}
+                                    navigation={navigation}
+                                    tags={item.tags}
+                                    value={item.value}
+                                />
+                            ))}
+                        </SectionCard>
+                    ) : null}
 
-                    {/* 活動詳情卡片 */}
-                    <InfoCard
-                        title={['活動詳情', 'Event Details', 'Detalhes do Evento'][chooseMode]}
-                        delay={200}
-                        themeColor={themeColor}>
-                        {/* 講者 */}
-                        {dataArrays.speaker[chooseMode] && (
-                            <View style={staticStyles.detailRow}>
-                                <Text style={dynamicStyles.detailLabel}>
-                                    {dataArrays.speaker[chooseMode + 3]}
-                                </Text>
-                                <Text style={dynamicStyles.detailValue} selectable>
-                                    {dataArrays.speaker[chooseMode]}
-                                </Text>
-                            </View>
-                        )}
+                    {contacts.length > 0 ? (
+                        <SectionCard
+                            delay={260}
+                            icon="person-circle-outline"
+                            style={styles.contactCard}
+                            title={
+                                LANGUAGE_LABELS.contactTitle[selectedLanguage]
+                            }>
+                            {contacts.map((item, index) => (
+                                <InfoRow
+                                    hyperlink={item.hyperlink}
+                                    icon={item.icon}
+                                    isLast={index === contacts.length - 1}
+                                    key={item.key}
+                                    label={item.label}
+                                    navigation={navigation}
+                                    value={item.value}
+                                />
+                            ))}
+                        </SectionCard>
+                    ) : null}
 
-                        {/* 地點 */}
-                        {dataArrays.venue[chooseMode] && (
-                            <View style={staticStyles.detailRow}>
-                                <Text style={dynamicStyles.detailLabel}>
-                                    {dataArrays.venue[chooseMode + 3]}
-                                </Text>
-                                <HyperlinkText
-                                    linkStyle={{ color: themeColor }}
-                                    navigation={navigation}>
-                                    <Text style={dynamicStyles.detailValue} selectable>
-                                        {dataArrays.venue[chooseMode]}
-                                    </Text>
-                                </HyperlinkText>
-                            </View>
-                        )}
-
-                        {/* 語言 */}
-                        {dataArrays.language[chooseMode] && (
-                            <View style={staticStyles.detailRow}>
-                                <Text style={dynamicStyles.detailLabel}>
-                                    {dataArrays.language[chooseMode + 3]}
-                                </Text>
-                                <View style={staticStyles.tagContainer}>
-                                    {dataArrays.language[chooseMode].map((lang, idx) => (
-                                        <View
-                                            key={idx}
-                                            style={[
-                                                staticStyles.tag,
-                                                { backgroundColor: `${themeColor}20` },
-                                            ]}>
-                                            <Text
-                                                style={[staticStyles.tagText, { color: themeColor }]}>
-                                                {lang}
-                                            </Text>
-                                        </View>
-                                    ))}
-                                </View>
-                            </View>
-                        )}
-
-                        {/* 對象 */}
-                        {dataArrays.targetAudience[chooseMode] && (
-                            <View style={staticStyles.detailRow}>
-                                <Text style={dynamicStyles.detailLabel}>
-                                    {dataArrays.targetAudience[chooseMode + 3]}
-                                </Text>
-                                <Text style={dynamicStyles.detailValue} selectable>
-                                    {dataArrays.targetAudience[chooseMode]}
-                                </Text>
-                            </View>
-                        )}
-
-                        {/* 主辦單位 */}
-                        {dataArrays.organiser[chooseMode] && (
-                            <View style={staticStyles.detailRow}>
-                                <Text style={dynamicStyles.detailLabel}>
-                                    {dataArrays.organiser[chooseMode + 3]}
-                                </Text>
-                                <Text style={dynamicStyles.detailValue} selectable>
-                                    {dataArrays.organiser[chooseMode]}
-                                </Text>
-                            </View>
-                        )}
-
-                        {/* 協辦單位 */}
-                        {hasCoorganiser && dataArrays.coorganiser[chooseMode] && (
-                            <View style={staticStyles.detailRow}>
-                                <Text style={dynamicStyles.detailLabel}>
-                                    {dataArrays.coorganiser[chooseMode + 3]}
-                                </Text>
-                                <Text style={dynamicStyles.detailValue} selectable>
-                                    {dataArrays.coorganiser[chooseMode]}
-                                </Text>
-                            </View>
-                        )}
-
-                        {/* 詳情 */}
-                        {hasContent && dataArrays.content[chooseMode] && (
-                            <View style={staticStyles.detailRow}>
-                                <Text style={dynamicStyles.detailLabel}>
-                                    {dataArrays.content[chooseMode + 3]}
-                                </Text>
-                                <HyperlinkText
-                                    linkStyle={{ color: themeColor }}
-                                    navigation={navigation}>
-                                    <Text style={[dynamicStyles.detailValue, staticStyles.detailContent]} selectable>
-                                        {dataArrays.content[chooseMode]}
-                                    </Text>
-                                </HyperlinkText>
-                            </View>
-                        )}
-
-                        {/* 備註 */}
-                        {hasRemark && dataArrays.remark[chooseMode] && (
-                            <View style={staticStyles.detailRow}>
-                                <Text style={dynamicStyles.detailLabel}>
-                                    {dataArrays.remark[chooseMode + 3]}
-                                </Text>
-                                <Text style={dynamicStyles.detailValue} selectable>
-                                    {dataArrays.remark[chooseMode]}
-                                </Text>
-                            </View>
-                        )}
-                    </InfoCard>
-
-                    {/* 聯絡人卡片 */}
-                    <ContactCard
-                        contactName={dataArrays.contactName}
-                        contactPhone={dataArrays.contactPhone}
-                        contactFax={dataArrays.contactFax}
-                        contactMail={dataArrays.contactMail}
-                        mode={chooseMode}
-                        themeColor={themeColor}
-                        navigation={navigation}
-                        dynamicStyles={dynamicStyles}
-                    />
-
-                    {/* 底部留白 */}
-                    <View style={staticStyles.bottomSpacer} />
+                    <View style={styles.bottomSpacer} />
                 </View>
             </Animated.ScrollView>
         </View>
     );
 };
-
-/**
- * 靜態樣式 - 不依賴主題的純佈局樣式
- */
-const staticStyles = StyleSheet.create({
-    // Hero 區域樣式
-    heroContainer: {
-        position: 'relative',
-        overflow: 'hidden',
-    },
-    heroImageWrapper: {
-        ...StyleSheet.absoluteFillObject,
-    },
-    heroPressable: {
-        width: '100%',
-        height: '100%',
-    },
-    heroImage: {
-        width: '100%',
-        height: '100%',
-    },
-    heroLoadingOverlay: {
-        ...StyleSheet.absoluteFillObject,
-        backgroundColor: 'rgba(0,0,0,0.3)',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    heroGradientOverlay: {
-        ...StyleSheet.absoluteFillObject,
-        backgroundColor: 'rgba(0,0,0,0.1)',
-    },
-    heroTitleContainer: {
-        position: 'absolute',
-        bottom: verticalScale(30),
-        left: scale(20),
-        right: scale(20),
-    },
-    heroTitleBlur: {
-        borderRadius: scale(16),
-        padding: scale(16),
-        overflow: 'hidden',
-    },
-
-    // 懸浮標題欄
-    floatingHeader: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        height: verticalScale(90),
-        justifyContent: 'flex-end',
-        paddingBottom: verticalScale(12),
-        paddingHorizontal: scale(20),
-        zIndex: 100,
-    },
-    floatingHeaderText: {
-        fontSize: moderateScale(17),
-        fontWeight: '600',
-        textAlign: 'center',
-    },
-
-    // 玻璃擬態卡片
-    glassCardContainer: {
-        borderRadius: scale(20),
-        overflow: 'hidden',
-        borderWidth: 1,
-    },
-    glassCardContent: {
-        padding: scale(16),
-    },
-
-    // 內容容器
-    contentWrapper: {
-        marginTop: verticalScale(-40),
-        paddingHorizontal: scale(16),
-        gap: verticalScale(16),
-    },
-
-    // 語言選擇器
-    languageContainer: {
-        alignItems: 'center',
-        marginVertical: verticalScale(8),
-    },
-    languageIndicator: {
-        position: 'absolute',
-        height: '100%',
-        borderRadius: scale(21),
-        top: scale(4),
-    },
-    languageButton: {
-        paddingHorizontal: scale(20),
-        paddingVertical: scale(10),
-        borderRadius: scale(21),
-        minWidth: scale(60),
-        alignItems: 'center',
-    },
-    languageText: {
-        fontSize: moderateScale(14),
-        fontWeight: '600',
-    },
-
-    // 時間顯示
-    timeCard: {
-        marginVertical: verticalScale(8),
-    },
-    timeContainer: {
-        gap: verticalScale(12),
-    },
-    timeBlock: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: scale(12),
-    },
-    timeIconContainer: {
-        width: scale(44),
-        height: scale(44),
-        borderRadius: scale(12),
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    timeIcon: {
-        fontSize: moderateScale(20),
-    },
-    timeContent: {
-        flex: 1,
-    },
-    timeLabel: {
-        fontSize: moderateScale(12),
-        fontWeight: '500',
-        marginBottom: verticalScale(2),
-    },
-
-    // 信息卡片
-    infoCard: {
-        marginVertical: verticalScale(4),
-    },
-    infoCardHeader: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: verticalScale(6),
-        paddingBottom: verticalScale(8),
-        borderBottomWidth: 1,
-        borderBottomColor: 'rgba(0,0,0,0.05)',
-    },
-    infoCardIndicator: {
-        width: scale(4),
-        height: scale(20),
-        borderRadius: scale(2),
-        marginRight: scale(8),
-    },
-    infoCardTitle: {
-        fontSize: moderateScale(17),
-        fontWeight: '700',
-    },
-    infoCardBody: {
-        gap: verticalScale(10),
-    },
-
-    // 詳情行
-    detailRow: {
-        flexDirection: 'column',
-        gap: verticalScale(4),
-    },
-    detailContent: {
-        marginTop: verticalScale(4),
-    },
-
-    // 標籤
-    tagContainer: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        gap: scale(6),
-    },
-    tag: {
-        paddingHorizontal: scale(8),
-        paddingVertical: verticalScale(2),
-        borderRadius: scale(6),
-    },
-    tagText: {
-        fontSize: moderateScale(12),
-        fontWeight: '500',
-    },
-
-    // 聯絡人卡片
-    contactCard: {
-        marginVertical: verticalScale(8),
-        marginBottom: verticalScale(24),
-    },
-    contactHeader: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: verticalScale(16),
-        paddingBottom: verticalScale(12),
-        borderBottomWidth: 1,
-        borderBottomColor: 'rgba(0,0,0,0.05)',
-    },
-    contactIconContainer: {
-        width: scale(44),
-        height: scale(44),
-        borderRadius: scale(14),
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginRight: scale(12),
-    },
-    contactIcon: {
-        fontSize: moderateScale(22),
-    },
-    contactTitle: {
-        fontSize: moderateScale(18),
-        fontWeight: '700',
-    },
-    contactBody: {
-        gap: verticalScale(12),
-    },
-    contactRow: {
-        flexDirection: 'column',
-        gap: verticalScale(2),
-    },
-
-    // 底部留白
-    bottomSpacer: {
-        height: verticalScale(40),
-    },
-});
 
 export default UMEventDetail;

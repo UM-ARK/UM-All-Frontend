@@ -16,7 +16,7 @@ import {
     GITHUB_ACTIVITY,
 } from '../../../utils/pathMap';
 import { trigger } from '../../../utils/trigger';
-import packageInfo from '../../../../package.json';
+import { getLocalAppVersion } from '../../../utils/appUpdateKits';
 
 import { scale, verticalScale } from 'react-native-size-matters';
 import { Image } from 'expo-image';
@@ -85,7 +85,7 @@ const AboutPage = ({ navigation }) => {
                     {/* 應用版本號 */}
                     <Text style={{ ...s.bodyText }}>
                         {t('APP Version', { ns: 'about' })}
-                        <Text style={{ ...s.highlightText }}>{packageInfo.version}</Text>
+                        <Text style={{ ...s.highlightText }}>{getLocalAppVersion()}</Text>
                     </Text>
 
                     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
@@ -142,19 +142,20 @@ ${t('課表數據和版本將被還原，你需要再進行手動更新！', { n
 ${t('將清除所有緩存並重啟，您確定繼續嗎？', { ns: 'about' })}`,
                                 [
                                     {
+                                        text: 'No',
+                                        style: 'cancel',
+                                        onPress: () => {
+                                            trigger();
+                                        },
+                                    },
+                                    {
                                         text: 'Yes',
+                                        style: 'destructive',
                                         onPress: async () => {
                                             trigger();
                                             await AsyncStorage.clear();
                                             reloadAppAsync();
                                             Alert.alert('已清除所有緩存');
-                                        },
-                                        style: 'destructive',
-                                    },
-                                    {
-                                        text: 'No',
-                                        onPress: () => {
-                                            trigger();
                                         },
                                     },
                                 ]

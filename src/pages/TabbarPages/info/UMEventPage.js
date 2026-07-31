@@ -1,31 +1,68 @@
 import React, {
+    forwardRef,
     useState,
     useEffect,
     useRef,
     useContext,
     useCallback,
+    useImperativeHandle,
 } from 'react';
-import {Text, View, ScrollView, RefreshControl} from 'react-native';
-import {FlashList} from '@shopify/flash-list';
+import { Text, View, RefreshControl } from 'react-native';
+import { FlashList } from '@shopify/flash-list';
 
-import {uiStyle, ThemeContext} from '../../../components/ThemeContext';
-import {UM_API_EVENT, UM_API_TOKEN} from '../../../utils/pathMap';
+import { uiStyle, ThemeContext } from '../../../components/ThemeContext';
+import { UM_API_EVENT, UM_API_TOKEN } from '../../../utils/pathMap';
 
 import NewsCard from './components/NewsCard';
-import Loading from '../../../components/Loading';
-import ScrollToTopButton from '../../../components/ScrollToTopButton';
+import NewsListSkeleton from './components/NewsListSkeleton';
 
 import axios from 'axios';
 import moment from 'moment-timezone';
-import {scale, verticalScale} from 'react-native-size-matters';
+import { useTranslation } from 'react-i18next';
+import { scale, verticalScale } from 'react-native-size-matters';
 
-const UMEventPage = () => {
+/**
+ * 澳大活動列表
+ * @param {boolean} [hideSourceLabel=false] - 嵌入校園頁時隱藏列表內來源標註
+ * @param {number} [contentTopInset=0] - 懸浮頁頭所需的列表頂部間距
+ * @param {(offsetY: number) => void} [onScrollOffsetChange] - 列表滾動位置回調
+ */
+const UMEventPage = forwardRef(function UMEventPage(
+    {
+        hideSourceLabel = false,
+        contentTopInset = 0,
+        onScrollOffsetChange,
+    },
+    ref,
+) {
     const scrollViewRef = useRef(null);
-    const progressRef = useRef();
-    const {theme} = useContext(ThemeContext);
+    const { theme } = useContext(ThemeContext);
+    const { i18n } = useTranslation();
+    const currentLanguage = i18n.resolvedLanguage || i18n.language;
 
     const [data, setData] = useState(undefined);
     const [isLoading, setIsLoading] = useState(true);
+
+    useImperativeHandle(
+        ref,
+        () => ({
+            scrollToTop: () => {
+                if (scrollViewRef.current?.scrollToOffset) {
+                    scrollViewRef.current.scrollToOffset({
+                        offset: 0,
+                        animated: true,
+                    });
+                } else {
+                    scrollViewRef.current?.scrollTo({
+                        x: 0,
+                        y: 0,
+                        animated: true,
+                    });
+                }
+            },
+        }),
+        [],
+    );
 
     // 獲取澳大舉辦活動的資訊
     const getData = async () => {
@@ -35,14 +72,6 @@ const UMEventPage = () => {
                     headers: {
                         Accept: 'application/json',
                         Authorization: UM_API_TOKEN,
-                    },
-                    onDownloadProgress: progressEvent => {
-                        const loadedMB = progressEvent.loaded / 1024 / 1024;
-                        let progress = loadedMB / 0.1; // 假設API返回數據大小約為2MB
-                        if (progress > 1) {
-                            progress = 0.95;
-                        } // 確保進度不超過1
-                        progressRef.current = progress; // 更新進度條
                     },
                 })
                 .then(res => {
@@ -68,11 +97,11 @@ const UMEventPage = () => {
                     resultList.sort((a, b) => {
                         return Math.abs(
                             nowTimeStamp -
-                                new Date(a.common.dateFrom).getTime(),
+                            new Date(a.common.dateFrom).getTime(),
                         ) >
                             Math.abs(
                                 nowTimeStamp -
-                                    new Date(b.common.dateFrom).getTime(),
+                                new Date(b.common.dateFrom).getTime(),
                             )
                             ? 1
                             : -1;
@@ -80,11 +109,11 @@ const UMEventPage = () => {
                     outdatedList.sort((a, b) => {
                         return Math.abs(
                             nowTimeStamp -
-                                new Date(a.common.dateFrom).getTime(),
+                            new Date(a.common.dateFrom).getTime(),
                         ) >
                             Math.abs(
                                 nowTimeStamp -
-                                    new Date(b.common.dateFrom).getTime(),
+                                new Date(b.common.dateFrom).getTime(),
                             )
                             ? 1
                             : -1;
@@ -110,16 +139,28 @@ const UMEventPage = () => {
 
     // 渲染列表 Item
     const renderItem = useCallback(
-        ({item}) => <NewsCard data={item} type={'event'} />,
-        [],
+        ({ item }) => (
+            <NewsCard
+                data={item}
+                type={'event'}
+                language={currentLanguage}
+            />
+        ),
+        [currentLanguage],
+    );
+
+    const handleScroll = useCallback(
+        e => {
+            onScrollOffsetChange?.(e.nativeEvent.contentOffset.y);
+        },
+        [onScrollOffsetChange],
     );
 
     // 渲染主要內容
     const renderPage = () => {
-        const {black, white, themeColor} = theme;
-        const listFooter = <View style={{marginBottom: scale(60)}} />;
-        const listHeader = (
-            <View style={{marginTop: verticalScale(8)}}>
+        const { black, themeColor } = theme;
+        const listHeader = hideSourceLabel ? null : (
+            <View style={{ marginTop: verticalScale(8) }}>
                 <Text
                     style={{
                         ...uiStyle.defaultText,
@@ -134,15 +175,18 @@ const UMEventPage = () => {
         );
 
         return (
-            <View style={{flex: 1, width: '100%'}}>
+            <View style={{ flex: 1, width: '100%' }}>
                 <FlashList
                     ref={scrollViewRef}
                     data={data}
+                    contentInsetAdjustmentBehavior="automatic"
+                    contentContainerStyle={{ paddingTop: contentTopInset }}
                     keyExtractor={item => item._id}
                     renderItem={renderItem}
                     drawDistance={500}
+                    onScroll={handleScroll}
+                    scrollEventThrottle={16}
                     ListHeaderComponent={listHeader}
-                    ListFooterComponent={listFooter}
                     refreshControl={
                         <RefreshControl
                             colors={[themeColor]}
@@ -155,12 +199,11 @@ const UMEventPage = () => {
                         />
                     }
                 />
-                <ScrollToTopButton virtualizedListRef={scrollViewRef} />
             </View>
         );
     };
 
-    const {black, white, themeColor, bg_color} = theme;
+    const { bg_color } = theme;
 
     return (
         <View
@@ -171,27 +214,12 @@ const UMEventPage = () => {
                 backgroundColor: bg_color,
             }}>
             {isLoading ? (
-                <ScrollView
-                    showsVerticalScrollIndicator={true}
-                    refreshControl={
-                        <RefreshControl
-                            colors={[themeColor]}
-                            tintColor={themeColor}
-                            refreshing={isLoading}
-                            onRefresh={() => {
-                                // 展示Loading標識
-                                setIsLoading(true);
-                                getData();
-                            }}
-                        />
-                    }>
-                    <Loading progress={progressRef.current} />
-                </ScrollView>
+                <NewsListSkeleton contentTopInset={contentTopInset} />
             ) : (
                 data != undefined && renderPage()
             )}
         </View>
     );
-};
+});
 
 export default UMEventPage;

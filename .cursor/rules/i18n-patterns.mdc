@@ -1,6 +1,6 @@
 ---
-description: 國際化 (i18n) 使用規範
-globs: "**/*.js"
+description: 國際化 (i18n) 使用規範與翻譯檔維護策略
+globs: src/i18n/**/*,**/*.{js,jsx}
 alwaysApply: false
 ---
 
@@ -8,34 +8,54 @@ alwaysApply: false
 
 ## 翻譯檔案
 
-- **英文**: `src/i18n/en-us.json`
-- **繁體中文**: `src/i18n/zh-hk.js`
+- **英文**: `src/i18n/en-us.json`（語言碼 `en`）
+- **繁體中文**: `src/i18n/zh-hk.js`（語言碼 `tc`）
+- `fallbackLng` 為 `tc`；缺 key 時 i18next 會回傳 key 本身
 
 ## 使用方式
 
 ```javascript
 import {useTranslation} from 'react-i18next';
 
-// 單個命名空間
 const {t} = useTranslation('common');
-
-// 多個命名空間
 const {t} = useTranslation(['common', 'home']);
 ```
 
 ## 鍵名規範
 
-**使用繁體中文作為鍵名**:
+**優先使用繁體中文作為鍵名**:
 
 ```javascript
 // ✅ 正確
 t('資訊')
-t('設置')
+t('登入 Harbor')
 
-// ❌ 錯誤
+// ❌ 錯誤（新字串不要用英文 key）
 t('info')
 t('settings')
 ```
+
+## 翻譯檔維護策略（重要）
+
+本專案 key 多為繁中字串，且 `tc` 缺 key 時會直接顯示 key → **多數新字串只需寫 `en-us.json`**。
+
+| 情況 | `en-us.json` | `zh-hk.js` |
+|------|--------------|------------|
+| 繁中 key，中英文案相同（`'登入': '登入'`） | ✅ 必寫英文譯文 | ⏭ 可省略（冗餘 identity map） |
+| 繁中 key，但繁中文案與 key 不同 | ✅ | ✅ 必寫 |
+| 英文 key（如 `setting` 的 `Settings`） | ✅ | ✅ 必寫，否則中文模式顯示英文 |
+
+```javascript
+// ✅ 新繁中 key：只需 en-us.json
+// en-us.json → "開啟選單": "Open menu"
+// zh-hk.js → 不必寫 "開啟選單": "開啟選單"
+
+// ✅ 英文 key：兩邊都要
+// en-us.json → "Settings": "Settings"
+// zh-hk.js   → Settings: '設置'
+```
+
+**原則**：不要為 identity map（key === value）徒增 `zh-hk.js` 條目；英文模式缺譯會露出中文 key，故 `en-us.json` 不可省。
 
 ## 命名空間分組
 
@@ -43,7 +63,10 @@ t('settings')
 |---------|------|
 | `common` | 通用（按鈕、提示） |
 | `home` | 主頁 |
-| `setting` | 設定 |
+| `harbor` | 職涯港 |
+| `my` | 我的 / Harbor 個人中心 |
+| `setting` | 設定（多為英文 key，需寫 zh-hk） |
 | `catalog` | 課表 |
 | `club` | 組織 |
 | `features` | 功能服務 |
+| `wiki` / `about` / `timetable` | 對應模組 |

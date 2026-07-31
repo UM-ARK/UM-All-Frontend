@@ -34,6 +34,9 @@ const getColorDiy = (isLight) => {
     const secondThemeColorValue = '#FF8627';
     const successValue = '#27ae60';
     const unreadValue = '#f75353';
+    const achievementGoldValue = isLight ? '#B77900' : '#F2C14E';
+    const achievementSilverValue = isLight ? '#6F7C87' : '#C2CBD3';
+    const achievementBronzeValue = isLight ? '#A85D32' : '#D9915B';
 
     return {
         isLight: isLight,
@@ -73,6 +76,16 @@ const getColorDiy = (isLight) => {
         },
         trueBlack,
 
+        // Harbor 成就等級配色
+        achievement: {
+            gold: achievementGoldValue,
+            goldTonal: `${achievementGoldValue}18`,
+            silver: achievementSilverValue,
+            silverTonal: `${achievementSilverValue}18`,
+            bronze: achievementBronzeValue,
+            bronzeTonal: `${achievementBronzeValue}18`,
+        },
+
         // 當想用純白，或其他顏色背景，白色文字時用white的色值
         white: whiteColor,
         trueWhite,
@@ -109,6 +122,14 @@ const getColorDiy = (isLight) => {
         // Harbor頁面配色
         harbor_bg_color: isLight ? '#fbfdff' : '#111111',
 
+        // expo-image 通用圖片佔位（可直接傳給 placeholder prop）
+        // 亮：淺灰；暗：深灰，避免深色模式下出現突兀亮塊
+        imagePlaceholder: {
+            blurhash: isLight
+                ? 'L6PZfSi_.AyE_3t7t7R**0o#DgR4'
+                : 'L1O|oat7fQfQfQfQfQfQfQfQfQ',
+        },
+
         // What2Reg，選咩課配色
         what2reg_color: '#30548b',
 
@@ -117,15 +138,18 @@ const getColorDiy = (isLight) => {
             bg_color: isLight ? '#fbfbfb' : trueBlack,
         },
 
-        // 陰影，IOS和Android要分開設置，shadow屬性只適用於IOS
+        // 跨平台陰影（RN New Architecture boxShadow，iOS / Android 視覺一致）
         viewShadow: {
-            shadowColor: blackMain,
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.08,
-            shadowRadius: 4,
-            elevation: 3,
-            // RN 0.76 後加入的css屬性，但需要新架構支持，新架構目前仍未在項目中啟用
-            // boxShadow: '1px 1px 3px 0px rgba(0,0,0,0.2)',
+            boxShadow: [
+                {
+                    offsetX: 0,
+                    offsetY: 2,
+                    blurRadius: 8,
+                    spreadDistance: 0,
+                    // 暗色模式略加深，避免陰影幾乎不可見
+                    color: rgba(trueBlack, isLight ? 0.1 : 0.45),
+                },
+            ],
         },
 
         barStyle: isLight ? 'dark-content' : 'light-content',

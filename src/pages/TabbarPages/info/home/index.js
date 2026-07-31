@@ -8,10 +8,10 @@ import {
     TouchableWithoutFeedback,
     Platform,
     Linking,
-    Alert,
     AppState,
     Keyboard,
     FlatList,
+    useWindowDimensions,
 } from 'react-native';
 
 // 本地工具
@@ -25,30 +25,26 @@ import {
     MAIL,
     ARK_WIKI,
     UM_Moodle,
-    ARK_HARBOR,
-    ARK_HARBOR_LOGIN,
-    ARK_HARBOR_NEW_TOPIC,
     ARK_WIKI_DONATE_RANK,
     AFD_UMACARK,
+    USUAL_Q,
 } from '../../../../utils/pathMap.js';
 import EventPage from './EventPage.js';
 import ModalBottom from '../../../../components/ModalBottom.js';
 import { setAPPInfo, handleLogout } from '../../../../utils/storageKits.js';
-import { isLocalAppOlderThanServer, showAppStoreUpdateAlert } from '../../../../utils/appUpdateKits.js';
-import packageInfo from '../../../../../package.json';
+import { getLocalAppVersion, isLocalAppOlderThanServer, showAppStoreUpdateAlert } from '../../../../utils/appUpdateKits.js';
 import HomeCard from './components/HomeCard.js';
-import { screenWidth } from '../../../../utils/stylesKits.js';
 import { trigger } from '../../../../utils/trigger.js';
 import { logToFirebase } from '../../../../utils/firebaseAnalytics.js';
 import { openLink } from '../../../../utils/browser.js';
 import { getLocalStorage } from '../../../../utils/storageKits.js';
+import { navigateToCourseTab } from '../../../../utils/courseNavigation.js';
+import { recordFeatureUsage } from '../../../../utils/featureRecentUsage';
 import { toastTextArr, toastKaomojiArr } from '../../../../static/UMARK_Assets/EasterEgg.js';
-import CustomBottomSheet from '../../courseSim/BottomSheet';
+import CustomBottomSheet from '../../../../utils/BottomSheet';
 import HyperlinkText from '../../../../components/HyperlinkText.js';
 import SearchBar from './components/SearchBar.js';
 import CalendarBar from './components/CalendarBar';
-import { FontAwesome, FontAwesome5, MaterialIcons, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { FlatGrid } from 'react-native-super-grid';
 import Toast from 'react-native-toast-message';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
@@ -60,6 +56,27 @@ import { useTranslation } from 'react-i18next';
 import { BottomSheetScrollView, BottomSheetFlatList } from '@gorhom/bottom-sheet';
 import ScrollToTopButton from '../../../../components/ScrollToTopButton';
 import TouchableScale from '../../../../components/TouchableScale';
+import FeatureIcon from './search/components/FeatureIcon';
+
+const MIN_REFRESH_DURATION = 800;
+const DONATE_PROBE_TIMEOUT_MS = 2500;
+const wait = duration => new Promise(resolve => setTimeout(resolve, duration));
+
+const openDonateLink = async () => {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), DONATE_PROBE_TIMEOUT_MS);
+    let url = AFD_UMACARK;
+
+    try {
+        await fetch(AFD_UMACARK, { method: 'HEAD', signal: controller.signal });
+    } catch {
+        url = GITHUB_DONATE;
+    } finally {
+        clearTimeout(timer);
+    }
+
+    return openLink({ URL: url, mode: 'fullScreen' });
+};
 
 const paymentArr = [
     require('../../../../static/img/donate/boc.jpg'),
@@ -68,29 +85,30 @@ const paymentArr = [
     require('../../../../static/img/donate/alipay.jpg'),
 ];
 
-// 定義可使用icon，注意大小寫
+// FeatureIcon 支援的 icon_type（與服務頁一致）
 const iconTypes = {
     ionicons: 'ionicons',
     materialCommunityIcons: 'MaterialCommunityIcons',
-    fontAwesome5: 'FontAwesome5',
-    materialIcons: 'MaterialIcons',
-    img: 'img',
-    view: 'view',
 };
 
 const HomeScreen = ({ navigation }) => {
     const { theme } = useTheme();
     const { white, bg_color, black, themeColor, themeColorLight, themeColorUltraLight, viewShadow, TIME_TABLE_COLOR } = theme;
-    const { t } = useTranslation(['common', 'home']);
+    const { t, i18n } = useTranslation(['common', 'home']);
+    const { width: windowWidth } = useWindowDimensions();
+    const isTc = i18n.language === 'tc';
+    const featureFontSize = isTc ? verticalScale(8) : verticalScale(7);
 
     // 狀態
     const functionArray = useMemo(() => [
         {
-            icon_name: 'bus',
-            icon_type: iconTypes.ionicons,
+            icon_name: 'bus-stop',
+            icon_type: iconTypes.materialCommunityIcons,
             function_name: t('校園巴士', { ns: 'home' }),
             func: () => {
                 trigger();
+                // 與服務頁共用常用紀錄（key_name 對齊 FeatureList）
+                recordFeatureUsage('校園巴士');
                 navigation.navigate('Bus');
             },
         },
@@ -101,28 +119,29 @@ const HomeScreen = ({ navigation }) => {
             func: () => {
                 trigger();
                 logToFirebase('openPage', { page: 'moodle' });
+                recordFeatureUsage('Moodle');
                 openLink(UM_Moodle);
             },
         },
+        // {
+        //     icon_name: 'plus',
+        //     icon_type: iconTypes.materialCommunityIcons,
+        //     function_name: t('新想法', { ns: 'home' }),
+        //     func: () => {
+        //         trigger();
+        //         logToFirebase('funcUse', { funcName: 'harbor_new' });
+        //         navigation.navigate('HarborComposer', { mode: 'newTopic' });
+        //     },
+        // },
         {
-            icon_name: 'plus',
-            icon_type: iconTypes.view,
-            function_name: t('新想法', { ns: 'home' }),
-            func: () => {
-                trigger();
-                logToFirebase('funcUse', { funcName: 'harbor_new' });
-                openLink({ URL: ARK_HARBOR_NEW_TOPIC, mode: 'fullScreen' });
-            },
-        },
-        {
-            icon_name: 'volunteer-activism',
-            icon_type: iconTypes.materialIcons,
+            icon_name: 'hand-heart',
+            icon_type: iconTypes.materialCommunityIcons,
             function_name: t('支持我們', { ns: 'home' }),
             func: () => {
                 trigger();
                 logToFirebase('funcUse', { funcName: 'donate' });
-                // 新版導航至愛發電主頁
-                openLink({ URL: AFD_UMACARK, mode: 'fullScreen' });
+                // 愛發電無法連線時改用 GitHub 捐贈頁
+                openDonateLink();
                 // 舊版打開BottomSheet展示收款碼
                 // if (sheetIndex != -1) {
                 //     logToFirebase('funcUse', { funcName: 'donate' });
@@ -133,19 +152,23 @@ const HomeScreen = ({ navigation }) => {
             },
         },
         {
-            icon_name: 'log-in',
+            icon_name: 'help-circle-outline',
             icon_type: iconTypes.ionicons,
-            function_name: t('論壇登入', { ns: 'home' }),
+            function_name: t('常見問題', { ns: 'home' }),
             func: () => {
                 trigger();
-                logToFirebase('funcUse', { funcName: 'harbor_login' });
-                openLink(ARK_HARBOR_LOGIN);
+                logToFirebase('funcUse', { funcName: 'usual_q' });
+                openLink(USUAL_Q);
             },
         },
-    ]);
+    ], [navigation, t]);
+    // 快捷項固定寬度 + 固定間距，整組置中，兩側自然留白（不均分視窗寬）
+    const quickFeatureItemWidth = scale(56);
+    const quickFeatureGap = scale(20);
     const [calRefreshKey, setCalRefreshKey] = useState(0);
     const [isShowModal, setIsShowModal] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+    const [isRefreshing, setIsRefreshing] = useState(false);
     const [showUpdateInfo, setShowUpdateInfo] = useState(false);
     const [app_version, setAppVersion] = useState({ lastest: '', local: '' });
     const [version_info, setVersionInfo] = useState(null);
@@ -162,8 +185,7 @@ const HomeScreen = ({ navigation }) => {
     const toastTimer = useRef(null);
     const appStateListener = useRef(null);
     const bottomSheetRef = useRef(null);
-
-    const { i18n } = useTranslation();
+    const refreshingRef = useRef(false);
 
     // 生命週期
     useEffect(() => {
@@ -244,7 +266,7 @@ const HomeScreen = ({ navigation }) => {
                 setShowUpdateInfo(true);
                 setAppVersion({
                     lastest: serverInfo.app_version,
-                    local: packageInfo.version,
+                    local: getLocalAppVersion(),
                 });
                 showAppStoreUpdateAlert(serverInfo);
                 if ('version_info' in serverInfo) {
@@ -276,6 +298,27 @@ const HomeScreen = ({ navigation }) => {
         getUpcomingCourse();
     }, []);
 
+    const handleRefresh = async () => {
+        if (refreshingRef.current) {
+            return;
+        }
+
+        refreshingRef.current = true;
+        setIsRefreshing(true);
+        onRefresh();
+
+        try {
+            await Promise.allSettled([
+                getAppData(),
+                eventPage.current?.onRefresh(),
+                wait(MIN_REFRESH_DURATION),
+            ]);
+        } finally {
+            refreshingRef.current = false;
+            setIsRefreshing(false);
+        }
+    };
+
     /**
      * 從緩存讀取一個星期的列表，跟現在的時間作比較，找到即將到來的課程。
      */
@@ -294,109 +337,33 @@ const HomeScreen = ({ navigation }) => {
         }
     };
 
-    // 渲染顶部校历图标
-    // 渲染功能圖標
-    const GetFunctionIcon = ({ icon_type, icon_name, function_name, func }) => {
-        let icon = null;
-        const imageSize = verticalScale(23);
-        const iconSize = verticalScale(23);
-        const containerSize = verticalScale(40); // 固定容器大小
-        const iconColor = theme.themeColor;
-
-        if (icon_type == 'ionicons') {
-            icon = (
-                <Ionicons
-                    name={icon_name}
-                    size={iconSize}
-                    color={iconColor}
-                />
-            );
-        } else if (icon_type == 'MaterialCommunityIcons') {
-            icon = (
-                <MaterialCommunityIcons
-                    name={icon_name}
-                    size={iconSize + scale(3)}
-                    color={iconColor}
-                />
-            );
-        } else if (icon_type == 'FontAwesome5') {
-            icon = (
-                <FontAwesome5
-                    name={icon_name}
-                    size={iconSize - verticalScale(3)}
-                    color={iconColor}
-                />
-            );
-        } else if (icon_type == 'MaterialIcons') {
-            icon = (
-                <MaterialIcons
-                    name={icon_name}
-                    size={iconSize - verticalScale(3)}
-                    color={iconColor}
-                />
-            );
-        } else if (icon_type == 'img') {
-            icon = (
-                <Image
-                    source={icon_name}
-                    style={{
-                        backgroundColor: theme.trueWhite,
-                        height: imageSize, width: imageSize,
-                        borderRadius: verticalScale(8),
-                    }}
-                />
-            );
-        } else if (icon_type == 'view') {
-            icon = (
-                <View style={{
-                    width: imageSize, height: imageSize,
-                    borderRadius: verticalScale(8),
-                    backgroundColor: themeColor,
-                    alignItems: 'center', justifyContent: 'center',
-                }}>
-                    <FontAwesome
-                        name={'plus'}
-                        size={imageSize - verticalScale(8)}
-                        color={white}
-                    />
-                </View>
-            );
-        }
-
-        return (
+    // 快捷功能：與服務頁相同的 FeatureIcon + 文字樣式
+    const renderQuickFeature = useCallback(
+        item => (
             <TouchableScale
                 style={{
-                    justifyContent: 'center', alignItems: 'center',
-                    width: containerSize, height: containerSize,
-                }}
-                onPress={func}>
-                <View style={{
-                    width: verticalScale(25),
-                    height: verticalScale(25),
+                    width: quickFeatureItemWidth,
                     justifyContent: 'center',
                     alignItems: 'center',
-                    marginBottom: verticalScale(2),
-                }}>
-                    {icon}
-                </View>
-
-                {function_name && (<View style={{
-                    width: '100%',
-                }}>
-                    <Text style={{
+                }}
+                activeOpacity={0.7}
+                onPress={item.func}
+                key={item.function_name}>
+                <FeatureIcon item={item} size={scale(22)} />
+                <Text
+                    style={{
                         ...uiStyle.defaultText,
-                        fontSize: verticalScale(8),
-                        fontWeight: 'bold',
-                        color: theme.themeColor,
+                        fontSize: featureFontSize,
+                        color: black.second,
                         textAlign: 'center',
-                        lineHeight: verticalScale(10),
+                        marginTop: verticalScale(2),
                     }}>
-                        {function_name}
-                    </Text>
-                </View>)}
+                    {item.function_name}
+                </Text>
             </TouchableScale>
-        );
-    };
+        ),
+        [black.second, featureFontSize, quickFeatureItemWidth],
+    );
 
     // 打開/關閉底部Modal
     const tiggerModalBottom = () => setIsShowModal(!isShowModal);
@@ -406,7 +373,9 @@ const HomeScreen = ({ navigation }) => {
         const {layoutMeasurement, contentOffset, contentSize} = event.nativeEvent;
 
         if (isLoading || isLoadMore) {return;}
-        const isCloseToBottom = layoutMeasurement.height + contentOffset.y >= contentSize.height - verticalScale(100);
+        // 僅 ARK 活動時瀑布流較短，提前約一屏觸發預載，避免滑到底才開始請求
+        const bottomThreshold = Math.max(layoutMeasurement.height, verticalScale(400));
+        const isCloseToBottom = layoutMeasurement.height + contentOffset.y >= contentSize.height - bottomThreshold;
 
         // 接近底部時，獲取更多數據
         if (isCloseToBottom && !isLoadMore && !isLoading) {
@@ -500,17 +469,14 @@ const HomeScreen = ({ navigation }) => {
     return (
         <View style={{ flex: 1, backgroundColor: bg_color, alignItems: 'center', justifyContent: 'center' }}>
             <ScrollView
+                style={{ width: windowWidth }}
+                contentInsetAdjustmentBehavior="automatic"
                 refreshControl={
                     <RefreshControl
                         colors={[themeColor]}
                         tintColor={themeColor}
-                        refreshing={isLoading}
-                        onRefresh={async () => {
-                            setIsLoading(true);
-                            onRefresh();
-                            getAppData();
-                            await eventPage.current?.onRefresh();
-                        }}
+                        refreshing={isRefreshing}
+                        onRefresh={handleRefresh}
                     />
                 }
                 alwaysBounceHorizontal={false}
@@ -533,14 +499,16 @@ const HomeScreen = ({ navigation }) => {
                     flexDirection: 'row',
                     alignItems: 'center', justifyContent: 'center',
                     alignSelf: 'center',
-                    width: screenWidth * 0.8,
-                    marginTop: verticalScale(3),
+                    width: windowWidth * 0.8,
+                    marginTop: verticalScale(6),
                 }}>
                     <TouchableScale
                         style={{ width: '100%' }}
                         onPress={() => {
                             trigger();
-                            navigation.navigate('CourseSimTab');
+                            navigateToCourseTab(navigation, {
+                                segment: 'timetable',
+                            });
                         }}>
                         {upcomingCourse ? (
                             <View style={{
@@ -548,8 +516,9 @@ const HomeScreen = ({ navigation }) => {
                                 alignItems: 'center', justifyContent: 'center',
                                 gap: scale(3),
                                 backgroundColor: `${themeColor}15`,
-                                paddingHorizontal: scale(20), paddingVertical: scale(10),
-                                borderRadius: scale(5),
+                                paddingHorizontal: scale(20),
+                                paddingVertical: verticalScale(6),
+                                borderRadius: scale(10),
                             }}>
                                 <Text style={{ ...uiStyle.defaultText, color: black.main, opacity: 0.7, fontWeight: 'bold' }}>{`⏰${t('下節課：', { ns: 'timetable' })}`}</Text>
                                 <Text style={{ ...uiStyle.defaultText, color: black.main, opacity: 0.7 }}>{upcomingCourse['Course Code']}</Text>
@@ -562,10 +531,10 @@ const HomeScreen = ({ navigation }) => {
                                 width: '100%',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                paddingVertical: verticalScale(8),
+                                paddingVertical: verticalScale(6),
                                 backgroundColor: `${theme.disabled}70`,
                                 opacity: 0.7,
-                                borderRadius: scale(5),
+                                borderRadius: scale(10),
                             }}>
                                 <Text style={{
                                     ...uiStyle.defaultText,
@@ -577,21 +546,18 @@ const HomeScreen = ({ navigation }) => {
                     </TouchableScale>
                 </View>
 
-                {/* 快捷功能圖標 */}
-                <View style={{ width: screenWidth * 0.8, marginTop: verticalScale(5) }}>
-                    <FlatGrid
-                        style={{
-                            backgroundColor: white, borderRadius: verticalScale(5),
-                        }}
-                        itemContainerStyle={{ alignItems: 'center', justifyContent: 'center' }}
-                        maxItemsPerRow={5}
-                        itemDimension={scale(50)}
-                        spacing={verticalScale(2)}
-                        data={functionArray}
-                        renderItem={({ item }) => GetFunctionIcon(item)}
-                        showsVerticalScrollIndicator={false}
-                        scrollEnabled={false}
-                    />
+                {/* 快捷功能圖標（固定寬與間距，整組置中聚攏） */}
+                <View
+                    style={{
+                        width: windowWidth,
+                        alignSelf: 'center',
+                        marginTop: verticalScale(6),
+                        flexDirection: 'row',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        gap: quickFeatureGap,
+                    }}>
+                    {functionArray.map(item => renderQuickFeature(item))}
                 </View>
 
                 {/* 更新提示 */}

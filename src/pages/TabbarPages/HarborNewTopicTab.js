@@ -3,8 +3,6 @@ import {View, StyleSheet} from 'react-native';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
 
 import {useTheme} from '../../components/ThemeContext';
-import {openLink} from '../../utils/browser';
-import {ARK_HARBOR_NEW_TOPIC} from '../../utils/pathMap';
 import {trigger} from '../../utils/trigger';
 import {logToFirebase} from '../../utils/firebaseAnalytics';
 
@@ -22,9 +20,9 @@ export function trackLastNonHarborPostTab(routeName) {
 }
 
 /**
- * 底部 Tab「發帖」：開 Harbor /new-topic（與主頁「新想法」一致）。
+ * 底部 Tab「發帖」：開啟原生 Harbor Composer（與主頁「新想法」一致）。
  * - Android：Tabbar 對此 route 使用 tabPress + preventDefault，此畫面通常不會被聚焦。
- * - iOS 原生 Tab：無法阻擋切換，聚焦後立刻開瀏覽器並跳回上一分頁（可能一幀空白）。
+ * - iOS 原生 Tab：無法阻擋切換，聚焦後立刻開 Composer 並跳回上一分頁（可能一幀空白）。
  */
 export default function HarborNewTopicTab() {
     const navigation = useNavigation();
@@ -38,10 +36,12 @@ export default function HarborNewTopicTab() {
         useCallback(() => {
             trigger();
             logToFirebase('funcUse', {funcName: 'harbor_new'});
-            openLink({URL: ARK_HARBOR_NEW_TOPIC, mode: 'fullScreen'});
             const target = lastNonHarborPostTabRouteName;
             requestAnimationFrame(() => {
                 navigation.navigate(target);
+                navigation.getParent()?.navigate('HarborComposer', {
+                    mode: 'newTopic',
+                });
             });
         }, [navigation]),
     );

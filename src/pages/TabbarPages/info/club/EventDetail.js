@@ -18,8 +18,8 @@ import { trigger } from '../../../../utils/trigger';
 import ModalBottom from '../../../../components/ModalBottom';
 import ARKImageView from '../../../../components/ARKImageView';
 import DialogDIY from '../../../../components/DialogDIY';
-import Loading from '../../../../components/Loading';
 import HyperlinkText from '../../../../components/HyperlinkText';
+import { EventDetailSkeleton } from '../components/DetailPageSkeleton';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
@@ -37,7 +37,7 @@ const CLUB_IMAGE_HEIGHT = PAGE_HEIGHT * 0.076;
 
 const EventDetail = (props) => {
     const { theme } = useTheme();
-    const { bg_color, white, black, themeColor, secondThemeColor, viewShadow, success, warning, trueWhite } = theme;
+    const { bg_color, white, black, themeColor, secondThemeColor, viewShadow, success, warning, trueWhite, imagePlaceholder } = theme;
 
     // 統一化卡片樣式（與 ClubDetail 保持一致）
     const styles = StyleSheet.create({
@@ -321,6 +321,9 @@ const EventDetail = (props) => {
                                     marginRight: scale(10),
                                 }}
                                 contentFit="contain"
+                                placeholder={imagePlaceholder}
+                                placeholderContentFit="contain"
+                                transition={200}
                             />
                             <View>
                                 <Text style={{
@@ -407,6 +410,9 @@ const EventDetail = (props) => {
                                     height: '100%',
                                 }}
                                 contentFit="cover"
+                                placeholder={imagePlaceholder}
+                                placeholderContentFit="cover"
+                                transition={200}
                             />
                         </TouchableOpacity>
                     ))}
@@ -548,8 +554,8 @@ const EventDetail = (props) => {
                 }}
             />
 
-            {/* 渲染主要內容 */}
-            {!state.isLoading && state.eventData ? (
+            {/* 有資料顯示詳情；首屏載入中改為骨架屏 */}
+            {state.eventData ? (
                 <ImageHeaderScrollView
                     maxOverlayOpacity={0.6}
                     minOverlayOpacity={0.3}
@@ -561,6 +567,10 @@ const EventDetail = (props) => {
                         <Image
                             source={state.coverImgUrl.replace('http:', 'https:')}
                             style={{ backgroundColor: trueWhite, width: '100%', height: '100%' }}
+                            contentFit="cover"
+                            placeholder={imagePlaceholder}
+                            placeholderContentFit="cover"
+                            transition={300}
                         />
                     )}
                     showsVerticalScrollIndicator={false}
@@ -572,12 +582,7 @@ const EventDetail = (props) => {
                     <View style={{ height: verticalScale(50) }} />
                 </ImageHeaderScrollView>
             ) : (
-                // Loading屏幕
-                <View style={{ flex: 1, backgroundColor: bg_color }}>
-                    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-                        <Loading />
-                    </View>
-                </View>
+                <EventDetailSkeleton />
             )}
         </View>
     );

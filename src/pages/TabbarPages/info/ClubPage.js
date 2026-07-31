@@ -6,12 +6,13 @@ import { BASE_URI, BASE_HOST, GET, USUAL_Q } from '../../../utils/pathMap';
 import { clubTagList, clubTagMap } from '../../../utils/clubMap';
 import { openLink } from '../../../utils/browser';
 import { trigger } from '../../../utils/trigger';
-import Loading from '../../../components/Loading';
 import ClubCard from './components/ClubCard';
 import ClubSearchBar from './components/ClubSearchBar';
 import { filterClubsBySearchQuery } from './utils/clubSearchFilter';
 import axios from 'axios';
 import { scale, verticalScale } from 'react-native-size-matters';
+import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const ITEMS_PER_ROW = 3;
 /** 與網格對齊的左右內距 */
@@ -19,6 +20,45 @@ const CLUB_GRID_HORIZONTAL_PADDING = scale(10);
 const CLUB_COLUMN_GAP = scale(6);
 /** 單欄上限：寬螢幕／橫屏時避免卡片被拉滿，維持約手機三欄視覺並靠左排列 */
 const CLUB_CELL_MAX_WIDTH = scale(122);
+/** 非首個區段標題比首個區段多出的頂部內距 */
+const SECTION_HEADER_EXTRA_TOP_PADDING = scale(12);
+const CLUB_SKELETON_LOGO_SIZE = verticalScale(45);
+/** 各區段列數，模擬 ARK／學生會／學會等分組 */
+const SKELETON_SECTION_ROWS = [2, 2, 3];
+const SKELETON_TITLE_WIDTHS = ['22%', '34%', '28%'];
+
+const ClubSkeletonCard = ({ cellWidth, white, tonal }) => (
+    <View style={{ width: cellWidth }}>
+        <View
+            style={{
+                borderRadius: scale(10),
+                backgroundColor: white,
+                justifyContent: 'space-around',
+                alignItems: 'center',
+                paddingVertical: scale(8),
+                margin: scale(3),
+                width: '100%',
+            }}>
+            <View
+                style={{
+                    width: CLUB_SKELETON_LOGO_SIZE,
+                    height: CLUB_SKELETON_LOGO_SIZE,
+                    borderRadius: scale(50),
+                    backgroundColor: tonal.primary15,
+                }}
+            />
+            <View
+                style={{
+                    marginTop: scale(5),
+                    height: verticalScale(10),
+                    width: '70%',
+                    borderRadius: scale(4),
+                    backgroundColor: tonal.primary08,
+                }}
+            />
+        </View>
+    </View>
+);
 
 const clubFilter = (clubDataList, tag) => clubDataList.filter(a => a.tag === tag);
 
@@ -57,11 +97,17 @@ const buildSections = (clubDataList) => {
 function ClubPage() {
     const { theme } = useContext(ThemeContext);
     const { themeColor, black, white } = theme;
+    const insets = useSafeAreaInsets();
+    // 優先讀 Tab Bar 實際高度，避免底部文案被浮動底欄遮擋
+    const tabBarHeight =
+        useContext(BottomTabBarHeightContext) ?? insets.bottom + 49;
     const [allClubs, setAllClubs] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [isLoading, setIsLoading] = useState(true);
     const [isOtherViewVisible, setIsOtherViewVisible] = useState(true);
     const sectionListRef = useRef(null);
+    const firstSectionHeaderHeightRef = useRef(0);
+    const clubRowHeightRef = useRef(0);
 
     const filteredClubs = useMemo(
         () => filterClubsBySearchQuery(allClubs, searchQuery),
@@ -77,6 +123,33 @@ function ClubPage() {
     const handleScrollEnd = useCallback(() => {
         setIsOtherViewVisible(true);
     }, []);
+
+    const scrollToSection = useCallback((sectionIndex) => {
+        if (sectionIndex === 0) {
+            sectionListRef.current?.getScrollResponder()?.scrollTo({ y: 0, animated: true });
+            return;
+        }
+
+        const firstHeaderHeight = firstSectionHeaderHeightRef.current;
+        const rowHeight = clubRowHeightRef.current;
+        if (!firstHeaderHeight || !rowHeight) {
+            return;
+        }
+
+        const sectionHeaderHeight = firstHeaderHeight + SECTION_HEADER_EXTRA_TOP_PADDING;
+        const offset = sections
+            .slice(0, sectionIndex)
+            .reduce((total, section, index) => (
+                total +
+                (index === 0 ? firstHeaderHeight : sectionHeaderHeight) +
+                section.data.length * rowHeight
+            ), 0);
+
+        sectionListRef.current?.getScrollResponder()?.scrollTo({
+            y: offset,
+            animated: true,
+        });
+    }, [sections]);
 
     const getData = useCallback(async () => {
         handleScrollStart();
@@ -115,7 +188,7 @@ function ClubPage() {
     }, []);
 
     const renderBottomInfo = useCallback(() => (
-        <View style={{ marginBottom: scale(20) }}>
+        <View style={{ marginBottom: tabBarHeight + scale(20) }}>
             <Text
                 style={{
                     ...uiStyle.defaultText,
@@ -153,7 +226,7 @@ function ClubPage() {
                 </Text>
             </TouchableOpacity>
         </View>
-    ), [allClubs.length, black.third, themeColor]);
+    ), [allClubs.length, black.third, tabBarHeight, themeColor]);
 
     const windowWidth = Dimensions.get('window').width;
     const rawCellWidth =
@@ -162,6 +235,65 @@ function ClubPage() {
             CLUB_COLUMN_GAP * (ITEMS_PER_ROW - 1)) /
         ITEMS_PER_ROW;
     const cellWidth = Math.min(rawCellWidth, CLUB_CELL_MAX_WIDTH);
+
+    // 組織列表骨架：區段標題 + 三欄圓形 Logo 卡
+    const renderClubSkeleton = useCallback(() => {
+        const { white, tonal, themeColor, bg_color } = theme;
+        return (
+            <View style={{ paddingBottom: scale(40) }}>
+                {SKELETON_SECTION_ROWS.map((rowCount, sectionIndex) => (
+                    <View key={`club-skeleton-section-${sectionIndex}`}>
+                        <View
+                            style={{
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                                paddingHorizontal: CLUB_GRID_HORIZONTAL_PADDING,
+                                paddingTop: sectionIndex === 0 ? scale(6) : scale(18),
+                                paddingBottom: scale(8),
+                                backgroundColor: bg_color,
+                            }}>
+                            <View
+                                style={{
+                                    width: scale(3),
+                                    height: verticalScale(15),
+                                    borderRadius: scale(2),
+                                    backgroundColor: themeColor,
+                                    marginRight: scale(10),
+                                }}
+                            />
+                            <View
+                                style={{
+                                    height: verticalScale(14),
+                                    width: SKELETON_TITLE_WIDTHS[sectionIndex],
+                                    borderRadius: scale(4),
+                                    backgroundColor: tonal.primary15,
+                                }}
+                            />
+                        </View>
+                        {Array.from({ length: rowCount }, (_, rowIndex) => (
+                            <View
+                                key={`club-skeleton-row-${sectionIndex}-${rowIndex}`}
+                                style={{
+                                    flexDirection: 'row',
+                                    justifyContent: 'flex-start',
+                                    paddingHorizontal: CLUB_GRID_HORIZONTAL_PADDING,
+                                    columnGap: CLUB_COLUMN_GAP,
+                                }}>
+                                {Array.from({ length: ITEMS_PER_ROW }, (_, itemIndex) => (
+                                    <ClubSkeletonCard
+                                        key={`club-skeleton-card-${sectionIndex}-${rowIndex}-${itemIndex}`}
+                                        cellWidth={cellWidth}
+                                        white={white}
+                                        tonal={tonal}
+                                    />
+                                ))}
+                            </View>
+                        ))}
+                    </View>
+                ))}
+            </View>
+        );
+    }, [cellWidth, theme]);
 
     return (
         <View style={{ flex: 1, backgroundColor: theme.bg_color }}>
@@ -183,7 +315,7 @@ function ClubPage() {
                     position: 'absolute',
                     zIndex: 2,
                     right: scale(10),
-                    bottom: verticalScale(70),
+                    bottom: tabBarHeight + verticalScale(16),
                     opacity: 0.9,
                     backgroundColor: white,
                     borderRadius: scale(10),
@@ -199,10 +331,7 @@ function ClubPage() {
                                 <TouchableOpacity
                                     onPress={() => {
                                         trigger();
-                                        const sectionIndex = sections.findIndex(sec => sec.title === itm.item);
-                                        if (sectionIndex !== -1) {
-                                            sectionListRef.current?.scrollToLocation({ sectionIndex, itemIndex: 0, viewOffset: 0, animated: true });
-                                        }
+                                        scrollToSection(itm.index);
                                     }}
                                     style={{
                                         padding: scale(5),
@@ -231,16 +360,21 @@ function ClubPage() {
             <SectionList
                 ref={sectionListRef}
                 style={{ flex: 1, width: '100%' }}
+                contentInsetAdjustmentBehavior="automatic"
                 sections={sections}
                 keyExtractor={(item, index) => {
                     const firstId = item[0]?._id;
                     return firstId ? `${firstId}-row-${index}` : `row-${index}`;
                 }}
                 renderSectionHeader={({ section }) => {
-                    const sectionIndex = sections.findIndex((s) => s.title === section.title);
-                    const isFirstSection = sectionIndex <= 0;
+                    const isFirstSection = section.title === sections[0]?.title;
                     return (
                         <View
+                            onLayout={({ nativeEvent }) => {
+                                if (isFirstSection) {
+                                    firstSectionHeaderHeightRef.current = nativeEvent.layout.height;
+                                }
+                            }}
                             style={{
                                 flexDirection: 'row',
                                 alignItems: 'center',
@@ -274,12 +408,16 @@ function ClubPage() {
                     );
                 }}
                 renderItem={({ item }) => (
-                    <View style={{
-                        flexDirection: 'row',
-                        justifyContent: 'flex-start',
-                        paddingHorizontal: CLUB_GRID_HORIZONTAL_PADDING,
-                        columnGap: CLUB_COLUMN_GAP,
-                    }}>
+                    <View
+                        onLayout={({ nativeEvent }) => {
+                            clubRowHeightRef.current = nativeEvent.layout.height;
+                        }}
+                        style={{
+                            flexDirection: 'row',
+                            justifyContent: 'flex-start',
+                            paddingHorizontal: CLUB_GRID_HORIZONTAL_PADDING,
+                            columnGap: CLUB_COLUMN_GAP,
+                        }}>
                         {item.map((club) => (
                             <View key={club._id} style={{ width: cellWidth }}>
                                 <ClubCard data={club} />
@@ -300,7 +438,7 @@ function ClubPage() {
                 }
                 onScrollBeginDrag={handleScrollStart}
                 onMomentumScrollEnd={handleScrollEnd}
-                ListEmptyComponent={isLoading ? <Loading /> : null}
+                ListEmptyComponent={isLoading ? renderClubSkeleton() : null}
                 ListFooterComponent={!isLoading ? renderBottomInfo : null}
                 showsVerticalScrollIndicator={false}
                 stickySectionHeadersEnabled

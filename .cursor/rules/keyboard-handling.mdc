@@ -66,4 +66,4 @@ import { KeyboardAwareScrollView, KeyboardToolbar } from 'react-native-keyboard-
 
 ## 已使用文件
 
-- `src/pages/TabbarPages/what2Reg/index.js` — 搜索頁（`KeyboardAwareScrollView` + `KeyboardToolbar`）
+- `src/pages/TabbarPages/course/pages/what2Reg/index.js` — 搜索頁（`KeyboardAwareScrollView` + `KeyboardToolbar`）

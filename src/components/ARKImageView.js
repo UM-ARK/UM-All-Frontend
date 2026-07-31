@@ -1,31 +1,89 @@
 import React, { useState, forwardRef, useImperativeHandle, useCallback, useMemo } from 'react';
-import { View, Text, StyleSheet, Pressable, Platform, Image } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Image as RNImage } from 'react-native';
 import GalleryPreview from 'react-native-gallery-preview';
+import { Image } from 'expo-image';
 import { useTheme } from './ThemeContext';
 import { scale } from 'react-native-size-matters';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { handleImageDownload } from '../utils/fileKits';
 import { trigger } from '../utils/trigger';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { isLiquidGlassSupported, LiquidGlassView } from '@callstack/liquid-glass';
+
+/**
+ * 圖片查看器操作鈕
+ * 淺色實心底 + 深色圖示：在黑色信箱與淺色圖片上都能辨識
+ *（不用 LiquidGlass：會透出底圖導致對比失效）
+ */
+const ViewerChromeButton = ({
+    iconName,
+    label,
+    size = scale(44),
+    iconSize = scale(22),
+    onPress,
+    trueWhite,
+    trueBlack,
+}) => {
+    return (
+        <Pressable
+            onPress={onPress}
+            hitSlop={scale(12)}
+            accessibilityRole="button"
+            accessibilityLabel={label}
+            style={({ pressed }) => [
+                {
+                    width: size,
+                    height: size,
+                    borderRadius: size / 2,
+                    backgroundColor: trueWhite,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    opacity: pressed ? 0.8 : 1,
+                    shadowColor: trueBlack,
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.35,
+                    shadowRadius: 4,
+                    elevation: 6,
+                },
+            ]}
+        >
+            <Ionicons
+                name={iconName}
+                color={trueBlack}
+                size={iconSize}
+            />
+        </Pressable>
+    );
+};
+
+/**
+ * GalleryPreview 自訂圖片元件：expo-image + blurhash 模糊加載
+ * 需回傳真實寬高給庫，才能正確計算縮放邊界
+ * 白底：透明 PNG / logo 在黑色查看器背景上才看得清
+ */
+const GalleryExpoImage = ({ source, onLoad, style, imagePlaceholder, trueWhite }) => {
+    return (
+        <Image
+            source={source}
+            style={[style, {backgroundColor: trueWhite}]}
+            contentFit="contain"
+            placeholder={imagePlaceholder}
+            placeholderContentFit="contain"
+            cachePolicy="memory-disk"
+            onLoad={e => {
+                onLoad(e.source.width, e.source.height);
+            }}
+        />
+    );
+};
 
 /**
  * ARKImageView - 全局圖片查看器組件
- * 用於替換舊的 ImageScrollViewer
- * 基於 react-native-gallery-preview 實現
- *
- * @example
- * const imageViewerRef = useRef(null);
- * <ARKImageView ref={imageViewerRef} imageUrls={imageList} />
- * // 打開圖片查看器
- * imageViewerRef.current?.handleOpenImage(index);
- * // 或舊版兼容
- * imageViewerRef.current?.tiggerModal();
+ * 基於 react-native-gallery-preview + expo-image
  */
 const ARKImageView = forwardRef((props, ref) => {
     const { imageUrls } = props;
     const { theme } = useTheme();
-    const { white, themeColor, black, viewShadow, trueBlack, trueWhite } = theme;
+    const { trueBlack, trueWhite, imagePlaceholder } = theme;
 
     const [visible, setVisible] = useState(false);
     const [startIndex, setStartIndex] = useState(0);
@@ -46,11 +104,11 @@ const ARKImageView = forwardRef((props, ref) => {
             if (typeof url === 'string') {
                 uri = url;
             } else if (typeof url === 'number') {
-                const assetSource = Image.resolveAssetSource(url);
+                const assetSource = RNImage.resolveAssetSource(url);
                 uri = assetSource?.uri || '';
             } else if (url && typeof url === 'object') {
-                if (url.url) {uri = url.url;}
-                else if (url.uri) {uri = url.uri;}
+                if (url.url) { uri = url.url; }
+                else if (url.uri) { uri = url.uri; }
             }
             if (uri) {
                 sources.push({ uri });
@@ -77,18 +135,18 @@ const ARKImageView = forwardRef((props, ref) => {
 
     const handleSaveImage = useCallback((imageIndex) => {
         const imageUrl = originalImages[imageIndex];
-        if (!imageUrl) {return;}
+        if (!imageUrl) { return; }
 
         let actualUrl = null;
 
         if (typeof imageUrl === 'string') {
             actualUrl = imageUrl;
         } else if (typeof imageUrl === 'number') {
-            const assetSource = Image.resolveAssetSource(imageUrl);
+            const assetSource = RNImage.resolveAssetSource(imageUrl);
             actualUrl = assetSource?.uri || null;
         } else if (typeof imageUrl === 'object') {
-            if (imageUrl.url) {actualUrl = imageUrl.url;}
-            else if (imageUrl.uri) {actualUrl = imageUrl.uri;}
+            if (imageUrl.url) { actualUrl = imageUrl.url; }
+            else if (imageUrl.uri) { actualUrl = imageUrl.uri; }
         }
 
         if (actualUrl) {
@@ -103,109 +161,89 @@ const ARKImageView = forwardRef((props, ref) => {
         close: handleClose,
     }), [handleOpenImage, tiggerModal, handleClose]);
 
+    /**
+     * 對齊庫內 DefaultHeader 的結構：position absolute + top 0 + 全寬。
+     */
     const OverlayComponent = useCallback(({
         onClose,
         currentImageIndex,
         imagesLength,
     }) => {
-        const topPadding = Math.max(insets.top, Platform.OS === 'android' ? scale(8) : 0);
         const bottomPadding = Math.max(insets.bottom, scale(20));
 
+        const onPressClose = () => {
+            trigger();
+            onClose();
+        };
+
         return (
-            <View style={StyleSheet.absoluteFillObject} pointerEvents="box-none">
+            <>
+                {/* 頂部：模仿 DefaultHeader，全寬條確保進佈局 */}
                 <View
-                    style={[styles.headerContainer, { paddingTop: topPadding }]}
+                    style={[styles.headerBar, { paddingTop: Math.max(insets.top, scale(12)) },]}
                     pointerEvents="box-none"
+                    collapsable={false}
                 >
-                    <LiquidGlassView
-                        interactive={true}
-                        hover={isLiquidGlassSupported ? { effect: 'highlight' } : null}
-                        style={{
-                            backgroundColor: isLiquidGlassSupported ? null : white,
-                            borderRadius: scale(20),
-                            width: scale(40),
-                            height: scale(40),
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            overflow: 'hidden',
-                            ...(isLiquidGlassSupported ? {} : viewShadow),
-                        }}
-                    >
-                        <Pressable
-                            onPress={() => {
-                                trigger();
-                                onClose();
-                            }}
-                            style={{
-                                width: '100%',
-                                height: '100%',
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                            }}
-                        >
-                            <Ionicons
-                                name="close"
-                                color={black.main}
-                                size={scale(24)}
-                            />
-                        </Pressable>
-                    </LiquidGlassView>
+                    <View style={styles.headerRow} collapsable={false}>
+                        <View style={styles.headerSpacer} />
+                        <ViewerChromeButton
+                            iconName="close"
+                            label="關閉"
+                            onPress={onPressClose}
+                            trueWhite={trueWhite}
+                            trueBlack={trueBlack}
+                        />
+                    </View>
                 </View>
 
+                {/* 底部：保存 */}
                 <View
-                    style={[styles.footerContainer, { paddingBottom: bottomPadding }]}
+                    style={[styles.footerBar, { paddingBottom: bottomPadding }]}
                     pointerEvents="box-none"
+                    collapsable={false}
                 >
                     {imagesLength > 1 && (
-                        <Text style={[styles.footerText, { color: trueWhite }]}>
+                        <Text
+                            style={[
+                                styles.footerText,
+                                {
+                                    color: trueWhite,
+                                    textShadowColor: `${trueBlack}99`,
+                                },
+                            ]}
+                        >
                             {currentImageIndex + 1} / {imagesLength}
                         </Text>
                     )}
-
-                    <LiquidGlassView
-                        interactive={true}
-                        hover={isLiquidGlassSupported ? { effect: 'highlight' } : null}
-                        style={{
-                            backgroundColor: isLiquidGlassSupported ? null : white,
-                            borderRadius: scale(25),
-                            width: scale(50),
-                            height: scale(50),
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            overflow: 'hidden',
-                        }}
-                    >
-                        <Pressable
-                            onPress={() => handleSaveImage(currentImageIndex)}
-                            style={{
-                                width: '100%',
-                                height: '100%',
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                            }}
-                        >
-                            <Ionicons
-                                name="download-outline"
-                                color={black.main}
-                                size={scale(24)}
-                            />
-                        </Pressable>
-                    </LiquidGlassView>
+                    <ViewerChromeButton
+                        iconName="download-outline"
+                        label="保存圖片"
+                        size={scale(50)}
+                        onPress={() => handleSaveImage(currentImageIndex)}
+                        trueWhite={trueWhite}
+                        trueBlack={trueBlack}
+                    />
                 </View>
-            </View>
+            </>
         );
     }, [
-        black.main,
         handleSaveImage,
         insets.bottom,
         insets.top,
-        themeColor,
+        trueBlack,
         trueWhite,
-        viewShadow,
-        white,
     ]);
 
-    if (processedImages.length === 0) {return null;}
+    // GalleryPreview 的 ImageComponent 只傳 source/onLoad/style，用閉包帶入 blurhash / 白底
+    const ImageComponent = useCallback((imageProps) => (
+        <GalleryExpoImage
+            {...imageProps}
+            imagePlaceholder={imagePlaceholder}
+            trueWhite={trueWhite}
+        />
+    ), [imagePlaceholder, trueWhite]);
+
+    if (processedImages.length === 0) { return null; }
 
     return (
         <GalleryPreview
@@ -214,6 +252,7 @@ const ARKImageView = forwardRef((props, ref) => {
             images={processedImages}
             initialIndex={startIndex}
             OverlayComponent={OverlayComponent}
+            ImageComponent={ImageComponent}
             backgroundColor={trueBlack}
             headerTextColor={trueWhite}
             doubleTabEnabled={true}
@@ -224,29 +263,44 @@ const ARKImageView = forwardRef((props, ref) => {
 });
 
 const styles = StyleSheet.create({
-    headerContainer: {
+    // 與庫 DefaultHeader 一致：不要包 absoluteFill 根節點
+    headerBar: {
         position: 'absolute',
         top: 0,
         left: 0,
         right: 0,
-        flexDirection: 'row',
-        justifyContent: 'flex-end',
-        alignItems: 'center',
+        width: '100%',
+        zIndex: 100,
+        elevation: 100,
+        paddingBottom: scale(10),
         paddingHorizontal: scale(16),
     },
-    footerContainer: {
+    headerRow: {
+        height: scale(44),
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'flex-end',
+    },
+    headerSpacer: {
+        flex: 1,
+    },
+    footerBar: {
         position: 'absolute',
         left: 0,
         right: 0,
         bottom: 0,
-        paddingTop: scale(20),
+        width: '100%',
+        zIndex: 100,
+        elevation: 100,
+        paddingTop: scale(12),
         alignItems: 'center',
-        justifyContent: 'center',
     },
     footerText: {
         fontSize: scale(16),
         fontWeight: '500',
         marginBottom: scale(12),
+        textShadowOffset: { width: 0, height: 1 },
+        textShadowRadius: 3,
     },
 });
 

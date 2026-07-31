@@ -1,440 +1,965 @@
-import React, { useRef, useState, useEffect, useCallback, useMemo } from 'react';
-import { View, Text, Platform, StyleSheet, BackHandler, TouchableOpacity, Alert } from 'react-native';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+    Alert,
+    Animated,
+    AppState,
+    Pressable,
+    StyleSheet,
+    Text,
+    useWindowDimensions,
+    View,
+} from 'react-native';
 
-import { WebView } from 'react-native-webview';
-import { scale, verticalScale } from 'react-native-size-matters';
-import Toast from 'react-native-toast-message';
-import SimpleProgressBar from '../../../components/SimpleProgressBar';
-import TouchableScale from '../../../components/TouchableScale';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { t } from 'i18next';
-import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
-import Share from 'react-native-share';
-import { useFocusEffect } from '@react-navigation/native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import { createDrawerNavigator } from '@react-navigation/drawer';
+import { useIsFocused } from '@react-navigation/native';
+import PagerView from 'react-native-pager-view';
+import Reanimated, {
+    cancelAnimation,
+    Easing,
+    Extrapolation,
+    interpolate,
+    useAnimatedStyle,
+    useSharedValue,
+    withTiming,
+} from 'react-native-reanimated';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { moderateScale, scale, verticalScale } from 'react-native-size-matters';
+import { SafeAreaView } from 'react-native-screens/experimental';
+import { useTranslation } from 'react-i18next';
 
-import { useTheme, themes, uiStyle, ThemeContext } from '../../../components/ThemeContext';
-import { ARK_HARBOR } from '../../../utils/pathMap';
+import { uiStyle, useTheme } from '../../../components/ThemeContext';
+import { useHarborSession } from '../../../contexts/HarborSessionContext';
 import { logToFirebase } from '../../../utils/firebaseAnalytics';
+import {
+    fetchHarborSiteCapabilities,
+    getHarborTopicViews,
+} from '../../../utils/harbor/harborApi';
 import { trigger } from '../../../utils/trigger';
-import { useAsyncStorage } from '@react-native-async-storage/async-storage';
-import { openLink } from '../../../utils/browser';
+import HarborDrawerContent from './components/HarborDrawerContent';
+import HarborTopicList from './components/HarborTopicList';
 
+const VIEW_CONFIG = {
+    latest: { label: '最新', analytics: 'latest' },
+    top: { label: '熱門', analytics: 'top' },
+};
+// 對齊資訊頁 Top Tab（~30），並預留搜尋列高度
+const STICKY_TOOLBAR_HEIGHT = verticalScale(36);
+const SEARCH_BAR_ROW_HEIGHT = verticalScale(38);
+const TOP_VISIBILITY_THRESHOLD = verticalScale(4);
+const SEARCH_SNAP_THRESHOLD = 0.5;
+const SEARCH_INTERACTIVE_THRESHOLD = 0.85;
+const SEARCH_SHOW_TIMING = {
+    duration: 280,
+    easing: Easing.bezier(0.22, 1, 0.36, 1),
+};
+const SEARCH_HIDE_TIMING = {
+    duration: 220,
+    easing: Easing.bezier(0.4, 0, 0.2, 1),
+};
+const HARBOR_TAB_INDICATOR_WIDTH = moderateScale(25, 0.1);
+const Drawer = createDrawerNavigator();
+const AnimatedPagerView = Animated.createAnimatedComponent(PagerView);
 
-const ARKHarbor = (props) => {
+const createScrollState = () => ({
+    lastOffset: 0,
+    progress: 1,
+});
+
+const clampSearchProgress = value => Math.min(1, Math.max(0, value));
+
+const HarborFeedTabs = ({ options, selectedIndex, position, onChange }) => {
     const { theme } = useTheme();
-    const { themeColor, black, white, wiki_bg_color, barStyle, isLight, harbor_bg_color, bg_color, viewShadow } = theme;
-    const insets = useSafeAreaInsets();
-
-    const s = StyleSheet.create({
-        titleText: {
-            ...uiStyle.defaultText,
-            fontSize: scale(18),
-            color: themeColor,
-            fontWeight: '600',
-        },
-        settingButtonContainer: {
-            width: scale(240),
-            margin: scale(10),
-            padding: scale(5), paddingVertical: scale(10),
-            borderRadius: scale(5),
-            backgroundColor: themeColor,
-            alignItems: 'center',
-            justifyContent: 'center',
-        },
-        settingText: {
-            ...uiStyle.defaultText,
-            fontSize: scale(16),
-            color: white,
-        },
-        navContainer: {
-            // position: 'absolute',
-            bottom: 0,
-            height: verticalScale(25),
-            width: '100%',
-            backgroundColor: bg_color,
-            flexDirection: 'row',
-            justifyContent: 'space-evenly',
-            alignItems: 'center',
-            opacity: 0.9,
-        },
-        button: {
-            // marginBottom: scale(10),
-        },
-    });
-    const iconSize = useMemo(() => verticalScale(20), []);
-
-    // 初始狀態
-    const [currentURL, setCurrentURL] = useState(ARK_HARBOR);
-    const [currentTitle, setCurrentTitle] = useState('ARK Harbor');
-    const [canGoBack, setCanGoBack] = useState(false);
-    const [canGoForward, setCanGoForward] = useState(false);
-    const [progress, setProgress] = useState(0);
-    const [isLoaded, setIsLoaded] = useState(false);
-    const [harborSetting, setHarborSetting] = useState(null);
-    const [openSetting, setOpenSetting] = useState(false);
-
-    const webviewRef = useRef();
-    const currentURLRef = useRef(ARK_HARBOR);
-
-    const { getItem, setItem } = useAsyncStorage('ARK_Harbor_Setting');
-
-    // 點擊後退按鈕觸發
-    const handleBackPress = () => {
-        trigger();
-        webviewRef.current.goBack();
-    };
-
-    // 點擊前進按鈕觸發
-    const handleForwardPress = () => {
-        trigger();
-        webviewRef.current.goForward();
-    };
-
-    const readItemFromStorage = async () => {
-        const item = await getItem();
-        const parsedItem = item ? JSON.parse(item) : null;
-        setHarborSetting(parsedItem);
-
-        if (parsedItem?.tabbarMode === 'webview') {
-            logToFirebase('openPage', { page: 'harbor_webview' });
-        }
-    };
-
-    // componentDidUpdate: 監聽 route.params 變化
-    useEffect(() => {
-        readItemFromStorage();
-
-        if (props.route.params && props.route.params.url !== currentURLRef.current) {
-            const { url } = props.route.params;
-            setCurrentURL(url);
-        }
-    }, [props.route.params]);
-
-    // 監聽Android返回鍵
-    useEffect(() => {
-        if (Platform.OS === 'android') {
-            const onBackPress = () => {
-                if (canGoBack && webviewRef.current) {
-                    webviewRef.current.goBack();
-                    return true; // 阻止默認返回行為
-                }
-                return false; // 讓系統處理（如退出頁面）
-            };
-
-            const sub = BackHandler.addEventListener('hardwareBackPress', onBackPress);
-            // 卸載時移除監聽
-            return () => {
-                sub.remove();
-            };
-        }
-    }, [canGoBack]);
-
-    // Webview導航狀態改變時調用，能獲取當前頁面URL與是否能回退
-    const onNavigationStateChange = (webViewState) => {
-        setCurrentTitle(webViewState.title);
-        // setCurrentURL(webViewState.url);
-        currentURLRef.current = webViewState.url; // 更新當前URL引用
-        setCanGoBack(webViewState.canGoBack);
-        setCanGoForward(webViewState.canGoForward);
-    };
-
-    // 判斷是否有設定用戶打開偏好
-    useFocusEffect(
-        useCallback(() => {
-            const getSettings = async () => {
-                const harborSettingStr = await getItem();
-                if (harborSettingStr == null) {
-                    setOpenSetting(true);
-                } else {
-                    const harborSetting = harborSettingStr ? JSON.parse(harborSettingStr) : {};
-                    if (harborSetting.tabbarMode === 'browser') {
-                        openLink({ URL: ARK_HARBOR, mode: 'fullScreen' });
-                    }
-                }
-            };
-            getSettings();
-        }, [])
+    const [indicatorOffsets, setIndicatorOffsets] = useState({});
+    const hasMeasuredAllOptions = options.every(
+        option => indicatorOffsets[option.key] !== undefined,
     );
+    const indicatorInputRange =
+        options.length > 1 ? options.map((option, index) => index) : [0, 1];
+    const indicatorOutputRange =
+        options.length > 1
+            ? options.map(option => indicatorOffsets[option.key] ?? 0)
+            : [
+                indicatorOffsets[options[0]?.key] ?? 0,
+                indicatorOffsets[options[0]?.key] ?? 0,
+            ];
+    const translateX = position.interpolate({
+        inputRange: indicatorInputRange,
+        outputRange: indicatorOutputRange,
+        extrapolate: 'clamp',
+    });
+
+    const handleOptionLayout = useCallback((key, event) => {
+        const { x, width } = event.nativeEvent.layout;
+        const nextOffset = x + (width - HARBOR_TAB_INDICATOR_WIDTH) / 2;
+        setIndicatorOffsets(current =>
+            current[key] === nextOffset
+                ? current
+                : { ...current, [key]: nextOffset },
+        );
+    }, []);
 
     return (
-        <View style={{ flex: 1 }}>
-            {!isLoaded ? (
-                <SimpleProgressBar
-                        progress={progress}
-                        width={null} // null -> 寬度為全屏
-                        height={2}
-                        color={themeColor}
-                    />
-            ) : null}
+        <View style={styles.feedTabs}>
+            {options.map((option, index) => {
+                const isSelected = selectedIndex === index;
 
-            {/* 用戶偏好為Browser時不顯示WebView，顯示設定選項 */}
-            {!openSetting && harborSetting && harborSetting.tabbarMode === 'webview' ? (
-                <WebView
-                    ref={webviewRef}
-                    source={{ uri: currentURL }}
-                    originWhitelist={['*']}
-                    startInLoadingState={true}
-                    pullToRefreshEnabled
-                    allowFileAccess
-                    allowUniversalAccessFromFileURLs
-                    cacheEnabled={true}
-                    // IOS
-                    sharedCookiesEnabled={true}              // iOS
-                    // enableApplePay={true}
-                    // Android
-                    thirdPartyCookiesEnabled
-                    javaScriptCanOpenWindowsAutomatically
-                    domStorageEnabled={true}
-                    // 前進、回退按鈕所需判斷邏輯
-                    onNavigationStateChange={onNavigationStateChange}
-                    // 進度條展示
-                    onLoadProgress={event => setProgress(event.nativeEvent.progress)}
-                    onLoadStart={() => {
-                        setIsLoaded(false);
-                        setProgress(0);
-                    }}
-                    onLoadEnd={() => setIsLoaded(true)}
-                />
-            ) : (
-                <View style={{ flex: 1, backgroundColor: bg_color, paddingHorizontal: scale(20), justifyContent: 'center' }}>
-
-                    {/* 標題區域 */}
-                    <View style={{ marginBottom: verticalScale(30), alignItems: 'center' }}>
-                        <Text style={{ fontSize: scale(20), fontWeight: 'bold', color: black.main, marginBottom: verticalScale(8) }}>
-                            {t('瀏覽方式偏好', { ns: 'harbor' })}
-                        </Text>
-                        <Text style={{ fontSize: scale(13), color: black.third, textAlign: 'center', lineHeight: scale(20) }}>
-                            {t('選擇最適合您的 Harbor 論壇瀏覽體驗', { ns: 'harbor' })}
-                        </Text>
-                    </View>
-
-                    {/* 選項 A: Browser (推薦) */}
-                    <TouchableScale
-                        activeScale={0.98}
-                        style={{
-                            backgroundColor: white, // 或適配深色模式的顏色
-                            borderRadius: scale(16),
-                            padding: scale(20),
-                            marginBottom: verticalScale(15),
-                            borderWidth: 1,
-                            borderColor: harborSetting?.tabbarMode === 'browser' ? themeColor : 'transparent', // 選中高亮
-                            ...viewShadow,
-                        }}
+                return (
+                    <Pressable
+                        key={option.key}
+                        accessibilityRole="tab"
+                        accessibilityState={{ selected: isSelected }}
+                        onLayout={event => handleOptionLayout(option.key, event)}
                         onPress={() => {
                             trigger();
-                            logToFirebase('clickHarbor', {
-                                mode: 'browser',
-                            });
-                            setHarborSetting({ tabbarMode: 'browser' });
-                            setItem(JSON.stringify({ tabbarMode: 'browser' }));
-                            openLink({ URL: ARK_HARBOR, mode: 'fullScreen' });
-                            Toast.show({ type: 'success', text1: '已切換至瀏覽器模式' });
+                            onChange(index);
                         }}
-                    >
-                        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: scale(8) }}>
-                            <Ionicons name="globe-outline" size={scale(16)} color={themeColor} />
-                            <Text
-                                style={{
-                                    fontSize: scale(16),
-                                    fontWeight: '600',
-                                    color: black.main,
-                                    marginLeft: scale(8),
-                                    flexShrink: 1,
-                                    flexGrow: 1,
-                                    minWidth: 0,
-                                }}
-                                numberOfLines={1}
-                                ellipsizeMode="tail"
-                            >
-                                {t('系統瀏覽器 (推薦)', { ns: 'harbor' })}
-                            </Text>
-                            <View style={{ backgroundColor: bg_color, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4, marginLeft: scale(8) }}>
-                                <Text style={{ color: themeColor, fontSize: scale(8), fontWeight: 'bold' }}>STABLE</Text>
-                            </View>
-                        </View>
-                        <Text style={{ fontSize: scale(13), color: black.second, lineHeight: scale(18) }}>
-                            ✅ {t('支援自動填充密碼', { ns: 'harbor' })}{'\n'}
-                            ✅ {t('兼容性最佳，解決舊設備錯誤', { ns: 'harbor' })}
+                        style={({ pressed }) => [
+                            styles.feedTab,
+                            pressed && {
+                                backgroundColor: theme.tonal.primary15,
+                            },
+                        ]}>
+                        <Text
+                            numberOfLines={1}
+                            style={[
+                                styles.feedTabLabel,
+                                {
+                                    color: isSelected
+                                        ? theme.themeColor
+                                        : theme.black.third,
+                                },
+                                isSelected && styles.feedTabLabelSelected,
+                            ]}>
+                            {option.label}
                         </Text>
-                    </TouchableScale>
-
-                    {/* 選項 B: Webview */}
-                    <TouchableScale
-                        activeScale={0.98}
-                        style={{
-                            backgroundColor: '#fff',
-                            borderRadius: scale(16),
-                            padding: scale(20),
-                            marginBottom: verticalScale(15),
-                            borderWidth: 1,
-                            borderColor: harborSetting?.tabbarMode === 'webview' ? themeColor : 'transparent',
-                            opacity: 0.9,
-                        }}
-                        onPress={() => {
-                            trigger();
-                            logToFirebase('clickHarbor', {
-                                mode: 'webview',
-                            });
-                            setHarborSetting({ tabbarMode: 'webview' });
-                            setItem(JSON.stringify({ tabbarMode: 'webview' }));
-                            setCurrentURL(ARK_HARBOR);
-                            setOpenSetting(false);
-                            Toast.show({ type: 'info', text1: '已切換至嵌入模式' });
-                        }}
-                    >
-                        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: scale(8) }}>
-                            <Ionicons name="phone-portrait-outline" size={scale(16)} color={black.main} />
-                            <Text style={{ fontSize: scale(16), fontWeight: '600', color: black.main, marginLeft: scale(8) }}>
-                                {t('APP 內嵌入瀏覽', { ns: 'harbor' })}
-                            </Text>
-                        </View>
-                        <Text style={{ fontSize: scale(13), color: black.second, lineHeight: scale(18) }}>
-                            ⚡️ {t('頁面切換更流暢', { ns: 'harbor' })}{'\n'}
-                            ⚠️ {t('需手動輸入密碼，舊版 Android 可能報錯', { ns: 'harbor' })}{'\n'}
-                            ⚠️ {t('報錯需要自行前往應用商店更新Webview組件', { ns: 'harbor' })}
-                        </Text>
-                    </TouchableScale>
-
-                    {/* 退出按鈕 */}
-                    <TouchableScale
-                        style={{ padding: scale(15), alignItems: 'center', marginTop: verticalScale(10) }}
-                        onPress={() => {
-                            trigger();
-                            setOpenSetting(false);
-                            if (harborSetting?.tabbarMode === 'browser') {
-                                props.navigation?.navigate('Tabbar', { screen: 'NewsTabbar' });
-                            }
-                        }}
-                    >
-                        <Text style={{ fontSize: scale(14), color: black.third }}>
-                            {t('隨時通過本頁面右下角設置按鈕修改偏好', { ns: 'harbor' })}
-                        </Text>
-                        <Text style={{ fontSize: scale(15), color: black.third, textDecorationLine: 'underline' }}>
-                            {t('暫不修改，返回', { ns: 'harbor' })}
-                        </Text>
-                    </TouchableScale>
-                </View>
-            )}
-
-            {/* Browser/Webview/回主頁 導航按鈕 */}
-            <View style={[s.navContainer]}>
-                {/* 主頁按鈕 */}
-                <TouchableOpacity
-                    style={s.button}
-                    onPress={() => {
-                        trigger();
-                        setOpenSetting(false);
-                        // 跳轉到Harbor主頁
-                        setCurrentURL(ARK_HARBOR);
-                        // 让WebView跳转到Harbor主页
-                        if (webviewRef.current) {
-                            webviewRef.current.stopLoading?.();
-                            webviewRef.current.injectJavaScript?.(`window.location.href = '${ARK_HARBOR}'; true;`);
-                        }
-                    }}
-                >
-                    <MaterialDesignIcons
-                        name={'home-circle'}
-                        size={iconSize}
-                        color={black.main}
-                    />
-                </TouchableOpacity>
-                {/* 刷新按鈕 */}
-                <TouchableOpacity
-                    style={s.button}
-                    onPress={() => {
-                        trigger();
-                        webviewRef.current?.reload();
-                    }}
-                    disabled={openSetting}
-                >
-                    <MaterialDesignIcons
-                        name={'refresh-circle'}
-                        size={iconSize}
-                        color={black.main}
-                    />
-                </TouchableOpacity>
-                {/* 後退按鈕 */}
-                <TouchableOpacity
-                    style={s.button}
-                    onPress={handleBackPress}
-                    disabled={openSetting || (canGoBack ? false : true)}>
-                    <MaterialDesignIcons
-                        name={'arrow-left-circle'}
-                        size={iconSize}
-                        color={canGoBack ? black.main : 'grey'}
-                    />
-                </TouchableOpacity>
-                {/* 前進按鈕 */}
-                <TouchableOpacity
-                    style={s.button}
-                    onPress={handleForwardPress}
-                    disabled={openSetting || (canGoForward ? false : true)}>
-                    <MaterialDesignIcons
-                        name={'arrow-right-circle'}
-                        size={iconSize}
-                        color={canGoForward ? black.main : 'grey'}
-                    />
-                </TouchableOpacity>
-                {/* 分享按鈕 */}
-                <TouchableOpacity
-                    style={s.button}
-                    onPress={() => {
-                        trigger();
-                        const shareOptions = {
-                            title: 'ARK職涯港',
-                            message: currentTitle + ' \n' + currentURLRef.current,
-                            url: currentURLRef.current,
-                        };
-
-                        Share.open(shareOptions)
-                            .then(res => { console.log(res); })
-                            .catch(err => { err && console.log(err); });
-                    }}
-                >
-                    <MaterialDesignIcons
-                        name={'share-circle'}
-                        size={iconSize}
-                        color={black.main}
-                    />
-                </TouchableOpacity>
-                {/* 打開瀏覽器 */}
-                <TouchableOpacity
-                    style={s.button}
-                    onPress={() => {
-                        trigger();
-                        openLink({ URL: currentURLRef.current, mode: 'fullScreen' });
-                        logToFirebase('openPage', { page: 'harbor_browser' });
-                    }}
-                >
-                    <MaterialDesignIcons
-                        name={'web'}
-                        size={iconSize}
-                        color={black.main}
-                    />
-                </TouchableOpacity>
-                {/* 設置按鈕 */}
-                <TouchableOpacity
-                    style={s.button}
-                    onPress={() => {
-                        trigger();
-                        setCurrentURL(currentURLRef.current); // 確保設置頁面打開時URL正確
-                        // 打開ARK Harbor設置頁面
-                        setOpenSetting(!openSetting);
-                    }}
-                >
-                    <MaterialDesignIcons
-                        name={'cog-outline'}
-                        size={iconSize}
-                        color={black.main}
-                    />
-                </TouchableOpacity>
-
-            </View>
-
+                    </Pressable>
+                );
+            })}
+            <Animated.View
+                pointerEvents="none"
+                style={[
+                    styles.feedTabIndicator,
+                    hasMeasuredAllOptions
+                        ? styles.feedTabIndicatorVisible
+                        : styles.feedTabIndicatorHidden,
+                    {
+                        backgroundColor: theme.themeColor,
+                        transform: [{ translateX }],
+                    },
+                ]}
+            />
         </View>
     );
 };
 
-export default ARKHarbor;
+const HarborStickyToolbar = ({
+    segmentOptions,
+    currentIndex,
+    tabPosition,
+    onChange,
+    status,
+    sessionLabel,
+    onSessionPress,
+    onMenuPress,
+    onComposePress,
+    onSearchPress,
+    onToolbarLayout,
+    searchBarCollapseStyle,
+    searchBarContentStyle,
+    isSearchInteractive,
+}) => {
+    const { theme } = useTheme();
+    const { t } = useTranslation('harbor');
+    const isSignedIn = status === 'signedIn';
+
+    return (
+        <View
+            style={[styles.stickyHeader, { backgroundColor: theme.bg_color }]}>
+            <View onLayout={onToolbarLayout} style={styles.stickyToolbar}>
+                <View style={styles.toolbarSide}>
+                    <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel={t('開啟選單')}
+                        hitSlop={scale(8)}
+                        onPress={() => {
+                            trigger();
+                            onMenuPress();
+                        }}
+                        style={({ pressed }) => [
+                            styles.toolbarIconButton,
+                            pressed && {
+                                backgroundColor: theme.tonal.primary15,
+                            },
+                        ]}>
+                        <MaterialCommunityIcons
+                            name="menu"
+                            size={scale(20)}
+                            color={theme.themeColor}
+                        />
+                    </Pressable>
+                </View>
+
+                <HarborFeedTabs
+                    options={segmentOptions}
+                    selectedIndex={currentIndex}
+                    position={tabPosition}
+                    onChange={onChange}
+                />
+
+                <View style={[styles.toolbarSide, styles.toolbarRight]}>
+                    <View style={styles.toolbarRightActions}>
+                        {isSignedIn ? null : (
+                            <Pressable
+                                accessibilityRole="button"
+                                accessibilityLabel={sessionLabel}
+                                disabled={
+                                    status === 'restoring' ||
+                                    status === 'authorizing'
+                                }
+                                onPress={() => {
+                                    trigger();
+                                    onSessionPress();
+                                }}
+                                style={({ pressed }) => [
+                                    styles.sessionButton,
+                                    pressed && {
+                                        backgroundColor:
+                                            theme.tonal.primary15,
+                                    },
+                                ]}>
+                                <MaterialCommunityIcons
+                                    name="login"
+                                    size={scale(14)}
+                                    color={theme.themeColor}
+                                />
+                                <Text
+                                    numberOfLines={1}
+                                    style={[
+                                        styles.sessionText,
+                                        { color: theme.themeColor },
+                                    ]}>
+                                    {sessionLabel}
+                                </Text>
+                            </Pressable>
+                        )}
+                        <Pressable
+                            accessibilityRole="button"
+                            accessibilityLabel={t('建立話題')}
+                            hitSlop={scale(8)}
+                            onPress={() => {
+                                trigger();
+                                onComposePress();
+                            }}
+                            style={({ pressed }) => [
+                                styles.toolbarIconButton,
+                                pressed && {
+                                    backgroundColor: theme.tonal.primary15,
+                                },
+                            ]}>
+                            <MaterialCommunityIcons
+                                name="plus"
+                                size={scale(20)}
+                                color={theme.themeColor}
+                            />
+                        </Pressable>
+                    </View>
+                </View>
+            </View>
+            <Reanimated.View
+                pointerEvents={isSearchInteractive ? 'auto' : 'none'}
+                style={[styles.searchBarCollapse, searchBarCollapseStyle]}>
+                <Reanimated.View
+                    style={[styles.searchBarRow, searchBarContentStyle]}>
+                    <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel={t('搜尋 Harbor')}
+                        onPress={() => {
+                            trigger();
+                            onSearchPress();
+                        }}
+                        style={({ pressed }) => [
+                            styles.searchBar,
+                            {
+                                backgroundColor: theme.white,
+                                borderColor: theme.themeColorUltraLight,
+                            },
+                            pressed && {
+                                backgroundColor: theme.tonal.primary15,
+                            },
+                        ]}>
+                        <MaterialCommunityIcons
+                            name="magnify"
+                            size={scale(16)}
+                            color={theme.black.third}
+                        />
+                        <Text
+                            numberOfLines={1}
+                            style={[
+                                styles.searchBarText,
+                                { color: theme.black.third },
+                            ]}>
+                            {t('搜尋 Harbor')}
+                        </Text>
+                    </Pressable>
+                </Reanimated.View>
+            </Reanimated.View>
+        </View>
+    );
+};
+
+const HarborFeedPane = ({
+    view,
+    navigation,
+    onCapabilities,
+    isTopicPressAllowed,
+    contentContainerStyle,
+    refreshProgressViewOffset,
+    isActive,
+    onScroll,
+    onScrollEndDrag,
+    onMomentumScrollEnd,
+}) => {
+    const source = useMemo(() => ({ view }), [view]);
+
+    return (
+        <View style={styles.feedPage}>
+            <HarborTopicList
+                source={source}
+                navigation={navigation}
+                onCapabilities={onCapabilities}
+                isTopicPressAllowed={isTopicPressAllowed}
+                contentContainerStyle={contentContainerStyle}
+                refreshProgressViewOffset={refreshProgressViewOffset}
+                isActive={isActive}
+                onScroll={onScroll}
+                onScrollEndDrag={onScrollEndDrag}
+                onMomentumScrollEnd={onMomentumScrollEnd}
+            />
+        </View>
+    );
+};
+
+/**
+ * Harbor 原生首頁：多視圖話題列表（分類／標籤入口在側邊抽屜）。
+ */
+const ForumPage = ({ navigation }) => {
+    const { theme } = useTheme();
+    const { t } = useTranslation('harbor');
+    const { status, login } = useHarborSession();
+    const isFocused = useIsFocused();
+    const pagerRef = useRef(null);
+    const pageScrollOffset = useRef(new Animated.Value(0)).current;
+    const pageScrollPosition = useRef(new Animated.Value(0)).current;
+    const currentViewRef = useRef('latest');
+    const blockTopicPressUntilRef = useRef(0);
+    const capabilitiesRef = useRef(null);
+    const capabilitiesControllerRef = useRef(null);
+    const scrollStatesRef = useRef({});
+    const [currentIndex, setCurrentIndex] = useState(0);
+    const [toolbarHeight, setToolbarHeight] = useState(STICKY_TOOLBAR_HEIGHT);
+    const [isSearchInteractive, setIsSearchInteractive] = useState(true);
+    const [capabilities, setCapabilities] = useState(null);
+    const [capabilitiesUnavailable, setCapabilitiesUnavailable] = useState(false);
+    const [mountedViews, setMountedViews] = useState({
+        latest: true,
+        top: false,
+    });
+    const searchProgress = useSharedValue(1);
+
+    useEffect(() => {
+        logToFirebase('openPage', { page: 'HarborNativeHome' });
+    }, []);
+
+    const getScrollState = useCallback(view => {
+        if (!scrollStatesRef.current[view]) {
+            scrollStatesRef.current[view] = createScrollState();
+        }
+        return scrollStatesRef.current[view];
+    }, []);
+
+    const syncSearchInteractive = useCallback(progress => {
+        const nextInteractive = progress >= SEARCH_INTERACTIVE_THRESHOLD;
+        setIsSearchInteractive(current =>
+            current === nextInteractive ? current : nextInteractive,
+        );
+    }, []);
+
+    const setSearchProgress = useCallback(
+        (progress, { animated = false, view } = {}) => {
+            const nextProgress = clampSearchProgress(progress);
+            if (view) {
+                getScrollState(view).progress = nextProgress;
+            }
+            cancelAnimation(searchProgress);
+            if (animated) {
+                const timing =
+                    nextProgress >= searchProgress.value
+                        ? SEARCH_SHOW_TIMING
+                        : SEARCH_HIDE_TIMING;
+                searchProgress.value = withTiming(nextProgress, timing);
+            } else {
+                searchProgress.value = nextProgress;
+            }
+            syncSearchInteractive(nextProgress);
+        },
+        [getScrollState, searchProgress, syncSearchInteractive],
+    );
+
+    const showSearchForView = useCallback(
+        view => {
+            setSearchProgress(1, { animated: true, view });
+        },
+        [setSearchProgress],
+    );
+
+    const onContentScroll = useCallback(
+        (view, offsetY) => {
+            const nextOffset = Math.max(0, offsetY);
+            const scrollState = getScrollState(view);
+            const delta = nextOffset - scrollState.lastOffset;
+            scrollState.lastOffset = nextOffset;
+
+            if (currentViewRef.current !== view) {
+                return;
+            }
+
+            if (nextOffset <= TOP_VISIBILITY_THRESHOLD) {
+                if (scrollState.progress !== 1) {
+                    setSearchProgress(1, { view });
+                }
+                return;
+            }
+
+            if (delta === 0) {
+                return;
+            }
+
+            // 上滑／下滑進度與位移 1:1；列表 translateY 同步補償，避免 padding 跳動
+            cancelAnimation(searchProgress);
+            const nextProgress = clampSearchProgress(
+                searchProgress.value - delta / SEARCH_BAR_ROW_HEIGHT,
+            );
+            scrollState.progress = nextProgress;
+            searchProgress.value = nextProgress;
+            syncSearchInteractive(nextProgress);
+        },
+        [
+            getScrollState,
+            searchProgress,
+            setSearchProgress,
+            syncSearchInteractive,
+        ],
+    );
+
+    const snapSearchProgress = useCallback(
+        view => {
+            if (currentViewRef.current !== view) {
+                return;
+            }
+            const target =
+                searchProgress.value >= SEARCH_SNAP_THRESHOLD ? 1 : 0;
+            if (Math.abs(searchProgress.value - target) < 0.001) {
+                getScrollState(view).progress = target;
+                syncSearchInteractive(target);
+                return;
+            }
+            setSearchProgress(target, { animated: true, view });
+        },
+        [
+            getScrollState,
+            searchProgress,
+            setSearchProgress,
+            syncSearchInteractive,
+        ],
+    );
+
+    const loadCapabilities = useCallback(() => {
+        capabilitiesControllerRef.current?.abort();
+        const controller = new AbortController();
+        capabilitiesControllerRef.current = controller;
+        fetchHarborSiteCapabilities({ signal: controller.signal })
+            .then(nextCapabilities => {
+                if (!controller.signal.aborted) {
+                    capabilitiesRef.current = nextCapabilities;
+                    setCapabilities(nextCapabilities);
+                    setCapabilitiesUnavailable(false);
+                }
+            })
+            .catch(() => {
+                if (!controller.signal.aborted) {
+                    capabilitiesRef.current = null;
+                    setCapabilitiesUnavailable(true);
+                }
+            })
+            .finally(() => {
+                if (capabilitiesControllerRef.current === controller) {
+                    capabilitiesControllerRef.current = null;
+                }
+            });
+    }, []);
+
+    useEffect(() => {
+        if (isFocused) {
+            loadCapabilities();
+        }
+    }, [isFocused, loadCapabilities, status]);
+
+    useEffect(() => {
+        const subscription = AppState.addEventListener('change', nextState => {
+            if (nextState === 'active' && isFocused) {
+                loadCapabilities();
+            }
+        });
+        return () => subscription.remove();
+    }, [isFocused, loadCapabilities]);
+
+    useEffect(() => {
+        return () => capabilitiesControllerRef.current?.abort();
+    }, []);
+
+    const enabledViews = useMemo(() => {
+        const availableViews = getHarborTopicViews(capabilities, {
+            signedIn: status === 'signedIn',
+            unavailable: capabilitiesUnavailable,
+        });
+        // 不提供新話題／未讀分頁；錯過即略過，角標仍獨立計算
+        return availableViews.filter(
+            view => view !== 'new' && view !== 'unread',
+        );
+    }, [capabilities, capabilitiesUnavailable, status]);
+
+    const segmentOptions = useMemo(
+        () =>
+            enabledViews.map(view => ({
+                key: view,
+                label: t(VIEW_CONFIG[view].label),
+            })),
+        [enabledViews, t],
+    );
+    const tabPosition = useMemo(
+        () => Animated.add(pageScrollPosition, pageScrollOffset),
+        [pageScrollOffset, pageScrollPosition],
+    );
+    const handlePageScroll = useMemo(
+        () =>
+            Animated.event(
+                [
+                    {
+                        nativeEvent: {
+                            offset: pageScrollOffset,
+                            position: pageScrollPosition,
+                        },
+                    },
+                ],
+                { useNativeDriver: true },
+            ),
+        [pageScrollOffset, pageScrollPosition],
+    );
+    const searchBarCollapseStyle = useAnimatedStyle(() => ({
+        height: interpolate(
+            searchProgress.value,
+            [0, 1],
+            [0, SEARCH_BAR_ROW_HEIGHT],
+            Extrapolation.CLAMP,
+        ),
+    }));
+    const searchBarContentStyle = useAnimatedStyle(() => ({
+        opacity: interpolate(
+            searchProgress.value,
+            [0, 0.2, 1],
+            [0, 0.7, 1],
+            Extrapolation.CLAMP,
+        ),
+        transform: [
+            {
+                translateY: interpolate(
+                    searchProgress.value,
+                    [0, 1],
+                    [-SEARCH_BAR_ROW_HEIGHT * 0.45, 0],
+                    Extrapolation.CLAMP,
+                ),
+            },
+        ],
+    }));
+    // 列表上移量與搜尋列收起量相同，避免先騰空再跟手
+    const feedTranslateStyle = useAnimatedStyle(() => ({
+        transform: [
+            {
+                translateY: interpolate(
+                    searchProgress.value,
+                    [0, 1],
+                    [-SEARCH_BAR_ROW_HEIGHT, 0],
+                    Extrapolation.CLAMP,
+                ),
+            },
+        ],
+    }));
+
+    const ensureMounted = useCallback(view => {
+        setMountedViews(current =>
+            current[view] ? current : { ...current, [view]: true },
+        );
+    }, []);
+
+    const handleCapabilities = useCallback(
+        nextCapabilities => {
+            if (Array.isArray(nextCapabilities?.topicViews)) {
+                capabilitiesRef.current = nextCapabilities;
+                setCapabilities(nextCapabilities);
+                setCapabilitiesUnavailable(false);
+            } else if (!capabilitiesRef.current) {
+                loadCapabilities();
+            }
+        },
+        [loadCapabilities],
+    );
+
+    const selectView = useCallback(
+        index => {
+            const view = enabledViews[index];
+            if (!view) {
+                return;
+            }
+            ensureMounted(view);
+            currentViewRef.current = view;
+            setCurrentIndex(index);
+            showSearchForView(view);
+            pagerRef.current?.setPage(index);
+            logToFirebase('harbor_feed_view', {
+                view: VIEW_CONFIG[view].analytics,
+            });
+        },
+        [enabledViews, ensureMounted, showSearchForView],
+    );
+
+    const handlePageSelected = useCallback(
+        event => {
+            const index = event.nativeEvent.position;
+            const view = enabledViews[index];
+            if (!view) {
+                return;
+            }
+            ensureMounted(view);
+            currentViewRef.current = view;
+            setCurrentIndex(index);
+            showSearchForView(view);
+            logToFirebase('harbor_feed_view', {
+                view: VIEW_CONFIG[view].analytics,
+            });
+        },
+        [enabledViews, ensureMounted, showSearchForView],
+    );
+
+    useEffect(() => {
+        const nextIndex = enabledViews.indexOf(currentViewRef.current);
+        if (nextIndex >= 0) {
+            if (nextIndex !== currentIndex) {
+                setCurrentIndex(nextIndex);
+                pageScrollPosition.setValue(nextIndex);
+                pageScrollOffset.setValue(0);
+                pagerRef.current?.setPageWithoutAnimation(nextIndex);
+            }
+            return;
+        }
+
+        currentViewRef.current = enabledViews[0] || 'latest';
+        setCurrentIndex(0);
+        pageScrollPosition.setValue(0);
+        pageScrollOffset.setValue(0);
+        pagerRef.current?.setPageWithoutAnimation(0);
+    }, [
+        currentIndex,
+        enabledViews,
+        pageScrollOffset,
+        pageScrollPosition,
+    ]);
+
+    const handleSessionPress = useCallback(async () => {
+        if (status === 'restoring' || status === 'authorizing') {
+            return;
+        }
+        try {
+            await login({
+                routeName: 'Tabbar',
+                params: {screen: 'ForumTabbar'},
+            });
+        } catch (error) {
+            Alert.alert(
+                t('Harbor 登入失敗'),
+                t('暫時無法登入 Harbor，請稍後再試。'),
+                [{ text: t('確定'), onPress: () => trigger() }],
+            );
+        }
+    }, [login, status, t]);
+
+    const sessionLabel =
+        status === 'restoring'
+            ? t('正在同步…')
+            : status === 'authorizing'
+                ? t('登入中…')
+                : t('登入');
+
+    const stickyHeaderHeight = toolbarHeight + SEARCH_BAR_ROW_HEIGHT;
+    const contentContainerStyle = useMemo(
+        () => ({
+            paddingTop: stickyHeaderHeight + verticalScale(4),
+        }),
+        [stickyHeaderHeight],
+    );
+    const refreshProgressViewOffset = stickyHeaderHeight + verticalScale(8);
+
+    const handleToolbarLayout = useCallback(event => {
+        const nextHeight = Math.ceil(event.nativeEvent.layout.height);
+        setToolbarHeight(currentHeight =>
+            currentHeight === nextHeight ? currentHeight : nextHeight,
+        );
+    }, []);
+
+    const handlePageScrollStateChanged = useCallback(event => {
+        const pageScrollState = event.nativeEvent.pageScrollState;
+        const guardDuration = pageScrollState === 'idle' ? 180 : 320;
+        blockTopicPressUntilRef.current = Date.now() + guardDuration;
+    }, []);
+
+    const isTopicPressAllowed = useCallback(
+        () => Date.now() >= blockTopicPressUntilRef.current,
+        [],
+    );
+
+    return (
+        <SafeAreaView
+            style={[styles.page, { backgroundColor: theme.bg_color }]}
+            edges={{ top: true }}>
+            <Reanimated.View style={[styles.pager, feedTranslateStyle]}>
+                <AnimatedPagerView
+                    ref={pagerRef}
+                    style={styles.pager}
+                    initialPage={0}
+                    onPageScroll={handlePageScroll}
+                    onPageSelected={handlePageSelected}
+                    onPageScrollStateChanged={handlePageScrollStateChanged}>
+                    {enabledViews.map(view => (
+                        <View
+                            key={view}
+                            style={styles.feedPage}
+                            collapsable={false}>
+                            {mountedViews[view] ? (
+                                <HarborFeedPane
+                                    view={view}
+                                    navigation={navigation}
+                                    onCapabilities={handleCapabilities}
+                                    isTopicPressAllowed={isTopicPressAllowed}
+                                    contentContainerStyle={
+                                        contentContainerStyle
+                                    }
+                                    refreshProgressViewOffset={
+                                        refreshProgressViewOffset
+                                    }
+                                    isActive={
+                                        enabledViews[currentIndex] === view
+                                    }
+                                    onScroll={event =>
+                                        onContentScroll(
+                                            view,
+                                            event.nativeEvent.contentOffset.y,
+                                        )
+                                    }
+                                    onScrollEndDrag={() =>
+                                        snapSearchProgress(view)
+                                    }
+                                    onMomentumScrollEnd={() =>
+                                        snapSearchProgress(view)
+                                    }
+                                />
+                            ) : null}
+                        </View>
+                    ))}
+                </AnimatedPagerView>
+            </Reanimated.View>
+            <View pointerEvents="box-none" style={styles.sharedHeader}>
+                <HarborStickyToolbar
+                    segmentOptions={segmentOptions}
+                    currentIndex={currentIndex}
+                    tabPosition={tabPosition}
+                    onChange={selectView}
+                    status={status}
+                    sessionLabel={sessionLabel}
+                    onSessionPress={handleSessionPress}
+                    onMenuPress={() => navigation.openDrawer()}
+                    onComposePress={() =>
+                        navigation.navigate('HarborComposer', {
+                            mode: 'newTopic',
+                        })
+                    }
+                    onSearchPress={() => navigation.navigate('HarborSearch')}
+                    onToolbarLayout={handleToolbarLayout}
+                    searchBarCollapseStyle={searchBarCollapseStyle}
+                    searchBarContentStyle={searchBarContentStyle}
+                    isSearchInteractive={isSearchInteractive}
+                />
+            </View>
+        </SafeAreaView>
+    );
+};
+
+const styles = StyleSheet.create({
+    page: {
+        flex: 1,
+        overflow: 'hidden',
+    },
+    stickyHeader: {
+        zIndex: 2,
+    },
+    stickyToolbar: {
+        minHeight: STICKY_TOOLBAR_HEIGHT,
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: scale(10),
+        paddingVertical: 0,
+    },
+    toolbarSide: {
+        flex: 1,
+        minWidth: 0,
+        alignItems: 'flex-start',
+    },
+    toolbarRight: {
+        alignItems: 'flex-end',
+    },
+    toolbarRightActions: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'flex-end',
+        gap: scale(2),
+        maxWidth: '100%',
+    },
+    toolbarIconButton: {
+        width: scale(30),
+        height: scale(30),
+        borderRadius: scale(10),
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    sessionButton: {
+        maxWidth: '100%',
+        minHeight: scale(30),
+        borderRadius: scale(8),
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'flex-end',
+        paddingHorizontal: scale(6),
+        paddingVertical: verticalScale(2),
+    },
+    sessionText: {
+        ...uiStyle.defaultText,
+        flexShrink: 1,
+        fontSize: scale(10),
+        fontWeight: '700',
+        marginLeft: scale(4),
+    },
+    feedTabs: {
+        height: verticalScale(30),
+        flexDirection: 'row',
+        flexShrink: 0,
+        marginHorizontal: scale(2),
+        position: 'relative',
+    },
+    feedTab: {
+        minHeight: verticalScale(30),
+        borderRadius: scale(8),
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingHorizontal: scale(8),
+    },
+    feedTabLabel: {
+        ...uiStyle.defaultText,
+        fontSize: scale(11),
+        fontWeight: '400',
+    },
+    feedTabLabelSelected: {
+        fontWeight: '600',
+    },
+    feedTabIndicator: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        width: HARBOR_TAB_INDICATOR_WIDTH,
+        height: verticalScale(2),
+        borderRadius: scale(1),
+    },
+    feedTabIndicatorVisible: {
+        opacity: 1,
+    },
+    feedTabIndicatorHidden: {
+        opacity: 0,
+    },
+    searchBarCollapse: {
+        overflow: 'hidden',
+    },
+    searchBarRow: {
+        height: SEARCH_BAR_ROW_HEIGHT,
+        justifyContent: 'center',
+        paddingHorizontal: scale(6),
+    },
+    searchBar: {
+        minHeight: verticalScale(30),
+        borderWidth: StyleSheet.hairlineWidth,
+        borderRadius: scale(9),
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: scale(10),
+    },
+    searchBarText: {
+        ...uiStyle.defaultText,
+        flex: 1,
+        fontSize: scale(12),
+        marginLeft: scale(6),
+    },
+    sharedHeader: {
+        position: 'absolute',
+        top: 0,
+        right: 0,
+        left: 0,
+        zIndex: 10,
+    },
+    pager: {
+        flex: 1,
+    },
+    feedPage: {
+        flex: 1,
+    },
+});
+
+const HarborDrawerNavigator = () => {
+    const { theme } = useTheme();
+    const { width } = useWindowDimensions();
+
+    const renderDrawerContent = useCallback(
+        props => <HarborDrawerContent {...props} />,
+        [],
+    );
+
+    return (
+        <Drawer.Navigator
+            drawerContent={renderDrawerContent}
+            screenOptions={{
+                headerShown: false,
+                drawerType: 'front',
+                drawerStyle: {
+                    width: Math.min(width * 0.88, scale(360)),
+                    backgroundColor: theme.bg_color,
+                },
+                sceneStyle: { backgroundColor: theme.bg_color },
+                swipeEdgeWidth: scale(28),
+                swipeMinDistance: scale(18),
+                drawerHideStatusBarOnOpen: false,
+            }}>
+            <Drawer.Screen
+                name="HarborHome"
+                component={ForumPage}
+                options={{ title: 'Harbor' }}
+            />
+        </Drawer.Navigator>
+    );
+};
+
+export default HarborDrawerNavigator;

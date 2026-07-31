@@ -1,11 +1,12 @@
 import React, { useContext, useState, memo, useCallback, useMemo } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, Image } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 
 import { useTheme, uiStyle } from '../../../../components/ThemeContext';
 import { trigger } from '../../../../utils/trigger';
 import PressableCard from '../../../../components/PressableCard';
 
 import { NavigationContext } from '@react-navigation/native';
+import { Image } from 'expo-image';
 import moment from 'moment-timezone';
 import { scale, verticalScale } from 'react-native-size-matters';
 
@@ -28,11 +29,11 @@ const getDateColor = (
     return black.third;
 };
 
-const NewsCard = ({ data, type = 'news' }) => {
-    // NavigationContext组件可以在非基页面拿到路由信息
+const NewsCard = ({ data, type = 'news', language = 'en' }) => {
+    // NavigationContext 可在非基頁拿到路由資訊
     const navigation = useContext(NavigationContext);
     const { theme } = useTheme();
-    const { white, black, viewShadow, themeColor, secondThemeColor, tonal } = theme;
+    const { white, black, viewShadow, themeColor, secondThemeColor, tonal, imagePlaceholder } = theme;
 
     // 圖片加載狀態
     const [imageLoading, setImageLoading] = useState(true);
@@ -42,7 +43,7 @@ const NewsCard = ({ data, type = 'news' }) => {
         newsCardContainer: {
             backgroundColor: white,
             marginTop: verticalScale(6),
-            marginHorizontal: scale(16),
+            marginHorizontal: scale(8),
             borderRadius: scale(16),
             // 在 VirtualizedList 等父層未給定寬度時，仍撐滿可視列寬，供內層水平 flex 正確分配
             alignSelf: 'stretch',
@@ -58,15 +59,17 @@ const NewsCard = ({ data, type = 'news' }) => {
         newsCardTextColumn: {
             flex: 1,
             minWidth: 0,
+            alignSelf: 'stretch',
+            justifyContent: 'space-between',
             // 與左側內邊距對稱的間隔，使圖片與卡片右緣保持舒適留白
             marginRight: scale(12),
         },
         newsCardImg: {
             width: verticalScale(90),
-            height: verticalScale(126),
+            height: verticalScale(90),
         },
     }),
-        [tonal.primary08, viewShadow],
+        [viewShadow, white],
     );
 
     const beginDate =
@@ -92,19 +95,12 @@ const NewsCard = ({ data, type = 'news' }) => {
         ],
     );
 
-    const { title_en, title_cn, title_pt } = useMemo(() => {
-        const titleState = { title_en: '', title_cn: '', title_pt: '' };
-        data.details.forEach(item => {
-            if (item.locale === 'en_US') {
-                titleState.title_en = item.title;
-            } else if (item.locale === 'pt_PT') {
-                titleState.title_pt = item.title;
-            } else if (item.locale === 'zh_TW') {
-                titleState.title_cn = item.title;
-            }
-        });
-        return titleState;
-    }, [data.details]);
+    const title = useMemo(() => {
+        const titleLocale = language === 'tc' ? 'zh_TW' : 'en_US';
+        return (
+            data.details.find(item => item.locale === titleLocale)?.title || ''
+        );
+    }, [data.details, language]);
 
     const { haveImage, imageUrls } = useMemo(() => {
         if (type === 'event') {
@@ -125,7 +121,7 @@ const NewsCard = ({ data, type = 'news' }) => {
         };
     }, [data.common, type]);
 
-    // 点击跳转逻辑
+    // 點擊跳轉邏輯
     const handlePress = useCallback(() => {
         trigger();
         setTimeout(() => {
@@ -138,51 +134,28 @@ const NewsCard = ({ data, type = 'news' }) => {
 
     return (
         <PressableCard style={styles.newsCardContainer} onPress={handlePress}>
-            {/* 文字居左，图片居右 */}
+            {/* 文字居左，圖片居右 */}
             <View style={styles.newsCardContentContainer}>
-                {/* 标题 */}
+                {/* 標題 */}
                 <View
                     style={[
                         styles.newsCardTextColumn,
                         !haveImage && { marginRight: 0 },
                     ]}>
-                    {/* 英文标题 */}
-                    {title_en.length > 0 && (
+                    {title.length > 0 && (
                         <Text
                             style={{
                                 ...uiStyle.defaultText,
-                                fontWeight: 'bold',
                                 color: black.main,
                                 fontSize: verticalScale(14),
                                 lineHeight: verticalScale(20),
                             }}
                             numberOfLines={3}>
-                            {title_en}
-                        </Text>
-                    )}
-                    {/* 中文标题 */}
-                    {title_cn.length > 0 && (
-                        <Text
-                            style={{
-                                ...uiStyle.defaultText,
-                                fontSize:
-                                    title_en.length > 0
-                                        ? verticalScale(13)
-                                        : verticalScale(15),
-                                color:
-                                    title_en.length > 0
-                                        ? black.second
-                                        : black.main,
-                                lineHeight: verticalScale(18),
-                                marginTop:
-                                    title_en.length > 0 ? verticalScale(4) : 0,
-                            }}
-                            numberOfLines={2}>
-                            {title_cn}
+                            {title}
                         </Text>
                     )}
 
-                    {/* 活动类型展示日期 */}
+                    {/* 活動類型展示日期 */}
                     <Text
                         style={{
                             ...uiStyle.defaultText,
@@ -212,7 +185,10 @@ const NewsCard = ({ data, type = 'news' }) => {
                                     // 加載失敗時降低透明度
                                     imageError && { opacity: 0.3 },
                                 ]}
-                                resizeMode="cover"
+                                contentFit="cover"
+                                placeholder={imagePlaceholder}
+                                placeholderContentFit="cover"
+                                transition={200}
                                 onLoadStart={() => setImageLoading(true)}
                                 onLoadEnd={() => setImageLoading(false)}
                                 onError={() => {

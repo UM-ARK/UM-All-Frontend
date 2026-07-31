@@ -1,24 +1,24 @@
 import React, { useContext, useCallback, memo } from 'react';
-import { View, Text, Image, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 
-import { useTheme, themes, uiStyle, ThemeContext } from '../../../../components/ThemeContext';
+import { useTheme, uiStyle } from '../../../../components/ThemeContext';
 import { trigger } from '../../../../utils/trigger';
 
 import { NavigationContext } from '@react-navigation/native';
-// import { Image } from 'expo-image';
+import { Image } from 'expo-image';
 import { scale, verticalScale } from 'react-native-size-matters';
 import TouchableScale from '../../../../components/TouchableScale';
 
 const IMG_SIZE = verticalScale(45);
 
 const ClubCard = ({ data }) => {
-    // NavigationContext组件可以在非基页面拿到路由信息
+    // NavigationContext 可在非基頁拿到路由資訊
     const navigation = useContext(NavigationContext);
     const { theme } = useTheme();
-    const { themeColor, black, white, trueWhite } = theme;
+    const { black, white, trueWhite, imagePlaceholder } = theme;
     const { logo_url, name } = data;
 
-    // 处理点击跳转逻辑
+    // 點擊跳轉組織詳情
     const handleJumpToDetail = useCallback(() => {
         trigger();
         setTimeout(() => {
@@ -33,14 +33,17 @@ const ClubCard = ({ data }) => {
             style={[styles.card, { backgroundColor: white }]}
             activeOpacity={0.8}
             onPress={handleJumpToDetail}>
-            {/* 社团 / 组织 Logo */}
+            {/* 社團 / 組織 Logo */}
             <Image
                 source={{ uri: logo_url }}
                 style={[styles.logo, { backgroundColor: trueWhite }]}
-                resizeMode="contain"
+                contentFit="contain"
+                placeholder={imagePlaceholder}
+                placeholderContentFit="contain"
+                transition={200}
             />
 
-            {/* 组织名 */}
+            {/* 組織名 */}
             <View style={styles.titleWrapper}>
                 <Text
                     style={{ ...uiStyle.defaultText, color: black.main, fontSize: verticalScale(10) }}

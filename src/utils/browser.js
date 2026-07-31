@@ -86,6 +86,8 @@ export const openLink = async (input) => {
                         },
                         {
                             text: 'Open',
+                            style: 'default',
+                            isPreferred: true,
                             onPress: () => Linking.openURL(url),
                         },
                     ],

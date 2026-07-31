@@ -64,7 +64,7 @@ export const getFunctionArr = (t) => [
                 go_where: 'Bus', // a function
                 describe: t('查看校巴到站情況', { ns: 'features' }),
                 key_name: '校園巴士',
-                keywords: 'Bus, Shuttle, Transport, 巴士, 校巴, 接駁, 交通, 到站, 班次, 環校',
+                keywords: 'Bus, Shuttle, Transport, Loop, Campus, 巴士, 校巴, 接駁, 交通, 到站, 班次, 環校, 校園',
             },
             {
                 icon_type: iconTypes.materialCommunityIcons,
@@ -303,6 +303,16 @@ export const getFunctionArr = (t) => [
                 describe: t('查看LCWC W22飯堂當前排隊人數', { ns: 'features' }),
                 key_name: '飯堂排隊',
                 keywords: 'Canteen Queue, Dining Hall, LCWC, W22, 飯堂, 排隊, 人數, 食堂, 餐廳, 統計',
+            },
+            {
+                icon_type: iconTypes.materialCommunityIcons,
+                icon_name: 'clock-time-four-outline',
+                fn_name: t('幹飯時間', { ns: 'features' }),
+                needLogin: false,
+                go_where: 'EatingSchedule',
+                describe: t('依目前本科課表統計各時段上、下課的Section數，以估算校園人流高峰，方便同學安排乾飯或通勤，減少排隊。數字代表Section數，並非實際人數。', { ns: 'features' }),
+                key_name: '幹飯時間',
+                keywords: 'Eating Schedule, Class Time, Commute, Canteen, Section, 幹飯, 乾飯, 上課, 下課, 通勤, 人流, 排隊',
             },
             {
                 icon_type: iconTypes.materialCommunityIcons,
@@ -574,7 +584,7 @@ export const getFunctionArr = (t) => [
                 icon_name: 'table-clock',
                 fn_name: t('課表模擬', { ns: 'features' }),
                 needLogin: false,
-                go_where: 'CourseSimTab',
+                go_where: 'CourseTab',
                 describe: t('ARK課表模擬功能，選課時不用再對著Excel自己慢慢找啦！', { ns: 'features' }),
                 key_name: '課表模擬',
                 keywords: 'Timetable Simulation, Course Schedule, Planning, 課表, 時間表, 模擬, 選課, 規劃',
@@ -596,7 +606,8 @@ export const getFunctionArr = (t) => [
                     // 狀態欄字體是否黑色，默認true
                     isBarStyleBlack: false,
                 },
-                describe: t('選咩課，UM Helper開發的課程評論網站', { ns: 'features' }),                key_name: '選咀課',
+                describe: t('選咩課，UM Helper開發的課程評論網站', { ns: 'features' }),
+                key_name: '選咩課',
                 keywords: 'What2Reg, Course Review, Course Rating, UM Helper, 課程評論, 評分, 教授評價, 選課'            },
             {
                 icon_type: iconTypes.materialCommunityIcons,

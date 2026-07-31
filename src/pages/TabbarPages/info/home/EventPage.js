@@ -1,32 +1,374 @@
-import React, { useState, useEffect, forwardRef, useImperativeHandle, useRef, useCallback, memo } from 'react';
+import React, {
+    useState,
+    useEffect,
+    forwardRef,
+    useImperativeHandle,
+    useRef,
+    useCallback,
+    useMemo,
+    memo,
+} from 'react';
 import {
     Text,
     View,
     StyleSheet,
     FlatList,
-    TouchableOpacity,
-    Dimensions,
-    Image,
+    Pressable,
+    ActivityIndicator,
     useWindowDimensions,
 } from 'react-native';
+// TODO: Harbor Card 暫時關閉，恢復時取消下列註釋
+// import { useNavigation } from '@react-navigation/native';
+// import { Image } from 'expo-image';
 
-import { useTheme, themes, uiStyle } from '../../../../components/ThemeContext';
-import { BASE_URI, BASE_HOST, GET, ARK_HARBOR_TOP, ARK_HARBOR_LATEST, ARK_HARBOR_TOPIC, ARK_HARBOR_AVATAR } from '../../../../utils/pathMap';
+import { useTheme, uiStyle } from '../../../../components/ThemeContext';
+import {
+    BASE_URI,
+    BASE_HOST,
+    GET,
+    // ARK_HARBOR_LATEST,
+    // ARK_HARBOR_AVATAR,
+} from '../../../../utils/pathMap';
 import { trigger } from '../../../../utils/trigger';
-import Loading from '../../../../components/Loading';
 import EventCard from '../components/EventCard';
-import { openLink } from '../../../../utils/browser';
-import { logToFirebase } from '../../../../utils/firebaseAnalytics';
+// import { logToFirebase } from '../../../../utils/firebaseAnalytics';
 
 import axios from 'axios';
 import Toast from 'react-native-simple-toast';
 import moment from 'moment-timezone';
 import { scale, verticalScale } from 'react-native-size-matters';
-import TouchableScale from '../../../../components/TouchableScale';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+// import TouchableScale from '../../../../components/TouchableScale';
+// import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import lodash from 'lodash';
 
+const PAGE_SIZE = 10;
+const REQUEST_TIMEOUT = 8000;
+const RETRY_DELAY = 600;
+const MIN_LOADING_DURATION = 500;
+const SKELETON_BORDER_RADIUS = scale(8);
+
+// 各欄骨架卡配置（僅 ARK 活動；Harbor 骨架已暫時關閉）
+const SKELETON_COLUMN_VARIANTS = [
+    [
+        { kind: 'event', imageRatio: 1, titleWidth: '88%' },
+        // { kind: 'harbor', excerptHeight: verticalScale(72) },
+        { kind: 'event', imageRatio: 0.78, titleWidth: '72%' },
+    ],
+    [
+        // { kind: 'harbor', excerptHeight: verticalScale(56) },
+        { kind: 'event', imageRatio: 1, titleWidth: '84%' },
+        { kind: 'event', imageRatio: 0.9, titleWidth: '64%' },
+    ],
+    [
+        { kind: 'event', imageRatio: 0.86, titleWidth: '80%' },
+        // { kind: 'harbor', excerptHeight: verticalScale(84) },
+        { kind: 'event', imageRatio: 1, titleWidth: '70%' },
+    ],
+];
+
+const EventSkeletonCard = ({ cardWidth, imageRatio, titleWidth }) => {
+    const { theme } = useTheme();
+    const { white, tonal } = theme;
+    const imageHeight = cardWidth * imageRatio;
+
+    return (
+        <View
+            style={{
+                backgroundColor: white,
+                borderRadius: SKELETON_BORDER_RADIUS,
+                margin: scale(5),
+                width: cardWidth,
+                overflow: 'hidden',
+            }}>
+            <View
+                style={{
+                    width: cardWidth,
+                    height: imageHeight,
+                    backgroundColor: tonal.primary15,
+                }}
+            />
+            <View style={{ padding: scale(8) }}>
+                <View
+                    style={{
+                        height: verticalScale(11),
+                        width: titleWidth,
+                        borderRadius: scale(4),
+                        backgroundColor: tonal.primary15,
+                    }}
+                />
+                <View
+                    style={{
+                        marginTop: verticalScale(6),
+                        height: verticalScale(11),
+                        width: '62%',
+                        borderRadius: scale(4),
+                        backgroundColor: tonal.primary08,
+                    }}
+                />
+                <View
+                    style={{
+                        marginTop: verticalScale(10),
+                        height: verticalScale(9),
+                        width: '38%',
+                        borderRadius: scale(4),
+                        backgroundColor: tonal.primary08,
+                    }}
+                />
+            </View>
+        </View>
+    );
+};
+
+// TODO: Harbor Card 暫時關閉，恢復時取消下列註釋
+// const HarborSkeletonCard = ({ cardWidth, excerptHeight }) => {
+//     const { theme } = useTheme();
+//     const { white, tonal } = theme;
+//
+//     return (
+//         <View
+//             style={{
+//                 backgroundColor: tonal.primary15,
+//                 borderRadius: SKELETON_BORDER_RADIUS,
+//                 margin: scale(5),
+//                 width: cardWidth,
+//                 overflow: 'hidden',
+//             }}>
+//             <View
+//                 style={{
+//                     marginTop: verticalScale(13),
+//                     marginHorizontal: scale(8),
+//                     marginBottom: verticalScale(8),
+//                 }}>
+//                 <View
+//                     style={{
+//                         height: excerptHeight,
+//                         borderRadius: scale(4),
+//                         backgroundColor: tonal.primary08,
+//                     }}
+//                 />
+//             </View>
+//             <View
+//                 style={{
+//                     backgroundColor: white,
+//                     paddingTop: verticalScale(8),
+//                     paddingBottom: verticalScale(10),
+//                     paddingHorizontal: scale(8),
+//                     borderBottomStartRadius: SKELETON_BORDER_RADIUS,
+//                     borderBottomEndRadius: SKELETON_BORDER_RADIUS,
+//                 }}>
+//                 <View
+//                     style={{
+//                         height: verticalScale(11),
+//                         width: '86%',
+//                         borderRadius: scale(4),
+//                         backgroundColor: tonal.primary15,
+//                     }}
+//                 />
+//                 <View
+//                     style={{
+//                         marginTop: verticalScale(6),
+//                         height: verticalScale(11),
+//                         width: '58%',
+//                         borderRadius: scale(4),
+//                         backgroundColor: tonal.primary08,
+//                     }}
+//                 />
+//                 <View
+//                     style={{
+//                         marginTop: verticalScale(10),
+//                         flexDirection: 'row',
+//                         alignItems: 'center',
+//                         justifyContent: 'space-between',
+//                     }}>
+//                     <View
+//                         style={{
+//                             width: verticalScale(12),
+//                             height: verticalScale(12),
+//                             borderRadius: scale(50),
+//                             backgroundColor: tonal.primary15,
+//                         }}
+//                     />
+//                     <View
+//                         style={{
+//                             height: verticalScale(8),
+//                             width: '28%',
+//                             borderRadius: scale(4),
+//                             backgroundColor: tonal.primary08,
+//                         }}
+//                     />
+//                 </View>
+//             </View>
+//         </View>
+//     );
+// };
+
+const wait = duration => new Promise(resolve => setTimeout(resolve, duration));
+
+const isCanceledRequest = (error, signal) => {
+    return signal?.aborted || error?.code === 'ERR_CANCELED' || axios.isCancel(error);
+};
+
+const requestWithRetry = async (request, signal, retries = 1) => {
+    let lastError;
+
+    for (let attempt = 0; attempt <= retries; attempt++) {
+        if (signal?.aborted) {
+            const canceledError = new Error('Request canceled');
+            canceledError.code = 'ERR_CANCELED';
+            throw canceledError;
+        }
+
+        try {
+            return await request();
+        } catch (error) {
+            if (isCanceledRequest(error, signal)) {
+                throw error;
+            }
+
+            lastError = error;
+            if (attempt < retries) {
+                await wait(RETRY_DELAY);
+            }
+        }
+    }
+
+    throw lastError;
+};
+
+const normalizeEvent = item => {
+    if (!item || typeof item.cover_image_url !== 'string') {
+        return item;
+    }
+
+    const isAbsoluteUrl = /^https?:\/\//i.test(item.cover_image_url);
+    return {
+        ...item,
+        cover_image_url: isAbsoluteUrl
+            ? item.cover_image_url
+            : BASE_HOST + item.cover_image_url,
+    };
+};
+
+const getEventKey = item => {
+    return item?._id || item?.id || `${item?.title}-${item?.startdatetime}`;
+};
+
+const orderEventList = eventList => {
+    const uniqueEvents = lodash.uniqBy(
+        eventList.filter(Boolean).map(normalizeEvent),
+        getEventKey,
+    );
+    const now = moment();
+    const activeEvents = [];
+    const finishedEvents = [];
+
+    uniqueEvents.forEach(item => {
+        if (item?.enddatetime && now.isBefore(moment(item.enddatetime))) {
+            activeEvents.push(item);
+        } else {
+            finishedEvents.push(item);
+        }
+    });
+
+    return activeEvents.concat(finishedEvents);
+};
+
+const interleaveColumn = (events, harborTopics, harborFirst) => {
+    // TODO: Harbor Card 暫時關閉，僅保留 ARK 活動
+    // const result = [];
+    // const itemCount = Math.max(events.length, harborTopics.length);
+    //
+    // for (let index = 0; index < itemCount; index++) {
+    //     if (harborFirst && harborTopics[index]) {
+    //         result.push(harborTopics[index]);
+    //     }
+    //     if (events[index]) {
+    //         result.push(events[index]);
+    //     }
+    //     if (!harborFirst && harborTopics[index]) {
+    //         result.push(harborTopics[index]);
+    //     }
+    // }
+    //
+    // return result;
+    void harborTopics;
+    void harborFirst;
+    return events;
+};
+
+const buildColumns = (eventList, harborList, numColumns) => {
+    const eventColumns = Array.from({ length: numColumns }, () => []);
+    // TODO: Harbor Card 暫時關閉
+    // const harborColumns = Array.from({ length: numColumns }, () => []);
+    void harborList;
+
+    eventList.forEach((item, index) => {
+        eventColumns[index % numColumns].push(item);
+    });
+    // harborList.forEach((item, index) => {
+    //     harborColumns[index % numColumns].push(item);
+    // });
+
+    return eventColumns.map((events, index) => {
+        // return interleaveColumn(events, harborColumns[index], index % 2 === 0);
+        return interleaveColumn(events, [], index % 2 === 0);
+    });
+};
+
+const fetchEventPage = async (page, signal) => {
+    const response = await requestWithRetry(
+        () => axios.get(BASE_URI + GET.EVENT_INFO_ALL, {
+            params: {
+                num_of_item: PAGE_SIZE,
+                page,
+            },
+            signal,
+            timeout: REQUEST_TIMEOUT,
+        }),
+        signal,
+    );
+    const json = response.data;
+
+    if (json?.message === 'success') {
+        const items = Array.isArray(json.content) ? json.content : [];
+        return {
+            items,
+            hasMore: items.length >= PAGE_SIZE,
+        };
+    }
+    if (String(json?.code) === '2') {
+        return { items: [], hasMore: false };
+    }
+
+    throw new Error('Invalid event response');
+};
+
+// TODO: Harbor Card 暫時關閉，恢復時取消下列註釋
+// const fetchHarborTopics = async signal => {
+//     const response = await requestWithRetry(
+//         () => axios.get(ARK_HARBOR_LATEST, {
+//             signal,
+//             timeout: REQUEST_TIMEOUT,
+//         }),
+//         signal,
+//     );
+//     const topics = response.data?.topic_list?.topics;
+//
+//     if (!Array.isArray(topics)) {
+//         throw new Error('Invalid Harbor response');
+//     }
+//
+//     const visibleTopics = topics.filter(item => item?.pinned === false);
+//     const sampledTopics = lodash.sampleSize(visibleTopics, 12);
+//     return lodash.uniqBy(
+//         lodash.shuffle(sampledTopics).map(item => ({ ...item, type: 'harbor' })),
+//         'id',
+//     );
+// };
+
 const EventPage = forwardRef((props, ref) => {
+    // TODO: Harbor Card 暫時關閉
+    // const navigation = useNavigation();
     const { theme } = useTheme();
     const { black, white, themeColor, viewShadow, bg_color } = theme;
     const s = StyleSheet.create({
@@ -35,7 +377,8 @@ const EventPage = forwardRef((props, ref) => {
             width: '100%',
             backgroundColor: bg_color,
             alignItems: 'flex-start',
-            justifyContent: 'space-between',
+            // 以內容寬度置中，避免 flex:1 把多餘空白擠到兩欄中間
+            justifyContent: 'center',
         },
         loadMore: {
             alignItems: 'center',
@@ -49,30 +392,28 @@ const EventPage = forwardRef((props, ref) => {
         },
     });
 
-    const [dataPage, setDataPage] = useState(1);
-    const [eventDataList, setEventDataList] = useState([]);
-    const [columnsData, setColumnsData] = useState([]); // 動態列數據
+    const [eventRawList, setEventRawList] = useState([]);
+    // TODO: Harbor Card 暫時關閉
+    // const [harborData, setHarborData] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [noMoreData, setNoMoreData] = useState(false);
-    const [harborData, setHarborData] = useState([]);
-    const [eventRawList, setEventRawList] = useState([]);  // 把活動原始數據也存 state
-    const [numColumns, setNumColumns] = useState(2); // 橫豎屏動態列數
-    const [cardWidth, setCardWidth] = useState(scale(160)); // 卡片寬度隨列數更新
+    const [isLoadingMore, setIsLoadingMore] = useState(false);
+    const [noMoreData, setNoMoreData] = useState(true);
+    const [numColumns, setNumColumns] = useState(2);
+    const [cardWidth, setCardWidth] = useState(scale(160));
     const windowLayout = useWindowDimensions();
+    const pageRef = useRef(1);
+    const requestGenerationRef = useRef(0);
+    const firstPageControllerRef = useRef(null);
+    const loadMoreControllerRef = useRef(null);
+    const loadingMoreRef = useRef(false);
 
-    // 暴露方法給父組件
-    useImperativeHandle(ref, () => ({
-        getNoMoreData: () => noMoreData,    // 返回noMoreData狀態
-        loadMoreData,
-        onRefresh,
-    }));
-
-    // 首次加載時，獲取數據
-    useEffect(() => {
-        // Fast Refresh 會保留 state，顯式重置回第一頁避免重複拼接
-        setDataPage(1);
-        getAPIData(1);
-    }, []);
+    const columnsData = useMemo(
+        // TODO: Harbor Card 暫時關閉，僅用空陣列佔位
+        // () => buildColumns(eventRawList, harborData, numColumns),
+        // [eventRawList, harborData, numColumns],
+        () => buildColumns(eventRawList, [], numColumns),
+        [eventRawList, numColumns],
+    );
 
     // 監聽螢幕尺寸，依據橫豎屏調整瀑布列數與卡片寬度
     useEffect(() => {
@@ -86,298 +427,155 @@ const EventPage = forwardRef((props, ref) => {
         setCardWidth(Math.min(Math.max(computedWidth, scale(140)), scale(220)));
     }, [windowLayout.height, windowLayout.width]);
 
-    useEffect(() => {
-        const filteredData = getNotFinishEvent(eventRawList, noMoreData);
-        separateData(filteredData);
-    }, [eventRawList]);
+    const loadFirstPage = useCallback(async () => {
+        const requestGeneration = ++requestGenerationRef.current;
+        firstPageControllerRef.current?.abort();
+        loadMoreControllerRef.current?.abort();
 
-    useEffect(() => {
-        // 當harborData變化時，重新分割數據
-        if (dataPage === 1 && harborData.length > 0) {
-            separateData(eventDataList);
-        }
-    }, [harborData]);
-
-    // 橫豎屏切換時重新分配瀑布列，保留已拉取的活動
-    useEffect(() => {
-        if (columnsData.length > 0 || eventDataList.length > 0) {
-            separateData(eventDataList.length > 0 ? eventDataList : eventRawList, { skipAppend: true });
-        }
-    }, [numColumns]);
-
-    // 監聽dataPage變化，重新獲取數據
-    useEffect(() => {
-        // dataPage控制頁碼，頁碼變化時，會重新獲取數據，實現瀑布流的加載更多功能
-        if (dataPage === 1) { return; }
-        if (isLoading) { return; }
-        if (noMoreData) { return; }
-        // 當dataPage變化時，重新獲取數據
-        Toast.show('數據加載中...');
-        if (!harborData || harborData.length === 0) {
-            getHarborData();
-        }
-        setNoMoreData(true);
-        getEventData();
-    }, [dataPage]);
-
-
-    /**
-     * 請求API數據，獲取ARK組織活動數據和ARK Harbor數據
-     * @returns {void}
-     */
-    const getAPIData = (page = dataPage) => {
-        if (page === 1) {
-            setIsLoading(true);
-            setNoMoreData(false);
-            setColumnsData([]);
-            setEventDataList([]);
-            setEventRawList([]);
-            setHarborData([]);
-        }
-        getHarborData();
-        getEventData(page);
-    };
-
-    /**
-     * 獲取ARK Event數據
-     * @param {boolean} loadMore
-     */
-    const getEventData = async (page = dataPage) => {
-        let URL = BASE_URI + GET.EVENT_INFO_ALL;
-        let num_of_item = 10;
-        let noMore = true;
+        const controller = new AbortController();
+        firstPageControllerRef.current = controller;
+        loadingMoreRef.current = false;
+        setIsLoadingMore(false);
+        setIsLoading(true);
 
         try {
-            const res = await axios.get(URL, {
-                params: {
-                    num_of_item,
-                    page: page,
-                },
-            });
-            const json = res.data;
-            if (json.message === 'success') {
-                let newDataArr = json.content;
-                if (newDataArr.length < num_of_item) {
-                    noMore = true;
-                } else {
-                    noMore = false;
-                }
+            // TODO: Harbor Card 暫時關閉，僅請求 ARK 活動
+            // const [eventResult, harborResult] = await Promise.allSettled([
+            //     fetchEventPage(1, controller.signal),
+            //     fetchHarborTopics(controller.signal),
+            //     wait(MIN_LOADING_DURATION),
+            // ]);
+            const [eventResult] = await Promise.allSettled([
+                fetchEventPage(1, controller.signal),
+                wait(MIN_LOADING_DURATION),
+            ]);
 
-                // 累積所有頁的活動，再統一分配到列，避免新頁集中到第一列（關鍵修正）
-                setEventRawList(prev => page === 1 ? newDataArr : prev.concat(newDataArr));
-            } else if (json.code === '2') {
-                alert('已無更多數據');
-                noMore = true;
-            } else {
-                alert('數據出錯，請聯繫開發者');
-            }
-        } catch (error) {
-            if (error.code === 'ERR_NETWORK' || error.code === 'ECONNABORTED') {
-                Toast.show('網絡錯誤！請檢查網絡再試');
-            } else {
-                alert('組織活動頁，未知錯誤，請聯繫開發者！\n也可能是國內網絡屏蔽所導致！');
-            }
-        } finally {
-            setIsLoading(false);
-            setNoMoreData(noMore);
-        }
-    };
-
-    /**
-     * 獲取ARK Harbor Latest數據
-     * @returns {Promise<Array>} 返回隨機選取的10條數據
-     */
-    const getHarborData = async () => {
-        try {
-            const URL = ARK_HARBOR_LATEST;
-            const res = await axios.get(URL);
-            if (res.data) {
-                const data = res.data;
-                const topics = data.topic_list.topics || [];
-                if (topics.length > 0) {
-                    const newTopic = lodash.sampleSize(topics, 12);
-                    let harborCopy = newTopic.map(item => ({ ...item, type: 'harbor' }));
-                    harborCopy = lodash.uniqBy(lodash.shuffle(harborCopy), 'id');
-                    setHarborData(harborCopy);
-                }
-            }
-        } catch (error) {
-            console.log('Error fetching topic data:', error);
-        }
-    };
-
-    const insertToList = (list, harborArr) => {
-        let listCopy = lodash.cloneDeep(list);
-
-        // 随机决定是否将 harbor 插到最顶部 (40% 概率)
-        const insertOnTop = Math.random() < 0.4;
-        if (insertOnTop && harborArr.length > 0) {
-            const randomIdx = Math.floor(Math.random() * harborArr.length);
-            const [harborToTop] = harborArr.splice(randomIdx, 1);
-            listCopy.unshift(harborToTop); // 顶部插入一个
-        }
-
-        // 所有活动后面都可以插入 harbor，不管结束没结束
-        let insertPositions = Array.from({ length: listCopy.length + 1 }, (_, i) => i);
-
-        // 随机打乱插入点
-        for (let i = insertPositions.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [insertPositions[i], insertPositions[j]] = [insertPositions[j], insertPositions[i]];
-        }
-
-        let used = 0;
-        harborArr.forEach((harborItem, i) => {
-            if (insertPositions.length > 0 && i < insertPositions.length) {
-                listCopy.splice(insertPositions[i], 0, harborItem);
-                // 插入后，所有后面的插入点都要 +1
-                insertPositions = insertPositions.map(pos => pos > insertPositions[i] ? pos + 1 : pos);
-                used++;
-            }
-        });
-
-        // 如果还有剩余 harbor，全部插到末尾
-        if (harborArr.length > used) {
-            listCopy.push(...harborArr.slice(used));
-        }
-
-        return listCopy;
-    };
-
-    const separateData = (eventList, options = {}) => {
-        const { skipAppend = false } = options; // skipAppend 用於橫豎屏重排，避免重複拼接
-        // 依列數動態分流 event 與 harbor，模擬小紅書瀑布
-        let columns = Array.from({ length: numColumns }, () => []);
-
-        // 先準備可用的 harbor 資料：若已有列中的 harbor，優先保留，否則使用最新 harborData（關鍵修正：翻頁後不丟失 harbor 卡片）
-        const existingHarbor = columnsData.flat().filter(itm => itm?.type === 'harbor');
-        const harborSource = existingHarbor.length > 0 ? existingHarbor : harborData;
-        const harborChunks = lodash.chunk(harborSource, Math.ceil(harborSource.length / numColumns));
-        // eventList 為空時，僅渲染 harbor 分段
-        if (!eventList || eventList.length === 0) {
-            if (harborData.length === 0) {
+            if (
+                controller.signal.aborted ||
+                requestGeneration !== requestGenerationRef.current
+            ) {
                 return;
             }
-            const filledHarbor = Array.from({ length: numColumns }, (_, idx) => harborChunks[idx] || []);
-            setColumnsData(filledHarbor);
+
+            if (eventResult.status === 'fulfilled') {
+                pageRef.current = 1;
+                setEventRawList(orderEventList(eventResult.value.items));
+                setNoMoreData(!eventResult.value.hasMore);
+            }
+            // if (harborResult.status === 'fulfilled') {
+            //     setHarborData(harborResult.value);
+            // }
+
+            // const failedCount = [eventResult, harborResult]
+            //     .filter(result => result.status === 'rejected')
+            //     .length;
+            // if (failedCount === 2) {
+            //     Toast.show('活動資料載入失敗，請檢查網絡後再試');
+            // } else if (failedCount === 1) {
+            //     Toast.show('部分活動資料載入失敗，請稍後下拉刷新');
+            // }
+            if (eventResult.status === 'rejected') {
+                Toast.show('活動資料載入失敗，請檢查網絡後再試');
+            }
+        } finally {
+            if (requestGeneration === requestGenerationRef.current) {
+                setIsLoading(false);
+                firstPageControllerRef.current = null;
+            }
+        }
+    }, []);
+
+    const loadMoreData = useCallback(async () => {
+        trigger();
+        if (isLoading || noMoreData || loadingMoreRef.current) {
             return;
         }
 
-        // 將圖片類型的服務器返回的相對路徑加上域名，缺字段時安全跳過（橫屏重排可能遇到空值）
-        eventList.forEach((itm) => {
-            if (!itm || !itm.cover_image_url || typeof itm.cover_image_url !== 'string') {
-                return;
-            }
-            if (itm.cover_image_url.indexOf(BASE_HOST) === -1) {
-                itm.cover_image_url = BASE_HOST + itm.cover_image_url;
-            }
-        });
+        loadingMoreRef.current = true;
+        setIsLoadingMore(true);
+        const requestGeneration = requestGenerationRef.current;
+        const nextPage = pageRef.current + 1;
+        const controller = new AbortController();
+        loadMoreControllerRef.current = controller;
 
-        // 翻頁場景：保持已分配順序，僅將「新增活動」追加，計算時排除 harbor 數量（關鍵修正）
-        if (dataPage > 1 && !skipAppend && columnsData.length === numColumns && eventDataList.length > 0) {
-            columns = columnsData.map(col => [...col]);
-            const existingEventLen = eventDataList.filter(itm => itm?.type !== 'harbor').length;
-            const newEvents = eventList.slice(existingEventLen);
-
-            if (newEvents.length === 0) {
-                // 無新增時保持原分佈
-                setColumnsData(columns);
-                setEventDataList(eventDataList);
+        try {
+            const result = await fetchEventPage(nextPage, controller.signal);
+            if (
+                controller.signal.aborted ||
+                requestGeneration !== requestGenerationRef.current
+            ) {
                 return;
             }
 
-            newEvents.forEach((itm, idx) => {
-                const targetIdx = (existingEventLen + idx) % numColumns;
-                columns[targetIdx].push(itm);
+            pageRef.current = nextPage;
+            setEventRawList(previous => {
+                return orderEventList(previous.concat(result.items));
             });
-        } else {
-            // 首頁或重算：依 index % numColumns 均勻分佈活動卡片
-            eventList.forEach((itm, idx) => {
-                const targetIdx = idx % numColumns;
-                columns[targetIdx].push(itm);
-            });
-        }
-
-        // 去重，避免重複卡片
-        columns = columns.map(col => lodash.uniqBy(col, item => item._id || item.id));
-
-        // 首頁將 harbor 隨機插入各列；翻頁時保留既有 harbor 位置不動
-        if (harborSource.length > 0 && (dataPage === 1 || skipAppend)) {
-            columns = columns.map((col, idx) => insertToList(col, lodash.cloneDeep(harborChunks[idx] || [])));
-        }
-
-        const mergedEvents = columns.flat();
-        setColumnsData(columns);
-        setEventDataList(mergedEvents);
-    };
-
-    // 篩選尚未結束的活動，並隨機亂序，最後與原數組合併去重
-    const getNotFinishEvent = (eventList, loadMore) => {
-        let notFinishEvent = [];
-        let closeFinishEvent = [];
-        let nowTime = moment(new Date());
-
-        eventList.forEach((itm, idx) => {
-            if (nowTime.isBefore(moment(itm.enddatetime))) {
-                if (idx >= 1) {
-                    notFinishEvent.push(itm);
-                } else if (idx < 1) {
-                    closeFinishEvent.push(itm);
-                }
+            setNoMoreData(!result.hasMore);
+        } catch (error) {
+            if (!isCanceledRequest(error, controller.signal)) {
+                Toast.show('更多活動載入失敗，請稍後再試');
             }
-        });
-
-        // 如果未結束 or 將結束活動超過1個，再進行隨機排序
-        if (!loadMore && (notFinishEvent.length > 1 || closeFinishEvent.length > 1)) {
-            notFinishEvent.sort(() => Math.random() - 0.5);
-
-            let newList = Array.from(new Set(
-                closeFinishEvent.concat(
-                    notFinishEvent.concat(eventList)
-                )
-            ));
-            setEventDataList(newList);
-            return newList;
-        } else {
-            setEventDataList(eventList);
-            return eventList;
+        } finally {
+            if (requestGeneration === requestGenerationRef.current) {
+                loadingMoreRef.current = false;
+                setIsLoadingMore(false);
+                loadMoreControllerRef.current = null;
+            }
         }
-    };
+    }, [isLoading, noMoreData]);
 
-    const loadMoreData = () => {
+    const onRefresh = useCallback(async () => {
         trigger();
-        if (isLoading) { return; }
-        if (noMoreData) { return; }
-        setDataPage(prev => prev + 1);
-    };
+        await loadFirstPage();
+    }, [loadFirstPage]);
 
-    const onRefresh = () => {
-        trigger();
-        setDataPage(1);
-        setTimeout(() => {
-            setColumnsData([]);
-        }, 300);
+    // TODO: Harbor Card 暫時關閉，恢復時取消下列註釋
+    // const handleHarborTopicPress = useCallback(item => {
+    //     trigger();
+    //     logToFirebase('clickHarbor', {
+    //         title: item.title,
+    //         mode: 'app',
+    //     });
+    //
+    //     // TODO: 日後在此擴充其他 Harbor Card 類型的 App 內跳轉邏輯。
+    //     navigation.navigate('HarborTopicDetail', {
+    //         topicId: item.id,
+    //         topicTitle: item.unicode_title || item.title,
+    //     });
+    // }, [navigation]);
 
-        setTimeout(() => {
-            setEventDataList([]);
-            setHarborData([]);
-            setEventRawList([]);
-            setNoMoreData(true);
-        }, 300);
+    useImperativeHandle(ref, () => ({
+        getNoMoreData: () => noMoreData,
+        loadMoreData,
+        onRefresh,
+    }), [loadMoreData, noMoreData, onRefresh]);
 
-        setTimeout(() => {
-            getAPIData(1);
-        }, 300);
-    };
+    // 首次載入 ARK 活動（Harbor 已暫時關閉）
+    useEffect(() => {
+        loadFirstPage();
+
+        return () => {
+            requestGenerationRef.current += 1;
+            firstPageControllerRef.current?.abort();
+            loadMoreControllerRef.current?.abort();
+        };
+    }, [loadFirstPage]);
 
     const renderLoadMoreView = () => {
+        if (eventRawList.length === 0) {
+            return null;
+        }
+
         return (
             <View
                 style={{
                     justifyContent: 'center', alignItems: 'center',
                     marginTop: scale(10), marginBottom: scale(20),
                 }}>
-                {noMoreData ? (
+                {isLoadingMore ? (
+                    <ActivityIndicator size="small" color={themeColor} />
+                ) : noMoreData ? (
                     <View style={{ alignItems: 'center' }}>
                         <Text style={{ ...uiStyle.defaultText, color: black.third, textAlign: 'center', fontSize: scale(12) }}>
                             恭喜你，達成『刨根問底』成就~
@@ -385,14 +583,13 @@ const EventPage = forwardRef((props, ref) => {
                         <Text style={{ ...uiStyle.defaultText, color: black.third, fontSize: scale(12) }}>[]~(￣▽￣)~*</Text>
                     </View>
                 ) : (
-                    <TouchableOpacity
-                        style={s.loadMore}
-                        activeOpacity={0.8}
+                    <Pressable
+                        style={({ pressed }) => [s.loadMore, pressed && { opacity: 0.8 }]}
                         onPress={loadMoreData}>
                         <Text style={{ ...uiStyle.defaultText, color: white, fontSize: scale(14) }}>
                             Load More
                         </Text>
-                    </TouchableOpacity>
+                    </Pressable>
                 )}
             </View>
         );
@@ -403,18 +600,21 @@ const EventPage = forwardRef((props, ref) => {
             <FlatList
                 data={dataList}
                 renderItem={({ item }) => {
-                    if (item.type === 'harbor') {
-                        if (item.pinned === false) {
-                            return renderHarborMessage(item);
-                        }
-                    } else {
-                        return <EventCard data={item} cardWidth={cardWidth} />;
-                    }
+                    // TODO: Harbor Card 暫時關閉
+                    // if (item.type === 'harbor') {
+                    //     if (item.pinned === false) {
+                    //         return renderHarborMessage(item);
+                    //     }
+                    // } else {
+                    //     return <EventCard data={item} cardWidth={cardWidth} />;
+                    // }
+                    return <EventCard data={item} cardWidth={cardWidth} />;
                 }}
                 scrollEnabled={false}
                 keyExtractor={(item, index) => {
-                    const prefix = item.type === 'harbor' ? 'harbor' : 'event';
-                    return `${prefix}-${item.id || item._id || index}-${index}`;
+                    // const prefix = item.type === 'harbor' ? 'harbor' : 'event';
+                    // return `${prefix}-${item.id || item._id || index}-${index}`;
+                    return `event-${item.id || item._id || index}-${index}`;
                 }}
             />
         </View>);
@@ -426,187 +626,201 @@ const EventPage = forwardRef((props, ref) => {
         return (
             <View style={s.waterFlowContainer}>
                 {columnsToRender.map((col, idx) => (
-                    <View key={`water-col-${idx}`} style={{ flex: 1, alignItems: 'center' }}>
+                    <View key={`water-col-${idx}`} style={{ alignItems: 'center' }}>
                         {col.length > 0 ? (
                             renderOneList(col)
-                        ) : (
-                            <Text style={{ ...uiStyle.defaultText }}>No more data</Text>
-                        )}
+                        ) : null}
                     </View>
                 ))}
             </View>
         );
     };
 
-    // 渲染harbor的消息
-    const renderHarborMessage = (item) => {
-        // unicode_title    直接返回對應的Emoji
-        // title            例如:heart_eyes:以字符串形式返回
-        // excerpt          主題內容
-        // id               主題ID
-        // like_count       點讚數
-        // highest_post_number 回復數
-        // views            瀏覽數
-        // pinned           是否置頂
-        const pinColor = black.third;
-        const cleanExcerpt = item.excerpt ? item.excerpt.replace(/:[a-zA-Z0-9_+-]+:/g, '') : '';
-        const borderRadius = scale(8);
-        const borderTopRadiusStyle = item.excerpt ? null : {
-            borderTopStartRadius: borderRadius, borderTopEndRadius: borderRadius,
-        };
-
-        return (
-            <TouchableScale style={{
-                backgroundColor: `${themeColor}15`,
-                borderRadius,
-                margin: scale(5),
-                width: cardWidth,
-                alignItems: 'flex-start', justifyContent: 'center',
-            }}
-                onPress={() => {
-                    trigger();
-                    const URL = ARK_HARBOR_TOPIC + item.id;
-                    // 升版後一律外開：不再讀 ARK_Harbor_Setting，避免舊快取 tabbarMode==='webview' 仍呼叫已移除的 Harbor 路由
-                    logToFirebase('clickHarbor', {
-                        title: item.title,
-                        mode: 'openLink',
-                    });
-                    openLink({ URL, mode: 'fullScreen' });
-
-                    // --- 舊邏輯（組件層：useAsyncStorage('ARK_Harbor_Setting')；依 tabbarMode 決定 navigate('Harbor') 或 openLink）---
-                    // const settingStr = await getItem();
-                    // const setting = settingStr ? JSON.parse(settingStr) : null;
-                    // logToFirebase('clickHarbor', {
-                    //     title: item.title,
-                    //     mode: setting ? setting.tabbarMode : 'browser',
-                    // });
-                    // if (setting && setting.tabbarMode == 'webview') {
-                    //     navigation.navigate('Harbor', { url: URL });
-                    // } else {
-                    //     openLink(URL);
-                    // }
-                }}
-            >
-                {/* 帖子內容 */}
-                {item.excerpt && (
-                    <View style={{
-                        marginTop: verticalScale(13), marginHorizontal: scale(8),
-                        paddingHorizontal: verticalScale(5), paddingBottom: verticalScale(5),
-                    }}>
-                        <Text style={{
-                            ...uiStyle.defaultText, fontSize: verticalScale(10), color: themeColor,
-                            lineHeight: verticalScale(16),
-                        }} numberOfLines={5}>
-                            {cleanExcerpt}
-                        </Text>
+    // 首頁載入骨架：僅 ARK 活動卡（Harbor 骨架已暫時關閉）
+    const renderSkeletonPage = () => (
+        <View style={s.waterFlowContainer}>
+            {Array.from({ length: numColumns }, (_, columnIndex) => {
+                const variants =
+                    SKELETON_COLUMN_VARIANTS[columnIndex] ||
+                    SKELETON_COLUMN_VARIANTS[0];
+                return (
+                    <View
+                        key={`skeleton-col-${columnIndex}`}
+                        style={{ alignItems: 'center' }}>
+                        {variants.map((item, itemIndex) =>
+                            // item.kind === 'harbor' ? (
+                            //     <HarborSkeletonCard
+                            //         key={`skeleton-harbor-${columnIndex}-${itemIndex}`}
+                            //         cardWidth={cardWidth}
+                            //         excerptHeight={item.excerptHeight}
+                            //     />
+                            // ) : (
+                                <EventSkeletonCard
+                                    key={`skeleton-event-${columnIndex}-${itemIndex}`}
+                                    cardWidth={cardWidth}
+                                    imageRatio={item.imageRatio}
+                                    titleWidth={item.titleWidth}
+                                />
+                            // ),
+                        )}
                     </View>
-                )}
+                );
+            })}
+        </View>
+    );
 
-                <View style={{
-                    marginTop: item.excerpt ? verticalScale(5) : null,
-                    paddingTop: verticalScale(5),
-                    backgroundColor: white,
-                    paddingBottom: verticalScale(10), paddingHorizontal: scale(8),
-                    borderBottomEndRadius: borderRadius, borderBottomStartRadius: borderRadius,
-                    ...borderTopRadiusStyle,
-                }}>
-                    {/* 帖子標題 */}
-                    <Text style={{
-                        ...uiStyle.defaultText, fontWeight: '500', fontSize: verticalScale(11), color: black.second,
-                        textAlign: 'left',
-                        lineHeight: verticalScale(16),
-                    }} numberOfLines={4}>
-                        {item.unicode_title ? item.unicode_title : item.title}
-                    </Text>
-
-                    {/* 底部Pin */}
-                    <View style={{
-                        marginTop: verticalScale(5),
-                        flexDirection: 'row', width: '100%',
-                        alignItems: 'center', justifyContent: 'space-between',
-                    }}>
-                        {/* 用戶頭像 */}
-                        <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
-                            <Image
-                                source={{ uri: ARK_HARBOR_AVATAR(item.last_poster_username) }}
-                                style={{
-                                    width: verticalScale(12), height: verticalScale(12),
-                                    borderRadius: scale(50),
-                                    backgroundColor: white,
-                                }}
-                            />
-                            <Text style={{
-                                marginLeft: scale(2), ...uiStyle.defaultText, color: black.third,
-                                fontSize: verticalScale(8), fontStyle: 'italic',
-                                flexShrink: 1, textAlign: 'left',
-                            }} numberOfLines={1}>
-                                {item.last_poster_username}
-                            </Text>
-                        </View>
-
-                        {/* 點讚等資訊 */}
-                        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end' }}>
-                            {/* 點讚數 回復數 瀏覽數 */}
-                            <View style={{ flexDirection: 'row' }}>
-                                {item?.like_count > 0 && (
-                                    <View style={{
-                                        marginLeft: scale(5),
-                                        alignItems: 'center', justifyContent: 'center', flexDirection: 'row',
-                                    }}>
-                                        <MaterialCommunityIcons name="thumb-up-outline" size={verticalScale(10)} color={pinColor} style={{ marginRight: scale(1) }} />
-                                        <Text style={{ ...uiStyle.defaultText, fontSize: verticalScale(8), color: pinColor }}>
-                                            {item.like_count}
-                                        </Text>
-                                    </View>
-                                )}
-
-                                {item?.highest_post_number > 1 && (
-                                    <View style={{
-                                        marginLeft: scale(5),
-                                        alignItems: 'center', justifyContent: 'center', flexDirection: 'row',
-                                    }}>
-                                        <MaterialCommunityIcons name="comment-outline" size={verticalScale(10)} color={pinColor} style={{ marginRight: scale(1) }} />
-                                        <Text style={{ ...uiStyle.defaultText, fontSize: verticalScale(8), color: pinColor }}>
-                                            {item.highest_post_number}
-                                        </Text>
-                                    </View>
-                                )}
-
-                                {item?.views > 0 && (
-                                    <View style={{
-                                        marginLeft: scale(5),
-                                        alignItems: 'center', justifyContent: 'center', flexDirection: 'row',
-                                    }}>
-                                        <MaterialCommunityIcons name="eye-outline" size={verticalScale(10)} color={pinColor} style={{ marginRight: scale(1) }} />
-                                        <Text style={{ ...uiStyle.defaultText, fontSize: verticalScale(8), color: pinColor }}>
-                                            {item.views}
-                                        </Text>
-                                    </View>
-                                )}
-                            </View>
-                        </View>
-                    </View>
-                </View>
-
-            </TouchableScale>
-        );
-    };
+    // TODO: Harbor Card 暫時關閉，恢復時取消下列註釋
+    // // 渲染harbor的消息
+    // const renderHarborMessage = (item) => {
+    //     // unicode_title    直接返回對應的Emoji
+    //     // title            例如:heart_eyes:以字符串形式返回
+    //     // excerpt          主題內容
+    //     // id               主題ID
+    //     // like_count       點讚數
+    //     // highest_post_number 回復數
+    //     // views            瀏覽數
+    //     // pinned           是否置頂
+    //     const pinColor = black.third;
+    //     const cleanExcerpt = item.excerpt ? item.excerpt.replace(/:[a-zA-Z0-9_+-]+:/g, '') : '';
+    //     const borderRadius = scale(8);
+    //     const borderTopRadiusStyle = item.excerpt ? null : {
+    //         borderTopStartRadius: borderRadius, borderTopEndRadius: borderRadius,
+    //     };
+    //
+    //     return (
+    //         <TouchableScale style={{
+    //             backgroundColor: `${themeColor}15`,
+    //             borderRadius,
+    //             margin: scale(5),
+    //             width: cardWidth,
+    //             alignItems: 'flex-start', justifyContent: 'center',
+    //         }}
+    //             onPress={() => handleHarborTopicPress(item)}
+    //         >
+    //             {/* 帖子內容 */}
+    //             {item.excerpt && (
+    //                 <View style={{
+    //                     marginTop: verticalScale(13), marginHorizontal: scale(8),
+    //                     paddingHorizontal: verticalScale(5), paddingBottom: verticalScale(5),
+    //                 }}>
+    //                     <Text style={{
+    //                         ...uiStyle.defaultText, fontSize: verticalScale(10), color: themeColor,
+    //                         lineHeight: verticalScale(16),
+    //                     }} numberOfLines={5}>
+    //                         {cleanExcerpt}
+    //                     </Text>
+    //                 </View>
+    //             )}
+    //
+    //             <View style={{
+    //                 marginTop: item.excerpt ? verticalScale(5) : null,
+    //                 paddingTop: verticalScale(5),
+    //                 backgroundColor: white,
+    //                 paddingBottom: verticalScale(10), paddingHorizontal: scale(8),
+    //                 borderBottomEndRadius: borderRadius, borderBottomStartRadius: borderRadius,
+    //                 ...borderTopRadiusStyle,
+    //             }}>
+    //                 {/* 帖子標題 */}
+    //                 <Text style={{
+    //                     ...uiStyle.defaultText, fontWeight: '500', fontSize: verticalScale(11), color: black.second,
+    //                     textAlign: 'left',
+    //                     lineHeight: verticalScale(16),
+    //                 }} numberOfLines={4}>
+    //                     {item.unicode_title ? item.unicode_title : item.title}
+    //                 </Text>
+    //
+    //                 {/* 底部Pin */}
+    //                 <View style={{
+    //                     marginTop: verticalScale(5),
+    //                     flexDirection: 'row', width: '100%',
+    //                     alignItems: 'center', justifyContent: 'space-between',
+    //                 }}>
+    //                     {/* 用戶頭像 */}
+    //                     <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
+    //                         <Image
+    //                             source={{ uri: ARK_HARBOR_AVATAR(item.last_poster_username) }}
+    //                             style={{
+    //                                 width: verticalScale(12), height: verticalScale(12),
+    //                                 borderRadius: scale(50),
+    //                                 backgroundColor: white,
+    //                             }}
+    //                             contentFit="cover"
+    //                         />
+    //                         <Text style={{
+    //                             marginLeft: scale(2), ...uiStyle.defaultText, color: black.third,
+    //                             fontSize: verticalScale(8), fontStyle: 'italic',
+    //                             flexShrink: 1, textAlign: 'left',
+    //                         }} numberOfLines={1}>
+    //                             {item.last_poster_username}
+    //                         </Text>
+    //                     </View>
+    //
+    //                     {/* 點讚等資訊 */}
+    //                     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end' }}>
+    //                         {/* 點讚數 回復數 瀏覽數 */}
+    //                         <View style={{ flexDirection: 'row' }}>
+    //                             {item?.like_count > 0 && (
+    //                                 <View style={{
+    //                                     marginLeft: scale(5),
+    //                                     alignItems: 'center', justifyContent: 'center', flexDirection: 'row',
+    //                                 }}>
+    //                                     <MaterialCommunityIcons name="thumb-up-outline" size={verticalScale(10)} color={pinColor} style={{ marginRight: scale(1) }} />
+    //                                     <Text style={{ ...uiStyle.defaultText, fontSize: verticalScale(8), color: pinColor }}>
+    //                                         {item.like_count}
+    //                                     </Text>
+    //                                 </View>
+    //                             )}
+    //
+    //                             {item?.highest_post_number > 1 && (
+    //                                 <View style={{
+    //                                     marginLeft: scale(5),
+    //                                     alignItems: 'center', justifyContent: 'center', flexDirection: 'row',
+    //                                 }}>
+    //                                     <MaterialCommunityIcons name="comment-outline" size={verticalScale(10)} color={pinColor} style={{ marginRight: scale(1) }} />
+    //                                     <Text style={{ ...uiStyle.defaultText, fontSize: verticalScale(8), color: pinColor }}>
+    //                                         {item.highest_post_number}
+    //                                     </Text>
+    //                                 </View>
+    //                             )}
+    //
+    //                             {item?.views > 0 && (
+    //                                 <View style={{
+    //                                     marginLeft: scale(5),
+    //                                     alignItems: 'center', justifyContent: 'center', flexDirection: 'row',
+    //                                 }}>
+    //                                     <MaterialCommunityIcons name="eye-outline" size={verticalScale(10)} color={pinColor} style={{ marginRight: scale(1) }} />
+    //                                     <Text style={{ ...uiStyle.defaultText, fontSize: verticalScale(8), color: pinColor }}>
+    //                                         {item.views}
+    //                                     </Text>
+    //                                 </View>
+    //                             )}
+    //                         </View>
+    //                     </View>
+    //                 </View>
+    //             </View>
+    //
+    //         </TouchableScale>
+    //     );
+    // };
 
     return (
         <View style={{ ...props.style }}>
             {isLoading ? (
-                <View style={{
-                    flex: 1,
-                    marginBottom: Dimensions.get('window').height,
-                }}>
-                    <Loading />
-                </View>
-            ) : (columnsData.some(col => col.length > 0) ? (
+                renderSkeletonPage()
+            ) : columnsData.some(col => col.length > 0) ? (
                 <View>
                     {renderPage()}
                     {renderLoadMoreView()}
                 </View>
-            ) : null)}
+            ) : (
+                <Text style={{
+                    ...uiStyle.defaultText,
+                    color: black.third,
+                    marginVertical: verticalScale(20),
+                }}>
+                    活動資料暫時無法載入，請下拉刷新
+                </Text>
+            )}
         </View>
     );
 });

@@ -19,6 +19,8 @@ export const GITHUB_UPDATE_PLAN = GITHUB_FRONT_BASE + 'issues';
 
 export const GITHUB_ACTIVITY = GITHUB_FRONT_BASE + 'activity';
 
+export const MARKDOWN_BASIC_SYNTAX_URL = 'https://markdown.com.cn/basic-syntax/headings.html';
+
 // 組織賬號登入
 export const ARK_WEB_CLUB_SIGNIN = BASE_HOST + '/clubsignin';
 
@@ -28,10 +30,70 @@ export const ARK_HARBOR_TOP = ARK_HARBOR + '/top.json';
 export const ARK_HARBOR_LATEST = ARK_HARBOR + '/latest.json';
 export const ARK_HARBOR_TOPIC = ARK_HARBOR + '/t/topic/';
 export const ARK_HARBOR_NEW_TOPIC = ARK_HARBOR + '/new-topic';
+
+export function ARK_HARBOR_TOPIC_URL(topicId, postNumber) {
+    const topicPath = `${ARK_HARBOR_TOPIC}${encodeURIComponent(topicId)}`;
+    return postNumber
+        ? `${topicPath}/${encodeURIComponent(postNumber)}`
+        : topicPath;
+}
+
+export function ARK_HARBOR_TOPIC_JSON(topicId) {
+    return ARK_HARBOR + `/t/${encodeURIComponent(topicId)}.json`;
+}
+
+export function ARK_HARBOR_TOPIC_POSTS(topicId) {
+    return ARK_HARBOR + `/t/${encodeURIComponent(topicId)}/posts.json`;
+}
+
+export function ARK_HARBOR_ABSOLUTE_URL(url) {
+    if (!url || typeof url !== 'string') {
+        return '';
+    }
+    if (url.startsWith('#') || /^[a-z][a-z0-9+.-]*:/i.test(url)) {
+        return url;
+    }
+    if (url.startsWith('//')) {
+        return `https:${url}`;
+    }
+    return ARK_HARBOR + (url.startsWith('/') ? url : `/${url}`);
+}
+
+export function ARK_HARBOR_AVATAR_TEMPLATE(avatarTemplate, size = 96) {
+    if (!avatarTemplate || typeof avatarTemplate !== 'string') {
+        return '';
+    }
+    return ARK_HARBOR_ABSOLUTE_URL(
+        avatarTemplate.replace('{size}', String(size)),
+    );
+}
+
 export function ARK_HARBOR_AVATAR(username) {
     return ARK_HARBOR + `/user_avatar/harbor.umall.one/${username}/16/52_2.png`;
 }
-export const ARK_HARBOR_FEEDBACK = ARK_HARBOR + '/c/site-feedback/2';
+
+// Discourse 標準 emoji 路徑；name 為 shortcode（如 heart、+1），不含冒號
+export function ARK_HARBOR_EMOJI_URL(name, emojiSet = 'twitter') {
+    if (!name || typeof name !== 'string') {
+        return '';
+    }
+    const emojiName = name.replace(/^:|:$/g, '').trim();
+    if (!emojiName) {
+        return '';
+    }
+    return (
+        ARK_HARBOR +
+        `/images/emoji/${encodeURIComponent(emojiSet)}/` +
+        `${encodeURIComponent(emojiName)}.png`
+    );
+}
+
+/** Harbor「反饋」分類（/c/site-feedback/2） */
+export const ARK_HARBOR_FEEDBACK_CATEGORY_ID = 2;
+export const ARK_HARBOR_FEEDBACK_CATEGORY_SLUG = 'site-feedback';
+export const ARK_HARBOR_FEEDBACK =
+    ARK_HARBOR +
+    `/c/${ARK_HARBOR_FEEDBACK_CATEGORY_SLUG}/${ARK_HARBOR_FEEDBACK_CATEGORY_ID}`;
 
 export const ARK_WIKI = 'https://wiki.umall.one';
 
@@ -126,7 +188,7 @@ export const UMALL_LOGO = 'https://umall.one/static/logo.png';
 // 用戶協議
 export const USER_AGREE = 'https://umall.one/user_agreement.html';
 // 常見問題
-export const USUAL_Q = 'https://umall.one/qa.html';
+export const USUAL_Q = 'https://umall.one/qa';
 
 // Webview 服務
 // 選咩課
@@ -156,6 +218,9 @@ export const UMEH_API = {
         SUBMIT_COMMENT: 'submit_comment/',
     },
 };
+
+// 澳大開放數據平台
+export const UM_OPEN_DATA = 'https://data.um.edu.mo';
 
 // 澳大 - API 車位
 export const UM_API_CAR_PARK =

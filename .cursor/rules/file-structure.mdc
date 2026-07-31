@@ -9,22 +9,30 @@ alwaysApply: false
 src/
 ├── components/          # 可複用 UI 元件
 ├── pages/
-│   ├── TabbarPages/    # 主標籤頁面
-│   ├── ClubSystem/     # 組織相關頁面
-│   └── Features/       # 功能頁面
+│   ├── TabbarPages/     # 底部標籤對應頁面
+│   │   ├── info/        # 資訊（活動、組織、新聞等）
+│   │   ├── course/      # 課程 Tab（揾課／課表段落容器）
+│   │   │   └── pages/
+│   │   │       ├── what2Reg/   # 揾課段落
+│   │   │       └── courseSim/  # 課表段落
+│   │   ├── features/    # 服務 Tab 入口
+│   │   ├── arkHarbor/   # Harbor（WebView／相關頁）
+│   │   ├── arkwiki/     # Wiki
+│   │   └── HarborNewTopicTab.js  # 「新想法」Tab 捷徑
+│   └── Features/        # 功能子頁（巴士、停車場、設定等）
 ├── utils/
-│   ├── storageKits.js  # AsyncStorage 封裝
-│   ├── pathMap.js      # API 端點常數
+│   ├── storageKits.js   # AsyncStorage 封裝
+│   ├── pathMap.js       # API 端點常數
 │   ├── (uiMap.js 已刪除，顏色統一管理於 ThemeContext.js)
-│   ├── trigger.js      # 觸覺回饋
+│   ├── trigger.js       # 觸覺回饋
 │   ├── firebaseAnalytics.js
 │   └── checkCoursesKits.js
 ├── static/
-│   ├── UMCourses/      # 打包課程 JSON (離線後備)
-│   └── UMARK_Assets/   # 圖片、圖示等
+│   ├── UMCourses/       # 打包課程 JSON (離線後備)
+│   └── UMARK_Assets/    # 圖片、圖示等
 └── i18n/
-    ├── en-us.json      # 英文翻譯
-    └── zh-hk.js        # 繁體中文翻譯
+    ├── en-us.json       # 英文翻譯
+    └── zh-hk.js         # 繁體中文翻譯
 ```
 
 ## 關鍵檔案

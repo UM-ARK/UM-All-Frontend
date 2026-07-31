@@ -4,16 +4,23 @@ import {
     Text,
     ScrollView,
     TouchableOpacity,
+    Pressable,
     Linking,
     Alert,
     Platform,
 } from 'react-native';
 import { useTheme, uiStyle } from '../../components/ThemeContext';
+import { useHarborSession } from '../../contexts/HarborSessionContext';
 import { openLink } from '../../utils/browser';
 import { trigger } from '../../utils/trigger';
-import { getLocalStorage, setLocalStorage } from '../../utils/storageKits';
-import { getUmehHostPref, setUmehHostPref, refreshUmehHost } from '../../utils/umehHost';
-import * as DropdownMenu from 'zeego/dropdown-menu';
+import { setLocalStorage } from '../../utils/storageKits';
+import {
+    getUmehHostPref,
+    setUmehHostPref,
+    refreshUmehHost,
+} from '../../utils/umehHost';
+// @expo/ui MenuView 用 SwiftUI Host + matchContents 反向量測，無明確寬度會塌陷。
+import { MenuView } from '@expo/ui/community/menu';
 import {
     USUAL_Q,
     USER_AGREE,
@@ -24,10 +31,10 @@ import {
     GITHUB_UPDATE_PLAN,
     ARK_WIKI_ABOUT_ARK,
     GITHUB_ACTIVITY,
+    ARK_HARBOR_FEEDBACK_CATEGORY_ID,
+    ARK_HARBOR_FEEDBACK_CATEGORY_SLUG,
 } from '../../utils/pathMap';
-import packageInfo from '../../../package.json';
 import { scale, verticalScale } from 'react-native-size-matters';
-import { Image } from 'expo-image';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { reloadAppAsync } from 'expo';
 import { useTranslation } from 'react-i18next';
@@ -35,106 +42,10 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import SegmentControl from '../../components/SegmentControl';
 import {
     fetchAppInfoFromServer,
+    getLocalAppVersion,
     isLocalAppOlderThanServer,
     showAppStoreUpdateAlert,
 } from '../../utils/appUpdateKits';
-
-/**
- * 用戶資料卡元件 - 玻璃擬態效果
- * @param {Object} userInfo - 用戶資訊對象
- * @param {string} userInfo.avatar - 頭像網址
- * @param {string} userInfo.name - 用戶名稱
- * @param {string} userInfo.type - 用戶類型（club/student）
- */
-const ProfileCard = ({ userInfo }) => {
-    const { theme } = useTheme();
-    const { themeColor, white, black, glass, viewShadow } = theme;
-    const { t } = useTranslation(['setting']);
-
-    const avatarUrl = userInfo?.avatar;
-    const userName = userInfo?.name || t('setting:Guest');
-    const userType = userInfo?.type === 'club' ? t('setting:Organization') : t('setting:Student');
-
-    return (
-        <View style={{
-            marginHorizontal: scale(15),
-            marginTop: verticalScale(10),
-            marginBottom: verticalScale(10),
-            borderRadius: scale(16),
-            overflow: 'hidden',
-            backgroundColor: themeColor,
-            ...viewShadow,
-        }}>
-            {/* 玻璃擬態效果覆蓋層 */}
-            <View style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                padding: scale(20),
-                backgroundColor: glass,
-                backdropFilter: 'blur(10px)',
-            }}>
-                {/* 頭像 */}
-                <View style={{
-                    width: scale(60),
-                    height: scale(60),
-                    borderRadius: scale(30),
-                    backgroundColor: white,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    overflow: 'hidden',
-                    borderWidth: 2,
-                    borderColor: white,
-                }}>
-                    {avatarUrl ? (
-                        <Image
-                            source={{ uri: avatarUrl }}
-                            style={{ width: '100%', height: '100%' }}
-                            contentFit="cover"
-                        />
-                    ) : (
-                        <Ionicons name="person" size={scale(30)} color={themeColor} />
-                    )}
-                </View>
-
-                {/* 用戶資訊 */}
-                <View style={{ marginLeft: scale(15), flex: 1 }}>
-                    <Text style={{
-                        ...uiStyle.defaultText,
-                        fontSize: scale(18),
-                        fontWeight: '700',
-                        color: white,
-                    }}>
-                        {userName} Still Building...
-                    </Text>
-                    <View style={{
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        marginTop: verticalScale(4),
-                    }}>
-                        <View style={{
-                            backgroundColor: glass,
-                            paddingHorizontal: scale(8),
-                            paddingVertical: verticalScale(2),
-                            borderRadius: scale(10),
-                        }}>
-                            <Text style={{
-                                ...uiStyle.defaultText,
-                                fontSize: scale(10),
-                                color: white,
-                                fontWeight: '500',
-                            }}>
-                                {userType}
-                            </Text>
-                        </View>
-                    </View>
-                </View>
-
-                {/* 箭頭 */}
-                <Ionicons name="chevron-forward" size={scale(20)} color={white} />
-            </View>
-        </View>
-    );
-};
 
 /**
  * 同一分區內多個設置項的容器：單一圓角卡片；項間分隔與功能頁卡片標題底線相同（bg_color、verticalScale(2)）
@@ -146,28 +57,35 @@ const SettingSectionCard = ({ children }) => {
     const items = React.Children.toArray(children).filter(Boolean);
 
     return (
-        <View style={{
-            marginHorizontal: scale(15),
-            marginBottom: verticalScale(8),
-            borderRadius: scale(16),
-            overflow: 'hidden',
-            backgroundColor: white,
-            ...viewShadow,
-        }}>
-            {items.map((child, index) => (
-                <React.Fragment key={index}>
-                    {index > 0 ? (
-                        <View
-                            style={{
-                                height: verticalScale(2),
-                                width: '100%',
-                                backgroundColor: bg_color,
-                            }}
-                        />
-                    ) : null}
-                    {child}
-                </React.Fragment>
-            ))}
+        // 外層承載陰影；內層 overflow 裁切內容，避免陰影被裁掉
+        <View
+            style={{
+                marginHorizontal: scale(15),
+                marginBottom: verticalScale(8),
+                borderRadius: scale(16),
+                backgroundColor: white,
+                ...viewShadow,
+            }}>
+            <View
+                style={{
+                    borderRadius: scale(16),
+                    overflow: 'hidden',
+                }}>
+                {items.map((child, index) => (
+                    <React.Fragment key={index}>
+                        {index > 0 ? (
+                            <View
+                                style={{
+                                    height: verticalScale(2),
+                                    width: '100%',
+                                    backgroundColor: bg_color,
+                                }}
+                            />
+                        ) : null}
+                        {child}
+                    </React.Fragment>
+                ))}
+            </View>
         </View>
     );
 };
@@ -182,24 +100,31 @@ const SettingSection = ({ title, icon }) => {
     const { black } = theme;
 
     return (
-        <View style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            marginHorizontal: scale(15),
-            marginTop: verticalScale(20),
-            marginBottom: verticalScale(6),
-        }}>
-            {icon && (
-                <Ionicons name={icon} size={scale(14)} color={black.third} style={{ marginRight: scale(6) }} />
-            )}
-            <Text style={{
-                ...uiStyle.defaultText,
-                fontSize: scale(12),
-                fontWeight: '600',
-                color: black.third,
-                textTransform: 'uppercase',
-                letterSpacing: scale(0.5),
+        <View
+            style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginHorizontal: scale(15),
+                marginTop: verticalScale(20),
+                marginBottom: verticalScale(6),
             }}>
+            {icon && (
+                <Ionicons
+                    name={icon}
+                    size={scale(14)}
+                    color={black.third}
+                    style={{ marginRight: scale(6) }}
+                />
+            )}
+            <Text
+                style={{
+                    ...uiStyle.defaultText,
+                    fontSize: scale(12),
+                    fontWeight: '600',
+                    color: black.third,
+                    textTransform: 'uppercase',
+                    letterSpacing: scale(0.5),
+                }}>
                 {title}
             </Text>
         </View>
@@ -217,16 +142,32 @@ const SettingSection = ({ title, icon }) => {
  * @param {boolean} showArrow - 是否顯示右箭頭，默認為 true
  * @param {boolean} grouped - 是否置於 SettingSectionCard 內（共用外層圓角與陰影）
  */
-const SettingItem = ({ icon, iconColor, title, subtitle, onPress, rightElement, showArrow = true, grouped = false }) => {
+const SettingItem = ({
+    icon,
+    iconColor,
+    title,
+    subtitle,
+    onPress,
+    rightElement,
+    showArrow = true,
+    grouped = false,
+}) => {
     const { theme } = useTheme();
     const { white, black, viewShadow } = theme;
+    // 無 onPress 時用 View，供 MenuView 作為觸發錨點（避免內層 Touchable 搶手勢）
+    const Container = onPress ? TouchableOpacity : View;
 
     return (
-        <TouchableOpacity
-            onPress={() => {
-                trigger();
-                onPress?.();
-            }}
+        <Container
+            {...(onPress
+                ? {
+                    onPress: () => {
+                        trigger();
+                        onPress();
+                    },
+                    activeOpacity: 0.7,
+                }
+                : {})}
             style={{
                 flexDirection: 'row',
                 alignItems: 'center',
@@ -241,41 +182,42 @@ const SettingItem = ({ icon, iconColor, title, subtitle, onPress, rightElement, 
                         marginBottom: verticalScale(8),
                         ...viewShadow,
                     }),
-            }}
-            activeOpacity={0.7}
-        >
+            }}>
             {/* 圖標 */}
             {icon && (
-                <View style={{
-                    width: scale(32),
-                    height: scale(32),
-                    borderRadius: scale(12),
-                    backgroundColor: `${iconColor}15`,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    marginRight: scale(12),
-                }}>
+                <View
+                    style={{
+                        width: scale(32),
+                        height: scale(32),
+                        borderRadius: scale(12),
+                        backgroundColor: `${iconColor}15`,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        marginRight: scale(12),
+                    }}>
                     <Ionicons name={icon} size={scale(18)} color={iconColor} />
                 </View>
             )}
 
             {/* 內容 */}
             <View style={{ flex: 1 }}>
-                <Text style={{
-                    ...uiStyle.defaultText,
-                    fontSize: scale(14),
-                    fontWeight: '500',
-                    color: black.main,
-                }}>
+                <Text
+                    style={{
+                        ...uiStyle.defaultText,
+                        fontSize: scale(14),
+                        fontWeight: '500',
+                        color: black.main,
+                    }}>
                     {title}
                 </Text>
                 {subtitle && (
-                    <Text style={{
-                        ...uiStyle.defaultText,
-                        fontSize: scale(11),
-                        color: black.third,
-                        marginTop: verticalScale(2),
-                    }}>
+                    <Text
+                        style={{
+                            ...uiStyle.defaultText,
+                            fontSize: scale(11),
+                            color: black.third,
+                            marginTop: verticalScale(2),
+                        }}>
                         {subtitle}
                     </Text>
                 )}
@@ -286,9 +228,14 @@ const SettingItem = ({ icon, iconColor, title, subtitle, onPress, rightElement, 
 
             {/* 箭頭 */}
             {showArrow && (
-                <Ionicons name="chevron-forward" size={scale(18)} color={black.third} style={{ marginLeft: scale(8) }} />
+                <Ionicons
+                    name="chevron-forward"
+                    size={scale(18)}
+                    color={black.third}
+                    style={{ marginLeft: scale(8) }}
+                />
             )}
-        </TouchableOpacity>
+        </Container>
     );
 };
 
@@ -298,40 +245,124 @@ const SettingItem = ({ icon, iconColor, title, subtitle, onPress, rightElement, 
  */
 const SettingPage = ({ navigation }) => {
     const { theme, themeMode, setThemeMode } = useTheme();
-    const { bg_color, black } = theme;
-    const { t, i18n } = useTranslation(['setting', 'about', 'common']);
-    const [userInfo, setUserInfo] = useState({});
+    const { bg_color, black, themeColor } = theme;
+    const { t, i18n } = useTranslation(['setting', 'about', 'common', 'my']);
+    const { status, user, login } = useHarborSession();
     const [umehHostPref, setUmehHostPrefState] = useState('auto');
 
-    // 組件掛載時加載用戶資訊和 host 偏好
     useEffect(() => {
-        loadUserInfo();
         getUmehHostPref().then(setUmehHostPrefState);
     }, []);
-
-    /**
-     * 從本地存儲加載用戶資訊
-     */
-    const loadUserInfo = async () => {
-        const info = await getLocalStorage('userInfo');
-        if (info) {
-            setUserInfo(info);
-        }
-    };
 
     /**
      * 處理主題變更
      * @param {number} index - 主題模式索引（0:系統, 1:淺色, 2:深色）
      */
-    const handleThemeChange = async (index) => {
+    const handleThemeChange = async index => {
         await setThemeMode(index);
+    };
+
+    /**
+     * 顯示 Harbor 操作錯誤
+     * @param {Object} sessionError - Harbor session 錯誤
+     */
+    const presentHarborError = useCallback(
+        sessionError => {
+            if (!sessionError) {
+                return;
+            }
+
+            const message =
+                sessionError.code === 'HARBOR_SESSION_EXPIRED'
+                    ? t('Harbor 登入已失效，請重新登入。', { ns: 'my' })
+                    : t('無法完成 Harbor 操作，請稍後再試。', { ns: 'my' });
+            Alert.alert(
+                t('Harbor 操作失敗', { ns: 'my' }),
+                message,
+                [
+                    {
+                        text: t('確定', { ns: 'my' }),
+                        onPress: () => trigger(),
+                    },
+                ],
+                { cancelable: false },
+            );
+        },
+        [t],
+    );
+
+    /**
+     * 開啟 Harbor 論壇反饋發帖頁
+     */
+    const openHarborFeedbackComposer = useCallback(() => {
+        navigation.navigate('HarborComposer', {
+            mode: 'newTopic',
+            categoryId: ARK_HARBOR_FEEDBACK_CATEGORY_ID,
+            categorySlug: ARK_HARBOR_FEEDBACK_CATEGORY_SLUG,
+        });
+    }, [navigation]);
+
+    /**
+     * 問題反饋 Menu：論壇反饋 / GitHub Issues
+     * @param {Object} event - MenuView onPressAction 事件
+     */
+    const handleFeedbackAction = event => {
+        trigger();
+        switch (event.nativeEvent.event) {
+            case 'harbor':
+                if (status === 'signedIn') {
+                    openHarborFeedbackComposer();
+                    break;
+                }
+                Alert.alert(
+                    t('需要登入 Harbor', { ns: 'my' }),
+                    t('登入後即可在論壇提交反饋。', { ns: 'my' }),
+                    [
+                        {
+                            text: t('取消'),
+                            style: 'cancel',
+                            onPress: () => trigger(),
+                        },
+                        {
+                            text: t('登入 Harbor', { ns: 'my' }),
+                            onPress: async () => {
+                                trigger();
+                                try {
+                                    const signedIn = await login({
+                                        routeName: 'HarborComposer',
+                                        params: {
+                                            mode: 'newTopic',
+                                            categoryId:
+                                                ARK_HARBOR_FEEDBACK_CATEGORY_ID,
+                                            categorySlug:
+                                                ARK_HARBOR_FEEDBACK_CATEGORY_SLUG,
+                                        },
+                                    });
+                                    if (signedIn) {
+                                        openHarborFeedbackComposer();
+                                    }
+                                } catch (sessionError) {
+                                    presentHarborError(sessionError);
+                                }
+                            },
+                        },
+                    ],
+                    { cancelable: true },
+                );
+                break;
+            case 'github':
+                openLink(GITHUB_UPDATE_PLAN);
+                break;
+            default:
+                break;
+        }
     };
 
     /**
      * 處理語言變更
      * @param {string} lang - 語言代碼（'tc' 或 'en'）
      */
-    const handleLanguageChange = (lang) => {
+    const handleLanguageChange = lang => {
         i18n.changeLanguage(lang);
         setLocalStorage('language', lang);
     };
@@ -359,7 +390,7 @@ const SettingPage = ({ navigation }) => {
                         reloadAppAsync();
                     },
                 },
-            ]
+            ],
         );
     };
 
@@ -370,7 +401,10 @@ const SettingPage = ({ navigation }) => {
         trigger();
         const result = await fetchAppInfoFromServer();
         if (!result.ok) {
-            Alert.alert(t('setting:Check Update'), t('setting:Check Update Error'));
+            Alert.alert(
+                t('setting:Check Update'),
+                t('setting:Check Update Error'),
+            );
             return;
         }
         if (isLocalAppOlderThanServer(result.content)) {
@@ -380,7 +414,7 @@ const SettingPage = ({ navigation }) => {
         }
     }, [t]);
 
-    const handleUmehHostPrefChange = async (pref) => {
+    const handleUmehHostPrefChange = async pref => {
         await setUmehHostPref(pref);
         setUmehHostPrefState(pref);
         refreshUmehHost();
@@ -409,11 +443,35 @@ const SettingPage = ({ navigation }) => {
     return (
         <View style={{ flex: 1, backgroundColor: bg_color }}>
             <ScrollView contentInsetAdjustmentBehavior="automatic">
-                {/* TODO: 用戶資料卡，等做好了賬號系統就加回去 */}
-                {/* <ProfileCard userInfo={userInfo} /> */}
+                {status === 'signedIn' && user ? (
+                    <>
+                        <SettingSection
+                            title="Harbor"
+                            icon="person-circle"
+                        />
+
+                        <SettingSectionCard>
+                            <SettingItem
+                                grouped
+                                icon="person-circle-outline"
+                                iconColor={themeColor}
+                                title={t('帳戶設定', { ns: 'my' })}
+                                subtitle={`@${user.username}`}
+                                onPress={() =>
+                                    navigation.navigate(
+                                        'HarborAccountSettings',
+                                    )
+                                }
+                            />
+                        </SettingSectionCard>
+                    </>
+                ) : null}
 
                 {/* 外觀設置分區 */}
-                <SettingSection title={t('setting:Appearance')} icon="color-palette" />
+                <SettingSection
+                    title={t('setting:Appearance')}
+                    icon="color-palette"
+                />
 
                 <SettingSectionCard>
                     <SettingItem
@@ -436,13 +494,19 @@ const SettingPage = ({ navigation }) => {
                         icon="language"
                         iconColor="#5856D6"
                         title={t('setting:Language')}
-                        subtitle={i18n.language === 'tc' ? '繁體中文' : 'English'}
+                        subtitle={
+                            i18n.language === 'tc' ? '繁體中文' : 'English'
+                        }
                         showArrow={false}
                         rightElement={
                             <SegmentControl
                                 options={languageOptions}
                                 selectedIndex={languageIndex}
-                                onChange={(index) => handleLanguageChange(languageOptions[index].key)}
+                                onChange={index =>
+                                    handleLanguageChange(
+                                        languageOptions[index].key,
+                                    )
+                                }
                             />
                         }
                     />
@@ -464,7 +528,7 @@ const SettingPage = ({ navigation }) => {
                         icon="cloud-download"
                         iconColor="#34C759"
                         title={t('setting:Check Update')}
-                        subtitle={`v${packageInfo.version}`}
+                        subtitle={`v${getLocalAppVersion()}`}
                         onPress={handleCheckUpdate}
                     />
                     <SettingItem
@@ -475,59 +539,74 @@ const SettingPage = ({ navigation }) => {
                         subtitle={umehHostPrefLabels[umehHostPref]}
                         showArrow={false}
                         rightElement={
-                            <DropdownMenu.Root>
-                                <DropdownMenu.Trigger>
-                                    <TouchableOpacity
+                            <MenuView
+                                actions={['auto', 'primary', 'backup'].map(
+                                    pref => ({
+                                        id: pref,
+                                        title: umehHostPrefLabels[pref],
+                                        state:
+                                            umehHostPref === pref
+                                                ? 'on'
+                                                : 'off',
+                                    }),
+                                )}
+                                onPressAction={event =>
+                                    handleUmehHostPrefChange(
+                                        event.nativeEvent.event,
+                                    )
+                                }
+                                shouldOpenOnLongPress={false}
+                                style={{ width: scale(72) }}>
+                                <Pressable
+                                    style={({ pressed }) => ({
+                                        width: scale(72),
+                                        flexDirection: 'row',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        backgroundColor: `${'#007AFF'}15`,
+                                        borderRadius: scale(8),
+                                        paddingHorizontal: scale(10),
+                                        paddingVertical: scale(5),
+                                        opacity: pressed ? 0.7 : 1,
+                                    })}>
+                                    <Text
                                         style={{
-                                            flexDirection: 'row',
-                                            alignItems: 'center',
-                                            backgroundColor: `${'#007AFF'}15`,
-                                            borderRadius: scale(8),
-                                            paddingHorizontal: scale(10),
-                                            paddingVertical: scale(5),
-                                        }}
-                                        activeOpacity={0.7}
-                                    >
-                                        <Text style={{
                                             ...uiStyle.defaultText,
                                             fontSize: scale(13),
                                             color: '#007AFF',
                                             fontWeight: '500',
                                         }}>
-                                            {umehHostPrefLabels[umehHostPref]}
-                                        </Text>
-                                        <Ionicons name="chevron-down" size={scale(12)} color="#007AFF" style={{ marginLeft: scale(4) }} />
-                                    </TouchableOpacity>
-                                </DropdownMenu.Trigger>
-                                <DropdownMenu.Content>
-                                    {['auto', 'primary', 'backup'].map(pref => (
-                                        <DropdownMenu.CheckboxItem
-                                            key={pref}
-                                            value={umehHostPref === pref ? 'on' : 'off'}
-                                            onValueChange={() => handleUmehHostPrefChange(pref)}
-                                        >
-                                            <DropdownMenu.ItemIndicator />
-                                            <DropdownMenu.ItemTitle>
-                                                {umehHostPrefLabels[pref]}
-                                            </DropdownMenu.ItemTitle>
-                                        </DropdownMenu.CheckboxItem>
-                                    ))}
-                                </DropdownMenu.Content>
-                            </DropdownMenu.Root>
+                                        {umehHostPrefLabels[umehHostPref]}
+                                    </Text>
+                                    <Ionicons
+                                        name="chevron-down"
+                                        size={scale(12)}
+                                        color="#007AFF"
+                                        style={{ marginLeft: scale(4) }}
+                                    />
+                                </Pressable>
+                            </MenuView>
                         }
                     />
                 </SettingSectionCard>
 
                 {/* 關於分區 */}
-                <SettingSection title={t('setting:About')} icon="information-circle" />
+                <SettingSection
+                    title={t('setting:About')}
+                    icon="information-circle"
+                />
 
                 <SettingSectionCard>
                     <SettingItem
                         grouped
-                        icon={Platform.OS === 'android' ? 'logo-android' : 'logo-apple'}
+                        icon={
+                            Platform.OS === 'android'
+                                ? 'logo-android'
+                                : 'logo-apple'
+                        }
                         iconColor={black.main}
                         title={t('setting:Version')}
-                        subtitle={`v${packageInfo.version}`}
+                        subtitle={`v${getLocalAppVersion()}`}
                         showArrow={false}
                     />
                     <SettingItem
@@ -572,16 +651,6 @@ const SettingPage = ({ navigation }) => {
                     />
                     <SettingItem
                         grouped
-                        icon="chatbubble-ellipses"
-                        iconColor="#34C759"
-                        title={t('setting:Feedback')}
-                        onPress={() => {
-                            trigger();
-                            openLink(GITHUB_UPDATE_PLAN);
-                        }}
-                    />
-                    <SettingItem
-                        grouped
                         icon="pulse"
                         iconColor="#FF9500"
                         title={t('setting:Activity')}
@@ -606,6 +675,34 @@ const SettingPage = ({ navigation }) => {
                 <SettingSection title={t('setting:Contact')} icon="mail" />
 
                 <SettingSectionCard>
+                    <MenuView
+                        actions={[
+                            {
+                                id: 'harbor',
+                                title: t('setting:Forum Feedback'),
+                                image: 'bubble.left.and.bubble.right',
+                                imageColor: themeColor,
+                                titleColor: themeColor,
+                            },
+                            {
+                                id: 'github',
+                                title: t('setting:GitHub Issues'),
+                                image: 'chevron.left.forwardslash.chevron.right',
+                                imageColor: themeColor,
+                                titleColor: themeColor,
+                            },
+                        ]}
+                        onOpenMenu={() => trigger()}
+                        onPressAction={handleFeedbackAction}
+                        shouldOpenOnLongPress={false}
+                        style={{ width: '100%' }}>
+                        <SettingItem
+                            grouped
+                            icon="chatbubble-ellipses"
+                            iconColor="#34C759"
+                            title={t('setting:Feedback')}
+                        />
+                    </MenuView>
                     <SettingItem
                         grouped
                         icon="globe"

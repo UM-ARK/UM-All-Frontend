@@ -1,24 +1,24 @@
 import React from 'react';
-import { View, Platform, Dimensions } from 'react-native';
 
 import { trigger } from '../../../utils/trigger';
 import { useTheme } from '../../../components/ThemeContext';
 import HomePage from './home/index';
-import NewsPage from './NewsPage';
 import ClubPage from './ClubPage';
-import UMEventPage from './UMEventPage';
-import WikiPage from '../arkwiki/index';
+import CampusPage from './CampusPage';
 
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
-import { scale, verticalScale } from 'react-native-size-matters';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { moderateScale } from 'react-native-size-matters';
+import { SafeAreaView } from 'react-native-screens/experimental';
 import { useTranslation } from 'react-i18next';
 
 const Tab = createMaterialTopTabNavigator();
 
-const tabWidth = verticalScale(25);
-const numOfTabs = 4;
-const TAB_BAR_HEIGHT = scale(30);
+// 平板只需要輕微放大，避免依短邊線性縮放後令頂部 Tab 過高
+const TOP_TAB_SCALE_FACTOR = 0.1;
+const TAB_INDICATOR_WIDTH = moderateScale(25, TOP_TAB_SCALE_FACTOR);
+const TAB_BAR_HEIGHT = moderateScale(30, TOP_TAB_SCALE_FACTOR);
+// 字體在平板上保留較明顯的放大幅度，但不影響 Tab Bar 本身高度
+const TAB_LABEL_FONT_SIZE = moderateScale(11, 0.3);
 
 export default function NewsScreen() {
     const { theme } = useTheme();
@@ -26,17 +26,21 @@ export default function NewsScreen() {
     const { t } = useTranslation(['common', 'home']);
 
     return (
-        <SafeAreaView style={{ backgroundColor: bg_color, flex: 1 }} edges={['top']}>
+        <SafeAreaView style={{ backgroundColor: bg_color, flex: 1 }} edges={{ top: true }}>
             <Tab.Navigator
                 screenOptions={{
                     tabBarLabelStyle: {
-                        fontSize: verticalScale(9),
+                        fontSize: TAB_LABEL_FONT_SIZE,
                         fontWeight: 'bold',
                     },
                     tabBarStyle: {
                         backgroundColor: bg_color,
                         height: TAB_BAR_HEIGHT,
                         overflow: 'hidden',
+                    },
+                    tabBarItemStyle: {
+                        minHeight: TAB_BAR_HEIGHT,
+                        paddingVertical: 0,
                     },
                     tabBarContentContainerStyle: {
                         alignItems: 'center',
@@ -48,56 +52,36 @@ export default function NewsScreen() {
                     tabBarPressColor: bg_color,
                     tabBarIndicatorStyle: {
                         backgroundColor: themeColor,
-                        width: tabWidth,
-                        marginLeft:
-                            (Dimensions.get('window').width / numOfTabs -
-                                tabWidth) /
-                            2,
+                        width: TAB_INDICATOR_WIDTH,
+                        marginHorizontal: 'auto',
                     },
                     lazy: true,
                 }}
-                initialRouteName="HomePage"
-            >
-                    <Tab.Screen
-                        name="HomePage"
-                        component={HomePage}
-                        options={{ title: t('TOPTAB_MAIN') }}
-                        listeners={() => ({
-                            tabPress: () => trigger(),
-                        })}
-                    />
-                    {/* <Tab.Screen
-                        name="WikiPage"
-                        component={WikiPage}
-                        options={{ title: t('Wiki') }}
-                        listeners={() => ({
-                            tabPress: () => trigger(),
-                        })}
-                    /> */}
-                    <Tab.Screen
-                        name="ClubPage"
-                        component={ClubPage}
-                        options={{ title: t('TOPTAB_CLUB') }}
-                        listeners={() => ({
-                            tabPress: () => trigger(),
-                        })}
-                    />
-                    <Tab.Screen
-                        name="UMEventPage"
-                        component={UMEventPage}
-                        options={{ title: t('TOPTAB_EVENT') }}
-                        listeners={() => ({
-                            tabPress: () => trigger(),
-                        })}
-                    />
-                    <Tab.Screen
-                        name="NewsPage"
-                        component={NewsPage}
-                        options={{ title: t('TOPTAB_NEWS') }}
-                        listeners={() => ({
-                            tabPress: () => trigger(),
-                        })}
-                    />
+                initialRouteName="HomePage">
+                <Tab.Screen
+                    name="ClubPage"
+                    component={ClubPage}
+                    options={{ title: t('TOPTAB_CLUB') }}
+                    listeners={() => ({
+                        tabPress: () => trigger(),
+                    })}
+                />
+                <Tab.Screen
+                    name="HomePage"
+                    component={HomePage}
+                    options={{ title: t('TOPTAB_MAIN') }}
+                    listeners={() => ({
+                        tabPress: () => trigger(),
+                    })}
+                />
+                <Tab.Screen
+                    name="CampusPage"
+                    component={CampusPage}
+                    options={{ title: t('TOPTAB_CAMPUS') }}
+                    listeners={() => ({
+                        tabPress: () => trigger(),
+                    })}
+                />
             </Tab.Navigator>
         </SafeAreaView>
     );

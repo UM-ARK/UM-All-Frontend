@@ -1,0 +1,627 @@
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {
+    Alert,
+    Modal,
+    Pressable,
+    StyleSheet,
+    Text,
+    View,
+} from 'react-native';
+import {ScrollView} from 'react-native-gesture-handler';
+import Animated, {
+    Easing,
+    runOnJS,
+    useAnimatedStyle,
+    useSharedValue,
+    withTiming,
+} from 'react-native-reanimated';
+import {scale, verticalScale} from 'react-native-size-matters';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {t} from 'i18next';
+
+import {useTheme, uiStyle} from '../../../../components/ThemeContext';
+import TouchableScale from '../../../../components/TouchableScale';
+import {trigger} from '../../../../utils/trigger';
+import {
+    DEFAULT_TIME_FROM,
+    DEFAULT_TIME_TO,
+    TIME_RANGE_PRESETS,
+} from '../constants';
+
+const HOURS = Array.from({length: 24}, (_, i) =>
+    String(i).padStart(2, '0'),
+);
+const MINUTES = Array.from({length: 12}, (_, i) =>
+    String(i * 5).padStart(2, '0'),
+);
+
+/** 固定整數高度，避免 snap 與 round 因小數互搶造成閃爍 */
+const ITEM_HEIGHT = 40;
+const VISIBLE_COUNT = 5;
+const WHEEL_HEIGHT = ITEM_HEIGHT * VISIBLE_COUNT;
+const WHEEL_PADDING = ITEM_HEIGHT * Math.floor(VISIBLE_COUNT / 2);
+/** 奇數份複本，初始落在中段，邊緣再無動畫回中以模擬循環 */
+const LOOP_COPIES = 5;
+const MIDDLE_COPY = Math.floor(LOOP_COPIES / 2);
+
+const OPEN_MS = 220;
+const CLOSE_MS = 200;
+const SHEET_TRANSLATE = 320;
+const BACKDROP_OPACITY = 0.45;
+
+const wrapIndex = (index, length) =>
+    ((index % length) + length) % length;
+
+/**
+ * 將 HH:mm 對齊到 5 分鐘刻度（結束時間 23:59 視為 23:55）。
+ *
+ * @param {string} time HH:mm
+ * @returns {{hour: string, minute: string}}
+ */
+const snapTimeParts = time => {
+    const [rawHour = '0', rawMinute = '0'] = String(time || '00:00').split(':');
+    const hourNum = Math.min(23, Math.max(0, parseInt(rawHour, 10) || 0));
+    let minuteNum = parseInt(rawMinute, 10) || 0;
+    if (minuteNum > 55) {
+        minuteNum = 55;
+    } else {
+        minuteNum = Math.round(minuteNum / 5) * 5;
+    }
+    return {
+        hour: String(hourNum).padStart(2, '0'),
+        minute: String(minuteNum).padStart(2, '0'),
+    };
+};
+
+/**
+ * @param {string} hour
+ * @param {string} minute
+ * @param {{asEnd?: boolean}} [options]
+ * @returns {string}
+ */
+const joinTime = (hour, minute, options = {}) => {
+    // 結束時間滾輪最末為 23:55，對齊全天／晚上結束 23:59
+    if (options.asEnd && hour === '23' && minute === '55') {
+        return '23:59';
+    }
+    return `${hour}:${minute}`;
+};
+
+/**
+ * 可滑動的時／分滾輪（循環列表；僅在慣性結束時回寫，避免 scrollTo 迴圈）。
+ */
+const TimeWheelColumn = ({values, value, onChange, textColor, accentColor}) => {
+    const scrollRef = useRef(null);
+    const suppressEndRef = useRef(true);
+    const valueRef = useRef(value);
+    const length = values.length;
+    const baseIndex = Math.max(0, values.indexOf(value));
+
+    const loopedValues = useMemo(() => {
+        const result = [];
+        for (let copy = 0; copy < LOOP_COPIES; copy += 1) {
+            for (let i = 0; i < length; i += 1) {
+                result.push(values[i]);
+            }
+        }
+        return result;
+    }, [length, values]);
+
+    valueRef.current = value;
+
+    // 選中項變更時對齊到中段複本，避免滾到列表兩端後無法繼續循環
+    useEffect(() => {
+        suppressEndRef.current = true;
+        const offset = (MIDDLE_COPY * length + baseIndex) * ITEM_HEIGHT;
+        const frame = requestAnimationFrame(() => {
+            scrollRef.current?.scrollTo({y: offset, animated: false});
+            setTimeout(() => {
+                suppressEndRef.current = false;
+            }, 80);
+        });
+        return () => cancelAnimationFrame(frame);
+    }, [baseIndex, length]);
+
+    const handleMomentumScrollEnd = event => {
+        if (suppressEndRef.current) {
+            return;
+        }
+        const rawIndex = Math.round(
+            event.nativeEvent.contentOffset.y / ITEM_HEIGHT,
+        );
+        const clampedIndex = Math.min(
+            loopedValues.length - 1,
+            Math.max(0, rawIndex),
+        );
+        const realIndex = wrapIndex(clampedIndex, length);
+        const next = values[realIndex];
+
+        // 滾到首／末份複本時無動畫回到中段，維持可繼續循環
+        const copyIndex = Math.floor(clampedIndex / length);
+        if (copyIndex === 0 || copyIndex === LOOP_COPIES - 1) {
+            suppressEndRef.current = true;
+            scrollRef.current?.scrollTo({
+                y: (MIDDLE_COPY * length + realIndex) * ITEM_HEIGHT,
+                animated: false,
+            });
+            setTimeout(() => {
+                suppressEndRef.current = false;
+            }, 80);
+        }
+
+        if (next !== valueRef.current) {
+            onChange(next);
+        }
+    };
+
+    return (
+        <View
+            style={{
+                height: WHEEL_HEIGHT,
+                width: scale(56),
+                overflow: 'hidden',
+            }}>
+            <View
+                pointerEvents="none"
+                style={{
+                    position: 'absolute',
+                    top: WHEEL_PADDING,
+                    left: 0,
+                    right: 0,
+                    height: ITEM_HEIGHT,
+                    borderRadius: scale(8),
+                    backgroundColor: accentColor,
+                    zIndex: 1,
+                }}
+            />
+            <ScrollView
+                ref={scrollRef}
+                showsVerticalScrollIndicator={false}
+                nestedScrollEnabled
+                snapToInterval={ITEM_HEIGHT}
+                snapToAlignment="start"
+                disableIntervalMomentum
+                decelerationRate="fast"
+                bounces={false}
+                onMomentumScrollEnd={handleMomentumScrollEnd}
+                contentContainerStyle={{paddingVertical: WHEEL_PADDING}}
+            >
+                {loopedValues.map((item, index) => {
+                    const isActive = wrapIndex(index, length) === baseIndex;
+                    return (
+                        <View
+                            key={`${index}-${item}`}
+                            style={{
+                                height: ITEM_HEIGHT,
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                            }}>
+                            <Text
+                                style={{
+                                    ...uiStyle.defaultText,
+                                    color: textColor,
+                                    fontSize: scale(isActive ? 18 : 15),
+                                    fontWeight: isActive ? '700' : '400',
+                                    opacity: isActive ? 1 : 0.4,
+                                }}>
+                                {item}
+                            </Text>
+                        </View>
+                    );
+                })}
+            </ScrollView>
+        </View>
+    );
+};
+
+/**
+ * 課程時段選擇 Modal：預設上午／下午／晚上 + 自訂開始／結束時分。
+ *
+ * @param {boolean} visible 是否顯示
+ * @param {string} from 開始時間 HH:mm
+ * @param {string} to 結束時間 HH:mm
+ * @param {Function} onConfirm 確認回調 ({from, to}) => void
+ * @param {Function} onCancel 取消回調
+ */
+const CourseTimeRangePicker = ({
+    visible,
+    from = '00:00',
+    to = '23:59',
+    onConfirm,
+    onCancel,
+}) => {
+    const {theme} = useTheme();
+    const {themeColor, black, white, bg_color, trueBlack, tonal} = theme;
+    const insets = useSafeAreaInsets();
+
+    // 自管掛載與透明度動畫，避開 react-native-modal 關閉時的黑白閃
+    const [mounted, setMounted] = useState(false);
+    const pendingActionRef = useRef(null);
+    const closingRef = useRef(false);
+    const mountedRef = useRef(false);
+    const progress = useSharedValue(0);
+
+    const [fromHour, setFromHour] = useState(() => snapTimeParts(from).hour);
+    const [fromMinute, setFromMinute] = useState(
+        () => snapTimeParts(from).minute,
+    );
+    const [toHour, setToHour] = useState(() => snapTimeParts(to).hour);
+    const [toMinute, setToMinute] = useState(() => snapTimeParts(to).minute);
+
+    useEffect(() => {
+        mountedRef.current = mounted;
+    }, [mounted]);
+
+    const flushPendingAction = useCallback(() => {
+        setMounted(false);
+        const action = pendingActionRef.current;
+        pendingActionRef.current = null;
+        if (action?.type === 'confirm') {
+            onConfirm?.(action.payload);
+        } else if (action?.type === 'cancel') {
+            onCancel?.();
+        }
+        closingRef.current = false;
+    }, [onCancel, onConfirm]);
+
+    const animateClose = useCallback(
+        action => {
+            if (closingRef.current) {
+                return;
+            }
+            closingRef.current = true;
+            pendingActionRef.current = action;
+            progress.value = withTiming(
+                0,
+                {duration: CLOSE_MS, easing: Easing.in(Easing.cubic)},
+                finished => {
+                    if (finished) {
+                        runOnJS(flushPendingAction)();
+                    }
+                },
+            );
+        },
+        [flushPendingAction, progress],
+    );
+
+    useEffect(() => {
+        if (visible) {
+            closingRef.current = false;
+            pendingActionRef.current = null;
+            progress.value = 0;
+            setMounted(true);
+            progress.value = withTiming(1, {
+                duration: OPEN_MS,
+                easing: Easing.out(Easing.cubic),
+            });
+            return;
+        }
+        if (mountedRef.current && !closingRef.current) {
+            animateClose(null);
+        }
+    }, [visible, animateClose, progress]);
+
+    useEffect(() => {
+        if (!visible) {
+            return;
+        }
+        const nextFrom = snapTimeParts(from);
+        const nextTo = snapTimeParts(to);
+        setFromHour(nextFrom.hour);
+        setFromMinute(nextFrom.minute);
+        setToHour(nextTo.hour);
+        setToMinute(nextTo.minute);
+    }, [visible, from, to]);
+
+    const currentFrom = joinTime(fromHour, fromMinute);
+    const currentTo = joinTime(toHour, toMinute, {asEnd: true});
+
+    const applyPreset = preset => {
+        trigger();
+        const isActive =
+            currentFrom === preset.from && currentTo === preset.to;
+        animateClose({
+            type: 'confirm',
+            payload: {
+                from: isActive ? DEFAULT_TIME_FROM : preset.from,
+                to: isActive ? DEFAULT_TIME_TO : preset.to,
+            },
+        });
+    };
+
+    const handleConfirm = () => {
+        trigger();
+        if (currentFrom >= currentTo) {
+            Alert.alert(
+                t('開始時間不能晚於結束時間！', {ns: 'timetable'}),
+            );
+            return;
+        }
+        animateClose({
+            type: 'confirm',
+            payload: {from: currentFrom, to: currentTo},
+        });
+    };
+
+    const handleCancel = () => {
+        trigger();
+        animateClose({type: 'cancel'});
+    };
+
+    const backdropStyle = useAnimatedStyle(() => ({
+        opacity: progress.value * BACKDROP_OPACITY,
+    }));
+
+    const sheetStyle = useAnimatedStyle(() => ({
+        transform: [
+            {
+                translateY: (1 - progress.value) * SHEET_TRANSLATE,
+            },
+        ],
+    }));
+
+    const renderHmPair = (hour, minute, setHour, setMinute) => (
+        <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <TimeWheelColumn
+                values={HOURS}
+                value={hour}
+                onChange={setHour}
+                textColor={themeColor}
+                accentColor={tonal.primary15}
+            />
+            <Text
+                style={{
+                    ...uiStyle.defaultText,
+                    color: black.second,
+                    fontSize: scale(18),
+                    fontWeight: '700',
+                    marginHorizontal: scale(2),
+                }}>
+                :
+            </Text>
+            <TimeWheelColumn
+                values={MINUTES}
+                value={minute}
+                onChange={setMinute}
+                textColor={themeColor}
+                accentColor={tonal.primary15}
+            />
+        </View>
+    );
+
+    if (!mounted) {
+        return null;
+    }
+
+    return (
+        <Modal
+            visible
+            transparent
+            animationType="none"
+            presentationStyle="overFullScreen"
+            statusBarTranslucent
+            onRequestClose={handleCancel}>
+            <View style={styles.root} pointerEvents="box-none">
+                <Animated.View
+                    pointerEvents="none"
+                    style={[
+                        StyleSheet.absoluteFill,
+                        {backgroundColor: trueBlack},
+                        backdropStyle,
+                    ]}
+                />
+                <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={t('取消', {ns: 'timetable'})}
+                    onPress={handleCancel}
+                    style={StyleSheet.absoluteFill}
+                />
+                <Animated.View
+                    style={[
+                        styles.sheet,
+                        {
+                            backgroundColor: bg_color,
+                            paddingBottom: Math.max(
+                                insets.bottom,
+                                verticalScale(16),
+                            ),
+                        },
+                        sheetStyle,
+                    ]}>
+                    <Text
+                        style={{
+                            ...uiStyle.defaultText,
+                            color: black.main,
+                            fontSize: scale(16),
+                            fontWeight: '700',
+                            textAlign: 'center',
+                            marginBottom: verticalScale(12),
+                        }}>
+                        {t('選擇時段', {ns: 'timetable'})}
+                    </Text>
+
+                    {/* 預設上午／下午／晚上 */}
+                    <View
+                        style={{
+                            flexDirection: 'row',
+                            flexWrap: 'wrap',
+                            justifyContent: 'center',
+                            marginBottom: verticalScale(12),
+                        }}>
+                        {TIME_RANGE_PRESETS.map(preset => {
+                            const isActive =
+                                currentFrom === preset.from &&
+                                currentTo === preset.to;
+                            return (
+                                <TouchableScale
+                                    key={preset.id}
+                                    activeScale={0.96}
+                                    style={{
+                                        paddingHorizontal: scale(12),
+                                        paddingVertical: verticalScale(8),
+                                        borderRadius: scale(10),
+                                        marginHorizontal: scale(4),
+                                        marginBottom: verticalScale(6),
+                                        backgroundColor: isActive
+                                            ? tonal.primary30
+                                            : tonal.primary15,
+                                    }}
+                                    onPress={() => applyPreset(preset)}
+                                    accessibilityRole="button"
+                                    accessibilityLabel={`${t(preset.labelKey, {
+                                        ns: 'timetable',
+                                    })} ${preset.from}-${preset.to}`}>
+                                    <Text
+                                        style={{
+                                            ...uiStyle.defaultText,
+                                            color: themeColor,
+                                            fontSize: scale(13),
+                                            fontWeight: isActive
+                                                ? '800'
+                                                : '600',
+                                            textAlign: 'center',
+                                        }}>
+                                        {t(preset.labelKey, {ns: 'timetable'})}
+                                    </Text>
+                                    <Text
+                                        style={{
+                                            ...uiStyle.defaultText,
+                                            color: black.third,
+                                            fontSize: scale(11),
+                                            textAlign: 'center',
+                                            marginTop: verticalScale(2),
+                                        }}>
+                                        {`${preset.from} - ${preset.to}`}
+                                    </Text>
+                                </TouchableScale>
+                            );
+                        })}
+                    </View>
+
+                    {/* 自訂開始／結束 */}
+                    <View
+                        style={{
+                            flexDirection: 'row',
+                            justifyContent: 'space-evenly',
+                            alignItems: 'flex-start',
+                            marginBottom: verticalScale(16),
+                        }}>
+                        <View style={{alignItems: 'center'}}>
+                            <Text
+                                style={{
+                                    ...uiStyle.defaultText,
+                                    color: black.third,
+                                    fontSize: scale(12),
+                                    marginBottom: verticalScale(4),
+                                }}>
+                                {t('開始', {ns: 'timetable'})}
+                            </Text>
+                            {renderHmPair(
+                                fromHour,
+                                fromMinute,
+                                setFromHour,
+                                setFromMinute,
+                            )}
+                        </View>
+                        <Text
+                            style={{
+                                ...uiStyle.defaultText,
+                                color: black.third,
+                                fontSize: scale(16),
+                                marginTop: verticalScale(88),
+                            }}>
+                            –
+                        </Text>
+                        <View style={{alignItems: 'center'}}>
+                            <Text
+                                style={{
+                                    ...uiStyle.defaultText,
+                                    color: black.third,
+                                    fontSize: scale(12),
+                                    marginBottom: verticalScale(4),
+                                }}>
+                                {t('結束', {ns: 'timetable'})}
+                            </Text>
+                            {renderHmPair(
+                                toHour,
+                                toMinute,
+                                setToHour,
+                                setToMinute,
+                            )}
+                        </View>
+                    </View>
+
+                    <View
+                        style={{
+                            flexDirection: 'row',
+                            justifyContent: 'space-between',
+                            gap: scale(10),
+                        }}>
+                        <Pressable
+                            accessibilityRole="button"
+                            accessibilityLabel={t('取消', {ns: 'timetable'})}
+                            onPress={handleCancel}
+                            style={({pressed}) => ({
+                                flex: 1,
+                                alignItems: 'center',
+                                paddingVertical: verticalScale(12),
+                                borderRadius: scale(12),
+                                backgroundColor: pressed
+                                    ? tonal.primary30
+                                    : tonal.primary15,
+                            })}>
+                            <Text
+                                style={{
+                                    ...uiStyle.defaultText,
+                                    color: black.second,
+                                    fontSize: scale(15),
+                                    fontWeight: '600',
+                                }}>
+                                {t('取消', {ns: 'timetable'})}
+                            </Text>
+                        </Pressable>
+                        <Pressable
+                            accessibilityRole="button"
+                            accessibilityLabel={t('確認', {ns: 'timetable'})}
+                            onPress={handleConfirm}
+                            style={({pressed}) => ({
+                                flex: 1,
+                                alignItems: 'center',
+                                paddingVertical: verticalScale(12),
+                                borderRadius: scale(12),
+                                backgroundColor: themeColor,
+                                opacity: pressed ? 0.85 : 1,
+                            })}>
+                            <Text
+                                style={{
+                                    ...uiStyle.defaultText,
+                                    color: white,
+                                    fontSize: scale(15),
+                                    fontWeight: '700',
+                                }}>
+                                {t('確認', {ns: 'timetable'})}
+                            </Text>
+                        </Pressable>
+                    </View>
+                </Animated.View>
+            </View>
+        </Modal>
+    );
+};
+
+const styles = StyleSheet.create({
+    root: {
+        flex: 1,
+        justifyContent: 'flex-end',
+        backgroundColor: 'transparent',
+    },
+    sheet: {
+        width: '100%',
+        borderTopLeftRadius: scale(16),
+        borderTopRightRadius: scale(16),
+        paddingHorizontal: scale(16),
+        paddingTop: verticalScale(14),
+    },
+});
+
+export default CourseTimeRangePicker;

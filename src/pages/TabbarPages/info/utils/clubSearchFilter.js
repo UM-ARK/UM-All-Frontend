@@ -1,5 +1,5 @@
 import * as OpenCC from 'opencc-js';
-import { hasChinese } from '../../what2Reg/utils/text';
+import { hasChinese } from '../../../../utils/text';
 
 /** 與搵課頁 what2Reg/utils/search.js 相同：簡體輸入轉繁體後比對 */
 const cnToTw = OpenCC.Converter({ from: 'cn', to: 'tw' });

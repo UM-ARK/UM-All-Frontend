@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { View, Text, Dimensions, ScrollView, StyleSheet, Linking, ActivityIndicator, Platform } from 'react-native';
+import { View, Text, Dimensions, ScrollView, StyleSheet, Linking, Platform } from 'react-native';
 
 import { useTheme, themes, uiStyle, ThemeContext } from '../../../../components/ThemeContext';
 import ARKImageView from '../../../../components/ARKImageView';
@@ -34,7 +34,7 @@ const { width: PAGE_WIDTH } = Dimensions.get('window');
 
 const NewsDetail = ({ route, navigation }) => {
     const { theme } = useTheme();
-    const { white, black, viewShadow, bg_color, themeColor, secondThemeColor } = theme;
+    const { white, black, viewShadow, bg_color, themeColor, secondThemeColor, imagePlaceholder } = theme;
     const styles = StyleSheet.create({
         title: {
             ...uiStyle.defaultText,
@@ -194,7 +194,6 @@ const NewsDetail = ({ route, navigation }) => {
     ]);
 
     const [chooseMode, setChooseMode] = useState(0);
-    const [imgLoading, setImgLoading] = useState([]);
 
     // 存放新聞數據
     const [data] = useState({
@@ -213,11 +212,6 @@ const NewsDetail = ({ route, navigation }) => {
     useEffect(() => {
         logToFirebase('openPage', { page: 'UMNews' });
     }, []);
-
-    // 初始化图片加载状态
-    useEffect(() => {
-        setImgLoading(new Array(data.imageUrls.length).fill(true)); // 默认所有图片都在加载
-    }, [data.imageUrls]);
 
     // 判斷語言是否存在，更新 LanguageMode.available
     useEffect(() => {
@@ -320,36 +314,11 @@ const NewsDetail = ({ route, navigation }) => {
                             <Image
                                 source={item}
                                 style={{ width: '100%', height: '100%' }}
-                                onLoadStart={() => {
-                                    // 使用函數式更新，避免多張圖片並行載入時 stale closure 導致狀態互相覆蓋
-                                    setImgLoading(prev => {
-                                        const next = [...prev];
-                                        next[index] = true;
-                                        return next;
-                                    });
-                                }}
-                                onLoadEnd={() => {
-                                    setImgLoading(prev => {
-                                        const next = [...prev];
-                                        next[index] = false;
-                                        return next;
-                                    });
-                                }}
+                                contentFit="cover"
+                                placeholder={imagePlaceholder}
+                                placeholderContentFit="cover"
+                                transition={200}
                             />
-                            {imgLoading[index] && (
-                                <View style={{
-                                    width: '100%',
-                                    height: '100%',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    position: 'absolute',
-                                }}>
-                                    <ActivityIndicator
-                                        size={'large'}
-                                        color={themeColor}
-                                    />
-                                </View>
-                            )}
                         </TouchableScale>
                     )}
                     itemContainerStyle={{

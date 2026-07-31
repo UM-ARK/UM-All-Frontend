@@ -6,7 +6,7 @@
   <img src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/en-us" width="250" height="83" alt="Download on the App Store"/>
 </a>
 <a href="https://play.google.com/store/apps/details?id=one.umall" style="display:inline-block;">
-  <img src="https://raw.githubusercontent.com/pioug/google-play-badges/refs/heads/main/svg/English.svg" width="250" height="83" alt="Get it on Google Play"/>
+  <img src="https://raw.githubusercontent.com/pioug/google-play-badges/main/svg/en.svg" width="250" height="83" alt="Get it on Google Play"/>
 </a>
 </div>
 
@@ -18,10 +18,10 @@
 
 **APP熒幕截圖**
 
-| | | |
-|:---:|:---:|:---:|
-| <img src="/README/img/Home.png" width="30%" alt="Home" /> | <img src="/README/img/Club.png" width="30%" alt="Club" /> | <img src="/README/img/Courses.png" width="30%" alt="Courses" /> |
-| <img src="/README/img/Timetable.png" width="30%" alt="Timetable" /> | <img src="/README/img/Features.png" width="30%" alt="Features" /> | <img src="/README/img/Bus.png" width="30%" alt="Bus" /> |
+|                                                                      |                                                                    |                                                                  |
+| :------------------------------------------------------------------: | :----------------------------------------------------------------: | :--------------------------------------------------------------: |
+|      <img src="./README/img/Home.png" width="30%" alt="Home" />      |     <img src="./README/img/Club.png" width="30%" alt="Club" />     | <img src="./README/img/Courses.png" width="30%" alt="Courses" /> |
+| <img src="./README/img/Timetable.png" width="30%" alt="Timetable" /> | <img src="./README/img/Features.png" width="30%" alt="Features" /> |     <img src="./README/img/Bus.png" width="30%" alt="Bus" />     |
 
 </div>
 
@@ -40,6 +40,9 @@
     - [🍎 iOS 運行](#-ios-運行)
     - [配置Firebase](#配置firebase)
   - [🐛 如何 Debug?](#-如何-debug)
+    - [重新打開 Dev Menu / 開啟 Tools button](#重新打開-dev-menu--開啟-tools-button)
+      - [方法 1：重新打開 Dev Menu](#方法-1重新打開-dev-menu)
+      - [方法 2：通過 Expo CLI 快捷鍵](#方法-2通過-expo-cli-快捷鍵)
     - [Google Firebase Analytics](#google-firebase-analytics)
 - [📦 打包方式](#-打包方式)
   - [🍎 iOS 打包](#-ios-打包)
@@ -74,7 +77,7 @@
 
 ### 🍎 iOS 環境 [Setup](https://reactnative.dev/docs/environment-setup)
 
-> 基於 Expo SDK 54 + React Native 0.81.5，iOS APP 目前只能在 Mac 開發調試
+> 基於 Expo SDK 57 + React Native 0.86，iOS APP 目前只能在 Mac 開發調試
 
 1. 先安裝`node`包（Node ≥18），方便之後使用指令
 
@@ -182,10 +185,10 @@ EXPO_PUBLIC_UM_API_TOKEN=你的_UM_Open_Data_Token
 
 本項目需要以下 Firebase 配置文件：
 
-| 平台 | 文件路徑 | 用途 |
-|------|----------|------|
-| Android | `google-services.json`（項目根目錄） | Firebase Analytics、Crashlytics |
-| iOS | `GoogleService-Info.plist`（項目根目錄） | Firebase Analytics、Crashlytics |
+| 平台    | 文件路徑                                 | 用途                            |
+| ------- | ---------------------------------------- | ------------------------------- |
+| Android | `google-services.json`（項目根目錄）     | Firebase Analytics、Crashlytics |
+| iOS     | `GoogleService-Info.plist`（項目根目錄） | Firebase Analytics、Crashlytics |
 
 **獲取方式：**
 1. 前往 [Firebase Console](https://console.firebase.google.com/) 創建項目
@@ -284,7 +287,7 @@ yarn android
 
 #### 🍎 iOS 運行
 
-> 項目使用 Expo SDK 54 與 CNG (Continuous Native Generation)，無需手動管理 CocoaPods
+> 項目使用 Expo SDK 57 與 CNG (Continuous Native Generation)，無需手動管理 CocoaPods
 
 1. 確保已安裝依賴
 
@@ -322,9 +325,52 @@ yarn iosBig       # 運行 iPad Pro 13-inch 模擬器
 -   舊版的項目可以在 `Metro` 的命令窗口中按下 `d` 再在模擬器中選擇 `Debug` 即可直接跳轉瀏覽器查看 log。
 <br>
 
-**react-native@0.81+更新：**
+**react-native@0.86 / Metro 除錯：**
 - 在`Metro`中直接使用`j`調出React DevTools。
 - iOS 模擬器支持最新的 Debugging 方案。
+
+#### 重新打開 Dev Menu / 開啟 Tools button
+
+開發模式下可透過 Expo Dev Menu 開啟效能監視、Element Inspector、DevTools 等工具。若畫面上看不到浮動 **Tools** 按鈕，請依下方方式打開 Dev Menu，並將 **Tools button** 設為開啟。
+
+<div align="center">
+  <img src="./README/img/DevMenu.png" width="45%" alt="Expo Dev Menu" />
+</div>
+
+##### 方法 1：重新打開 Dev Menu
+
+在開發模式下：
+
+**iOS Simulator**
+
+- 按：`⌘ + D`
+- 或 Simulator 選單：`Device` → `Shake`
+
+**真機 iPhone**
+
+- 搖晃設備，或者先啟動 Metro：
+
+```bash
+npx expo start
+```
+
+啟動後在終端機按：`i`
+
+重新打開 Dev Menu 後，進入：
+
+```text
+Dev Menu → Tools button → 開啟
+```
+
+##### 方法 2：通過 Expo CLI 快捷鍵
+
+Metro 運行時：
+
+```bash
+npx expo start
+```
+
+按：`m` 打開開發菜單。
 
 #### Google Firebase Analytics
 
@@ -337,7 +383,7 @@ iOS和Android平台：打開 [偵錯事件](https://firebase.google.com/docs/ana
 
 ### 🍎 iOS 打包
 
-> 項目使用 Expo SDK 54 與 CNG，推薦使用 Expo 進行打包
+> 項目使用 Expo SDK 57 與 CNG，推薦使用 Expo 進行打包
 
 #### 方式一：使用 Expo 構建（推薦）
 
@@ -385,9 +431,9 @@ eas build --platform ios
 npx expo run:ios --configuration Release --device
 ```
 
-| | |
-| --- | --- |
-| **好處** | 不必等待 EAS 雲端排隊，本機建置與重裝較快。 |
+|                 |                                                                                                    |
+| --------------- | -------------------------------------------------------------------------------------------------- |
+| **好處**        | 不必等待 EAS 雲端排隊，本機建置與重裝較快。                                                        |
 | **條件 / 壞處** | 需要有效的 **Apple 開發者帳號**，且本機 **Xcode 與簽名環境**（Team、憑證、裝置信任等）需設定正確。 |
 
 首次使用前請先依上文完成 `npx expo prebuild` 與依賴安裝；若簽名失敗，請在 Xcode 中開啟 `ios` 內的 workspace，檢查 **Signing & Capabilities** 與目標裝置是否已加入開發團隊。

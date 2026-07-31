@@ -2,7 +2,8 @@
   "expo": {
     "name": "ARK ALL",
     "slug": "arkall",
-    "version": "26.5.0",
+    "scheme": "one.umall",
+    "version": "26.8.0",
     "icon": "./src/static/img/logo.png",
     "userInterfaceStyle": "automatic",
     "ios": {
@@ -11,7 +12,11 @@
       "icon": "./src/static/img/logo.png",
       "googleServicesFile": "./GoogleService-Info.plist",
       "bundleIdentifier": "one.umall",
-      "buildNumber": "26.5.0",
+      "buildNumber": "26.8.0",
+      "associatedDomains": [
+        "applinks:umall.one",
+        "webcredentials:umall.one"
+      ],
       "infoPlist": {
         "UIViewControllerBasedStatusBarAppearance": true,
         "LSApplicationCategoryType": "public.app-category.utilities",
@@ -22,12 +27,29 @@
       "userInterfaceStyle": "automatic",
       "googleServicesFile": "./google-services.json",
       "package": "one.umall",
-      "versionCode": 78,
+      "versionCode": 80,
       "adaptiveIcon": {
         "foregroundImage": "./src/static/img/ic_launcher_foreground.png",
         "backgroundColor": "#E6AB52"
       },
       "icon": "./src/static/img/logo.png",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "umall.one",
+              "pathPrefix": "/auth/discourse"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        }
+      ],
       "permissions": [
         "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.WRITE_EXTERNAL_STORAGE",
@@ -66,6 +88,12 @@
       [
         "expo-build-properties",
         {
+          "android": {
+            "buildArchs": [
+              "armeabi-v7a",
+              "arm64-v8a"
+            ]
+          },
           "ios": {
             "useFrameworks": "static",
             "forceStaticLinking": [
@@ -87,7 +115,12 @@
       "expo-system-ui",
       "expo-font",
       "@react-native-community/datetimepicker",
-      "expo-image"
+      "expo-image",
+      "expo-status-bar",
+      "expo-secure-store",
+      "react-native-quick-crypto",
+      "expo-quick-actions",
+      "expo-sharing"
     ],
     "extra": {
       "eas": {
