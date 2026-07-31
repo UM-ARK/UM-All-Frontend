@@ -12,6 +12,7 @@
       "icon": "./src/static/img/logo.png",
       "googleServicesFile": "./GoogleService-Info.plist",
       "bundleIdentifier": "one.umall",
+      "appleTeamId": "UVSHNJYJWU",
       "buildNumber": "26.8.0",
       "associatedDomains": [
         "applinks:umall.one",
@@ -27,7 +28,7 @@
       "userInterfaceStyle": "automatic",
       "googleServicesFile": "./google-services.json",
       "package": "one.umall",
-      "versionCode": 80,
+      "versionCode": 81,
       "adaptiveIcon": {
         "foregroundImage": "./src/static/img/ic_launcher_foreground.png",
         "backgroundColor": "#E6AB52"
@@ -53,12 +54,11 @@
       "permissions": [
         "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.WRITE_EXTERNAL_STORAGE",
-        "android.permission.READ_MEDIA_VISUAL_USER_SELECTED",
-        "android.permission.ACCESS_MEDIA_LOCATION",
-        "android.permission.READ_MEDIA_IMAGES",
-        "android.permission.READ_MEDIA_VIDEO",
-        "android.permission.READ_MEDIA_AUDIO",
         "android.permission.RECORD_AUDIO"
+      ],
+      "blockedPermissions": [
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.READ_MEDIA_VIDEO"
       ]
     },
     "plugins": [
@@ -76,7 +76,8 @@
         {
           "photosPermission": "允許 ARK ALL 訪問您的照片以保存圖片。",
           "savePhotosPermission": "允許 ARK ALL 保存照片到相冊。",
-          "isAccessMediaLocationEnabled": true
+          "isAccessMediaLocationEnabled": false,
+          "granularPermissions": []
         }
       ],
       [
