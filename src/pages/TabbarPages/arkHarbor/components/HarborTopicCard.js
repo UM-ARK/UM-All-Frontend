@@ -165,7 +165,6 @@ const HarborTopicCard = ({
                         : theme.white,
                     borderColor: theme.themeColorUltraLight,
                 },
-                theme.viewShadow,
             ]}>
             <View style={styles.authorRow}>
                 {avatarUrl ? (
