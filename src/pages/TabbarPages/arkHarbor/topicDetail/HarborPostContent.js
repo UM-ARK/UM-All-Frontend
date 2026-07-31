@@ -19,7 +19,7 @@ import RenderHTML, {
     useIMGElementProps,
     useIMGElementState,
     useRendererProps,
-} from 'react-native-render-html';
+} from '@native-html/render';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { WebView } from 'react-native-webview';
 import { scale, verticalScale } from 'react-native-size-matters';

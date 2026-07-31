@@ -1952,8 +1952,6 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
-  - react-native-render-html (6.3.4):
-    - React-Core
   - react-native-safe-area-context (5.7.0):
     - hermes-engine
     - RCTRequired
@@ -3108,7 +3106,6 @@ DEPENDENCIES:
   - "react-native-menu (from `../node_modules/@react-native-menu/menu`)"
   - react-native-pager-view (from `../node_modules/react-native-pager-view`)
   - react-native-quick-base64 (from `../node_modules/react-native-quick-base64`)
-  - react-native-render-html (from `../node_modules/react-native-render-html`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
   - react-native-simple-toast (from `../node_modules/react-native-simple-toast`)
   - "react-native-slider (from `../node_modules/@react-native-community/slider`)"
@@ -3347,8 +3344,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-pager-view"
   react-native-quick-base64:
     :path: "../node_modules/react-native-quick-base64"
-  react-native-render-html:
-    :path: "../node_modules/react-native-render-html"
   react-native-safe-area-context:
     :path: "../node_modules/react-native-safe-area-context"
   react-native-simple-toast:
@@ -3555,7 +3550,6 @@ SPEC CHECKSUMS:
   react-native-menu: 46df909c7c60c4a6cb6757bf2281ea65d612065c
   react-native-pager-view: 583ed48cc9e4a5d11b3d7bfb6f2f319c929f50e7
   react-native-quick-base64: e254a406ac7d7f20857c9fbcbfb57fbf91ae21be
-  react-native-render-html: 5afc4751f1a98621b3009432ef84c47019dcb2bd
   react-native-safe-area-context: ba7283e541a5f57c6b27a7e33f2c40b8977888c0
   react-native-simple-toast: e72b90b79229ed6a2744d1c9b4f23f7c51308e7f
   react-native-slider: b15258ac3d287a5951f76b11497d659ed20c0def
