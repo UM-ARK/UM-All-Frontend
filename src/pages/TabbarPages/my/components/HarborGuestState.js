@@ -16,11 +16,13 @@ import {scale, verticalScale} from 'react-native-size-matters';
 import {uiStyle, useTheme} from '../../../../components/ThemeContext';
 import TouchableScale from '../../../../components/TouchableScale';
 import {trigger} from '../../../../utils/trigger';
+import HarborLoginConsentModal from './HarborLoginConsentModal';
 import HarborSectionHeader from './HarborSectionHeader';
 
 const HarborGuestState = ({isAuthorizing, onLogin, onBrowse}) => {
     const {theme} = useTheme();
     const {t} = useTranslation('my');
+    const [consentVisible, setConsentVisible] = React.useState(false);
     const features = [
         {
             key: 'identity',
@@ -92,7 +94,9 @@ const HarborGuestState = ({isAuthorizing, onLogin, onBrowse}) => {
                     ]}
                     onPress={() => {
                         trigger();
-                        onLogin();
+                        if (!isAuthorizing) {
+                            setConsentVisible(true);
+                        }
                     }}>
                     {isAuthorizing ? (
                         <ActivityIndicator color={theme.trueWhite} />
@@ -207,6 +211,15 @@ const HarborGuestState = ({isAuthorizing, onLogin, onBrowse}) => {
                     </View>
                 ))}
             </View>
+
+            <HarborLoginConsentModal
+                visible={consentVisible}
+                onCancel={() => setConsentVisible(false)}
+                onConfirm={() => {
+                    setConsentVisible(false);
+                    onLogin();
+                }}
+            />
         </View>
     );
 };

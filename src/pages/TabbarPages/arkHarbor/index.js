@@ -35,6 +35,7 @@ import {
     getHarborTopicViews,
 } from '../../../utils/harbor/harborApi';
 import { trigger } from '../../../utils/trigger';
+import HarborLoginConsentModal from '../my/components/HarborLoginConsentModal';
 import HarborDrawerContent from './components/HarborDrawerContent';
 import HarborTopicList from './components/HarborTopicList';
 
@@ -364,6 +365,7 @@ const ForumPage = ({ navigation }) => {
         latest: true,
         top: false,
     });
+    const [consentVisible, setConsentVisible] = useState(false);
     const searchProgress = useSharedValue(1);
 
     useEffect(() => {
@@ -674,7 +676,15 @@ const ForumPage = ({ navigation }) => {
         pageScrollPosition,
     ]);
 
-    const handleSessionPress = useCallback(async () => {
+    const handleSessionPress = useCallback(() => {
+        if (status === 'restoring' || status === 'authorizing') {
+            return;
+        }
+        setConsentVisible(true);
+    }, [status]);
+
+    const handleLoginConfirm = useCallback(async () => {
+        setConsentVisible(false);
         if (status === 'restoring' || status === 'authorizing') {
             return;
         }
@@ -798,6 +808,11 @@ const ForumPage = ({ navigation }) => {
                     isSearchInteractive={isSearchInteractive}
                 />
             </View>
+            <HarborLoginConsentModal
+                visible={consentVisible}
+                onCancel={() => setConsentVisible(false)}
+                onConfirm={handleLoginConfirm}
+            />
         </SafeAreaView>
     );
 };
