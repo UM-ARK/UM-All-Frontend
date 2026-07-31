@@ -1760,11 +1760,6 @@
     sf-symbols-typescript "^2.1.0"
     vaul "^1.1.2"
 
-"@expo/vector-icons@^15.0.2":
-  version "15.1.1"
-  resolved "https://registry.npmjs.org/@expo/vector-icons/-/vector-icons-15.1.1.tgz#4b1d2c60493c0b0536972f0a5babd5f5c85b48f4"
-  integrity sha512-Iu2VkcoI5vygbtYngm7jb4ifxElNVXQYdDrYkT7UCEIiKLeWnQY0wf2ZhHZ+Wro6Sc5TaumpKUOqDRpLi5rkvw==
-
 "@expo/ws-tunnel@^2.0.0":
   version "2.0.0"
   resolved "https://registry.npmjs.org/@expo/ws-tunnel/-/ws-tunnel-2.0.0.tgz#32d5fae46c7deb34cdf6b319a53b8a19b7915c93"
