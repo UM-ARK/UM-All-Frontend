@@ -30,6 +30,8 @@ const HarborSearchPage = ({route, navigation}) => {
     const searchPanelRef = useRef(null);
     const initialSearchStartedRef = useRef(false);
     const [optionModal, setOptionModal] = useState(null);
+    const [isSearchFocused, setIsSearchFocused] = useState(false);
+    const [filtersExpanded, setFiltersExpanded] = useState(false);
 
     useEffect(() => {
         navigation.setOptions({headerTitle: t('Harbor 搜尋')});
@@ -183,12 +185,17 @@ const HarborSearchPage = ({route, navigation}) => {
                 results={results}
                 actions={actions}
                 onOpenOption={setOptionModal}
+                onSearchFocusChange={setIsSearchFocused}
+                onFiltersExpandedChange={setFiltersExpanded}
             />
             <HarborSearchResults
                 results={results}
                 history={history}
                 actions={actions}
                 resultTab={resultTab}
+                query={criteria.query}
+                isSearchFocused={isSearchFocused}
+                filtersExpanded={filtersExpanded}
                 headerHeight={headerHeight}
                 onCollapseSearch={collapseSearchFocus}
                 onResultPress={handleResultPress}

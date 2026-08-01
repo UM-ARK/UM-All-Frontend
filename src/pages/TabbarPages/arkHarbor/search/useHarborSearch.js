@@ -1,10 +1,13 @@
 import {
     useCallback,
     useEffect,
+    useMemo,
     useRef,
     useState,
 } from 'react';
 import {Keyboard} from 'react-native';
+
+import lodash from 'lodash';
 
 import {logToFirebase} from '../../../../utils/firebaseAnalytics';
 import {
@@ -21,13 +24,22 @@ import {
     removeHarborSearchHistory,
 } from '../../../../utils/harbor/harborSearch';
 
+/** 輸入停下後才打 API；期間先用本地結果即時篩選 */
+const LIVE_SEARCH_DEBOUNCE_MS = 400;
+
 const useHarborSearch = ({initialQuery, onSearchStart}) => {
     const controllerRef = useRef(null);
     const requestGenerationRef = useRef(0);
     const activeSearchRef = useRef(null);
     const loadingMoreRef = useRef(false);
-    const [query, setQuery] = useState(
-        typeof initialQuery === 'string' ? initialQuery : '',
+    const runSearchRef = useRef(null);
+    const debouncedLiveSearchRef = useRef(null);
+    const queryRef = useRef(initialQueryText);
+    const initialQueryText =
+        typeof initialQuery === 'string' ? initialQuery : '';
+    const [query, setQuery] = useState(initialQueryText);
+    const [committedQuery, setCommittedQuery] = useState(
+        initialQueryText.trim(),
     );
     const [history, setHistory] = useState([]);
     const [items, setItems] = useState([]);
@@ -47,6 +59,7 @@ const useHarborSearch = ({initialQuery, onSearchStart}) => {
     const [error, setError] = useState(null);
     const [loadMoreError, setLoadMoreError] = useState(null);
     const [filterOptionsError, setFilterOptionsError] = useState(false);
+    queryRef.current = query;
 
     useEffect(() => {
         let active = true;
@@ -84,11 +97,13 @@ const useHarborSearch = ({initialQuery, onSearchStart}) => {
     }, []);
 
     const invalidateSearchResults = useCallback(() => {
+        debouncedLiveSearchRef.current?.cancel();
         requestGenerationRef.current += 1;
         controllerRef.current?.abort();
         controllerRef.current = null;
         loadingMoreRef.current = false;
         setHasSearched(false);
+        setCommittedQuery('');
         setItems([]);
         setIsLoading(false);
         setIsLoadingMore(false);
@@ -98,14 +113,6 @@ const useHarborSearch = ({initialQuery, onSearchStart}) => {
         setLoadMoreError(null);
     }, []);
 
-    const handleQueryChange = useCallback(
-        nextQuery => {
-            setQuery(nextQuery);
-            invalidateSearchResults();
-        },
-        [invalidateSearchResults],
-    );
-
     const runSearch = useCallback(
         async ({
             queryOverride,
@@ -113,6 +120,9 @@ const useHarborSearch = ({initialQuery, onSearchStart}) => {
             orderOverride,
             page = 0,
             append = false,
+            // 防抖即時搜尋：不收鍵盤、不清空現有結果、不寫入歷史
+            silent = false,
+            skipHistory = false,
         } = {}) => {
             const normalizedQuery = (
                 queryOverride === undefined ? query : queryOverride
@@ -139,8 +149,10 @@ const useHarborSearch = ({initialQuery, onSearchStart}) => {
                 return;
             }
 
-            Keyboard.dismiss();
-            onSearchStart();
+            if (!silent) {
+                Keyboard.dismiss();
+                onSearchStart();
+            }
 
             if (append) {
                 if (loadingMoreRef.current) {
@@ -153,11 +165,18 @@ const useHarborSearch = ({initialQuery, onSearchStart}) => {
                 controllerRef.current?.abort();
                 loadingMoreRef.current = false;
                 setHasSearched(true);
+                // 手動搜尋立刻對齊；防抖搜尋等結果回來再更新，避免本地篩選閃爍
+                if (!silent) {
+                    setCommittedQuery(normalizedQuery);
+                }
                 setIsLoading(true);
                 setIsLoadingMore(false);
                 setError(null);
                 setLoadMoreError(null);
-                setItems([]);
+                // 靜默搜尋保留舊結果供本地篩選；手動搜尋才清空
+                if (!silent) {
+                    setItems([]);
+                }
                 setHasMore(false);
                 setNextPage(null);
                 activeSearchRef.current = {
@@ -178,7 +197,7 @@ const useHarborSearch = ({initialQuery, onSearchStart}) => {
                               .trim()
                               .replace(/^@+/, '')}`
                         : '');
-                if (historyQuery) {
+                if (historyQuery && !skipHistory) {
                     addHarborSearchHistory(historyQuery).then(setHistory);
                 }
                 logToFirebase('harbor_search', {
@@ -188,6 +207,7 @@ const useHarborSearch = ({initialQuery, onSearchStart}) => {
                     timeRange,
                     order: normalizedOrder,
                     resultTab,
+                    silent,
                 });
             }
 
@@ -207,6 +227,16 @@ const useHarborSearch = ({initialQuery, onSearchStart}) => {
                     requestGeneration !== requestGenerationRef.current
                 ) {
                     return;
+                }
+                // 防抖期間若又繼續輸入，丟棄過期回應，等待下一輪
+                if (
+                    !append &&
+                    userQuery.trim() !== queryRef.current.trim()
+                ) {
+                    return;
+                }
+                if (!append) {
+                    setCommittedQuery(userQuery);
                 }
                 setItems(currentItems => {
                     if (!append) {
@@ -250,19 +280,50 @@ const useHarborSearch = ({initialQuery, onSearchStart}) => {
             timeRange,
         ],
     );
+    runSearchRef.current = runSearch;
+
+    const debouncedLiveSearch = useMemo(
+        () =>
+            lodash.debounce(nextQuery => {
+                runSearchRef.current?.({
+                    queryOverride: nextQuery,
+                    silent: true,
+                    skipHistory: true,
+                });
+            }, LIVE_SEARCH_DEBOUNCE_MS),
+        [],
+    );
+    debouncedLiveSearchRef.current = debouncedLiveSearch;
+
+    useEffect(
+        () => () => {
+            debouncedLiveSearch.cancel();
+        },
+        [debouncedLiveSearch],
+    );
+
+    // 輸入時立即更新 query（供本地篩選）；停下後防抖打 API
+    const handleQueryChange = useCallback(
+        nextQuery => {
+            setQuery(nextQuery);
+            debouncedLiveSearch(nextQuery);
+        },
+        [debouncedLiveSearch],
+    );
 
     const selectOrder = useCallback(
         nextOrder => {
             if (nextOrder === order) {
                 return;
             }
+            debouncedLiveSearch.cancel();
             if (hasSearched && activeSearchRef.current) {
                 runSearch({orderOverride: nextOrder});
                 return;
             }
             setOrder(nextOrder);
         },
-        [hasSearched, order, runSearch],
+        [debouncedLiveSearch, hasSearched, order, runSearch],
     );
 
     const selectResultTab = useCallback(nextTab => {
@@ -293,13 +354,14 @@ const useHarborSearch = ({initialQuery, onSearchStart}) => {
     ]);
 
     const resetFilters = useCallback(() => {
+        debouncedLiveSearch.cancel();
         invalidateSearchResults();
         setCategory(null);
         setTag(null);
         setAuthor('');
         setTimeRange('all');
         setOrder('relevance');
-    }, [invalidateSearchResults]);
+    }, [debouncedLiveSearch, invalidateSearchResults]);
 
     const clearHistory = useCallback(async () => {
         setHistory(await clearHarborSearchHistory());
@@ -310,9 +372,18 @@ const useHarborSearch = ({initialQuery, onSearchStart}) => {
     }, []);
 
     const cancelSearch = useCallback(() => {
+        debouncedLiveSearch.cancel();
         requestGenerationRef.current += 1;
         controllerRef.current?.abort();
-    }, []);
+    }, [debouncedLiveSearch]);
+
+    const runSearchAction = useCallback(
+        (options = {}) => {
+            debouncedLiveSearch.cancel();
+            return runSearch(options);
+        },
+        [debouncedLiveSearch, runSearch],
+    );
 
     // 排序已獨立為第二層，不計入篩選徽章
     const activeFilterCount =
@@ -320,6 +391,7 @@ const useHarborSearch = ({initialQuery, onSearchStart}) => {
         Number(Boolean(tag)) +
         Number(Boolean(author.trim())) +
         Number(timeRange !== 'all');
+    const isQueryDirty = query.trim() !== committedQuery.trim();
 
     return {
         criteria: {
@@ -346,6 +418,7 @@ const useHarborSearch = ({initialQuery, onSearchStart}) => {
             nextPage,
             error,
             loadMoreError,
+            isQueryDirty,
         },
         history: {
             items: history,
@@ -360,7 +433,7 @@ const useHarborSearch = ({initialQuery, onSearchStart}) => {
             setOrder,
             selectOrder,
             selectResultTab,
-            runSearch,
+            runSearch: runSearchAction,
             invalidateSearchResults,
             resetFilters,
             handleLoadMore,

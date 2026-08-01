@@ -17,6 +17,7 @@ import {scale, verticalScale} from 'react-native-size-matters';
 import {useTranslation} from 'react-i18next';
 
 import {uiStyle, useTheme} from '../../../../components/ThemeContext';
+import {filterHarborSearchItems} from '../../../../utils/harbor/harborSearch';
 import {trigger} from '../../../../utils/trigger';
 import {
     HarborFullState,
@@ -24,6 +25,9 @@ import {
 } from '../components/HarborListStates';
 import HarborTopicCard from '../components/HarborTopicCard';
 import HarborSearchResultCard from './HarborSearchResultCard';
+
+/** 無輸入時疊加顯示的最近搜尋筆數 */
+const HISTORY_PREVIEW_LIMIT = 3;
 
 /** 將搜尋命中合併進 topic，供 HarborTopicCard 直接複用 */
 const toTopicCardTopic = item => {
@@ -48,6 +52,9 @@ const HarborSearchResults = ({
     history,
     actions,
     resultTab,
+    query = '',
+    isSearchFocused = false,
+    filtersExpanded = false,
     headerHeight,
     onCollapseSearch,
     onResultPress,
@@ -64,6 +71,7 @@ const HarborSearchResults = ({
         isLoadingMore,
         error,
         loadMoreError,
+        isQueryDirty = false,
     } = results;
     const {items: historyRecords} = history;
     const {
@@ -73,9 +81,15 @@ const HarborSearchResults = ({
         removeHistory,
     } = actions;
     const isUsersTab = resultTab === 'users';
+    // 僅在無輸入、未展開篩選時顯示最近搜尋（聚焦或尚未搜尋）
+    const showHistoryPreview =
+        historyRecords.length > 0 &&
+        !query.trim() &&
+        !filtersExpanded &&
+        (isSearchFocused || !hasSearched);
     const historyItems = useMemo(
         () =>
-            historyRecords.map(record => ({
+            historyRecords.slice(0, HISTORY_PREVIEW_LIMIT).map(record => ({
                 id: `history-${record.query.toLowerCase()}`,
                 kind: 'history',
                 ...record,
@@ -83,12 +97,41 @@ const HarborSearchResults = ({
         [historyRecords],
     );
     const filteredItems = useMemo(() => {
-        if (isUsersTab) {
-            return items.filter(item => item.kind === 'user');
+        const tabItems = isUsersTab
+            ? items.filter(item => item.kind === 'user')
+            : items.filter(item => item.kind !== 'user');
+        // 輸入中：先對既有結果做本地篩選；防抖 API 回來後 isQueryDirty=false
+        if (isQueryDirty) {
+            return filterHarborSearchItems(tabItems, query);
         }
-        return items.filter(item => item.kind !== 'user');
-    }, [isUsersTab, items]);
-    const listData = hasSearched ? filteredItems : historyItems;
+        return tabItems;
+    }, [isQueryDirty, isUsersTab, items, query]);
+    const showResultsCount =
+        hasSearched && !error && filteredItems.length > 0;
+    const listData = useMemo(() => {
+        if (!hasSearched) {
+            return historyItems;
+        }
+        if (!showHistoryPreview) {
+            return filteredItems;
+        }
+        // 聚焦時：最近搜尋 → 結果標題 → 既有結果
+        const nextItems = [...historyItems];
+        if (showResultsCount) {
+            nextItems.push({
+                id: 'results-header',
+                kind: 'resultsHeader',
+                count: filteredItems.length,
+            });
+        }
+        return nextItems.concat(filteredItems);
+    }, [
+        filteredItems,
+        hasSearched,
+        historyItems,
+        showHistoryPreview,
+        showResultsCount,
+    ]);
 
     const renderItem = useCallback(
         ({item}) => {
@@ -155,6 +198,19 @@ const HarborSearchResults = ({
                 );
             }
 
+            if (item.kind === 'resultsHeader') {
+                return (
+                    <Text
+                        style={[
+                            styles.sectionTitle,
+                            styles.resultsTitleAfterHistory,
+                            {color: theme.black.second},
+                        ]}>
+                        {t('{{count}} 個搜尋結果', {count: item.count})}
+                    </Text>
+                );
+            }
+
             if (item.kind === 'user') {
                 return (
                     <HarborSearchResultCard
@@ -191,68 +247,66 @@ const HarborSearchResults = ({
     );
 
     const renderListHeader = useCallback(() => {
-        if (hasSearched) {
-            if (isLoading || error || filteredItems.length === 0) {
-                return null;
-            }
+        if (showHistoryPreview) {
             return (
-                <Text
-                    style={[
-                        styles.sectionTitle,
-                        {color: theme.black.second},
-                    ]}>
-                    {t('{{count}} 個搜尋結果', {count: filteredItems.length})}
-                </Text>
+                <View style={styles.historyHeader}>
+                    <Text
+                        style={[
+                            styles.sectionTitle,
+                            {color: theme.black.second},
+                        ]}>
+                        {t('最近搜尋')}
+                    </Text>
+                    <Pressable
+                        accessibilityRole="button"
+                        onPress={() => {
+                            trigger();
+                            onCollapseSearch();
+                            onClearHistory();
+                        }}
+                        style={({pressed}) => [
+                            styles.clearHistoryButton,
+                            pressed && {
+                                backgroundColor: theme.tonal.primary15,
+                            },
+                        ]}>
+                        <Text
+                            style={[
+                                styles.clearHistoryText,
+                                {color: theme.themeColor},
+                            ]}>
+                            {t('清除全部')}
+                        </Text>
+                    </Pressable>
+                </View>
             );
         }
-        if (historyRecords.length === 0) {
+        if (!showResultsCount) {
             return null;
         }
         return (
-            <View style={styles.historyHeader}>
-                <Text
-                    style={[
-                        styles.sectionTitle,
-                        {color: theme.black.second},
-                    ]}>
-                    {t('最近搜尋')}
-                </Text>
-                <Pressable
-                    accessibilityRole="button"
-                    onPress={() => {
-                        trigger();
-                        onCollapseSearch();
-                        onClearHistory();
-                    }}
-                    style={({pressed}) => [
-                        styles.clearHistoryButton,
-                        pressed && {
-                            backgroundColor: theme.tonal.primary15,
-                        },
-                    ]}>
-                    <Text
-                        style={[
-                            styles.clearHistoryText,
-                            {color: theme.themeColor},
-                        ]}>
-                        {t('清除全部')}
-                    </Text>
-                </Pressable>
-            </View>
+            <Text
+                style={[
+                    styles.sectionTitle,
+                    {color: theme.black.second},
+                ]}>
+                {t('{{count}} 個搜尋結果', {count: filteredItems.length})}
+            </Text>
         );
     }, [
-        error,
         filteredItems.length,
-        hasSearched,
-        historyRecords.length,
-        isLoading,
         onClearHistory,
         onCollapseSearch,
+        showHistoryPreview,
+        showResultsCount,
         t,
         theme,
     ]);
 
     const renderEmptyState = useCallback(() => {
+        if (filteredItems.length > 0) {
+            return null;
+        }
         if (isLoading) {
             return (
                 <View style={styles.loadingState}>
@@ -269,6 +323,10 @@ const HarborSearchResults = ({
                     </Text>
                 </View>
             );
+        }
+        // 輸入中等待防抖：只留最近搜尋，不搶先顯示「無結果」
+        if (isQueryDirty) {
+            return null;
         }
         if (error) {
             const noPermission = [401, 403].includes(error?.response?.status);
@@ -316,7 +374,17 @@ const HarborSearchResults = ({
                 )}
             />
         );
-    }, [error, hasSearched, isLoading, isUsersTab, runSearch, t, theme]);
+    }, [
+        error,
+        filteredItems.length,
+        hasSearched,
+        isLoading,
+        isQueryDirty,
+        isUsersTab,
+        runSearch,
+        t,
+        theme,
+    ]);
 
     const renderFooter = useCallback(() => {
         // 用戶分頁僅首頁結果，不顯示載入更多
@@ -387,6 +455,9 @@ const styles = StyleSheet.create({
         fontWeight: '700',
         marginHorizontal: scale(14),
         marginBottom: verticalScale(8),
+    },
+    resultsTitleAfterHistory: {
+        marginTop: verticalScale(12),
     },
     historyHeader: {
         flexDirection: 'row',

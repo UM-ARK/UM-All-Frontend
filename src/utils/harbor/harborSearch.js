@@ -174,3 +174,43 @@ export const buildHarborSearchQuery = ({
 
     return terms.filter(Boolean).join(' ');
 };
+
+/** 對已載入的搜尋結果做即時關鍵字篩選（輸入防抖完成前的本地預覽） */
+export const filterHarborSearchItems = (items, query) => {
+    if (!Array.isArray(items)) {
+        return [];
+    }
+    const normalizedQuery =
+        typeof query === 'string' ? query.trim().toLowerCase() : '';
+    if (!normalizedQuery) {
+        return items;
+    }
+
+    return items.filter(item => {
+        if (!item || typeof item !== 'object') {
+            return false;
+        }
+        if (item.kind === 'user') {
+            const user = item.user || {};
+            return [user.username, user.name].some(value =>
+                String(value || '')
+                    .toLowerCase()
+                    .includes(normalizedQuery),
+            );
+        }
+
+        const topic = item.topic || {};
+        const author = item.author || topic.author || {};
+        const haystack = [
+            item.title,
+            item.excerpt,
+            topic.title,
+            topic.excerpt,
+            typeof author === 'string' ? author : author.username,
+            typeof author === 'string' ? '' : author.name,
+        ]
+            .map(value => String(value || '').toLowerCase())
+            .join(' ');
+        return haystack.includes(normalizedQuery);
+    });
+};

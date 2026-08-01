@@ -1,6 +1,7 @@
 import React, {
     forwardRef,
     useCallback,
+    useEffect,
     useImperativeHandle,
     useRef,
     useState,
@@ -20,39 +21,47 @@ import Animated, {
     useSharedValue,
     withTiming,
 } from 'react-native-reanimated';
-import {scale, verticalScale} from 'react-native-size-matters';
-import {useTranslation} from 'react-i18next';
+import { scale, verticalScale } from 'react-native-size-matters';
+import { useTranslation } from 'react-i18next';
 
 import TouchableScale from '../../../../components/TouchableScale';
-import {uiStyle, useTheme} from '../../../../components/ThemeContext';
-import {trigger} from '../../../../utils/trigger';
+import { uiStyle, useTheme } from '../../../../components/ThemeContext';
+import { trigger } from '../../../../utils/trigger';
 import SearchFilterChip from './SearchFilterChip';
 
 const TIME_OPTIONS = [
-    {key: 'all', label: '不限時間'},
-    {key: 'week', label: '最近一週'},
-    {key: 'month', label: '最近一個月'},
-    {key: 'year', label: '最近一年'},
+    { key: 'all', label: '不限時間' },
+    { key: 'week', label: '最近一週' },
+    { key: 'month', label: '最近一個月' },
+    { key: 'year', label: '最近一年' },
 ];
 
 const ORDER_OPTIONS = [
-    {key: 'relevance', label: '相關度'},
-    {key: 'latest', label: '最新發布'},
-    {key: 'likes', label: '最多讚好'},
-    {key: 'views', label: '最多瀏覽'},
+    { key: 'relevance', label: '相關度' },
+    { key: 'latest', label: '最新發布' },
+    { key: 'likes', label: '最多讚好' },
+    { key: 'views', label: '最多瀏覽' },
 ];
 
 /** 對齊 ClubSearchBar 的搜尋操作滑入時長 */
 const SEARCH_ACTION_TIMING_MS = 220;
 
 const HarborSearchPanel = forwardRef(
-    ({criteria, options, results, actions, onOpenOption}, ref) => {
-        const {theme} = useTheme();
-        const {t} = useTranslation('harbor');
+    (
+        { criteria, options, results, actions, onOpenOption, onSearchFocusChange, onFiltersExpandedChange },
+        ref,
+    ) => {
+        const { theme } = useTheme();
+        const { t } = useTranslation('harbor');
         const inputRef = useRef(null);
         const searchFocused = useSharedValue(0);
         const searchCancelWidth = useSharedValue(0);
         const [filtersExpanded, setFiltersExpanded] = useState(false);
+
+        useEffect(() => {
+            onFiltersExpandedChange?.(filtersExpanded);
+        }, [filtersExpanded, onFiltersExpandedChange]);
+
         const {
             query,
             category,
@@ -63,8 +72,8 @@ const HarborSearchPanel = forwardRef(
             resultTab,
             activeFilterCount,
         } = criteria;
-        const {filterOptionsError} = options;
-        const {isLoading} = results;
+        const { filterOptionsError } = options;
+        const { isLoading } = results;
         const {
             handleQueryChange,
             setAuthor,
@@ -80,7 +89,7 @@ const HarborSearchPanel = forwardRef(
         const searchInputOuterAnimated = useAnimatedStyle(() => ({
             marginRight: withTiming(
                 searchFocused.value * searchCancelWidth.value,
-                {duration: SEARCH_ACTION_TIMING_MS},
+                { duration: SEARCH_ACTION_TIMING_MS },
             ),
         }));
 
@@ -90,7 +99,7 @@ const HarborSearchPanel = forwardRef(
                 {
                     translateX: withTiming(
                         (1 - searchFocused.value) * searchCancelWidth.value,
-                        {duration: SEARCH_ACTION_TIMING_MS},
+                        { duration: SEARCH_ACTION_TIMING_MS },
                     ),
                 },
             ],
@@ -98,12 +107,19 @@ const HarborSearchPanel = forwardRef(
 
         const handleSearchFocus = useCallback(() => {
             searchFocused.value = 1;
-        }, [searchFocused]);
+            onSearchFocusChange?.(true);
+        }, [onSearchFocusChange, searchFocused]);
 
         const collapseSearchFocus = useCallback(() => {
             inputRef.current?.blur();
             searchFocused.value = 0;
-        }, [searchFocused]);
+            onSearchFocusChange?.(false);
+        }, [onSearchFocusChange, searchFocused]);
+
+        const handleSearchBlur = useCallback(() => {
+            searchFocused.value = 0;
+            onSearchFocusChange?.(false);
+        }, [onSearchFocusChange, searchFocused]);
 
         useImperativeHandle(
             ref,
@@ -197,6 +213,7 @@ const HarborSearchPanel = forwardRef(
                                 value={query}
                                 onChangeText={handleQueryChange}
                                 onFocus={handleSearchFocus}
+                                onBlur={handleSearchBlur}
                                 onSubmitEditing={handleSearchAction}
                                 placeholder={t('關鍵字或 Discourse 搜尋語法')}
                                 placeholderTextColor={theme.black.third}
@@ -207,7 +224,7 @@ const HarborSearchPanel = forwardRef(
                                 selectionColor={theme.themeColor}
                                 style={[
                                     styles.searchInput,
-                                    {color: theme.black.main},
+                                    { color: theme.black.main },
                                 ]}
                             />
                             {isLoading ? (
@@ -270,11 +287,11 @@ const HarborSearchPanel = forwardRef(
                     <View style={styles.resultTab}>
                         <Pressable
                             accessibilityRole="tab"
-                            accessibilityState={{selected: isTopicsTab}}
+                            accessibilityState={{ selected: isTopicsTab }}
                             onPress={() => handleSelectResultTab('topics')}
-                            style={({pressed}) => [
+                            style={({ pressed }) => [
                                 styles.resultTabLabel,
-                                pressed && {opacity: 0.7},
+                                pressed && { opacity: 0.7 },
                             ]}>
                             <Text
                                 style={[
@@ -296,16 +313,16 @@ const HarborSearchPanel = forwardRef(
                             accessibilityLabel={
                                 activeFilterCount > 0
                                     ? t('篩選（{{count}}）', {
-                                          count: activeFilterCount,
-                                      })
+                                        count: activeFilterCount,
+                                    })
                                     : t('篩選')
                             }
-                            accessibilityState={{expanded: filtersExpanded}}
+                            accessibilityState={{ expanded: filtersExpanded }}
                             hitSlop={scale(8)}
                             onPress={handleToggleFilters}
-                            style={({pressed}) => [
+                            style={({ pressed }) => [
                                 styles.topicFilterButton,
-                                pressed && {opacity: 0.6},
+                                pressed && { opacity: 0.6 },
                             ]}>
                             <MaterialCommunityIcons
                                 name="filter-variant"
@@ -320,12 +337,12 @@ const HarborSearchPanel = forwardRef(
                                 <View
                                     style={[
                                         styles.topicFilterBadge,
-                                        {backgroundColor: theme.themeColor},
+                                        { backgroundColor: theme.themeColor },
                                     ]}>
                                     <Text
                                         style={[
                                             styles.topicFilterBadgeText,
-                                            {color: theme.white},
+                                            { color: theme.white },
                                         ]}>
                                         {activeFilterCount}
                                     </Text>
@@ -336,14 +353,14 @@ const HarborSearchPanel = forwardRef(
                             <View
                                 style={[
                                     styles.resultTabUnderline,
-                                    {backgroundColor: theme.themeColor},
+                                    { backgroundColor: theme.themeColor },
                                 ]}
                             />
                         ) : null}
                     </View>
                     <Pressable
                         accessibilityRole="tab"
-                        accessibilityState={{selected: !isTopicsTab}}
+                        accessibilityState={{ selected: !isTopicsTab }}
                         onPress={() => handleSelectResultTab('users')}
                         style={styles.resultTab}>
                         <Text
@@ -362,7 +379,7 @@ const HarborSearchPanel = forwardRef(
                             <View
                                 style={[
                                     styles.resultTabUnderline,
-                                    {backgroundColor: theme.themeColor},
+                                    { backgroundColor: theme.themeColor },
                                 ]}
                             />
                         ) : null}
@@ -393,7 +410,7 @@ const HarborSearchPanel = forwardRef(
                             <Text
                                 style={[
                                     styles.filterLabel,
-                                    {color: theme.black.second},
+                                    { color: theme.black.second },
                                 ]}>
                                 {t('分類與標籤')}
                             </Text>
@@ -428,7 +445,7 @@ const HarborSearchPanel = forwardRef(
                             <Text
                                 style={[
                                     styles.filterLabel,
-                                    {color: theme.black.second},
+                                    { color: theme.black.second },
                                 ]}>
                                 {t('作者')}
                             </Text>
@@ -445,7 +462,7 @@ const HarborSearchPanel = forwardRef(
                                 <Text
                                     style={[
                                         styles.authorPrefix,
-                                        {color: theme.black.third},
+                                        { color: theme.black.third },
                                     ]}>
                                     @
                                 </Text>
@@ -467,7 +484,7 @@ const HarborSearchPanel = forwardRef(
                                     }}
                                     style={[
                                         styles.authorInput,
-                                        {color: theme.black.main},
+                                        { color: theme.black.main },
                                     ]}
                                 />
                             </View>
@@ -476,7 +493,7 @@ const HarborSearchPanel = forwardRef(
                             <Text
                                 style={[
                                     styles.filterLabel,
-                                    {color: theme.black.second},
+                                    { color: theme.black.second },
                                 ]}>
                                 {t('時間')}
                             </Text>
@@ -499,7 +516,7 @@ const HarborSearchPanel = forwardRef(
                             <Text
                                 style={[
                                     styles.filterOptionError,
-                                    {color: theme.unread},
+                                    { color: theme.unread },
                                 ]}>
                                 {t('部分分類或標籤暫時無法載入。')}
                             </Text>
@@ -512,7 +529,7 @@ const HarborSearchPanel = forwardRef(
                                     collapseSearchFocus();
                                     resetFilters();
                                 }}
-                                style={({pressed}) => [
+                                style={({ pressed }) => [
                                     styles.resetFiltersButton,
                                     pressed && {
                                         backgroundColor:
@@ -522,7 +539,7 @@ const HarborSearchPanel = forwardRef(
                                 <Text
                                     style={[
                                         styles.resetFiltersText,
-                                        {color: theme.themeColor},
+                                        { color: theme.themeColor },
                                     ]}>
                                     {t('重設篩選')}
                                 </Text>
@@ -567,8 +584,10 @@ const styles = StyleSheet.create({
         ...uiStyle.defaultText,
         flex: 1,
         minWidth: 0,
+        height: verticalScale(20),
         marginLeft: scale(4),
-        paddingVertical: scale(6),
+        paddingVertical: 0,
+        textAlignVertical: 'center',
         fontSize: verticalScale(12),
     },
     searchLoading: {
@@ -581,8 +600,9 @@ const styles = StyleSheet.create({
     searchActionWrap: {
         position: 'absolute',
         right: 0,
+        top: 0,
+        bottom: 0,
         justifyContent: 'center',
-        paddingVertical: scale(6),
         paddingLeft: scale(6),
         paddingRight: scale(2),
     },

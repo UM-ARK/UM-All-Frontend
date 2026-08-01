@@ -7,6 +7,7 @@ import {
     addHarborSearchHistory,
     buildHarborSearchQuery,
     clearHarborSearchHistory,
+    filterHarborSearchItems,
     getHarborSearchAfterDate,
     getHarborSearchHistory,
     removeHarborSearchHistory,
@@ -108,5 +109,34 @@ describe('Harbor 搜尋工具', () => {
     it('破損儲存內容會安全返回空陣列', async () => {
         getLocalStorage.mockResolvedValue(new Error('broken'));
         await expect(getHarborSearchHistory()).resolves.toEqual([]);
+    });
+
+    it('即時篩選已載入的話題與用戶結果', () => {
+        const items = [
+            {
+                id: '1',
+                kind: 'topic',
+                title: '可以使用 Event 功能',
+                excerpt: '時間表',
+                author: {username: 'qq_yyy'},
+            },
+            {
+                id: '2',
+                kind: 'topic',
+                title: 'APP 開發測試',
+                excerpt: '測試回复',
+                author: {username: 'other'},
+            },
+            {
+                id: '3',
+                kind: 'user',
+                user: {username: 'event_bot', name: 'Event Bot'},
+            },
+        ];
+
+        expect(
+            filterHarborSearchItems(items, 'eve').map(item => item.id),
+        ).toEqual(['1', '3']);
+        expect(filterHarborSearchItems(items, '')).toEqual(items);
     });
 });
