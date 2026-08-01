@@ -25,33 +25,6 @@ export const activityMeta = {
     },
 };
 
-// 常見 Discourse reaction shortcode → Unicode（活動列表用）
-const HARBOR_REACTION_UNICODE = Object.freeze({
-    heart: '❤️',
-    '+1': '👍',
-    '-1': '👎',
-    laughing: '😆',
-    open_mouth: '😮',
-    clap: '👏',
-    confetti_ball: '🎊',
-    hugs: '🤗',
-    smile: '😄',
-    tada: '🎉',
-    pray: '🙏',
-    eyes: '👀',
-    rocket: '🚀',
-    heart_eyes: '😍',
-    slightly_smiling_face: '🙂',
-});
-
-export function getHarborReactionEmoji(reactionValue) {
-    if (!reactionValue || typeof reactionValue !== 'string') {
-        return '';
-    }
-    const name = reactionValue.replace(/^:|:$/g, '').trim();
-    return HARBOR_REACTION_UNICODE[name] || '';
-}
-
 const notificationMeta = {
     mentioned: {icon: 'at-outline', label: '提及'},
     group_mentioned: {icon: 'people-outline', label: '提及'},
