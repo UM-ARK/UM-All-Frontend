@@ -1,4 +1,4 @@
-import React, {useMemo} from 'react';
+import React, { useMemo } from 'react';
 import {
     ActivityIndicator,
     Pressable,
@@ -8,23 +8,23 @@ import {
     View,
 } from 'react-native';
 
-import {isLiquidGlassSupported} from '@callstack/liquid-glass';
-import {useHeaderHeight} from '@react-navigation/elements';
-import {Image} from 'expo-image';
+import { isLiquidGlassSupported } from '@callstack/liquid-glass';
+import { useHeaderHeight } from '@react-navigation/elements';
+import { Image } from 'expo-image';
 import {
     KeyboardAwareScrollView,
     KeyboardToolbar,
 } from 'react-native-keyboard-controller';
 import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
-import {scale, verticalScale} from 'react-native-size-matters';
-import {useTranslation} from 'react-i18next';
+import { scale, verticalScale } from 'react-native-size-matters';
+import { useTranslation } from 'react-i18next';
 
-import {useTheme} from '../../../../components/ThemeContext';
+import { useTheme } from '../../../../components/ThemeContext';
 import SimpleProgressBar from '../../../../components/SimpleProgressBar';
 import HarborCategoryIcon from '../components/HarborCategoryIcon';
 import HarborCategoryPickerSheet from './HarborCategoryPickerSheet';
 import HarborTagPickerSheet from './HarborTagPickerSheet';
-import {MAX_IMAGES_PER_POST} from './harborComposerImages';
+import { MAX_IMAGES_PER_POST } from './harborComposerImages';
 
 const HarborComposerForm = ({
     categorySheetRef,
@@ -41,8 +41,8 @@ const HarborComposerForm = ({
     submit,
     tagSheetRef,
 }) => {
-    const {theme} = useTheme();
-    const {t} = useTranslation('harbor');
+    const { theme } = useTheme();
+    const { t } = useTranslation('harbor');
     const headerHeight = useHeaderHeight();
     const {
         categories,
@@ -52,7 +52,6 @@ const HarborComposerForm = ({
         isEdit,
         isEditingFirstPost,
         isNewTopic,
-        isReply,
         isTagCountValid,
         maximumPostLength,
         maximumTagCount,
@@ -81,9 +80,7 @@ const HarborComposerForm = ({
         isUploadingImages,
     } = imagesState;
     const {
-        handleSubmit,
         isDeleting,
-        isSubmitDisabled,
         isSubmitting,
         rawLength,
         submitError,
@@ -93,7 +90,7 @@ const HarborComposerForm = ({
         () => [
             styles.scrollContent,
             isLiquidGlassSupported
-                ? {paddingTop: headerHeight + scale(16)}
+                ? { paddingTop: headerHeight + scale(8) }
                 : null,
         ],
         [headerHeight],
@@ -103,7 +100,7 @@ const HarborComposerForm = ({
         <View
             style={[
                 styles.container,
-                {backgroundColor: theme.bg_color},
+                { backgroundColor: theme.bg_color },
             ]}>
             <KeyboardAwareScrollView
                 bottomOffset={verticalScale(72)}
@@ -114,14 +111,14 @@ const HarborComposerForm = ({
                 keyboardDismissMode="interactive"
                 keyboardShouldPersistTaps="handled"
                 scrollIndicatorInsets={
-                    isLiquidGlassSupported ? {top: headerHeight} : undefined
+                    isLiquidGlassSupported ? { top: headerHeight } : undefined
                 }>
                 {!isNewTopic ? (
                     <Pressable
                         accessibilityLabel={t('查看原帖')}
                         accessibilityRole="button"
                         onPress={onPressContext}
-                        style={({pressed}) => [
+                        style={({ pressed }) => [
                             styles.contextCard,
                             {
                                 backgroundColor: pressed
@@ -139,7 +136,7 @@ const HarborComposerForm = ({
                             <Text
                                 style={[
                                     styles.contextTitle,
-                                    {color: theme.black.main},
+                                    { color: theme.black.main },
                                 ]}
                                 numberOfLines={2}>
                                 {route.params?.topicTitle ||
@@ -148,7 +145,7 @@ const HarborComposerForm = ({
                             <Text
                                 style={[
                                     styles.secondaryText,
-                                    {color: theme.black.third},
+                                    { color: theme.black.third },
                                 ]}>
                                 {isEdit
                                     ? t('正在編輯第 {{count}} 樓', {
@@ -174,45 +171,96 @@ const HarborComposerForm = ({
                     </Pressable>
                 ) : null}
 
-                {isNewTopic || isEditingFirstPost ? (
-                    <View style={styles.fieldGroup}>
-                        <View style={styles.bodyLabelRow}>
-                            <Text
-                                style={[
-                                    styles.fieldLabel,
-                                    {color: theme.black.second},
-                                ]}>
-                                {t('標題')}
-                            </Text>
+                <View
+                    style={[
+                        styles.composerBlock,
+                        {
+                            backgroundColor: theme.white,
+                            borderColor: theme.themeColorUltraLight,
+                        },
+                    ]}>
+                    {isNewTopic || isEditingFirstPost ? (
+                        <View>
                             {maximumTitleLength != null &&
-                            titleLength > maximumTitleLength ? (
+                                titleLength > maximumTitleLength ? (
                                 <Text
                                     style={[
                                         styles.requirementCounter,
-                                        {color: theme.unread},
+                                        styles.inlineCounter,
+                                        { color: theme.unread },
                                     ]}>
                                     {`${titleLength}/${maximumTitleLength}`}
                                 </Text>
                             ) : null}
+                            <TextInput
+                                accessibilityLabel={t('話題標題')}
+                                autoCapitalize="sentences"
+                                onChangeText={setTitle}
+                                placeholder={t('新增標題')}
+                                placeholderTextColor={theme.black.third}
+                                style={[
+                                    styles.titleInput,
+                                    { color: theme.black.main },
+                                ]}
+                                value={title}
+                            />
                         </View>
+                    ) : null}
+
+                    <View>
+                        {maximumPostLength != null &&
+                            (supportsImages
+                                ? visibleTextLength
+                                : rawLength) > maximumPostLength ? (
+                            <Text
+                                style={[
+                                    styles.requirementCounter,
+                                    styles.inlineCounter,
+                                    { color: theme.unread },
+                                ]}>
+                                {`${supportsImages ? visibleTextLength : rawLength}/${maximumPostLength}`}
+                            </Text>
+                        ) : null}
                         <TextInput
-                            accessibilityLabel={t('話題標題')}
+                            accessibilityLabel={t('內容')}
                             autoCapitalize="sentences"
-                            onChangeText={setTitle}
-                            placeholder={t('說點什麼或提個問題')}
+                            multiline
+                            onChangeText={setRaw}
+                            placeholder={t('分享你的想法…內容將自動儲存')}
                             placeholderTextColor={theme.black.third}
+                            scrollEnabled
                             style={[
-                                styles.singleLineInput,
-                                {
-                                    backgroundColor: theme.white,
-                                    borderColor: theme.themeColorUltraLight,
-                                    color: theme.black.main,
-                                },
+                                styles.bodyInput,
+                                {color: theme.black.main},
                             ]}
-                            value={title}
+                            textAlignVertical="top"
+                            value={raw}
                         />
                     </View>
-                ) : null}
+
+                    <Pressable
+                        accessibilityLabel={t('查看 Markdown 基本語法')}
+                        accessibilityRole="link"
+                        hitSlop={scale(6)}
+                        onPress={onOpenMarkdownGuide}
+                        style={({ pressed }) => [
+                            styles.markdownHelpButton,
+                            pressed && { opacity: 0.7 },
+                        ]}>
+                        <Text
+                            style={[
+                                styles.markdownHelpText,
+                                { color: theme.black.third },
+                            ]}>
+                            {t('支援 Markdown')}
+                        </Text>
+                        <MaterialCommunityIcons
+                            name="information-outline"
+                            size={scale(15)}
+                            color={theme.black.third}
+                        />
+                    </Pressable>
+                </View>
 
                 {isNewTopic ? (
                     <>
@@ -220,14 +268,14 @@ const HarborComposerForm = ({
                             <Text
                                 style={[
                                     styles.fieldLabel,
-                                    {color: theme.black.second},
+                                    { color: theme.black.second },
                                 ]}>
                                 {t('分類')}
                             </Text>
                             <Pressable
                                 accessibilityRole="button"
                                 onPress={onOpenCategorySheet}
-                                style={({pressed}) => [
+                                style={({ pressed }) => [
                                     styles.selectorButton,
                                     {
                                         backgroundColor: pressed
@@ -270,7 +318,7 @@ const HarborComposerForm = ({
                                 <Text
                                     style={[
                                         styles.fieldLabel,
-                                        {color: theme.black.second},
+                                        { color: theme.black.second },
                                     ]}>
                                     {t('標籤')}
                                 </Text>
@@ -291,7 +339,7 @@ const HarborComposerForm = ({
                             <Pressable
                                 accessibilityRole="button"
                                 onPress={onOpenTagSheet}
-                                style={({pressed}) => [
+                                style={({ pressed }) => [
                                     styles.selectorButton,
                                     {
                                         backgroundColor: pressed
@@ -327,81 +375,13 @@ const HarborComposerForm = ({
                     </>
                 ) : null}
 
-                <View style={styles.fieldGroup}>
-                    <View style={styles.bodyLabelRow}>
-                        <View style={styles.fieldLabelRow}>
-                            <Text
-                                style={[
-                                    styles.fieldLabel,
-                                    {color: theme.black.second},
-                                ]}>
-                                {t('內容')}
-                            </Text>
-                            <Pressable
-                                accessibilityLabel={t(
-                                    '查看 Markdown 基本語法',
-                                )}
-                                accessibilityRole="link"
-                                hitSlop={scale(6)}
-                                onPress={onOpenMarkdownGuide}
-                                style={({pressed}) => [
-                                    styles.markdownHelpButton,
-                                    pressed && {opacity: 0.7},
-                                ]}>
-                                <Text
-                                    style={[
-                                        styles.markdownHelpText,
-                                        {color: theme.black.third},
-                                    ]}>
-                                    {t('支援 Markdown')}
-                                </Text>
-                                <MaterialCommunityIcons
-                                    name="information-outline"
-                                    size={scale(15)}
-                                    color={theme.black.third}
-                                />
-                            </Pressable>
-                        </View>
-                        {maximumPostLength != null &&
-                        (supportsImages
-                            ? visibleTextLength
-                            : rawLength) > maximumPostLength ? (
-                            <Text
-                                style={[
-                                    styles.requirementCounter,
-                                    {color: theme.unread},
-                                ]}>
-                                {`${supportsImages ? visibleTextLength : rawLength}/${maximumPostLength}`}
-                            </Text>
-                        ) : null}
-                    </View>
-                    <TextInput
-                        accessibilityLabel={t('內容')}
-                        autoCapitalize="sentences"
-                        multiline
-                        onChangeText={setRaw}
-                        placeholder={t('分享你的想法…內容將自動儲存')}
-                        placeholderTextColor={theme.black.third}
-                        style={[
-                            styles.bodyInput,
-                            {
-                                backgroundColor: theme.white,
-                                borderColor: theme.themeColorUltraLight,
-                                color: theme.black.main,
-                            },
-                        ]}
-                        textAlignVertical="top"
-                        value={raw}
-                    />
-                </View>
-
                 {supportsImages ? (
                     <View style={styles.fieldGroup}>
                         <View style={styles.bodyLabelRow}>
                             <Text
                                 style={[
                                     styles.fieldLabel,
-                                    {color: theme.black.second},
+                                    { color: theme.black.second },
                                 ]}>
                                 {t('圖片')}
                             </Text>
@@ -409,7 +389,7 @@ const HarborComposerForm = ({
                                 <Text
                                     style={[
                                         styles.requirementCounter,
-                                        {color: theme.black.third},
+                                        { color: theme.black.third },
                                     ]}>
                                     {`${images.length}/${MAX_IMAGES_PER_POST}`}
                                 </Text>
@@ -433,7 +413,7 @@ const HarborComposerForm = ({
                                         ]}>
                                         <Image
                                             contentFit="cover"
-                                            source={{uri: image.localUri}}
+                                            source={{ uri: image.localUri }}
                                             style={styles.imageThumbnail}
                                         />
                                         <View style={styles.imageDetails}>
@@ -444,7 +424,7 @@ const HarborComposerForm = ({
                                                     {
                                                         color:
                                                             image.status ===
-                                                            'failed'
+                                                                'failed'
                                                                 ? theme.unread
                                                                 : theme.black
                                                                     .second,
@@ -477,7 +457,7 @@ const HarborComposerForm = ({
                                                     onPress={() =>
                                                         handleRetryImage(image)
                                                     }
-                                                    style={({pressed}) => [
+                                                    style={({ pressed }) => [
                                                         styles.imageRetryButton,
                                                         {
                                                             backgroundColor:
@@ -509,7 +489,7 @@ const HarborComposerForm = ({
                                             onPress={() =>
                                                 handleRemoveImage(image.id)
                                             }
-                                            style={({pressed}) => [
+                                            style={({ pressed }) => [
                                                 styles.imageRemoveButton,
                                                 pressed && {
                                                     backgroundColor:
@@ -540,7 +520,7 @@ const HarborComposerForm = ({
                                 hasReachedImageLimit
                             }
                             onPress={handleAddImages}
-                            style={({pressed}) => [
+                            style={({ pressed }) => [
                                 styles.addImageButton,
                                 {
                                     backgroundColor: pressed
@@ -562,7 +542,7 @@ const HarborComposerForm = ({
                             <Text
                                 style={[
                                     styles.addImageText,
-                                    {color: theme.themeColor},
+                                    { color: theme.themeColor },
                                 ]}>
                                 {isPreparingImages
                                     ? t('正在處理圖片…')
@@ -575,7 +555,7 @@ const HarborComposerForm = ({
                             <Pressable
                                 accessibilityRole="link"
                                 onPress={onOpenWebComposer}
-                                style={({pressed}) => [
+                                style={({ pressed }) => [
                                     styles.webComposerButton,
                                     pressed && {
                                         backgroundColor:
@@ -590,7 +570,7 @@ const HarborComposerForm = ({
                                 <Text
                                     style={[
                                         styles.webComposerText,
-                                        {color: theme.black.third},
+                                        { color: theme.black.third },
                                     ]}>
                                     {t('需要進階排版？前往 Harbor 網頁版')}
                                 </Text>
@@ -616,61 +596,13 @@ const HarborComposerForm = ({
                         <Text
                             style={[
                                 styles.inlineErrorText,
-                                {color: theme.unread},
+                                { color: theme.unread },
                             ]}>
                             {submitError}
                         </Text>
                     </View>
                 ) : null}
 
-                <Pressable
-                    accessibilityRole="button"
-                    accessibilityState={{
-                        disabled: isSubmitDisabled,
-                    }}
-                    disabled={isSubmitDisabled}
-                    onPress={handleSubmit}
-                    style={({pressed}) => [
-                        styles.submitButton,
-                        {
-                            backgroundColor:
-                                isSubmitDisabled
-                                    ? theme.disabled
-                                    : pressed
-                                        ? theme.themeColorLight
-                                        : theme.themeColor,
-                        },
-                    ]}>
-                    {isSubmitting ? (
-                        <ActivityIndicator
-                            size="small"
-                            color={theme.trueWhite}
-                        />
-                    ) : (
-                        <MaterialCommunityIcons
-                            name={isEdit ? 'content-save-outline' : 'send'}
-                            size={scale(20)}
-                            color={theme.trueWhite}
-                        />
-                    )}
-                    <Text
-                        style={[
-                            styles.submitButtonText,
-                            {color: theme.trueWhite},
-                        ]}>
-                        {isUploadingImages
-                            ? t('正在上傳圖片…')
-                            : isSubmitting
-                                ? t('正在提交…')
-                                : isPreparingImages
-                                    ? t('正在處理圖片…')
-                                    : isEdit
-                                        ? t('儲存修改')
-                                        : isReply
-                                            ? t('發布回覆')
-                                            : t('發佈')}
-                    </Text>
-                </Pressable>
                 {isEdit && editMetadata.canDelete ? (
                     <Pressable
                         accessibilityRole="button"
@@ -679,7 +611,7 @@ const HarborComposerForm = ({
                         }}
                         disabled={isDeleting || isSubmitting}
                         onPress={onPressDelete}
-                        style={({pressed}) => [
+                        style={({ pressed }) => [
                             styles.deleteButton,
                             {
                                 backgroundColor: pressed
@@ -705,7 +637,7 @@ const HarborComposerForm = ({
                         <Text
                             style={[
                                 styles.deleteButtonText,
-                                {color: theme.unread},
+                                { color: theme.unread },
                             ]}>
                             {isDeleting
                                 ? t('正在刪除…')
@@ -768,18 +700,23 @@ const styles = StyleSheet.create({
         fontWeight: '600',
     },
     bodyInput: {
-        borderRadius: scale(12),
-        borderWidth: StyleSheet.hairlineWidth,
         fontSize: scale(15),
+        height: verticalScale(180),
         lineHeight: scale(22),
-        minHeight: verticalScale(220),
-        paddingHorizontal: scale(14),
-        paddingVertical: verticalScale(12),
+        paddingHorizontal: 0,
+        paddingVertical: verticalScale(4),
     },
     bodyLabelRow: {
         alignItems: 'center',
         flexDirection: 'row',
         justifyContent: 'space-between',
+    },
+    composerBlock: {
+        borderRadius: scale(12),
+        borderWidth: StyleSheet.hairlineWidth,
+        gap: verticalScale(4),
+        paddingHorizontal: scale(14),
+        paddingVertical: verticalScale(12),
     },
     container: {
         flex: 1,
@@ -807,10 +744,9 @@ const styles = StyleSheet.create({
         fontSize: scale(13),
         fontWeight: '600',
     },
-    fieldLabelRow: {
-        alignItems: 'center',
-        flexDirection: 'row',
-        gap: scale(8),
+    inlineCounter: {
+        alignSelf: 'flex-end',
+        marginBottom: verticalScale(2),
     },
     inlineError: {
         alignItems: 'flex-start',
@@ -869,8 +805,10 @@ const styles = StyleSheet.create({
     },
     markdownHelpButton: {
         alignItems: 'center',
+        alignSelf: 'flex-start',
         flexDirection: 'row',
         gap: scale(3),
+        marginTop: verticalScale(4),
     },
     markdownHelpText: {
         fontSize: scale(11),
@@ -880,8 +818,9 @@ const styles = StyleSheet.create({
         fontWeight: '600',
     },
     scrollContent: {
-        gap: verticalScale(17),
-        padding: scale(16),
+        gap: verticalScale(14),
+        paddingHorizontal: scale(12),
+        paddingTop: scale(8),
         paddingBottom: verticalScale(36),
     },
     secondaryText: {
@@ -906,27 +845,11 @@ const styles = StyleSheet.create({
         fontSize: scale(14),
         lineHeight: scale(19),
     },
-    singleLineInput: {
-        borderRadius: scale(12),
-        borderWidth: StyleSheet.hairlineWidth,
-        fontSize: scale(14),
-        minHeight: verticalScale(48),
-        paddingHorizontal: scale(14),
-        paddingVertical: verticalScale(10),
-    },
-    submitButton: {
-        alignItems: 'center',
-        borderRadius: scale(13),
-        flexDirection: 'row',
-        gap: scale(8),
-        justifyContent: 'center',
-        minHeight: verticalScale(50),
-        paddingHorizontal: scale(18),
-        paddingVertical: verticalScale(12),
-    },
-    submitButtonText: {
-        fontSize: scale(15),
-        fontWeight: '700',
+    titleInput: {
+        fontSize: scale(18),
+        lineHeight: scale(26),
+        paddingHorizontal: 0,
+        paddingVertical: verticalScale(6),
     },
     webComposerButton: {
         alignItems: 'center',

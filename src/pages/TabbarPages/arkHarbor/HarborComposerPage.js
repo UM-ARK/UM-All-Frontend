@@ -166,55 +166,6 @@ const HarborComposerPage = ({route, navigation}) => {
         );
     }, [discardDraftAndExit, t]);
 
-    useEffect(() => {
-        const shouldShowDiscard =
-            sessionStatus === 'signedIn' &&
-            !isLoading &&
-            !isDraftLoading &&
-            !loadError &&
-            hasDraftContent;
-        navigation.setOptions({
-            headerTitle: isNewTopic
-                ? t('發佈話題')
-                : isReply
-                    ? t('回覆話題')
-                    : t('編輯貼文'),
-            headerRight: shouldShowDiscard
-                ? () => (
-                    <Pressable
-                        accessibilityLabel={t('捨棄這次修改')}
-                        accessibilityRole="button"
-                        hitSlop={scale(8)}
-                        onPress={handleDiscard}
-                        style={({pressed}) => [
-                            styles.discardButton,
-                            pressed && {opacity: 0.6},
-                        ]}>
-                        <Text
-                            style={[
-                                styles.discardButtonText,
-                                {color: theme.unread},
-                            ]}>
-                            {t('捨棄')}
-                        </Text>
-                    </Pressable>
-                )
-                : undefined,
-        });
-    }, [
-        handleDiscard,
-        hasDraftContent,
-        isDraftLoading,
-        isLoading,
-        isNewTopic,
-        isReply,
-        loadError,
-        navigation,
-        sessionStatus,
-        t,
-        theme.unread,
-    ]);
-
     const handleOpenWebComposer = useCallback(() => {
         trigger();
         openLink({URL: ARK_HARBOR_NEW_TOPIC, mode: 'fullScreen'});
@@ -480,6 +431,109 @@ const HarborComposerPage = ({route, navigation}) => {
         titleLength,
         uploadImages,
     });
+
+    useEffect(() => {
+        const canShowHeaderActions =
+            sessionStatus === 'signedIn' &&
+            !isLoading &&
+            !isDraftLoading &&
+            !loadError &&
+            !isReply;
+        const shouldShowDiscard =
+            canShowHeaderActions && hasDraftContent;
+        const isPublishDisabled =
+            isSubmitDisabled || isDeleting;
+        navigation.setOptions({
+            headerTitle: isNewTopic
+                ? t('發佈話題')
+                : isReply
+                    ? t('回覆話題')
+                    : t('編輯貼文'),
+            headerRight: canShowHeaderActions
+                ? () => (
+                    <View style={styles.headerRightRow}>
+                        {shouldShowDiscard ? (
+                            <Pressable
+                                accessibilityLabel={t('捨棄這次修改')}
+                                accessibilityRole="button"
+                                hitSlop={scale(8)}
+                                onPress={handleDiscard}
+                                style={({pressed}) => [
+                                    styles.headerActionButton,
+                                    pressed && {opacity: 0.6},
+                                ]}>
+                                <Text
+                                    style={[
+                                        styles.headerActionText,
+                                        {color: theme.unread},
+                                    ]}>
+                                    {t('捨棄')}
+                                </Text>
+                            </Pressable>
+                        ) : null}
+                        <Pressable
+                            accessibilityLabel={
+                                isEdit ? t('儲存修改') : t('發佈')
+                            }
+                            accessibilityRole="button"
+                            accessibilityState={{
+                                disabled: isPublishDisabled,
+                            }}
+                            disabled={isPublishDisabled}
+                            hitSlop={scale(8)}
+                            onPress={handleSubmit}
+                            style={({pressed}) => [
+                                styles.headerActionButton,
+                                pressed &&
+                                    !isPublishDisabled && {
+                                        opacity: 0.6,
+                                    },
+                            ]}>
+                            {isSubmitting ? (
+                                <ActivityIndicator
+                                    size="small"
+                                    color={theme.themeColor}
+                                />
+                            ) : (
+                                <Text
+                                    style={[
+                                        styles.headerActionText,
+                                        {
+                                            color: isPublishDisabled
+                                                ? theme.black.third
+                                                : theme.themeColor,
+                                        },
+                                    ]}>
+                                    {isEdit
+                                        ? t('儲存')
+                                        : t('發佈')}
+                                </Text>
+                            )}
+                        </Pressable>
+                    </View>
+                )
+                : undefined,
+        });
+    }, [
+        handleDiscard,
+        handleSubmit,
+        hasDraftContent,
+        isDeleting,
+        isDraftLoading,
+        isEdit,
+        isLoading,
+        isNewTopic,
+        isReply,
+        isSubmitDisabled,
+        isSubmitting,
+        loadError,
+        navigation,
+        sessionStatus,
+        t,
+        theme.black.third,
+        theme.themeColor,
+        theme.unread,
+    ]);
 
     const handleSelectCategory = useCallback(item => {
         setCategoryId(Number(item.id));
@@ -788,10 +842,7 @@ const HarborComposerPage = ({route, navigation}) => {
             onSelectCategory={handleSelectCategory}
             route={route}
             submit={{
-                handleSubmit,
-                isPostLengthValid,
                 isDeleting,
-                isSubmitDisabled: isSubmitDisabled || isDeleting,
                 isSubmitting,
                 rawLength,
                 submitError,
@@ -808,13 +859,18 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         paddingHorizontal: scale(28),
     },
-    discardButton: {
+    headerActionButton: {
         paddingHorizontal: scale(6),
         paddingVertical: verticalScale(6),
     },
-    discardButtonText: {
+    headerActionText: {
         fontSize: scale(14),
         fontWeight: '600',
+    },
+    headerRightRow: {
+        alignItems: 'center',
+        flexDirection: 'row',
+        gap: scale(2),
     },
     inlineErrorText: {
         flex: 1,
