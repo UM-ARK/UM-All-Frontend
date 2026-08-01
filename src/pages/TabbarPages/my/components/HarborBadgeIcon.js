@@ -1,12 +1,12 @@
 import React from 'react';
-import {StyleSheet, View} from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
-import {Image} from 'expo-image';
+import { Image } from 'expo-image';
 import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
 import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
-import {scale, verticalScale} from 'react-native-size-matters';
+import { scale, verticalScale } from 'react-native-size-matters';
 
-import {useTheme} from '../../../../components/ThemeContext';
+import { useTheme } from '../../../../components/ThemeContext';
 
 // 紀念日／慶典型徽章：Discourse 常標為銀級，視覺改用金色更喜慶
 const FESTIVE_BADGE_ICONS = new Set([
@@ -41,21 +41,20 @@ const getBadgeColors = (theme, badge) => {
     };
 };
 
-const HarborBadgeIcon = ({badge, compact = false}) => {
-    const {theme} = useTheme();
+const HarborBadgeIcon = ({ badge, compact = false }) => {
+    const { theme } = useTheme();
     const colors = getBadgeColors(theme, badge);
-    const hasApiIcon =
-        badge.icon && FontAwesome6.hasIcon(badge.icon, 'solid');
+    const hasApiIcon = badge.icon;
 
     return (
         <View
             style={[
                 compact ? styles.compactContainer : styles.container,
-                {backgroundColor: colors.backgroundColor},
+                { backgroundColor: colors.backgroundColor },
             ]}>
             {badge.imageUrl ? (
                 <Image
-                    source={{uri: badge.imageUrl}}
+                    source={{ uri: badge.imageUrl }}
                     style={compact ? styles.compactImage : styles.image}
                     contentFit="contain"
                 />
