@@ -14,9 +14,13 @@ import {scale, verticalScale} from 'react-native-size-matters';
 
 import {useTheme} from '../../../../components/ThemeContext';
 import {useHarborSession} from '../../../../contexts/HarborSessionContext';
-import {fetchHarborUserActions} from '../../../../utils/harbor/harborApi';
+import {
+    fetchHarborUserActions,
+    fetchHarborUserCreatedTopics,
+} from '../../../../utils/harbor/harborApi';
 import {trigger} from '../../../../utils/trigger';
 import {HarborInlineRetry} from '../../arkHarbor/components/HarborListStates';
+import HarborTopicCard from '../../arkHarbor/components/HarborTopicCard';
 import HarborActivityRow from '../components/HarborActivityRow';
 import HarborEmptyState from '../components/HarborEmptyState';
 
@@ -38,6 +42,7 @@ const HarborActivityPage = ({
     const {user} = useHarborSession();
     const headerHeight = React.useContext(HeaderHeightContext) || 0;
     const kind = embeddedKind || route?.params?.kind || 'all';
+    const isTopicsKind = kind === 'topics';
     const title = embeddedTitle || route?.params?.title || t('所有活動');
     const username = user?.username || '';
     const controllerRef = React.useRef(null);
@@ -47,7 +52,7 @@ const HarborActivityPage = ({
     const [isRefreshing, setIsRefreshing] = React.useState(false);
     const [isLoadingMore, setIsLoadingMore] = React.useState(false);
     const [hasMore, setHasMore] = React.useState(false);
-    const [nextOffset, setNextOffset] = React.useState(0);
+    const [nextCursor, setNextCursor] = React.useState(0);
     const [loadError, setLoadError] = React.useState(false);
     const [loadMoreError, setLoadMoreError] = React.useState(false);
 
@@ -70,17 +75,24 @@ const HarborActivityPage = ({
             setLoadError(false);
 
             try {
-                const result = await fetchHarborUserActions(username, {
-                    kind,
-                    offset: 0,
-                    signal: controller.signal,
-                });
+                const result = isTopicsKind
+                    ? await fetchHarborUserCreatedTopics(username, {
+                          page: 0,
+                          signal: controller.signal,
+                      })
+                    : await fetchHarborUserActions(username, {
+                          kind,
+                          offset: 0,
+                          signal: controller.signal,
+                      });
                 if (controller.signal.aborted) {
                     return;
                 }
                 setItems(result.items);
                 setHasMore(result.hasMore);
-                setNextOffset(result.nextOffset);
+                setNextCursor(
+                    isTopicsKind ? result.nextPage : result.nextOffset,
+                );
                 setLoadMoreError(false);
             } catch (error) {
                 if (!controller.signal.aborted) {
@@ -94,7 +106,7 @@ const HarborActivityPage = ({
                 }
             }
         },
-        [kind, username],
+        [isTopicsKind, kind, username],
     );
 
     React.useEffect(() => {
@@ -106,39 +118,56 @@ const HarborActivityPage = ({
         return () => controllerRef.current?.abort();
     }, [loadFirstPage, navigation, username]);
 
-    const loadMore = React.useCallback(async ({force = false} = {}) => {
-        if (
-            !hasMore ||
-            loadingMoreRef.current ||
-            !username ||
-            (loadMoreError && !force)
-        ) {
-            return;
-        }
-        loadingMoreRef.current = true;
-        setIsLoadingMore(true);
-        setLoadMoreError(false);
-        try {
-            const result = await fetchHarborUserActions(username, {
-                kind,
-                offset: nextOffset,
-            });
-            setItems(currentItems => {
-                const seenIds = new Set(currentItems.map(item => item.id));
-                return [
-                    ...currentItems,
-                    ...result.items.filter(item => !seenIds.has(item.id)),
-                ];
-            });
-            setHasMore(result.hasMore);
-            setNextOffset(result.nextOffset);
-        } catch (error) {
-            setLoadMoreError(true);
-        } finally {
-            loadingMoreRef.current = false;
-            setIsLoadingMore(false);
-        }
-    }, [hasMore, kind, loadMoreError, nextOffset, username]);
+    const loadMore = React.useCallback(
+        async ({force = false} = {}) => {
+            if (
+                !hasMore ||
+                loadingMoreRef.current ||
+                !username ||
+                nextCursor == null ||
+                (loadMoreError && !force)
+            ) {
+                return;
+            }
+            loadingMoreRef.current = true;
+            setIsLoadingMore(true);
+            setLoadMoreError(false);
+            try {
+                const result = isTopicsKind
+                    ? await fetchHarborUserCreatedTopics(username, {
+                          page: nextCursor,
+                      })
+                    : await fetchHarborUserActions(username, {
+                          kind,
+                          offset: nextCursor,
+                      });
+                setItems(currentItems => {
+                    const seenIds = new Set(currentItems.map(item => item.id));
+                    return [
+                        ...currentItems,
+                        ...result.items.filter(item => !seenIds.has(item.id)),
+                    ];
+                });
+                setHasMore(result.hasMore);
+                setNextCursor(
+                    isTopicsKind ? result.nextPage : result.nextOffset,
+                );
+            } catch (error) {
+                setLoadMoreError(true);
+            } finally {
+                loadingMoreRef.current = false;
+                setIsLoadingMore(false);
+            }
+        },
+        [
+            hasMore,
+            isTopicsKind,
+            kind,
+            loadMoreError,
+            nextCursor,
+            username,
+        ],
+    );
 
     const handleItemPress = React.useCallback(
         item => {
@@ -154,11 +183,70 @@ const HarborActivityPage = ({
         [navigation],
     );
 
+    const handleTopicPress = React.useCallback(
+        topic => {
+            if (!topic?.id) {
+                return;
+            }
+            navigation.navigate('HarborTopicDetail', {
+                topicId: topic.id,
+                topicTitle: topic.title,
+            });
+        },
+        [navigation],
+    );
+
+    const handleCategoryPress = React.useCallback(
+        category => {
+            navigation.navigate('HarborCategoryTopics', {
+                categoryId: category.id,
+                categorySlug: category.slug,
+                categoryName: category.name,
+            });
+        },
+        [navigation],
+    );
+
     const handleRefresh = React.useCallback(() => {
         trigger();
         loadFirstPage({refresh: true});
         onProfileRefresh?.();
     }, [loadFirstPage, onProfileRefresh]);
+
+    const renderItem = React.useCallback(
+        ({item}) => {
+            if (isTopicsKind) {
+                return (
+                    <HarborTopicCard
+                        topic={item}
+                        onPress={handleTopicPress}
+                        onCategoryPress={handleCategoryPress}
+                    />
+                );
+            }
+            return (
+                <View
+                    style={[
+                        styles.rowCard,
+                        {backgroundColor: theme.white},
+                        theme.viewShadow,
+                    ]}>
+                    <HarborActivityRow
+                        item={item}
+                        onPress={handleItemPress}
+                    />
+                </View>
+            );
+        },
+        [
+            handleCategoryPress,
+            handleItemPress,
+            handleTopicPress,
+            isTopicsKind,
+            theme.viewShadow,
+            theme.white,
+        ],
+    );
 
     if (isLoading) {
         return (
@@ -188,7 +276,7 @@ const HarborActivityPage = ({
             ]}>
             <FlashList
                 data={items}
-                keyExtractor={item => item.id}
+                keyExtractor={item => String(item.id)}
                 scrollIndicatorInsets={
                     isLiquidGlassSupported ? {top: headerHeight} : undefined
                 }
@@ -197,6 +285,7 @@ const HarborActivityPage = ({
                 }
                 contentContainerStyle={[
                     styles.content,
+                    isTopicsKind && styles.topicsContent,
                     {
                         paddingBottom: contentBottomInset,
                         paddingTop: contentTopInset + verticalScale(12),
@@ -208,20 +297,10 @@ const HarborActivityPage = ({
                 showsVerticalScrollIndicator={false}
                 onScroll={onScroll}
                 scrollEventThrottle={16}
-                renderItem={({item}) => (
-                    <View
-                        style={[
-                            styles.rowCard,
-                            {backgroundColor: theme.white},
-                            theme.viewShadow,
-                        ]}>
-                        <HarborActivityRow
-                            item={item}
-                            onPress={handleItemPress}
-                        />
-                    </View>
-                )}
-                ItemSeparatorComponent={ListSeparator}
+                renderItem={renderItem}
+                ItemSeparatorComponent={
+                    isTopicsKind ? undefined : ListSeparator
+                }
                 ListHeaderComponent={
                     loadError && items.length > 0 ? (
                         <HarborInlineRetry
@@ -251,7 +330,9 @@ const HarborActivityPage = ({
                                     '無法取得 Harbor 活動，請檢查網絡後再試。',
                                 )
                                 : t(
-                                    '你在 Harbor 的新活動會顯示在這裡。',
+                                    isTopicsKind
+                                        ? '你建立的話題會顯示在這裡。'
+                                        : '你在 Harbor 的新活動會顯示在這裡。',
                                 )
                         }
                         actionLabel={loadError ? t('重試') : undefined}
@@ -303,6 +384,9 @@ const styles = StyleSheet.create({
         paddingHorizontal: scale(14),
         paddingTop: verticalScale(12),
         paddingBottom: verticalScale(32),
+    },
+    topicsContent: {
+        paddingHorizontal: scale(6),
     },
     rowCard: {
         borderRadius: scale(18),

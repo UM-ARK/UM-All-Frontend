@@ -1377,6 +1377,47 @@ function normalizeProfile(
     };
 }
 
+async function buildNormalizedTopicListResult(data, page) {
+    const topicList = data?.topic_list;
+    const rawTopics = topicList?.topics;
+    if (!topicList || !Array.isArray(rawTopics)) {
+        throw new Error('Invalid Harbor topic list response');
+    }
+
+    let categories = normalizeCategories(data);
+    if (rawTopics.length > 0 && categories.length === 0) {
+        try {
+            categories = await fetchHarborDiscoveryCategories();
+        } catch {
+            categories = [];
+        }
+    }
+    const categoriesById = new Map(
+        categories.map(category => [category.id, category]),
+    );
+    const users = getTopicUsers(data);
+    const items = rawTopics
+        .filter(Boolean)
+        .map(topic =>
+            normalizeTopicSummary(topic, {
+                categoriesById,
+                users,
+            }),
+        )
+        .filter(topic => topic.id != null);
+    const pageInfo = getTopicPageInfo(topicList, page, rawTopics.length);
+
+    return {
+        items,
+        ...pageInfo,
+        categories,
+        capabilities: {
+            canCreateTopic: Boolean(topicList.can_create_topic),
+            solved: items.some(topic => topic.capabilities.solved),
+        },
+    };
+}
+
 export async function fetchHarborTopicList({
     view = 'latest',
     page = 0,
@@ -1396,48 +1437,27 @@ export async function fetchHarborTopicList({
         params: { page: normalizedPage },
         signal,
     });
-    const topicList = response.data?.topic_list;
-    const rawTopics = topicList?.topics;
-    if (!topicList || !Array.isArray(rawTopics)) {
-        throw new Error('Invalid Harbor topic list response');
-    }
+    return buildNormalizedTopicListResult(response.data, normalizedPage);
+}
 
-    let categories = normalizeCategories(response.data);
-    if (rawTopics.length > 0 && categories.length === 0) {
-        try {
-            categories = await fetchHarborDiscoveryCategories();
-        } catch {
-            categories = [];
-        }
+// 使用者建立的話題列表（發佈頁）
+export async function fetchHarborUserCreatedTopics(
+    username,
+    { page = 0, signal } = {},
+) {
+    if (typeof username !== 'string' || !username.trim()) {
+        throw new TypeError('Harbor username is required');
     }
-    const categoriesById = new Map(
-        categories.map(category => [category.id, category]),
-    );
-    const users = getTopicUsers(response.data);
-    const items = rawTopics
-        .filter(Boolean)
-        .map(topic =>
-            normalizeTopicSummary(topic, {
-                categoriesById,
-                users,
-            }),
-        )
-        .filter(topic => topic.id != null);
-    const pageInfo = getTopicPageInfo(
-        topicList,
-        normalizedPage,
-        rawTopics.length,
-    );
-
-    return {
-        items,
-        ...pageInfo,
-        categories,
-        capabilities: {
-            canCreateTopic: Boolean(topicList.can_create_topic),
-            solved: items.some(topic => topic.capabilities.solved),
+    const normalizedPage = Math.max(0, Math.floor(Number(page) || 0));
+    const encodedUsername = encodeURIComponent(username.trim());
+    const response = await harborApi.get(
+        `/topics/created-by/${encodedUsername}.json`,
+        {
+            params: { page: normalizedPage },
+            signal,
         },
-    };
+    );
+    return buildNormalizedTopicListResult(response.data, normalizedPage);
 }
 
 export async function fetchHarborSearch({

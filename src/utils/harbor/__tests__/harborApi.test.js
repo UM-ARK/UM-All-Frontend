@@ -23,6 +23,7 @@ import {
     fetchHarborUnreadNotificationCount,
     fetchHarborForumBadgeSnapshot,
     fetchHarborUserActions,
+    fetchHarborUserCreatedTopics,
     fetchCachedHarborFlagTypes,
     flagHarborPost,
     getHarborTopicViews,
@@ -320,6 +321,77 @@ describe('Harbor API 資料正規化', () => {
                 postNumber: 3,
             }),
         ]);
+    });
+
+    it('將使用者建立的話題列表轉為話題卡片資料', async () => {
+        getSpy.mockResolvedValue({
+            data: {
+                users: [
+                    {
+                        id: 7,
+                        username: 'ark-user',
+                        name: 'ARK',
+                        avatar_template: '/user_avatar/ark-user/{size}.png',
+                    },
+                ],
+                topic_list: {
+                    can_create_topic: true,
+                    more_topics_url: '/topics/created-by/ark-user?page=1',
+                    topics: [
+                        {
+                            id: 88,
+                            title: '我建立的話題',
+                            excerpt: '<p>發佈內容</p>',
+                            category_id: 4,
+                            category_name: '吹水台',
+                            category_slug: 'general',
+                            posters: [{user_id: 7}],
+                            posts_count: 3,
+                            reply_count: 2,
+                            views: 40,
+                            like_count: 5,
+                            created_at: '2026-07-20T08:00:00Z',
+                            last_posted_at: '2026-07-21T08:00:00Z',
+                        },
+                    ],
+                },
+            },
+        });
+
+        const result = await fetchHarborUserCreatedTopics('ark-user', {
+            page: 0,
+        });
+
+        expect(getSpy).toHaveBeenCalledWith(
+            '/topics/created-by/ark-user.json',
+            expect.objectContaining({
+                params: {page: 0},
+            }),
+        );
+        expect(result).toEqual(
+            expect.objectContaining({
+                hasMore: true,
+                nextPage: 1,
+            }),
+        );
+        expect(result.items[0]).toEqual(
+            expect.objectContaining({
+                id: 88,
+                title: '我建立的話題',
+                excerpt: '發佈內容',
+                replyCount: 2,
+                viewCount: 40,
+                likeCount: 5,
+                author: expect.objectContaining({
+                    username: 'ark-user',
+                }),
+                category: expect.objectContaining({
+                    id: 4,
+                    name: '吹水台',
+                    slug: 'general',
+                }),
+            }),
+        );
     });
 
     it('贊過列表優先使用 discourse-reactions，並合併 heart 影子讚', async () => {
