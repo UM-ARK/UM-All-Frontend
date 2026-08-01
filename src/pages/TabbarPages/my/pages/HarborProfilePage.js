@@ -9,28 +9,105 @@ import {
     View,
 } from 'react-native';
 
-import {isLiquidGlassSupported} from '@callstack/liquid-glass';
-import {useHeaderHeight} from '@react-navigation/elements';
-import {MenuView} from '@react-native-menu/menu';
-import {Image} from 'expo-image';
-import {useTranslation} from 'react-i18next';
+import { isLiquidGlassSupported } from '@callstack/liquid-glass';
+import { useHeaderHeight } from '@react-navigation/elements';
+import { MenuView } from '@react-native-menu/menu';
+import { Image } from 'expo-image';
+import { useTranslation } from 'react-i18next';
 import Ionicons from "@react-native-vector-icons/ionicons";
-import {KeyboardAwareScrollView, KeyboardToolbar} from 'react-native-keyboard-controller';
-import {scale, verticalScale} from 'react-native-size-matters';
+import { KeyboardAwareScrollView, KeyboardToolbar } from 'react-native-keyboard-controller';
+import Animated, {
+    Easing,
+    interpolate,
+    useAnimatedStyle,
+    useSharedValue,
+    withRepeat,
+    withSequence,
+    withTiming,
+} from 'react-native-reanimated';
+import { scale, verticalScale } from 'react-native-size-matters';
 
-import {uiStyle, useTheme} from '../../../../components/ThemeContext';
-import {useHarborSession} from '../../../../contexts/HarborSessionContext';
+import { uiStyle, useTheme } from '../../../../components/ThemeContext';
+import { useHarborSession } from '../../../../contexts/HarborSessionContext';
 import HarborBadgeIcon from '../components/HarborBadgeIcon';
 import {
     fetchHarborProfileMetadata,
     fetchHarborUserProfile,
     updateHarborProfile,
 } from '../../../../utils/harbor/harborApi';
-import {openLink} from '../../../../utils/browser';
-import {ARK_HARBOR} from '../../../../utils/pathMap';
-import {trigger} from '../../../../utils/trigger';
+import { openLink } from '../../../../utils/browser';
+import { ARK_HARBOR } from '../../../../utils/pathMap';
+import { trigger } from '../../../../utils/trigger';
 
 const AVATAR_SOURCE = require('../../../../static/img/logo_round.png');
+const UMER_DISPLAY_LABEL = '🎓 UMer';
+
+const isUmerGroupLabel = label => {
+    const key = String(label || '')
+        .replace(/[^a-zA-Z0-9]/g, '')
+        .toLowerCase();
+    return key === 'umer';
+};
+
+const resolveUmerBadgeLabel = (groups, isUMer) => {
+    const hasUmerGroup =
+        Array.isArray(groups) && groups.some(isUmerGroupLabel);
+    return isUMer || hasUmerGroup ? UMER_DISPLAY_LABEL : null;
+};
+
+// 頭像右上角 UMer 角標：45° 傾斜並輕微浮動
+const UmerAvatarBadge = ({ label }) => {
+    const { theme } = useTheme();
+    const pulse = useSharedValue(0);
+
+    React.useEffect(() => {
+        pulse.value = withRepeat(
+            withSequence(
+                withTiming(1, {
+                    duration: 1100,
+                    easing: Easing.inOut(Easing.sin),
+                }),
+                withTiming(0, {
+                    duration: 1100,
+                    easing: Easing.inOut(Easing.sin),
+                }),
+            ),
+            -1,
+            false,
+        );
+    }, [pulse]);
+
+    const animatedStyle = useAnimatedStyle(() => {
+        const wobble = interpolate(pulse.value, [0, 1], [-3, 3]);
+        return {
+            transform: [
+                { rotate: `${45 + wobble}deg` },
+                {
+                    translateY: interpolate(pulse.value, [0, 1], [0, -2.5]),
+                },
+                { scale: interpolate(pulse.value, [0, 1], [1, 1.08]) },
+            ],
+        };
+    });
+
+    return (
+        <Animated.View
+            pointerEvents="none"
+            style={[
+                styles.umerBadge,
+                {
+                    backgroundColor: theme.themeColor,
+                    shadowColor: theme.themeColor,
+                },
+                animatedStyle,
+            ]}>
+            <Text
+                style={[styles.umerBadgeText, { color: theme.trueWhite }]}>
+                {label}
+            </Text>
+        </Animated.View>
+    );
+};
 
 const ProfileTextField = ({
     editable,
@@ -41,11 +118,11 @@ const ProfileTextField = ({
     value,
     ...inputProps
 }) => {
-    const {theme} = useTheme();
+    const { theme } = useTheme();
 
     return (
         <View style={styles.field}>
-            <Text style={[styles.fieldLabel, {color: theme.black.second}]}>
+            <Text style={[styles.fieldLabel, { color: theme.black.second }]}>
                 {label}
             </Text>
             <TextInput
@@ -74,10 +151,10 @@ const ProfileTextField = ({
     );
 };
 
-const HarborProfilePage = ({navigation, route}) => {
-    const {theme} = useTheme();
-    const {t} = useTranslation('my');
-    const {user, refresh} = useHarborSession();
+const HarborProfilePage = ({ navigation, route }) => {
+    const { theme } = useTheme();
+    const { t } = useTranslation('my');
+    const { user, refresh } = useHarborSession();
     const headerHeight = useHeaderHeight();
     const sessionUsername = user?.username || '';
     const requestedUsername = String(
@@ -115,7 +192,7 @@ const HarborProfilePage = ({navigation, route}) => {
     const [isSaving, setIsSaving] = React.useState(false);
 
     React.useEffect(() => {
-        navigation.setOptions({headerTitle: t('Harbor 個人資料')});
+        navigation.setOptions({ headerTitle: t('Harbor 個人資料') });
     }, [navigation, t]);
 
     React.useEffect(() => {
@@ -180,7 +257,7 @@ const HarborProfilePage = ({navigation, route}) => {
             return undefined;
         }
 
-        fetchHarborProfileMetadata({signal: controller.signal})
+        fetchHarborProfileMetadata({ signal: controller.signal })
             .then(metadata => {
                 if (isActive) {
                     setWorkStatusField(metadata.workStatusField);
@@ -206,7 +283,7 @@ const HarborProfilePage = ({navigation, route}) => {
 
     React.useEffect(() => {
         if (isOwnProfile && !user?.profile) {
-            refresh().catch(() => {});
+            refresh().catch(() => { });
         }
     }, [isOwnProfile, refresh, user?.profile]);
 
@@ -229,12 +306,22 @@ const HarborProfilePage = ({navigation, route}) => {
     const canSave = Boolean(
         isOwnProfile && profile.canEdit && hasChanges && !isSaving && username,
     );
+    const umerLabel = React.useMemo(
+        () =>
+            resolveUmerBadgeLabel(
+                viewedUser?.groups,
+                viewedUser?.isUMer,
+            ),
+        [viewedUser?.groups, viewedUser?.isUMer],
+    );
     const profileTags = React.useMemo(
         () =>
             [
                 profile.workStatus,
                 viewedUser?.role,
-                ...(viewedUser?.groups || []),
+                ...(viewedUser?.groups || []).filter(
+                    item => !isUmerGroupLabel(item),
+                ),
                 `TL${viewedUser?.trustLevel ?? 0}`,
             ].filter(
                 (tag, index, tags) =>
@@ -300,7 +387,7 @@ const HarborProfilePage = ({navigation, route}) => {
         Alert.alert(
             t('Harbor 操作失敗'),
             t('無法更新 Harbor 個人資料，請稍後再試。'),
-            [{text: t('確定'), onPress: () => trigger()}],
+            [{ text: t('確定'), onPress: () => trigger() }],
         );
     };
 
@@ -318,9 +405,9 @@ const HarborProfilePage = ({navigation, route}) => {
         setIsSaving(true);
         try {
             await updateHarborProfile(username, {
-                ...(profile.canChangeBio ? {bio} : {}),
-                ...(profile.canChangeLocation ? {location} : {}),
-                ...(profile.canChangeWebsite ? {website} : {}),
+                ...(profile.canChangeBio ? { bio } : {}),
+                ...(profile.canChangeLocation ? { location } : {}),
+                ...(profile.canChangeWebsite ? { website } : {}),
                 ...(canEditWorkStatus
                     ? {
                         workStatus,
@@ -356,15 +443,15 @@ const HarborProfilePage = ({navigation, route}) => {
     };
 
     return (
-        <View style={[styles.container, {backgroundColor: theme.bg_color}]}>
+        <View style={[styles.container, { backgroundColor: theme.bg_color }]}>
             <KeyboardAwareScrollView
                 bottomOffset={verticalScale(72)}
                 contentInset={
-                    isLiquidGlassSupported ? {top: headerHeight} : undefined
+                    isLiquidGlassSupported ? { top: headerHeight } : undefined
                 }
                 contentOffset={
                     isLiquidGlassSupported
-                        ? {x: 0, y: -headerHeight}
+                        ? { x: 0, y: -headerHeight }
                         : undefined
                 }
                 contentInsetAdjustmentBehavior={
@@ -374,7 +461,7 @@ const HarborProfilePage = ({navigation, route}) => {
                 keyboardDismissMode="interactive"
                 keyboardShouldPersistTaps="handled"
                 scrollIndicatorInsets={
-                    isLiquidGlassSupported ? {top: headerHeight} : undefined
+                    isLiquidGlassSupported ? { top: headerHeight } : undefined
                 }
                 showsVerticalScrollIndicator={false}>
                 {isLoadingProfile ? (
@@ -383,7 +470,7 @@ const HarborProfilePage = ({navigation, route}) => {
                         <Text
                             style={[
                                 styles.loadingText,
-                                {color: theme.black.third},
+                                { color: theme.black.third },
                             ]}>
                             {t('正在載入個人資料…')}
                         </Text>
@@ -392,7 +479,7 @@ const HarborProfilePage = ({navigation, route}) => {
                     <View
                         style={[
                             styles.notice,
-                            {backgroundColor: theme.tonal.unread15},
+                            { backgroundColor: theme.tonal.unread15 },
                         ]}>
                         <Ionicons
                             name="information-circle-outline"
@@ -402,7 +489,7 @@ const HarborProfilePage = ({navigation, route}) => {
                         <Text
                             style={[
                                 styles.noticeText,
-                                {color: theme.black.second},
+                                { color: theme.black.second },
                             ]}>
                             {t('無法取得這個 Harbor 個人資料，請稍後再試。')}
                         </Text>
@@ -413,24 +500,27 @@ const HarborProfilePage = ({navigation, route}) => {
                             <View
                                 style={[
                                     styles.avatarRing,
-                                    {backgroundColor: theme.tonal.primary30},
+                                    { backgroundColor: theme.tonal.primary30 },
                                 ]}>
                                 <Image
                                     source={
                                         viewedUser?.avatarUrl
-                                            ? {uri: viewedUser.avatarUrl}
+                                            ? { uri: viewedUser.avatarUrl }
                                             : AVATAR_SOURCE
                                     }
                                     style={styles.avatar}
                                     contentFit="cover"
                                 />
+                                {umerLabel ? (
+                                    <UmerAvatarBadge label={umerLabel} />
+                                ) : null}
                             </View>
                             <View style={styles.nameRow}>
                                 <Text
                                     numberOfLines={1}
                                     style={[
                                         styles.identityName,
-                                        {color: theme.black.main},
+                                        { color: theme.black.main },
                                     ]}>
                                     {viewedUser?.displayName || username}
                                 </Text>
@@ -438,14 +528,14 @@ const HarborProfilePage = ({navigation, route}) => {
                             <Text
                                 style={[
                                     styles.username,
-                                    {color: theme.black.third},
+                                    { color: theme.black.third },
                                 ]}>
                                 @{username}
                             </Text>
                             <Text
                                 style={[
                                     styles.role,
-                                    {color: theme.black.second},
+                                    { color: theme.black.second },
                                 ]}>
                                 {profile.workStatus || viewedUser?.role}
                             </Text>
@@ -455,7 +545,7 @@ const HarborProfilePage = ({navigation, route}) => {
                             <View
                                 style={[
                                     styles.modeControl,
-                                    {backgroundColor: theme.tonal.primary08},
+                                    { backgroundColor: theme.tonal.primary08 },
                                 ]}>
                                 {['preview', 'edit'].map(nextMode => (
                                     <Pressable
@@ -496,7 +586,7 @@ const HarborProfilePage = ({navigation, route}) => {
                                     <Text
                                         style={[
                                             styles.sectionTitle,
-                                            {color: theme.black.main},
+                                            { color: theme.black.main },
                                         ]}>
                                         {t('身份標籤')}
                                     </Text>
@@ -527,7 +617,7 @@ const HarborProfilePage = ({navigation, route}) => {
                                             <Text
                                                 style={[
                                                     styles.emptyText,
-                                                    {color: theme.black.third},
+                                                    { color: theme.black.third },
                                                 ]}>
                                                 {t('沒有可顯示的標籤')}
                                             </Text>
@@ -539,14 +629,14 @@ const HarborProfilePage = ({navigation, route}) => {
                                     <Text
                                         style={[
                                             styles.sectionTitle,
-                                            {color: theme.black.main},
+                                            { color: theme.black.main },
                                         ]}>
                                         {t('公開資料')}
                                     </Text>
                                     <View
                                         style={[
                                             styles.list,
-                                            {backgroundColor: theme.white},
+                                            { backgroundColor: theme.white },
                                         ]}>
                                         {publicInfoItems.map((item, index) => {
                                             const content = (
@@ -608,7 +698,7 @@ const HarborProfilePage = ({navigation, route}) => {
                                                         </View>
                                                     )}
                                                     {index <
-                                                    publicInfoItems.length - 1 ? (
+                                                        publicInfoItems.length - 1 ? (
                                                         <View
                                                             style={[
                                                                 styles.divider,
@@ -629,14 +719,14 @@ const HarborProfilePage = ({navigation, route}) => {
                                     <Text
                                         style={[
                                             styles.sectionTitle,
-                                            {color: theme.black.main},
+                                            { color: theme.black.main },
                                         ]}>
                                         {t('社群統計')}
                                     </Text>
                                     <View
                                         style={[
                                             styles.metrics,
-                                            {backgroundColor: theme.white},
+                                            { backgroundColor: theme.white },
                                         ]}>
                                         {[
                                             ...(viewedUser?.contributions || []),
@@ -648,7 +738,7 @@ const HarborProfilePage = ({navigation, route}) => {
                                                 <Text
                                                     style={[
                                                         styles.metricValue,
-                                                        {color: theme.black.main},
+                                                        { color: theme.black.main },
                                                     ]}>
                                                     {isSummaryVisible
                                                         ? item.value
@@ -657,7 +747,7 @@ const HarborProfilePage = ({navigation, route}) => {
                                                 <Text
                                                     style={[
                                                         styles.metricLabel,
-                                                        {color: theme.black.third},
+                                                        { color: theme.black.third },
                                                     ]}>
                                                     {t(item.label)}
                                                 </Text>
@@ -668,7 +758,7 @@ const HarborProfilePage = ({navigation, route}) => {
                                         <Text
                                             style={[
                                                 styles.sectionHint,
-                                                {color: theme.black.third},
+                                                { color: theme.black.third },
                                             ]}>
                                             {t('這位用戶的統計目前不可見。')}
                                         </Text>
@@ -679,14 +769,14 @@ const HarborProfilePage = ({navigation, route}) => {
                                     <Text
                                         style={[
                                             styles.sectionTitle,
-                                            {color: theme.black.main},
+                                            { color: theme.black.main },
                                         ]}>
                                         {t('論壇成就')}
                                     </Text>
                                     <View
                                         style={[
                                             styles.list,
-                                            {backgroundColor: theme.white},
+                                            { backgroundColor: theme.white },
                                         ]}>
                                         {viewedUser?.badges?.length ? (
                                             viewedUser.badges.map(
@@ -727,7 +817,7 @@ const HarborProfilePage = ({navigation, route}) => {
                                                             </View>
                                                         </View>
                                                         {index <
-                                                        viewedUser.badges.length -
+                                                            viewedUser.badges.length -
                                                             1 ? (
                                                             <View
                                                                 style={[
@@ -746,7 +836,7 @@ const HarborProfilePage = ({navigation, route}) => {
                                             <Text
                                                 style={[
                                                     styles.emptyListText,
-                                                    {color: theme.black.third},
+                                                    { color: theme.black.third },
                                                 ]}>
                                                 {areBadgesVisible
                                                     ? t('沒有公開成就')
@@ -775,7 +865,7 @@ const HarborProfilePage = ({navigation, route}) => {
                                         <Text
                                             style={[
                                                 styles.noticeText,
-                                                {color: theme.black.second},
+                                                { color: theme.black.second },
                                             ]}>
                                             {t('目前無法在 App 內編輯這個 Harbor 個人資料。')}
                                         </Text>
@@ -785,13 +875,13 @@ const HarborProfilePage = ({navigation, route}) => {
                                 <View
                                     style={[
                                         styles.formCard,
-                                        {backgroundColor: theme.white},
+                                        { backgroundColor: theme.white },
                                     ]}>
                                     <View style={styles.field}>
                                         <Text
                                             style={[
                                                 styles.fieldLabel,
-                                                {color: theme.black.second},
+                                                { color: theme.black.second },
                                             ]}>
                                             {t('工作狀態')}
                                         </Text>
@@ -871,7 +961,7 @@ const HarborProfilePage = ({navigation, route}) => {
                                             <Text
                                                 style={[
                                                     styles.fieldHint,
-                                                    {color: theme.unread},
+                                                    { color: theme.unread },
                                                 ]}>
                                                 {t('工作狀態選項載入失敗，可稍後重試或使用 Harbor Web。')}
                                             </Text>
@@ -923,14 +1013,14 @@ const HarborProfilePage = ({navigation, route}) => {
                                     accessibilityRole="button"
                                     disabled={!canSave}
                                     onPress={handleSave}
-                                    style={({pressed}) => [
+                                    style={({ pressed }) => [
                                         styles.saveButton,
                                         {
                                             backgroundColor: canSave
                                                 ? theme.themeColor
                                                 : theme.disabled,
                                         },
-                                        pressed && canSave && {opacity: 0.82},
+                                        pressed && canSave && { opacity: 0.82 },
                                     ]}>
                                     {isSaving ? (
                                         <ActivityIndicator
@@ -947,7 +1037,7 @@ const HarborProfilePage = ({navigation, route}) => {
                                     <Text
                                         style={[
                                             styles.saveText,
-                                            {color: theme.trueWhite},
+                                            { color: theme.trueWhite },
                                         ]}>
                                         {isSaving ? t('正在儲存…') : t('儲存')}
                                     </Text>
@@ -965,10 +1055,10 @@ const HarborProfilePage = ({navigation, route}) => {
                             ? openHarborProfileSettings
                             : openHarborProfile
                     }
-                    style={({pressed}) => [
+                    style={({ pressed }) => [
                         styles.webButton,
-                        {borderColor: theme.themeColorUltraLight},
-                        pressed && {backgroundColor: theme.tonal.primary08},
+                        { borderColor: theme.themeColorUltraLight },
+                        pressed && { backgroundColor: theme.tonal.primary08 },
                     ]}>
                     <Ionicons
                         name="open-outline"
@@ -978,7 +1068,7 @@ const HarborProfilePage = ({navigation, route}) => {
                     <Text
                         style={[
                             styles.webButtonText,
-                            {color: theme.themeColor},
+                            { color: theme.themeColor },
                         ]}>
                         {isEditing
                             ? t('在 Harbor Web 編輯更多資料')
@@ -1007,6 +1097,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         paddingHorizontal: scale(15),
         paddingVertical: verticalScale(16),
+        overflow: 'visible',
     },
     avatarRing: {
         width: scale(94),
@@ -1014,11 +1105,30 @@ const styles = StyleSheet.create({
         borderRadius: scale(47),
         alignItems: 'center',
         justifyContent: 'center',
+        overflow: 'visible',
     },
     avatar: {
         width: scale(84),
         height: scale(84),
         borderRadius: scale(42),
+    },
+    umerBadge: {
+        position: 'absolute',
+        top: scale(-4),
+        right: scale(-18),
+        borderRadius: scale(6),
+        paddingHorizontal: scale(7),
+        paddingVertical: verticalScale(3),
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.35,
+        shadowRadius: 4,
+        elevation: 4,
+    },
+    umerBadgeText: {
+        ...uiStyle.defaultText,
+        fontSize: scale(10),
+        fontWeight: '800',
+        letterSpacing: 0.2,
     },
     nameRow: {
         flexDirection: 'row',
