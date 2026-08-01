@@ -1,8 +1,13 @@
+import * as OpenCC from 'opencc-js';
+
 import {getLocalStorage, setLocalStorage} from '../storageKits';
 
 export const HARBOR_SEARCH_HISTORY_STORAGE_KEY =
     'ARK_Harbor_Search_History';
 export const HARBOR_SEARCH_HISTORY_LIMIT = 10;
+export const HARBOR_SEARCH_FALLBACK_THRESHOLD = 10;
+
+const traditionalToSimplified = OpenCC.Converter({from: 'tw', to: 'cn'});
 
 const SEARCH_RANGE_DAYS = {
     week: 7,
@@ -11,6 +16,49 @@ const SEARCH_RANGE_DAYS = {
 };
 
 const normalizeQueryKey = query => query.trim().toLowerCase();
+
+export const canRunHarborKeywordSearch = query =>
+    Array.from(typeof query === 'string' ? query.trim() : '').length >= 2;
+
+export const getSimplifiedHarborSearchQuery = query => {
+    const normalizedQuery = typeof query === 'string' ? query.trim() : '';
+    return normalizedQuery ? traditionalToSimplified(normalizedQuery) : '';
+};
+
+const getHarborSearchItemKey = item => {
+    if (item?.postId != null) {
+        return `post:${item.postId}`;
+    }
+    if (item?.topicId != null) {
+        return `topic:${item.topicId}`;
+    }
+    if (item?.kind === 'user') {
+        return item.user?.id != null
+            ? `user:${item.user.id}`
+            : `username:${String(item.user?.username || '').toLowerCase()}`;
+    }
+    return `item:${item?.id}`;
+};
+
+export const mergeHarborSearchItems = (originalItems, convertedItems) => {
+    const mergedItems = [];
+    const seenKeys = new Set();
+
+    [...(originalItems || []), ...(convertedItems || [])].forEach(item => {
+        const itemKey = getHarborSearchItemKey(item);
+        if (seenKeys.has(itemKey)) {
+            return;
+        }
+        seenKeys.add(itemKey);
+        mergedItems.push(item);
+    });
+
+    return mergedItems;
+};
+
+export const countHarborSearchContentItems = items =>
+    (Array.isArray(items) ? items : []).filter(item => item?.kind !== 'user')
+        .length;
 
 const normalizeTimestamp = searchedAt =>
     Number.isFinite(searchedAt) && searchedAt >= 0 ? searchedAt : 0;

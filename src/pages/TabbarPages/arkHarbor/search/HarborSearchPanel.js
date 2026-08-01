@@ -71,6 +71,7 @@ const HarborSearchPanel = forwardRef(
             order,
             resultTab,
             activeFilterCount,
+            canSearch,
         } = criteria;
         const { filterOptionsError } = options;
         const { isLoading } = results;
@@ -261,9 +262,9 @@ const HarborSearchPanel = forwardRef(
                         <TouchableScale
                             accessibilityRole="button"
                             accessibilityState={{
-                                disabled: !query.trim() || isLoading,
+                                disabled: !canSearch || isLoading,
                             }}
-                            disabled={!query.trim() || isLoading}
+                            disabled={!canSearch || isLoading}
                             hitSlop={scale(6)}
                             onPress={handleSearchAction}>
                             <Text
@@ -271,7 +272,7 @@ const HarborSearchPanel = forwardRef(
                                     styles.searchActionText,
                                     {
                                         color:
-                                            !query.trim() || isLoading
+                                            !canSearch || isLoading
                                                 ? theme.disabled
                                                 : theme.themeColor,
                                     },
@@ -574,7 +575,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         borderRadius: scale(9),
-        minHeight: scale(32),
+        minHeight: verticalScale(30),
         paddingLeft: scale(6),
         paddingRight: scale(6),
         marginLeft: scale(4),
@@ -583,10 +584,8 @@ const styles = StyleSheet.create({
     searchInput: {
         ...uiStyle.defaultText,
         flex: 1,
-        minWidth: 0,
-        height: verticalScale(20),
+        width: 0,
         marginLeft: scale(4),
-        paddingVertical: 0,
         textAlignVertical: 'center',
         fontSize: verticalScale(12),
     },

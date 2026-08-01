@@ -6,10 +6,14 @@ jest.mock('../../storageKits', () => ({
 import {
     addHarborSearchHistory,
     buildHarborSearchQuery,
+    canRunHarborKeywordSearch,
     clearHarborSearchHistory,
+    countHarborSearchContentItems,
     filterHarborSearchItems,
     getHarborSearchAfterDate,
     getHarborSearchHistory,
+    getSimplifiedHarborSearchQuery,
+    mergeHarborSearchItems,
     removeHarborSearchHistory,
     sanitizeHarborSearchHistory,
 } from '../harborSearch';
@@ -53,6 +57,42 @@ describe('Harbor 搜尋工具', () => {
         const now = Date.parse('2026-07-26T12:00:00Z');
         expect(getHarborSearchAfterDate('week', now)).toBe('2026-07-19');
         expect(getHarborSearchAfterDate('all', now)).toBe('');
+    });
+
+    it('至少輸入兩個字才允許關鍵字搜尋', () => {
+        expect(canRunHarborKeywordSearch('課')).toBe(false);
+        expect(canRunHarborKeywordSearch('課程')).toBe(true);
+        expect(canRunHarborKeywordSearch('ab')).toBe(true);
+    });
+
+    it('將繁體搜尋字轉為簡體版本', () => {
+        expect(getSimplifiedHarborSearchQuery('課程評價')).toBe('课程评价');
+    });
+
+    it('原文結果優先並按貼文或話題 ID 合併去重', () => {
+        const originalItems = [
+            {id: 'original-post', kind: 'post', postId: 10, topicId: 1},
+            {id: 'original-topic', kind: 'topic', topicId: 2},
+            {id: 'original-user', kind: 'user', user: {id: 3}},
+        ];
+        const convertedItems = [
+            {id: 'converted-post', kind: 'post', postId: 10, topicId: 1},
+            {id: 'converted-topic', kind: 'topic', topicId: 2},
+            {id: 'new-topic', kind: 'topic', topicId: 4},
+            {id: 'converted-user', kind: 'user', user: {id: 3}},
+        ];
+
+        expect(
+            mergeHarborSearchItems(originalItems, convertedItems).map(
+                item => item.id,
+            ),
+        ).toEqual([
+            'original-post',
+            'original-topic',
+            'original-user',
+            'new-topic',
+        ]);
+        expect(countHarborSearchContentItems(originalItems)).toBe(2);
     });
 
     it('清理、排序及忽略大小寫去重最近搜尋', () => {

@@ -18,25 +18,108 @@ import {
 import {
     addHarborSearchHistory,
     buildHarborSearchQuery,
+    canRunHarborKeywordSearch,
     clearHarborSearchHistory,
+    countHarborSearchContentItems,
     getHarborSearchAfterDate,
     getHarborSearchHistory,
+    getSimplifiedHarborSearchQuery,
+    HARBOR_SEARCH_FALLBACK_THRESHOLD,
+    mergeHarborSearchItems,
     removeHarborSearchHistory,
 } from '../../../../utils/harbor/harborSearch';
 
 /** 輸入停下後才打 API；期間先用本地結果即時篩選 */
-const LIVE_SEARCH_DEBOUNCE_MS = 400;
+const LIVE_SEARCH_DEBOUNCE_MS = 700;
+const SEARCH_CACHE_TTL_MS = 5 * 60 * 1000;
+
+const getCachedSearchResult = (cache, cacheKey) => {
+    const cachedResult = cache.get(cacheKey);
+    if (!cachedResult) {
+        return null;
+    }
+    if (Date.now() - cachedResult.cachedAt >= SEARCH_CACHE_TTL_MS) {
+        cache.delete(cacheKey);
+        return null;
+    }
+    return cachedResult.result;
+};
+
+const fetchSearchWithFallback = async ({
+    searchQuery,
+    convertedSearchQuery,
+    userQuery,
+    page,
+    signal,
+    cache,
+}) => {
+    const cacheKey = JSON.stringify([
+        searchQuery,
+        convertedSearchQuery,
+        userQuery,
+        page,
+    ]);
+    const cachedResult = getCachedSearchResult(cache, cacheKey);
+    if (cachedResult) {
+        return cachedResult;
+    }
+
+    const originalResult = await fetchHarborSearch({
+        query: searchQuery,
+        userQuery,
+        page,
+        signal,
+    });
+    let result = originalResult;
+
+    if (
+        convertedSearchQuery &&
+        convertedSearchQuery !== searchQuery &&
+        countHarborSearchContentItems(originalResult.items) <
+            HARBOR_SEARCH_FALLBACK_THRESHOLD
+    ) {
+        try {
+            const convertedResult = await fetchHarborSearch({
+                query: convertedSearchQuery,
+                userQuery: '',
+                page,
+                signal,
+            });
+            const hasMore = originalResult.hasMore || convertedResult.hasMore;
+            result = {
+                ...originalResult,
+                items: mergeHarborSearchItems(
+                    originalResult.items,
+                    convertedResult.items,
+                ),
+                hasMore,
+                nextPage: hasMore ? page + 1 : null,
+            };
+        } catch (error) {
+            if (signal?.aborted || error?.code === 'ERR_CANCELED') {
+                throw error;
+            }
+        }
+    }
+
+    cache.set(cacheKey, {
+        cachedAt: Date.now(),
+        result,
+    });
+    return result;
+};
 
 const useHarborSearch = ({initialQuery, onSearchStart}) => {
+    const initialQueryText =
+        typeof initialQuery === 'string' ? initialQuery : '';
     const controllerRef = useRef(null);
     const requestGenerationRef = useRef(0);
     const activeSearchRef = useRef(null);
     const loadingMoreRef = useRef(false);
+    const searchResultCacheRef = useRef(new Map());
     const runSearchRef = useRef(null);
     const debouncedLiveSearchRef = useRef(null);
     const queryRef = useRef(initialQueryText);
-    const initialQueryText =
-        typeof initialQuery === 'string' ? initialQuery : '';
     const [query, setQuery] = useState(initialQueryText);
     const [committedQuery, setCommittedQuery] = useState(
         initialQueryText.trim(),
@@ -131,6 +214,12 @@ const useHarborSearch = ({initialQuery, onSearchStart}) => {
                 authorOverride === undefined ? author : authorOverride;
             const normalizedOrder =
                 orderOverride === undefined ? order : orderOverride;
+            if (
+                normalizedQuery &&
+                !canRunHarborKeywordSearch(normalizedQuery)
+            ) {
+                return;
+            }
             // 允許空關鍵字：僅作者／分類等篩選時仍組出有效 Discourse 查詢（如 @username）
             const searchQuery = append
                 ? activeSearchRef.current?.searchQuery
@@ -142,6 +231,21 @@ const useHarborSearch = ({initialQuery, onSearchStart}) => {
                     after: getHarborSearchAfterDate(timeRange),
                     order: normalizedOrder,
                 });
+            const convertedUserQuery = append
+                ? activeSearchRef.current?.convertedUserQuery
+                : getSimplifiedHarborSearchQuery(normalizedQuery);
+            const convertedSearchQuery = append
+                ? activeSearchRef.current?.convertedSearchQuery
+                : convertedUserQuery && convertedUserQuery !== normalizedQuery
+                  ? buildHarborSearchQuery({
+                        query: convertedUserQuery,
+                        category,
+                        tag,
+                        author: normalizedAuthor,
+                        after: getHarborSearchAfterDate(timeRange),
+                        order: normalizedOrder,
+                    })
+                  : searchQuery;
             const userQuery = append
                 ? activeSearchRef.current?.userQuery
                 : normalizedQuery;
@@ -181,6 +285,8 @@ const useHarborSearch = ({initialQuery, onSearchStart}) => {
                 setNextPage(null);
                 activeSearchRef.current = {
                     searchQuery,
+                    convertedSearchQuery,
+                    convertedUserQuery,
                     userQuery,
                 };
                 setQuery(normalizedQuery);
@@ -216,11 +322,13 @@ const useHarborSearch = ({initialQuery, onSearchStart}) => {
             controllerRef.current = controller;
 
             try {
-                const result = await fetchHarborSearch({
-                    query: searchQuery,
+                const result = await fetchSearchWithFallback({
+                    searchQuery,
+                    convertedSearchQuery,
                     userQuery,
                     page,
                     signal: controller.signal,
+                    cache: searchResultCacheRef.current,
                 });
                 if (
                     controller.signal.aborted ||
@@ -242,13 +350,10 @@ const useHarborSearch = ({initialQuery, onSearchStart}) => {
                     if (!append) {
                         return result.items;
                     }
-                    const seenIds = new Set(
-                        currentItems.map(item => item.id),
+                    return mergeHarborSearchItems(
+                        currentItems,
+                        result.items,
                     );
-                    return [
-                        ...currentItems,
-                        ...result.items.filter(item => !seenIds.has(item.id)),
-                    ];
                 });
                 setHasMore(result.hasMore);
                 setNextPage(result.nextPage);
@@ -306,9 +411,14 @@ const useHarborSearch = ({initialQuery, onSearchStart}) => {
     const handleQueryChange = useCallback(
         nextQuery => {
             setQuery(nextQuery);
+            debouncedLiveSearch.cancel();
+            if (!canRunHarborKeywordSearch(nextQuery)) {
+                invalidateSearchResults();
+                return;
+            }
             debouncedLiveSearch(nextQuery);
         },
-        [debouncedLiveSearch],
+        [debouncedLiveSearch, invalidateSearchResults],
     );
 
     const selectOrder = useCallback(
@@ -392,6 +502,9 @@ const useHarborSearch = ({initialQuery, onSearchStart}) => {
         Number(Boolean(author.trim())) +
         Number(timeRange !== 'all');
     const isQueryDirty = query.trim() !== committedQuery.trim();
+    const canSearch =
+        canRunHarborKeywordSearch(query) ||
+        (!query.trim() && Boolean(author.trim()));
 
     return {
         criteria: {
@@ -403,6 +516,7 @@ const useHarborSearch = ({initialQuery, onSearchStart}) => {
             order,
             resultTab,
             activeFilterCount,
+            canSearch,
         },
         options: {
             categories,
