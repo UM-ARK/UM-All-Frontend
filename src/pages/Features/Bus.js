@@ -297,7 +297,7 @@ const BusScreen = () => {
                         }}
                         onPress={() => {
                             trigger();
-                            openLink(UM_MAP);
+                            openLink({URL: UM_MAP, mode: 'fullScreen'});
                         }}
                     >
                         <Text style={{ ...uiStyle.defaultText, fontSize: scale(11), color: themeColor, fontWeight: 'bold' }}>{t('校園地圖', { ns: 'features' })}</Text>

@@ -252,7 +252,11 @@ const SearchScreen = ({ navigation }) => {
 
             if (item.go_where === 'Webview' || item.go_where === 'Linking') {
                 if (item.webview_param?.url) {
-                    openLink(item.webview_param.url);
+                    // 有指定 mode（如校園地圖 fullScreen）時傳入；其餘預設 Modal
+                    openLink({
+                        URL: item.webview_param.url,
+                        mode: item.webview_param.mode,
+                    });
                 }
                 return;
             }

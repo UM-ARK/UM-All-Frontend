@@ -97,7 +97,11 @@ function Index({ navigation }) {
 
             setTimeout(() => {
                 if (go_where === 'Webview' || go_where === 'Linking') {
-                    openLink(webview_param.url);
+                    // 有指定 mode（如校園地圖 fullScreen）時傳入；其餘預設 Modal
+                    openLink({
+                        URL: webview_param.url,
+                        mode: webview_param.mode,
+                    });
                 } else if (go_where === COURSE_TAB_ROUTE) {
                     // 此入口對應「課表模擬」，需落在選課頁的課表段落
                     navigateToCourseTab(navigation, { segment: 'timetable' });

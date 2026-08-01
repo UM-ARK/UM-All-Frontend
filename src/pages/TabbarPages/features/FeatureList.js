@@ -103,6 +103,8 @@ export const getFunctionArr = (t) => [
                     bg_color_diy: '#fff',
                     // 狀態欄字體是否黑色，默認true
                     // isBarStyleBlack: false,
+                    // 地圖適合全螢幕瀏覽；其餘連結預設仍走 Modal
+                    mode: 'fullScreen',
                 },
                 describe: t('查看澳大校園地圖', { ns: 'features' }),
                 key_name: '校園地圖',
