@@ -311,10 +311,8 @@ const HarborTopicList = ({
                     items: updateItems(cachedResult.items),
                 });
             });
-            if (
-                reloadLists &&
-                ['new', 'unread'].includes(sourceRef.current?.view)
-            ) {
+            // 發帖／刪帖等需重排時刷新當前列表；主頁僅有 latest／top，不可再限死 new／unread
+            if (reloadLists) {
                 loadFirstPage({ refresh: true, showIndicator: false });
             }
         });
