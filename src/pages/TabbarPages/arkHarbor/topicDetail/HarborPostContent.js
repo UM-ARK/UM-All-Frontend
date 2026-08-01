@@ -34,7 +34,10 @@ import {
 import { hasHarborInteractiveContent } from '../../../../utils/harbor/harborPostEvent';
 import { ARK_HARBOR } from '../../../../utils/pathMap';
 import { trigger } from '../../../../utils/trigger';
-import { normalizeHtmlUrl } from './harborTopicModels';
+import {
+    getHarborImagePressAction,
+    normalizeHtmlUrl,
+} from './harborTopicModels';
 import styles from './styles';
 
 const iframeModel = HTMLElementModel.fromCustomModel({
@@ -110,13 +113,15 @@ const HarborImageRenderer = props => {
     const rendererProps = useRendererProps('img');
     const state = useIMGElementState(imageProps);
     const parentUrl = props.tnode?.parent?.attributes?.href;
-    const imageUrl = parentUrl || imageProps.source?.uri;
+    const sourceUrl = imageProps.source?.uri;
 
     if (state.type === 'error') {
         return (
             <IMGElementContainer
                 style={state.containerStyle}
-                onPress={() => rendererProps.onPress?.(imageUrl)}>
+                onPress={() =>
+                    rendererProps.onPress?.({ parentUrl, sourceUrl })
+                }>
                 <IMGElementContentError {...state} />
             </IMGElementContainer>
         );
@@ -125,7 +130,7 @@ const HarborImageRenderer = props => {
     return (
         <IMGElementContainer
             style={state.containerStyle}
-            onPress={() => rendererProps.onPress?.(imageUrl)}>
+            onPress={() => rendererProps.onPress?.({ parentUrl, sourceUrl })}>
             <Image
                 source={{ uri: state.source?.uri }}
                 style={[
@@ -346,12 +351,20 @@ const HarborPostContent = memo(
                         width: Math.min(contentWidth, scale(240)),
                         height: verticalScale(160),
                     },
-                    onPress: url => {
-                        const normalizedUrl = normalizeHtmlUrl(url);
-                        const imageIndex = imageUrls.indexOf(normalizedUrl);
-                        if (imageIndex >= 0) {
+                    onPress: ({ parentUrl, sourceUrl }) => {
+                        const action = getHarborImagePressAction({
+                            parentUrl,
+                            sourceUrl,
+                            imageUrls,
+                        });
+                        if (action?.type === 'image') {
                             trigger();
-                            onOpenImage(imageIndex);
+                            onOpenImage(action.imageIndex);
+                            return;
+                        }
+                        if (action?.type === 'link') {
+                            trigger();
+                            onPressLink(action.url);
                         }
                     },
                 },

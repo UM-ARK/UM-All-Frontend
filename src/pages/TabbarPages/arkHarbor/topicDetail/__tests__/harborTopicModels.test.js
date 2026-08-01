@@ -13,12 +13,53 @@ import {
     flattenNestedPosts,
     formatHarborFlagTypesForPost,
     getFlagActions,
+    getHarborImagePressAction,
     interpolateHarborI18nTemplate,
     isHarborPostDeleted,
     mergeAvailableFlagTypes,
     updateNestedPostTree,
     updateOptimisticFlag,
 } from '../harborTopicModels';
+
+describe('getHarborImagePressAction', () => {
+    it('優先以父連結或圖片來源開啟相簿', () => {
+        const imageUrls = ['/uploads/original.jpeg', '/uploads/plain.jpeg'];
+
+        expect(
+            getHarborImagePressAction({
+                parentUrl: '/uploads/original.jpeg',
+                sourceUrl: '/uploads/thumbnail.jpeg',
+                imageUrls,
+            }),
+        ).toEqual({ type: 'image', imageIndex: 0 });
+        expect(
+            getHarborImagePressAction({
+                sourceUrl: '/uploads/plain.jpeg',
+                imageUrls,
+            }),
+        ).toEqual({ type: 'image', imageIndex: 1 });
+    });
+
+    it('非相簿圖片優先開啟父連結，並忽略頁內錨點', () => {
+        expect(
+            getHarborImagePressAction({
+                parentUrl: 'https://www.youtube.com/watch?v=I78NqlA0EWI',
+                sourceUrl: '/uploads/youtube-thumbnail.jpeg',
+                imageUrls: ['/uploads/youtube-thumbnail.jpeg'],
+            }),
+        ).toEqual({
+            type: 'link',
+            url: 'https://www.youtube.com/watch?v=I78NqlA0EWI',
+        });
+        expect(
+            getHarborImagePressAction({
+                parentUrl: '#heading',
+                sourceUrl: '/uploads/thumbnail.jpeg',
+                imageUrls: [],
+            }),
+        ).toBeNull();
+    });
+});
 
 describe('canDeleteHarborPost', () => {
     it('回覆只依帖子權限判斷', () => {
