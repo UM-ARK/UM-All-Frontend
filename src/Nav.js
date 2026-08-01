@@ -415,7 +415,7 @@ const Nav = () => {
                         component={HarborAccountSettingsPage}
                     />
                     <Stack.Screen
-                        name="HarborProfileEdit"
+                        name="HarborProfile"
                         component={HarborProfilePage}
                     />
                 </Stack.Group>

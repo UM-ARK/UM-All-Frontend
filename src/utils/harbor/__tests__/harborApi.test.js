@@ -15,6 +15,7 @@ import {
     fetchHarborNestedPostChildren,
     fetchHarborNotifications,
     fetchHarborProfileMetadata,
+    fetchHarborUserProfile,
     fetchHarborSearch,
     fetchHarborSiteCapabilities,
     fetchHarborTags,
@@ -265,6 +266,44 @@ describe('Harbor API 資料正規化', () => {
                 user_fields: {'1': '在讀'},
             },
             {signal: undefined},
+        );
+    });
+
+    it('取得指定使用者的公開個人資料', async () => {
+        getSpy.mockResolvedValueOnce({
+            data: {
+                user: {
+                    username: 'harbor-user',
+                    name: 'Harbor User',
+                    avatar_template: '/avatar/{size}.png',
+                    title: '社群成員',
+                    bio_cooked: '<p>公開簡介</p>',
+                    location: '澳門',
+                    website: 'https://umall.one',
+                    user_fields: {'1': '在讀'},
+                    groups: [{id: 41, name: 'UMer'}],
+                },
+            },
+        });
+
+        const result = await fetchHarborUserProfile('harbor user');
+
+        expect(getSpy).toHaveBeenCalledWith('/u/harbor%20user.json', {
+            signal: undefined,
+        });
+        expect(result).toEqual(
+            expect.objectContaining({
+                displayName: 'Harbor User',
+                username: 'harbor-user',
+                role: '社群成員',
+                isUMer: true,
+                profile: expect.objectContaining({
+                    bio: '公開簡介',
+                    location: '澳門',
+                    website: 'https://umall.one',
+                    workStatus: '在讀',
+                }),
+            }),
         );
     });
 

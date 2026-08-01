@@ -22,6 +22,7 @@ import {uiStyle, useTheme} from '../../../../components/ThemeContext';
 import {useHarborSession} from '../../../../contexts/HarborSessionContext';
 import {
     fetchHarborProfileMetadata,
+    fetchHarborUserProfile,
     updateHarborProfile,
 } from '../../../../utils/harbor/harborApi';
 import {openLink} from '../../../../utils/browser';
@@ -72,13 +73,35 @@ const ProfileTextField = ({
     );
 };
 
-const HarborProfilePage = ({navigation}) => {
+const HarborProfilePage = ({navigation, route}) => {
     const {theme} = useTheme();
     const {t} = useTranslation('my');
     const {user, refresh} = useHarborSession();
     const headerHeight = useHeaderHeight();
-    const username = user?.username || '';
-    const profile = React.useMemo(() => user?.profile || {}, [user?.profile]);
+    const sessionUsername = user?.username || '';
+    const requestedUsername = String(
+        route?.params?.username || sessionUsername,
+    );
+    const isOwnProfile = Boolean(
+        sessionUsername &&
+        requestedUsername.toLowerCase() === sessionUsername.toLowerCase(),
+    );
+    const [viewedUser, setViewedUser] = React.useState(
+        isOwnProfile ? user : null,
+    );
+    const [isLoadingProfile, setIsLoadingProfile] = React.useState(
+        !isOwnProfile,
+    );
+    const [profileError, setProfileError] = React.useState(false);
+    const [mode, setMode] = React.useState(
+        isOwnProfile && route?.params?.mode === 'edit' ? 'edit' : 'preview',
+    );
+    const isEditing = isOwnProfile && mode === 'edit';
+    const username = viewedUser?.username || requestedUsername;
+    const profile = React.useMemo(
+        () => viewedUser?.profile || {},
+        [viewedUser?.profile],
+    );
     const [bio, setBio] = React.useState(profile.bio || '');
     const [location, setLocation] = React.useState(profile.location || '');
     const [website, setWebsite] = React.useState(profile.website || '');
@@ -91,8 +114,54 @@ const HarborProfilePage = ({navigation}) => {
     const [isSaving, setIsSaving] = React.useState(false);
 
     React.useEffect(() => {
-        navigation.setOptions({headerTitle: t('編輯 Harbor 個人資料')});
+        navigation.setOptions({headerTitle: t('Harbor 個人資料')});
     }, [navigation, t]);
+
+    React.useEffect(() => {
+        setMode(
+            isOwnProfile && route?.params?.mode === 'edit'
+                ? 'edit'
+                : 'preview',
+        );
+    }, [isOwnProfile, requestedUsername, route?.params?.mode]);
+
+    React.useEffect(() => {
+        if (isOwnProfile) {
+            setViewedUser(user);
+            setIsLoadingProfile(false);
+            setProfileError(false);
+            return;
+        }
+
+        const controller = new AbortController();
+        let isActive = true;
+        setIsLoadingProfile(true);
+        setProfileError(false);
+
+        fetchHarborUserProfile(requestedUsername, {
+            signal: controller.signal,
+        })
+            .then(nextUser => {
+                if (isActive) {
+                    setViewedUser(nextUser);
+                }
+            })
+            .catch(error => {
+                if (isActive && error?.name !== 'CanceledError') {
+                    setProfileError(true);
+                }
+            })
+            .finally(() => {
+                if (isActive) {
+                    setIsLoadingProfile(false);
+                }
+            });
+
+        return () => {
+            isActive = false;
+            controller.abort();
+        };
+    }, [isOwnProfile, requestedUsername, user]);
 
     React.useEffect(() => {
         setBio(profile.bio || '');
@@ -104,6 +173,11 @@ const HarborProfilePage = ({navigation}) => {
     React.useEffect(() => {
         const controller = new AbortController();
         let isActive = true;
+
+        if (!isOwnProfile) {
+            setIsLoadingMetadata(false);
+            return undefined;
+        }
 
         fetchHarborProfileMetadata({signal: controller.signal})
             .then(metadata => {
@@ -127,13 +201,13 @@ const HarborProfilePage = ({navigation}) => {
             isActive = false;
             controller.abort();
         };
-    }, []);
+    }, [isOwnProfile]);
 
     React.useEffect(() => {
-        if (!user?.profile) {
+        if (isOwnProfile && !user?.profile) {
             refresh().catch(() => {});
         }
-    }, [refresh, user?.profile]);
+    }, [isOwnProfile, refresh, user?.profile]);
 
     const initialValues = {
         bio: profile.bio || '',
@@ -152,7 +226,7 @@ const HarborProfilePage = ({navigation}) => {
         workStatusField.options.length,
     );
     const canSave = Boolean(
-        profile.canEdit && hasChanges && !isSaving && username,
+        isOwnProfile && profile.canEdit && hasChanges && !isSaving && username,
     );
     const workStatusActions = (workStatusField?.options || []).map(option => ({
         id: option,
@@ -204,7 +278,17 @@ const HarborProfilePage = ({navigation}) => {
     const openHarborProfileSettings = () => {
         trigger();
         openLink({
-            URL: `${ARK_HARBOR}/u/${username}/preferences/profile`,
+            URL: `${ARK_HARBOR}/u/${encodeURIComponent(
+                username,
+            )}/preferences/profile`,
+            mode: 'fullScreen',
+        });
+    };
+
+    const openHarborProfile = () => {
+        trigger();
+        openLink({
+            URL: `${ARK_HARBOR}/u/${encodeURIComponent(username)}/summary`,
             mode: 'fullScreen',
         });
     };
@@ -231,65 +315,18 @@ const HarborProfilePage = ({navigation}) => {
                     isLiquidGlassSupported ? {top: headerHeight} : undefined
                 }
                 showsVerticalScrollIndicator={false}>
-                <View
-                    style={[
-                        styles.identityCard,
-                        {backgroundColor: theme.tonal.primary15},
-                    ]}>
-                    <Image
-                        source={
-                            user?.avatarUrl
-                                ? {uri: user.avatarUrl}
-                                : AVATAR_SOURCE
-                        }
-                        style={styles.avatar}
-                        contentFit="cover"
-                    />
-                    <View style={styles.identityText}>
-                        <View style={styles.nameRow}>
-                            <Text
-                                numberOfLines={1}
-                                style={[
-                                    styles.identityName,
-                                    {color: theme.black.main},
-                                ]}>
-                                @{username}
-                            </Text>
-                            {user?.isUMer ? (
-                                <View
-                                    style={[
-                                        styles.umerBadge,
-                                        {
-                                            backgroundColor:
-                                                theme.tonal.primary30,
-                                        },
-                                    ]}>
-                                    <Ionicons
-                                        name="school-outline"
-                                        size={scale(12)}
-                                        color={theme.themeColor}
-                                    />
-                                    <Text
-                                        style={[
-                                            styles.umerText,
-                                            {color: theme.themeColor},
-                                        ]}>
-                                        UMer
-                                    </Text>
-                                </View>
-                            ) : null}
-                        </View>
+                {isLoadingProfile ? (
+                    <View style={styles.loadingProfile}>
+                        <ActivityIndicator color={theme.themeColor} />
                         <Text
                             style={[
-                                styles.username,
+                                styles.loadingText,
                                 {color: theme.black.third},
                             ]}>
-                            {profile.workStatus || user?.role}
+                            {t('正在載入個人資料…')}
                         </Text>
                     </View>
-                </View>
-
-                {!profile.canEdit ? (
+                ) : profileError ? (
                     <View
                         style={[
                             styles.notice,
@@ -305,173 +342,386 @@ const HarborProfilePage = ({navigation}) => {
                                 styles.noticeText,
                                 {color: theme.black.second},
                             ]}>
-                            {t('目前無法在 App 內編輯這個 Harbor 個人資料。')}
+                            {t('無法取得這個 Harbor 個人資料，請稍後再試。')}
                         </Text>
                     </View>
-                ) : null}
-
-                <View
-                    style={[
-                        styles.formCard,
-                        {backgroundColor: theme.white},
-                        theme.viewShadow,
-                    ]}>
-                    <View style={styles.field}>
-                        <Text
+                ) : (
+                    <>
+                        <View
                             style={[
-                                styles.fieldLabel,
-                                {color: theme.black.second},
+                                styles.identityCard,
+                                {backgroundColor: theme.tonal.primary15},
                             ]}>
-                            {t('工作狀態')}
-                        </Text>
-                        {canEditWorkStatus && !isSaving ? (
-                            <MenuView
-                                actions={workStatusActions}
-                                onOpenMenu={() => trigger()}
-                                onPressAction={event => {
-                                    trigger();
-                                    setWorkStatus(event.nativeEvent.event);
-                                }}
-                                shouldOpenOnLongPress={false}>
-                                <View
-                                    accessible
-                                    accessibilityRole="button"
-                                    style={[
-                                        styles.select,
-                                        {
-                                            backgroundColor:
-                                                theme.tonal.primary08,
-                                            borderColor:
-                                                theme.themeColorUltraLight,
-                                        },
-                                    ]}>
-                                    <Text
-                                        style={[
-                                            styles.selectText,
-                                            {
-                                                color: workStatus
-                                                    ? theme.black.main
-                                                    : theme.black.third,
-                                            },
-                                        ]}>
-                                        {workStatus || t('請選擇工作狀態')}
-                                    </Text>
-                                    <Ionicons
-                                        name="chevron-down"
-                                        size={scale(17)}
-                                        color={theme.black.third}
-                                    />
-                                </View>
-                            </MenuView>
-                        ) : (
                             <View
                                 style={[
-                                    styles.select,
-                                    {
-                                        backgroundColor:
-                                            theme.tonal.primary08,
-                                        borderColor:
-                                            theme.themeColorUltraLight,
-                                    },
+                                    styles.avatarRing,
+                                    {backgroundColor: theme.tonal.primary30},
                                 ]}>
-                                {isLoadingMetadata ? (
-                                    <ActivityIndicator
-                                        size="small"
-                                        color={theme.themeColor}
-                                    />
-                                ) : (
-                                    <Text
-                                        style={[
-                                            styles.selectText,
-                                            {color: theme.black.third},
-                                        ]}>
-                                        {workStatus || t('暫時無法取得')}
-                                    </Text>
-                                )}
+                                <Image
+                                    source={
+                                        viewedUser?.avatarUrl
+                                            ? {uri: viewedUser.avatarUrl}
+                                            : AVATAR_SOURCE
+                                    }
+                                    style={styles.avatar}
+                                    contentFit="cover"
+                                />
                             </View>
-                        )}
-                        {metadataError ? (
+                            <View style={styles.nameRow}>
+                                <Text
+                                    numberOfLines={1}
+                                    style={[
+                                        styles.identityName,
+                                        {color: theme.black.main},
+                                    ]}>
+                                    {viewedUser?.displayName || username}
+                                </Text>
+                                {viewedUser?.isUMer ? (
+                                    <View
+                                        style={[
+                                            styles.umerBadge,
+                                            {
+                                                backgroundColor:
+                                                    theme.tonal.primary30,
+                                            },
+                                        ]}>
+                                        <Ionicons
+                                            name="school-outline"
+                                            size={scale(12)}
+                                            color={theme.themeColor}
+                                        />
+                                        <Text
+                                            style={[
+                                                styles.umerText,
+                                                {color: theme.themeColor},
+                                            ]}>
+                                            UMer
+                                        </Text>
+                                    </View>
+                                ) : null}
+                            </View>
                             <Text
                                 style={[
-                                    styles.fieldHint,
-                                    {color: theme.unread},
+                                    styles.username,
+                                    {color: theme.black.third},
                                 ]}>
-                                {t('工作狀態選項載入失敗，可稍後重試或使用 Harbor Web。')}
+                                @{username}
                             </Text>
+                            <Text
+                                style={[
+                                    styles.role,
+                                    {color: theme.black.second},
+                                ]}>
+                                {profile.workStatus || viewedUser?.role}
+                            </Text>
+                        </View>
+
+                        {isOwnProfile ? (
+                            <View
+                                style={[
+                                    styles.modeControl,
+                                    {backgroundColor: theme.tonal.primary08},
+                                ]}>
+                                {['preview', 'edit'].map(nextMode => (
+                                    <Pressable
+                                        accessibilityRole="button"
+                                        key={nextMode}
+                                        onPress={() => {
+                                            trigger();
+                                            setMode(nextMode);
+                                        }}
+                                        style={[
+                                            styles.modeButton,
+                                            mode === nextMode && {
+                                                backgroundColor: theme.white,
+                                            },
+                                        ]}>
+                                        <Text
+                                            style={[
+                                                styles.modeText,
+                                                {
+                                                    color:
+                                                        mode === nextMode
+                                                            ? theme.themeColor
+                                                            : theme.black.third,
+                                                },
+                                            ]}>
+                                            {nextMode === 'preview'
+                                                ? t('預覽')
+                                                : t('編輯')}
+                                        </Text>
+                                    </Pressable>
+                                ))}
+                            </View>
                         ) : null}
-                    </View>
 
-                    <ProfileTextField
-                        editable={Boolean(profile.canChangeBio) && !isSaving}
-                        label={t('個人簡介')}
-                        multiline
-                        onChangeText={setBio}
-                        placeholder={t('介紹一下自己')}
-                        textAlignVertical="top"
-                        value={bio}
-                    />
-                    <ProfileTextField
-                        editable={
-                            Boolean(profile.canChangeLocation) && !isSaving
-                        }
-                        label={t('地點')}
-                        onChangeText={setLocation}
-                        placeholder={t('你所在的城市或地區')}
-                        returnKeyType="next"
-                        value={location}
-                    />
-                    <ProfileTextField
-                        autoCapitalize="none"
-                        autoCorrect={false}
-                        editable={
-                            Boolean(profile.canChangeWebsite) && !isSaving
-                        }
-                        keyboardType="url"
-                        label={t('個人網站')}
-                        onChangeText={setWebsite}
-                        placeholder="https://"
-                        returnKeyType="done"
-                        value={website}
-                    />
-                </View>
+                        {!isEditing ? (
+                            <View
+                                style={[
+                                    styles.profileCard,
+                                    {backgroundColor: theme.white},
+                                    theme.viewShadow,
+                                ]}>
+                                <Text
+                                    style={[
+                                        styles.bio,
+                                        {color: theme.black.main},
+                                    ]}>
+                                    {profile.bio || t('這位用戶尚未填寫個人簡介。')}
+                                </Text>
+                                {profile.location ? (
+                                    <View style={styles.detailRow}>
+                                        <Ionicons
+                                            name="location-outline"
+                                            size={scale(17)}
+                                            color={theme.black.third}
+                                        />
+                                        <Text
+                                            style={[
+                                                styles.detailText,
+                                                {color: theme.black.second},
+                                            ]}>
+                                            {profile.location}
+                                        </Text>
+                                    </View>
+                                ) : null}
+                                {profile.website ? (
+                                    <Pressable
+                                        accessibilityRole="link"
+                                        onPress={() => {
+                                            trigger();
+                                            openLink({
+                                                URL: profile.website,
+                                                mode: 'fullScreen',
+                                            });
+                                        }}
+                                        style={styles.detailRow}>
+                                        <Ionicons
+                                            name="link-outline"
+                                            size={scale(17)}
+                                            color={theme.themeColor}
+                                        />
+                                        <Text
+                                            numberOfLines={1}
+                                            style={[
+                                                styles.detailText,
+                                                {color: theme.themeColor},
+                                            ]}>
+                                            {profile.website}
+                                        </Text>
+                                    </Pressable>
+                                ) : null}
+                            </View>
+                        ) : (
+                            <>
+                                {!profile.canEdit ? (
+                                    <View
+                                        style={[
+                                            styles.notice,
+                                            {
+                                                backgroundColor:
+                                                    theme.tonal.unread15,
+                                            },
+                                        ]}>
+                                        <Ionicons
+                                            name="information-circle-outline"
+                                            size={scale(18)}
+                                            color={theme.unread}
+                                        />
+                                        <Text
+                                            style={[
+                                                styles.noticeText,
+                                                {color: theme.black.second},
+                                            ]}>
+                                            {t('目前無法在 App 內編輯這個 Harbor 個人資料。')}
+                                        </Text>
+                                    </View>
+                                ) : null}
 
-                <Pressable
-                    accessibilityRole="button"
-                    disabled={!canSave}
-                    onPress={handleSave}
-                    style={({pressed}) => [
-                        styles.saveButton,
-                        {
-                            backgroundColor: canSave
-                                ? theme.themeColor
-                                : theme.disabled,
-                        },
-                        pressed && canSave && {opacity: 0.82},
-                    ]}>
-                    {isSaving ? (
-                        <ActivityIndicator
-                            size="small"
-                            color={theme.trueWhite}
-                        />
-                    ) : (
-                        <Ionicons
-                            name="checkmark-circle-outline"
-                            size={scale(19)}
-                            color={theme.trueWhite}
-                        />
-                    )}
-                    <Text
-                        style={[
-                            styles.saveText,
-                            {color: theme.trueWhite},
-                        ]}>
-                        {isSaving ? t('正在儲存…') : t('儲存')}
-                    </Text>
-                </Pressable>
+                                <View
+                                    style={[
+                                        styles.formCard,
+                                        {backgroundColor: theme.white},
+                                        theme.viewShadow,
+                                    ]}>
+                                    <View style={styles.field}>
+                                        <Text
+                                            style={[
+                                                styles.fieldLabel,
+                                                {color: theme.black.second},
+                                            ]}>
+                                            {t('工作狀態')}
+                                        </Text>
+                                        {canEditWorkStatus && !isSaving ? (
+                                            <MenuView
+                                                actions={workStatusActions}
+                                                onOpenMenu={() => trigger()}
+                                                onPressAction={event => {
+                                                    trigger();
+                                                    setWorkStatus(
+                                                        event.nativeEvent.event,
+                                                    );
+                                                }}
+                                                shouldOpenOnLongPress={false}>
+                                                <View
+                                                    accessible
+                                                    accessibilityRole="button"
+                                                    style={[
+                                                        styles.select,
+                                                        {
+                                                            backgroundColor:
+                                                                theme.tonal.primary08,
+                                                            borderColor:
+                                                                theme.themeColorUltraLight,
+                                                        },
+                                                    ]}>
+                                                    <Text
+                                                        style={[
+                                                            styles.selectText,
+                                                            {
+                                                                color: workStatus
+                                                                    ? theme.black.main
+                                                                    : theme.black.third,
+                                                            },
+                                                        ]}>
+                                                        {workStatus ||
+                                                            t('請選擇工作狀態')}
+                                                    </Text>
+                                                    <Ionicons
+                                                        name="chevron-down"
+                                                        size={scale(17)}
+                                                        color={theme.black.third}
+                                                    />
+                                                </View>
+                                            </MenuView>
+                                        ) : (
+                                            <View
+                                                style={[
+                                                    styles.select,
+                                                    {
+                                                        backgroundColor:
+                                                            theme.tonal.primary08,
+                                                        borderColor:
+                                                            theme.themeColorUltraLight,
+                                                    },
+                                                ]}>
+                                                {isLoadingMetadata ? (
+                                                    <ActivityIndicator
+                                                        size="small"
+                                                        color={theme.themeColor}
+                                                    />
+                                                ) : (
+                                                    <Text
+                                                        style={[
+                                                            styles.selectText,
+                                                            {
+                                                                color: theme.black.third,
+                                                            },
+                                                        ]}>
+                                                        {workStatus ||
+                                                            t('暫時無法取得')}
+                                                    </Text>
+                                                )}
+                                            </View>
+                                        )}
+                                        {metadataError ? (
+                                            <Text
+                                                style={[
+                                                    styles.fieldHint,
+                                                    {color: theme.unread},
+                                                ]}>
+                                                {t('工作狀態選項載入失敗，可稍後重試或使用 Harbor Web。')}
+                                            </Text>
+                                        ) : null}
+                                    </View>
+
+                                    <ProfileTextField
+                                        editable={
+                                            Boolean(profile.canChangeBio) &&
+                                            !isSaving
+                                        }
+                                        label={t('個人簡介')}
+                                        multiline
+                                        onChangeText={setBio}
+                                        placeholder={t('介紹一下自己')}
+                                        textAlignVertical="top"
+                                        value={bio}
+                                    />
+                                    <ProfileTextField
+                                        editable={
+                                            Boolean(
+                                                profile.canChangeLocation,
+                                            ) && !isSaving
+                                        }
+                                        label={t('地點')}
+                                        onChangeText={setLocation}
+                                        placeholder={t('你所在的城市或地區')}
+                                        returnKeyType="next"
+                                        value={location}
+                                    />
+                                    <ProfileTextField
+                                        autoCapitalize="none"
+                                        autoCorrect={false}
+                                        editable={
+                                            Boolean(
+                                                profile.canChangeWebsite,
+                                            ) && !isSaving
+                                        }
+                                        keyboardType="url"
+                                        label={t('個人網站')}
+                                        onChangeText={setWebsite}
+                                        placeholder="https://"
+                                        returnKeyType="done"
+                                        value={website}
+                                    />
+                                </View>
+
+                                <Pressable
+                                    accessibilityRole="button"
+                                    disabled={!canSave}
+                                    onPress={handleSave}
+                                    style={({pressed}) => [
+                                        styles.saveButton,
+                                        {
+                                            backgroundColor: canSave
+                                                ? theme.themeColor
+                                                : theme.disabled,
+                                        },
+                                        pressed && canSave && {opacity: 0.82},
+                                    ]}>
+                                    {isSaving ? (
+                                        <ActivityIndicator
+                                            size="small"
+                                            color={theme.trueWhite}
+                                        />
+                                    ) : (
+                                        <Ionicons
+                                            name="checkmark-circle-outline"
+                                            size={scale(19)}
+                                            color={theme.trueWhite}
+                                        />
+                                    )}
+                                    <Text
+                                        style={[
+                                            styles.saveText,
+                                            {color: theme.trueWhite},
+                                        ]}>
+                                        {isSaving ? t('正在儲存…') : t('儲存')}
+                                    </Text>
+                                </Pressable>
+                            </>
+                        )}
+                    </>
+                )}
 
                 <Pressable
                     accessibilityRole="link"
-                    onPress={openHarborProfileSettings}
+                    disabled={isLoadingProfile || profileError}
+                    onPress={
+                        isEditing
+                            ? openHarborProfileSettings
+                            : openHarborProfile
+                    }
                     style={({pressed}) => [
                         styles.webButton,
                         {borderColor: theme.themeColorUltraLight},
@@ -487,11 +737,13 @@ const HarborProfilePage = ({navigation}) => {
                             styles.webButtonText,
                             {color: theme.themeColor},
                         ]}>
-                        {t('在 Harbor Web 編輯更多資料')}
+                        {isEditing
+                            ? t('在 Harbor Web 編輯更多資料')
+                            : t('在 Harbor Web 查看個人資料')}
                     </Text>
                 </Pressable>
             </KeyboardAwareScrollView>
-            <KeyboardToolbar />
+            {isEditing ? <KeyboardToolbar /> : null}
         </View>
     );
 };
@@ -507,37 +759,48 @@ const styles = StyleSheet.create({
         gap: verticalScale(14),
     },
     identityCard: {
-        minHeight: verticalScale(82),
+        minHeight: verticalScale(210),
         borderRadius: scale(20),
-        flexDirection: 'row',
         alignItems: 'center',
-        gap: scale(12),
+        justifyContent: 'center',
         paddingHorizontal: scale(15),
-        paddingVertical: verticalScale(13),
+        paddingVertical: verticalScale(22),
+    },
+    avatarRing: {
+        width: scale(94),
+        height: scale(94),
+        borderRadius: scale(47),
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     avatar: {
-        width: scale(52),
-        height: scale(52),
-        borderRadius: scale(18),
-    },
-    identityText: {
-        flex: 1,
+        width: scale(84),
+        height: scale(84),
+        borderRadius: scale(42),
     },
     nameRow: {
         flexDirection: 'row',
         alignItems: 'center',
         gap: scale(7),
+        marginTop: verticalScale(12),
     },
     identityName: {
         ...uiStyle.defaultText,
         flexShrink: 1,
-        fontSize: scale(15),
-        fontWeight: '730',
+        fontSize: scale(19),
+        fontWeight: '760',
+        textAlign: 'center',
     },
     username: {
         ...uiStyle.defaultText,
+        fontSize: scale(11),
+        marginTop: verticalScale(3),
+    },
+    role: {
+        ...uiStyle.defaultText,
         fontSize: scale(10),
-        marginTop: verticalScale(4),
+        fontWeight: '600',
+        marginTop: verticalScale(7),
     },
     umerBadge: {
         minHeight: verticalScale(22),
@@ -551,6 +814,55 @@ const styles = StyleSheet.create({
         ...uiStyle.defaultText,
         fontSize: scale(10),
         fontWeight: '700',
+    },
+    loadingProfile: {
+        minHeight: verticalScale(180),
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: verticalScale(10),
+    },
+    loadingText: {
+        ...uiStyle.defaultText,
+        fontSize: scale(11),
+    },
+    modeControl: {
+        minHeight: verticalScale(42),
+        borderRadius: scale(13),
+        flexDirection: 'row',
+        padding: scale(3),
+    },
+    modeButton: {
+        flex: 1,
+        borderRadius: scale(10),
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    modeText: {
+        ...uiStyle.defaultText,
+        fontSize: scale(11),
+        fontWeight: '700',
+    },
+    profileCard: {
+        borderRadius: scale(20),
+        gap: verticalScale(14),
+        paddingHorizontal: scale(17),
+        paddingVertical: verticalScale(19),
+    },
+    bio: {
+        ...uiStyle.defaultText,
+        fontSize: scale(13),
+        lineHeight: verticalScale(21),
+    },
+    detailRow: {
+        minHeight: verticalScale(28),
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: scale(9),
+    },
+    detailText: {
+        ...uiStyle.defaultText,
+        flex: 1,
+        fontSize: scale(11),
     },
     notice: {
         borderRadius: scale(14),

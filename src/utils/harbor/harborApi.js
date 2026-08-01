@@ -1399,6 +1399,8 @@ function normalizeProfile(
             bio:
                 typeof profile.bio_raw === 'string'
                     ? profile.bio_raw
+                    : typeof profile.bio_cooked === 'string'
+                    ? stripHtml(profile.bio_cooked)
                     : previousProfile.bio || '',
             location:
                 typeof profile.location === 'string'
@@ -1831,6 +1833,30 @@ export async function fetchHarborProfileMetadata({ signal } = {}) {
             }
             : null,
     };
+}
+
+export async function fetchHarborUserProfile(username, { signal } = {}) {
+    if (typeof username !== 'string' || !username.trim()) {
+        throw new TypeError('Invalid Harbor username');
+    }
+
+    const encodedUsername = encodeURIComponent(username.trim());
+    const response = await harborApi.get(`/u/${encodedUsername}.json`, {
+        signal,
+    });
+    const profile = response.data?.user;
+    if (!profile?.username) {
+        throw new Error('Invalid Harbor user profile response');
+    }
+
+    return normalizeProfile(
+        profile,
+        response.data,
+        null,
+        null,
+        {profile: true, summary: false, badges: false},
+        null,
+    );
 }
 
 export async function updateHarborProfile(
