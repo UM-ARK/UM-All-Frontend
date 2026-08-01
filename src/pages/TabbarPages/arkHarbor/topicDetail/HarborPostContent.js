@@ -1,9 +1,12 @@
 import React, {
     memo,
     useMemo,
+    useRef,
+    useState,
 } from 'react';
 import {
     Image as NativeImage,
+    Modal,
     Pressable,
     StyleSheet,
     Text,
@@ -22,6 +25,7 @@ import RenderHTML, {
 } from '@native-html/render';
 import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import { WebView } from 'react-native-webview';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { scale, verticalScale } from 'react-native-size-matters';
 import { useTranslation } from 'react-i18next';
 
@@ -59,6 +63,10 @@ const customHTMLElementModels = {
 
 const HarborIframeRenderer = ({ tnode }) => {
     const { theme } = useTheme();
+    const { t } = useTranslation('harbor');
+    const insets = useSafeAreaInsets();
+    const embeddedWebViewRef = useRef(null);
+    const [fullscreen, setFullscreen] = useState(false);
     const sourceUrl = normalizeHtmlUrl(tnode?.attributes?.src);
     const requestedHeight = Number(tnode?.attributes?.height);
     const height = Number.isFinite(requestedHeight)
@@ -72,19 +80,100 @@ const HarborIframeRenderer = ({ tnode }) => {
         return null;
     }
 
+    const openFullscreen = () => {
+        trigger();
+        embeddedWebViewRef.current?.injectJavaScript(
+            `document.querySelectorAll('video').forEach(video => video.pause()); true;`,
+        );
+        setFullscreen(true);
+    };
+
+    const closeFullscreen = () => {
+        trigger();
+        setFullscreen(false);
+    };
+
     return (
-        <View
-            style={[
-                styles.iframeContainer,
-                { height, backgroundColor: theme.white },
-            ]}>
-            <WebView
-                source={{ uri: sourceUrl }}
-                style={{ backgroundColor: theme.white }}
-                scrollEnabled={false}
-                allowsInlineMediaPlayback
-            />
-        </View>
+        <>
+            <View
+                style={[
+                    styles.iframeContainer,
+                    { height, backgroundColor: theme.white },
+                ]}>
+                <WebView
+                    ref={embeddedWebViewRef}
+                    source={{ uri: sourceUrl }}
+                    style={{ backgroundColor: theme.white }}
+                    scrollEnabled={false}
+                    allowsInlineMediaPlayback
+                    allowsFullscreenVideo
+                />
+                <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={t('全螢幕播放')}
+                    hitSlop={scale(8)}
+                    onPress={openFullscreen}
+                    style={({ pressed }) => [
+                        styles.iframeExpandButton,
+                        {
+                            backgroundColor: theme.trueWhite,
+                            shadowColor: theme.trueBlack,
+                            opacity: pressed ? 0.8 : 1,
+                        },
+                    ]}>
+                    <MaterialCommunityIcons
+                        name="fullscreen"
+                        size={scale(22)}
+                        color={theme.trueBlack}
+                    />
+                </Pressable>
+            </View>
+            <Modal
+                visible={fullscreen}
+                animationType="fade"
+                presentationStyle="fullScreen"
+                statusBarTranslucent
+                onRequestClose={closeFullscreen}>
+                <View
+                    style={[
+                        styles.iframeFullscreenModal,
+                        { backgroundColor: theme.trueBlack },
+                    ]}>
+                    {fullscreen ? (
+                        <WebView
+                            source={{ uri: sourceUrl }}
+                            style={[
+                                styles.iframeFullscreenWebView,
+                                { backgroundColor: theme.trueBlack },
+                            ]}
+                            scrollEnabled={false}
+                            allowsInlineMediaPlayback
+                            allowsFullscreenVideo
+                        />
+                    ) : null}
+                    <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel={t('關閉')}
+                        hitSlop={scale(8)}
+                        onPress={closeFullscreen}
+                        style={({ pressed }) => [
+                            styles.iframeFullscreenClose,
+                            {
+                                top: Math.max(insets.top, verticalScale(12)),
+                                backgroundColor: theme.trueWhite,
+                                shadowColor: theme.trueBlack,
+                                opacity: pressed ? 0.8 : 1,
+                            },
+                        ]}>
+                        <MaterialCommunityIcons
+                            name="close"
+                            size={scale(22)}
+                            color={theme.trueBlack}
+                        />
+                    </Pressable>
+                </View>
+            </Modal>
+        </>
     );
 };
 
