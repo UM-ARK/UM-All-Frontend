@@ -370,7 +370,12 @@ const HarborProfilePage = ({ navigation, route }) => {
             ...(viewedUser?.contributions || []),
             ...(viewedUser?.stats || []),
         ]
-            .filter(item => item.key !== 'topicsRead')
+            .filter(
+                item =>
+                    item.key !== 'topicsRead' &&
+                    // 預覽模式對應他人視角，評論數僅本人可看
+                    (isEditing || item.key !== 'postsCreated'),
+            )
             .map(item => {
                 if (item.key === 'postsCreated') {
                     return {
