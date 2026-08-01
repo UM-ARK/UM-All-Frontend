@@ -245,6 +245,8 @@ PODS:
     - ExpoModulesJSI
     - ExpoModulesWorklets
     - RNWorklets
+  - ExpoNotifications (57.0.8):
+    - ExpoModulesCore
   - ExpoQuickActions (6.0.2):
     - ExpoModulesCore
   - ExpoSecureStore (57.0.1):
@@ -3033,6 +3035,7 @@ DEPENDENCIES:
   - ExpoModulesJSI (from `../node_modules/expo-modules-jsi/apple`)
   - ExpoModulesWorklets (from `../node_modules/expo-modules-core/ExpoModulesWorklets.podspec`)
   - ExpoModulesWorkletsAdapter (from `../node_modules/expo-modules-core`)
+  - ExpoNotifications (from `../node_modules/expo-notifications/ios`)
   - ExpoQuickActions (from `../node_modules/expo-quick-actions/ios`)
   - ExpoSecureStore (from `../node_modules/expo-secure-store/ios`)
   - ExpoSharing (from `../node_modules/expo-sharing/ios`)
@@ -3220,6 +3223,8 @@ EXTERNAL SOURCES:
     :podspec: "../node_modules/expo-modules-core/ExpoModulesWorklets.podspec"
   ExpoModulesWorkletsAdapter:
     :path: "../node_modules/expo-modules-core"
+  ExpoNotifications:
+    :path: "../node_modules/expo-notifications/ios"
   ExpoQuickActions:
     :path: "../node_modules/expo-quick-actions/ios"
   ExpoSecureStore:
@@ -3480,6 +3485,7 @@ SPEC CHECKSUMS:
   ExpoModulesJSI: 3accd404d715d63e7b04015d20c857e903e3bc73
   ExpoModulesWorklets: 6b240031daa3de4df791588fc78236637ff602f6
   ExpoModulesWorkletsAdapter: 7a7b58fb35a09f073cb310d7c63af696700a4858
+  ExpoNotifications: 0f253ad90f108c1c4045b541294164865c6aadc8
   ExpoQuickActions: edf2c5bc044f83dc9e9ed4dc4de7fe4a5b1b0422
   ExpoSecureStore: 94793113049a2d7478dfe1a13aa15081e9f61755
   ExpoSharing: dcf5cb459c99f344aabf126b171eb61d2e49276f

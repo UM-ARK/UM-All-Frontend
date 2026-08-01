@@ -87,6 +87,14 @@
         }
       ],
       [
+        "expo-notifications",
+        {
+          "color": "#4796d6",
+          "defaultChannel": "default",
+          "enableBackgroundRemoteNotifications": false
+        }
+      ],
+      [
         "expo-build-properties",
         {
           "android": {
