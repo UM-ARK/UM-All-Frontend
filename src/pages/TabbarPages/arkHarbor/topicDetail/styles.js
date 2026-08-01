@@ -239,18 +239,18 @@ const styles = StyleSheet.create({
     firstPostBody: {
         marginTop: verticalScale(4),
     },
-    firstPostBodyCollapsed: {
+    postBodyCollapsed: {
         maxHeight: verticalScale(132),
         overflow: 'hidden',
     },
-    firstPostExpandButton: {
+    postContentToggle: {
         minHeight: verticalScale(34),
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
         paddingTop: verticalScale(4),
     },
-    firstPostExpandText: {
+    postContentToggleText: {
         ...uiStyle.defaultText,
         fontSize: scale(12),
         fontWeight: '600',
@@ -812,35 +812,31 @@ const styles = StyleSheet.create({
         fontWeight: '700',
         marginLeft: scale(6),
     },
-    firstPostNavigation: {
+    postNavigation: {
         position: 'absolute',
-        left: scale(34),
-        right: scale(34),
-        minHeight: verticalScale(40),
+        left: scale(72),
+        right: scale(72),
+        minHeight: verticalScale(32),
         borderWidth: StyleSheet.hairlineWidth,
-        borderRadius: scale(20),
+        borderRadius: scale(16),
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
         zIndex: 22,
     },
-    firstPostNavigationButton: {
+    postNavigationButton: {
         flex: 1,
-        minHeight: verticalScale(40),
+        minHeight: verticalScale(32),
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        paddingHorizontal: scale(8),
+        paddingHorizontal: scale(6),
     },
-    firstPostNavigationText: {
+    postNavigationText: {
         ...uiStyle.defaultText,
-        fontSize: scale(12),
+        fontSize: scale(11),
         fontWeight: '600',
-        marginLeft: scale(5),
-    },
-    firstPostNavigationDivider: {
-        width: StyleSheet.hairlineWidth,
-        height: verticalScale(20),
+        marginLeft: scale(4),
     },
     modalPage: {
         flex: 1,

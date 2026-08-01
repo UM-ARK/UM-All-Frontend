@@ -195,8 +195,8 @@ const HarborPostCard = memo(
         onPressLink,
         onPressOpenNotifications,
         onPressOpenOriginal,
-        onFirstPostBodyLayout,
-        onExpandFirstPost,
+        onPostBodyLayout,
+        onTogglePost,
         onPressReply,
         onPressShare,
         onPressTag,
@@ -219,7 +219,8 @@ const HarborPostCard = memo(
         reactionDisabled,
         reactions,
         reactionsEnabled,
-        isFirstPostCollapsed,
+        isPostCollapsed,
+        isPostLong,
     }) => {
         const { theme } = useTheme();
         const { t, i18n } = useTranslation('harbor');
@@ -720,6 +721,35 @@ const HarborPostCard = memo(
             </Pressable>
         ) : null;
 
+        const postContentToggle = isPostLong ? (
+            <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={
+                    isPostCollapsed ? t('展開正文') : t('收起正文')
+                }
+                onPress={() => {
+                    trigger();
+                    onTogglePost?.();
+                }}
+                style={({ pressed }) => [
+                    styles.postContentToggle,
+                    pressed ? styles.pressedLink : null,
+                ]}>
+                <MaterialCommunityIcons
+                    name={isPostCollapsed ? 'chevron-down' : 'chevron-up'}
+                    size={scale(18)}
+                    color={themeColor}
+                />
+                <Text
+                    style={[
+                        styles.postContentToggleText,
+                        { color: themeColor },
+                    ]}>
+                    {isPostCollapsed ? t('展開正文') : t('收起正文')}
+                </Text>
+            </Pressable>
+        ) : null;
+
         if (isDeleted || isHidden) {
             return (
                 <View style={nestedContainerStyle}>
@@ -898,11 +928,11 @@ const HarborPostCard = memo(
                             style={[
                                 styles.postBody,
                                 styles.firstPostBody,
-                                isFirstPostCollapsed
-                                    ? styles.firstPostBodyCollapsed
+                                isPostCollapsed
+                                    ? styles.postBodyCollapsed
                                     : null,
                             ]}>
-                            <View onLayout={onFirstPostBodyLayout}>
+                            <View onLayout={onPostBodyLayout}>
                                 <HarborPostContent
                                     cooked={post.cooked}
                                     contentWidth={contentWidth}
@@ -921,32 +951,7 @@ const HarborPostCard = memo(
                             </View>
                         </View>
 
-                        {isFirstPostCollapsed ? (
-                            <Pressable
-                                accessibilityRole="button"
-                                accessibilityLabel={t('展開正文')}
-                                onPress={() => {
-                                    trigger();
-                                    onExpandFirstPost?.();
-                                }}
-                                style={({ pressed }) => [
-                                    styles.firstPostExpandButton,
-                                    pressed ? styles.pressedLink : null,
-                                ]}>
-                                <MaterialCommunityIcons
-                                    name="chevron-down"
-                                    size={scale(18)}
-                                    color={themeColor}
-                                />
-                                <Text
-                                    style={[
-                                        styles.firstPostExpandText,
-                                        { color: themeColor },
-                                    ]}>
-                                    {t('展開正文')}
-                                </Text>
-                            </Pressable>
-                        ) : null}
+                        {postContentToggle}
 
                         {hasTopicTags ? (
                             <View
@@ -1164,31 +1169,41 @@ const HarborPostCard = memo(
                                 </View>
                             </View>
 
-                            <View style={styles.replyBody}>
-                                <HarborPostContent
-                                    cooked={post.cooked}
-                                    contentWidth={
-                                        contentWidth -
-                                        (isNestedReply
-                                            ? scale(28)
-                                            : scale(38))
-                                    }
-                                    imageUrls={imageUrls}
-                                    onOpenImage={onOpenImage}
-                                    onPressLink={onPressLink}
-                                    postUrl={postUrl}
-                                    compact
-                                    forceInteractiveFallback={Boolean(
-                                        postEvent,
-                                    )}>
-                                    {postEvent ? (
-                                        <HarborPostEventCard
-                                            event={postEvent}
-                                            postUrl={postUrl}
-                                        />
-                                    ) : null}
-                                </HarborPostContent>
+                            <View
+                                style={[
+                                    styles.replyBody,
+                                    isPostCollapsed
+                                        ? styles.postBodyCollapsed
+                                        : null,
+                                ]}>
+                                <View onLayout={onPostBodyLayout}>
+                                    <HarborPostContent
+                                        cooked={post.cooked}
+                                        contentWidth={
+                                            contentWidth -
+                                            (isNestedReply
+                                                ? scale(28)
+                                                : scale(38))
+                                        }
+                                        imageUrls={imageUrls}
+                                        onOpenImage={onOpenImage}
+                                        onPressLink={onPressLink}
+                                        postUrl={postUrl}
+                                        compact
+                                        forceInteractiveFallback={Boolean(
+                                            postEvent,
+                                        )}>
+                                        {postEvent ? (
+                                            <HarborPostEventCard
+                                                event={postEvent}
+                                                postUrl={postUrl}
+                                            />
+                                        ) : null}
+                                    </HarborPostContent>
+                                </View>
                             </View>
+
+                            {postContentToggle}
 
                             <View style={styles.postMetaRow}>
                                 <Text

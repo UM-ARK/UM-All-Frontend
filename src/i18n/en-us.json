@@ -158,6 +158,7 @@
         "說點什麼...": "Say something...",
         "暫無回覆": "No replies yet",
         "收起正文": "Collapse post",
+        "收起 {{postNumber}} 樓的正文": "Collapse post #{{postNumber}}",
         "展開正文": "Expand post",
         "查看評論": "View comments",
         "此帖子已被隱藏": "This post has been hidden",

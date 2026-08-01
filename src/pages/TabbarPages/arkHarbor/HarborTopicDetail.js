@@ -258,8 +258,8 @@ const HarborTopicDetail = ({ route, navigation }) => {
     const [topicActionBarHeight, setTopicActionBarHeight] = useState(
         verticalScale(48),
     );
-    const [firstPostBodyHeight, setFirstPostBodyHeight] = useState(0);
-    const [isFirstPostCollapsed, setIsFirstPostCollapsed] = useState(false);
+    const [postBodyHeights, setPostBodyHeights] = useState({});
+    const [collapsedPostNumbers, setCollapsedPostNumbers] = useState({});
 
     const firstPost = useMemo(
         () =>
@@ -275,30 +275,42 @@ const HarborTopicDetail = ({ route, navigation }) => {
         firstPost &&
         !canUpdatePostReaction(firstPost);
     const commentCount = Math.max(Number(topic?.posts_count || 1) - 1, 0);
-    const firstPostLongThreshold = Math.max(
+    const postLongThreshold = Math.max(
         height - headerHeight - topicActionBarHeight - verticalScale(24),
         verticalScale(320),
     );
-    const isFirstPostLong = firstPostBodyHeight > firstPostLongThreshold;
-    const showFirstPostNavigation =
-        isFirstPostLong && !isFirstPostCollapsed && currentPostNumber === 1;
+    const isCurrentPostLong =
+        Number(postBodyHeights[currentPostNumber] || 0) > postLongThreshold;
+    const isCurrentPostCollapsed = Boolean(
+        collapsedPostNumbers[currentPostNumber],
+    );
+    const showPostNavigation =
+        isCurrentPostLong && !isCurrentPostCollapsed;
 
     useEffect(() => {
-        setFirstPostBodyHeight(0);
-        setIsFirstPostCollapsed(false);
+        setPostBodyHeights({});
+        setCollapsedPostNumbers({});
     }, [topicId]);
 
-    const handleFirstPostBodyLayout = useCallback(event => {
-        if (isFirstPostCollapsed) {
+    const handlePostBodyLayout = useCallback((postNumber, event) => {
+        if (collapsedPostNumbers[postNumber]) {
             return;
         }
-        setFirstPostBodyHeight(event.nativeEvent.layout.height);
-    }, [isFirstPostCollapsed]);
+        const bodyHeight = event.nativeEvent.layout.height;
+        setPostBodyHeights(current =>
+            current[postNumber] === bodyHeight
+                ? current
+                : { ...current, [postNumber]: bodyHeight },
+        );
+    }, [collapsedPostNumbers]);
 
-    const toggleFirstPostCollapsed = useCallback(() => {
-        setIsFirstPostCollapsed(current => !current);
+    const togglePostCollapsed = useCallback(postNumber => {
+        setCollapsedPostNumbers(current => ({
+            ...current,
+            [postNumber]: !current[postNumber],
+        }));
         requestAnimationFrame(() => {
-            scrollToPost(1, { animated: false, allowFetch: false });
+            scrollToPost(postNumber, { animated: false, allowFetch: false });
         });
     }, [scrollToPost]);
 
@@ -714,6 +726,12 @@ const HarborTopicDetail = ({ route, navigation }) => {
                 (postIndex === 0 ||
                     previousPostNumber <= unreadAfterPostNumber);
             const isFirstPost = Number(item.post_number) === 1;
+            const postNumber = Number(item.post_number);
+            const isPostCollapsed = Boolean(
+                collapsedPostNumbers[postNumber],
+            );
+            const isPostLong =
+                Number(postBodyHeights[postNumber] || 0) > postLongThreshold;
 
             return (
                 <View>
@@ -772,12 +790,10 @@ const HarborTopicDetail = ({ route, navigation }) => {
                         onPressOpenOriginal={
                             isFirstPost ? openOriginalTopic : undefined
                         }
-                        onFirstPostBodyLayout={
-                            isFirstPost ? handleFirstPostBodyLayout : undefined
+                        onPostBodyLayout={event =>
+                            handlePostBodyLayout(postNumber, event)
                         }
-                        onExpandFirstPost={
-                            isFirstPost ? toggleFirstPostCollapsed : undefined
-                        }
+                        onTogglePost={() => togglePostCollapsed(postNumber)}
                         onPressReply={scrollToPost}
                         onPressShare={sharePost}
                         onPressTag={openTag}
@@ -834,9 +850,8 @@ const HarborTopicDetail = ({ route, navigation }) => {
                         }
                         reactions={validReactions}
                         reactionsEnabled={validReactions.length > 0}
-                        isFirstPostCollapsed={
-                            isFirstPost && isFirstPostCollapsed
-                        }
+                        isPostCollapsed={isPostCollapsed}
+                        isPostLong={isPostLong}
                     />
                 </View>
             );
@@ -844,6 +859,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
         [
             canReplyToTopic,
             black.third,
+            collapsedPostNumbers,
             contentWidth,
             imageUrls,
             isLoadingPrevious,
@@ -851,8 +867,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
             confirmDeletePost,
             explainPostReactionDisabled,
             harborUser?.username,
-            handleFirstPostBodyLayout,
-            isFirstPostCollapsed,
+            handlePostBodyLayout,
             openAuthor,
             openBookmarkEditor,
             openCategory,
@@ -866,6 +881,8 @@ const HarborTopicDetail = ({ route, navigation }) => {
             openTag,
             pendingMutations,
             pendingNestedPostNumbers,
+            postBodyHeights,
+            postLongThreshold,
             posts,
             scrollToPost,
             selectPostReaction,
@@ -874,7 +891,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
             t,
             themeColor,
             theme.disabled,
-            toggleFirstPostCollapsed,
+            togglePostCollapsed,
             togglePostLike,
             topic,
             topicId,
@@ -1054,79 +1071,42 @@ const HarborTopicDetail = ({ route, navigation }) => {
                 reactionsEnabled={validReactions.length > 0}
             />
 
-            {showFirstPostNavigation ? (
+            {showPostNavigation ? (
                 <View
                     style={[
-                        styles.firstPostNavigation,
+                        styles.postNavigation,
                         {
-                            bottom: topicActionBarHeight + verticalScale(10),
+                            bottom: topicActionBarHeight + verticalScale(6),
                             backgroundColor: white,
                             borderColor: theme.disabled,
                         },
                     ]}>
                     <Pressable
                         accessibilityRole="button"
-                        accessibilityLabel={
-                            isFirstPostCollapsed
-                                ? t('展開正文')
-                                : t('收起正文')
-                        }
+                        accessibilityLabel={t('收起 {{postNumber}} 樓的正文', {
+                            postNumber: currentPostNumber,
+                        })}
                         onPress={() => {
                             trigger();
-                            toggleFirstPostCollapsed();
+                            togglePostCollapsed(currentPostNumber);
                         }}
                         style={({ pressed }) => [
-                            styles.firstPostNavigationButton,
+                            styles.postNavigationButton,
                             pressed ? styles.pressedLink : null,
                         ]}>
                         <MaterialCommunityIcons
-                            name={
-                                isFirstPostCollapsed
-                                    ? 'arrow-expand-vertical'
-                                    : 'arrow-collapse-vertical'
-                            }
-                            size={scale(17)}
+                            name="arrow-collapse-vertical"
+                            size={scale(15)}
                             color={themeColor}
                         />
                         <Text
                             style={[
-                                styles.firstPostNavigationText,
+                                styles.postNavigationText,
                                 { color: themeColor },
                             ]}>
-                            {isFirstPostCollapsed
-                                ? t('展開正文')
-                                : t('收起正文')}
-                        </Text>
-                    </Pressable>
-                    <View
-                        style={[
-                            styles.firstPostNavigationDivider,
-                            { backgroundColor: theme.disabled },
-                        ]}
-                    />
-                    <Pressable
-                        accessibilityRole="button"
-                        accessibilityLabel={t('查看評論')}
-                        onPress={() => {
-                            trigger();
-                            jumpToComments();
-                        }}
-                        style={({ pressed }) => [
-                            styles.firstPostNavigationButton,
-                            pressed ? styles.pressedLink : null,
-                        ]}>
-                        <MaterialCommunityIcons
-                            name="comment-outline"
-                            size={scale(17)}
-                            color={black.main}
-                        />
-                        <Text
-                            style={[
-                                styles.firstPostNavigationText,
-                                { color: black.main },
-                            ]}>
-                            {t('查看評論')}
-                            {commentCount > 0 ? ` ${commentCount}` : ''}
+                            {t('收起 {{postNumber}} 樓的正文', {
+                                postNumber: currentPostNumber,
+                            })}
                         </Text>
                     </Pressable>
                 </View>
@@ -1144,7 +1124,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
                             bottom:
                                 topicActionBarHeight +
                                 verticalScale(
-                                    showFirstPostNavigation ? 58 : 10,
+                                    showPostNavigation ? 48 : 10,
                                 ),
                             backgroundColor: pressed
                                 ? tonal.primary50
