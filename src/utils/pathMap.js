@@ -68,8 +68,18 @@ export function ARK_HARBOR_AVATAR_TEMPLATE(avatarTemplate, size = 96) {
     );
 }
 
-export function ARK_HARBOR_AVATAR(username) {
-    return ARK_HARBOR + `/user_avatar/harbor.umall.one/${username}/16/52_2.png`;
+export function ARK_HARBOR_AVATAR(username, size = 96) {
+    if (!username || typeof username !== 'string') {
+        return '';
+    }
+    const safeUsername = username.trim();
+    if (!safeUsername) {
+        return '';
+    }
+    return (
+        ARK_HARBOR +
+        `/user_avatar/harbor.umall.one/${encodeURIComponent(safeUsername)}/${size}/1.png`
+    );
 }
 
 // Discourse 標準 emoji 路徑；name 為 shortcode（如 heart、+1），不含冒號

@@ -545,6 +545,18 @@ describe('Harbor API 資料正規化', () => {
             })
             .mockResolvedValueOnce({
                 data: {
+                    users: [
+                        {
+                            id: 7,
+                            username: 'reader',
+                            avatar_template: '/user_avatar/reader/{size}.png',
+                        },
+                        {
+                            id: 1,
+                            username: 'ark-user',
+                            avatar_template: '/user_avatar/self/{size}.png',
+                        },
+                    ],
                     topic_list: {
                         topics: [
                             {
@@ -552,6 +564,11 @@ describe('Harbor API 資料正規化', () => {
                                 slug: 'private-topic',
                                 title: '私人對話',
                                 unread_posts: 2,
+                                last_poster_username: 'reader',
+                                posters: [
+                                    {user_id: 1},
+                                    {user_id: 7, extras: 'latest'},
+                                ],
                             },
                             {
                                 id: 32,
@@ -605,6 +622,8 @@ describe('Harbor API 資料正規化', () => {
                 id: '31',
                 slug: 'private-topic',
                 unreadCount: 2,
+                actingUsername: 'reader',
+                avatarUrl: '/user_avatar/reader/{size}.png',
             }),
         );
         expect(messages[1]).toEqual(

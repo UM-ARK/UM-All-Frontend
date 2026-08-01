@@ -1162,7 +1162,51 @@ function normalizeNotification(notification, index) {
     };
 }
 
-function normalizeMessage(topic, index) {
+// 私信列表：取對方會員（優先最新發言者，排除自己）
+function resolvePrivateMessageCounterpart(topic, users, currentUsername) {
+    const posters = Array.isArray(topic?.posters) ? topic.posters : [];
+    let latestOther = null;
+    let firstOther = null;
+    posters.forEach(poster => {
+        const user = users.usersById.get(toNumberOrNull(poster?.user_id));
+        if (!user?.username || user.username === currentUsername) {
+            return;
+        }
+        if (!firstOther) {
+            firstOther = user;
+        }
+        if (
+            String(poster?.extras || '')
+                .split(/\s+/)
+                .includes('latest')
+        ) {
+            latestOther = user;
+        }
+    });
+    if (latestOther || firstOther) {
+        return latestOther || firstOther;
+    }
+    const lastPosterUsername = topic?.last_poster_username || '';
+    if (lastPosterUsername && lastPosterUsername !== currentUsername) {
+        return (
+            users.usersByUsername.get(lastPosterUsername) || {
+                id: null,
+                username: lastPosterUsername,
+                name: '',
+                avatarUrl: null,
+            }
+        );
+    }
+    return null;
+}
+
+function normalizeMessage(topic, index, { users, currentUsername } = {}) {
+    const emptyUsers = { usersById: new Map(), usersByUsername: new Map() };
+    const counterpart = resolvePrivateMessageCounterpart(
+        topic,
+        users || emptyUsers,
+        currentUsername || '',
+    );
     return {
         id: String(topic.id || `message-${index}`),
         title: topic.title || '',
@@ -1171,6 +1215,8 @@ function normalizeMessage(topic, index) {
         unreadCount: Number(topic.unread_posts || topic.new_posts || 0),
         topicId: Number(topic.id) || null,
         slug: topic.slug || '',
+        actingUsername: counterpart?.username || '',
+        avatarUrl: counterpart?.avatarUrl || null,
     };
 }
 
@@ -2024,7 +2070,13 @@ export async function fetchHarborMessages(username, { signal } = {}) {
         `/topics/private-messages/${encodedUsername}.json`,
         { signal },
     );
-    return (response.data?.topic_list?.topics || []).map(normalizeMessage);
+    const users = getTopicUsers(response.data);
+    return (response.data?.topic_list?.topics || []).map((topic, index) =>
+        normalizeMessage(topic, index, {
+            users,
+            currentUsername: username,
+        }),
+    );
 }
 
 export async function fetchHarborTopic(
