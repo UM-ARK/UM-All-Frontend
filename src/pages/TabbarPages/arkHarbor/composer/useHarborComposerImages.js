@@ -10,6 +10,10 @@ import * as ImagePicker from 'expo-image-picker';
 import Toast from 'react-native-simple-toast';
 
 import {uploadHarborComposerImage} from '../../../../utils/harbor/harborApi';
+import {
+    deleteHarborDraftImageFile,
+    harborDraftImageExists,
+} from '../../../../utils/harbor/harborDraftImages';
 import {trigger} from '../../../../utils/trigger';
 import {getUploadErrorMessage} from './harborComposerErrors';
 import {
@@ -262,6 +266,9 @@ export function useHarborComposerImages({composerSettings, t}) {
                         maxImageBytes != null &&
                         compressedImage.fileSize > maxImageBytes
                     ) {
+                        deleteHarborDraftImageFile(
+                            compressedImage.localUri,
+                        );
                         oversizedImageCount += 1;
                         continue;
                     }
@@ -319,6 +326,12 @@ export function useHarborComposerImages({composerSettings, t}) {
         trigger();
         uploadControllersRef.current.get(imageId)?.abort();
         uploadControllersRef.current.delete(imageId);
+        const removed = imagesRef.current.find(
+            image => image.id === imageId,
+        );
+        if (removed?.localUri) {
+            deleteHarborDraftImageFile(removed.localUri);
+        }
         updateImages(current =>
             current.filter(image => image.id !== imageId),
         );
@@ -352,23 +365,43 @@ export function useHarborComposerImages({composerSettings, t}) {
                 if (!localUri && !remoteUrl && !shortUrl) {
                     return null;
                 }
+                const localFileExists = harborDraftImageExists(localUri);
+                const previewUri = localFileExists
+                    ? localUri
+                    : remoteUrl || localUri;
+                if (!previewUri && !shortUrl) {
+                    return null;
+                }
+                // 本機檔案遺失且尚未上傳：標為 failed，避免發布時才爆錯
+                const missingLocal =
+                    Boolean(localUri) &&
+                    !localFileExists &&
+                    !shortUrl &&
+                    !remoteUrl;
                 return {
                     ...image,
                     id:
                         typeof image.id === 'string' && image.id
                             ? image.id
                             : `draft-image-${Date.now()}-${index}`,
-                    localUri: localUri || remoteUrl,
+                    localUri: previewUri,
                     remoteUrl,
                     shortUrl,
                     progress: shortUrl ? 1 : 0,
-                    status: shortUrl ? 'uploaded' : 'ready',
+                    status: shortUrl
+                        ? 'uploaded'
+                        : missingLocal
+                            ? 'failed'
+                            : 'ready',
+                    error: missingLocal
+                        ? t('圖片檔案已遺失，請重新選擇。')
+                        : image.error || '',
                 };
             })
             .filter(Boolean);
         imagesRef.current = restoredImages;
         setImages(restoredImages);
-    }, []);
+    }, [t]);
 
     return {
         images,

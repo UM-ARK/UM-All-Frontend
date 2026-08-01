@@ -21,7 +21,6 @@ import {getComposerErrorMessage} from './harborComposerErrors';
 export function useHarborComposerSubmit({
     areSelectedTagsAllowed,
     categoryId,
-    draftKey,
     editMetadata,
     hasUnreadyImages,
     images,
@@ -229,7 +228,6 @@ export function useHarborComposerSubmit({
                 })
                 : await createHarborPost({
                     raw: submissionRaw,
-                    draftKey,
                     ...(isNewTopic
                         ? {
                             title: title.trim(),
@@ -329,7 +327,6 @@ export function useHarborComposerSubmit({
         }
     }, [
         categoryId,
-        draftKey,
         editMetadata,
         hasUnreadyImages,
         images,

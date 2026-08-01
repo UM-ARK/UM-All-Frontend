@@ -107,7 +107,6 @@ const HarborComposerPage = ({route, navigation}) => {
     const {
         clearDraftAfterPublish,
         discardDraftAndExit,
-        draftKey,
         hasDraftContent,
         isDraftLoading,
     } = useHarborDraft({
@@ -480,7 +479,6 @@ const HarborComposerPage = ({route, navigation}) => {
         title,
         titleLength,
         uploadImages,
-        draftKey,
     });
 
     const handleSelectCategory = useCallback(item => {

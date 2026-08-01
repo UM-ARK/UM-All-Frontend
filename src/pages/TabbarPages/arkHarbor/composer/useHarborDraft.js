@@ -10,21 +10,18 @@ import {AppState} from 'react-native';
 import Toast from 'react-native-simple-toast';
 
 import {
-    completeHarborDraftDeletion,
-    deleteHarborDraftAtLatestSequence,
+    deleteHarborComposerDraft,
     getHarborComposerDraftKey,
     getHarborDraftAccountId,
     getHarborDraftAction,
     getHarborDraftMode,
     loadHarborComposerDraft,
-    markHarborDraftForDeletion,
     saveLocalHarborDraft,
-    syncLocalHarborDraft,
 } from '../../../../utils/harbor/harborDrafts';
+import {deleteHarborDraftImageFiles} from '../../../../utils/harbor/harborDraftImages';
 import {buildHarborComposerRaw} from '../harborComposerText';
 
 const AUTOSAVE_DELAY = 1200;
-const REMOTE_AUTOSAVE_DELAY = 15 * 1000;
 
 const getRestoredTags = (draftTags, availableTags) => {
     if (!Array.isArray(draftTags)) {
@@ -106,14 +103,10 @@ export function useHarborDraft({
     const draftRef = useRef(null);
     const savedSignatureRef = useRef('');
     const autosaveTimerRef = useRef(null);
-    const remoteAutosaveTimerRef = useRef(null);
-    const remoteSyncQueueRef = useRef(Promise.resolve());
-    const queuedRemoteSignaturesRef = useRef(new Set());
     const draftGenerationRef = useRef(0);
     const completedRef = useRef(false);
     const leavingRef = useRef(false);
     const allowNextRemovalRef = useRef(false);
-    const conflictToastShownRef = useRef(false);
     const [isDraftLoading, setIsDraftLoading] = useState(
         sessionStatus === 'signedIn' && Boolean(draftKey),
     );
@@ -202,187 +195,57 @@ export function useHarborDraft({
         title,
     ]);
 
-    const saveCurrentDraft = useCallback(
-        async ({syncRemote = true} = {}) => {
-            if (
-                completedRef.current ||
-                !accountId ||
-                !draftKey ||
-                !hasDraftContent
-            ) {
-                return draftRef.current;
-            }
-            const record = buildDraftRecord();
-            const signature = JSON.stringify(record.data);
-            if (
-                signature === savedSignatureRef.current &&
-                draftRef.current &&
-                (
-                    !syncRemote ||
-                    draftRef.current.syncStatus === 'synced'
-                )
-            ) {
-                return draftRef.current;
-            }
-            const localDraft = await saveLocalHarborDraft(
-                accountId,
-                record,
-            );
-            draftRef.current = localDraft;
-            draftGenerationRef.current += 1;
-            savedSignatureRef.current = signature;
-
-            if (syncRemote && sessionStatus === 'signedIn') {
-                if (queuedRemoteSignaturesRef.current.has(signature)) {
-                    return localDraft;
-                }
-                queuedRemoteSignaturesRef.current.add(signature);
-                remoteSyncQueueRef.current =
-                    remoteSyncQueueRef.current
-                        .catch(() => null)
-                        .then(async () => {
-                            const draftToSync = {
-                                ...localDraft,
-                                sequence:
-                                    draftRef.current?.sequence ||
-                                    localDraft.sequence,
-                            };
-                            try {
-                                const remoteData = {
-                                    ...draftToSync.data,
-                                    appImages: (
-                                        draftToSync.data.appImages || []
-                                    )
-                                        .filter(image => image.shortUrl)
-                                        .map(image => ({
-                                            id: image.id,
-                                            remoteUrl: image.remoteUrl,
-                                            fileName: image.fileName,
-                                            mimeType: image.mimeType,
-                                            fileSize: image.fileSize,
-                                            uploadId: image.uploadId,
-                                            shortUrl: image.shortUrl,
-                                            status: image.status,
-                                        })),
-                                };
-                                const result =
-                                    await syncLocalHarborDraft(
-                                        accountId,
-                                        draftToSync,
-                                        {data: remoteData},
-                                    );
-                                draftRef.current = result.draft;
-                                if (
-                                    result.conflictUser &&
-                                    !conflictToastShownRef.current
-                                ) {
-                                    conflictToastShownRef.current = true;
-                                    Toast.show(
-                                        t(
-                                            '草稿已保存在本機，但 Harbor 上有較新的版本。',
-                                        ),
-                                    );
-                                }
-                            } catch (error) {
-                                const nextStatus =
-                                    error?.response?.status === 409
-                                        ? 'conflict'
-                                        : 'offline';
-                                const offlineDraft =
-                                    await saveLocalHarborDraft(
-                                        accountId,
-                                        {
-                                            ...draftRef.current,
-                                            syncStatus: nextStatus,
-                                        },
-                                    );
-                                draftRef.current = offlineDraft;
-                                if (
-                                    nextStatus === 'conflict' &&
-                                    !conflictToastShownRef.current
-                                ) {
-                                    conflictToastShownRef.current = true;
-                                    Toast.show(
-                                        t(
-                                            '草稿已保存在本機，但 Harbor 上有較新的版本。',
-                                        ),
-                                    );
-                                }
-                            } finally {
-                                queuedRemoteSignaturesRef.current.delete(
-                                    signature,
-                                );
-                            }
-                        });
-            }
-            return localDraft;
-        },
-        [
+    const saveCurrentDraft = useCallback(async () => {
+        if (
+            completedRef.current ||
+            !accountId ||
+            !draftKey ||
+            !hasDraftContent
+        ) {
+            return draftRef.current;
+        }
+        const record = buildDraftRecord();
+        const signature = JSON.stringify(record.data);
+        if (
+            signature === savedSignatureRef.current &&
+            draftRef.current
+        ) {
+            return draftRef.current;
+        }
+        const localDraft = await saveLocalHarborDraft(
             accountId,
-            buildDraftRecord,
-            draftKey,
-            hasDraftContent,
-            sessionStatus,
-            t,
-        ],
-    );
+            record,
+        );
+        draftRef.current = localDraft;
+        draftGenerationRef.current += 1;
+        savedSignatureRef.current = signature;
+        return localDraft;
+    }, [
+        accountId,
+        buildDraftRecord,
+        draftKey,
+        hasDraftContent,
+    ]);
 
     const discardCurrentDraft = useCallback(async () => {
-        const sequence = draftRef.current?.sequence || 0;
         draftGenerationRef.current += 1;
-        const discardGeneration = draftGenerationRef.current;
         savedSignatureRef.current = '';
+        const imagesToDelete = [
+            ...(Array.isArray(draftRef.current?.data?.appImages)
+                ? draftRef.current.data.appImages
+                : []),
+            ...(supportsImages ? getDraftImages(images) : []),
+        ];
         draftRef.current = {
-            sequence,
+            sequence: 0,
             createdAt: Date.now(),
-            syncStatus: 'synced',
+            syncStatus: 'local',
         };
         if (accountId && draftKey) {
-            await markHarborDraftForDeletion(
-                accountId,
-                draftKey,
-                sequence,
-            );
+            await deleteHarborComposerDraft(accountId, draftKey);
         }
-        if (!draftKey) {
-            return;
-        }
-        remoteSyncQueueRef.current =
-            remoteSyncQueueRef.current
-                .catch(() => null)
-                .then(async () => {
-                    if (
-                        draftGenerationRef.current !==
-                        discardGeneration
-                    ) {
-                        return null;
-                    }
-                    const latestSequence =
-                        draftRef.current?.sequence || sequence;
-                    if (accountId) {
-                        await markHarborDraftForDeletion(
-                            accountId,
-                            draftKey,
-                            latestSequence,
-                        );
-                    }
-                    try {
-                        await deleteHarborDraftAtLatestSequence(
-                            draftKey,
-                            latestSequence,
-                        );
-                        if (accountId) {
-                            await completeHarborDraftDeletion(
-                                accountId,
-                                draftKey,
-                            );
-                        }
-                    } catch {
-                        return null;
-                    }
-                    return draftKey;
-                });
-    }, [accountId, draftKey]);
+        deleteHarborDraftImageFiles(imagesToDelete);
+    }, [accountId, draftKey, images, supportsImages]);
 
     useEffect(() => {
         if (sessionStatus !== 'signedIn' || !draftKey) {
@@ -401,22 +264,8 @@ export function useHarborDraft({
         loadControllerRef.current = controller;
         setIsDraftLoading(true);
 
-        loadHarborComposerDraft(accountId, draftKey, {
-            signal: controller.signal,
-        })
+        loadHarborComposerDraft(accountId, draftKey)
             .then(draft => {
-                if (
-                    !controller.signal.aborted &&
-                    draft?.pendingDeletion
-                ) {
-                    draftRef.current = {
-                        sequence: draft.sequence,
-                        createdAt: Date.now(),
-                        syncStatus: 'synced',
-                    };
-                    savedSignatureRef.current = '';
-                    return;
-                }
                 if (
                     controller.signal.aborted ||
                     !draft ||
@@ -483,17 +332,6 @@ export function useHarborDraft({
                 if (supportsImages) {
                     restoreDraftImages(data.appImages);
                 }
-                if (
-                    draft.syncStatus === 'conflict' &&
-                    !conflictToastShownRef.current
-                ) {
-                    conflictToastShownRef.current = true;
-                    Toast.show(
-                        t(
-                            '已恢復本機草稿；Harbor 上另有較新的版本。',
-                        ),
-                    );
-                }
             })
             .catch(() => {
                 if (!controller.signal.aborted) {
@@ -529,7 +367,6 @@ export function useHarborDraft({
 
     useEffect(() => {
         clearTimeout(autosaveTimerRef.current);
-        clearTimeout(remoteAutosaveTimerRef.current);
         if (
             isComposerLoading ||
             isDraftLoading ||
@@ -545,18 +382,13 @@ export function useHarborDraft({
             }
             return () => {
                 clearTimeout(autosaveTimerRef.current);
-                clearTimeout(remoteAutosaveTimerRef.current);
             };
         }
         autosaveTimerRef.current = setTimeout(() => {
-            saveCurrentDraft({syncRemote: false}).catch(() => null);
-        }, AUTOSAVE_DELAY);
-        remoteAutosaveTimerRef.current = setTimeout(() => {
             saveCurrentDraft().catch(() => null);
-        }, REMOTE_AUTOSAVE_DELAY);
+        }, AUTOSAVE_DELAY);
         return () => {
             clearTimeout(autosaveTimerRef.current);
-            clearTimeout(remoteAutosaveTimerRef.current);
         };
     }, [
         categoryId,
@@ -581,8 +413,7 @@ export function useHarborDraft({
                     !completedRef.current
                 ) {
                     clearTimeout(autosaveTimerRef.current);
-                    clearTimeout(remoteAutosaveTimerRef.current);
-                    saveCurrentDraft({syncRemote: false}).catch(() => null);
+                    saveCurrentDraft().catch(() => null);
                 }
             },
         );
@@ -622,7 +453,6 @@ export function useHarborDraft({
                 }
                 leavingRef.current = true;
                 clearTimeout(autosaveTimerRef.current);
-                clearTimeout(remoteAutosaveTimerRef.current);
                 saveCurrentDraft()
                     .then(() => {
                         Toast.show(t('草稿已自動保存。'));
@@ -649,14 +479,12 @@ export function useHarborDraft({
     const clearDraftAfterPublish = useCallback(async () => {
         completedRef.current = true;
         clearTimeout(autosaveTimerRef.current);
-        clearTimeout(remoteAutosaveTimerRef.current);
         await discardCurrentDraft();
     }, [discardCurrentDraft]);
 
     const discardDraftAndExit = useCallback(async () => {
         completedRef.current = true;
         clearTimeout(autosaveTimerRef.current);
-        clearTimeout(remoteAutosaveTimerRef.current);
         try {
             await discardCurrentDraft();
             allowNextRemovalRef.current = true;
