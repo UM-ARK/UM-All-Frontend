@@ -41,6 +41,7 @@ import {
     loadHarborLoginIntent,
     saveHarborLoginIntent,
 } from '../utils/harbor/harborLoginIntent';
+import { syncAppIconBadgeCount } from '../utils/appIconBadge';
 import { getLocalStorage, setLocalStorage } from '../utils/storageKits';
 
 const PROFILE_CACHE_KEY = 'harbor_profile_cache';
@@ -356,6 +357,13 @@ export const HarborSessionProvider = ({ children }) => {
             refreshInboxUnreadCount().catch(() => {});
         }
     }, [refreshInboxUnreadCount, status, user?.username]);
+
+    // 將 Harbor 收件匣未讀同步到主畫面 App 角標；登出時清零
+    useEffect(() => {
+        const badgeCount =
+            status === 'signedIn' ? inboxUnreadCount : 0;
+        syncAppIconBadgeCount(badgeCount).catch(() => {});
+    }, [inboxUnreadCount, status]);
 
     useEffect(() => {
         const subscription = AppState.addEventListener('change', nextState => {
