@@ -115,14 +115,9 @@ const useHarborSearch = ({initialQuery, onSearchStart}) => {
             const normalizedQuery = (
                 queryOverride === undefined ? query : queryOverride
             ).trim();
-            if (!normalizedQuery) {
-                return;
-            }
-
-            Keyboard.dismiss();
-            onSearchStart();
             const normalizedAuthor =
                 authorOverride === undefined ? author : authorOverride;
+            // 允許空關鍵字：僅作者／分類等篩選時仍組出有效 Discourse 查詢（如 @username）
             const searchQuery = append
                 ? activeSearchRef.current?.searchQuery
                 : buildHarborSearchQuery({
@@ -139,6 +134,9 @@ const useHarborSearch = ({initialQuery, onSearchStart}) => {
             if (!searchQuery || (append && !activeSearchRef.current)) {
                 return;
             }
+
+            Keyboard.dismiss();
+            onSearchStart();
 
             if (append) {
                 if (loadingMoreRef.current) {
@@ -166,7 +164,16 @@ const useHarborSearch = ({initialQuery, onSearchStart}) => {
                 if (authorOverride !== undefined) {
                     setAuthor(normalizedAuthor);
                 }
-                addHarborSearchHistory(normalizedQuery).then(setHistory);
+                const historyQuery =
+                    normalizedQuery ||
+                    (normalizedAuthor
+                        ? `@${String(normalizedAuthor)
+                              .trim()
+                              .replace(/^@+/, '')}`
+                        : '');
+                if (historyQuery) {
+                    addHarborSearchHistory(historyQuery).then(setHistory);
+                }
                 logToFirebase('harbor_search', {
                     hasCategory: Boolean(category),
                     hasTag: Boolean(tag),

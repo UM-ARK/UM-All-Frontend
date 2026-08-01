@@ -39,6 +39,15 @@ describe('Harbor 搜尋工具', () => {
         );
     });
 
+    it('空關鍵字僅帶作者時組成 @username 查詢', () => {
+        expect(
+            buildHarborSearchQuery({
+                query: '',
+                author: 'qq_yyy',
+            }),
+        ).toBe('@qq_yyy');
+    });
+
     it('按所選時間範圍建立搜尋日期', () => {
         const now = Date.parse('2026-07-26T12:00:00Z');
         expect(getHarborSearchAfterDate('week', now)).toBe('2026-07-19');

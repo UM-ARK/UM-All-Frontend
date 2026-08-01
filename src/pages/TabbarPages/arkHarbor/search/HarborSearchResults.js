@@ -22,7 +22,26 @@ import {
     HarborFullState,
     HarborInlineRetry,
 } from '../components/HarborListStates';
+import HarborTopicCard from '../components/HarborTopicCard';
 import HarborSearchResultCard from './HarborSearchResultCard';
+
+/** 將搜尋命中合併進 topic，供 HarborTopicCard 直接複用 */
+const toTopicCardTopic = item => {
+    if (!item?.topic) {
+        return null;
+    }
+    return {
+        ...item.topic,
+        // 搜尋命中作者（貼文 username）優先；topic 摘要常缺 posters 會變成「Harbor 會員」
+        author: item.author || item.topic.author,
+        excerpt: item.excerpt || item.topic.excerpt,
+        activityAt:
+            item.createdAt ||
+            item.topic.activityAt ||
+            item.topic.lastPostedAt ||
+            item.topic.createdAt,
+    };
+};
 
 const HarborSearchResults = ({
     results,
@@ -33,7 +52,6 @@ const HarborSearchResults = ({
     onResultPress,
     onAuthorPress,
     onCategoryPress,
-    onTagPress,
     onClearHistory,
 }) => {
     const {theme} = useTheme();
@@ -129,13 +147,25 @@ const HarborSearchResults = ({
                 );
             }
 
+            if (item.kind === 'user') {
+                return (
+                    <HarborSearchResultCard
+                        user={item.user}
+                        onPress={onAuthorPress}
+                    />
+                );
+            }
+
+            const topic = toTopicCardTopic(item);
+            if (!topic) {
+                return null;
+            }
+
             return (
-                <HarborSearchResultCard
-                    item={item}
-                    onPress={onResultPress}
-                    onAuthorPress={onAuthorPress}
+                <HarborTopicCard
+                    topic={topic}
+                    onPress={() => onResultPress(item)}
                     onCategoryPress={onCategoryPress}
-                    onTagPress={onTagPress}
                 />
             );
         },
@@ -144,7 +174,6 @@ const HarborSearchResults = ({
             onCategoryPress,
             onCollapseSearch,
             onResultPress,
-            onTagPress,
             removeHistory,
             runSearch,
             setQuery,

@@ -801,7 +801,8 @@ function normalizeSearchResult(data, page, additionalUsers = []) {
                 likeCount: toCount(post?.like_count),
                 category: topic.category,
                 tags: topic.tags,
-                topic,
+                // 寫回搜尋命中作者，讓複用 HarborTopicCard 時頭像／ID 正確
+                topic: author ? {...topic, author} : topic,
             };
         })
         .filter(Boolean);

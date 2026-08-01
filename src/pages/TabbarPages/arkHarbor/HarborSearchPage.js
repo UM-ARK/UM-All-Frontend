@@ -101,13 +101,14 @@ const HarborSearchPage = ({route, navigation}) => {
             if (!username) {
                 return;
             }
+            // 清空關鍵字，改以作者篩選列出該作者貼文（避免沿用原關鍵字導致幾乎無結果）
             searchPanelRef.current?.expandFilters();
             runSearch({
-                queryOverride: query.trim() || username,
+                queryOverride: '',
                 authorOverride: username,
             });
         },
-        [query, runSearch],
+        [runSearch],
     );
 
     const handleCategoryPress = useCallback(
@@ -117,16 +118,6 @@ const HarborSearchPage = ({route, navigation}) => {
                 categoryId: selectedCategory.id,
                 categorySlug: selectedCategory.slug,
                 categoryName: selectedCategory.name,
-            });
-        },
-        [collapseSearchFocus, navigation],
-    );
-
-    const handleTagPress = useCallback(
-        selectedTag => {
-            collapseSearchFocus();
-            navigation.navigate('HarborTagTopics', {
-                tag: selectedTag.name || selectedTag,
             });
         },
         [collapseSearchFocus, navigation],
@@ -200,7 +191,6 @@ const HarborSearchPage = ({route, navigation}) => {
                 onResultPress={handleResultPress}
                 onAuthorPress={handleAuthorPress}
                 onCategoryPress={handleCategoryPress}
-                onTagPress={handleTagPress}
                 onClearHistory={handleClearHistory}
             />
             <SearchOptionModal

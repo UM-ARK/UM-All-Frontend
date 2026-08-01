@@ -119,12 +119,13 @@ const HarborSearchPanel = forwardRef(
 
         const handleSearchAction = useCallback(() => {
             trigger();
-            if (!query.trim()) {
+            // 無關鍵字時若已填作者，仍允許搜尋該作者貼文
+            if (!query.trim() && !author.trim()) {
                 collapseSearchFocus();
                 return;
             }
             runSearch();
-        }, [collapseSearchFocus, query, runSearch]);
+        }, [author, collapseSearchFocus, query, runSearch]);
 
         return (
             <View
