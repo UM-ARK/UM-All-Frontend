@@ -1861,6 +1861,12 @@ describe('Harbor API 資料正規化', () => {
                 author: expect.objectContaining({
                     username: 'topic-author',
                 }),
+                topic: expect.objectContaining({
+                    author: expect.objectContaining({
+                        username: 'topic-author',
+                        avatarUrl: expect.stringContaining('/author/'),
+                    }),
+                }),
                 category: expect.objectContaining({
                     id: 4,
                     name: '吹水台',

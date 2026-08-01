@@ -1,6 +1,5 @@
 import React, {
     memo,
-    useMemo,
 } from 'react';
 import {
     ActivityIndicator,
@@ -9,7 +8,6 @@ import {
     View,
 } from 'react-native';
 
-import { MenuView } from '@react-native-menu/menu';
 import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import { scale, verticalScale } from 'react-native-size-matters';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -17,50 +15,10 @@ import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '../../../../components/ThemeContext';
 import { trigger } from '../../../../utils/trigger';
+import HarborReactionControl, {
+    HarborReactionIcon,
+} from './HarborReactionControl';
 import styles from './styles';
-
-// 常見 Discourse reaction shortcode → Unicode（底部選單用）
-const HARBOR_REACTION_UNICODE = Object.freeze({
-    heart: '❤️',
-    '+1': '👍',
-    '-1': '👎',
-    laughing: '😆',
-    open_mouth: '😮',
-    clap: '👏',
-    confetti_ball: '🎊',
-    hugs: '🤗',
-    smile: '😄',
-    tada: '🎉',
-    pray: '🙏',
-    eyes: '👀',
-    rocket: '🚀',
-    heart_eyes: '😍',
-    slightly_smiling_face: '🙂',
-});
-const HARBOR_REACTION_LABEL = Object.freeze({
-    heart: '愛心',
-    '+1': '讚同',
-    '-1': '不讚同',
-    laughing: '好笑',
-    open_mouth: '驚訝',
-    clap: '拍手',
-    confetti_ball: '慶祝',
-    hugs: '擁抱',
-    smile: '微笑',
-    tada: '太棒了',
-    pray: '祈禱',
-    eyes: '留意',
-    rocket: '火箭',
-    heart_eyes: '喜愛',
-    slightly_smiling_face: '淡淡微笑',
-});
-
-const normalizeHarborReactionName = name => {
-    if (!name || typeof name !== 'string') {
-        return '';
-    }
-    return name.replace(/^:|:$/g, '').trim();
-};
 
 const formatCount = value => {
     const count = Number(value || 0);
@@ -108,25 +66,6 @@ const HarborTopicActionBar = memo(
             white,
         } = theme;
 
-        const reactionMenuActions = useMemo(() => {
-            return (reactions || []).map(reaction => {
-                const reactionName = normalizeHarborReactionName(reaction);
-                const unicode = HARBOR_REACTION_UNICODE[reactionName];
-                const label = t(
-                    HARBOR_REACTION_LABEL[reactionName] ||
-                        reactionName.replace(/_/g, ' '),
-                );
-                return {
-                    id: reaction,
-                    title: unicode ? `${unicode}  ${label}` : label,
-                    state: currentReaction === reaction ? 'on' : 'off',
-                    attributes: {
-                        disabled: Boolean(reactionPending),
-                    },
-                };
-            });
-        }, [currentReaction, reactionPending, reactions, t]);
-
         const likeIconName = reactionsEnabled
             ? currentReaction
                 ? 'heart'
@@ -137,11 +76,20 @@ const HarborTopicActionBar = memo(
         const likeActive = reactionsEnabled
             ? Boolean(currentReaction)
             : Boolean(liked);
+        const showCurrentReaction =
+            reactionsEnabled &&
+            currentReaction &&
+            currentReaction !== 'heart';
 
         const likeButton = (
             <View style={styles.topicActionIconButton}>
                 {reactionPending ? (
                     <ActivityIndicator size="small" color={themeColor} />
+                ) : showCurrentReaction ? (
+                    <HarborReactionIcon
+                        name={currentReaction}
+                        size={scale(20)}
+                    />
                 ) : (
                     <MaterialCommunityIcons
                         name={likeIconName}
@@ -216,27 +164,16 @@ const HarborTopicActionBar = memo(
                 </Pressable>
 
                 <View style={styles.topicActionIcons}>
-                    {reactionsEnabled && reactionDisabled ? (
-                        <Pressable
-                            accessibilityRole="button"
-                            accessibilityLabel={t('回應')}
-                            onPress={() => {
-                                trigger();
-                                onPressDisabledReaction?.();
-                            }}>
+                    {reactionsEnabled ? (
+                        <HarborReactionControl
+                            currentReaction={currentReaction}
+                            disabled={reactionDisabled}
+                            onPressDisabled={onPressDisabledReaction}
+                            onSelectReaction={onSelectReaction}
+                            pending={reactionPending}
+                            reactions={reactions}>
                             {likeButton}
-                        </Pressable>
-                    ) : reactionsEnabled ? (
-                        <MenuView
-                            actions={reactionMenuActions}
-                            onOpenMenu={() => trigger()}
-                            onPressAction={event => {
-                                trigger();
-                                onSelectReaction?.(event.nativeEvent.event);
-                            }}
-                            shouldOpenOnLongPress={false}>
-                            {likeButton}
-                        </MenuView>
+                        </HarborReactionControl>
                     ) : (
                         <Pressable
                             accessibilityRole="button"

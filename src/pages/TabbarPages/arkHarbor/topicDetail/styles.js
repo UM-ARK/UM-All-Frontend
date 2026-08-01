@@ -967,14 +967,6 @@ const styles = StyleSheet.create({
         fontSize: scale(11),
         fontWeight: '700',
     },
-    reactionGlyph: {
-        textAlign: 'center',
-    },
-    reactionFallbackText: {
-        ...uiStyle.defaultText,
-        fontWeight: '600',
-        textAlign: 'center',
-    },
     notificationOption: {
         minHeight: verticalScale(54),
         borderTopWidth: StyleSheet.hairlineWidth,
