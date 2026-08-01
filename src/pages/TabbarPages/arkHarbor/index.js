@@ -725,6 +725,34 @@ const ForumPage = ({ navigation }) => {
         );
     }, []);
 
+    // Drawer 側滑開合時攔截貼文點擊，避免誤進詳情後返回造成主頁刷新感
+    useEffect(() => {
+        const blockTopicPress = () => {
+            blockTopicPressUntilRef.current = Number.POSITIVE_INFINITY;
+        };
+        const releaseTopicPress = () => {
+            blockTopicPressUntilRef.current = Date.now() + 180;
+        };
+        const unsubscribeGestureStart = navigation.addListener(
+            'gestureStart',
+            blockTopicPress,
+        );
+        const unsubscribeGestureEnd = navigation.addListener(
+            'gestureEnd',
+            releaseTopicPress,
+        );
+        const unsubscribeGestureCancel = navigation.addListener(
+            'gestureCancel',
+            releaseTopicPress,
+        );
+
+        return () => {
+            unsubscribeGestureStart();
+            unsubscribeGestureEnd();
+            unsubscribeGestureCancel();
+        };
+    }, [navigation]);
+
     const handlePageScrollStateChanged = useCallback(event => {
         const pageScrollState = event.nativeEvent.pageScrollState;
         const guardDuration = pageScrollState === 'idle' ? 180 : 320;
