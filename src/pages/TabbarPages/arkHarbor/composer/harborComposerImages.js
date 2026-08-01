@@ -6,7 +6,7 @@ import {
 
 import {persistHarborDraftImage} from '../../../../utils/harbor/harborDraftImages';
 
-export const MAX_IMAGES_PER_POST = 6;
+export const MAX_IMAGES_PER_POST = 9;
 export const MAX_CONCURRENT_IMAGE_UPLOADS = 3;
 
 const MAX_COMPRESSED_IMAGE_DIMENSION = 2048;

@@ -464,6 +464,19 @@ const styles = StyleSheet.create({
         shadowRadius: scale(4),
         elevation: 6,
     },
+    imageGrid: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        marginVertical: verticalScale(5),
+    },
+    imageGridItem: {
+        borderRadius: scale(8),
+        overflow: 'hidden',
+    },
+    imageGridImage: {
+        width: '100%',
+        height: '100%',
+    },
     interactiveFallback: {
         alignSelf: 'flex-start',
         flexDirection: 'row',

@@ -32,6 +32,7 @@ import { useTranslation } from 'react-i18next';
 import { uiStyle, useTheme } from '../../../../components/ThemeContext';
 import { openLink } from '../../../../utils/browser';
 import {
+    groupConsecutiveHarborImages,
     replaceHarborEmojiImages,
     stripTrailingEmptyHarborHtml,
 } from '../../../../utils/harbor/harborHtml';
@@ -56,10 +57,25 @@ const harborEmojiModel = HTMLElementModel.fromCustomModel({
     contentModel: HTMLContentModel.textual,
 });
 
+const harborImageGridModel = HTMLElementModel.fromCustomModel({
+    tagName: 'harbor-image-grid',
+    contentModel: HTMLContentModel.block,
+});
+
+const harborGridImgModel = HTMLElementModel.fromCustomModel({
+    tagName: 'harbor-grid-img',
+    contentModel: HTMLContentModel.block,
+    isVoid: true,
+});
+
 const customHTMLElementModels = {
     'harbor-emoji': harborEmojiModel,
+    'harbor-grid-img': harborGridImgModel,
+    'harbor-image-grid': harborImageGridModel,
     iframe: iframeModel,
 };
+
+const HARBOR_IMAGE_GRID_COLUMNS = 3;
 
 const HarborIframeRenderer = ({ tnode }) => {
     const { theme } = useTheme();
@@ -236,8 +252,83 @@ const HarborImageRenderer = props => {
     );
 };
 
+const collectHarborGridImages = tnode => {
+    const images = [];
+    const walk = node => {
+        if (!node) {
+            return;
+        }
+        if (node.tagName === 'harbor-grid-img') {
+            const src = normalizeHtmlUrl(node.attributes?.src);
+            const href = normalizeHtmlUrl(node.attributes?.href) || src;
+            if (src) {
+                images.push({
+                    src,
+                    href,
+                    alt: node.attributes?.alt || '',
+                });
+            }
+            return;
+        }
+        node.children?.forEach(walk);
+    };
+    walk(tnode);
+    return images;
+};
+
+const HarborImageGridRenderer = ({ tnode }) => {
+    const { theme } = useTheme();
+    const rendererProps = useRendererProps('harbor-image-grid');
+    const contentWidth = Number(rendererProps?.contentWidth) || 0;
+    const onPressImage = rendererProps?.onPressImage;
+    const images = useMemo(() => collectHarborGridImages(tnode), [tnode]);
+    const gap = scale(4);
+    const cellSize =
+        contentWidth > 0
+            ? Math.floor(
+                (contentWidth - gap * (HARBOR_IMAGE_GRID_COLUMNS - 1)) /
+                HARBOR_IMAGE_GRID_COLUMNS,
+            )
+            : scale(100);
+
+    if (images.length === 0) {
+        return null;
+    }
+
+    return (
+        <View style={[styles.imageGrid, { gap }]}>
+            {images.map((image, index) => (
+                <Pressable
+                    key={`${image.href || image.src}-${index}`}
+                    accessibilityRole="imagebutton"
+                    accessibilityLabel={image.alt || undefined}
+                    onPress={() => onPressImage?.(image)}
+                    style={({ pressed }) => [
+                        styles.imageGridItem,
+                        {
+                            width: cellSize,
+                            height: cellSize,
+                            opacity: pressed ? 0.85 : 1,
+                        },
+                    ]}>
+                    <Image
+                        source={{ uri: image.src }}
+                        style={styles.imageGridImage}
+                        contentFit="cover"
+                        placeholder={theme.imagePlaceholder}
+                        placeholderContentFit="cover"
+                        transition={300}
+                        accessibilityLabel={image.alt || undefined}
+                    />
+                </Pressable>
+            ))}
+        </View>
+    );
+};
+
 const htmlRenderers = {
     'harbor-emoji': HarborEmojiRenderer,
+    'harbor-image-grid': HarborImageGridRenderer,
     iframe: HarborIframeRenderer,
     img: HarborImageRenderer,
 };
@@ -260,7 +351,9 @@ const HarborPostContent = memo(
         const { black, disabled, themeColor, tonal, white } = theme;
         const normalizedCooked = useMemo(() => {
             return stripTrailingEmptyHarborHtml(
-                replaceHarborEmojiImages(cooked || ''),
+                groupConsecutiveHarborImages(
+                    replaceHarborEmojiImages(cooked || ''),
+                ),
             );
         }, [cooked]);
         const requiresInteractiveFallback = useMemo(() => {
@@ -444,6 +537,25 @@ const HarborPostContent = memo(
                         const action = getHarborImagePressAction({
                             parentUrl,
                             sourceUrl,
+                            imageUrls,
+                        });
+                        if (action?.type === 'image') {
+                            trigger();
+                            onOpenImage(action.imageIndex);
+                            return;
+                        }
+                        if (action?.type === 'link') {
+                            trigger();
+                            onPressLink(action.url);
+                        }
+                    },
+                },
+                'harbor-image-grid': {
+                    contentWidth,
+                    onPressImage: ({ href, src }) => {
+                        const action = getHarborImagePressAction({
+                            parentUrl: href,
+                            sourceUrl: src,
                             imageUrls,
                         });
                         if (action?.type === 'image') {
