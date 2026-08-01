@@ -41,6 +41,7 @@ import {
     setHarborTopicNotificationLevel,
     toggleHarborPostReaction,
     unlikeHarborPost,
+    updateHarborAvatar,
     updateHarborProfile,
     updateHarborBookmark,
     validateActiveHarborSession,
@@ -266,6 +267,40 @@ describe('Harbor API 資料正規化', () => {
                 user_fields: {'1': '在讀'},
             },
             {signal: undefined},
+        );
+    });
+
+    it('上傳並套用 Harbor 頭像', async () => {
+        const signal = {aborted: false};
+        postSpy.mockResolvedValueOnce({data: {id: '91'}});
+        putSpy.mockResolvedValueOnce({data: {success: 'OK'}});
+
+        await expect(
+            updateHarborAvatar(
+                'ark user',
+                {
+                    uri: 'file:///avatar.jpeg',
+                    fileName: 'avatar.jpeg',
+                    mimeType: 'image/jpeg',
+                },
+                {signal},
+            ),
+        ).resolves.toEqual({success: 'OK'});
+        expect(postSpy).toHaveBeenCalledWith(
+            '/uploads.json',
+            expect.any(FormData),
+            {
+                headers: {'Content-Type': 'multipart/form-data'},
+                signal,
+            },
+        );
+        expect(putSpy).toHaveBeenCalledWith(
+            '/u/ark%20user/preferences/avatar/pick.json',
+            {
+                upload_id: 91,
+                type: 'uploaded',
+            },
+            {signal},
         );
     });
 

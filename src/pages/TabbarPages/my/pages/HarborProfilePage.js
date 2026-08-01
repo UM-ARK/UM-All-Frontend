@@ -13,6 +13,7 @@ import { isLiquidGlassSupported } from '@callstack/liquid-glass';
 import { useHeaderHeight } from '@react-navigation/elements';
 import { MenuView } from '@react-native-menu/menu';
 import { Image } from 'expo-image';
+import * as ImagePicker from 'expo-image-picker';
 import { useTranslation } from 'react-i18next';
 import Ionicons from "@react-native-vector-icons/ionicons";
 import { KeyboardAwareScrollView, KeyboardToolbar } from 'react-native-keyboard-controller';
@@ -33,6 +34,7 @@ import HarborBadgeIcon from '../components/HarborBadgeIcon';
 import {
     fetchHarborProfileMetadata,
     fetchHarborUserProfile,
+    updateHarborAvatar,
     updateHarborProfile,
 } from '../../../../utils/harbor/harborApi';
 import { openLink } from '../../../../utils/browser';
@@ -190,6 +192,7 @@ const HarborProfilePage = ({ navigation, route }) => {
     const [isLoadingMetadata, setIsLoadingMetadata] = React.useState(true);
     const [metadataError, setMetadataError] = React.useState(false);
     const [isSaving, setIsSaving] = React.useState(false);
+    const [isUpdatingAvatar, setIsUpdatingAvatar] = React.useState(false);
 
     React.useEffect(() => {
         navigation.setOptions({ headerTitle: t('Harbor 個人資料') });
@@ -304,7 +307,12 @@ const HarborProfilePage = ({ navigation, route }) => {
         workStatusField.options.length,
     );
     const canSave = Boolean(
-        isOwnProfile && profile.canEdit && hasChanges && !isSaving && username,
+        isOwnProfile &&
+        profile.canEdit &&
+        hasChanges &&
+        !isSaving &&
+        !isUpdatingAvatar &&
+        username,
     );
     const umerLabel = React.useMemo(
         () =>
@@ -424,6 +432,58 @@ const HarborProfilePage = ({ navigation, route }) => {
         }
     };
 
+    const handleAvatarPress = async () => {
+        trigger();
+        if (isSaving || isUpdatingAvatar) {
+            return;
+        }
+
+        try {
+            const permission =
+                await ImagePicker.getMediaLibraryPermissionsAsync();
+            let permissionStatus = permission.status;
+            if (permissionStatus !== 'granted') {
+                const result =
+                    await ImagePicker.requestMediaLibraryPermissionsAsync();
+                permissionStatus = result.status;
+            }
+            if (permissionStatus !== 'granted') {
+                Alert.alert(
+                    t('無法選擇圖片'),
+                    t('請允許相片權限後再更換頭像。'),
+                );
+                return;
+            }
+
+            const result = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ['images'],
+                allowsEditing: true,
+                aspect: [1, 1],
+                quality: 0.9,
+            });
+            if (result.canceled || !result.assets?.[0]) {
+                return;
+            }
+
+            const asset = result.assets[0];
+            setIsUpdatingAvatar(true);
+            await updateHarborAvatar(username, {
+                uri: asset.uri,
+                fileName: asset.fileName,
+                mimeType: asset.mimeType,
+            });
+            await refresh();
+        } catch (error) {
+            Alert.alert(
+                t('Harbor 操作失敗'),
+                t('無法更新 Harbor 頭像，請稍後再試。'),
+                [{ text: t('確定'), onPress: () => trigger() }],
+            );
+        } finally {
+            setIsUpdatingAvatar(false);
+        }
+    };
+
     const openHarborProfileSettings = () => {
         trigger();
         openLink({
@@ -513,6 +573,34 @@ const HarborProfilePage = ({ navigation, route }) => {
                                 />
                                 {umerLabel ? (
                                     <UmerAvatarBadge label={umerLabel} />
+                                ) : null}
+                                {isEditing && profile.canEdit ? (
+                                    <Pressable
+                                        accessibilityLabel={t('更換頭像')}
+                                        accessibilityRole="button"
+                                        disabled={isSaving || isUpdatingAvatar}
+                                        onPress={handleAvatarPress}
+                                        style={({ pressed }) => [
+                                            styles.avatarEditButton,
+                                            {
+                                                backgroundColor: theme.themeColor,
+                                                borderColor: theme.bg_color,
+                                            },
+                                            pressed && { opacity: 0.82 },
+                                        ]}>
+                                        {isUpdatingAvatar ? (
+                                            <ActivityIndicator
+                                                color={theme.trueWhite}
+                                                size="small"
+                                            />
+                                        ) : (
+                                            <Ionicons
+                                                color={theme.trueWhite}
+                                                name="pencil"
+                                                size={scale(15)}
+                                            />
+                                        )}
+                                    </Pressable>
                                 ) : null}
                             </View>
                             <View style={styles.nameRow}>
@@ -1111,6 +1199,17 @@ const styles = StyleSheet.create({
         width: scale(84),
         height: scale(84),
         borderRadius: scale(42),
+    },
+    avatarEditButton: {
+        position: 'absolute',
+        right: scale(-2),
+        bottom: scale(-2),
+        width: scale(30),
+        height: scale(30),
+        borderRadius: scale(15),
+        borderWidth: scale(2),
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     umerBadge: {
         position: 'absolute',

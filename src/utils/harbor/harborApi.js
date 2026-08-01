@@ -1920,6 +1920,49 @@ export async function updateHarborProfile(
     return response.data;
 }
 
+export async function updateHarborAvatar(
+    username,
+    image,
+    { signal } = {},
+) {
+    if (typeof username !== 'string' || !username.trim()) {
+        throw new TypeError('Invalid Harbor username');
+    }
+    if (!image || typeof image.uri !== 'string' || !image.uri.trim()) {
+        throw new TypeError('Invalid Harbor avatar image');
+    }
+
+    const data = new FormData();
+    data.append('upload_type', 'avatar');
+    data.append('synchronous', 'true');
+    data.append('file', {
+        uri: image.uri,
+        name: image.fileName || 'avatar.jpg',
+        type: image.mimeType || 'image/jpeg',
+    });
+
+    const uploadResponse = await harborApi.post('/uploads.json', data, {
+        headers: {'Content-Type': 'multipart/form-data'},
+        signal,
+    });
+    const upload = uploadResponse.data?.upload || uploadResponse.data;
+    const uploadId = toNumberOrNull(upload?.id);
+    if (!Number.isInteger(uploadId) || uploadId <= 0) {
+        throw new Error('Invalid Harbor avatar upload response');
+    }
+
+    const encodedUsername = encodeURIComponent(username.trim());
+    const response = await harborApi.put(
+        `/u/${encodedUsername}/preferences/avatar/pick.json`,
+        {
+            upload_id: uploadId,
+            type: 'uploaded',
+        },
+        { signal },
+    );
+    return response.data;
+}
+
 function flagTypeRequiresMessage(type) {
     if (type?.is_custom_flag) {
         return true;
