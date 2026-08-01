@@ -5,6 +5,7 @@ import {
     ARK_HARBOR,
     ARK_HARBOR_ABSOLUTE_URL,
     ARK_HARBOR_AVATAR_TEMPLATE,
+    ARK_HARBOR_UPLOAD_URL,
 } from '../pathMap';
 import {
     getHarborHtmlAttribute,
@@ -1376,6 +1377,11 @@ function normalizeProfile(
         : matchingPreviousUser?.groups || [];
 
     return {
+        id:
+            toNumberOrNull(currentUser.id) ??
+            toNumberOrNull(profile.id) ??
+            matchingPreviousUser?.id ??
+            null,
         displayName:
             currentUser.name ||
             profile.name ||
@@ -1814,6 +1820,18 @@ export async function fetchHarborProfileMetadata({ signal } = {}) {
     const workStatusField = userFields.find(
         field => field?.name === '工作狀態' || Number(field?.id) === 1,
     );
+    const settingsResponse = await harborApi.get('/site/settings.json', {
+        signal,
+    });
+    const settings = settingsResponse.data?.site_settings ||
+        settingsResponse.data;
+    const selectableAvatarValues = Array.isArray(
+        settings?.selectable_avatars,
+    )
+        ? settings.selectable_avatars
+        : typeof settings?.selectable_avatars === 'string'
+        ? settings.selectable_avatars.split('|')
+        : [];
 
     return {
         workStatusField: workStatusField
@@ -1829,6 +1847,24 @@ export async function fetchHarborProfileMetadata({ signal } = {}) {
                     : [],
             }
             : null,
+        selectableAvatars: selectableAvatarValues
+            .map(item => {
+                const value = typeof item === 'string'
+                    ? item.trim()
+                    : typeof item?.url === 'string'
+                    ? item.url.trim()
+                    : '';
+                return value
+                    ? {
+                        value,
+                        url: ARK_HARBOR_UPLOAD_URL(value),
+                    }
+                    : null;
+            })
+            .filter(Boolean),
+        canUploadCustomAvatar:
+            settings?.allow_uploaded_avatars !== false &&
+            settings?.selectable_avatars_mode !== 'no_one',
     };
 }
 
@@ -1914,7 +1950,7 @@ export async function updateHarborProfile(
 export async function updateHarborAvatar(
     username,
     image,
-    { signal } = {},
+    { signal, userId } = {},
 ) {
     if (typeof username !== 'string' || !username.trim()) {
         throw new TypeError('Invalid Harbor username');
@@ -1922,9 +1958,14 @@ export async function updateHarborAvatar(
     if (!image || typeof image.uri !== 'string' || !image.uri.trim()) {
         throw new TypeError('Invalid Harbor avatar image');
     }
+    const normalizedUserId = toNumberOrNull(userId);
+    if (!Number.isInteger(normalizedUserId) || normalizedUserId <= 0) {
+        throw new TypeError('Invalid Harbor user id');
+    }
 
     const data = new FormData();
     data.append('upload_type', 'avatar');
+    data.append('user_id', String(normalizedUserId));
     data.append('synchronous', 'true');
     data.append('file', {
         uri: image.uri,
@@ -1949,6 +1990,27 @@ export async function updateHarborAvatar(
             upload_id: uploadId,
             type: 'uploaded',
         },
+        { signal },
+    );
+    return response.data;
+}
+
+export async function selectHarborAvatar(
+    username,
+    avatarUrl,
+    { signal } = {},
+) {
+    if (typeof username !== 'string' || !username.trim()) {
+        throw new TypeError('Invalid Harbor username');
+    }
+    if (typeof avatarUrl !== 'string' || !avatarUrl.trim()) {
+        throw new TypeError('Invalid Harbor selectable avatar');
+    }
+
+    const encodedUsername = encodeURIComponent(username.trim());
+    const response = await harborApi.put(
+        `/u/${encodedUsername}/preferences/avatar/select.json`,
+        { url: avatarUrl.trim() },
         { signal },
     );
     return response.data;

@@ -51,6 +51,7 @@ const HarborSessionContext = createContext(null);
 
 function createFallbackUser() {
     return {
+        id: null,
         displayName: 'Harbor',
         username: '',
         role: 'Harbor 會員',

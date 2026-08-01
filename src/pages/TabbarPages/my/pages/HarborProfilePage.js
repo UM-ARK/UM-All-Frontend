@@ -30,10 +30,12 @@ import { scale, verticalScale } from 'react-native-size-matters';
 
 import { uiStyle, useTheme } from '../../../../components/ThemeContext';
 import { useHarborSession } from '../../../../contexts/HarborSessionContext';
+import HarborAvatarPickerModal from '../components/HarborAvatarPickerModal';
 import HarborBadgeIcon from '../components/HarborBadgeIcon';
 import {
     fetchHarborProfileMetadata,
     fetchHarborUserProfile,
+    selectHarborAvatar,
     updateHarborAvatar,
     updateHarborProfile,
 } from '../../../../utils/harbor/harborApi';
@@ -193,6 +195,11 @@ const HarborProfilePage = ({ navigation, route }) => {
     const [metadataError, setMetadataError] = React.useState(false);
     const [isSaving, setIsSaving] = React.useState(false);
     const [isUpdatingAvatar, setIsUpdatingAvatar] = React.useState(false);
+    const [isAvatarPickerVisible, setIsAvatarPickerVisible] =
+        React.useState(false);
+    const [selectableAvatars, setSelectableAvatars] = React.useState([]);
+    const [canUploadCustomAvatar, setCanUploadCustomAvatar] =
+        React.useState(false);
 
     React.useEffect(() => {
         navigation.setOptions({ headerTitle: t('Harbor 個人資料') });
@@ -264,12 +271,28 @@ const HarborProfilePage = ({ navigation, route }) => {
             .then(metadata => {
                 if (isActive) {
                     setWorkStatusField(metadata.workStatusField);
+                    setSelectableAvatars(metadata.selectableAvatars);
+                    setCanUploadCustomAvatar(metadata.canUploadCustomAvatar);
                     setMetadataError(!metadata.workStatusField);
+                    if (__DEV__) {
+                        console.log('[HarborProfile] avatar.metadata.loaded', {
+                            count: metadata.selectableAvatars.length,
+                            canUploadCustomAvatar:
+                                metadata.canUploadCustomAvatar,
+                        });
+                    }
                 }
             })
             .catch(error => {
                 if (isActive && error?.name !== 'CanceledError') {
                     setMetadataError(true);
+                    if (__DEV__) {
+                        console.warn('[HarborProfile] avatar.metadata.failed', {
+                            errorCode: error?.code || null,
+                            httpStatus: error?.response?.status || null,
+                            message: error?.message || String(error),
+                        });
+                    }
                 }
             })
             .finally(() => {
@@ -505,8 +528,16 @@ const HarborProfilePage = ({ navigation, route }) => {
         }
     };
 
-    const handleAvatarPress = async () => {
+    const handleAvatarPress = () => {
         trigger();
+        if (isSaving || isUpdatingAvatar) {
+            return;
+        }
+
+        setIsAvatarPickerVisible(true);
+    };
+
+    const handleUploadAvatar = async () => {
         if (isSaving || isUpdatingAvatar) {
             return;
         }
@@ -540,12 +571,38 @@ const HarborProfilePage = ({ navigation, route }) => {
 
             const asset = result.assets[0];
             setIsUpdatingAvatar(true);
-            await updateHarborAvatar(username, {
-                uri: asset.uri,
-                fileName: asset.fileName,
-                mimeType: asset.mimeType,
-            });
+            await updateHarborAvatar(
+                username,
+                {
+                    uri: asset.uri,
+                    fileName: asset.fileName,
+                    mimeType: asset.mimeType,
+                },
+                {userId: viewedUser?.id},
+            );
             await refresh();
+            setIsAvatarPickerVisible(false);
+        } catch (error) {
+            Alert.alert(
+                t('Harbor 操作失敗'),
+                t('無法更新 Harbor 頭像，請稍後再試。'),
+                [{ text: t('確定'), onPress: () => trigger() }],
+            );
+        } finally {
+            setIsUpdatingAvatar(false);
+        }
+    };
+
+    const handleSelectAvatar = async avatar => {
+        if (isUpdatingAvatar) {
+            return;
+        }
+
+        setIsUpdatingAvatar(true);
+        try {
+            await selectHarborAvatar(username, avatar.value);
+            await refresh();
+            setIsAvatarPickerVisible(false);
         } catch (error) {
             Alert.alert(
                 t('Harbor 操作失敗'),
@@ -1277,6 +1334,16 @@ const HarborProfilePage = ({ navigation, route }) => {
                 </Pressable>
             </KeyboardAwareScrollView>
             {isEditing ? <KeyboardToolbar /> : null}
+            <HarborAvatarPickerModal
+                avatars={selectableAvatars}
+                canUpload={canUploadCustomAvatar}
+                isLoading={isLoadingMetadata}
+                isSubmitting={isUpdatingAvatar}
+                onClose={() => setIsAvatarPickerVisible(false)}
+                onSelect={handleSelectAvatar}
+                onUpload={handleUploadAvatar}
+                visible={isAvatarPickerVisible}
+            />
         </View>
     );
 };

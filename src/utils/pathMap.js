@@ -25,6 +25,7 @@ export const MARKDOWN_BASIC_SYNTAX_URL = 'https://markdown.com.cn/basic-syntax/h
 export const ARK_WEB_CLUB_SIGNIN = BASE_HOST + '/clubsignin';
 
 export const ARK_HARBOR = 'https://harbor.umall.one';
+export const ARK_HARBOR_ASSET_HOST = 'https://assert.umall.one';
 export const ARK_HARBOR_LOGIN = ARK_HARBOR + '/login';
 export const ARK_HARBOR_TOP = ARK_HARBOR + '/top.json';
 export const ARK_HARBOR_LATEST = ARK_HARBOR + '/latest.json';
@@ -57,6 +58,16 @@ export function ARK_HARBOR_ABSOLUTE_URL(url) {
         return `https:${url}`;
     }
     return ARK_HARBOR + (url.startsWith('/') ? url : `/${url}`);
+}
+
+export function ARK_HARBOR_UPLOAD_URL(url) {
+    const absoluteUrl = ARK_HARBOR_ABSOLUTE_URL(url);
+    const r2ObjectPath = absoluteUrl.match(
+        /^https?:\/\/[^/]+\.r2\.cloudflarestorage\.com(\/.*)$/i,
+    );
+    return r2ObjectPath
+        ? ARK_HARBOR_ASSET_HOST + r2ObjectPath[1]
+        : absoluteUrl;
 }
 
 export function ARK_HARBOR_AVATAR_TEMPLATE(avatarTemplate, size = 96) {

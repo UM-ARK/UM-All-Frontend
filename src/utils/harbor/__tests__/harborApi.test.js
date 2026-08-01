@@ -36,6 +36,7 @@ import {
     markHarborNotificationRead,
     normalizeHarborFlagTypes,
     saveHarborTopicTimings,
+    selectHarborAvatar,
     setActiveHarborCredentials,
     setHarborCredentialRejectedHandler,
     setHarborTopicNotificationLevel,
@@ -49,7 +50,17 @@ import {
 
 jest.mock('../../pathMap', () => ({
     ARK_HARBOR: 'https://harbor.example.com',
+    ARK_HARBOR_ABSOLUTE_URL: url =>
+        url.startsWith('//')
+            ? `https:${url}`
+            : `https://harbor.example.com${url}`,
     ARK_HARBOR_AVATAR_TEMPLATE: template => template,
+    ARK_HARBOR_UPLOAD_URL: url =>
+        url.includes('.r2.cloudflarestorage.com')
+            ? `https://assert.example.com${url.replace(/^\/\/[^/]+/, '')}`
+            : url.startsWith('//')
+            ? `https:${url}`
+            : `https://harbor.example.com${url}`,
 }));
 
 describe('Harbor API 資料正規化', () => {
@@ -182,6 +193,7 @@ describe('Harbor API 資料正規化', () => {
             .mockResolvedValueOnce({
                 data: {
                     current_user: {
+                        id: 7,
                         username: 'ark-user',
                     },
                 },
@@ -213,6 +225,7 @@ describe('Harbor API 資料正規化', () => {
         });
 
         expect(result.isUMer).toBe(true);
+        expect(result.id).toBe(7);
         expect(result.profile).toEqual({
             bio: 'Harbor 簡介',
             location: '澳門',
@@ -239,6 +252,14 @@ describe('Harbor API 資料正規化', () => {
                 ],
             },
         });
+        getSpy.mockResolvedValueOnce({
+            data: {
+                allow_uploaded_avatars: true,
+                selectable_avatars:
+                    '//harbor.example.r2.cloudflarestorage.com/original/avatar-1.png|/uploads/avatar-2.png',
+                selectable_avatars_mode: 'everyone',
+            },
+        });
         putSpy.mockResolvedValueOnce({data: {success: 'OK'}});
 
         await expect(fetchHarborProfileMetadata()).resolves.toEqual({
@@ -248,6 +269,17 @@ describe('Harbor API 資料正規化', () => {
                 required: true,
                 options: ['在讀', '在職'],
             },
+            selectableAvatars: [
+                {
+                    value: '//harbor.example.r2.cloudflarestorage.com/original/avatar-1.png',
+                    url: 'https://assert.example.com/original/avatar-1.png',
+                },
+                {
+                    value: '/uploads/avatar-2.png',
+                    url: 'https://harbor.example.com/uploads/avatar-2.png',
+                },
+            ],
+            canUploadCustomAvatar: true,
         });
         await expect(
             updateHarborProfile('ark user', {
@@ -283,7 +315,7 @@ describe('Harbor API 資料正規化', () => {
                     fileName: 'avatar.jpeg',
                     mimeType: 'image/jpeg',
                 },
-                {signal},
+                {signal, userId: 7},
             ),
         ).resolves.toEqual({success: 'OK'});
         expect(postSpy).toHaveBeenCalledWith(
@@ -294,12 +326,37 @@ describe('Harbor API 資料正規化', () => {
                 signal,
             },
         );
+        expect(Array.from(postSpy.mock.calls[0][1].entries())).toEqual(
+            expect.arrayContaining([
+                ['upload_type', 'avatar'],
+                ['user_id', '7'],
+                ['synchronous', 'true'],
+            ]),
+        );
         expect(putSpy).toHaveBeenCalledWith(
             '/u/ark%20user/preferences/avatar/pick.json',
             {
                 upload_id: 91,
                 type: 'uploaded',
             },
+            {signal},
+        );
+    });
+
+    it('套用站點提供的 Harbor 頭像', async () => {
+        const signal = {aborted: false};
+        putSpy.mockResolvedValueOnce({data: {success: 'OK'}});
+
+        await expect(
+            selectHarborAvatar(
+                'ark user',
+                '//cdn.example.com/avatar.png',
+                {signal},
+            ),
+        ).resolves.toEqual({success: 'OK'});
+        expect(putSpy).toHaveBeenCalledWith(
+            '/u/ark%20user/preferences/avatar/select.json',
+            {url: '//cdn.example.com/avatar.png'},
             {signal},
         );
     });
