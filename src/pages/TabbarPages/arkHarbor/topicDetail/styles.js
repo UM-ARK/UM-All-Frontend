@@ -243,6 +243,19 @@ const styles = StyleSheet.create({
         maxHeight: verticalScale(132),
         overflow: 'hidden',
     },
+    firstPostExpandButton: {
+        minHeight: verticalScale(34),
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingTop: verticalScale(4),
+    },
+    firstPostExpandText: {
+        ...uiStyle.defaultText,
+        fontSize: scale(12),
+        fontWeight: '600',
+        marginLeft: scale(2),
+    },
     firstPostPlainTagRow: {
         marginTop: verticalScale(4),
     },

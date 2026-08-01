@@ -281,7 +281,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
     );
     const isFirstPostLong = firstPostBodyHeight > firstPostLongThreshold;
     const showFirstPostNavigation =
-        isFirstPostLong && currentPostNumber === 1;
+        isFirstPostLong && !isFirstPostCollapsed && currentPostNumber === 1;
 
     useEffect(() => {
         setFirstPostBodyHeight(0);
@@ -775,6 +775,9 @@ const HarborTopicDetail = ({ route, navigation }) => {
                         onFirstPostBodyLayout={
                             isFirstPost ? handleFirstPostBodyLayout : undefined
                         }
+                        onExpandFirstPost={
+                            isFirstPost ? toggleFirstPostCollapsed : undefined
+                        }
                         onPressReply={scrollToPost}
                         onPressShare={sharePost}
                         onPressTag={openTag}
@@ -871,6 +874,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
             t,
             themeColor,
             theme.disabled,
+            toggleFirstPostCollapsed,
             togglePostLike,
             topic,
             topicId,

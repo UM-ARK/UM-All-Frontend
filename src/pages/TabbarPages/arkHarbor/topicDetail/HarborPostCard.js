@@ -196,6 +196,7 @@ const HarborPostCard = memo(
         onPressOpenNotifications,
         onPressOpenOriginal,
         onFirstPostBodyLayout,
+        onExpandFirstPost,
         onPressReply,
         onPressShare,
         onPressTag,
@@ -919,6 +920,33 @@ const HarborPostCard = memo(
                                 </HarborPostContent>
                             </View>
                         </View>
+
+                        {isFirstPostCollapsed ? (
+                            <Pressable
+                                accessibilityRole="button"
+                                accessibilityLabel={t('展開正文')}
+                                onPress={() => {
+                                    trigger();
+                                    onExpandFirstPost?.();
+                                }}
+                                style={({ pressed }) => [
+                                    styles.firstPostExpandButton,
+                                    pressed ? styles.pressedLink : null,
+                                ]}>
+                                <MaterialCommunityIcons
+                                    name="chevron-down"
+                                    size={scale(18)}
+                                    color={themeColor}
+                                />
+                                <Text
+                                    style={[
+                                        styles.firstPostExpandText,
+                                        { color: themeColor },
+                                    ]}>
+                                    {t('展開正文')}
+                                </Text>
+                            </Pressable>
+                        ) : null}
 
                         {hasTopicTags ? (
                             <View
