@@ -284,9 +284,7 @@ const HarborStickyToolbar = ({
                                 backgroundColor: theme.white,
                                 borderColor: theme.themeColorUltraLight,
                             },
-                            pressed && {
-                                backgroundColor: theme.tonal.primary15,
-                            },
+                            pressed && { opacity: 0.85 },
                         ]}>
                         <MaterialCommunityIcons
                             name="magnify"
