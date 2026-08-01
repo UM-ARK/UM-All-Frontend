@@ -197,6 +197,7 @@ const HarborProfilePage = ({ navigation, route }) => {
     const [isUpdatingAvatar, setIsUpdatingAvatar] = React.useState(false);
     const [isAvatarPickerVisible, setIsAvatarPickerVisible] =
         React.useState(false);
+    const [pendingAvatar, setPendingAvatar] = React.useState(null);
     const [selectableAvatars, setSelectableAvatars] = React.useState([]);
     const [canUploadCustomAvatar, setCanUploadCustomAvatar] =
         React.useState(false);
@@ -534,6 +535,7 @@ const HarborProfilePage = ({ navigation, route }) => {
             return;
         }
 
+        setPendingAvatar(null);
         setIsAvatarPickerVisible(true);
     };
 
@@ -570,39 +572,54 @@ const HarborProfilePage = ({ navigation, route }) => {
             }
 
             const asset = result.assets[0];
-            setIsUpdatingAvatar(true);
-            await updateHarborAvatar(
-                username,
-                {
+            setPendingAvatar({
+                type: 'upload',
+                url: asset.uri,
+                image: {
                     uri: asset.uri,
                     fileName: asset.fileName,
                     mimeType: asset.mimeType,
                 },
-                {userId: viewedUser?.id},
-            );
-            await refresh();
-            setIsAvatarPickerVisible(false);
+            });
         } catch (error) {
             Alert.alert(
                 t('Harbor 操作失敗'),
                 t('無法更新 Harbor 頭像，請稍後再試。'),
                 [{ text: t('確定'), onPress: () => trigger() }],
             );
-        } finally {
-            setIsUpdatingAvatar(false);
         }
     };
 
-    const handleSelectAvatar = async avatar => {
-        if (isUpdatingAvatar) {
+    const handleSelectAvatar = avatar => {
+        setPendingAvatar({
+            type: 'selectable',
+            ...avatar,
+        });
+    };
+
+    const handleCloseAvatarPicker = () => {
+        setPendingAvatar(null);
+        setIsAvatarPickerVisible(false);
+    };
+
+    const handleConfirmAvatar = async () => {
+        if (isUpdatingAvatar || !pendingAvatar) {
             return;
         }
 
         setIsUpdatingAvatar(true);
         try {
-            await selectHarborAvatar(username, avatar.value);
+            if (pendingAvatar.type === 'upload') {
+                await updateHarborAvatar(
+                    username,
+                    pendingAvatar.image,
+                    {userId: viewedUser?.id},
+                );
+            } else {
+                await selectHarborAvatar(username, pendingAvatar.value);
+            }
             await refresh();
-            setIsAvatarPickerVisible(false);
+            handleCloseAvatarPicker();
         } catch (error) {
             Alert.alert(
                 t('Harbor 操作失敗'),
@@ -1339,9 +1356,11 @@ const HarborProfilePage = ({ navigation, route }) => {
                 canUpload={canUploadCustomAvatar}
                 isLoading={isLoadingMetadata}
                 isSubmitting={isUpdatingAvatar}
-                onClose={() => setIsAvatarPickerVisible(false)}
+                onClose={handleCloseAvatarPicker}
+                onConfirm={handleConfirmAvatar}
                 onSelect={handleSelectAvatar}
                 onUpload={handleUploadAvatar}
+                selectedAvatar={pendingAvatar}
                 visible={isAvatarPickerVisible}
             />
         </View>

@@ -23,8 +23,10 @@ const HarborAvatarPickerModal = ({
     isLoading,
     isSubmitting,
     onClose,
+    onConfirm,
     onSelect,
     onUpload,
+    selectedAvatar,
     visible,
 }) => {
     const {theme} = useTheme();
@@ -116,41 +118,70 @@ const HarborAvatarPickerModal = ({
                             data={avatars}
                             keyExtractor={item => item.value}
                             numColumns={4}
-                            renderItem={({item}) => (
-                                <Pressable
-                                    accessibilityLabel={t('選擇這個頭像')}
-                                    accessibilityRole="button"
-                                    disabled={isSubmitting}
-                                    onPress={() => {
-                                        trigger();
-                                        onSelect(item);
-                                    }}
-                                    style={({pressed}) => [
-                                        styles.avatarCell,
-                                        pressed && {opacity: 0.72},
-                                    ]}>
-                                    <Image
-                                        contentFit="cover"
-                                        onError={event => {
-                                            if (__DEV__) {
-                                                console.warn(
-                                                    '[HarborProfile] avatar.image.failed',
-                                                    {
-                                                        fileName:
-                                                            item.url
-                                                                .split('/')
-                                                                .pop() || null,
-                                                        message:
-                                                            event?.error || null,
-                                                    },
-                                                );
-                                            }
+                            renderItem={({item}) => {
+                                const selected =
+                                    selectedAvatar?.type === 'selectable' &&
+                                    selectedAvatar.value === item.value;
+                                return (
+                                    <Pressable
+                                        accessibilityLabel={t('選擇這個頭像')}
+                                        accessibilityRole="button"
+                                        accessibilityState={{selected}}
+                                        disabled={isSubmitting}
+                                        onPress={() => {
+                                            trigger();
+                                            onSelect(item);
                                         }}
-                                        source={{uri: item.url}}
-                                        style={styles.avatar}
-                                    />
-                                </Pressable>
-                            )}
+                                        style={({pressed}) => [
+                                            styles.avatarCell,
+                                            pressed && {opacity: 0.72},
+                                        ]}>
+                                        <Image
+                                            contentFit="cover"
+                                            onError={event => {
+                                                if (__DEV__) {
+                                                    console.warn(
+                                                        '[HarborProfile] avatar.image.failed',
+                                                        {
+                                                            fileName:
+                                                                item.url
+                                                                    .split('/')
+                                                                    .pop() || null,
+                                                            message:
+                                                                event?.error || null,
+                                                        },
+                                                    );
+                                                }
+                                            }}
+                                            source={{uri: item.url}}
+                                            style={[
+                                                styles.avatar,
+                                                selected && {
+                                                    borderColor: theme.themeColor,
+                                                },
+                                                selected &&
+                                                    styles.selectedAvatar,
+                                            ]}
+                                        />
+                                        {selected ? (
+                                            <View
+                                                style={[
+                                                    styles.selectedBadge,
+                                                    {
+                                                        backgroundColor:
+                                                            theme.themeColor,
+                                                    },
+                                                ]}>
+                                                <Ionicons
+                                                    color={theme.trueWhite}
+                                                    name="checkmark"
+                                                    size={scale(13)}
+                                                />
+                                            </View>
+                                        ) : null}
+                                    </Pressable>
+                                );
+                            }}
                             showsVerticalScrollIndicator={false}
                             style={styles.avatarGrid}
                             ListEmptyComponent={
@@ -167,12 +198,12 @@ const HarborAvatarPickerModal = ({
                         />
                     )}
 
-                    {canUpload ? (
-                        <View
-                            style={[
-                                styles.footer,
-                                {borderTopColor: theme.themeColorUltraLight},
-                            ]}>
+                    <View
+                        style={[
+                            styles.footer,
+                            {borderTopColor: theme.themeColorUltraLight},
+                        ]}>
+                        {canUpload ? (
                             <Pressable
                                 accessibilityRole="button"
                                 disabled={isSubmitting}
@@ -185,10 +216,11 @@ const HarborAvatarPickerModal = ({
                                     {backgroundColor: theme.tonal.primary08},
                                     pressed && {opacity: 0.78},
                                 ]}>
-                                {isSubmitting ? (
-                                    <ActivityIndicator
-                                        color={theme.themeColor}
-                                        size="small"
+                                {selectedAvatar?.type === 'upload' ? (
+                                    <Image
+                                        contentFit="cover"
+                                        source={{uri: selectedAvatar.url}}
+                                        style={styles.uploadPreview}
                                     />
                                 ) : (
                                     <Ionicons
@@ -202,13 +234,71 @@ const HarborAvatarPickerModal = ({
                                         styles.uploadText,
                                         {color: theme.themeColor},
                                     ]}>
-                                    {isSubmitting
-                                        ? t('正在更新頭像…')
+                                    {selectedAvatar?.type === 'upload'
+                                        ? t('已選擇自訂頭像')
                                         : t('從相簿上傳自訂頭像')}
                                 </Text>
                             </Pressable>
+                        ) : null}
+                        <View style={styles.actionRow}>
+                            <Pressable
+                                accessibilityRole="button"
+                                disabled={isSubmitting}
+                                onPress={handleClose}
+                                style={({pressed}) => [
+                                    styles.actionButton,
+                                    {
+                                        backgroundColor:
+                                            theme.tonal.primary08,
+                                    },
+                                    pressed && {opacity: 0.78},
+                                ]}>
+                                <Text
+                                    style={[
+                                        styles.actionText,
+                                        {color: theme.black.second},
+                                    ]}>
+                                    {t('取消')}
+                                </Text>
+                            </Pressable>
+                            <Pressable
+                                accessibilityRole="button"
+                                disabled={
+                                    !selectedAvatar ||
+                                    isLoading ||
+                                    isSubmitting
+                                }
+                                onPress={() => {
+                                    trigger();
+                                    onConfirm();
+                                }}
+                                style={({pressed}) => [
+                                    styles.actionButton,
+                                    {
+                                        backgroundColor:
+                                            selectedAvatar && !isLoading
+                                                ? theme.themeColor
+                                                : theme.disabled,
+                                    },
+                                    pressed && {opacity: 0.78},
+                                ]}>
+                                {isSubmitting ? (
+                                    <ActivityIndicator
+                                        color={theme.trueWhite}
+                                        size="small"
+                                    />
+                                ) : (
+                                    <Text
+                                        style={[
+                                            styles.actionText,
+                                            {color: theme.trueWhite},
+                                        ]}>
+                                        {t('確定')}
+                                    </Text>
+                                )}
+                            </Pressable>
                         </View>
-                    ) : null}
+                    </View>
                 </View>
             </View>
         </Modal>
@@ -271,6 +361,19 @@ const styles = StyleSheet.create({
         height: scale(62),
         borderRadius: scale(31),
     },
+    selectedAvatar: {
+        borderWidth: scale(3),
+    },
+    selectedBadge: {
+        position: 'absolute',
+        right: scale(6),
+        bottom: verticalScale(5),
+        width: scale(20),
+        height: scale(20),
+        borderRadius: scale(10),
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
     loadingState: {
         flex: 1,
         alignItems: 'center',
@@ -290,6 +393,7 @@ const styles = StyleSheet.create({
     },
     footer: {
         borderTopWidth: StyleSheet.hairlineWidth,
+        gap: verticalScale(10),
         paddingHorizontal: scale(14),
         paddingVertical: verticalScale(12),
     },
@@ -302,6 +406,27 @@ const styles = StyleSheet.create({
         gap: scale(8),
     },
     uploadText: {
+        ...uiStyle.defaultText,
+        fontSize: scale(11),
+        fontWeight: '700',
+    },
+    uploadPreview: {
+        width: scale(28),
+        height: scale(28),
+        borderRadius: scale(14),
+    },
+    actionRow: {
+        flexDirection: 'row',
+        gap: scale(10),
+    },
+    actionButton: {
+        flex: 1,
+        minHeight: verticalScale(40),
+        borderRadius: scale(12),
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    actionText: {
         ...uiStyle.defaultText,
         fontSize: scale(11),
         fontWeight: '700',
