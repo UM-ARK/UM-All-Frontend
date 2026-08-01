@@ -44,7 +44,12 @@ const HarborActivityPage = ({
     const kind = embeddedKind || route?.params?.kind || 'all';
     const isTopicsKind = kind === 'topics';
     const title = embeddedTitle || route?.params?.title || t('所有活動');
-    const username = user?.username || '';
+    // 可從 route 指定用戶名（個人資料頁查看他人活動）；否則用當前登入用戶
+    const username =
+        (typeof route?.params?.username === 'string' &&
+            route.params.username.trim()) ||
+        user?.username ||
+        '';
     const controllerRef = React.useRef(null);
     const loadingMoreRef = React.useRef(false);
     const [items, setItems] = React.useState([]);

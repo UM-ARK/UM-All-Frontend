@@ -59,7 +59,6 @@ const HarborProfileOverview = ({
                 if (item.key === 'postsCreated') {
                     return {
                         ...item,
-                        label: '評論',
                         onPress: () =>
                             navigation.navigate('HarborActivity', {
                                 kind: 'replies',

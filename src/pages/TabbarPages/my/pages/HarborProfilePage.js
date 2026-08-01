@@ -340,6 +340,79 @@ const HarborProfilePage = ({ navigation, route }) => {
     const unavailableSections = viewedUser?.unavailableProfileSections || [];
     const isSummaryVisible = !unavailableSections.includes('summary');
     const areBadgesVisible = !unavailableSections.includes('badges');
+    const communityStatsItems = React.useMemo(() => {
+        const activityUsername = viewedUser?.username || username;
+        return [
+            ...(viewedUser?.contributions || []),
+            ...(viewedUser?.stats || []),
+        ]
+            .filter(item => item.key !== 'topicsRead')
+            .map(item => {
+                if (item.key === 'postsCreated') {
+                    return {
+                        ...item,
+                        label: '評論',
+                        onPress:
+                            isSummaryVisible && activityUsername
+                                ? () =>
+                                      navigation.navigate('HarborActivity', {
+                                          kind: 'replies',
+                                          title: t('評論'),
+                                          username: activityUsername,
+                                      })
+                                : undefined,
+                    };
+                }
+                if (item.key === 'topicsCreated') {
+                    return {
+                        ...item,
+                        onPress:
+                            isSummaryVisible && activityUsername
+                                ? () =>
+                                      navigation.navigate('HarborActivity', {
+                                          kind: 'topics',
+                                          title: t('建立話題'),
+                                          username: activityUsername,
+                                      })
+                                : undefined,
+                    };
+                }
+                if (item.key === 'likesReceived') {
+                    return {
+                        ...item,
+                        onPress:
+                            isSummaryVisible && activityUsername
+                                ? () =>
+                                      navigation.navigate('HarborActivity', {
+                                          kind: 'likesReceived',
+                                          title: t('收到的讚'),
+                                          username: activityUsername,
+                                      })
+                                : undefined,
+                    };
+                }
+                if (item.key === 'badges') {
+                    return {
+                        ...item,
+                        onPress:
+                            areBadgesVisible && isOwnProfile
+                                ? () => navigation.navigate('HarborBadges')
+                                : undefined,
+                    };
+                }
+                return item;
+            });
+    }, [
+        areBadgesVisible,
+        isOwnProfile,
+        isSummaryVisible,
+        navigation,
+        t,
+        username,
+        viewedUser?.contributions,
+        viewedUser?.stats,
+        viewedUser?.username,
+    ]);
     const publicInfoItems = [
         {
             key: 'bio',
@@ -816,31 +889,70 @@ const HarborProfilePage = ({ navigation, route }) => {
                                             styles.metrics,
                                             { backgroundColor: theme.white },
                                         ]}>
-                                        {[
-                                            ...(viewedUser?.contributions || []),
-                                            ...(viewedUser?.stats || []),
-                                        ].map(item => (
-                                            <View
-                                                key={item.key}
-                                                style={styles.metric}>
-                                                <Text
-                                                    style={[
-                                                        styles.metricValue,
-                                                        { color: theme.black.main },
-                                                    ]}>
-                                                    {isSummaryVisible
-                                                        ? item.value
-                                                        : '—'}
-                                                </Text>
-                                                <Text
-                                                    style={[
-                                                        styles.metricLabel,
-                                                        { color: theme.black.third },
-                                                    ]}>
-                                                    {t(item.label)}
-                                                </Text>
-                                            </View>
-                                        ))}
+                                        {communityStatsItems.map(item => {
+                                            const content = (
+                                                <>
+                                                    <Text
+                                                        style={[
+                                                            styles.metricValue,
+                                                            {
+                                                                color: theme
+                                                                    .black.main,
+                                                            },
+                                                        ]}>
+                                                        {isSummaryVisible
+                                                            ? item.value
+                                                            : '—'}
+                                                    </Text>
+                                                    <Text
+                                                        style={[
+                                                            styles.metricLabel,
+                                                            {
+                                                                color: theme
+                                                                    .black
+                                                                    .third,
+                                                            },
+                                                        ]}>
+                                                        {t(item.label)}
+                                                    </Text>
+                                                </>
+                                            );
+                                            if (item.onPress) {
+                                                return (
+                                                    <Pressable
+                                                        key={item.key}
+                                                        accessibilityRole="button"
+                                                        accessibilityLabel={`${
+                                                            isSummaryVisible
+                                                                ? item.value
+                                                                : '—'
+                                                        } ${t(item.label)}`}
+                                                        onPress={() => {
+                                                            trigger();
+                                                            item.onPress();
+                                                        }}
+                                                        style={({
+                                                            pressed,
+                                                        }) => [
+                                                            styles.metric,
+                                                            pressed && {
+                                                                backgroundColor:
+                                                                    theme.tonal
+                                                                        .primary08,
+                                                            },
+                                                        ]}>
+                                                        {content}
+                                                    </Pressable>
+                                                );
+                                            }
+                                            return (
+                                                <View
+                                                    key={item.key}
+                                                    style={styles.metric}>
+                                                    {content}
+                                                </View>
+                                            );
+                                        })}
                                     </View>
                                     {!isSummaryVisible ? (
                                         <Text
@@ -1355,6 +1467,7 @@ const styles = StyleSheet.create({
         minHeight: verticalScale(68),
         alignItems: 'center',
         justifyContent: 'center',
+        borderRadius: scale(8),
         paddingHorizontal: scale(3),
         paddingVertical: verticalScale(7),
     },

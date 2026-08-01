@@ -424,7 +424,6 @@ describe('Harbor API 資料正規化', () => {
             stats: [
                 {key: 'daysVisited', value: '90'},
                 {key: 'readTime', value: '120'},
-                {key: 'topicsRead', value: '45'},
             ],
             badges: [{id: 'badge-1'}],
         };
@@ -462,7 +461,6 @@ describe('Harbor API 資料正規化', () => {
         expect(result.stats.map(item => item.value)).toEqual([
             '90',
             '120',
-            '45',
         ]);
         expect(result.badges).toEqual(previousUser.badges);
         expect(result.partialProfile).toBe(true);
@@ -509,7 +507,6 @@ describe('Harbor API 資料正規化', () => {
             '—',
         ]);
         expect(result.stats.map(item => item.value)).toEqual([
-            '—',
             '—',
             '—',
         ]);

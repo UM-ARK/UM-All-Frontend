@@ -1454,7 +1454,7 @@ function normalizeProfile(
                     'postsCreated',
                     summary.post_count,
                 ),
-                label: '發布貼文',
+                label: '評論',
             },
             {
                 key: 'likesReceived',
@@ -1491,15 +1491,6 @@ function normalizeProfile(
                         Math.max(0, Math.round(Number(value || 0) / 60)),
                 ),
                 label: '閱讀時間（分鐘）',
-            },
-            {
-                key: 'topicsRead',
-                value: summaryMetric(
-                    'stats',
-                    'topicsRead',
-                    summary.topics_entered,
-                ),
-                label: '已讀話題',
             },
         ],
         badges,
