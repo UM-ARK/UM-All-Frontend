@@ -10,9 +10,9 @@ import {
     clearHarborSearchHistory,
     countHarborSearchContentItems,
     filterHarborSearchItems,
+    getAlternateHarborSearchQueries,
     getHarborSearchAfterDate,
     getHarborSearchHistory,
-    getSimplifiedHarborSearchQuery,
     mergeHarborSearchItems,
     removeHarborSearchHistory,
     sanitizeHarborSearchHistory,
@@ -65,8 +65,23 @@ describe('Harbor 搜尋工具', () => {
         expect(canRunHarborKeywordSearch('ab')).toBe(true);
     });
 
-    it('將繁體搜尋字轉為簡體版本', () => {
-        expect(getSimplifiedHarborSearchQuery('課程評價')).toBe('课程评价');
+    it('為繁體或簡體搜尋字產生另一種中文版本', () => {
+        expect(getAlternateHarborSearchQueries('課程評價')).toEqual([
+            '课程评价',
+        ]);
+        expect(getAlternateHarborSearchQueries('新帖子测试')).toEqual([
+            '新帖子測試',
+        ]);
+        expect(getAlternateHarborSearchQueries('课程評價')).toEqual([
+            '课程评价',
+            '課程評價',
+        ]);
+    });
+
+    it('純英文或數字不執行中文版本補查', () => {
+        expect(getAlternateHarborSearchQueries('Harbor')).toEqual([]);
+        expect(getAlternateHarborSearchQueries('12345')).toEqual([]);
+        expect(getAlternateHarborSearchQueries('Harbor 123')).toEqual([]);
     });
 
     it('原文結果優先並按貼文或話題 ID 合併去重', () => {

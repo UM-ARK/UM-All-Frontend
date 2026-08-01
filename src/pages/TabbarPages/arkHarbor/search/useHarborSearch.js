@@ -21,9 +21,9 @@ import {
     canRunHarborKeywordSearch,
     clearHarborSearchHistory,
     countHarborSearchContentItems,
+    getAlternateHarborSearchQueries,
     getHarborSearchAfterDate,
     getHarborSearchHistory,
-    getSimplifiedHarborSearchQuery,
     HARBOR_SEARCH_FALLBACK_THRESHOLD,
     mergeHarborSearchItems,
     removeHarborSearchHistory,
@@ -47,7 +47,7 @@ const getCachedSearchResult = (cache, cacheKey) => {
 
 const fetchSearchWithFallback = async ({
     searchQuery,
-    convertedSearchQuery,
+    alternateSearchQueries,
     userQuery,
     page,
     signal,
@@ -55,7 +55,7 @@ const fetchSearchWithFallback = async ({
 }) => {
     const cacheKey = JSON.stringify([
         searchQuery,
-        convertedSearchQuery,
+        alternateSearchQueries,
         userQuery,
         page,
     ]);
@@ -73,33 +73,49 @@ const fetchSearchWithFallback = async ({
     let result = originalResult;
 
     if (
-        convertedSearchQuery &&
-        convertedSearchQuery !== searchQuery &&
+        alternateSearchQueries.length > 0 &&
         countHarborSearchContentItems(originalResult.items) <
             HARBOR_SEARCH_FALLBACK_THRESHOLD
     ) {
-        try {
-            const convertedResult = await fetchHarborSearch({
-                query: convertedSearchQuery,
-                userQuery: '',
-                page,
-                signal,
-            });
-            const hasMore = originalResult.hasMore || convertedResult.hasMore;
-            result = {
-                ...originalResult,
-                items: mergeHarborSearchItems(
-                    originalResult.items,
-                    convertedResult.items,
-                ),
-                hasMore,
-                nextPage: hasMore ? page + 1 : null,
-            };
-        } catch (error) {
-            if (signal?.aborted || error?.code === 'ERR_CANCELED') {
-                throw error;
+        let mergedItems = originalResult.items;
+        let hasMore = originalResult.hasMore;
+
+        for (const alternateSearchQuery of alternateSearchQueries) {
+            if (
+                countHarborSearchContentItems(mergedItems) >=
+                HARBOR_SEARCH_FALLBACK_THRESHOLD
+            ) {
+                break;
             }
+            let alternateResult;
+
+            try {
+                alternateResult = await fetchHarborSearch({
+                    query: alternateSearchQuery,
+                    userQuery: '',
+                    page,
+                    signal,
+                });
+            } catch (error) {
+                if (signal?.aborted || error?.code === 'ERR_CANCELED') {
+                    throw error;
+                }
+                continue;
+            }
+
+            mergedItems = mergeHarborSearchItems(
+                mergedItems,
+                alternateResult.items,
+            );
+            hasMore = hasMore || alternateResult.hasMore;
         }
+
+        result = {
+            ...originalResult,
+            items: mergedItems,
+            hasMore,
+            nextPage: hasMore ? page + 1 : null,
+        };
     }
 
     cache.set(cacheKey, {
@@ -231,21 +247,21 @@ const useHarborSearch = ({initialQuery, onSearchStart}) => {
                     after: getHarborSearchAfterDate(timeRange),
                     order: normalizedOrder,
                 });
-            const convertedUserQuery = append
-                ? activeSearchRef.current?.convertedUserQuery
-                : getSimplifiedHarborSearchQuery(normalizedQuery);
-            const convertedSearchQuery = append
-                ? activeSearchRef.current?.convertedSearchQuery
-                : convertedUserQuery && convertedUserQuery !== normalizedQuery
-                  ? buildHarborSearchQuery({
-                        query: convertedUserQuery,
+            const alternateUserQueries = append
+                ? activeSearchRef.current?.alternateUserQueries
+                : getAlternateHarborSearchQueries(normalizedQuery);
+            const alternateSearchQueries = append
+                ? activeSearchRef.current?.alternateSearchQueries
+                : alternateUserQueries.map(alternateUserQuery =>
+                      buildHarborSearchQuery({
+                        query: alternateUserQuery,
                         category,
                         tag,
                         author: normalizedAuthor,
                         after: getHarborSearchAfterDate(timeRange),
                         order: normalizedOrder,
-                    })
-                  : searchQuery;
+                      }),
+                  );
             const userQuery = append
                 ? activeSearchRef.current?.userQuery
                 : normalizedQuery;
@@ -285,8 +301,8 @@ const useHarborSearch = ({initialQuery, onSearchStart}) => {
                 setNextPage(null);
                 activeSearchRef.current = {
                     searchQuery,
-                    convertedSearchQuery,
-                    convertedUserQuery,
+                    alternateSearchQueries,
+                    alternateUserQueries,
                     userQuery,
                 };
                 setQuery(normalizedQuery);
@@ -324,7 +340,7 @@ const useHarborSearch = ({initialQuery, onSearchStart}) => {
             try {
                 const result = await fetchSearchWithFallback({
                     searchQuery,
-                    convertedSearchQuery,
+                    alternateSearchQueries,
                     userQuery,
                     page,
                     signal: controller.signal,

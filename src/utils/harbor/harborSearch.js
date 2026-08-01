@@ -8,6 +8,8 @@ export const HARBOR_SEARCH_HISTORY_LIMIT = 10;
 export const HARBOR_SEARCH_FALLBACK_THRESHOLD = 10;
 
 const traditionalToSimplified = OpenCC.Converter({from: 'tw', to: 'cn'});
+const simplifiedToTraditional = OpenCC.Converter({from: 'cn', to: 'tw'});
+const HAN_CHARACTER_PATTERN = /[\u3400-\u9FFF\uF900-\uFAFF]/;
 
 const SEARCH_RANGE_DAYS = {
     week: 7,
@@ -20,9 +22,20 @@ const normalizeQueryKey = query => query.trim().toLowerCase();
 export const canRunHarborKeywordSearch = query =>
     Array.from(typeof query === 'string' ? query.trim() : '').length >= 2;
 
-export const getSimplifiedHarborSearchQuery = query => {
+export const getAlternateHarborSearchQueries = query => {
     const normalizedQuery = typeof query === 'string' ? query.trim() : '';
-    return normalizedQuery ? traditionalToSimplified(normalizedQuery) : '';
+    if (!normalizedQuery || !HAN_CHARACTER_PATTERN.test(normalizedQuery)) {
+        return [];
+    }
+
+    return [
+        traditionalToSimplified(normalizedQuery),
+        simplifiedToTraditional(normalizedQuery),
+    ].filter(
+        (convertedQuery, index, queries) =>
+            convertedQuery !== normalizedQuery &&
+            queries.indexOf(convertedQuery) === index,
+    );
 };
 
 const getHarborSearchItemKey = item => {
