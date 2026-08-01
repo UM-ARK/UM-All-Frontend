@@ -364,6 +364,14 @@ const HarborTopicDetail = ({ route, navigation }) => {
                 return;
             }
 
+            if (target?.type === 'user' && target.username) {
+                navigation.navigate('HarborProfile', {
+                    username: target.username,
+                    mode: 'preview',
+                });
+                return;
+            }
+
             const fallbackUrl = target?.url || url;
             console.warn(
                 '[HarborPostContent] Web fallback link:',
