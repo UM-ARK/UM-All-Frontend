@@ -284,19 +284,62 @@ describe('Harbor API 資料正規化', () => {
                     groups: [{id: 41, name: 'UMer'}],
                 },
             },
-        });
+        })
+            .mockResolvedValueOnce({
+                data: {
+                    user_summary: {
+                        topic_count: 12,
+                        post_count: 34,
+                        likes_received: 56,
+                        days_visited: 78,
+                        time_read: 5400,
+                        topics_entered: 90,
+                    },
+                },
+            })
+            .mockResolvedValueOnce({
+                data: {
+                    badges: [{id: 3, name: 'Nice Reply'}],
+                    user_badges: [{id: 8, badge_id: 3}],
+                },
+            });
 
         const result = await fetchHarborUserProfile('harbor user');
 
-        expect(getSpy).toHaveBeenCalledWith('/u/harbor%20user.json', {
-            signal: undefined,
-        });
+        expect(getSpy).toHaveBeenNthCalledWith(
+            1,
+            '/u/harbor%20user.json',
+            {signal: undefined},
+        );
+        expect(getSpy).toHaveBeenNthCalledWith(
+            2,
+            '/u/harbor%20user/summary.json',
+            {signal: undefined},
+        );
+        expect(getSpy).toHaveBeenNthCalledWith(
+            3,
+            '/user-badges/harbor%20user.json',
+            {signal: undefined},
+        );
         expect(result).toEqual(
             expect.objectContaining({
                 displayName: 'Harbor User',
                 username: 'harbor-user',
                 role: '社群成員',
                 isUMer: true,
+                groups: ['UMer'],
+                contributions: expect.arrayContaining([
+                    expect.objectContaining({
+                        key: 'topicsCreated',
+                        value: '12',
+                    }),
+                ]),
+                badges: [
+                    expect.objectContaining({
+                        id: '8',
+                        name: 'Nice Reply',
+                    }),
+                ],
                 profile: expect.objectContaining({
                     bio: '公開簡介',
                     location: '澳門',
@@ -305,6 +348,30 @@ describe('Harbor API 資料正規化', () => {
                 }),
             }),
         );
+    });
+
+    it('公開統計與徽章不可見時仍保留基本個人資料', async () => {
+        getSpy
+            .mockResolvedValueOnce({
+                data: {
+                    user: {
+                        username: 'private-stats',
+                        name: 'Private Stats',
+                    },
+                },
+            })
+            .mockRejectedValueOnce(new Error('Summary unavailable'))
+            .mockRejectedValueOnce(new Error('Badges unavailable'));
+
+        const result = await fetchHarborUserProfile('private-stats');
+
+        expect(result.displayName).toBe('Private Stats');
+        expect(result.contributions[0].value).toBe('—');
+        expect(result.badges).toEqual([]);
+        expect(result.unavailableProfileSections).toEqual([
+            'summary',
+            'badges',
+        ]);
     });
 
     it('Secondary profile API 失敗時保留同帳號上次成功資料', async () => {

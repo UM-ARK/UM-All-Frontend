@@ -20,6 +20,7 @@ import {scale, verticalScale} from 'react-native-size-matters';
 
 import {uiStyle, useTheme} from '../../../../components/ThemeContext';
 import {useHarborSession} from '../../../../contexts/HarborSessionContext';
+import HarborBadgeIcon from '../components/HarborBadgeIcon';
 import {
     fetchHarborProfileMetadata,
     fetchHarborUserProfile,
@@ -228,6 +229,67 @@ const HarborProfilePage = ({navigation, route}) => {
     const canSave = Boolean(
         isOwnProfile && profile.canEdit && hasChanges && !isSaving && username,
     );
+    const profileTags = React.useMemo(
+        () =>
+            [
+                profile.workStatus,
+                viewedUser?.role,
+                ...(viewedUser?.groups || []),
+                `TL${viewedUser?.trustLevel ?? 0}`,
+            ].filter(
+                (tag, index, tags) =>
+                    tag && tags.findIndex(item => item === tag) === index,
+            ),
+        [profile.workStatus, viewedUser],
+    );
+    const unavailableSections = viewedUser?.unavailableProfileSections || [];
+    const isSummaryVisible = !unavailableSections.includes('summary');
+    const areBadgesVisible = !unavailableSections.includes('badges');
+    const publicInfoItems = [
+        {
+            key: 'bio',
+            icon: 'person-outline',
+            label: t('個人簡介'),
+            value: profile.bio || t('未填寫'),
+        },
+        {
+            key: 'workStatus',
+            icon: 'briefcase-outline',
+            label: t('工作狀態'),
+            value: profile.workStatus || t('未填寫'),
+        },
+        {
+            key: 'role',
+            icon: 'ribbon-outline',
+            label: t('身份'),
+            value: viewedUser?.role || t('Harbor 會員'),
+        },
+        {
+            key: 'location',
+            icon: 'location-outline',
+            label: t('地點'),
+            value: profile.location || t('未填寫'),
+        },
+        {
+            key: 'website',
+            icon: 'link-outline',
+            label: t('個人網站'),
+            value: profile.website || t('未填寫'),
+            link: profile.website,
+        },
+        {
+            key: 'joinedAt',
+            icon: 'calendar-outline',
+            label: t('加入時間'),
+            value: viewedUser?.joinedAt || t('暫不可見'),
+        },
+        {
+            key: 'trustLevel',
+            icon: 'shield-checkmark-outline',
+            label: t('信任等級'),
+            value: `TL${viewedUser?.trustLevel ?? 0}`,
+        },
+    ];
     const workStatusActions = (workStatusField?.options || []).map(option => ({
         id: option,
         title: option,
@@ -347,11 +409,7 @@ const HarborProfilePage = ({navigation, route}) => {
                     </View>
                 ) : (
                     <>
-                        <View
-                            style={[
-                                styles.identityCard,
-                                {backgroundColor: theme.tonal.primary15},
-                            ]}>
+                        <View style={styles.identityCard}>
                             <View
                                 style={[
                                     styles.avatarRing,
@@ -376,29 +434,6 @@ const HarborProfilePage = ({navigation, route}) => {
                                     ]}>
                                     {viewedUser?.displayName || username}
                                 </Text>
-                                {viewedUser?.isUMer ? (
-                                    <View
-                                        style={[
-                                            styles.umerBadge,
-                                            {
-                                                backgroundColor:
-                                                    theme.tonal.primary30,
-                                            },
-                                        ]}>
-                                        <Ionicons
-                                            name="school-outline"
-                                            size={scale(12)}
-                                            color={theme.themeColor}
-                                        />
-                                        <Text
-                                            style={[
-                                                styles.umerText,
-                                                {color: theme.themeColor},
-                                            ]}>
-                                            UMer
-                                        </Text>
-                                    </View>
-                                ) : null}
                             </View>
                             <Text
                                 style={[
@@ -456,62 +491,271 @@ const HarborProfilePage = ({navigation, route}) => {
                         ) : null}
 
                         {!isEditing ? (
-                            <View
-                                style={[
-                                    styles.profileCard,
-                                    {backgroundColor: theme.white},
-                                    theme.viewShadow,
-                                ]}>
-                                <Text
-                                    style={[
-                                        styles.bio,
-                                        {color: theme.black.main},
-                                    ]}>
-                                    {profile.bio || t('這位用戶尚未填寫個人簡介。')}
-                                </Text>
-                                {profile.location ? (
-                                    <View style={styles.detailRow}>
-                                        <Ionicons
-                                            name="location-outline"
-                                            size={scale(17)}
-                                            color={theme.black.third}
-                                        />
-                                        <Text
-                                            style={[
-                                                styles.detailText,
-                                                {color: theme.black.second},
-                                            ]}>
-                                            {profile.location}
-                                        </Text>
+                            <>
+                                <View style={styles.section}>
+                                    <Text
+                                        style={[
+                                            styles.sectionTitle,
+                                            {color: theme.black.main},
+                                        ]}>
+                                        {t('身份標籤')}
+                                    </Text>
+                                    <View style={styles.tags}>
+                                        {profileTags.length ? (
+                                            profileTags.map(tag => (
+                                                <View
+                                                    key={tag}
+                                                    style={[
+                                                        styles.tag,
+                                                        {
+                                                            backgroundColor:
+                                                                theme.tonal.primary15,
+                                                        },
+                                                    ]}>
+                                                    <Text
+                                                        style={[
+                                                            styles.tagText,
+                                                            {
+                                                                color: theme.themeColor,
+                                                            },
+                                                        ]}>
+                                                        {tag}
+                                                    </Text>
+                                                </View>
+                                            ))
+                                        ) : (
+                                            <Text
+                                                style={[
+                                                    styles.emptyText,
+                                                    {color: theme.black.third},
+                                                ]}>
+                                                {t('沒有可顯示的標籤')}
+                                            </Text>
+                                        )}
                                     </View>
-                                ) : null}
-                                {profile.website ? (
-                                    <Pressable
-                                        accessibilityRole="link"
-                                        onPress={() => {
-                                            trigger();
-                                            openLink({
-                                                URL: profile.website,
-                                                mode: 'fullScreen',
-                                            });
-                                        }}
-                                        style={styles.detailRow}>
-                                        <Ionicons
-                                            name="link-outline"
-                                            size={scale(17)}
-                                            color={theme.themeColor}
-                                        />
+                                </View>
+
+                                <View style={styles.section}>
+                                    <Text
+                                        style={[
+                                            styles.sectionTitle,
+                                            {color: theme.black.main},
+                                        ]}>
+                                        {t('公開資料')}
+                                    </Text>
+                                    <View
+                                        style={[
+                                            styles.list,
+                                            {backgroundColor: theme.white},
+                                        ]}>
+                                        {publicInfoItems.map((item, index) => {
+                                            const content = (
+                                                <>
+                                                    <Ionicons
+                                                        name={item.icon}
+                                                        size={scale(18)}
+                                                        color={
+                                                            item.link
+                                                                ? theme.themeColor
+                                                                : theme.black.third
+                                                        }
+                                                    />
+                                                    <View
+                                                        style={styles.listText}>
+                                                        <Text
+                                                            style={[
+                                                                styles.listLabel,
+                                                                {
+                                                                    color: theme.black.third,
+                                                                },
+                                                            ]}>
+                                                            {item.label}
+                                                        </Text>
+                                                        <Text
+                                                            style={[
+                                                                styles.listValue,
+                                                                {
+                                                                    color: item.link
+                                                                        ? theme.themeColor
+                                                                        : theme.black.main,
+                                                                },
+                                                            ]}>
+                                                            {item.value}
+                                                        </Text>
+                                                    </View>
+                                                </>
+                                            );
+
+                                            return (
+                                                <React.Fragment key={item.key}>
+                                                    {item.link ? (
+                                                        <Pressable
+                                                            accessibilityRole="link"
+                                                            onPress={() => {
+                                                                trigger();
+                                                                openLink({
+                                                                    URL: item.link,
+                                                                    mode: 'fullScreen',
+                                                                });
+                                                            }}
+                                                            style={styles.listRow}>
+                                                            {content}
+                                                        </Pressable>
+                                                    ) : (
+                                                        <View
+                                                            style={styles.listRow}>
+                                                            {content}
+                                                        </View>
+                                                    )}
+                                                    {index <
+                                                    publicInfoItems.length - 1 ? (
+                                                        <View
+                                                            style={[
+                                                                styles.divider,
+                                                                {
+                                                                    backgroundColor:
+                                                                        theme.themeColorUltraLight,
+                                                                },
+                                                            ]}
+                                                        />
+                                                    ) : null}
+                                                </React.Fragment>
+                                            );
+                                        })}
+                                    </View>
+                                </View>
+
+                                <View style={styles.section}>
+                                    <Text
+                                        style={[
+                                            styles.sectionTitle,
+                                            {color: theme.black.main},
+                                        ]}>
+                                        {t('社群統計')}
+                                    </Text>
+                                    <View
+                                        style={[
+                                            styles.metrics,
+                                            {backgroundColor: theme.white},
+                                        ]}>
+                                        {[
+                                            ...(viewedUser?.contributions || []),
+                                            ...(viewedUser?.stats || []),
+                                        ].map(item => (
+                                            <View
+                                                key={item.key}
+                                                style={styles.metric}>
+                                                <Text
+                                                    style={[
+                                                        styles.metricValue,
+                                                        {color: theme.black.main},
+                                                    ]}>
+                                                    {isSummaryVisible
+                                                        ? item.value
+                                                        : '—'}
+                                                </Text>
+                                                <Text
+                                                    style={[
+                                                        styles.metricLabel,
+                                                        {color: theme.black.third},
+                                                    ]}>
+                                                    {t(item.label)}
+                                                </Text>
+                                            </View>
+                                        ))}
+                                    </View>
+                                    {!isSummaryVisible ? (
                                         <Text
-                                            numberOfLines={1}
                                             style={[
-                                                styles.detailText,
-                                                {color: theme.themeColor},
+                                                styles.sectionHint,
+                                                {color: theme.black.third},
                                             ]}>
-                                            {profile.website}
+                                            {t('這位用戶的統計目前不可見。')}
                                         </Text>
-                                    </Pressable>
-                                ) : null}
-                            </View>
+                                    ) : null}
+                                </View>
+
+                                <View style={styles.section}>
+                                    <Text
+                                        style={[
+                                            styles.sectionTitle,
+                                            {color: theme.black.main},
+                                        ]}>
+                                        {t('論壇成就')}
+                                    </Text>
+                                    <View
+                                        style={[
+                                            styles.list,
+                                            {backgroundColor: theme.white},
+                                        ]}>
+                                        {viewedUser?.badges?.length ? (
+                                            viewedUser.badges.map(
+                                                (badge, index) => (
+                                                    <React.Fragment
+                                                        key={badge.id}>
+                                                        <View
+                                                            style={
+                                                                styles.badgeRow
+                                                            }>
+                                                            <HarborBadgeIcon
+                                                                badge={badge}
+                                                                compact
+                                                            />
+                                                            <View
+                                                                style={
+                                                                    styles.listText
+                                                                }>
+                                                                <Text
+                                                                    style={[
+                                                                        styles.badgeName,
+                                                                        {
+                                                                            color: theme.black.main,
+                                                                        },
+                                                                    ]}>
+                                                                    {badge.name}
+                                                                </Text>
+                                                                <Text
+                                                                    style={[
+                                                                        styles.badgeDescription,
+                                                                        {
+                                                                            color: theme.black.third,
+                                                                        },
+                                                                    ]}>
+                                                                    {badge.description ||
+                                                                        t('Harbor 社群徽章')}
+                                                                </Text>
+                                                            </View>
+                                                        </View>
+                                                        {index <
+                                                        viewedUser.badges.length -
+                                                            1 ? (
+                                                            <View
+                                                                style={[
+                                                                    styles.divider,
+                                                                    {
+                                                                        backgroundColor:
+                                                                            theme.themeColorUltraLight,
+                                                                    },
+                                                                ]}
+                                                            />
+                                                        ) : null}
+                                                    </React.Fragment>
+                                                ),
+                                            )
+                                        ) : (
+                                            <Text
+                                                style={[
+                                                    styles.emptyListText,
+                                                    {color: theme.black.third},
+                                                ]}>
+                                                {areBadgesVisible
+                                                    ? t('沒有公開成就')
+                                                    : t('這位用戶的成就目前不可見。')}
+                                            </Text>
+                                        )}
+                                    </View>
+                                </View>
+                            </>
                         ) : (
                             <>
                                 {!profile.canEdit ? (
@@ -542,7 +786,6 @@ const HarborProfilePage = ({navigation, route}) => {
                                     style={[
                                         styles.formCard,
                                         {backgroundColor: theme.white},
-                                        theme.viewShadow,
                                     ]}>
                                     <View style={styles.field}>
                                         <Text
@@ -759,12 +1002,11 @@ const styles = StyleSheet.create({
         gap: verticalScale(14),
     },
     identityCard: {
-        minHeight: verticalScale(210),
-        borderRadius: scale(20),
+        minHeight: verticalScale(180),
         alignItems: 'center',
         justifyContent: 'center',
         paddingHorizontal: scale(15),
-        paddingVertical: verticalScale(22),
+        paddingVertical: verticalScale(16),
     },
     avatarRing: {
         width: scale(94),
@@ -802,19 +1044,6 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         marginTop: verticalScale(7),
     },
-    umerBadge: {
-        minHeight: verticalScale(22),
-        borderRadius: scale(8),
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: scale(4),
-        paddingHorizontal: scale(7),
-    },
-    umerText: {
-        ...uiStyle.defaultText,
-        fontSize: scale(10),
-        fontWeight: '700',
-    },
     loadingProfile: {
         minHeight: verticalScale(180),
         alignItems: 'center',
@@ -842,27 +1071,127 @@ const styles = StyleSheet.create({
         fontSize: scale(11),
         fontWeight: '700',
     },
-    profileCard: {
-        borderRadius: scale(20),
-        gap: verticalScale(14),
-        paddingHorizontal: scale(17),
-        paddingVertical: verticalScale(19),
+    section: {
+        gap: verticalScale(8),
     },
-    bio: {
+    sectionTitle: {
         ...uiStyle.defaultText,
         fontSize: scale(13),
-        lineHeight: verticalScale(21),
+        fontWeight: '720',
+        paddingHorizontal: scale(3),
     },
-    detailRow: {
-        minHeight: verticalScale(28),
+    tags: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        alignItems: 'center',
+        gap: scale(7),
+        paddingHorizontal: scale(3),
+    },
+    tag: {
+        minHeight: verticalScale(26),
+        borderRadius: scale(9),
+        justifyContent: 'center',
+        paddingHorizontal: scale(9),
+        paddingVertical: verticalScale(4),
+    },
+    tagText: {
+        ...uiStyle.defaultText,
+        fontSize: scale(10),
+        fontWeight: '650',
+    },
+    emptyText: {
+        ...uiStyle.defaultText,
+        fontSize: scale(11),
+        paddingVertical: verticalScale(5),
+    },
+    list: {
+        borderRadius: scale(14),
+        overflow: 'hidden',
+    },
+    listRow: {
+        minHeight: verticalScale(58),
         flexDirection: 'row',
         alignItems: 'center',
-        gap: scale(9),
+        gap: scale(12),
+        paddingHorizontal: scale(14),
+        paddingVertical: verticalScale(10),
     },
-    detailText: {
-        ...uiStyle.defaultText,
+    listText: {
         flex: 1,
+        minWidth: 0,
+    },
+    listLabel: {
+        ...uiStyle.defaultText,
+        fontSize: scale(9),
+        marginBottom: verticalScale(3),
+    },
+    listValue: {
+        ...uiStyle.defaultText,
         fontSize: scale(11),
+        lineHeight: verticalScale(17),
+    },
+    divider: {
+        height: StyleSheet.hairlineWidth,
+        marginLeft: scale(44),
+    },
+    metrics: {
+        borderRadius: scale(14),
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        paddingHorizontal: scale(6),
+        paddingVertical: verticalScale(8),
+    },
+    metric: {
+        width: '33.333%',
+        minHeight: verticalScale(68),
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingHorizontal: scale(3),
+        paddingVertical: verticalScale(7),
+    },
+    metricValue: {
+        ...uiStyle.defaultText,
+        fontSize: scale(18),
+        fontWeight: '760',
+        textAlign: 'center',
+    },
+    metricLabel: {
+        ...uiStyle.defaultText,
+        fontSize: scale(9),
+        lineHeight: verticalScale(13),
+        textAlign: 'center',
+        marginTop: verticalScale(4),
+    },
+    sectionHint: {
+        ...uiStyle.defaultText,
+        fontSize: scale(9),
+        paddingHorizontal: scale(4),
+    },
+    badgeRow: {
+        minHeight: verticalScale(68),
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: scale(12),
+        paddingHorizontal: scale(14),
+        paddingVertical: verticalScale(9),
+    },
+    badgeName: {
+        ...uiStyle.defaultText,
+        fontSize: scale(11),
+        fontWeight: '680',
+    },
+    badgeDescription: {
+        ...uiStyle.defaultText,
+        fontSize: scale(9),
+        lineHeight: verticalScale(13),
+        marginTop: verticalScale(3),
+    },
+    emptyListText: {
+        ...uiStyle.defaultText,
+        fontSize: scale(11),
+        textAlign: 'center',
+        paddingHorizontal: scale(14),
+        paddingVertical: verticalScale(22),
     },
     notice: {
         borderRadius: scale(14),

@@ -1369,6 +1369,11 @@ function normalizeProfile(
     const isUMer = profileGroups
         ? profileGroups.some(group => group?.name === 'UMer')
         : Boolean(matchingPreviousUser?.isUMer);
+    const groups = profileGroups
+        ? profileGroups
+              .map(group => group?.full_name || group?.name || '')
+              .filter(Boolean)
+        : matchingPreviousUser?.groups || [];
 
     return {
         displayName:
@@ -1395,6 +1400,7 @@ function normalizeProfile(
             ? ARK_HARBOR_AVATAR_TEMPLATE(avatarTemplate, 144)
             : matchingPreviousUser?.avatarUrl || null,
         isUMer,
+        groups,
         profile: {
             bio:
                 typeof profile.bio_raw === 'string'
@@ -1841,20 +1847,31 @@ export async function fetchHarborUserProfile(username, { signal } = {}) {
     }
 
     const encodedUsername = encodeURIComponent(username.trim());
-    const response = await harborApi.get(`/u/${encodedUsername}.json`, {
-        signal,
-    });
-    const profile = response.data?.user;
+    const [profileResult, summaryResult, badgeResult] =
+        await Promise.allSettled([
+            harborApi.get(`/u/${encodedUsername}.json`, {signal}),
+            harborApi.get(`/u/${encodedUsername}/summary.json`, {signal}),
+            harborApi.get(`/user-badges/${encodedUsername}.json`, {signal}),
+        ]);
+    if (profileResult.status === 'rejected') {
+        throw profileResult.reason;
+    }
+
+    const profile = profileResult.value.data?.user;
     if (!profile?.username) {
         throw new Error('Invalid Harbor user profile response');
     }
 
     return normalizeProfile(
         profile,
-        response.data,
-        null,
-        null,
-        {profile: true, summary: false, badges: false},
+        profileResult.value.data,
+        summaryResult.status === 'fulfilled' ? summaryResult.value.data : null,
+        badgeResult.status === 'fulfilled' ? badgeResult.value.data : null,
+        {
+            profile: true,
+            summary: summaryResult.status === 'fulfilled',
+            badges: badgeResult.status === 'fulfilled',
+        },
         null,
     );
 }
