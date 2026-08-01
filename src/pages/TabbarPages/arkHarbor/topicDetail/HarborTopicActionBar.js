@@ -105,7 +105,6 @@ const HarborTopicActionBar = memo(
             bg_color,
             disabled,
             themeColor,
-            tonal,
             white,
         } = theme;
 
@@ -193,10 +192,12 @@ const HarborTopicActionBar = memo(
                     style={({ pressed }) => [
                         styles.topicActionCompose,
                         {
-                            backgroundColor: pressed
-                                ? tonal.primary30
-                                : bg_color,
-                            opacity: canReply ? 1 : 0.5,
+                            backgroundColor: bg_color,
+                            opacity: !canReply
+                                ? 0.5
+                                : pressed
+                                    ? 0.7
+                                    : 1,
                         },
                     ]}>
                     <MaterialCommunityIcons
