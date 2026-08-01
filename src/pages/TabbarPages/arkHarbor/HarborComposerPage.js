@@ -25,6 +25,7 @@ import {deleteHarborPost} from '../../../utils/harbor/harborApi';
 import {publishHarborTopicUpdate} from '../../../utils/harbor/harborTopicUpdates';
 import {
     ARK_HARBOR_NEW_TOPIC,
+    ARK_HARBOR_TOPIC_URL,
     MARKDOWN_BASIC_SYNTAX_URL,
 } from '../../../utils/pathMap';
 import {trigger} from '../../../utils/trigger';
@@ -36,6 +37,10 @@ import {useHarborComposer} from './composer/useHarborComposer';
 import {useHarborDraft} from './composer/useHarborDraft';
 import {useHarborComposerImages} from './composer/useHarborComposerImages';
 import {useHarborComposerSubmit} from './composer/useHarborComposerSubmit';
+import {
+    buildHarborComposerRaw,
+    splitHarborComposerRaw,
+} from './harborComposerText';
 
 const HarborComposerPage = ({route, navigation}) => {
     const {theme} = useTheme();
@@ -51,6 +56,8 @@ const HarborComposerPage = ({route, navigation}) => {
         categoryId,
         composerSettings,
         editMetadata,
+        editImageMode,
+        initialEditImages,
         isEdit,
         isEditingFirstPost,
         isLoading,
@@ -79,6 +86,7 @@ const HarborComposerPage = ({route, navigation}) => {
         selectedTags,
         sessionStatus,
         setCategoryId,
+        setEditImageMode,
         setLoadError,
         setRaw,
         setSelectedTags,
@@ -96,6 +104,7 @@ const HarborComposerPage = ({route, navigation}) => {
         hasReachedImageLimit,
         hasUnreadyImages,
         handleAddImages,
+        handleMoveImage,
         handleRemoveImage,
         handleRetryImage,
         isPreparingImages,
@@ -103,6 +112,12 @@ const HarborComposerPage = ({route, navigation}) => {
         restoreDraftImages,
         uploadImages,
     } = useHarborComposerImages({composerSettings, t});
+
+    useEffect(() => {
+        if (isEdit && !isLoading) {
+            restoreDraftImages(initialEditImages);
+        }
+    }, [initialEditImages, isEdit, isLoading, restoreDraftImages]);
 
     const {
         clearDraftAfterPublish,
@@ -113,6 +128,7 @@ const HarborComposerPage = ({route, navigation}) => {
         categories,
         categoryId,
         editMetadata,
+        editImageMode,
         images,
         isComposerLoading: isLoading,
         isEditingFirstPost,
@@ -126,6 +142,7 @@ const HarborComposerPage = ({route, navigation}) => {
         selectedTags,
         sessionStatus,
         setCategoryId,
+        setEditImageMode,
         setRaw,
         setSelectedTags,
         setTitle,
@@ -168,8 +185,103 @@ const HarborComposerPage = ({route, navigation}) => {
 
     const handleOpenWebComposer = useCallback(() => {
         trigger();
-        openLink({URL: ARK_HARBOR_NEW_TOPIC, mode: 'fullScreen'});
-    }, []);
+        const topicId = Number(
+            editMetadata.topicId ??
+            editMetadata.topic_id ??
+            route.params?.topicId,
+        );
+        const postNumber = Number(
+            editMetadata.postNumber ??
+            editMetadata.post_number ??
+            route.params?.postNumber,
+        );
+        openLink({
+            URL:
+                isEdit && Number.isInteger(topicId) && topicId > 0
+                    ? ARK_HARBOR_TOPIC_URL(topicId, postNumber)
+                    : ARK_HARBOR_NEW_TOPIC,
+            mode: 'fullScreen',
+        });
+    }, [
+        editMetadata.postNumber,
+        editMetadata.post_number,
+        editMetadata.topicId,
+        editMetadata.topic_id,
+        isEdit,
+        route.params?.postNumber,
+        route.params?.topicId,
+    ]);
+
+    const applyEditImageMode = useCallback(nextMode => {
+        if (
+            nextMode === 'manual' &&
+            images.some(image => image.status !== 'uploaded')
+        ) {
+            Toast.show(
+                t('請先移除尚未上傳的圖片，或使用九宮格模式儲存。'),
+            );
+            return;
+        }
+        if (nextMode === 'manual') {
+            const currentGridRaw = buildHarborComposerRaw(raw, images);
+            const originalSplit = splitHarborComposerRaw(originalText, {
+                existingImages: images,
+            });
+            const originalGridRaw = buildHarborComposerRaw(
+                originalSplit.text,
+                originalSplit.images,
+            );
+            setRaw(
+                currentGridRaw === originalGridRaw
+                    ? originalText
+                    : currentGridRaw,
+            );
+        } else {
+            const splitPost = splitHarborComposerRaw(raw, {
+                existingImages: images,
+            });
+            setRaw(splitPost.text);
+            restoreDraftImages(splitPost.images);
+        }
+        setEditImageMode(nextMode);
+    }, [
+        images,
+        originalText,
+        raw,
+        restoreDraftImages,
+        setEditImageMode,
+        setRaw,
+        t,
+    ]);
+
+    const handleChangeEditImageMode = useCallback(nextMode => {
+        if (nextMode === editImageMode) {
+            return;
+        }
+        trigger();
+        if (nextMode === 'grid') {
+            Alert.alert(
+                t('切換到九宮格排序？'),
+                t('切換後，可管理的圖片會重新排序並統一放到正文末尾。若要保留 Web 端編輯的圖片位置，請繼續使用手動文本排序。'),
+                [
+                    {
+                        text: t('取消'),
+                        style: 'cancel',
+                        onPress: trigger,
+                    },
+                    {
+                        text: t('繼續'),
+                        onPress: () => {
+                            trigger();
+                            applyEditImageMode('grid');
+                        },
+                    },
+                ],
+            );
+            return;
+        }
+        applyEditImageMode(nextMode);
+    }, [applyEditImageMode, editImageMode, t]);
 
     const handleOpenMarkdownGuide = useCallback(() => {
         trigger();
@@ -773,6 +885,7 @@ const HarborComposerPage = ({route, navigation}) => {
                 }}
                 imagesState={{
                     handleAddImages,
+                    handleMoveImage,
                     handleRemoveImage,
                     handleRetryImage,
                     hasReachedImageLimit,
@@ -801,6 +914,7 @@ const HarborComposerPage = ({route, navigation}) => {
                 categoryId,
                 composerSettings,
                 editMetadata,
+                editImageMode,
                 isEdit,
                 isEditingFirstPost,
                 isNewTopic,
@@ -826,6 +940,7 @@ const HarborComposerPage = ({route, navigation}) => {
             }}
             imagesState={{
                 handleAddImages,
+                handleMoveImage,
                 handleRemoveImage,
                 handleRetryImage,
                 hasReachedImageLimit,
@@ -833,6 +948,7 @@ const HarborComposerPage = ({route, navigation}) => {
                 isPreparingImages,
                 isUploadingImages,
             }}
+            onChangeEditImageMode={handleChangeEditImageMode}
             onOpenCategorySheet={openCategorySheet}
             onOpenMarkdownGuide={handleOpenMarkdownGuide}
             onOpenTagSheet={openTagSheet}

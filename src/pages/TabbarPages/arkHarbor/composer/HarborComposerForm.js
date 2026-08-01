@@ -10,7 +10,6 @@ import {
 
 import { isLiquidGlassSupported } from '@callstack/liquid-glass';
 import { useHeaderHeight } from '@react-navigation/elements';
-import { Image } from 'expo-image';
 import {
     KeyboardAwareScrollView,
     KeyboardToolbar,
@@ -20,9 +19,9 @@ import { scale, verticalScale } from 'react-native-size-matters';
 import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '../../../../components/ThemeContext';
-import SimpleProgressBar from '../../../../components/SimpleProgressBar';
 import HarborCategoryIcon from '../components/HarborCategoryIcon';
 import HarborCategoryPickerSheet from './HarborCategoryPickerSheet';
+import HarborComposerImageGrid from './HarborComposerImageGrid';
 import HarborTagPickerSheet from './HarborTagPickerSheet';
 import { MAX_IMAGES_PER_POST } from './harborComposerImages';
 
@@ -30,6 +29,7 @@ const HarborComposerForm = ({
     categorySheetRef,
     composer,
     imagesState,
+    onChangeEditImageMode,
     onOpenCategorySheet,
     onOpenMarkdownGuide,
     onOpenTagSheet,
@@ -49,6 +49,7 @@ const HarborComposerForm = ({
         categoryId,
         composerSettings,
         editMetadata,
+        editImageMode,
         isEdit,
         isEditingFirstPost,
         isNewTopic,
@@ -72,6 +73,7 @@ const HarborComposerForm = ({
     } = composer;
     const {
         handleAddImages,
+        handleMoveImage,
         handleRemoveImage,
         handleRetryImage,
         hasReachedImageLimit,
@@ -262,7 +264,7 @@ const HarborComposerForm = ({
                     </Pressable>
                 </View>
 
-                {isNewTopic ? (
+                {isNewTopic || isEditingFirstPost ? (
                     <>
                         <View style={styles.fieldGroup}>
                             <Text
@@ -375,182 +377,168 @@ const HarborComposerForm = ({
                     </>
                 ) : null}
 
-                {supportsImages ? (
+                {supportsImages || isEdit ? (
                     <View style={styles.fieldGroup}>
-                        <View style={styles.bodyLabelRow}>
-                            <Text
-                                style={[
-                                    styles.fieldLabel,
-                                    { color: theme.black.second },
-                                ]}>
-                                {t('圖片')}
-                            </Text>
-                            {images.length > 0 ? (
-                                <Text
-                                    style={[
-                                        styles.requirementCounter,
-                                        { color: theme.black.third },
-                                    ]}>
-                                    {`${images.length}/${MAX_IMAGES_PER_POST}`}
-                                </Text>
-                            ) : null}
-                        </View>
-                        {images.length > 0 ? (
-                            <View style={styles.imageList}>
-                                {images.map(image => (
-                                    <View
-                                        key={image.id}
+                        {supportsImages ? (
+                            <>
+                                <View style={styles.bodyLabelRow}>
+                                    <Text
                                         style={[
-                                            styles.imageCard,
-                                            {
-                                                backgroundColor: theme.white,
-                                                borderColor:
-                                                    image.status === 'failed'
-                                                        ? theme.unread
-                                                        : theme
-                                                            .themeColorUltraLight,
-                                            },
+                                            styles.fieldLabel,
+                                            { color: theme.black.second },
                                         ]}>
-                                        <Image
-                                            contentFit="cover"
-                                            source={{ uri: image.localUri }}
-                                            style={styles.imageThumbnail}
-                                        />
-                                        <View style={styles.imageDetails}>
-                                            <Text
-                                                numberOfLines={1}
-                                                style={[
-                                                    styles.imageStatus,
+                                        {t('圖片')}
+                                    </Text>
+                                    {images.length > 0 ? (
+                                        <Text
+                                            style={[
+                                                styles.requirementCounter,
+                                                { color: theme.black.third },
+                                            ]}>
+                                            {`${images.length}/${MAX_IMAGES_PER_POST}`}
+                                        </Text>
+                                    ) : null}
+                                </View>
+                                <HarborComposerImageGrid
+                                    handleMoveImage={handleMoveImage}
+                                    handleRemoveImage={handleRemoveImage}
+                                    handleRetryImage={handleRetryImage}
+                                    images={images}
+                                />
+                                <Pressable
+                                    accessibilityRole="button"
+                                    accessibilityState={{
+                                        disabled:
+                                            isPreparingImages ||
+                                            isUploadingImages ||
+                                            hasReachedImageLimit,
+                                    }}
+                                    disabled={
+                                        isPreparingImages ||
+                                        isUploadingImages ||
+                                        hasReachedImageLimit
+                                    }
+                                    onPress={handleAddImages}
+                                    style={({ pressed }) => [
+                                        styles.addImageButton,
+                                        {
+                                            backgroundColor: pressed
+                                                ? theme.tonal.primary15
+                                                : isPreparingImages ||
+                                                    isUploadingImages ||
+                                                    hasReachedImageLimit
+                                                    ? theme.disabled
+                                                    : theme.white,
+                                            borderColor:
+                                                theme.themeColorUltraLight,
+                                        },
+                                    ]}>
+                                    <MaterialCommunityIcons
+                                        name="image-plus-outline"
+                                        size={scale(21)}
+                                        color={theme.themeColor}
+                                    />
+                                    <Text
+                                        style={[
+                                            styles.addImageText,
+                                            { color: theme.themeColor },
+                                        ]}>
+                                        {isPreparingImages
+                                            ? t('正在處理圖片…')
+                                            : hasReachedImageLimit
+                                                ? t('已達 {{count}} 張上限', {
+                                                    count: MAX_IMAGES_PER_POST,
+                                                })
+                                                : t('新增圖片')}
+                                    </Text>
+                                </Pressable>
+                            </>
+                        ) : null}
+                        {isEdit ? (
+                            <View
+                                style={[
+                                    styles.editImageModeBlock,
+                                    {
+                                        backgroundColor: theme.white,
+                                        borderColor: theme.themeColorUltraLight,
+                                    },
+                                ]}>
+                                <View style={styles.editImageModeControl}>
+                                    {[
+                                        {key: 'grid', label: t('九宮格排序')},
+                                        {key: 'manual', label: t('手動文本排序')},
+                                    ].map(option => {
+                                        const selected = editImageMode === option.key;
+                                        return (
+                                            <Pressable
+                                                key={option.key}
+                                                accessibilityRole="button"
+                                                accessibilityState={{selected}}
+                                                onPress={() =>
+                                                    onChangeEditImageMode(option.key)
+                                                }
+                                                style={({pressed}) => [
+                                                    styles.editImageModeButton,
                                                     {
-                                                        color:
-                                                            image.status ===
-                                                                'failed'
-                                                                ? theme.unread
-                                                                : theme.black
-                                                                    .second,
+                                                        backgroundColor: selected
+                                                            ? theme.tonal.primary15
+                                                            : pressed
+                                                                ? theme.tonal.primary08
+                                                                : theme.white,
+                                                        borderColor: selected
+                                                            ? theme.themeColor
+                                                            : theme.themeColorUltraLight,
                                                     },
                                                 ]}>
-                                                {image.status === 'uploaded'
-                                                    ? t('已上傳')
-                                                    : image.status === 'failed'
-                                                        ? image.error
-                                                        : image.status ===
-                                                            'pending'
-                                                            ? t('等待上傳…')
-                                                            : image.status ===
-                                                                'uploading'
-                                                                ? t('正在上傳…')
-                                                                : t(
-                                                                    '已準備好上傳',
-                                                                )}
-                                            </Text>
-                                            {image.status === 'uploading' ? (
-                                                <SimpleProgressBar
-                                                    height={verticalScale(4)}
-                                                    progress={image.progress}
-                                                    width="100%"
-                                                />
-                                            ) : null}
-                                            {image.status === 'failed' ? (
-                                                <Pressable
-                                                    accessibilityRole="button"
-                                                    onPress={() =>
-                                                        handleRetryImage(image)
-                                                    }
-                                                    style={({ pressed }) => [
-                                                        styles.imageRetryButton,
+                                                <Text
+                                                    style={[
+                                                        styles.editImageModeButtonText,
                                                         {
-                                                            backgroundColor:
-                                                                pressed
-                                                                    ? theme.tonal
-                                                                        .primary30
-                                                                    : theme.tonal
-                                                                        .primary15,
+                                                            color: selected
+                                                                ? theme.themeColor
+                                                                : theme.black.second,
                                                         },
                                                     ]}>
-                                                    <Text
-                                                        style={[
-                                                            styles.imageRetryText,
-                                                            {
-                                                                color:
-                                                                    theme
-                                                                        .themeColor,
-                                                            },
-                                                        ]}>
-                                                        {t('重試')}
-                                                    </Text>
-                                                </Pressable>
-                                            ) : null}
-                                        </View>
-                                        <Pressable
-                                            accessibilityLabel={t('移除圖片')}
-                                            accessibilityRole="button"
-                                            hitSlop={scale(8)}
-                                            onPress={() =>
-                                                handleRemoveImage(image.id)
-                                            }
-                                            style={({ pressed }) => [
-                                                styles.imageRemoveButton,
-                                                pressed && {
-                                                    backgroundColor:
-                                                        theme.tonal.unread15,
-                                                },
-                                            ]}>
-                                            <MaterialCommunityIcons
-                                                name="close"
-                                                size={scale(19)}
-                                                color={theme.unread}
-                                            />
-                                        </Pressable>
-                                    </View>
-                                ))}
+                                                    {option.label}
+                                                </Text>
+                                            </Pressable>
+                                        );
+                                    })}
+                                </View>
+                                <Text
+                                    style={[
+                                        styles.editImageModeHelp,
+                                        {color: theme.black.third},
+                                    ]}>
+                                    {editImageMode === 'grid'
+                                        ? t('二次編輯時，手機端會把九宮格圖片統一放在文末。若要調整圖片在正文中的位置，請使用手動文本排序，或前往 Harbor 網頁版。')
+                                        : t('手動移動圖片 Markdown 可調整正文位置；切回九宮格後，圖片會重新統一放到文末。')}
+                                </Text>
+                                <Pressable
+                                    accessibilityRole="link"
+                                    onPress={onOpenWebComposer}
+                                    style={({ pressed }) => [
+                                        styles.webComposerButton,
+                                        pressed && {
+                                            backgroundColor:
+                                                theme.tonal.primary08,
+                                        },
+                                    ]}>
+                                    <MaterialCommunityIcons
+                                        name="open-in-new"
+                                        size={scale(17)}
+                                        color={theme.black.third}
+                                    />
+                                    <Text
+                                        style={[
+                                            styles.webComposerText,
+                                            { color: theme.black.third },
+                                        ]}>
+                                        {t('前往 Harbor 網頁版操作')}
+                                    </Text>
+                                </Pressable>
                             </View>
                         ) : null}
-                        <Pressable
-                            accessibilityRole="button"
-                            accessibilityState={{
-                                disabled:
-                                    isPreparingImages ||
-                                    isUploadingImages ||
-                                    hasReachedImageLimit,
-                            }}
-                            disabled={
-                                isPreparingImages ||
-                                isUploadingImages ||
-                                hasReachedImageLimit
-                            }
-                            onPress={handleAddImages}
-                            style={({ pressed }) => [
-                                styles.addImageButton,
-                                {
-                                    backgroundColor: pressed
-                                        ? theme.tonal.primary15
-                                        : isPreparingImages ||
-                                            isUploadingImages ||
-                                            hasReachedImageLimit
-                                            ? theme.disabled
-                                            : theme.white,
-                                    borderColor:
-                                        theme.themeColorUltraLight,
-                                },
-                            ]}>
-                            <MaterialCommunityIcons
-                                name="image-plus-outline"
-                                size={scale(21)}
-                                color={theme.themeColor}
-                            />
-                            <Text
-                                style={[
-                                    styles.addImageText,
-                                    { color: theme.themeColor },
-                                ]}>
-                                {isPreparingImages
-                                    ? t('正在處理圖片…')
-                                    : hasReachedImageLimit
-                                        ? t('已達 6 張上限')
-                                        : t('新增圖片')}
-                            </Text>
-                        </Pressable>
                         {isNewTopic ? (
                             <Pressable
                                 accessibilityRole="link"
@@ -695,6 +683,33 @@ const styles = StyleSheet.create({
         fontSize: scale(14),
         fontWeight: '700',
     },
+    editImageModeBlock: {
+        borderRadius: scale(12),
+        borderWidth: StyleSheet.hairlineWidth,
+        gap: verticalScale(9),
+        padding: scale(12),
+    },
+    editImageModeButton: {
+        alignItems: 'center',
+        borderRadius: scale(9),
+        borderWidth: StyleSheet.hairlineWidth,
+        flex: 1,
+        justifyContent: 'center',
+        minHeight: verticalScale(38),
+        paddingHorizontal: scale(8),
+    },
+    editImageModeButtonText: {
+        fontSize: scale(12),
+        fontWeight: '700',
+    },
+    editImageModeControl: {
+        flexDirection: 'row',
+        gap: scale(8),
+    },
+    editImageModeHelp: {
+        fontSize: scale(11),
+        lineHeight: scale(17),
+    },
     addImageText: {
         fontSize: scale(14),
         fontWeight: '600',
@@ -761,47 +776,6 @@ const styles = StyleSheet.create({
         fontSize: scale(12),
         lineHeight: scale(18),
         textAlign: 'center',
-    },
-    imageCard: {
-        alignItems: 'center',
-        borderRadius: scale(12),
-        borderWidth: StyleSheet.hairlineWidth,
-        flexDirection: 'row',
-        gap: scale(10),
-        padding: scale(8),
-    },
-    imageDetails: {
-        flex: 1,
-        gap: verticalScale(7),
-    },
-    imageList: {
-        gap: verticalScale(8),
-    },
-    imageRemoveButton: {
-        alignItems: 'center',
-        borderRadius: scale(16),
-        height: scale(30),
-        justifyContent: 'center',
-        width: scale(30),
-    },
-    imageRetryButton: {
-        alignSelf: 'flex-start',
-        borderRadius: scale(7),
-        paddingHorizontal: scale(10),
-        paddingVertical: verticalScale(5),
-    },
-    imageRetryText: {
-        fontSize: scale(12),
-        fontWeight: '600',
-    },
-    imageStatus: {
-        fontSize: scale(12),
-        lineHeight: scale(17),
-    },
-    imageThumbnail: {
-        borderRadius: scale(8),
-        height: scale(62),
-        width: scale(72),
     },
     markdownHelpButton: {
         alignItems: 'center',

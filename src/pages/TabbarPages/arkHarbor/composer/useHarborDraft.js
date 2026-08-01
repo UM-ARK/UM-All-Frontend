@@ -63,6 +63,7 @@ const getDraftImages = images =>
         fileSize: image.fileSize,
         uploadId: image.uploadId,
         shortUrl: image.shortUrl,
+        markdown: image.markdown,
         status: image.status,
     }));
 
@@ -70,6 +71,7 @@ export function useHarborDraft({
     categories,
     categoryId,
     editMetadata,
+    editImageMode,
     images,
     isComposerLoading,
     isEditingFirstPost,
@@ -83,6 +85,7 @@ export function useHarborDraft({
     selectedTags,
     sessionStatus,
     setCategoryId,
+    setEditImageMode,
     setRaw,
     setSelectedTags,
     setTitle,
@@ -120,10 +123,37 @@ export function useHarborDraft({
         editMetadata.title ||
         route.params?.topicTitle ||
         '';
+    const originalCategoryValue =
+        editMetadata.categoryId ??
+        editMetadata.category_id ??
+        route.params?.categoryId;
+    const originalCategoryId = originalCategoryValue == null
+        ? null
+        : Number(originalCategoryValue);
+    const selectedCategoryId = categoryId == null
+        ? null
+        : Number(categoryId);
+    const originalTags = Array.isArray(editMetadata.tags)
+        ? editMetadata.tags
+        : Array.isArray(route.params?.tags)
+            ? route.params.tags
+            : [];
+    const originalTagNames = originalTags
+        .map(tag => String(tag?.name || tag || '').trim())
+        .filter(Boolean)
+        .sort()
+        .join('\n');
+    const selectedTagNames = selectedTags
+        .map(tag => String(tag?.name || '').trim())
+        .filter(Boolean)
+        .sort()
+        .join('\n');
     const hasDraftContent = mode === 'edit'
-        ? raw.trim() !== String(originalText || '').trim() ||
+        ? composedRaw.trim() !== String(originalText || '').trim() ||
             (isEditingFirstPost &&
-                title.trim() !== String(originalTitle).trim())
+                (title.trim() !== String(originalTitle).trim() ||
+                    selectedCategoryId !== originalCategoryId ||
+                    selectedTagNames !== originalTagNames))
         : Boolean(
             raw.trim() ||
             images.length > 0 ||
@@ -137,7 +167,11 @@ export function useHarborDraft({
             action: getHarborDraftAction(mode),
             archetypeId: 'regular',
             appText: raw,
-            appImages: supportsImages ? getDraftImages(images) : [],
+            appImages:
+                supportsImages || mode === 'edit'
+                    ? getDraftImages(images)
+                    : [],
+            appImageEditMode: mode === 'edit' ? editImageMode : undefined,
             appContext: {
                 topicId: Number(route.params?.topicId) || null,
                 topicTitle: route.params?.topicTitle || '',
@@ -168,6 +202,11 @@ export function useHarborDraft({
             if (isEditingFirstPost) {
                 data.title = title;
                 data.original_title = originalTitle;
+                data.categoryId = categoryId;
+                data.tags = selectedTags.map(tag => ({
+                    ...(tag.id == null ? {} : {id: tag.id}),
+                    name: tag.name,
+                }));
             }
         }
         return {
@@ -183,6 +222,7 @@ export function useHarborDraft({
         categoryId,
         composedRaw,
         draftKey,
+        editImageMode,
         images,
         isEditingFirstPost,
         mode,
@@ -234,7 +274,9 @@ export function useHarborDraft({
             ...(Array.isArray(draftRef.current?.data?.appImages)
                 ? draftRef.current.data.appImages
                 : []),
-            ...(supportsImages ? getDraftImages(images) : []),
+            ...(supportsImages || mode === 'edit'
+                ? getDraftImages(images)
+                : []),
         ];
         draftRef.current = {
             sequence: 0,
@@ -245,7 +287,7 @@ export function useHarborDraft({
             await deleteHarborComposerDraft(accountId, draftKey);
         }
         deleteHarborDraftImageFiles(imagesToDelete);
-    }, [accountId, draftKey, images, supportsImages]);
+    }, [accountId, draftKey, images, mode, supportsImages]);
 
     useEffect(() => {
         if (sessionStatus !== 'signedIn' || !draftKey) {
@@ -276,6 +318,13 @@ export function useHarborDraft({
                 const data = draft.data;
                 draftRef.current = draft;
                 savedSignatureRef.current = JSON.stringify(data);
+                const restoredEditImageMode =
+                    mode === 'edit' && data.appImageEditMode === 'grid'
+                        ? 'grid'
+                        : 'manual';
+                if (mode === 'edit') {
+                    setEditImageMode(restoredEditImageMode);
+                }
                 setRaw(
                     typeof data.appText === 'string'
                         ? data.appText
@@ -288,7 +337,7 @@ export function useHarborDraft({
                     setTitle(data.title);
                 }
                 if (
-                    mode === 'newTopic' &&
+                    (mode === 'newTopic' || isEditingFirstPost) &&
                     data.categoryId != null
                 ) {
                     const restoredCategoryId = Number(data.categoryId);
@@ -302,13 +351,13 @@ export function useHarborDraft({
                         setCategoryId(restoredCategoryId);
                     }
                 } else if (
-                    mode === 'newTopic' &&
+                    (mode === 'newTopic' || isEditingFirstPost) &&
                     data.categoryId == null &&
                     !requiresCategory
                 ) {
                     setCategoryId(null);
                 }
-                if (mode === 'newTopic') {
+                if (mode === 'newTopic' || isEditingFirstPost) {
                     const draftCategory = categories.find(
                         category =>
                             Number(category.id) ===
@@ -329,9 +378,7 @@ export function useHarborDraft({
                         getRestoredTags(data.tags, availableTags),
                     );
                 }
-                if (supportsImages) {
-                    restoreDraftImages(data.appImages);
-                }
+                restoreDraftImages(data.appImages);
             })
             .catch(() => {
                 if (!controller.signal.aborted) {
@@ -357,10 +404,10 @@ export function useHarborDraft({
         restoreDraftImages,
         sessionStatus,
         setCategoryId,
+        setEditImageMode,
         setRaw,
         setSelectedTags,
         setTitle,
-        supportsImages,
         t,
         tags,
     ]);

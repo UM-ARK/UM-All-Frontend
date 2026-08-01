@@ -51,6 +51,7 @@ import HarborTopicDetailSkeleton from './topicDetail/HarborTopicDetailSkeleton';
 import {
     canShowFlagMenu,
     canUpdatePostReaction,
+    extractPostImages,
     getLikeAction,
     getReactionCount,
 } from './topicDetail/harborTopicModels';
@@ -645,12 +646,15 @@ const HarborTopicDetail = ({ route, navigation }) => {
                 topicId,
                 topicTitle: topic?.title || initialTopicTitle,
                 categoryId: topic?.category_id,
+                tags: topic?.tags,
+                editImageUrls: extractPostImages(post?.cooked),
             });
         },
         [
             initialTopicTitle,
             navigation,
             topic?.category_id,
+            topic?.tags,
             topic?.title,
             topicId,
         ],

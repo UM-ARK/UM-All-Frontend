@@ -2,13 +2,13 @@ import React, {useCallback, useRef} from 'react';
 import {
     ActivityIndicator,
     Pressable,
+    ScrollView,
     StyleSheet,
     Text,
     TextInput,
     View,
 } from 'react-native';
 
-import {Image} from 'expo-image';
 import {KeyboardStickyView} from 'react-native-keyboard-controller';
 import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import {scale, verticalScale} from 'react-native-size-matters';
@@ -16,6 +16,7 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useTranslation} from 'react-i18next';
 
 import {useTheme} from '../../../../components/ThemeContext';
+import HarborComposerImageGrid from './HarborComposerImageGrid';
 import {MAX_IMAGES_PER_POST} from './harborComposerImages';
 
 export const HarborReplyComposerState = ({
@@ -126,6 +127,7 @@ const HarborReplyComposerForm = ({
     } = composer;
     const {
         handleAddImages,
+        handleMoveImage,
         handleRemoveImage,
         handleRetryImage,
         hasReachedImageLimit,
@@ -193,92 +195,18 @@ const HarborReplyComposerForm = ({
                     />
 
                     {images.length > 0 ? (
-                        <View style={styles.imageRow}>
-                            {images.map(image => (
-                                <View
-                                    key={image.id}
-                                    style={[
-                                        styles.imageContainer,
-                                        {
-                                            backgroundColor:
-                                                theme.tonal.primary08,
-                                            borderColor:
-                                                image.status === 'failed'
-                                                    ? theme.unread
-                                                    : theme
-                                                        .themeColorUltraLight,
-                                        },
-                                    ]}>
-                                    <Image
-                                        contentFit="cover"
-                                        source={{uri: image.localUri}}
-                                        style={styles.image}
-                                    />
-                                    {image.status === 'pending' ||
-                                    image.status === 'uploading' ||
-                                    image.status === 'failed' ? (
-                                        <Pressable
-                                            accessibilityLabel={
-                                                image.status === 'failed'
-                                                    ? t('重試')
-                                                    : undefined
-                                            }
-                                            accessibilityRole={
-                                                image.status === 'failed'
-                                                    ? 'button'
-                                                    : undefined
-                                            }
-                                            disabled={
-                                                image.status !== 'failed'
-                                            }
-                                            onPress={() =>
-                                                handleRetryImage(image)
-                                            }
-                                            style={[
-                                                StyleSheet.absoluteFill,
-                                                styles.imageStatus,
-                                                {
-                                                    backgroundColor:
-                                                        theme.trueBlack,
-                                                },
-                                            ]}>
-                                            {image.status === 'failed' ? (
-                                                <MaterialCommunityIcons
-                                                    name="reload"
-                                                    size={scale(19)}
-                                                    color={theme.trueWhite}
-                                                />
-                                            ) : (
-                                                <ActivityIndicator
-                                                    size="small"
-                                                    color={theme.trueWhite}
-                                                />
-                                            )}
-                                        </Pressable>
-                                    ) : null}
-                                    <Pressable
-                                        accessibilityLabel={t('移除圖片')}
-                                        accessibilityRole="button"
-                                        hitSlop={scale(5)}
-                                        onPress={() =>
-                                            handleRemoveImage(image.id)
-                                        }
-                                        style={[
-                                            styles.removeImageButton,
-                                            {
-                                                backgroundColor:
-                                                    theme.trueBlack,
-                                            },
-                                        ]}>
-                                        <MaterialCommunityIcons
-                                            name="close"
-                                            size={scale(13)}
-                                            color={theme.trueWhite}
-                                        />
-                                    </Pressable>
-                                </View>
-                            ))}
-                        </View>
+                        <ScrollView
+                            contentContainerStyle={styles.imageGridContent}
+                            nestedScrollEnabled
+                            showsVerticalScrollIndicator={false}
+                            style={styles.imageGrid}>
+                            <HarborComposerImageGrid
+                                handleMoveImage={handleMoveImage}
+                                handleRemoveImage={handleRemoveImage}
+                                handleRetryImage={handleRetryImage}
+                                images={images}
+                            />
+                        </ScrollView>
                     ) : null}
 
                     {submitError ? (
@@ -404,11 +332,6 @@ const styles = StyleSheet.create({
         fontSize: scale(10),
         marginLeft: scale(8),
     },
-    image: {
-        borderRadius: scale(9),
-        height: '100%',
-        width: '100%',
-    },
     imageButton: {
         alignItems: 'center',
         borderRadius: scale(10),
@@ -416,28 +339,17 @@ const styles = StyleSheet.create({
         minHeight: scale(32),
         paddingHorizontal: scale(6),
     },
-    imageContainer: {
-        borderRadius: scale(9),
-        borderWidth: StyleSheet.hairlineWidth,
-        height: scale(46),
-        overflow: 'visible',
-        width: scale(46),
-    },
     imageCount: {
         fontSize: scale(10),
         fontWeight: '600',
         marginLeft: scale(4),
     },
-    imageRow: {
-        flexDirection: 'row',
-        gap: scale(7),
+    imageGrid: {
         marginTop: verticalScale(9),
+        maxHeight: verticalScale(210),
     },
-    imageStatus: {
-        alignItems: 'center',
-        borderRadius: scale(9),
-        justifyContent: 'center',
-        opacity: 0.58,
+    imageGridContent: {
+        paddingVertical: scale(1),
     },
     input: {
         borderRadius: scale(12),
@@ -450,16 +362,6 @@ const styles = StyleSheet.create({
     },
     page: {
         flex: 1,
-    },
-    removeImageButton: {
-        alignItems: 'center',
-        borderRadius: scale(10),
-        height: scale(20),
-        justifyContent: 'center',
-        position: 'absolute',
-        right: scale(-6),
-        top: scale(-6),
-        width: scale(20),
     },
     sendButton: {
         alignItems: 'center',

@@ -1,7 +1,11 @@
 import axios from 'axios';
 import qs from 'qs';
 
-import { ARK_HARBOR, ARK_HARBOR_AVATAR_TEMPLATE } from '../pathMap';
+import {
+    ARK_HARBOR,
+    ARK_HARBOR_ABSOLUTE_URL,
+    ARK_HARBOR_AVATAR_TEMPLATE,
+} from '../pathMap';
 import {
     getHarborHtmlAttribute,
     replaceHarborEmojiShortcodes,
@@ -2645,6 +2649,18 @@ export async function fetchHarborPostForEdit(postId, { signal } = {}) {
         throw new Error('Invalid Harbor editable post response: missing raw');
     }
 
+    const imageUrls = typeof post.cooked === 'string'
+        ? (post.cooked.match(/<img\b[^>]*>/gi) || [])
+            .filter(tag => {
+                const className = getHarborHtmlAttribute(tag, 'class');
+                return !className.split(/\s+/).includes('emoji');
+            })
+            .map(tag => ARK_HARBOR_ABSOLUTE_URL(
+                getHarborHtmlAttribute(tag, 'src'),
+            ))
+            .filter(Boolean)
+        : [];
+
     return {
         id: toNumberOrNull(post.id) ?? id,
         raw: post.raw,
@@ -2657,6 +2673,9 @@ export async function fetchHarborPostForEdit(postId, { signal } = {}) {
             : null,
         canDelete: Boolean(post.can_delete),
         canEdit: Boolean(post.can_edit),
+        ...(typeof post.cooked === 'string'
+            ? {cooked: post.cooked, imageUrls}
+            : {}),
     };
 }
 

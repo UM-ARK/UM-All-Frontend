@@ -10,6 +10,7 @@ import {
     canFlagPost,
     canShowFlagMenu,
     canUpdatePostReaction,
+    extractPostImages,
     flattenNestedPosts,
     formatHarborFlagTypesForPost,
     getFlagActions,
@@ -20,6 +21,21 @@ import {
     updateNestedPostTree,
     updateOptimisticFlag,
 } from '../harborTopicModels';
+
+describe('extractPostImages', () => {
+    it('以 lightbox 原圖地址提供 Composer 預覽映射', () => {
+        expect(
+            extractPostImages(
+                '<a class="lightbox" ' +
+                'href="https://assert.umall.one/original/1X/b27fa981.jpeg">' +
+                '<img src="https://assert.umall.one/optimized/1X/b27fa981.jpeg">' +
+                '</a>',
+            ),
+        ).toEqual([
+            'https://assert.umall.one/original/1X/b27fa981.jpeg',
+        ]);
+    });
+});
 
 describe('getHarborImagePressAction', () => {
     it('優先以父連結或圖片來源開啟相簿', () => {

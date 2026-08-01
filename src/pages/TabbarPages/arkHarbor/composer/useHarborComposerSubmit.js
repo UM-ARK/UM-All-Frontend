@@ -98,19 +98,29 @@ export function useHarborComposerSubmit({
                 count: maximumTitleLength,
             });
         }
-        if (isNewTopic && requiresCategory && categoryId == null) {
+        if (
+            (isNewTopic || isEditingFirstPost) &&
+            requiresCategory &&
+            categoryId == null
+        ) {
             return t('請選擇話題分類。');
         }
-        if (isNewTopic && selectedTags.length < minimumTagCount) {
+        if (
+            (isNewTopic || isEditingFirstPost) &&
+            selectedTags.length < minimumTagCount
+        ) {
             return t('此分類至少需要 {{count}} 個標籤。', {
                 count: minimumTagCount,
             });
         }
-        if (isNewTopic && !areSelectedTagsAllowed) {
+        if (
+            (isNewTopic || isEditingFirstPost) &&
+            !areSelectedTagsAllowed
+        ) {
             return t('此分類不接受已選擇的部分標籤，請重新選擇。');
         }
         if (
-            isNewTopic &&
+            (isNewTopic || isEditingFirstPost) &&
             maximumTagCount != null &&
             selectedTags.length > maximumTagCount
         ) {
@@ -210,7 +220,7 @@ export function useHarborComposerSubmit({
             }
             const result = isEdit
                 ? await updateHarborPost(route.params?.postId, {
-                    raw,
+                    raw: submissionRaw,
                     originalText,
                     topicId: Number(
                         editMetadata.topicId ??
@@ -223,7 +233,15 @@ export function useHarborComposerSubmit({
                         editMetadata.title ||
                         route.params?.topicTitle,
                     ...(isEditingFirstPost
-                        ? {title: title.trim()}
+                        ? {
+                            title: title.trim(),
+                            categoryId,
+                            tags: selectedTags,
+                            originalTags:
+                                editMetadata.tags ||
+                                route.params?.tags ||
+                                [],
+                        }
                         : {}),
                 })
                 : await createHarborPost({
@@ -313,7 +331,7 @@ export function useHarborComposerSubmit({
                 publishHarborTopicUpdate(resultTopicId, {reloadLists: true});
                 await onPublished();
                 Toast.show(
-                    t('貼文正文已更新，但話題標題更新失敗，請重新載入確認。'),
+                    t('貼文正文已更新，但部分話題資料更新失敗，請重新載入確認。'),
                 );
                 onSuccess(resultTopicId, resultPostNumber);
                 return;

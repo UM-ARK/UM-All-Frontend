@@ -342,6 +342,27 @@ export function useHarborComposerImages({composerSettings, t}) {
         uploadImages([image]);
     }, [uploadImages]);
 
+    const handleMoveImage = useCallback((imageId, offset) => {
+        trigger();
+        updateImages(current => {
+            const currentIndex = current.findIndex(
+                image => image.id === imageId,
+            );
+            const nextIndex = currentIndex + offset;
+            if (
+                currentIndex < 0 ||
+                nextIndex < 0 ||
+                nextIndex >= current.length
+            ) {
+                return current;
+            }
+            const nextImages = [...current];
+            const [image] = nextImages.splice(currentIndex, 1);
+            nextImages.splice(nextIndex, 0, image);
+            return nextImages;
+        });
+    }, [updateImages]);
+
     const restoreDraftImages = useCallback(draftImages => {
         const restoredImages = (
             Array.isArray(draftImages) ? draftImages : []
@@ -408,6 +429,7 @@ export function useHarborComposerImages({composerSettings, t}) {
         hasReachedImageLimit,
         hasUnreadyImages,
         handleAddImages,
+        handleMoveImage,
         handleRemoveImage,
         handleRetryImage,
         isPreparingImages,

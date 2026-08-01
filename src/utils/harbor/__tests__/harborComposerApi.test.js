@@ -16,6 +16,10 @@ import {
 
 jest.mock('../../pathMap', () => ({
     ARK_HARBOR: 'https://harbor.example.com',
+    ARK_HARBOR_ABSOLUTE_URL: value =>
+        value.startsWith('http')
+            ? value
+            : `https://harbor.example.com${value}`,
     ARK_HARBOR_AVATAR_TEMPLATE: template => template,
 }));
 
@@ -416,6 +420,28 @@ describe('Harbor Composer API', () => {
         await expect(fetchHarborPostForEdit(81)).rejects.toThrow(
             'Invalid Harbor editable post response: missing raw',
         );
+    });
+
+    it('載入編輯資料時提供既有圖片預覽地址', async () => {
+        getSpy.mockResolvedValue({
+            data: {
+                id: 81,
+                raw: '![圖片](upload://first.jpeg)',
+                cooked:
+                    '<p><img src="/uploads/first.jpeg"></p>' +
+                    '<img class="emoji" src="/images/emoji/smile.png">',
+                topic_id: 31,
+                post_number: 1,
+                can_edit: true,
+            },
+        });
+
+        await expect(fetchHarborPostForEdit(81)).resolves.toMatchObject({
+            cooked:
+                '<p><img src="/uploads/first.jpeg"></p>' +
+                '<img class="emoji" src="/images/emoji/smile.png">',
+            imageUrls: ['https://harbor.example.com/uploads/first.jpeg'],
+        });
     });
 
     it('單帖回應未提供 Topic tags 時保留 unknown 狀態', async () => {
