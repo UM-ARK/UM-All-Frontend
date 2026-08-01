@@ -23,6 +23,11 @@ import HarborCategoryIcon from './HarborCategoryIcon';
 
 const CARD_MARGIN_HORIZONTAL = scale(6);
 const CARD_PADDING_HORIZONTAL = scale(12);
+// 豎圖預覽比例（相對螢幕）
+const COVER_PORTRAIT_WIDTH_RATIO = 1 / 2.3;
+const COVER_PORTRAIT_HEIGHT_RATIO = 1 / 3.6;
+// 橫圖：更寬、更矮
+const COVER_LANDSCAPE_HEIGHT_RATIO = 1 / 4;
 
 const STATUS_CONFIG = {
     pinned: { icon: 'pin-outline', label: '置頂' },
@@ -137,6 +142,8 @@ const HarborTopicCard = ({
         ? ARK_HARBOR_ABSOLUTE_URL(topic.imageUrl)
         : '';
     const [coverFailed, setCoverFailed] = useState(false);
+    // null：尚未得知比例，先用豎圖尺寸佔位
+    const [isLandscape, setIsLandscape] = useState(null);
     const category = topic.category?.name ? topic.category : null;
     const statuses = Object.keys(STATUS_CONFIG).filter(status => {
         if (status === 'pinned') {
@@ -162,12 +169,17 @@ const HarborTopicCard = ({
         borderRadius: AVATAR_SIZE / 2,
         backgroundColor: theme.tonal.primary15,
     };
-    // 封面：半屏寬 × 三分之一屏高
-    const coverWidth = windowWidth / 2.3;
-    const coverHeight = windowHeight / 3.5;
+    // 豎圖：半屏左右寬 × 約 1/3.5 屏高；橫圖：貼齊內容區寬、高度更矮
+    const coverWidth = isLandscape
+        ? windowWidth / 1.5
+        : windowWidth * COVER_PORTRAIT_WIDTH_RATIO;
+    const coverHeight = isLandscape
+        ? windowHeight * COVER_LANDSCAPE_HEIGHT_RATIO
+        : windowHeight * COVER_PORTRAIT_HEIGHT_RATIO;
 
     useEffect(() => {
         setCoverFailed(false);
+        setIsLandscape(null);
     }, [coverUrl]);
 
     return (
@@ -294,6 +306,13 @@ const HarborTopicCard = ({
                         placeholderContentFit="cover"
                         transition={180}
                         recyclingKey={coverUrl}
+                        onLoad={event => {
+                            const width = Number(event?.source?.width);
+                            const height = Number(event?.source?.height);
+                            if (width > 0 && height > 0) {
+                                setIsLandscape(width > height);
+                            }
+                        }}
                         onError={() => setCoverFailed(true)}
                     />
                 </View>
