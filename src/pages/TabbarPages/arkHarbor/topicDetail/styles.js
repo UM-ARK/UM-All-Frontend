@@ -239,6 +239,10 @@ const styles = StyleSheet.create({
     firstPostBody: {
         marginTop: verticalScale(4),
     },
+    firstPostBodyCollapsed: {
+        maxHeight: verticalScale(132),
+        overflow: 'hidden',
+    },
     firstPostPlainTagRow: {
         marginTop: verticalScale(4),
     },
@@ -794,6 +798,36 @@ const styles = StyleSheet.create({
         fontSize: scale(13),
         fontWeight: '700',
         marginLeft: scale(6),
+    },
+    firstPostNavigation: {
+        position: 'absolute',
+        left: scale(34),
+        right: scale(34),
+        minHeight: verticalScale(40),
+        borderWidth: StyleSheet.hairlineWidth,
+        borderRadius: scale(20),
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 22,
+    },
+    firstPostNavigationButton: {
+        flex: 1,
+        minHeight: verticalScale(40),
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingHorizontal: scale(8),
+    },
+    firstPostNavigationText: {
+        ...uiStyle.defaultText,
+        fontSize: scale(12),
+        fontWeight: '600',
+        marginLeft: scale(5),
+    },
+    firstPostNavigationDivider: {
+        width: StyleSheet.hairlineWidth,
+        height: verticalScale(20),
     },
     modalPage: {
         flex: 1,

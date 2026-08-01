@@ -132,7 +132,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
         status: sessionStatus,
         user: harborUser,
     } = useHarborSession();
-    const { width } = useWindowDimensions();
+    const { height, width } = useWindowDimensions();
     const headerHeight = useHeaderHeight();
     const {
         black,
@@ -258,6 +258,8 @@ const HarborTopicDetail = ({ route, navigation }) => {
     const [topicActionBarHeight, setTopicActionBarHeight] = useState(
         verticalScale(48),
     );
+    const [firstPostBodyHeight, setFirstPostBodyHeight] = useState(0);
+    const [isFirstPostCollapsed, setIsFirstPostCollapsed] = useState(false);
 
     const firstPost = useMemo(
         () =>
@@ -273,6 +275,32 @@ const HarborTopicDetail = ({ route, navigation }) => {
         firstPost &&
         !canUpdatePostReaction(firstPost);
     const commentCount = Math.max(Number(topic?.posts_count || 1) - 1, 0);
+    const firstPostLongThreshold = Math.max(
+        height - headerHeight - topicActionBarHeight - verticalScale(24),
+        verticalScale(320),
+    );
+    const isFirstPostLong = firstPostBodyHeight > firstPostLongThreshold;
+    const showFirstPostNavigation =
+        isFirstPostLong && currentPostNumber === 1;
+
+    useEffect(() => {
+        setFirstPostBodyHeight(0);
+        setIsFirstPostCollapsed(false);
+    }, [topicId]);
+
+    const handleFirstPostBodyLayout = useCallback(event => {
+        if (isFirstPostCollapsed) {
+            return;
+        }
+        setFirstPostBodyHeight(event.nativeEvent.layout.height);
+    }, [isFirstPostCollapsed]);
+
+    const toggleFirstPostCollapsed = useCallback(() => {
+        setIsFirstPostCollapsed(current => !current);
+        requestAnimationFrame(() => {
+            scrollToPost(1, { animated: false, allowFetch: false });
+        });
+    }, [scrollToPost]);
 
     const listBottomInset =
         topicActionBarHeight + verticalScale(8);
@@ -744,6 +772,9 @@ const HarborTopicDetail = ({ route, navigation }) => {
                         onPressOpenOriginal={
                             isFirstPost ? openOriginalTopic : undefined
                         }
+                        onFirstPostBodyLayout={
+                            isFirstPost ? handleFirstPostBodyLayout : undefined
+                        }
                         onPressReply={scrollToPost}
                         onPressShare={sharePost}
                         onPressTag={openTag}
@@ -800,6 +831,9 @@ const HarborTopicDetail = ({ route, navigation }) => {
                         }
                         reactions={validReactions}
                         reactionsEnabled={validReactions.length > 0}
+                        isFirstPostCollapsed={
+                            isFirstPost && isFirstPostCollapsed
+                        }
                     />
                 </View>
             );
@@ -814,6 +848,8 @@ const HarborTopicDetail = ({ route, navigation }) => {
             confirmDeletePost,
             explainPostReactionDisabled,
             harborUser?.username,
+            handleFirstPostBodyLayout,
+            isFirstPostCollapsed,
             openAuthor,
             openBookmarkEditor,
             openCategory,
@@ -1014,6 +1050,84 @@ const HarborTopicDetail = ({ route, navigation }) => {
                 reactionsEnabled={validReactions.length > 0}
             />
 
+            {showFirstPostNavigation ? (
+                <View
+                    style={[
+                        styles.firstPostNavigation,
+                        {
+                            bottom: topicActionBarHeight + verticalScale(10),
+                            backgroundColor: white,
+                            borderColor: theme.disabled,
+                        },
+                    ]}>
+                    <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel={
+                            isFirstPostCollapsed
+                                ? t('展開正文')
+                                : t('收起正文')
+                        }
+                        onPress={() => {
+                            trigger();
+                            toggleFirstPostCollapsed();
+                        }}
+                        style={({ pressed }) => [
+                            styles.firstPostNavigationButton,
+                            pressed ? styles.pressedLink : null,
+                        ]}>
+                        <MaterialCommunityIcons
+                            name={
+                                isFirstPostCollapsed
+                                    ? 'arrow-expand-vertical'
+                                    : 'arrow-collapse-vertical'
+                            }
+                            size={scale(17)}
+                            color={themeColor}
+                        />
+                        <Text
+                            style={[
+                                styles.firstPostNavigationText,
+                                { color: themeColor },
+                            ]}>
+                            {isFirstPostCollapsed
+                                ? t('展開正文')
+                                : t('收起正文')}
+                        </Text>
+                    </Pressable>
+                    <View
+                        style={[
+                            styles.firstPostNavigationDivider,
+                            { backgroundColor: theme.disabled },
+                        ]}
+                    />
+                    <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel={t('查看評論')}
+                        onPress={() => {
+                            trigger();
+                            jumpToComments();
+                        }}
+                        style={({ pressed }) => [
+                            styles.firstPostNavigationButton,
+                            pressed ? styles.pressedLink : null,
+                        ]}>
+                        <MaterialCommunityIcons
+                            name="comment-outline"
+                            size={scale(17)}
+                            color={black.main}
+                        />
+                        <Text
+                            style={[
+                                styles.firstPostNavigationText,
+                                { color: black.main },
+                            ]}>
+                            {t('查看評論')}
+                            {commentCount > 0 ? ` ${commentCount}` : ''}
+                        </Text>
+                    </Pressable>
+                </View>
+            ) : null}
+
             {pendingNewPostIds.length > 0 ? (
                 <Pressable
                     onPress={() => {
@@ -1023,7 +1137,11 @@ const HarborTopicDetail = ({ route, navigation }) => {
                     style={({ pressed }) => [
                         styles.newRepliesButton,
                         {
-                            bottom: topicActionBarHeight + verticalScale(10),
+                            bottom:
+                                topicActionBarHeight +
+                                verticalScale(
+                                    showFirstPostNavigation ? 58 : 10,
+                                ),
                             backgroundColor: pressed
                                 ? tonal.primary50
                                 : themeColor,

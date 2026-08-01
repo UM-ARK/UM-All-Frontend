@@ -195,6 +195,7 @@ const HarborPostCard = memo(
         onPressLink,
         onPressOpenNotifications,
         onPressOpenOriginal,
+        onFirstPostBodyLayout,
         onPressReply,
         onPressShare,
         onPressTag,
@@ -217,6 +218,7 @@ const HarborPostCard = memo(
         reactionDisabled,
         reactions,
         reactionsEnabled,
+        isFirstPostCollapsed,
     }) => {
         const { theme } = useTheme();
         const { t, i18n } = useTranslation('harbor');
@@ -895,22 +897,27 @@ const HarborPostCard = memo(
                             style={[
                                 styles.postBody,
                                 styles.firstPostBody,
+                                isFirstPostCollapsed
+                                    ? styles.firstPostBodyCollapsed
+                                    : null,
                             ]}>
-                            <HarborPostContent
-                                cooked={post.cooked}
-                                contentWidth={contentWidth}
-                                imageUrls={imageUrls}
-                                onOpenImage={onOpenImage}
-                                onPressLink={onPressLink}
-                                postUrl={postUrl}
-                                forceInteractiveFallback={Boolean(postEvent)}>
-                                {postEvent ? (
-                                    <HarborPostEventCard
-                                        event={postEvent}
-                                        postUrl={postUrl}
-                                    />
-                                ) : null}
-                            </HarborPostContent>
+                            <View onLayout={onFirstPostBodyLayout}>
+                                <HarborPostContent
+                                    cooked={post.cooked}
+                                    contentWidth={contentWidth}
+                                    imageUrls={imageUrls}
+                                    onOpenImage={onOpenImage}
+                                    onPressLink={onPressLink}
+                                    postUrl={postUrl}
+                                    forceInteractiveFallback={Boolean(postEvent)}>
+                                    {postEvent ? (
+                                        <HarborPostEventCard
+                                            event={postEvent}
+                                            postUrl={postUrl}
+                                        />
+                                    ) : null}
+                                </HarborPostContent>
+                            </View>
                         </View>
 
                         {hasTopicTags ? (
