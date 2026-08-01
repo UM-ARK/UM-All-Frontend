@@ -14,6 +14,7 @@ import {
     fetchHarborNotificationPage,
     fetchHarborNestedPostChildren,
     fetchHarborNotifications,
+    fetchHarborProfileMetadata,
     fetchHarborSearch,
     fetchHarborSiteCapabilities,
     fetchHarborTags,
@@ -39,6 +40,7 @@ import {
     setHarborTopicNotificationLevel,
     toggleHarborPostReaction,
     unlikeHarborPost,
+    updateHarborProfile,
     updateHarborBookmark,
     validateActiveHarborSession,
 } from '../harborApi';
@@ -171,6 +173,99 @@ describe('Harbor API 資料正規化', () => {
                 unavailable: true,
             }),
         ).toEqual(['latest', 'top']);
+    });
+
+    it('保留可編輯個人資料欄位並識別 UMer 群組', async () => {
+        getSpy
+            .mockResolvedValueOnce({
+                data: {
+                    current_user: {
+                        username: 'ark-user',
+                    },
+                },
+            })
+            .mockResolvedValueOnce({
+                data: {
+                    user: {
+                        username: 'ark-user',
+                        name: 'ARK User',
+                        bio_raw: 'Harbor 簡介',
+                        location: '澳門',
+                        website: 'https://umall.one',
+                        user_fields: {'1': '在讀'},
+                        groups: [{id: 41, name: 'UMer'}],
+                        can_edit: true,
+                        can_edit_name: true,
+                        can_change_bio: true,
+                        can_change_location: true,
+                        can_change_website: true,
+                    },
+                },
+            })
+            .mockResolvedValueOnce({data: {user_summary: {}}})
+            .mockResolvedValueOnce({data: {badges: [], user_badges: []}});
+
+        const result = await fetchCurrentHarborUser({
+            userApiKey: 'key',
+            clientId: 'client',
+        });
+
+        expect(result.isUMer).toBe(true);
+        expect(result.profile).toEqual({
+            bio: 'Harbor 簡介',
+            location: '澳門',
+            website: 'https://umall.one',
+            workStatus: '在讀',
+            canEdit: true,
+            canChangeBio: true,
+            canChangeLocation: true,
+            canChangeWebsite: true,
+        });
+    });
+
+    it('取得工作狀態欄位設定並更新個人資料', async () => {
+        getSpy.mockResolvedValueOnce({
+            data: {
+                user_fields: [
+                    {
+                        id: 1,
+                        name: '工作狀態',
+                        editable: true,
+                        required: true,
+                        options: ['在讀', '在職'],
+                    },
+                ],
+            },
+        });
+        putSpy.mockResolvedValueOnce({data: {success: 'OK'}});
+
+        await expect(fetchHarborProfileMetadata()).resolves.toEqual({
+            workStatusField: {
+                id: 1,
+                editable: true,
+                required: true,
+                options: ['在讀', '在職'],
+            },
+        });
+        await expect(
+            updateHarborProfile('ark user', {
+                bio: 'Harbor 簡介',
+                location: '澳門',
+                website: 'https://umall.one',
+                workStatus: '在讀',
+                workStatusFieldId: 1,
+            }),
+        ).resolves.toEqual({success: 'OK'});
+        expect(putSpy).toHaveBeenCalledWith(
+            '/u/ark%20user.json',
+            {
+                bio_raw: 'Harbor 簡介',
+                location: '澳門',
+                website: 'https://umall.one',
+                user_fields: {'1': '在讀'},
+            },
+            {signal: undefined},
+        );
     });
 
     it('Secondary profile API 失敗時保留同帳號上次成功資料', async () => {

@@ -1362,6 +1362,13 @@ function normalizeProfile(
     const currentUnreadMessages = toNumberOrNull(
         currentUser.unread_private_messages,
     );
+    const previousProfile = matchingPreviousUser?.profile || {};
+    const profileGroups = Array.isArray(profile.groups)
+        ? profile.groups
+        : null;
+    const isUMer = profileGroups
+        ? profileGroups.some(group => group?.name === 'UMer')
+        : Boolean(matchingPreviousUser?.isUMer);
 
     return {
         displayName:
@@ -1387,6 +1394,41 @@ function normalizeProfile(
         avatarUrl: avatarTemplate
             ? ARK_HARBOR_AVATAR_TEMPLATE(avatarTemplate, 144)
             : matchingPreviousUser?.avatarUrl || null,
+        isUMer,
+        profile: {
+            bio:
+                typeof profile.bio_raw === 'string'
+                    ? profile.bio_raw
+                    : previousProfile.bio || '',
+            location:
+                typeof profile.location === 'string'
+                    ? profile.location
+                    : previousProfile.location || '',
+            website:
+                typeof profile.website === 'string'
+                    ? profile.website
+                    : previousProfile.website || '',
+            workStatus:
+                typeof profile.user_fields?.['1'] === 'string'
+                    ? profile.user_fields['1']
+                    : previousProfile.workStatus || '',
+            canEdit:
+                typeof profile.can_edit === 'boolean'
+                    ? profile.can_edit
+                    : Boolean(previousProfile.canEdit),
+            canChangeBio:
+                typeof profile.can_change_bio === 'boolean'
+                    ? profile.can_change_bio
+                    : Boolean(previousProfile.canChangeBio),
+            canChangeLocation:
+                typeof profile.can_change_location === 'boolean'
+                    ? profile.can_change_location
+                    : Boolean(previousProfile.canChangeLocation),
+            canChangeWebsite:
+                typeof profile.can_change_website === 'boolean'
+                    ? profile.can_change_website
+                    : Boolean(previousProfile.canChangeWebsite),
+        },
         contributions: [
             {
                 key: 'topicsCreated',
@@ -1763,6 +1805,76 @@ export function fetchCachedHarborComposerSettings({
 export async function fetchHarborSiteCapabilities({ signal } = {}) {
     const response = await harborApi.get('/site.json', { signal });
     return normalizeSiteCapabilities(response.data);
+}
+
+export async function fetchHarborProfileMetadata({ signal } = {}) {
+    const response = await harborApi.get('/site.json', { signal });
+    const userFields = Array.isArray(response.data?.user_fields)
+        ? response.data.user_fields
+        : [];
+    const workStatusField = userFields.find(
+        field => field?.name === '工作狀態' || Number(field?.id) === 1,
+    );
+
+    return {
+        workStatusField: workStatusField
+            ? {
+                id: Number(workStatusField.id),
+                editable: workStatusField.editable !== false,
+                required: Boolean(workStatusField.required),
+                options: Array.isArray(workStatusField.options)
+                    ? workStatusField.options.filter(
+                        option =>
+                            typeof option === 'string' && option.trim(),
+                    )
+                    : [],
+            }
+            : null,
+    };
+}
+
+export async function updateHarborProfile(
+    username,
+    {
+        bio,
+        location,
+        website,
+        workStatus,
+        workStatusFieldId,
+    },
+    { signal } = {},
+) {
+    if (typeof username !== 'string' || !username.trim()) {
+        throw new TypeError('Invalid Harbor username');
+    }
+
+    const payload = {};
+    if (bio != null) {
+        payload.bio_raw = String(bio).trim();
+    }
+    if (location != null) {
+        payload.location = String(location).trim();
+    }
+    if (website != null) {
+        payload.website = String(website).trim();
+    }
+    if (workStatus != null) {
+        const fieldId = Number(workStatusFieldId);
+        if (!Number.isInteger(fieldId) || fieldId <= 0) {
+            throw new TypeError('Invalid Harbor work status field');
+        }
+        payload.user_fields = {
+            [fieldId]: String(workStatus).trim(),
+        };
+    }
+
+    const encodedUsername = encodeURIComponent(username.trim());
+    const response = await harborApi.put(
+        `/u/${encodedUsername}.json`,
+        payload,
+        { signal },
+    );
+    return response.data;
 }
 
 function flagTypeRequiresMessage(type) {

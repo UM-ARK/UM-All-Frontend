@@ -96,9 +96,9 @@ const HarborAccountSettingsPage = ({navigation}) => {
         {
             key: 'profile',
             title: t('編輯 Harbor 個人資料'),
-            description: t('更新頭像、簡介與公開資料'),
+            description: t('更新工作狀態、簡介與公開資料'),
             icon: 'person-outline',
-            onPress: () => openHarborPath(`/u/${username}/preferences/profile`),
+            onPress: () => navigation.navigate('HarborProfileEdit'),
         },
         {
             key: 'web',

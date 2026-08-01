@@ -34,6 +34,7 @@ import HarborTopicListPage from './pages/TabbarPages/arkHarbor/HarborTopicListPa
 import HarborComposerPage from './pages/TabbarPages/arkHarbor/HarborComposerPage';
 import HarborDraftsPage from './pages/TabbarPages/arkHarbor/HarborDraftsPage';
 import HarborAccountSettingsPage from './pages/TabbarPages/my/pages/HarborAccountSettingsPage';
+import HarborProfilePage from './pages/TabbarPages/my/pages/HarborProfilePage';
 import HarborActivityPage from './pages/TabbarPages/my/pages/HarborActivityPage';
 import HarborBadgesPage from './pages/TabbarPages/my/pages/HarborBadgesPage';
 import HarborInboxPage from './pages/TabbarPages/my/pages/HarborInboxPage';
@@ -412,6 +413,10 @@ const Nav = () => {
                     <Stack.Screen
                         name="HarborAccountSettings"
                         component={HarborAccountSettingsPage}
+                    />
+                    <Stack.Screen
+                        name="HarborProfileEdit"
+                        component={HarborProfilePage}
                     />
                 </Stack.Group>
             </Stack.Navigator>
