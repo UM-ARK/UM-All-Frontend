@@ -332,7 +332,9 @@ const HarborActivityPage = ({
                                 : t(
                                     isTopicsKind
                                         ? '你建立的話題會顯示在這裡。'
-                                        : '你在 Harbor 的新活動會顯示在這裡。',
+                                        : kind === 'likesReceived'
+                                          ? '別人給你的讚會顯示在這裡。'
+                                          : '你在 Harbor 的新活動會顯示在這裡。',
                                 )
                         }
                         actionLabel={loadError ? t('重試') : undefined}

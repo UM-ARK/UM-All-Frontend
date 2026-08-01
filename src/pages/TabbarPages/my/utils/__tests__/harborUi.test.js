@@ -3,6 +3,7 @@ import {
     getHarborInboxActor,
     getHarborNotificationPresentation,
     getHarborNotificationTarget,
+    getHarborReactionEmoji,
 } from '../harborUi';
 
 describe('Harbor 相對時間格式', () => {
@@ -31,6 +32,15 @@ describe('Harbor 相對時間格式', () => {
             '剛剛',
         );
         expect(formatRelativeTime('invalid', 'tc', now)).toBe('');
+    });
+});
+
+describe('Harbor 反應 emoji', () => {
+    it('將常見 shortcode 轉成 Unicode', () => {
+        expect(getHarborReactionEmoji('clap')).toBe('👏');
+        expect(getHarborReactionEmoji(':heart:')).toBe('❤️');
+        expect(getHarborReactionEmoji('unknown')).toBe('');
+        expect(getHarborReactionEmoji('')).toBe('');
     });
 });
 

@@ -467,6 +467,108 @@ describe('Harbor API 資料正規化', () => {
         ]);
     });
 
+    it('收到的讚列表使用 reactions-received，並帶按讚者頭像', async () => {
+        getSpy.mockResolvedValue({
+            data: [
+                {
+                    id: 33,
+                    user_id: 4,
+                    post_id: 42,
+                    created_at: '2026-08-01T08:19:35.833Z',
+                    user: {
+                        id: 4,
+                        username: 'yyyyyyounger',
+                        avatar_template:
+                            '/user_avatar/harbor.umall.one/yyyyyyounger/{size}/20_2.png',
+                    },
+                    post: {
+                        excerpt: '可以使用Event功能開啟時間表',
+                        id: 42,
+                        topic_id: 27,
+                        topic_title: '可以使用Event功能開啟時間表（倒計時）',
+                        post_number: 1,
+                        topic: {
+                            id: 27,
+                            title: '可以使用Event功能開啟時間表（倒計時）',
+                        },
+                    },
+                    reaction: {
+                        id: 55,
+                        reaction_type: 'emoji',
+                        reaction_value: 'clap',
+                        created_at: '2026-08-01T08:19:35.830Z',
+                    },
+                },
+            ],
+        });
+
+        const result = await fetchHarborUserActions('qq_yyy', {
+            kind: 'likesReceived',
+        });
+
+        expect(getSpy).toHaveBeenCalledWith(
+            '/discourse-reactions/posts/reactions-received.json',
+            expect.objectContaining({
+                params: expect.objectContaining({
+                    username: 'qq_yyy',
+                }),
+            }),
+        );
+        expect(result.items).toEqual([
+            expect.objectContaining({
+                id: '33',
+                kind: 'likeReceived',
+                title: '可以使用Event功能開啟時間表（倒計時）',
+                excerpt: '可以使用Event功能開啟時間表',
+                topicId: 27,
+                postNumber: 1,
+                actingUsername: 'yyyyyyounger',
+                reactionValue: 'clap',
+                avatarUrl: expect.stringContaining('yyyyyyounger'),
+            }),
+        ]);
+        expect(result.hasMore).toBe(false);
+        expect(result.nextOffset).toBeNull();
+    });
+
+    it('收到的讚列表支援 before_reaction_user_id 分頁', async () => {
+        getSpy.mockResolvedValue({
+            data: Array.from({length: 20}, (_, index) => ({
+                id: 100 - index,
+                created_at: '2026-08-01T08:00:00Z',
+                user: {
+                    username: `user-${index}`,
+                    avatar_template: `/user_avatar/harbor.umall.one/user-${index}/{size}/1.png`,
+                },
+                post: {
+                    topic_id: 10 + index,
+                    topic_title: `話題 ${index}`,
+                    post_number: 1,
+                    excerpt: '內容',
+                },
+                reaction: {reaction_value: 'heart'},
+            })),
+        });
+
+        const result = await fetchHarborUserActions('qq_yyy', {
+            kind: 'likesReceived',
+            offset: 50,
+        });
+
+        expect(getSpy).toHaveBeenCalledWith(
+            '/discourse-reactions/posts/reactions-received.json',
+            expect.objectContaining({
+                params: {
+                    username: 'qq_yyy',
+                    before_reaction_user_id: 50,
+                },
+            }),
+        );
+        expect(result.hasMore).toBe(true);
+        expect(result.nextOffset).toBe(81);
+        expect(result.items).toHaveLength(20);
+    });
+
     it('收藏列表支援分頁、名稱及提醒狀態', async () => {
         getSpy.mockResolvedValue({
             data: {

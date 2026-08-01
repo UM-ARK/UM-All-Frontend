@@ -67,6 +67,16 @@ const HarborProfileOverview = ({
                             }),
                     };
                 }
+                if (item.key === 'likesReceived') {
+                    return {
+                        ...item,
+                        onPress: () =>
+                            navigation.navigate('HarborActivity', {
+                                kind: 'likesReceived',
+                                title: t('收到的讚'),
+                            }),
+                    };
+                }
                 return item;
             });
     }, [navigation, t, user.contributions]);

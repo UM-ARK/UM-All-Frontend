@@ -1092,6 +1092,39 @@ function normalizeReactionGiven(item, index) {
     };
 }
 
+// discourse-reactions「收到的讚」列表項目（含按讚者頭像）
+function normalizeReactionReceived(item, index) {
+    const post = item?.post || {};
+    const topic = post.topic || {};
+    const actor = item?.user || {};
+    const reaction = item?.reaction || {};
+    const reactionId = item?.id;
+    const avatarTemplate =
+        actor.avatar_template || actor.avatarTemplate || '';
+    return {
+        id: String(
+            reactionId ||
+            item?.post_id ||
+            post.id ||
+            `reaction-received-${index}`,
+        ),
+        kind: 'likeReceived',
+        title: post.topic_title || topic.title || topic.fancy_title || '',
+        excerpt: stripHtml(post.excerpt || ''),
+        createdAt: item?.created_at || reaction.created_at || '',
+        topicId: Number(post.topic_id || topic.id) || null,
+        postNumber: Number(post.post_number) || null,
+        actingUsername: actor.username || '',
+        avatarUrl: avatarTemplate
+            ? ARK_HARBOR_AVATAR_TEMPLATE(avatarTemplate, 72)
+            : '',
+        reactionValue:
+            typeof reaction.reaction_value === 'string'
+                ? reaction.reaction_value.trim()
+                : '',
+    };
+}
+
 function mergeLikeActivityItems(primaryItems, secondaryItems) {
     const seen = new Set();
     const merged = [];
@@ -1870,6 +1903,40 @@ export async function fetchHarborUserActions(
                 nextOffset: nextReactionOffset,
             };
         }
+
+        return {
+            items: reactionItems,
+            hasMore: hasMoreReactions,
+            nextOffset: nextReactionOffset,
+        };
+    }
+
+    // 收到的讚：discourse-reactions reactions-received
+    if (kind === 'likesReceived') {
+        const beforeReactionUserId = Math.max(0, Number(offset) || 0);
+        const reactionParams = { username };
+        if (beforeReactionUserId > 0) {
+            reactionParams.before_reaction_user_id = beforeReactionUserId;
+        }
+
+        const reactionResponse = await harborApi.get(
+            '/discourse-reactions/posts/reactions-received.json',
+            {
+                params: reactionParams,
+                signal,
+            },
+        );
+        const reactionRows = Array.isArray(reactionResponse.data)
+            ? reactionResponse.data
+            : reactionResponse.data?.user_reactions ||
+              reactionResponse.data?.reactions ||
+              [];
+        const reactionItems = reactionRows.map(normalizeReactionReceived);
+        const hasMoreReactions =
+            reactionItems.length >= REACTION_GIVEN_PAGE_SIZE;
+        const nextReactionOffset = hasMoreReactions
+            ? Number(reactionItems[reactionItems.length - 1]?.id) || null
+            : null;
 
         return {
             items: reactionItems,
