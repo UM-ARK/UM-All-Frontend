@@ -47,6 +47,7 @@ const HarborSearchResults = ({
     results,
     history,
     actions,
+    resultTab,
     headerHeight,
     onCollapseSearch,
     onResultPress,
@@ -71,6 +72,7 @@ const HarborSearchResults = ({
         handleLoadMore,
         removeHistory,
     } = actions;
+    const isUsersTab = resultTab === 'users';
     const historyItems = useMemo(
         () =>
             historyRecords.map(record => ({
@@ -80,7 +82,13 @@ const HarborSearchResults = ({
             })),
         [historyRecords],
     );
-    const listData = hasSearched ? items : historyItems;
+    const filteredItems = useMemo(() => {
+        if (isUsersTab) {
+            return items.filter(item => item.kind === 'user');
+        }
+        return items.filter(item => item.kind !== 'user');
+    }, [isUsersTab, items]);
+    const listData = hasSearched ? filteredItems : historyItems;
 
     const renderItem = useCallback(
         ({item}) => {
@@ -184,7 +192,7 @@ const HarborSearchResults = ({
 
     const renderListHeader = useCallback(() => {
         if (hasSearched) {
-            if (isLoading || error || items.length === 0) {
+            if (isLoading || error || filteredItems.length === 0) {
                 return null;
             }
             return (
@@ -193,7 +201,7 @@ const HarborSearchResults = ({
                         styles.sectionTitle,
                         {color: theme.black.second},
                     ]}>
-                    {t('{{count}} 個搜尋結果', {count: items.length})}
+                    {t('{{count}} 個搜尋結果', {count: filteredItems.length})}
                 </Text>
             );
         }
@@ -234,10 +242,10 @@ const HarborSearchResults = ({
         );
     }, [
         error,
+        filteredItems.length,
         hasSearched,
         historyRecords.length,
         isLoading,
-        items.length,
         onClearHistory,
         onCollapseSearch,
         t,
@@ -286,8 +294,16 @@ const HarborSearchResults = ({
             return (
                 <HarborFullState
                     icon="magnify-close"
-                    title={t('沒有找到搜尋結果')}
-                    description={t('試試其他關鍵字或調整搜尋篩選。')}
+                    title={
+                        isUsersTab
+                            ? t('沒有找到使用者')
+                            : t('沒有找到搜尋結果')
+                    }
+                    description={
+                        isUsersTab
+                            ? t('試試其他關鍵字。')
+                            : t('試試其他關鍵字或調整搜尋篩選。')
+                    }
                 />
             );
         }
@@ -300,9 +316,13 @@ const HarborSearchResults = ({
                 )}
             />
         );
-    }, [error, hasSearched, isLoading, runSearch, t, theme]);
+    }, [error, hasSearched, isLoading, isUsersTab, runSearch, t, theme]);
 
     const renderFooter = useCallback(() => {
+        // 用戶分頁僅首頁結果，不顯示載入更多
+        if (isUsersTab) {
+            return <View style={styles.footerSpacing} />;
+        }
         if (isLoadingMore) {
             return (
                 <View style={styles.footerLoading}>
@@ -328,6 +348,7 @@ const HarborSearchResults = ({
     }, [
         handleLoadMore,
         isLoadingMore,
+        isUsersTab,
         loadMoreError,
         t,
         theme.themeColor,
@@ -341,7 +362,7 @@ const HarborSearchResults = ({
             ListHeaderComponent={renderListHeader}
             ListEmptyComponent={renderEmptyState}
             ListFooterComponent={renderFooter}
-            onEndReached={handleLoadMore}
+            onEndReached={isUsersTab ? undefined : handleLoadMore}
             onEndReachedThreshold={0.35}
             onScrollBeginDrag={onCollapseSearch}
             keyboardDismissMode="on-drag"

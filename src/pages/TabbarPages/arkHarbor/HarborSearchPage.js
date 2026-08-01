@@ -45,11 +45,12 @@ const HarborSearchPage = ({route, navigation}) => {
         onSearchStart: collapseSearchFocus,
     });
     const {criteria, options, results, history, actions} = search;
-    const {query, category, tag} = criteria;
+    const {category, tag, resultTab} = criteria;
     const {categories, tags} = options;
     const {
         setCategory,
         setTag,
+        selectResultTab,
         runSearch,
         invalidateSearchResults,
         clearHistory,
@@ -101,14 +102,15 @@ const HarborSearchPage = ({route, navigation}) => {
             if (!username) {
                 return;
             }
-            // 清空關鍵字，改以作者篩選列出該作者貼文（避免沿用原關鍵字導致幾乎無結果）
+            // 切回話題分頁，清空關鍵字並以作者篩選列出貼文
+            selectResultTab('topics');
             searchPanelRef.current?.expandFilters();
             runSearch({
                 queryOverride: '',
                 authorOverride: username,
             });
         },
-        [runSearch],
+        [runSearch, selectResultTab],
     );
 
     const handleCategoryPress = useCallback(
@@ -186,6 +188,7 @@ const HarborSearchPage = ({route, navigation}) => {
                 results={results}
                 history={history}
                 actions={actions}
+                resultTab={resultTab}
                 headerHeight={headerHeight}
                 onCollapseSearch={collapseSearchFocus}
                 onResultPress={handleResultPress}

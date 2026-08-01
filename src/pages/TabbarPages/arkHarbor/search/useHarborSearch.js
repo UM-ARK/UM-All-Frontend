@@ -38,6 +38,7 @@ const useHarborSearch = ({initialQuery, onSearchStart}) => {
     const [author, setAuthor] = useState('');
     const [timeRange, setTimeRange] = useState('all');
     const [order, setOrder] = useState('relevance');
+    const [resultTab, setResultTab] = useState('topics');
     const [hasSearched, setHasSearched] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -109,6 +110,7 @@ const useHarborSearch = ({initialQuery, onSearchStart}) => {
         async ({
             queryOverride,
             authorOverride,
+            orderOverride,
             page = 0,
             append = false,
         } = {}) => {
@@ -117,6 +119,8 @@ const useHarborSearch = ({initialQuery, onSearchStart}) => {
             ).trim();
             const normalizedAuthor =
                 authorOverride === undefined ? author : authorOverride;
+            const normalizedOrder =
+                orderOverride === undefined ? order : orderOverride;
             // 允許空關鍵字：僅作者／分類等篩選時仍組出有效 Discourse 查詢（如 @username）
             const searchQuery = append
                 ? activeSearchRef.current?.searchQuery
@@ -126,7 +130,7 @@ const useHarborSearch = ({initialQuery, onSearchStart}) => {
                     tag,
                     author: normalizedAuthor,
                     after: getHarborSearchAfterDate(timeRange),
-                    order,
+                    order: normalizedOrder,
                 });
             const userQuery = append
                 ? activeSearchRef.current?.userQuery
@@ -164,6 +168,9 @@ const useHarborSearch = ({initialQuery, onSearchStart}) => {
                 if (authorOverride !== undefined) {
                     setAuthor(normalizedAuthor);
                 }
+                if (orderOverride !== undefined) {
+                    setOrder(normalizedOrder);
+                }
                 const historyQuery =
                     normalizedQuery ||
                     (normalizedAuthor
@@ -179,7 +186,8 @@ const useHarborSearch = ({initialQuery, onSearchStart}) => {
                     hasTag: Boolean(tag),
                     hasAuthor: Boolean(normalizedAuthor),
                     timeRange,
-                    order,
+                    order: normalizedOrder,
+                    resultTab,
                 });
             }
 
@@ -231,8 +239,35 @@ const useHarborSearch = ({initialQuery, onSearchStart}) => {
                 }
             }
         },
-        [author, category, onSearchStart, order, query, tag, timeRange],
+        [
+            author,
+            category,
+            onSearchStart,
+            order,
+            query,
+            resultTab,
+            tag,
+            timeRange,
+        ],
     );
+
+    const selectOrder = useCallback(
+        nextOrder => {
+            if (nextOrder === order) {
+                return;
+            }
+            if (hasSearched && activeSearchRef.current) {
+                runSearch({orderOverride: nextOrder});
+                return;
+            }
+            setOrder(nextOrder);
+        },
+        [hasSearched, order, runSearch],
+    );
+
+    const selectResultTab = useCallback(nextTab => {
+        setResultTab(nextTab);
+    }, []);
 
     const handleLoadMore = useCallback(() => {
         if (
@@ -279,12 +314,12 @@ const useHarborSearch = ({initialQuery, onSearchStart}) => {
         controllerRef.current?.abort();
     }, []);
 
+    // 排序已獨立為第二層，不計入篩選徽章
     const activeFilterCount =
         Number(Boolean(category)) +
         Number(Boolean(tag)) +
         Number(Boolean(author.trim())) +
-        Number(timeRange !== 'all') +
-        Number(order !== 'relevance');
+        Number(timeRange !== 'all');
 
     return {
         criteria: {
@@ -294,6 +329,7 @@ const useHarborSearch = ({initialQuery, onSearchStart}) => {
             author,
             timeRange,
             order,
+            resultTab,
             activeFilterCount,
         },
         options: {
@@ -322,6 +358,8 @@ const useHarborSearch = ({initialQuery, onSearchStart}) => {
             setAuthor,
             setTimeRange,
             setOrder,
+            selectOrder,
+            selectResultTab,
             runSearch,
             invalidateSearchResults,
             resetFilters,

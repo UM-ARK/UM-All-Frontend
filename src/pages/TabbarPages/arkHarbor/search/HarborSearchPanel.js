@@ -60,6 +60,7 @@ const HarborSearchPanel = forwardRef(
             author,
             timeRange,
             order,
+            resultTab,
             activeFilterCount,
         } = criteria;
         const {filterOptionsError} = options;
@@ -68,11 +69,13 @@ const HarborSearchPanel = forwardRef(
             handleQueryChange,
             setAuthor,
             setTimeRange,
-            setOrder,
+            selectOrder,
+            selectResultTab,
             runSearch,
             invalidateSearchResults,
             resetFilters,
         } = actions;
+        const isTopicsTab = resultTab === 'topics';
 
         const searchInputOuterAnimated = useAnimatedStyle(() => ({
             marginRight: withTiming(
@@ -126,6 +129,38 @@ const HarborSearchPanel = forwardRef(
             }
             runSearch();
         }, [author, collapseSearchFocus, query, runSearch]);
+
+        const handleSelectResultTab = useCallback(
+            nextTab => {
+                trigger();
+                collapseSearchFocus();
+                if (nextTab === 'users') {
+                    setFiltersExpanded(false);
+                    selectResultTab('users');
+                    return;
+                }
+                // 已在話題分頁：再點一次才展開／收合篩選；從用戶切過來時不展開
+                if (isTopicsTab) {
+                    setFiltersExpanded(current => !current);
+                    return;
+                }
+                setFiltersExpanded(false);
+                selectResultTab('topics');
+            },
+            [collapseSearchFocus, isTopicsTab, selectResultTab],
+        );
+
+        const handleToggleFilters = useCallback(() => {
+            trigger();
+            collapseSearchFocus();
+            // 僅在話題分頁可展開篩選；從用戶分頁點篩選圖示只切回話題
+            if (!isTopicsTab) {
+                setFiltersExpanded(false);
+                selectResultTab('topics');
+                return;
+            }
+            setFiltersExpanded(current => !current);
+        }, [collapseSearchFocus, isTopicsTab, selectResultTab]);
 
         return (
             <View
@@ -229,61 +264,130 @@ const HarborSearchPanel = forwardRef(
                         </TouchableScale>
                     </Animated.View>
                 </View>
-                <View style={styles.filterToolbar}>
+
+                {/* 第一層：話題｜用戶 */}
+                <View style={styles.resultTabRow}>
+                    <View style={styles.resultTab}>
+                        <Pressable
+                            accessibilityRole="tab"
+                            accessibilityState={{selected: isTopicsTab}}
+                            onPress={() => handleSelectResultTab('topics')}
+                            style={({pressed}) => [
+                                styles.resultTabLabel,
+                                pressed && {opacity: 0.7},
+                            ]}>
+                            <Text
+                                style={[
+                                    styles.resultTabText,
+                                    {
+                                        color: isTopicsTab
+                                            ? theme.black.main
+                                            : theme.black.third,
+                                        fontWeight: isTopicsTab
+                                            ? '700'
+                                            : '500',
+                                    },
+                                ]}>
+                                {t('話題')}
+                            </Text>
+                        </Pressable>
+                        <Pressable
+                            accessibilityRole="button"
+                            accessibilityLabel={
+                                activeFilterCount > 0
+                                    ? t('篩選（{{count}}）', {
+                                          count: activeFilterCount,
+                                      })
+                                    : t('篩選')
+                            }
+                            accessibilityState={{expanded: filtersExpanded}}
+                            hitSlop={scale(8)}
+                            onPress={handleToggleFilters}
+                            style={({pressed}) => [
+                                styles.topicFilterButton,
+                                pressed && {opacity: 0.6},
+                            ]}>
+                            <MaterialCommunityIcons
+                                name="filter-variant"
+                                size={scale(16)}
+                                color={
+                                    activeFilterCount > 0 || filtersExpanded
+                                        ? theme.themeColor
+                                        : theme.black.third
+                                }
+                            />
+                            {activeFilterCount > 0 ? (
+                                <View
+                                    style={[
+                                        styles.topicFilterBadge,
+                                        {backgroundColor: theme.themeColor},
+                                    ]}>
+                                    <Text
+                                        style={[
+                                            styles.topicFilterBadgeText,
+                                            {color: theme.white},
+                                        ]}>
+                                        {activeFilterCount}
+                                    </Text>
+                                </View>
+                            ) : null}
+                        </Pressable>
+                        {isTopicsTab ? (
+                            <View
+                                style={[
+                                    styles.resultTabUnderline,
+                                    {backgroundColor: theme.themeColor},
+                                ]}
+                            />
+                        ) : null}
+                    </View>
                     <Pressable
-                        accessibilityRole="button"
-                        accessibilityState={{expanded: filtersExpanded}}
-                        onPress={() => {
-                            trigger();
-                            collapseSearchFocus();
-                            setFiltersExpanded(current => !current);
-                        }}
-                        style={({pressed}) => [
-                            styles.filterToggle,
-                            {
-                                backgroundColor: pressed
-                                    ? theme.tonal.primary30
-                                    : activeFilterCount > 0
-                                        ? theme.tonal.primary15
-                                        : theme.tonal.primary08,
-                            },
-                        ]}>
-                        <MaterialCommunityIcons
-                            name="tune-variant"
-                            size={scale(16)}
-                            color={theme.themeColor}
-                        />
+                        accessibilityRole="tab"
+                        accessibilityState={{selected: !isTopicsTab}}
+                        onPress={() => handleSelectResultTab('users')}
+                        style={styles.resultTab}>
                         <Text
                             style={[
-                                styles.filterToggleText,
-                                {color: theme.themeColor},
+                                styles.resultTabText,
+                                {
+                                    color: !isTopicsTab
+                                        ? theme.black.main
+                                        : theme.black.third,
+                                    fontWeight: !isTopicsTab ? '700' : '500',
+                                },
                             ]}>
-                            {activeFilterCount > 0
-                                ? t('篩選（{{count}}）', {
-                                    count: activeFilterCount,
-                                })
-                                : t('篩選')}
+                            {t('用戶')}
                         </Text>
-                        <MaterialCommunityIcons
-                            name={
-                                filtersExpanded
-                                    ? 'chevron-up'
-                                    : 'chevron-down'
-                            }
-                            size={scale(16)}
-                            color={theme.themeColor}
-                        />
+                        {!isTopicsTab ? (
+                            <View
+                                style={[
+                                    styles.resultTabUnderline,
+                                    {backgroundColor: theme.themeColor},
+                                ]}
+                            />
+                        ) : null}
                     </Pressable>
-                    <Text
-                        numberOfLines={1}
-                        style={[
-                            styles.syntaxHint,
-                            {color: theme.black.third},
-                        ]}>
-                        in: · status: · category: · tags:
-                    </Text>
                 </View>
-                {filtersExpanded ? (
+
+                {/* 第二層：排序（僅話題分頁） */}
+                {isTopicsTab ? (
+                    <View style={styles.orderRow}>
+                        {ORDER_OPTIONS.map(option => (
+                            <SearchFilterChip
+                                key={option.key}
+                                label={t(option.label)}
+                                selected={order === option.key}
+                                onPress={() => {
+                                    collapseSearchFocus();
+                                    selectOrder(option.key);
+                                }}
+                            />
+                        ))}
+                    </View>
+                ) : null}
+
+                {/* 展開篩選（僅話題分頁） */}
+                {isTopicsTab && filtersExpanded ? (
                     <View style={styles.filters}>
                         <View style={styles.filterSection}>
                             <Text
@@ -391,29 +495,6 @@ const HarborSearchPanel = forwardRef(
                                 ))}
                             </View>
                         </View>
-                        <View style={styles.filterSection}>
-                            <Text
-                                style={[
-                                    styles.filterLabel,
-                                    {color: theme.black.second},
-                                ]}>
-                                {t('排序')}
-                            </Text>
-                            <View style={styles.filterChipRow}>
-                                {ORDER_OPTIONS.map(option => (
-                                    <SearchFilterChip
-                                        key={option.key}
-                                        label={t(option.label)}
-                                        selected={order === option.key}
-                                        onPress={() => {
-                                            collapseSearchFocus();
-                                            invalidateSearchResults();
-                                            setOrder(option.key);
-                                        }}
-                                    />
-                                ))}
-                            </View>
-                        </View>
                         {filterOptionsError ? (
                             <Text
                                 style={[
@@ -510,30 +591,59 @@ const styles = StyleSheet.create({
         fontSize: verticalScale(14),
         textAlign: 'center',
     },
-    filterToolbar: {
+    resultTabRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginTop: verticalScale(7),
+        marginTop: verticalScale(10),
+        paddingHorizontal: scale(4),
     },
-    filterToggle: {
-        minHeight: verticalScale(30),
-        borderRadius: scale(9),
+    resultTab: {
+        position: 'relative',
         flexDirection: 'row',
         alignItems: 'center',
-        paddingHorizontal: scale(9),
+        marginRight: scale(18),
+        paddingBottom: verticalScale(6),
     },
-    filterToggleText: {
-        ...uiStyle.defaultText,
-        fontSize: scale(11),
-        fontWeight: '700',
-        marginHorizontal: scale(4),
+    resultTabLabel: {
+        flexDirection: 'row',
+        alignItems: 'center',
     },
-    syntaxHint: {
+    resultTabText: {
         ...uiStyle.defaultText,
-        flex: 1,
+        fontSize: scale(14),
+    },
+    resultTabUnderline: {
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        bottom: 0,
+        height: scale(2),
+        borderRadius: scale(1),
+    },
+    topicFilterButton: {
+        marginLeft: scale(4),
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    topicFilterBadge: {
+        minWidth: scale(14),
+        height: scale(14),
+        borderRadius: scale(7),
+        marginLeft: scale(2),
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingHorizontal: scale(3),
+    },
+    topicFilterBadgeText: {
+        ...uiStyle.defaultText,
         fontSize: scale(9),
-        textAlign: 'right',
-        marginLeft: scale(8),
+        fontWeight: '700',
+        lineHeight: scale(12),
+    },
+    orderRow: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        marginTop: verticalScale(8),
     },
     filters: {
         paddingTop: verticalScale(8),
