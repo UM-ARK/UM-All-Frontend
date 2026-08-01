@@ -404,8 +404,11 @@ const HarborProfilePage = ({ navigation, route }) => {
                 if (item.key === 'likesReceived') {
                     return {
                         ...item,
+                        // 預覽模式對應他人視角，收到的讚僅本人可進入
                         onPress:
-                            isSummaryVisible && activityUsername
+                            isEditing &&
+                            isSummaryVisible &&
+                            activityUsername
                                 ? () =>
                                       navigation.navigate('HarborActivity', {
                                           kind: 'likesReceived',
@@ -428,6 +431,7 @@ const HarborProfilePage = ({ navigation, route }) => {
             });
     }, [
         areBadgesVisible,
+        isEditing,
         isOwnProfile,
         isSummaryVisible,
         navigation,
