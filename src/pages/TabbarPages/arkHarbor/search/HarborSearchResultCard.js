@@ -15,7 +15,7 @@ import {uiStyle, useTheme} from '../../../../components/ThemeContext';
 import {trigger} from '../../../../utils/trigger';
 
 /** 搜尋結果中的使用者列（話題／貼文直接複用 HarborTopicCard） */
-const HarborSearchResultCard = memo(({user, onPress}) => {
+const HarborSearchResultCard = memo(({user, onPress, onAvatarPress}) => {
     const {theme} = useTheme();
     const {t} = useTranslation('harbor');
 
@@ -36,30 +36,42 @@ const HarborSearchResultCard = memo(({user, onPress}) => {
                     borderColor: theme.themeColorUltraLight,
                 },
             ]}>
-            {user.avatarUrl ? (
-                <Image
-                    source={{uri: user.avatarUrl}}
-                    style={[
-                        styles.resultAvatar,
-                        {backgroundColor: theme.tonal.primary15},
-                    ]}
-                    contentFit="cover"
-                    placeholder={theme.imagePlaceholder}
-                    transition={180}
-                />
-            ) : (
-                <View
-                    style={[
-                        styles.resultAvatarFallback,
-                        {backgroundColor: theme.tonal.primary15},
-                    ]}>
-                    <MaterialCommunityIcons
-                        name="account-outline"
-                        size={scale(20)}
-                        color={theme.themeColor}
+            <Pressable
+                accessibilityRole="link"
+                accessibilityLabel={user.name || user.username}
+                onPress={event => {
+                    event.stopPropagation?.();
+                    trigger();
+                    onAvatarPress(user.username);
+                }}
+                style={({pressed}) => [
+                    pressed && styles.avatarPressed,
+                ]}>
+                {user.avatarUrl ? (
+                    <Image
+                        source={{uri: user.avatarUrl}}
+                        style={[
+                            styles.resultAvatar,
+                            {backgroundColor: theme.tonal.primary15},
+                        ]}
+                        contentFit="cover"
+                        placeholder={theme.imagePlaceholder}
+                        transition={180}
                     />
-                </View>
-            )}
+                ) : (
+                    <View
+                        style={[
+                            styles.resultAvatarFallback,
+                            {backgroundColor: theme.tonal.primary15},
+                        ]}>
+                        <MaterialCommunityIcons
+                            name="account-outline"
+                            size={scale(20)}
+                            color={theme.themeColor}
+                        />
+                    </View>
+                )}
+            </Pressable>
             <View style={styles.userResultText}>
                 <Text
                     numberOfLines={1}
@@ -111,6 +123,9 @@ const styles = StyleSheet.create({
         borderRadius: scale(19),
         alignItems: 'center',
         justifyContent: 'center',
+    },
+    avatarPressed: {
+        opacity: 0.65,
     },
     userResultText: {
         flex: 1,

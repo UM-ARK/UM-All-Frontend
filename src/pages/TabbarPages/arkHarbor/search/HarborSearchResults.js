@@ -59,6 +59,7 @@ const HarborSearchResults = ({
     onCollapseSearch,
     onResultPress,
     onAuthorPress,
+    onProfilePress,
     onCategoryPress,
     onClearHistory,
 }) => {
@@ -216,6 +217,7 @@ const HarborSearchResults = ({
                     <HarborSearchResultCard
                         user={item.user}
                         onPress={onAuthorPress}
+                        onAvatarPress={onProfilePress}
                     />
                 );
             }
@@ -229,12 +231,14 @@ const HarborSearchResults = ({
                 <HarborTopicCard
                     topic={topic}
                     onPress={() => onResultPress(item)}
+                    onAuthorPress={onProfilePress}
                     onCategoryPress={onCategoryPress}
                 />
             );
         },
         [
             onAuthorPress,
+            onProfilePress,
             onCategoryPress,
             onCollapseSearch,
             onResultPress,

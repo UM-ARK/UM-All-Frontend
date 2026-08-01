@@ -486,17 +486,29 @@ const HarborTopicList = ({
         [navigation],
     );
 
+    const handleAuthorPress = useCallback(
+        username => {
+            navigation.navigate('HarborProfile', {
+                username,
+                mode: 'preview',
+            });
+        },
+        [navigation],
+    );
+
     const renderTopic = useCallback(
         ({ item }) => (
             <HarborTopicCard
                 topic={item}
                 onPress={handleTopicPress}
+                onAuthorPress={handleAuthorPress}
                 onCategoryPress={handleCategoryPress}
                 isPressAllowed={isTopicPressAllowed}
             />
         ),
         [
             handleCategoryPress,
+            handleAuthorPress,
             handleTopicPress,
             isTopicPressAllowed,
         ],

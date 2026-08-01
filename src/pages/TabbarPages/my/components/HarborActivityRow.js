@@ -20,6 +20,8 @@ const HarborActivityLeading = ({
     fallbackIcon,
     reactionValue,
     theme,
+    username,
+    onPress,
 }) => {
     const [failed, setFailed] = React.useState(false);
     React.useEffect(() => {
@@ -52,8 +54,8 @@ const HarborActivityLeading = ({
         </View>
     );
 
-    return (
-        <View style={styles.leadingWrap}>
+    const content = (
+        <>
             {leading}
             {reactionValue ? (
                 <View
@@ -64,11 +66,41 @@ const HarborActivityLeading = ({
                     />
                 </View>
             ) : null}
+        </>
+    );
+
+    if (username && onPress) {
+        return (
+            <Pressable
+                accessibilityRole="link"
+                accessibilityLabel={username}
+                onPress={event => {
+                    event.stopPropagation?.();
+                    trigger();
+                    onPress(username);
+                }}
+                style={({pressed}) => [
+                    styles.leadingWrap,
+                    pressed && styles.leadingPressed,
+                ]}>
+                {content}
+            </Pressable>
+        );
+    }
+
+    return (
+        <View style={styles.leadingWrap}>
+            {content}
         </View>
     );
 };
 
-const HarborActivityRow = ({ item, onPress, showDivider = false }) => {
+const HarborActivityRow = ({
+    item,
+    onPress,
+    onAvatarPress,
+    showDivider = false,
+}) => {
     const { theme } = useTheme();
     const { t, i18n } = useTranslation('my');
     const meta = activityMeta[item.kind] || activityMeta.activity;
@@ -97,6 +129,8 @@ const HarborActivityRow = ({ item, onPress, showDivider = false }) => {
                 fallbackIcon={meta.icon}
                 reactionValue={item.reactionValue}
                 theme={theme}
+                username={item.actingUsername}
+                onPress={onAvatarPress}
             />
             <View style={styles.content}>
                 <View style={styles.metaRow}>
@@ -179,6 +213,9 @@ const styles = StyleSheet.create({
     leadingWrap: {
         width: scale(42),
         height: scale(42),
+    },
+    leadingPressed: {
+        opacity: 0.65,
     },
     avatar: {
         width: scale(42),

@@ -196,6 +196,19 @@ const HarborActivityPage = ({
         [navigation],
     );
 
+    const handleAuthorPress = React.useCallback(
+        profileUsername => {
+            if (!profileUsername) {
+                return;
+            }
+            navigation.navigate('HarborProfile', {
+                username: profileUsername,
+                mode: 'preview',
+            });
+        },
+        [navigation],
+    );
+
     const handleCategoryPress = React.useCallback(
         category => {
             navigation.navigate('HarborCategoryTopics', {
@@ -220,6 +233,7 @@ const HarborActivityPage = ({
                     <HarborTopicCard
                         topic={item}
                         onPress={handleTopicPress}
+                        onAuthorPress={handleAuthorPress}
                         onCategoryPress={handleCategoryPress}
                     />
                 );
@@ -234,12 +248,14 @@ const HarborActivityPage = ({
                     <HarborActivityRow
                         item={item}
                         onPress={handleItemPress}
+                        onAvatarPress={handleAuthorPress}
                     />
                 </View>
             );
         },
         [
             handleCategoryPress,
+            handleAuthorPress,
             handleItemPress,
             handleTopicPress,
             isTopicsKind,

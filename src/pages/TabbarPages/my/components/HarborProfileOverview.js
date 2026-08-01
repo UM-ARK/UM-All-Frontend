@@ -92,6 +92,12 @@ const HarborProfileOverview = ({
         <View style={styles.container}>
             <HarborProfileCard
                 user={user}
+                onProfilePress={() =>
+                    navigation.navigate('HarborProfile', {
+                        username: user.username,
+                        mode: 'preview',
+                    })
+                }
                 onSettingsPress={onSettingsPress}
             />
             {user.partialProfile ? (

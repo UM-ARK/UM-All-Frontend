@@ -442,17 +442,33 @@ const HarborInboxPage = ({
                     pressed && {backgroundColor: theme.tonal.primary08},
                 ]}
                 onPress={() => handlePress(item)}>
-                <HarborInboxLeading
-                    avatarUrl={avatarUrl}
-                    accentColor={accentColor}
-                    fallbackIcon={
-                        isNotification
-                            ? presentation.icon
-                            : 'mail-outline'
-                    }
-                    unread={unread}
-                    theme={theme}
-                />
+                <Pressable
+                    accessibilityRole="link"
+                    accessibilityLabel={avatarActor.username}
+                    disabled={!avatarActor.username}
+                    onPress={event => {
+                        event.stopPropagation?.();
+                        trigger();
+                        navigation.navigate('HarborProfile', {
+                            username: avatarActor.username,
+                            mode: 'preview',
+                        });
+                    }}
+                    style={({pressed}) => [
+                        pressed && styles.avatarPressed,
+                    ]}>
+                    <HarborInboxLeading
+                        avatarUrl={avatarUrl}
+                        accentColor={accentColor}
+                        fallbackIcon={
+                            isNotification
+                                ? presentation.icon
+                                : 'mail-outline'
+                        }
+                        unread={unread}
+                        theme={theme}
+                    />
+                </Pressable>
                 <View style={styles.rowContent}>
                     <View style={styles.rowHeader}>
                         <Text
@@ -691,6 +707,9 @@ const styles = StyleSheet.create({
         width: scale(38),
         height: scale(38),
         borderRadius: scale(19),
+    },
+    avatarPressed: {
+        opacity: 0.65,
     },
     rowContent: {
         flex: 1,

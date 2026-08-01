@@ -382,9 +382,12 @@ const HarborTopicDetail = ({ route, navigation }) => {
             if (!username) {
                 return;
             }
-            openHarborLink(`${ARK_HARBOR}/u/${encodeURIComponent(username)}`);
+            navigation.navigate('HarborProfile', {
+                username,
+                mode: 'preview',
+            });
         },
-        [openHarborLink],
+        [navigation],
     );
 
     const openCategory = useCallback(

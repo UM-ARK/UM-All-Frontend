@@ -115,6 +115,19 @@ const HarborSearchPage = ({route, navigation}) => {
         [runSearch, selectResultTab],
     );
 
+    const handleProfilePress = useCallback(
+        username => {
+            if (!username) {
+                return;
+            }
+            navigation.navigate('HarborProfile', {
+                username,
+                mode: 'preview',
+            });
+        },
+        [navigation],
+    );
+
     const handleCategoryPress = useCallback(
         selectedCategory => {
             collapseSearchFocus();
@@ -200,6 +213,7 @@ const HarborSearchPage = ({route, navigation}) => {
                 onCollapseSearch={collapseSearchFocus}
                 onResultPress={handleResultPress}
                 onAuthorPress={handleAuthorPress}
+                onProfilePress={handleProfilePress}
                 onCategoryPress={handleCategoryPress}
                 onClearHistory={handleClearHistory}
             />

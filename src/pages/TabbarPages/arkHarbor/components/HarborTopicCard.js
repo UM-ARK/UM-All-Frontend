@@ -124,6 +124,7 @@ const StatusChip = ({ status }) => {
 const HarborTopicCard = ({
     topic,
     onPress,
+    onAuthorPress,
     onCategoryPress,
     isPressAllowed,
 }) => {
@@ -203,24 +204,37 @@ const HarborTopicCard = ({
                 },
             ]}>
             <View style={styles.authorRow}>
-                {avatarUrl ? (
-                    <Image
-                        source={{ uri: avatarUrl }}
-                        style={avatarStyle}
-                        contentFit="cover"
-                        placeholder={theme.imagePlaceholder}
-                        placeholderContentFit="cover"
-                        transition={180}
-                    />
-                ) : (
-                    <View style={[styles.avatarFallback, avatarStyle]}>
-                        <MaterialCommunityIcons
-                            name="account-outline"
-                            size={scale(14)}
-                            color={theme.themeColor}
+                <Pressable
+                    accessibilityRole="link"
+                    accessibilityLabel={authorId}
+                    disabled={!onAuthorPress || !author.username}
+                    onPress={event => {
+                        event.stopPropagation?.();
+                        trigger();
+                        onAuthorPress(author.username);
+                    }}
+                    style={({ pressed }) => [
+                        pressed && styles.avatarPressed,
+                    ]}>
+                    {avatarUrl ? (
+                        <Image
+                            source={{ uri: avatarUrl }}
+                            style={avatarStyle}
+                            contentFit="cover"
+                            placeholder={theme.imagePlaceholder}
+                            placeholderContentFit="cover"
+                            transition={180}
                         />
-                    </View>
-                )}
+                    ) : (
+                        <View style={[styles.avatarFallback, avatarStyle]}>
+                            <MaterialCommunityIcons
+                                name="account-outline"
+                                size={scale(14)}
+                                color={theme.themeColor}
+                            />
+                        </View>
+                    )}
+                </Pressable>
                 <View style={styles.authorText}>
                     <Text
                         numberOfLines={1}
@@ -421,6 +435,9 @@ const styles = StyleSheet.create({
     avatarFallback: {
         alignItems: 'center',
         justifyContent: 'center',
+    },
+    avatarPressed: {
+        opacity: 0.65,
     },
     authorText: {
         flex: 1,
