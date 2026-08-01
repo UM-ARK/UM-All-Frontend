@@ -1,5 +1,11 @@
-import React, { memo } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import React, { memo, useEffect, useState } from 'react';
+import {
+    Pressable,
+    StyleSheet,
+    Text,
+    useWindowDimensions,
+    View,
+} from 'react-native';
 
 import { Image } from 'expo-image';
 import moment from 'moment-timezone';
@@ -8,9 +14,15 @@ import { scale, verticalScale } from 'react-native-size-matters';
 import { useTranslation } from 'react-i18next';
 
 import { uiStyle, useTheme } from '../../../../components/ThemeContext';
-import { ARK_HARBOR_AVATAR_TEMPLATE } from '../../../../utils/pathMap';
+import {
+    ARK_HARBOR_ABSOLUTE_URL,
+    ARK_HARBOR_AVATAR_TEMPLATE,
+} from '../../../../utils/pathMap';
 import { trigger } from '../../../../utils/trigger';
 import HarborCategoryIcon from './HarborCategoryIcon';
+
+const CARD_MARGIN_HORIZONTAL = scale(6);
+const CARD_PADDING_HORIZONTAL = scale(12);
 
 const STATUS_CONFIG = {
     pinned: { icon: 'pin-outline', label: '置頂' },
@@ -112,6 +124,7 @@ const HarborTopicCard = ({
 }) => {
     const { theme } = useTheme();
     const { t } = useTranslation('harbor');
+    const { width: windowWidth, height: windowHeight } = useWindowDimensions();
     const author = topic.author || {};
     const authorId = resolveUserId(author, t('Harbor 會員'));
     const avatarTemplate = author.avatarTemplate || author.avatar_template;
@@ -120,6 +133,10 @@ const HarborTopicCard = ({
         (avatarTemplate
             ? ARK_HARBOR_AVATAR_TEMPLATE(avatarTemplate, 72)
             : null);
+    const coverUrl = topic.imageUrl
+        ? ARK_HARBOR_ABSOLUTE_URL(topic.imageUrl)
+        : '';
+    const [coverFailed, setCoverFailed] = useState(false);
     const category = topic.category?.name ? topic.category : null;
     const statuses = Object.keys(STATUS_CONFIG).filter(status => {
         if (status === 'pinned') {
@@ -145,6 +162,13 @@ const HarborTopicCard = ({
         borderRadius: AVATAR_SIZE / 2,
         backgroundColor: theme.tonal.primary15,
     };
+    // 封面：半屏寬 × 三分之一屏高
+    const coverWidth = windowWidth / 2.3;
+    const coverHeight = windowHeight / 3.5;
+
+    useEffect(() => {
+        setCoverFailed(false);
+    }, [coverUrl]);
 
     return (
         <Pressable
@@ -252,6 +276,29 @@ const HarborTopicCard = ({
                 </Text>
             ) : null}
 
+            {coverUrl && !coverFailed ? (
+                <View
+                    style={[
+                        styles.coverWrap,
+                        {
+                            backgroundColor: theme.tonal.primary08,
+                            width: coverWidth,
+                            height: coverHeight,
+                        },
+                    ]}>
+                    <Image
+                        source={{ uri: coverUrl }}
+                        style={styles.coverImage}
+                        contentFit="cover"
+                        placeholder={theme.imagePlaceholder}
+                        placeholderContentFit="cover"
+                        transition={180}
+                        recyclingKey={coverUrl}
+                        onError={() => setCoverFailed(true)}
+                    />
+                </View>
+            ) : null}
+
             {statuses.length > 0 ? (
                 <View style={styles.statusRow}>
                     {statuses.map(status => (
@@ -342,9 +389,9 @@ const styles = StyleSheet.create({
     card: {
         borderWidth: StyleSheet.hairlineWidth,
         borderRadius: scale(12),
-        marginHorizontal: scale(6),
+        marginHorizontal: CARD_MARGIN_HORIZONTAL,
         marginBottom: verticalScale(4),
-        paddingHorizontal: scale(12),
+        paddingHorizontal: CARD_PADDING_HORIZONTAL,
         paddingTop: verticalScale(11),
         overflow: 'hidden',
     },
@@ -402,6 +449,16 @@ const styles = StyleSheet.create({
         fontSize: scale(11),
         lineHeight: scale(17),
         marginTop: verticalScale(3),
+    },
+    coverWrap: {
+        alignSelf: 'flex-start',
+        marginTop: verticalScale(8),
+        borderRadius: scale(8),
+        overflow: 'hidden',
+    },
+    coverImage: {
+        width: '100%',
+        height: '100%',
     },
     categoryChip: {
         maxWidth: scale(150),
