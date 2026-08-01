@@ -22,7 +22,10 @@ import {
     COMPOSER_MODES,
     getEditPost,
 } from './harborComposerModels';
-import {splitHarborComposerRaw} from '../harborComposerText';
+import {
+    canUseHarborComposerImageGrid,
+    splitHarborComposerRaw,
+} from '../harborComposerText';
 
 export function useHarborComposer({route, t}) {
     const {
@@ -37,9 +40,7 @@ export function useHarborComposer({route, t}) {
     const isNewTopic = mode === 'newTopic';
     const isReply = mode === 'reply';
     const isEdit = mode === 'edit';
-    const [editImageMode, setEditImageMode] = useState('manual');
-    const supportsImages = isNewTopic || isReply ||
-        (isEdit && editImageMode === 'grid');
+    const supportsImages = isNewTopic || isReply || isEdit;
     const routePostNumber = Number(route.params?.postNumber);
     const routeQuoteRaw = route.params?.quoteRaw;
     const initialRaw = routeQuoteRaw
@@ -65,6 +66,8 @@ export function useHarborComposer({route, t}) {
     const [publishRestriction, setPublishRestriction] = useState('');
     const [editMetadata, setEditMetadata] = useState({});
     const [initialEditImages, setInitialEditImages] = useState([]);
+    const [requiresWebImageEditing, setRequiresWebImageEditing] =
+        useState(false);
     const isEditingFirstPost =
         isEdit &&
         Number(
@@ -204,7 +207,10 @@ export function useHarborComposer({route, t}) {
                             ? routeImageUrls
                             : post.imageUrls || [],
                 });
-                setRaw(postRaw);
+                const canUseImageGrid =
+                    canUseHarborComposerImageGrid(postRaw);
+                setRequiresWebImageEditing(!canUseImageGrid);
+                setRaw(canUseImageGrid ? splitPost.text : postRaw);
                 setInitialEditImages(splitPost.images);
                 setOriginalText(
                     String(post.originalText ?? post.original_text ?? postRaw),
@@ -359,7 +365,6 @@ export function useHarborComposer({route, t}) {
         categoryId,
         composerSettings,
         editMetadata,
-        editImageMode,
         initialEditImages,
         isEdit,
         isEditingFirstPost,
@@ -382,6 +387,7 @@ export function useHarborComposer({route, t}) {
         originalText,
         publishRestriction,
         raw,
+        requiresWebImageEditing,
         requiresCategory,
         routePostNumber,
         selectedCategory,
@@ -389,8 +395,8 @@ export function useHarborComposer({route, t}) {
         selectedTags,
         sessionStatus,
         setCategoryId,
-        setEditImageMode,
         setLoadError,
+        setRequiresWebImageEditing,
         setRaw,
         setSelectedTags,
         setTitle,

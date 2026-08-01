@@ -641,6 +641,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
         post => {
             openHarborComposer(navigation, {
                 mode: 'edit',
+                fromTopicDetail: true,
                 postId: post.id,
                 postNumber: post.post_number,
                 topicId,

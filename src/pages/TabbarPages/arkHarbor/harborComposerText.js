@@ -47,6 +47,26 @@ export function buildHarborComposerRaw(text, images = []) {
 
 const HARBOR_UPLOAD_IMAGE_LINE_PATTERN =
     /^\s*(!\[[^\]\n]*\]\(\s*(upload:\/\/[^)\s]+)(?:\s+["'][^)]*["'])?\s*\))\s*$/i;
+const HARBOR_IMAGE_PATTERN = /!\[[^\]\n]*\]\([^\n)]+\)|<img\b/i;
+
+export function canUseHarborComposerImageGrid(raw) {
+    let imageBlockStarted = false;
+    const lines = String(raw || '').split('\n');
+
+    for (const line of lines) {
+        if (HARBOR_UPLOAD_IMAGE_LINE_PATTERN.test(line)) {
+            imageBlockStarted = true;
+            continue;
+        }
+        if (!line.trim()) {
+            continue;
+        }
+        if (imageBlockStarted || HARBOR_IMAGE_PATTERN.test(line)) {
+            return false;
+        }
+    }
+    return true;
+}
 
 export function splitHarborComposerRaw(
     raw,

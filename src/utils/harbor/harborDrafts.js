@@ -6,6 +6,49 @@ import {
 
 export const HARBOR_DRAFTS_STORAGE_KEY = 'ARK_Harbor_Drafts_v1';
 
+const getDraftTagNames = tags =>
+    (Array.isArray(tags) ? tags : [])
+        .map(tag => String(tag?.name || tag || '').trim())
+        .filter(Boolean)
+        .sort()
+        .join('\n');
+
+export const hasHarborEditDraftConflict = (
+    draftData,
+    serverText,
+    {title, categoryId, tags} = {},
+) => {
+    if (
+        typeof draftData?.original_text === 'string' &&
+        draftData.original_text !== String(serverText || '')
+    ) {
+        return true;
+    }
+    if (
+        typeof draftData?.original_title === 'string' &&
+        draftData.original_title !== String(title || '')
+    ) {
+        return true;
+    }
+    if (
+        Object.prototype.hasOwnProperty.call(
+            draftData || {},
+            'original_category_id',
+        ) &&
+        (draftData.original_category_id == null
+            ? null
+            : Number(draftData.original_category_id)) !==
+            (categoryId == null ? null : Number(categoryId))
+    ) {
+        return true;
+    }
+    return (
+        Array.isArray(draftData?.original_tags) &&
+        getDraftTagNames(draftData.original_tags) !==
+            getDraftTagNames(tags)
+    );
+};
+
 const HARBOR_DRAFT_ACTIONS = {
     edit: 'edit',
     newTopic: 'createTopic',

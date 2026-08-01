@@ -29,7 +29,6 @@ const HarborComposerForm = ({
     categorySheetRef,
     composer,
     imagesState,
-    onChangeEditImageMode,
     onOpenCategorySheet,
     onOpenMarkdownGuide,
     onOpenTagSheet,
@@ -49,7 +48,6 @@ const HarborComposerForm = ({
         categoryId,
         composerSettings,
         editMetadata,
-        editImageMode,
         isEdit,
         isEditingFirstPost,
         isNewTopic,
@@ -197,6 +195,8 @@ const HarborComposerForm = ({
                             <TextInput
                                 accessibilityLabel={t('話題標題')}
                                 autoCapitalize="sentences"
+                                multiline
+                                numberOfLines={3}
                                 onChangeText={setTitle}
                                 placeholder={t('新增標題')}
                                 placeholderTextColor={theme.black.third}
@@ -204,7 +204,14 @@ const HarborComposerForm = ({
                                     styles.titleInput,
                                     { color: theme.black.main },
                                 ]}
+                                textAlignVertical="top"
                                 value={title}
+                            />
+                            <View
+                                style={[
+                                    styles.titleBodyDivider,
+                                    {backgroundColor: theme.disabled},
+                                ]}
                             />
                         </View>
                     ) : null}
@@ -454,91 +461,6 @@ const HarborComposerForm = ({
                                 </Pressable>
                             </>
                         ) : null}
-                        {isEdit ? (
-                            <View
-                                style={[
-                                    styles.editImageModeBlock,
-                                    {
-                                        backgroundColor: theme.white,
-                                        borderColor: theme.themeColorUltraLight,
-                                    },
-                                ]}>
-                                <View style={styles.editImageModeControl}>
-                                    {[
-                                        {key: 'grid', label: t('九宮格排序')},
-                                        {key: 'manual', label: t('手動文本排序')},
-                                    ].map(option => {
-                                        const selected = editImageMode === option.key;
-                                        return (
-                                            <Pressable
-                                                key={option.key}
-                                                accessibilityRole="button"
-                                                accessibilityState={{selected}}
-                                                onPress={() =>
-                                                    onChangeEditImageMode(option.key)
-                                                }
-                                                style={({pressed}) => [
-                                                    styles.editImageModeButton,
-                                                    {
-                                                        backgroundColor: selected
-                                                            ? theme.tonal.primary15
-                                                            : pressed
-                                                                ? theme.tonal.primary08
-                                                                : theme.white,
-                                                        borderColor: selected
-                                                            ? theme.themeColor
-                                                            : theme.themeColorUltraLight,
-                                                    },
-                                                ]}>
-                                                <Text
-                                                    style={[
-                                                        styles.editImageModeButtonText,
-                                                        {
-                                                            color: selected
-                                                                ? theme.themeColor
-                                                                : theme.black.second,
-                                                        },
-                                                    ]}>
-                                                    {option.label}
-                                                </Text>
-                                            </Pressable>
-                                        );
-                                    })}
-                                </View>
-                                <Text
-                                    style={[
-                                        styles.editImageModeHelp,
-                                        {color: theme.black.third},
-                                    ]}>
-                                    {editImageMode === 'grid'
-                                        ? t('二次編輯時，手機端會把九宮格圖片統一放在文末。若要調整圖片在正文中的位置，請使用手動文本排序，或前往 Harbor 網頁版。')
-                                        : t('手動移動圖片 Markdown 可調整正文位置；切回九宮格後，圖片會重新統一放到文末。')}
-                                </Text>
-                                <Pressable
-                                    accessibilityRole="link"
-                                    onPress={onOpenWebComposer}
-                                    style={({ pressed }) => [
-                                        styles.webComposerButton,
-                                        pressed && {
-                                            backgroundColor:
-                                                theme.tonal.primary08,
-                                        },
-                                    ]}>
-                                    <MaterialCommunityIcons
-                                        name="open-in-new"
-                                        size={scale(17)}
-                                        color={theme.black.third}
-                                    />
-                                    <Text
-                                        style={[
-                                            styles.webComposerText,
-                                            { color: theme.black.third },
-                                        ]}>
-                                        {t('前往 Harbor 網頁版操作')}
-                                    </Text>
-                                </Pressable>
-                            </View>
-                        ) : null}
                         {isNewTopic ? (
                             <Pressable
                                 accessibilityRole="link"
@@ -683,33 +605,6 @@ const styles = StyleSheet.create({
         fontSize: scale(14),
         fontWeight: '700',
     },
-    editImageModeBlock: {
-        borderRadius: scale(12),
-        borderWidth: StyleSheet.hairlineWidth,
-        gap: verticalScale(9),
-        padding: scale(12),
-    },
-    editImageModeButton: {
-        alignItems: 'center',
-        borderRadius: scale(9),
-        borderWidth: StyleSheet.hairlineWidth,
-        flex: 1,
-        justifyContent: 'center',
-        minHeight: verticalScale(38),
-        paddingHorizontal: scale(8),
-    },
-    editImageModeButtonText: {
-        fontSize: scale(12),
-        fontWeight: '700',
-    },
-    editImageModeControl: {
-        flexDirection: 'row',
-        gap: scale(8),
-    },
-    editImageModeHelp: {
-        fontSize: scale(11),
-        lineHeight: scale(17),
-    },
     addImageText: {
         fontSize: scale(14),
         fontWeight: '600',
@@ -819,9 +714,15 @@ const styles = StyleSheet.create({
         fontSize: scale(14),
         lineHeight: scale(19),
     },
+    titleBodyDivider: {
+        height: StyleSheet.hairlineWidth,
+        marginBottom: verticalScale(4),
+        marginTop: verticalScale(2),
+    },
     titleInput: {
         fontSize: scale(18),
         lineHeight: scale(26),
+        maxHeight: scale(26) * 3 + verticalScale(12),
         paddingHorizontal: 0,
         paddingVertical: verticalScale(6),
     },

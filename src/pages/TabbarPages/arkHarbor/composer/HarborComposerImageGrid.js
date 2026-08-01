@@ -80,6 +80,7 @@ const HarborComposerImageGrid = ({
                         image.status === 'pending' ||
                         image.status === 'uploading';
                     const isFailed = image.status === 'failed';
+                    const isNew = image.isNew === true;
                     const previewIndex = previewIndexById.get(image.id);
                     return (
                         <View
@@ -91,7 +92,12 @@ const HarborComposerImageGrid = ({
                                     backgroundColor: theme.tonal.primary08,
                                     borderColor: isFailed
                                         ? theme.unread
-                                        : theme.themeColorUltraLight,
+                                        : isNew
+                                            ? theme.success
+                                            : theme.themeColorUltraLight,
+                                    borderWidth: isNew
+                                        ? scale(2)
+                                        : StyleSheet.hairlineWidth,
                                 },
                             ]}>
                             <Pressable
@@ -135,6 +141,22 @@ const HarborComposerImageGrid = ({
                                     {index + 1}
                                 </Text>
                             </View>
+
+                            {isNew ? (
+                                <View
+                                    style={[
+                                        styles.newBadge,
+                                        {backgroundColor: theme.success},
+                                    ]}>
+                                    <Text
+                                        style={[
+                                            styles.newBadgeText,
+                                            {color: theme.trueWhite},
+                                        ]}>
+                                        {t('新加入')}
+                                    </Text>
+                                </View>
+                            ) : null}
 
                             <Pressable
                                 accessibilityLabel={t('移除第 {{count}} 張圖片', {
@@ -269,8 +291,20 @@ const styles = StyleSheet.create({
     },
     item: {
         borderRadius: scale(9),
-        borderWidth: StyleSheet.hairlineWidth,
         overflow: 'hidden',
+    },
+    newBadge: {
+        borderRadius: scale(8),
+        paddingHorizontal: scale(6),
+        paddingVertical: scale(3),
+        position: 'absolute',
+        right: scale(29),
+        top: scale(5),
+        zIndex: 3,
+    },
+    newBadgeText: {
+        fontSize: scale(9),
+        fontWeight: '700',
     },
     orderButton: {
         alignItems: 'center',

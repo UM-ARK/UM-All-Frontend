@@ -1,5 +1,6 @@
 import {
     buildHarborComposerRaw,
+    canUseHarborComposerImageGrid,
     getHarborComposerResult,
     splitHarborComposerRaw,
 } from '../harborComposerText';
@@ -55,6 +56,43 @@ describe('buildHarborComposerRaw', () => {
             '![第二張|690x388](upload://second.jpeg)\n\n' +
             '![第一張](upload://first.jpeg)',
         );
+    });
+});
+
+describe('canUseHarborComposerImageGrid', () => {
+    it('只允許正文末尾的連續 Harbor 圖片區塊', () => {
+        expect(
+            canUseHarborComposerImageGrid(
+                '正文\n\n' +
+                '![第一張](upload://first.jpeg)\n\n' +
+                '![第二張](upload://second.jpeg)',
+            ),
+        ).toBe(true);
+        expect(
+            canUseHarborComposerImageGrid(
+                '![第一張](upload://first.jpeg)\n\n正文',
+            ),
+        ).toBe(false);
+    });
+
+    it('行內圖片、外部圖片或 HTML 圖片交由網頁版處理', () => {
+        expect(
+            canUseHarborComposerImageGrid(
+                '正文 ![行內](upload://inline.jpeg)',
+            ),
+        ).toBe(false);
+        expect(
+            canUseHarborComposerImageGrid(
+                '![外部](https://example.com/image.jpeg)',
+            ),
+        ).toBe(false);
+        expect(
+            canUseHarborComposerImageGrid('<img src="image.jpeg">'),
+        ).toBe(false);
+    });
+
+    it('沒有圖片的正文可直接使用九宮格', () => {
+        expect(canUseHarborComposerImageGrid('只有正文')).toBe(true);
     });
 });
 

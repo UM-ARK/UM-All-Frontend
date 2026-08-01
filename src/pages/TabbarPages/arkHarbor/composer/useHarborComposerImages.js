@@ -22,7 +22,7 @@ import {
     MAX_IMAGES_PER_POST,
 } from './harborComposerImages';
 
-export function useHarborComposerImages({composerSettings, t}) {
+export function useHarborComposerImages({composerSettings, isEdit, t}) {
     const uploadControllersRef = useRef(new Map());
     const uploadBatchRef = useRef(null);
     const imagesRef = useRef([]);
@@ -275,6 +275,7 @@ export function useHarborComposerImages({composerSettings, t}) {
                     nextImages.push({
                         id: imageId,
                         ...compressedImage,
+                        isNew: Boolean(isEdit),
                         progress: 0,
                         status: 'ready',
                     });
@@ -318,6 +319,7 @@ export function useHarborComposerImages({composerSettings, t}) {
         composerSettings,
         hasReachedImageLimit,
         images.length,
+        isEdit,
         t,
         updateImages,
     ]);

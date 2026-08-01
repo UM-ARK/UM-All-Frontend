@@ -17,6 +17,7 @@ import {
     deleteHarborComposerDraft,
     getHarborComposerDraftKey,
     getHarborDraftAccountId,
+    hasHarborEditDraftConflict,
     getLocalHarborDraft,
     getLocalHarborDrafts,
     loadHarborComposerDraft,
@@ -86,6 +87,40 @@ describe('Harbor 草稿', () => {
                 topicId: 31,
             }),
         ).toBe('topic_31');
+    });
+
+    it('編輯草稿基準與服務器正文不同時判定為衝突', () => {
+        expect(
+            hasHarborEditDraftConflict(
+                {original_text: '圖片 A\n\n圖片 B'},
+                '圖片 B\n\n圖片 A',
+            ),
+        ).toBe(true);
+        expect(
+            hasHarborEditDraftConflict(
+                {original_text: '圖片 A\n\n圖片 B'},
+                '圖片 A\n\n圖片 B',
+            ),
+        ).toBe(false);
+        expect(
+            hasHarborEditDraftConflict({}, '服務器正文'),
+        ).toBe(false);
+        expect(
+            hasHarborEditDraftConflict(
+                {
+                    original_text: '正文',
+                    original_title: '原標題',
+                    original_category_id: 2,
+                    original_tags: [{name: '校園'}],
+                },
+                '正文',
+                {
+                    title: 'Web 新標題',
+                    categoryId: 2,
+                    tags: [{name: '校園'}],
+                },
+            ),
+        ).toBe(true);
     });
 
     it('載入草稿只讀本機，不同步遠端', async () => {

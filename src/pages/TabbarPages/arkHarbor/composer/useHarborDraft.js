@@ -5,7 +5,7 @@ import {
     useRef,
     useState,
 } from 'react';
-import {AppState} from 'react-native';
+import {Alert, AppState} from 'react-native';
 
 import Toast from 'react-native-simple-toast';
 
@@ -15,11 +15,17 @@ import {
     getHarborDraftAccountId,
     getHarborDraftAction,
     getHarborDraftMode,
+    hasHarborEditDraftConflict,
     loadHarborComposerDraft,
     saveLocalHarborDraft,
 } from '../../../../utils/harbor/harborDrafts';
 import {deleteHarborDraftImageFiles} from '../../../../utils/harbor/harborDraftImages';
-import {buildHarborComposerRaw} from '../harborComposerText';
+import {trigger} from '../../../../utils/trigger';
+import {
+    buildHarborComposerRaw,
+    canUseHarborComposerImageGrid,
+    splitHarborComposerRaw,
+} from '../harborComposerText';
 
 const AUTOSAVE_DELAY = 1200;
 
@@ -64,6 +70,7 @@ const getDraftImages = images =>
         uploadId: image.uploadId,
         shortUrl: image.shortUrl,
         markdown: image.markdown,
+        isNew: image.isNew,
         status: image.status,
     }));
 
@@ -71,9 +78,9 @@ export function useHarborDraft({
     categories,
     categoryId,
     editMetadata,
-    editImageMode,
     images,
     isComposerLoading,
+    isEditingBlocked,
     isEditingFirstPost,
     mode,
     navigation,
@@ -85,8 +92,8 @@ export function useHarborDraft({
     selectedTags,
     sessionStatus,
     setCategoryId,
-    setEditImageMode,
     setRaw,
+    setRequiresWebImageEditing,
     setSelectedTags,
     setTitle,
     supportsImages,
@@ -110,6 +117,8 @@ export function useHarborDraft({
     const completedRef = useRef(false);
     const leavingRef = useRef(false);
     const allowNextRemovalRef = useRef(false);
+    const isTopicDetailEdit =
+        mode === 'edit' && route.params?.fromTopicDetail === true;
     const [isDraftLoading, setIsDraftLoading] = useState(
         sessionStatus === 'signedIn' && Boolean(draftKey),
     );
@@ -148,7 +157,9 @@ export function useHarborDraft({
         .filter(Boolean)
         .sort()
         .join('\n');
-    const hasDraftContent = mode === 'edit'
+    const hasDraftContent = isEditingBlocked
+        ? false
+        : mode === 'edit'
         ? composedRaw.trim() !== String(originalText || '').trim() ||
             (isEditingFirstPost &&
                 (title.trim() !== String(originalTitle).trim() ||
@@ -171,7 +182,7 @@ export function useHarborDraft({
                 supportsImages || mode === 'edit'
                     ? getDraftImages(images)
                     : [],
-            appImageEditMode: mode === 'edit' ? editImageMode : undefined,
+            appImageEditMode: mode === 'edit' ? 'grid' : undefined,
             appContext: {
                 topicId: Number(route.params?.topicId) || null,
                 topicTitle: route.params?.topicTitle || '',
@@ -202,6 +213,10 @@ export function useHarborDraft({
             if (isEditingFirstPost) {
                 data.title = title;
                 data.original_title = originalTitle;
+                data.original_category_id = originalCategoryId;
+                data.original_tags = originalTagNames
+                    ? originalTagNames.split('\n')
+                    : [];
                 data.categoryId = categoryId;
                 data.tags = selectedTags.map(tag => ({
                     ...(tag.id == null ? {} : {id: tag.id}),
@@ -222,11 +237,12 @@ export function useHarborDraft({
         categoryId,
         composedRaw,
         draftKey,
-        editImageMode,
         images,
         isEditingFirstPost,
         mode,
         originalText,
+        originalCategoryId,
+        originalTagNames,
         originalTitle,
         raw,
         route.params,
@@ -290,7 +306,11 @@ export function useHarborDraft({
     }, [accountId, draftKey, images, mode, supportsImages]);
 
     useEffect(() => {
-        if (sessionStatus !== 'signedIn' || !draftKey) {
+        if (
+            sessionStatus !== 'signedIn' ||
+            !draftKey ||
+            isEditingBlocked
+        ) {
             setIsDraftLoading(false);
             return;
         }
@@ -318,67 +338,153 @@ export function useHarborDraft({
                 const data = draft.data;
                 draftRef.current = draft;
                 savedSignatureRef.current = JSON.stringify(data);
-                const restoredEditImageMode =
-                    mode === 'edit' && data.appImageEditMode === 'grid'
-                        ? 'grid'
-                        : 'manual';
-                if (mode === 'edit') {
-                    setEditImageMode(restoredEditImageMode);
-                }
-                setRaw(
-                    typeof data.appText === 'string'
-                        ? data.appText
-                        : String(data.reply || ''),
-                );
-                if (
-                    (mode === 'newTopic' || isEditingFirstPost) &&
-                    typeof data.title === 'string'
-                ) {
-                    setTitle(data.title);
-                }
-                if (
-                    (mode === 'newTopic' || isEditingFirstPost) &&
-                    data.categoryId != null
-                ) {
-                    const restoredCategoryId = Number(data.categoryId);
+                const restoreDraft = () => {
+                    const draftText =
+                        typeof data.appText === 'string'
+                            ? data.appText
+                            : String(data.reply || '');
+                    const fullDraftText =
+                        mode === 'edit' &&
+                        data.appImageEditMode === 'grid'
+                            ? buildHarborComposerRaw(
+                                draftText,
+                                data.appImages,
+                            )
+                            : draftText;
+                    if (mode === 'edit') {
+                        const canUseImageGrid =
+                            canUseHarborComposerImageGrid(fullDraftText);
+                        setRequiresWebImageEditing(!canUseImageGrid);
+                        if (canUseImageGrid) {
+                            const splitDraft = splitHarborComposerRaw(
+                                fullDraftText,
+                                {existingImages: data.appImages},
+                            );
+                            const pendingImages = (
+                                Array.isArray(data.appImages)
+                                    ? data.appImages
+                                    : []
+                            ).filter(image => !image?.shortUrl);
+                            setRaw(splitDraft.text);
+                            restoreDraftImages([
+                                ...splitDraft.images,
+                                ...pendingImages,
+                            ]);
+                        } else {
+                            setRaw(fullDraftText);
+                            restoreDraftImages(data.appImages);
+                        }
+                    } else {
+                        setRaw(draftText);
+                        restoreDraftImages(data.appImages);
+                    }
                     if (
-                        categories.some(
+                        (mode === 'newTopic' || isEditingFirstPost) &&
+                        typeof data.title === 'string'
+                    ) {
+                        setTitle(data.title);
+                    }
+                    if (
+                        (mode === 'newTopic' || isEditingFirstPost) &&
+                        data.categoryId != null
+                    ) {
+                        const restoredCategoryId = Number(data.categoryId);
+                        if (
+                            categories.some(
+                                category =>
+                                    Number(category.id) ===
+                                    restoredCategoryId,
+                            )
+                        ) {
+                            setCategoryId(restoredCategoryId);
+                        }
+                    } else if (
+                        (mode === 'newTopic' || isEditingFirstPost) &&
+                        data.categoryId == null &&
+                        !requiresCategory
+                    ) {
+                        setCategoryId(null);
+                    }
+                    if (mode === 'newTopic' || isEditingFirstPost) {
+                        const draftCategory = categories.find(
                             category =>
                                 Number(category.id) ===
-                                restoredCategoryId,
-                        )
-                    ) {
-                        setCategoryId(restoredCategoryId);
+                                Number(data.categoryId),
+                        );
+                        const allowedTagNames = new Set(
+                            Array.isArray(draftCategory?.allowedTags)
+                                ? draftCategory.allowedTags
+                                : [],
+                        );
+                        const availableTags =
+                            allowedTagNames.size > 0
+                                ? tags.filter(tag =>
+                                    allowedTagNames.has(tag.name),
+                                )
+                                : tags;
+                        setSelectedTags(
+                            getRestoredTags(data.tags, availableTags),
+                        );
                     }
-                } else if (
-                    (mode === 'newTopic' || isEditingFirstPost) &&
-                    data.categoryId == null &&
-                    !requiresCategory
-                ) {
-                    setCategoryId(null);
-                }
-                if (mode === 'newTopic' || isEditingFirstPost) {
-                    const draftCategory = categories.find(
-                        category =>
-                            Number(category.id) ===
-                            Number(data.categoryId),
-                    );
-                    const allowedTagNames = new Set(
-                        Array.isArray(draftCategory?.allowedTags)
-                            ? draftCategory.allowedTags
+                };
+                if (
+                    isTopicDetailEdit &&
+                    hasHarborEditDraftConflict(data, originalText, {
+                        title: originalTitle,
+                        categoryId: originalCategoryId,
+                        tags: originalTagNames
+                            ? originalTagNames.split('\n')
                             : [],
-                    );
-                    const availableTags =
-                        allowedTagNames.size > 0
-                            ? tags.filter(tag =>
-                                allowedTagNames.has(tag.name),
-                            )
-                            : tags;
-                    setSelectedTags(
-                        getRestoredTags(data.tags, availableTags),
-                    );
+                    })
+                ) {
+                    return new Promise((resolve, reject) => {
+                        Alert.alert(
+                            t('Web 端帖子已有更新'),
+                            t('此帖子在 App 草稿保存後已於 Web 端更新。若以 Web 為準，App 草稿修改將被覆蓋，包括圖片位置與排序。'),
+                            [
+                                {
+                                    text: t('保留 App 草稿'),
+                                    onPress: () => {
+                                        trigger();
+                                        restoreDraft();
+                                        resolve();
+                                    },
+                                },
+                                {
+                                    text: t('以 Web 為準'),
+                                    style: 'destructive',
+                                    onPress: async () => {
+                                        trigger();
+                                        try {
+                                            const deleted =
+                                                await deleteHarborComposerDraft(
+                                                    accountId,
+                                                    draftKey,
+                                                );
+                                            if (!deleted) {
+                                                throw new Error(
+                                                    'Harbor draft deletion failed',
+                                                );
+                                            }
+                                            draftGenerationRef.current += 1;
+                                            savedSignatureRef.current = '';
+                                            draftRef.current = {
+                                                sequence: 0,
+                                                createdAt: Date.now(),
+                                                syncStatus: 'local',
+                                            };
+                                            resolve();
+                                        } catch (error) {
+                                            reject(error);
+                                        }
+                                    },
+                                },
+                            ],
+                            {cancelable: false},
+                        );
+                    });
                 }
-                restoreDraftImages(data.appImages);
+                restoreDraft();
             })
             .catch(() => {
                 if (!controller.signal.aborted) {
@@ -398,14 +504,20 @@ export function useHarborDraft({
         categories,
         draftKey,
         isComposerLoading,
+        isEditingBlocked,
         isEditingFirstPost,
+        isTopicDetailEdit,
         mode,
+        originalCategoryId,
+        originalText,
+        originalTagNames,
+        originalTitle,
         requiresCategory,
         restoreDraftImages,
         sessionStatus,
         setCategoryId,
-        setEditImageMode,
         setRaw,
+        setRequiresWebImageEditing,
         setSelectedTags,
         setTitle,
         t,
@@ -500,7 +612,7 @@ export function useHarborDraft({
                 }
                 leavingRef.current = true;
                 clearTimeout(autosaveTimerRef.current);
-                saveCurrentDraft()
+                const saveAndLeave = () => saveCurrentDraft()
                     .then(() => {
                         Toast.show(t('草稿已自動保存。'));
                         allowNextRemovalRef.current = true;
@@ -512,12 +624,44 @@ export function useHarborDraft({
                             t('草稿保存失敗，請稍後再試。'),
                         );
                     });
+                if (isTopicDetailEdit) {
+                    Alert.alert(
+                        t('尚未上傳修改'),
+                        t('修改將保存為 App 草稿。若帖子之後在 Web 端更新，下次進入編輯時可能需要覆蓋 App 草稿並以 Web 版本為準。建議即時上傳修改。'),
+                        [
+                            {
+                                text: t('繼續編輯'),
+                                style: 'cancel',
+                                onPress: () => {
+                                    trigger();
+                                    leavingRef.current = false;
+                                },
+                            },
+                            {
+                                text: t('保存草稿並退出'),
+                                onPress: () => {
+                                    trigger();
+                                    saveAndLeave();
+                                },
+                            },
+                        ],
+                        {
+                            cancelable: true,
+                            onDismiss: () => {
+                                leavingRef.current = false;
+                            },
+                        },
+                    );
+                    return;
+                }
+                saveAndLeave();
             },
         );
         return unsubscribe;
     }, [
         discardCurrentDraft,
         hasDraftContent,
+        isTopicDetailEdit,
         navigation,
         saveCurrentDraft,
         t,

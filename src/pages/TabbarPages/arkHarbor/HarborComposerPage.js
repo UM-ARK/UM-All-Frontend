@@ -37,10 +37,6 @@ import {useHarborComposer} from './composer/useHarborComposer';
 import {useHarborDraft} from './composer/useHarborDraft';
 import {useHarborComposerImages} from './composer/useHarborComposerImages';
 import {useHarborComposerSubmit} from './composer/useHarborComposerSubmit';
-import {
-    buildHarborComposerRaw,
-    splitHarborComposerRaw,
-} from './harborComposerText';
 
 const HarborComposerPage = ({route, navigation}) => {
     const {theme} = useTheme();
@@ -48,6 +44,7 @@ const HarborComposerPage = ({route, navigation}) => {
     const categorySheetRef = useRef(null);
     const tagSheetRef = useRef(null);
     const deletingRef = useRef(false);
+    const webImageAlertShownRef = useRef(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const {
         allTags,
@@ -56,7 +53,6 @@ const HarborComposerPage = ({route, navigation}) => {
         categoryId,
         composerSettings,
         editMetadata,
-        editImageMode,
         initialEditImages,
         isEdit,
         isEditingFirstPost,
@@ -79,6 +75,7 @@ const HarborComposerPage = ({route, navigation}) => {
         originalText,
         publishRestriction,
         raw,
+        requiresWebImageEditing,
         requiresCategory,
         routePostNumber,
         selectedCategory,
@@ -86,8 +83,8 @@ const HarborComposerPage = ({route, navigation}) => {
         selectedTags,
         sessionStatus,
         setCategoryId,
-        setEditImageMode,
         setLoadError,
+        setRequiresWebImageEditing,
         setRaw,
         setSelectedTags,
         setTitle,
@@ -111,7 +108,7 @@ const HarborComposerPage = ({route, navigation}) => {
         isUploadingImages,
         restoreDraftImages,
         uploadImages,
-    } = useHarborComposerImages({composerSettings, t});
+    } = useHarborComposerImages({composerSettings, isEdit, t});
 
     useEffect(() => {
         if (isEdit && !isLoading) {
@@ -128,9 +125,9 @@ const HarborComposerPage = ({route, navigation}) => {
         categories,
         categoryId,
         editMetadata,
-        editImageMode,
         images,
         isComposerLoading: isLoading,
+        isEditingBlocked: requiresWebImageEditing,
         isEditingFirstPost,
         mode,
         navigation,
@@ -142,8 +139,8 @@ const HarborComposerPage = ({route, navigation}) => {
         selectedTags,
         sessionStatus,
         setCategoryId,
-        setEditImageMode,
         setRaw,
+        setRequiresWebImageEditing,
         setSelectedTags,
         setTitle,
         supportsImages,
@@ -212,76 +209,47 @@ const HarborComposerPage = ({route, navigation}) => {
         route.params?.topicId,
     ]);
 
-    const applyEditImageMode = useCallback(nextMode => {
-        if (
-            nextMode === 'manual' &&
-            images.some(image => image.status !== 'uploaded')
-        ) {
-            Toast.show(
-                t('請先移除尚未上傳的圖片，或使用九宮格模式儲存。'),
-            );
-            return;
-        }
-        if (nextMode === 'manual') {
-            const currentGridRaw = buildHarborComposerRaw(raw, images);
-            const originalSplit = splitHarborComposerRaw(originalText, {
-                existingImages: images,
-            });
-            const originalGridRaw = buildHarborComposerRaw(
-                originalSplit.text,
-                originalSplit.images,
-            );
-            setRaw(
-                currentGridRaw === originalGridRaw
-                    ? originalText
-                    : currentGridRaw,
-            );
-        } else {
-            const splitPost = splitHarborComposerRaw(raw, {
-                existingImages: images,
-            });
-            setRaw(splitPost.text);
-            restoreDraftImages(splitPost.images);
-        }
-        setEditImageMode(nextMode);
-    }, [
-        images,
-        originalText,
-        raw,
-        restoreDraftImages,
-        setEditImageMode,
-        setRaw,
-        t,
-    ]);
+    const showWebImageEditingAlert = useCallback(() => {
+        Alert.alert(
+            t('此帖子需在網頁版編輯'),
+            t('這篇帖子有圖片不在正文末尾的連續圖片區塊中，App 無法安全編輯。請前往 Harbor 網頁版操作。'),
+            [
+                {
+                    text: t('返回'),
+                    style: 'cancel',
+                    onPress: () => {
+                        trigger();
+                        navigation.goBack();
+                    },
+                },
+                {
+                    text: t('前往網頁版'),
+                    onPress: handleOpenWebComposer,
+                },
+            ],
+            {cancelable: false},
+        );
+    }, [handleOpenWebComposer, navigation, t]);
 
-    const handleChangeEditImageMode = useCallback(nextMode => {
-        if (nextMode === editImageMode) {
+    useEffect(() => {
+        if (
+            !isEdit ||
+            isLoading ||
+            isDraftLoading ||
+            !requiresWebImageEditing ||
+            webImageAlertShownRef.current
+        ) {
             return;
         }
-        trigger();
-        if (nextMode === 'grid') {
-            Alert.alert(
-                t('切換到九宮格排序？'),
-                t('切換後，可管理的圖片會重新排序並統一放到正文末尾。若要保留 Web 端編輯的圖片位置，請繼續使用手動文本排序。'),
-                [
-                    {
-                        text: t('取消'),
-                        style: 'cancel',
-                        onPress: trigger,
-                    },
-                    {
-                        text: t('繼續'),
-                        onPress: () => {
-                            trigger();
-                            applyEditImageMode('grid');
-                        },
-                    },
-                ],
-            );
-            return;
-        }
-        applyEditImageMode(nextMode);
-    }, [applyEditImageMode, editImageMode, t]);
+        webImageAlertShownRef.current = true;
+        showWebImageEditingAlert();
+    }, [
+        isDraftLoading,
+        isEdit,
+        isLoading,
+        requiresWebImageEditing,
+        showWebImageEditingAlert,
+    ]);
 
     const handleOpenMarkdownGuide = useCallback(() => {
         trigger();
@@ -550,6 +518,7 @@ const HarborComposerPage = ({route, navigation}) => {
             !isLoading &&
             !isDraftLoading &&
             !loadError &&
+            !requiresWebImageEditing &&
             !isReply;
         const shouldShowDiscard =
             canShowHeaderActions && hasDraftContent;
@@ -584,9 +553,7 @@ const HarborComposerPage = ({route, navigation}) => {
                             </Pressable>
                         ) : null}
                         <Pressable
-                            accessibilityLabel={
-                                isEdit ? t('儲存修改') : t('發佈')
-                            }
+                            accessibilityLabel={t('發佈')}
                             accessibilityRole="button"
                             accessibilityState={{
                                 disabled: isPublishDisabled,
@@ -616,9 +583,7 @@ const HarborComposerPage = ({route, navigation}) => {
                                                 : theme.themeColor,
                                         },
                                     ]}>
-                                    {isEdit
-                                        ? t('儲存')
-                                        : t('發佈')}
+                                    {t('發佈')}
                                 </Text>
                             )}
                         </Pressable>
@@ -640,6 +605,7 @@ const HarborComposerPage = ({route, navigation}) => {
         isSubmitting,
         loadError,
         navigation,
+        requiresWebImageEditing,
         sessionStatus,
         t,
         theme.black.third,
@@ -873,6 +839,55 @@ const HarborComposerPage = ({route, navigation}) => {
         );
     }
 
+    if (isEdit && requiresWebImageEditing) {
+        return (
+            <View
+                style={[
+                    styles.centeredState,
+                    {backgroundColor: theme.bg_color},
+                ]}>
+                <MaterialCommunityIcons
+                    name="open-in-new"
+                    size={scale(42)}
+                    color={theme.themeColor}
+                />
+                <Text
+                    style={[
+                        styles.stateTitle,
+                        {color: theme.black.main},
+                    ]}>
+                    {t('請前往網頁版編輯')}
+                </Text>
+                <Text
+                    style={[
+                        styles.stateDescription,
+                        {color: theme.black.third},
+                    ]}>
+                    {t('此帖子的圖片並非全部連續放在正文末尾，為避免改變圖片位置，App 不允許編輯。')}
+                </Text>
+                <Pressable
+                    accessibilityRole="link"
+                    onPress={handleOpenWebComposer}
+                    style={({pressed}) => [
+                        styles.secondaryButton,
+                        {
+                            backgroundColor: pressed
+                                ? theme.tonal.primary30
+                                : theme.tonal.primary15,
+                        },
+                    ]}>
+                    <Text
+                        style={[
+                            styles.secondaryButtonText,
+                            {color: theme.themeColor},
+                        ]}>
+                        {t('前往網頁版')}
+                    </Text>
+                </Pressable>
+            </View>
+        );
+    }
+
     if (isReply) {
         return (
             <HarborReplyComposerForm
@@ -914,7 +929,6 @@ const HarborComposerPage = ({route, navigation}) => {
                 categoryId,
                 composerSettings,
                 editMetadata,
-                editImageMode,
                 isEdit,
                 isEditingFirstPost,
                 isNewTopic,
@@ -948,7 +962,6 @@ const HarborComposerPage = ({route, navigation}) => {
                 isPreparingImages,
                 isUploadingImages,
             }}
-            onChangeEditImageMode={handleChangeEditImageMode}
             onOpenCategorySheet={openCategorySheet}
             onOpenMarkdownGuide={handleOpenMarkdownGuide}
             onOpenTagSheet={openTagSheet}
