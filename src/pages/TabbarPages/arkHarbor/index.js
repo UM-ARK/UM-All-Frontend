@@ -581,19 +581,19 @@ const ForumPage = ({ navigation }) => {
             },
         ],
     }));
-    // 列表上移量與搜尋列收起量相同，避免先騰空再跟手
-    const feedTranslateStyle = useAnimatedStyle(() => ({
-        transform: [
-            {
-                translateY: interpolate(
-                    searchProgress.value,
-                    [0, 1],
-                    [-SEARCH_BAR_ROW_HEIGHT, 0],
-                    Extrapolation.CLAMP,
-                ),
-            },
-        ],
-    }));
+    // 列表上移量與搜尋列收起量相同；同時以負 marginBottom 拉高佈局，避免底部騰空
+    const feedTranslateStyle = useAnimatedStyle(() => {
+        const collapseOffset = interpolate(
+            searchProgress.value,
+            [0, 1],
+            [SEARCH_BAR_ROW_HEIGHT, 0],
+            Extrapolation.CLAMP,
+        );
+        return {
+            marginBottom: -collapseOffset,
+            transform: [{ translateY: -collapseOffset }],
+        };
+    });
 
     const ensureMounted = useCallback(view => {
         setMountedViews(current =>
@@ -766,73 +766,79 @@ const ForumPage = ({ navigation }) => {
         <SafeAreaView
             style={[styles.page, { backgroundColor: theme.bg_color }]}
             edges={{ top: true }}>
-            <Reanimated.View style={[styles.pager, feedTranslateStyle]}>
-                <AnimatedPagerView
-                    ref={pagerRef}
-                    style={styles.pager}
-                    initialPage={0}
-                    onPageScroll={handlePageScroll}
-                    onPageSelected={handlePageSelected}
-                    onPageScrollStateChanged={handlePageScrollStateChanged}>
-                    {enabledViews.map(view => (
-                        <View
-                            key={view}
-                            style={styles.feedPage}
-                            collapsable={false}>
-                            {mountedViews[view] ? (
-                                <HarborFeedPane
-                                    view={view}
-                                    navigation={navigation}
-                                    onCapabilities={handleCapabilities}
-                                    isTopicPressAllowed={isTopicPressAllowed}
-                                    contentContainerStyle={
-                                        contentContainerStyle
-                                    }
-                                    refreshProgressViewOffset={
-                                        refreshProgressViewOffset
-                                    }
-                                    isActive={
-                                        enabledViews[currentIndex] === view
-                                    }
-                                    onScroll={event =>
-                                        onContentScroll(
-                                            view,
-                                            event.nativeEvent.contentOffset.y,
-                                        )
-                                    }
-                                    onScrollEndDrag={() =>
-                                        snapSearchProgress(view)
-                                    }
-                                    onMomentumScrollEnd={() =>
-                                        snapSearchProgress(view)
-                                    }
-                                />
-                            ) : null}
-                        </View>
-                    ))}
-                </AnimatedPagerView>
-            </Reanimated.View>
-            <View pointerEvents="box-none" style={styles.sharedHeader}>
-                <HarborStickyToolbar
-                    segmentOptions={segmentOptions}
-                    currentIndex={currentIndex}
-                    tabPosition={tabPosition}
-                    onChange={selectView}
-                    status={status}
-                    sessionLabel={sessionLabel}
-                    onSessionPress={handleSessionPress}
-                    onMenuPress={() => navigation.openDrawer()}
-                    onComposePress={() =>
-                        navigation.navigate('HarborComposer', {
-                            mode: 'newTopic',
-                        })
-                    }
-                    onSearchPress={() => navigation.navigate('HarborSearch')}
-                    onToolbarLayout={handleToolbarLayout}
-                    searchBarCollapseStyle={searchBarCollapseStyle}
-                    searchBarContentStyle={searchBarContentStyle}
-                    isSearchInteractive={isSearchInteractive}
-                />
+            {/*
+              裁切必須在 top inset 下方：列表下滑時 translateY 若畫進
+              SafeAreaView padding 區，Android edge-to-edge 透明狀態欄圖示會被蓋住
+            */}
+            <View style={styles.contentClip}>
+                <Reanimated.View style={[styles.pager, feedTranslateStyle]}>
+                    <AnimatedPagerView
+                        ref={pagerRef}
+                        style={styles.pager}
+                        initialPage={0}
+                        onPageScroll={handlePageScroll}
+                        onPageSelected={handlePageSelected}
+                        onPageScrollStateChanged={handlePageScrollStateChanged}>
+                        {enabledViews.map(view => (
+                            <View
+                                key={view}
+                                style={styles.feedPage}
+                                collapsable={false}>
+                                {mountedViews[view] ? (
+                                    <HarborFeedPane
+                                        view={view}
+                                        navigation={navigation}
+                                        onCapabilities={handleCapabilities}
+                                        isTopicPressAllowed={isTopicPressAllowed}
+                                        contentContainerStyle={
+                                            contentContainerStyle
+                                        }
+                                        refreshProgressViewOffset={
+                                            refreshProgressViewOffset
+                                        }
+                                        isActive={
+                                            enabledViews[currentIndex] === view
+                                        }
+                                        onScroll={event =>
+                                            onContentScroll(
+                                                view,
+                                                event.nativeEvent.contentOffset.y,
+                                            )
+                                        }
+                                        onScrollEndDrag={() =>
+                                            snapSearchProgress(view)
+                                        }
+                                        onMomentumScrollEnd={() =>
+                                            snapSearchProgress(view)
+                                        }
+                                    />
+                                ) : null}
+                            </View>
+                        ))}
+                    </AnimatedPagerView>
+                </Reanimated.View>
+                <View pointerEvents="box-none" style={styles.sharedHeader}>
+                    <HarborStickyToolbar
+                        segmentOptions={segmentOptions}
+                        currentIndex={currentIndex}
+                        tabPosition={tabPosition}
+                        onChange={selectView}
+                        status={status}
+                        sessionLabel={sessionLabel}
+                        onSessionPress={handleSessionPress}
+                        onMenuPress={() => navigation.openDrawer()}
+                        onComposePress={() =>
+                            navigation.navigate('HarborComposer', {
+                                mode: 'newTopic',
+                            })
+                        }
+                        onSearchPress={() => navigation.navigate('HarborSearch')}
+                        onToolbarLayout={handleToolbarLayout}
+                        searchBarCollapseStyle={searchBarCollapseStyle}
+                        searchBarContentStyle={searchBarContentStyle}
+                        isSearchInteractive={isSearchInteractive}
+                    />
+                </View>
             </View>
             <HarborLoginConsentModal
                 visible={consentVisible}
@@ -845,6 +851,9 @@ const ForumPage = ({ navigation }) => {
 
 const styles = StyleSheet.create({
     page: {
+        flex: 1,
+    },
+    contentClip: {
         flex: 1,
         overflow: 'hidden',
     },
