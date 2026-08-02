@@ -1,7 +1,8 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import {
     ActivityIndicator,
     Alert,
+    Platform,
     Pressable,
     StyleSheet,
     Text,
@@ -12,9 +13,11 @@ import MaterialCommunityIcons from '@react-native-vector-icons/material-design-i
 import { FlashList } from '@shopify/flash-list';
 import { isLiquidGlassSupported } from '@callstack/liquid-glass';
 import { useHeaderHeight } from '@react-navigation/elements';
+import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
 import moment from 'moment';
 import { useTranslation } from 'react-i18next';
 import { scale, verticalScale } from 'react-native-size-matters';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { uiStyle, useTheme } from '../../../components/ThemeContext';
 import { openLink } from '../../../utils/browser';
@@ -70,6 +73,14 @@ const WikiHome = ({navigation}) => {
     const {theme} = useTheme();
     const {t} = useTranslation('wiki');
     const headerHeight = useHeaderHeight();
+    const insets = useSafeAreaInsets();
+    const tabBarHeight =
+        useContext(BottomTabBarHeightContext) ?? insets.bottom + 49;
+    // 服務頁外層不再預留 Tab 高度；iOS 浮動 Tab 需列表自行留白
+    const listBottomPad =
+        Platform.OS === 'ios'
+            ? tabBarHeight + verticalScale(10)
+            : verticalScale(28);
     const [recentChanges, setRecentChanges] = useState([]);
     const [isLoadingRecent, setIsLoadingRecent] = useState(true);
     const [collapsedCategoryKeys, setCollapsedCategoryKeys] = useState(new Set());
@@ -277,7 +288,7 @@ const WikiHome = ({navigation}) => {
                 renderItem={renderItem}
                 keyExtractor={(item, index) => `${item.type}-${item.key || item.title}-${index}`}
                 ListHeaderComponent={listHeader}
-                contentContainerStyle={styles.content}
+                contentContainerStyle={[styles.content, {paddingBottom: listBottomPad}]}
             />
         </View>
     );

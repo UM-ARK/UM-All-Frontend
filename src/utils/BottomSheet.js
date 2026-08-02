@@ -25,7 +25,10 @@ const CustomBottomSheet = forwardRef((props, ref) => {
     });
 
     // 最低 30%，避免過矮只露出把手、視覺上貼在 Tab Bar
-    const snapPoints = useMemo(() => ['30%', '45%', '60%', '80%'], []);
+    const snapPoints = useMemo(
+        () => props.snapPoints ?? ['30%', '45%', '60%', '80%'],
+        [props.snapPoints],
+    );
     const [currentIdx, setIdx] = useState(-1);
 
     const shadowRadiusValue = currentIdx !== -1 ? verticalScale(12) : 0;
