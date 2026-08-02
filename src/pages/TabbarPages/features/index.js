@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback, useMemo, useEffect } from 'react';
+import React, { useState, useRef, useCallback, useContext, useMemo, useEffect } from 'react';
 import {
     Platform,
     ScrollView,
@@ -24,18 +24,28 @@ import CustomBottomSheet from '../../../utils/BottomSheet';
 import { getFunctionArr } from './FeatureList';
 import SearchBar from '../info/home/components/SearchBar';
 import FeatureIcon from '../info/home/search/components/FeatureIcon';
+import WikiHome from '../arkwiki';
 
 import { FlatGrid } from 'react-native-super-grid';
+import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import Clipboard from '@react-native-clipboard/clipboard';
-import { scale, verticalScale } from 'react-native-size-matters';
+import { moderateScale, scale, verticalScale } from 'react-native-size-matters';
 import Toast from 'react-native-simple-toast';
 import TouchableScale from '../../../components/TouchableScale';
 import { useTranslation } from 'react-i18next';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
+import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-screens/experimental';
 
-function Index({ navigation }) {
-    const insets = useSafeAreaInsets();
+const Tab = createMaterialTopTabNavigator();
+
+const TOP_TAB_SCALE_FACTOR = 0.1;
+const TAB_INDICATOR_WIDTH = moderateScale(25, TOP_TAB_SCALE_FACTOR);
+const TAB_BAR_HEIGHT = moderateScale(30, TOP_TAB_SCALE_FACTOR);
+const TAB_LABEL_FONT_SIZE = moderateScale(11, 0.3);
+
+function FeatureListPage({ navigation }) {
     const { theme } = useTheme();
     const { themeColor, white, black, bg_color } = theme;
     const { t, i18n } = useTranslation(['common', 'home', 'features']);
@@ -250,15 +260,11 @@ function Index({ navigation }) {
         );
     };
 
-    // Android 底欄外層不再包 SafeAreaView；此處單獨補頂部狀態列區，避免內容頂到螢幕
-    const topInsetAndroid = Platform.OS === 'android' ? insets.top : 0;
-
     return (
         <View
             style={{
                 flex: 1,
                 backgroundColor: bg_color,
-                paddingTop: topInsetAndroid,
             }}>
             <ScrollView
                 showsVerticalScrollIndicator={true}
@@ -329,4 +335,68 @@ function Index({ navigation }) {
     );
 }
 
-export default Index;
+export default function Index() {
+    const { theme } = useTheme();
+    const { bg_color, black, themeColor } = theme;
+    const { t } = useTranslation('common');
+    const insets = useSafeAreaInsets();
+    const tabBarHeight =
+        useContext(BottomTabBarHeightContext) ?? insets.bottom + 49;
+    // iOS 原生 Tab Bar 是浮動疊層，Top Tab 的場景需預留整個底欄高度
+    const bottomInset = Platform.OS === 'ios' ? tabBarHeight : 0;
+
+    return (
+        <SafeAreaView
+            style={{ backgroundColor: bg_color, flex: 1, paddingBottom: bottomInset }}
+            edges={{ top: true }}>
+            <Tab.Navigator
+                screenOptions={{
+                    tabBarLabelStyle: {
+                        fontSize: TAB_LABEL_FONT_SIZE,
+                        fontWeight: 'bold',
+                    },
+                    tabBarStyle: {
+                        backgroundColor: bg_color,
+                        height: TAB_BAR_HEIGHT,
+                        overflow: 'hidden',
+                    },
+                    tabBarItemStyle: {
+                        minHeight: TAB_BAR_HEIGHT,
+                        paddingVertical: 0,
+                    },
+                    tabBarContentContainerStyle: {
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                    },
+                    tabBarBounces: false,
+                    tabBarActiveTintColor: themeColor,
+                    tabBarInactiveTintColor: black.third,
+                    tabBarPressColor: bg_color,
+                    tabBarIndicatorStyle: {
+                        backgroundColor: themeColor,
+                        width: TAB_INDICATOR_WIDTH,
+                        marginHorizontal: 'auto',
+                    },
+                    lazy: true,
+                }}
+                initialRouteName="FeatureList">
+                <Tab.Screen
+                    name="FeatureList"
+                    component={FeatureListPage}
+                    options={{ title: t('服務') }}
+                    listeners={() => ({
+                        tabPress: () => trigger(),
+                    })}
+                />
+                <Tab.Screen
+                    name="WikiHome"
+                    component={WikiHome}
+                    options={{ title: t('百科') }}
+                    listeners={() => ({
+                        tabPress: () => trigger(),
+                    })}
+                />
+            </Tab.Navigator>
+        </SafeAreaView>
+    );
+}
