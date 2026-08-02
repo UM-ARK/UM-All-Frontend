@@ -5,6 +5,28 @@ export const BASE_URI = 'https://umall.one/api/';
 // 用適配API返回的圖片相對路徑
 export const BASE_HOST = 'https://umall.one';
 
+export const ARK_APP_LINK = BASE_HOST + '/app';
+
+export function ARK_COURSE_SHARE_URL(courseCode) {
+    return ARK_APP_LINK + `/course/${encodeURIComponent(courseCode)}`;
+}
+
+export function ARK_CLUB_SHARE_URL(clubNum) {
+    return ARK_APP_LINK + `/club/${encodeURIComponent(clubNum)}`;
+}
+
+export function ARK_EVENT_SHARE_URL(eventId) {
+    return ARK_APP_LINK + `/event/${encodeURIComponent(eventId)}`;
+}
+
+export function ARK_HARBOR_TOPIC_SHARE_URL(topicId, postNumber) {
+    const topicPath = ARK_APP_LINK +
+        `/harbor/topic/${encodeURIComponent(topicId)}`;
+    return postNumber
+        ? `${topicPath}/${encodeURIComponent(postNumber)}`
+        : topicPath;
+}
+
 export const APPSTORE_URL = 'https://apps.apple.com/app/id1636670554';
 
 export const MAIL = 'umacark@gmail.com';

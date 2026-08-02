@@ -53,6 +53,7 @@ import UMOrg from './pages/Features/UMOrg';
 import SettingPage from './pages/Features/SettingPage';
 import { useTheme } from './components/ThemeContext';
 import { useHarborSession } from './contexts/HarborSessionContext';
+import { APP_LINKING } from './utils/appLinks';
 
 const Stack = createNativeStackNavigator();
 
@@ -194,6 +195,7 @@ const Nav = () => {
         <NavigationContainer
             ref={navigationRef}
             theme={navigationTheme}
+            linking={APP_LINKING}
             onReady={handleNavigationReady}>
             <Stack.Navigator
                 initialRouteName="Tabbar"

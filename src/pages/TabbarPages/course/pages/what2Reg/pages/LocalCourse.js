@@ -1,11 +1,12 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Text, View, ScrollView, FlatList, Alert } from 'react-native';
+import React, { useState, useEffect, useLayoutEffect, useMemo, useCallback } from 'react';
+import { Text, View, ScrollView, FlatList, Alert, Share } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { t } from 'i18next';
 
 import { useTheme, uiStyle } from '../../../../../../components/ThemeContext';
+import { getDeepLinkShareHeaderOptions } from '../../../../../../components/DeepLinkShareButton';
 import SegmentControl from '../../../../../../components/SegmentControl';
-import { ARK_WIKI_SEARCH } from '../../../../../../utils/pathMap';
+import { ARK_COURSE_SHARE_URL, ARK_WIKI_SEARCH } from '../../../../../../utils/pathMap';
 import { openLink } from '../../../../../../utils/browser';
 import { getCourseData } from '../../../../../../utils/checkCoursesKits';
 import coursePlanTime from '../../../../../../static/UMCourses/coursePlanTime';
@@ -249,6 +250,28 @@ const LocalCourse = (props) => {
     const [relateTeacherObj, setRelateTeacherObj] = useState(null);
     const [courseInfo, setCourseInfo] = useState(null);
 
+    const shareCourse = useCallback(() => {
+        const url = ARK_COURSE_SHARE_URL(courseCode);
+        Share.share({
+            message: `${courseCode}\n${url}`,
+            url,
+        }).catch(() => {
+            Alert.alert('分享失敗', '請稍後再試。');
+        });
+    }, [courseCode]);
+
+    useLayoutEffect(() => {
+        if (!courseCode) {return;}
+        navigation.setOptions({
+            headerTitle: courseCode,
+            ...getDeepLinkShareHeaderOptions({
+                accessibilityLabel: t('分享'),
+                onPress: shareCourse,
+                themeColor,
+            }),
+        });
+    }, [courseCode, navigation, shareCourse, themeColor]);
+
     useEffect(() => {
         const init = async () => {
             try {
@@ -282,8 +305,8 @@ const LocalCourse = (props) => {
             setIsLoading(true);
             if (navigation.canGoBack()) {
                 navigation.goBack();
-                openLink(URL);
             }
+            openLink(URL);
         } else {
             // 按section分離課程數據
             const relateSectionObj_ = groupBy(relateList, 'Section');

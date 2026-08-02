@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react';
 import {
+    Alert,
     View,
     Text,
     TouchableOpacity,
@@ -9,11 +10,12 @@ import {
     ScrollView,
     RefreshControl,
     Linking,
-    Platform,
+    Share,
 } from 'react-native';
 
 import { useTheme, uiStyle } from '../../../../components/ThemeContext';
-import { BASE_URI, BASE_HOST, GET, POST, MAIL } from '../../../../utils/pathMap';
+import { getDeepLinkShareHeaderOptions } from '../../../../components/DeepLinkShareButton';
+import { BASE_URI, BASE_HOST, GET, ARK_EVENT_SHARE_URL, POST, MAIL } from '../../../../utils/pathMap';
 import { trigger } from '../../../../utils/trigger';
 import ModalBottom from '../../../../components/ModalBottom';
 import ARKImageView from '../../../../components/ARKImageView';
@@ -102,28 +104,32 @@ const EventDetail = (props) => {
     // ref
     const imageScrollViewer = useRef(null);
     const toast = useRef(null);
+    const eventId = props.route.params?.eventId ??
+        props.route.params?.data?._id;
 
-    // componentDidMount & componentDidUpdate for route.params change
-    useEffect(() => {
-        getAllThings();
-    }, []);
+    const shareEvent = useCallback(() => {
+        const url = ARK_EVENT_SHARE_URL(eventId);
+        Share.share({
+            message: `${state.title || 'ARK ALL'}\n${url}`,
+            url,
+        }).catch(() => {
+            Alert.alert('分享失敗', '請稍後再試。');
+        });
+    }, [eventId, state.title]);
 
-    // 監聽 route.params 變化，類似 componentDidUpdate(prevProps)
-    useEffect(() => {
-        const params = props.route.params;
-        getAllThings();
-    }, [props.route.params]);
-
-    // 獲取所有資料
-    const getAllThings = useCallback(() => {
-        // 獲取上級路由傳遞的參數，展示活動詳情
-        const eventDataParam = props.route.params.data;
-        getClubData(eventDataParam.created_by);
-        getEventData(eventDataParam._id);
-    }, [props.route.params]);
+    useLayoutEffect(() => {
+        if (!eventId) {return;}
+        props.navigation.setOptions(
+            getDeepLinkShareHeaderOptions({
+                accessibilityLabel: '分享',
+                onPress: shareEvent,
+                themeColor,
+            }),
+        );
+    }, [eventId, props.navigation, shareEvent, themeColor]);
 
     // 按社團id獲取社團資訊，頭像
-    const getClubData = async (club_num) => {
+    const getClubData = useCallback(async (club_num) => {
         try {
             const res = await axios.get(BASE_URI + GET.CLUB_INFO_NUM + club_num);
             let json = res.data;
@@ -135,10 +141,10 @@ const EventDetail = (props) => {
         } catch (err) {
             console.log('err', err);
         }
-    };
+    }, []);
 
     // 按eventID獲取活動資訊，包含是否已follow
-    const getEventData = async (eventID) => {
+    const getEventData = useCallback(async (eventID) => {
         let URL = BASE_URI + GET.EVENT_INFO_EVENT_ID;
         try {
             const res = await axios.get(URL + eventID);
@@ -150,6 +156,7 @@ const EventDetail = (props) => {
                     let addHostArr = eventData.relate_image_url.map((itm) => BASE_HOST + itm);
                     eventData.relate_image_url = addHostArr;
                 }
+                getClubData(eventData.created_by);
                 updateState({
                     coverImgUrl: eventData.cover_image_url,
                     title: eventData.title,
@@ -168,7 +175,14 @@ const EventDetail = (props) => {
         } catch (err) {
             console.log('err', err);
         }
-    };
+    }, [getClubData]);
+
+    // 監聽 route.params 變化
+    useEffect(() => {
+        if (eventId) {
+            getEventData(eventId);
+        }
+    }, [eventId, getEventData]);
 
     // 打開/關閉底部Modal
     const tiggerModalBottom = () => {

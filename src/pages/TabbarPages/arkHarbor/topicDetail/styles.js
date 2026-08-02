@@ -8,13 +8,6 @@ const styles = StyleSheet.create({
     page: {
         flex: 1,
     },
-    headerShareButton: {
-        width: scale(36),
-        height: scale(36),
-        borderRadius: scale(18),
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
     centeredPage: {
         flex: 1,
         alignItems: 'center',

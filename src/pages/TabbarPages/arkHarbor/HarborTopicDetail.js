@@ -10,7 +10,6 @@ import {
     ActivityIndicator,
     Alert,
     InteractionManager,
-    Platform,
     Pressable,
     RefreshControl,
     Share,
@@ -29,6 +28,7 @@ import { scale, verticalScale } from 'react-native-size-matters';
 import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '../../../components/ThemeContext';
+import { getDeepLinkShareHeaderOptions } from '../../../components/DeepLinkShareButton';
 import { useHarborSession } from '../../../contexts/HarborSessionContext';
 import { openLink } from '../../../utils/browser';
 import {
@@ -40,6 +40,7 @@ import {
 } from '../../../utils/harbor/harborNavigation';
 import {
     ARK_HARBOR,
+    ARK_HARBOR_TOPIC_SHARE_URL,
     ARK_HARBOR_TOPIC_URL,
 } from '../../../utils/pathMap';
 import { trigger } from '../../../utils/trigger';
@@ -99,31 +100,6 @@ const TOPIC_NOTIFICATION_OPTIONS = [
         icon: 'bell-off-outline',
     },
 ];
-
-const HarborTopicShareButton = ({
-    accessibilityLabel,
-    onPress,
-    themeColor,
-}) => (
-    <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={accessibilityLabel}
-        onPress={() => {
-            trigger();
-            onPress();
-        }}
-        style={styles.headerShareButton}>
-        <MaterialCommunityIcons
-            name="share-variant-outline"
-            size={scale(20)}
-            color={themeColor}
-        />
-    </Pressable>
-);
-
-const createHarborTopicShareButton = props => () => (
-    <HarborTopicShareButton {...props} />
-);
 
 const HarborTopicDetail = ({ route, navigation }) => {
     const { theme } = useTheme();
@@ -424,7 +400,10 @@ const HarborTopicDetail = ({ route, navigation }) => {
 
     const sharePost = useCallback(
         post => {
-            const url = ARK_HARBOR_TOPIC_URL(topicId, post?.post_number);
+            const url = ARK_HARBOR_TOPIC_SHARE_URL(
+                topicId,
+                post?.post_number,
+            );
             Share.share({
                 message: `${topic?.title || 'Harbor'}\n${url}`,
                 url,
@@ -436,7 +415,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
     );
 
     const shareCurrentPost = useCallback(() => {
-        const url = ARK_HARBOR_TOPIC_URL(
+        const url = ARK_HARBOR_TOPIC_SHARE_URL(
             topicId,
             currentPostNumber > 0 ? currentPostNumber : undefined,
         );
@@ -451,34 +430,11 @@ const HarborTopicDetail = ({ route, navigation }) => {
     useLayoutEffect(() => {
         navigation.setOptions({
             headerTitle: '',
-            // iOS：原生 UIBarButtonItem，液態玻璃下才是標準圓形
-            headerRight:
-                Platform.OS === 'ios'
-                    ? undefined
-                    : createHarborTopicShareButton({
-                          accessibilityLabel: t('分享'),
-                          onPress: shareCurrentPost,
-                          themeColor,
-                      }),
-            unstable_headerRightItems:
-                Platform.OS === 'ios'
-                    ? () => [
-                          {
-                              type: 'button',
-                              label: t('分享'),
-                              accessibilityLabel: t('分享'),
-                              icon: {
-                                  type: 'sfSymbol',
-                                  name: 'square.and.arrow.up',
-                              },
-                              tintColor: themeColor,
-                              onPress: () => {
-                                  trigger();
-                                  shareCurrentPost();
-                              },
-                          },
-                      ]
-                    : undefined,
+            ...getDeepLinkShareHeaderOptions({
+                accessibilityLabel: t('分享'),
+                onPress: shareCurrentPost,
+                themeColor,
+            }),
         });
     }, [navigation, shareCurrentPost, t, themeColor]);
 

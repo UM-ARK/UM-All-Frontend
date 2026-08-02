@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react';
 import {
     View,
     Text,
@@ -11,14 +11,15 @@ import {
     StyleSheet,
     RefreshControl,
     Linking,
-    Platform,
+    Share,
 } from 'react-native';
 
 import { useTheme, themes, uiStyle, ThemeContext } from '../../../../components/ThemeContext';
+import { getDeepLinkShareHeaderOptions } from '../../../../components/DeepLinkShareButton';
 import { clubTagMap } from '../../../../utils/clubMap';
 import { setAPPInfo } from '../../../../utils/storageKits';
 import { logToFirebase } from '../../../../utils/firebaseAnalytics';
-import { BASE_URI, BASE_HOST, GET, ARK_LETTER_IMG, POST, MAIL } from '../../../../utils/pathMap';
+import { BASE_URI, BASE_HOST, GET, ARK_LETTER_IMG, ARK_CLUB_SHARE_URL, POST, MAIL } from '../../../../utils/pathMap';
 import HyperlinkText from '../../../../components/HyperlinkText';
 import { handleLogout } from '../../../../utils/storageKits';
 
@@ -135,15 +136,32 @@ const ClubDetail = (props) => {
     const [isLoading, setIsLoading] = useState(true);
     const [toastColor, setToastColor] = useState(themeColor);
     const [isShow, setIsShow] = useState(false);
+    const clubNum = props.route.params?.clubNum ??
+        props.route.params?.data?.club_num;
 
-    // 由ClubPage跳轉初始化
-    useEffect(() => {
-        const clubDataParam = props.route.params.data;
-        getData(clubDataParam.club_num);
-    }, []);
+    const shareClub = useCallback(() => {
+        const url = ARK_CLUB_SHARE_URL(clubNum);
+        Share.share({
+            message: `${clubData?.name || 'ARK ALL'}\n${url}`,
+            url,
+        }).catch(() => {
+            Alert.alert('分享失敗', '請稍後再試。');
+        });
+    }, [clubData?.name, clubNum]);
+
+    useLayoutEffect(() => {
+        if (!clubNum) {return;}
+        props.navigation.setOptions(
+            getDeepLinkShareHeaderOptions({
+                accessibilityLabel: '分享',
+                onPress: shareClub,
+                themeColor,
+            }),
+        );
+    }, [clubNum, props.navigation, shareClub, themeColor]);
 
     // 獲取指定id的社團信息
-    const getData = async (club_num) => {
+    const getData = useCallback(async (club_num) => {
         try {
             const res = await axios.get(BASE_URI + GET.CLUB_INFO_NUM + club_num);
             const json = res.data;
@@ -163,7 +181,14 @@ const ClubDetail = (props) => {
         } catch (err) {
             console.error(err);
         }
-    };
+    }, []);
+
+    // 由ClubPage或深度連結跳轉初始化
+    useEffect(() => {
+        if (clubNum) {
+            getData(clubNum);
+        }
+    }, [clubNum, getData]);
 
     // 按組織號碼獲取活動
     const getEventData = async (club_num) => {
