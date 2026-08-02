@@ -134,6 +134,16 @@ const CourseCard = memo(
                 titleColor: themeColor,
             },
             {
+                id: 'harbor-discuss',
+                title: t('討論', { ns: 'catalog' }),
+                image: Platform.select({
+                    ios: 'bubble.left.and.bubble.right',
+                    android: 'ic_btn_speak_now',
+                }),
+                imageColor: black.third,
+                titleColor: black.third,
+            },
+            {
                 id: 'what2reg',
                 title: t('評價', { ns: 'catalog' }),
                 image: Platform.select({
@@ -198,6 +208,14 @@ const CourseCard = memo(
                         });
                     }
                     navigateToWikiSearch(navigation, wikiQuery, {autoOpenUnique: true});
+                    break;
+                }
+                case 'harbor-discuss': {
+                    logToFirebase('checkCourse', {
+                        courseCode: courseCode,
+                        action: 'harbor-discuss',
+                    });
+                    navigation.navigate('HarborSearch', {query: courseCode});
                     break;
                 }
                 case 'what2reg': {

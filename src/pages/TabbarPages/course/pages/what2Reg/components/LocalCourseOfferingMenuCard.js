@@ -101,6 +101,16 @@ const LocalCourseOfferingMenuCard = ({
             titleColor: themeColor,
         },
         {
+            id: `${keyPrefix}-harbor-discuss`,
+            title: t('討論', { ns: 'catalog' }),
+            image: Platform.select({
+                ios: 'bubble.left.and.bubble.right',
+                android: 'ic_btn_speak_now',
+            }),
+            imageColor: black.third,
+            titleColor: black.third,
+        },
+        {
             id: `${keyPrefix}-what2reg`,
             title: t('評價', { ns: 'catalog' }),
             image: Platform.select({
@@ -153,6 +163,15 @@ const LocalCourseOfferingMenuCard = ({
                     });
                 }
                 navigateToWikiSearch(navigation, wikiQuery, {autoOpenUnique: true});
+                break;
+            }
+            case `${keyPrefix}-harbor-discuss`: {
+                const cc = courseRow['Course Code'];
+                logToFirebase('checkCourse', {
+                    courseCode: cc,
+                    action: 'harbor-discuss',
+                });
+                navigation.navigate('HarborSearch', {query: cc});
                 break;
             }
             case `${keyPrefix}-what2reg`: {
