@@ -17,6 +17,7 @@ import {useTranslation} from 'react-i18next';
 
 import {useTheme} from '../../../components/ThemeContext';
 import {logToFirebase} from '../../../utils/firebaseAnalytics';
+import {openHarborComposer} from '../../../utils/harbor/harborNavigation';
 import {trigger} from '../../../utils/trigger';
 import HarborSearchPanel from './search/HarborSearchPanel';
 import HarborSearchResults from './search/HarborSearchResults';
@@ -158,6 +159,16 @@ const HarborSearchPage = ({route, navigation}) => {
         ]);
     }, [clearHistory, t]);
 
+    const handleComposePress = useCallback(() => {
+        collapseSearchFocus();
+        openHarborComposer(navigation, {
+            mode: 'newTopic',
+            ...(Number.isFinite(category?.id) && category.id > 0
+                ? {categoryId: category.id}
+                : {}),
+        });
+    }, [category, collapseSearchFocus, navigation]);
+
     const pageStyle = useMemo(
         () => [
             styles.page,
@@ -216,6 +227,7 @@ const HarborSearchPage = ({route, navigation}) => {
                 onProfilePress={handleProfilePress}
                 onCategoryPress={handleCategoryPress}
                 onClearHistory={handleClearHistory}
+                onComposePress={handleComposePress}
             />
             <SearchOptionModal
                 visible={optionModal === 'category'}

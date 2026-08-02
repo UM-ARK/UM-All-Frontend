@@ -17,6 +17,7 @@ import {scale, verticalScale} from 'react-native-size-matters';
 import {useTranslation} from 'react-i18next';
 
 import {uiStyle, useTheme} from '../../../../components/ThemeContext';
+import TouchableScale from '../../../../components/TouchableScale';
 import {filterHarborSearchItems} from '../../../../utils/harbor/harborSearch';
 import {trigger} from '../../../../utils/trigger';
 import {
@@ -62,6 +63,7 @@ const HarborSearchResults = ({
     onProfilePress,
     onCategoryPress,
     onClearHistory,
+    onComposePress,
 }) => {
     const {theme} = useTheme();
     const {t} = useTranslation('harbor');
@@ -109,6 +111,14 @@ const HarborSearchResults = ({
     }, [isQueryDirty, isUsersTab, items, query]);
     const showResultsCount =
         hasSearched && !error && filteredItems.length > 0;
+    // 話題分頁搜尋完成後顯示發佈入口（有結果在底部、無結果在空狀態）
+    const showComposePrompt =
+        typeof onComposePress === 'function' &&
+        hasSearched &&
+        !isUsersTab &&
+        !isLoading &&
+        !isQueryDirty &&
+        !error;
     const listData = useMemo(() => {
         if (!hasSearched) {
             return historyItems;
@@ -250,6 +260,46 @@ const HarborSearchResults = ({
         ],
     );
 
+    const renderComposePrompt = useCallback(
+        () => (
+            <View style={styles.composePrompt}>
+                <Text
+                    style={[
+                        styles.composePromptText,
+                        {color: theme.black.third},
+                    ]}>
+                    {t('沒有找到想要的？')}
+                </Text>
+                <TouchableScale
+                    accessibilityRole="button"
+                    accessibilityLabel={t('發佈話題')}
+                    onPress={() => {
+                        trigger();
+                        onCollapseSearch();
+                        onComposePress();
+                    }}
+                    style={[
+                        styles.composeButton,
+                        {backgroundColor: theme.tonal.primary15},
+                    ]}>
+                    <MaterialCommunityIcons
+                        name="plus"
+                        size={scale(16)}
+                        color={theme.themeColor}
+                    />
+                    <Text
+                        style={[
+                            styles.composeButtonText,
+                            {color: theme.themeColor},
+                        ]}>
+                        {t('發佈話題')}
+                    </Text>
+                </TouchableScale>
+            </View>
+        ),
+        [onCollapseSearch, onComposePress, t, theme],
+    );
+
     const renderListHeader = useCallback(() => {
         if (showHistoryPreview) {
             return (
@@ -354,19 +404,22 @@ const HarborSearchResults = ({
         }
         if (hasSearched) {
             return (
-                <HarborFullState
-                    icon="magnify-close"
-                    title={
-                        isUsersTab
-                            ? t('沒有找到使用者')
-                            : t('沒有找到搜尋結果')
-                    }
-                    description={
-                        isUsersTab
-                            ? t('試試其他關鍵字。')
-                            : t('試試其他關鍵字或調整搜尋篩選。')
-                    }
-                />
+                <View style={styles.emptyState}>
+                    <HarborFullState
+                        icon="magnify-close"
+                        title={
+                            isUsersTab
+                                ? t('沒有找到使用者')
+                                : t('沒有找到搜尋結果')
+                        }
+                        description={
+                            isUsersTab
+                                ? t('試試其他關鍵字。')
+                                : t('試試其他關鍵字或調整搜尋篩選。')
+                        }
+                    />
+                    {showComposePrompt ? renderComposePrompt() : null}
+                </View>
             );
         }
         return (
@@ -385,7 +438,9 @@ const HarborSearchResults = ({
         isLoading,
         isQueryDirty,
         isUsersTab,
+        renderComposePrompt,
         runSearch,
+        showComposePrompt,
         t,
         theme,
     ]);
@@ -407,21 +462,33 @@ const HarborSearchResults = ({
         }
         if (loadMoreError) {
             return (
-                <View style={styles.footerRetry}>
-                    <HarborInlineRetry
-                        message={t('暫時無法載入更多搜尋結果')}
-                        actionLabel={t('重試')}
-                        onRetry={handleLoadMore}
-                    />
+                <View>
+                    <View style={styles.footerRetry}>
+                        <HarborInlineRetry
+                            message={t('暫時無法載入更多搜尋結果')}
+                            actionLabel={t('重試')}
+                            onRetry={handleLoadMore}
+                        />
+                    </View>
+                    {showComposePrompt && filteredItems.length > 0
+                        ? renderComposePrompt()
+                        : null}
                 </View>
             );
         }
+        // 有結果時在列表底部顯示發佈入口；無結果已在空狀態顯示，避免重複
+        if (showComposePrompt && filteredItems.length > 0) {
+            return renderComposePrompt();
+        }
         return <View style={styles.footerSpacing} />;
     }, [
+        filteredItems.length,
         handleLoadMore,
         isLoadingMore,
         isUsersTab,
         loadMoreError,
+        renderComposePrompt,
+        showComposePrompt,
         t,
         theme.themeColor,
     ]);
@@ -529,6 +596,34 @@ const styles = StyleSheet.create({
         ...uiStyle.defaultText,
         fontSize: scale(11),
         marginTop: verticalScale(10),
+    },
+    emptyState: {
+        paddingBottom: verticalScale(8),
+    },
+    composePrompt: {
+        alignItems: 'center',
+        marginHorizontal: scale(14),
+        marginTop: verticalScale(4),
+        marginBottom: verticalScale(20),
+        paddingTop: verticalScale(12),
+    },
+    composePromptText: {
+        ...uiStyle.defaultText,
+        fontSize: scale(12),
+        marginBottom: verticalScale(10),
+    },
+    composeButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        borderRadius: scale(11),
+        paddingHorizontal: scale(16),
+        paddingVertical: verticalScale(9),
+    },
+    composeButtonText: {
+        ...uiStyle.defaultText,
+        fontSize: scale(13),
+        fontWeight: '700',
+        marginLeft: scale(4),
     },
     footerLoading: {
         minHeight: verticalScale(54),
