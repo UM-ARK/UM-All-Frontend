@@ -373,8 +373,29 @@ const Nav = () => {
                     />
                     <Stack.Screen name="AllEvents" component={AllEvents} />
 
-                    {/* ARK選課 */}
-                    <Stack.Screen name="LocalCourse" component={LocalCourse} />
+                    {/* ARK選課：改為 card，避免再進 Wiki 時被 Modal 蓋住（Wiki 出現在背後） */}
+                    <Stack.Screen
+                        name="LocalCourse"
+                        component={LocalCourse}
+                        options={{
+                            presentation: 'card',
+                        }}
+                    />
+                    {/* Wiki 搜尋／條目：同組 card + headerLeft，與 LocalCourse 堆疊順序一致 */}
+                    <Stack.Screen
+                        name="WikiSearch"
+                        component={WikiSearchPage}
+                        options={{
+                            presentation: 'card',
+                        }}
+                    />
+                    <Stack.Screen
+                        name="WikiArticle"
+                        component={WikiArticlePage}
+                        options={{
+                            presentation: 'card',
+                        }}
+                    />
                 </Stack.Group>
 
                 {/* 普通左右壓動畫組 */}
@@ -396,8 +417,6 @@ const Nav = () => {
                         options={{ headerTitle: t('搜索') }}
                     />
                     <Stack.Screen name="WikiHome" component={WikiHome} />
-                    <Stack.Screen name="WikiSearch" component={WikiSearchPage} />
-                    <Stack.Screen name="WikiArticle" component={WikiArticlePage} />
                     <Stack.Screen name="Webviewer" component={Webviewer} />
                     <Stack.Screen
                         name="SettingPage"

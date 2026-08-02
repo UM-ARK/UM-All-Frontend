@@ -125,7 +125,7 @@ const CourseCard = memo(
         const courseActions = [
             {
                 id: 'ark-wiki',
-                title: `${t('寫', { ns: 'catalog' })} Wiki`,
+                title: 'Wiki',
                 image: Platform.select({
                     ios: 'book',
                     android: 'ic_menu_agenda',
@@ -135,7 +135,7 @@ const CourseCard = memo(
             },
             {
                 id: 'what2reg',
-                title: `${t('查', { ns: 'catalog' })} ${t('選咩課', { ns: 'catalog' })}`,
+                title: t('評價', { ns: 'catalog' }),
                 image: Platform.select({
                     ios: 'star',
                     android: 'btn_star_big_on',
@@ -145,7 +145,7 @@ const CourseCard = memo(
             },
             {
                 id: 'official',
-                title: `${t('查', { ns: 'catalog' })} ${t('官方', { ns: 'catalog' })}`,
+                title: t('官方', { ns: 'catalog' }),
                 image: Platform.select({
                     ios: 'graduationcap',
                     android: 'ic_menu_info_details',
@@ -157,7 +157,7 @@ const CourseCard = memo(
                 ? [
                     {
                         id: 'coursesim',
-                        title: `${t('查', { ns: 'catalog' })} ${t('模擬課表', { ns: 'catalog' })}`,
+                        title: t('模擬課表', { ns: 'catalog' }),
                         image: Platform.select({
                             ios: 'calendar',
                             android: 'ic_menu_my_calendar',
@@ -167,7 +167,7 @@ const CourseCard = memo(
                     },
                     {
                         id: 'section',
-                        title: `${t('查', { ns: 'catalog' })} Section`,
+                        title: 'Section',
                         image: Platform.select({
                             ios: 'list.bullet',
                             android: 'ic_menu_sort_by_size',

@@ -92,7 +92,7 @@ const LocalCourseOfferingMenuCard = ({
     const offeringActions = [
         {
             id: `${keyPrefix}-wiki`,
-            title: `${t('寫', { ns: 'catalog' })} Wiki`,
+            title: 'Wiki',
             image: Platform.select({
                 ios: 'book',
                 android: 'ic_menu_agenda',
@@ -102,7 +102,7 @@ const LocalCourseOfferingMenuCard = ({
         },
         {
             id: `${keyPrefix}-what2reg`,
-            title: `${t('查', { ns: 'catalog' })} ${t('選咩課', { ns: 'catalog' })}`,
+            title: t('評價', { ns: 'catalog' }),
             image: Platform.select({
                 ios: 'star',
                 android: 'btn_star_big_on',
@@ -112,7 +112,7 @@ const LocalCourseOfferingMenuCard = ({
         },
         {
             id: `${keyPrefix}-coursesim`,
-            title: `${t('查', { ns: 'catalog' })} ${t('模擬課表', { ns: 'catalog' })}`,
+            title: t('模擬課表', { ns: 'catalog' }),
             image: Platform.select({
                 ios: 'calendar',
                 android: 'ic_menu_my_calendar',
@@ -122,7 +122,7 @@ const LocalCourseOfferingMenuCard = ({
         },
         {
             id: `${keyPrefix}-add-coursesim`,
-            title: `${t('添加至模擬課表', { ns: 'catalog' })}`,
+            title: t('添加至模擬課表', { ns: 'catalog' }),
             image: Platform.select({
                 ios: 'plus.circle',
                 android: 'ic_menu_add',
