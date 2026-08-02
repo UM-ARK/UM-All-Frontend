@@ -1,6 +1,7 @@
 import { Linking, Platform, Appearance, Alert } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
 import { themes } from '../components/ThemeContext';
+import { ARK_WIKI } from './pathMap';
 
 // 定義 Android 上支持 Custom Tabs 的常見瀏覽器包名
 // 優先級：Chrome > Edge > Firefox > 其他
@@ -53,6 +54,11 @@ export const openLink = async (input) => {
         mode = input.mode;
     } else {
         throw new Error('openLink: Invalid input');
+    }
+
+    // Wiki 連結預設全螢幕（呼叫端可顯式傳 mode 覆寫）
+    if (!mode && typeof url === 'string' && url.startsWith(ARK_WIKI)) {
+        mode = 'fullScreen';
     }
 
     const colorScheme = Appearance.getColorScheme(); // 'light' 或 'dark'
