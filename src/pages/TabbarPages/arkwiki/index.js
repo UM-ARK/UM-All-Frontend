@@ -23,29 +23,47 @@ import { ARK_WIKI } from '../../../utils/pathMap';
 import { trigger } from '../../../utils/trigger';
 import { fetchRandomWikiTitle, fetchWikiRecentChanges } from '../../../utils/wikiApi';
 
-const CURATED_ARTICLES = [
-    {title: 'ARK捐贈榜'},
-    {title: '電腦學會'},
-    {title: '澳大大事'},
-    {title: '常用口語黑話'},
-    {title: 'ARK ALL', label: '關於 ARK ALL'},
-    {title: 'CIS 計算機'},
-    {title: 'ECEN1000 ECEN1011 Digital System', label: 'ECEN1000 Digital System'},
-    {title: 'IET 英國機械工程師學會澳門大學學生分部', label: 'IET'},
-    {title: '更換學分'},
-    {title: '常用工具'},
-    {title: '三院', label: '光明三院'},
-    {title: 'ARK ALL開發踩坑指北', label: 'ARK ALL 開發踩坑指北'},
-    {title: 'ACCT 會計'},
-    {title: 'CISC1000'},
-    {title: '攝影學會'},
-    {title: 'CS/SP點', label: 'CS/SP 點'},
-    {title: 'ICTO 資訊及通訊科技部', label: 'ICTO'},
-    {title: 'ECE 電機及電腦工程系', label: 'ECE 電機'},
-    {title: 'GELH2001 Sex and the Arts'},
-    {title: '2FA 雙重認證'},
-    {title: '學生組織'},
-    {title: '澳門大學金融攻略'},
+const CURATED_CATEGORIES = [
+    {
+        key: 'campus',
+        title: 'ARK 與校園',
+        articles: [
+            {title: 'ARK捐贈榜'},
+            {title: '澳大大事'},
+            {title: '常用口語黑話'},
+            {title: 'ARK ALL', label: '關於 ARK ALL'},
+            {title: '更換學分'},
+            {title: '常用工具'},
+            {title: '三院', label: '光明三院'},
+            {title: 'ARK ALL開發踩坑指北', label: 'ARK ALL 開發踩坑指北'},
+            {title: 'ICTO 資訊及通訊科技部', label: 'ICTO'},
+            {title: '2FA 雙重認證'},
+            {title: '澳門大學金融攻略'},
+        ],
+    },
+    {
+        key: 'organizations',
+        title: '學生組織',
+        articles: [
+            {title: '學生組織'},
+            {title: '電腦學會'},
+            {title: 'IET 英國機械工程師學會澳門大學學生分部', label: 'IET'},
+            {title: '攝影學會'},
+        ],
+    },
+    {
+        key: 'courses',
+        title: '課程與學系',
+        articles: [
+            {title: 'CIS 計算機'},
+            {title: 'ECEN1000 ECEN1011 Digital System', label: 'ECEN1000 Digital System'},
+            {title: 'ACCT 會計'},
+            {title: 'CISC1000'},
+            {title: 'CS/SP點', label: 'CS/SP 點'},
+            {title: 'ECE 電機及電腦工程系', label: 'ECE 電機'},
+            {title: 'GELH2001 Sex and the Arts'},
+        ],
+    },
 ];
 
 const WikiHome = ({navigation}) => {
@@ -54,6 +72,7 @@ const WikiHome = ({navigation}) => {
     const headerHeight = useHeaderHeight();
     const [recentChanges, setRecentChanges] = useState([]);
     const [isLoadingRecent, setIsLoadingRecent] = useState(true);
+    const [collapsedCategoryKeys, setCollapsedCategoryKeys] = useState(new Set());
 
     useEffect(() => {
         navigation.setOptions({headerTitle: 'ARK Wiki'});
@@ -71,7 +90,7 @@ const WikiHome = ({navigation}) => {
     }, [navigation]);
 
     const items = useMemo(() => [
-        ...CURATED_ARTICLES.map(article => ({...article, type: 'article', section: 'curated'})),
+        ...CURATED_CATEGORIES.map(category => ({...category, type: 'category'})),
         {type: 'heading', title: t('最近更新')},
         ...recentChanges.map(item => ({...item, type: 'article', section: 'recent'})),
     ], [recentChanges, t]);
@@ -88,6 +107,19 @@ const WikiHome = ({navigation}) => {
         navigation.navigate('WikiArticle', {title});
     };
 
+    const toggleCategory = key => {
+        trigger();
+        setCollapsedCategoryKeys(currentKeys => {
+            const nextKeys = new Set(currentKeys);
+            if (nextKeys.has(key)) {
+                nextKeys.delete(key);
+            } else {
+                nextKeys.add(key);
+            }
+            return nextKeys;
+        });
+    };
+
     const openRandomArticle = async () => {
         trigger();
         try {
@@ -102,6 +134,65 @@ const WikiHome = ({navigation}) => {
     };
 
     const renderItem = ({item}) => {
+        if (item.type === 'category') {
+            const isCollapsed = collapsedCategoryKeys.has(item.key);
+            return (
+                <View
+                    style={[
+                        styles.category,
+                        {backgroundColor: theme.white, borderColor: theme.disabled},
+                    ]}>
+                    <Pressable
+                        accessibilityState={{expanded: !isCollapsed}}
+                        onPress={() => toggleCategory(item.key)}
+                        style={({pressed}) => [
+                            styles.categoryHeader,
+                            pressed && {backgroundColor: theme.tonal.primary15},
+                        ]}>
+                        <View style={styles.categoryTitleRow}>
+                            <Text style={[styles.categoryTitle, {color: theme.black.main}]}>
+                                {t(item.title)}
+                            </Text>
+                            <Text style={[styles.categoryCount, {color: theme.black.third}]}>
+                                {item.articles.length}
+                            </Text>
+                        </View>
+                        <MaterialCommunityIcons
+                            name={isCollapsed ? 'chevron-down' : 'chevron-up'}
+                            size={scale(20)}
+                            color={theme.black.third}
+                        />
+                    </Pressable>
+                    {!isCollapsed ? (
+                        <View style={styles.articleChips}>
+                            {item.articles.map(article => (
+                                <Pressable
+                                    key={article.title}
+                                    onPress={() => openArticle(article.title)}
+                                    style={({pressed}) => [
+                                        styles.articleChip,
+                                        {
+                                            backgroundColor: pressed
+                                                ? theme.tonal.primary30
+                                                : theme.tonal.primary08,
+                                            borderColor: theme.disabled,
+                                        },
+                                    ]}>
+                                    <MaterialCommunityIcons
+                                        name="book-open-page-variant-outline"
+                                        size={scale(15)}
+                                        color={theme.themeColor}
+                                    />
+                                    <Text style={[styles.articleChipText, {color: theme.black.main}]}>
+                                        {article.label || article.title}
+                                    </Text>
+                                </Pressable>
+                            ))}
+                        </View>
+                    ) : null}
+                </View>
+            );
+        }
         if (item.type === 'heading') {
             return (
                 <View style={styles.headingRow}>
@@ -182,8 +273,9 @@ const WikiHome = ({navigation}) => {
         <View style={pageStyle}>
             <FlashList
                 data={items}
+                extraData={collapsedCategoryKeys}
                 renderItem={renderItem}
-                keyExtractor={(item, index) => `${item.type}-${item.title}-${index}`}
+                keyExtractor={(item, index) => `${item.type}-${item.key || item.title}-${index}`}
                 ListHeaderComponent={listHeader}
                 contentContainerStyle={styles.content}
             />
@@ -252,6 +344,57 @@ const styles = StyleSheet.create({
         fontWeight: '700',
         marginTop: verticalScale(18),
         marginBottom: verticalScale(8),
+    },
+    category: {
+        borderWidth: StyleSheet.hairlineWidth,
+        borderRadius: scale(13),
+        marginBottom: verticalScale(9),
+        overflow: 'hidden',
+    },
+    categoryHeader: {
+        minHeight: verticalScale(42),
+        paddingHorizontal: scale(12),
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+    },
+    categoryTitleRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: scale(7),
+    },
+    categoryTitle: {
+        ...uiStyle.defaultText,
+        fontSize: scale(15),
+        fontWeight: '700',
+    },
+    categoryCount: {
+        ...uiStyle.defaultText,
+        fontSize: scale(11),
+    },
+    articleChips: {
+        paddingHorizontal: scale(10),
+        paddingBottom: verticalScale(10),
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: scale(7),
+    },
+    articleChip: {
+        maxWidth: '100%',
+        minHeight: verticalScale(31),
+        borderWidth: StyleSheet.hairlineWidth,
+        borderRadius: scale(10),
+        paddingHorizontal: scale(9),
+        paddingVertical: verticalScale(6),
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: scale(5),
+    },
+    articleChipText: {
+        ...uiStyle.defaultText,
+        flexShrink: 1,
+        fontSize: scale(12),
+        fontWeight: '600',
     },
     articleRow: {
         minHeight: verticalScale(52),
