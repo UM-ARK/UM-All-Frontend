@@ -41,7 +41,6 @@ import {
     UM_RC,
     UM_ALUMNI,
     ARK_HARBOR,
-    ARK_WIKI,
     CANTEEN_QUEUE,
 } from '../../../utils/pathMap';
 import { getCurrentUmehHost } from '../../../utils/umehHost';
@@ -571,12 +570,7 @@ export const getFunctionArr = (t) => [
                 icon_name: 'file-document-edit-outline',
                 fn_name: 'Wiki',
                 needLogin: false,
-                go_where: 'Linking',
-                webview_param: {
-                    // import pathMap的鏈接進行跳轉
-                    url: ARK_WIKI,
-                    title: 'ARK Wiki',
-                },
+                go_where: 'WikiHome',
                 describe: t('ARK Wiki，希望集成澳大的所有資訊、攻略、學習方法等', { ns: 'features' }),
                 key_name: 'Wiki',
                 keywords: 'Wiki, Guide, Information, Knowledge Base, 百科, 攻略, 資訊, 知識庫',

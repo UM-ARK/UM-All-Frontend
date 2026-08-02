@@ -15,11 +15,11 @@ import { t } from 'i18next';
 
 import { useTheme, uiStyle } from '../../../../../../components/ThemeContext';
 import { trigger } from '../../../../../../utils/trigger';
-import { ARK_WIKI_SEARCH } from '../../../../../../utils/pathMap';
 import { useUmehHost } from '../../../../../../utils/umehHost';
 import { openLink } from '../../../../../../utils/browser';
 import { logToFirebase } from '../../../../../../utils/firebaseAnalytics';
 import { navigateToCourseTab } from '../../../../../../utils/courseNavigation';
+import { navigateToWikiSearch } from '../../../../../../utils/wikiNavigation';
 import { getCourseSectionDisplayTitle } from '../utils/courseTitle';
 
 /** 與 LocalCourse 列表左右內距一致 */
@@ -138,9 +138,9 @@ const LocalCourseOfferingMenuCard = ({
             case `${keyPrefix}-wiki`: {
                 const cc = courseRow['Course Code'];
                 const prof = courseRow['Teacher Information'];
-                let URL = ARK_WIKI_SEARCH + encodeURIComponent(cc);
+                let wikiQuery = cc;
                 if (prof) {
-                    URL = ARK_WIKI_SEARCH + encodeURIComponent(prof);
+                    wikiQuery = prof;
                     logToFirebase('checkCourse', {
                         courseCode: cc,
                         profName: prof,
@@ -152,7 +152,7 @@ const LocalCourseOfferingMenuCard = ({
                         action: 'ark-wiki',
                     });
                 }
-                openLink(URL);
+                navigateToWikiSearch(navigation, wikiQuery, {autoOpenUnique: true});
                 break;
             }
             case `${keyPrefix}-what2reg`: {

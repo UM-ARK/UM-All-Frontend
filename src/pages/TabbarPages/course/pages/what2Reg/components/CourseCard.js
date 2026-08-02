@@ -3,7 +3,6 @@ import { View, Text, StyleSheet, Platform } from 'react-native';
 
 import { useTheme, uiStyle } from '../../../../../../components/ThemeContext';
 import {
-    ARK_WIKI_SEARCH,
     OFFICIAL_COURSE_SEARCH,
 } from '../../../../../../utils/pathMap';
 import { useUmehHost } from '../../../../../../utils/umehHost';
@@ -11,6 +10,7 @@ import { logToFirebase } from '../../../../../../utils/firebaseAnalytics';
 import { openLink } from '../../../../../../utils/browser';
 import { trigger } from '../../../../../../utils/trigger';
 import { navigateToCourseTab } from '../../../../../../utils/courseNavigation';
+import { navigateToWikiSearch } from '../../../../../../utils/wikiNavigation';
 import { getCourseDisplayTitle } from '../utils/courseTitle';
 
 import { scale } from 'react-native-size-matters';
@@ -183,11 +183,9 @@ const CourseCard = memo(
             trigger();
             switch (event.nativeEvent.event) {
                 case 'ark-wiki': {
-                    let URL = ARK_WIKI_SEARCH + encodeURIComponent(courseCode);
+                    let wikiQuery = courseCode;
                     if (prof_info) {
-                        URL =
-                            ARK_WIKI_SEARCH +
-                            encodeURIComponent(prof_info.name);
+                        wikiQuery = prof_info.name;
                         logToFirebase('checkCourse', {
                             courseCode: courseCode,
                             profName: prof_info.name,
@@ -199,7 +197,7 @@ const CourseCard = memo(
                             action: 'ark-wiki',
                         });
                     }
-                    openLink(URL);
+                    navigateToWikiSearch(navigation, wikiQuery, {autoOpenUnique: true});
                     break;
                 }
                 case 'what2reg': {

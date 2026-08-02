@@ -118,6 +118,10 @@ export const ARK_HARBOR_FEEDBACK =
 
 export const ARK_WIKI = 'https://wiki.umall.one';
 
+export const ARK_WIKI_API = ARK_WIKI + '/api.php';
+
+export const ARK_WIKI_REST = ARK_WIKI + '/rest.php/v1';
+
 export const ARK_WIKI_SEARCH = ARK_WIKI + '/wiki/Special:Search?search=';
 
 export const ARK_WIKI_ABOUT_ARK = ARK_WIKI + '/wiki/ARK_ALL';

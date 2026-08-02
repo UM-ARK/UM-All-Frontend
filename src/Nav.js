@@ -38,6 +38,9 @@ import HarborProfilePage from './pages/TabbarPages/my/pages/HarborProfilePage';
 import HarborActivityPage from './pages/TabbarPages/my/pages/HarborActivityPage';
 import HarborBadgesPage from './pages/TabbarPages/my/pages/HarborBadgesPage';
 import HarborInboxPage from './pages/TabbarPages/my/pages/HarborInboxPage';
+import WikiHome from './pages/TabbarPages/arkwiki';
+import WikiSearchPage from './pages/TabbarPages/arkwiki/WikiSearchPage';
+import WikiArticlePage from './pages/TabbarPages/arkwiki/WikiArticlePage';
 
 import LocalCourse from './pages/TabbarPages/course/pages/what2Reg/pages/LocalCourse';
 
@@ -392,6 +395,9 @@ const Nav = () => {
                         component={SearchScreen}
                         options={{ headerTitle: t('搜索') }}
                     />
+                    <Stack.Screen name="WikiHome" component={WikiHome} />
+                    <Stack.Screen name="WikiSearch" component={WikiSearchPage} />
+                    <Stack.Screen name="WikiArticle" component={WikiArticlePage} />
                     <Stack.Screen name="Webviewer" component={Webviewer} />
                     <Stack.Screen
                         name="SettingPage"
