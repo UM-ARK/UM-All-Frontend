@@ -43,6 +43,11 @@
               "scheme": "https",
               "host": "umall.one",
               "pathPrefix": "/auth/discourse"
+            },
+            {
+              "scheme": "https",
+              "host": "umall.one",
+              "pathPrefix": "/app/"
             }
           ],
           "category": [
