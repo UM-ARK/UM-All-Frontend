@@ -68,11 +68,14 @@ const HarborLoginConsentModal = ({visible, onCancel, onConfirm}) => {
             transparent
             animationType="fade"
             onRequestClose={handleCancel}>
-            <View
-                style={[
-                    styles.backdrop,
-                    {backgroundColor: theme.tonal.primary50},
-                ]}>
+            <View style={styles.backdrop}>
+                <View
+                    style={[
+                        StyleSheet.absoluteFill,
+                        styles.backdropDim,
+                        {backgroundColor: theme.trueBlack},
+                    ]}
+                />
                 <Pressable
                     accessibilityRole="button"
                     accessibilityLabel={t('取消')}
@@ -233,6 +236,9 @@ const styles = StyleSheet.create({
         justifyContent: 'flex-end',
         padding: scale(16),
         paddingBottom: verticalScale(28),
+    },
+    backdropDim: {
+        opacity: 0.55,
     },
     sheet: {
         width: '100%',
