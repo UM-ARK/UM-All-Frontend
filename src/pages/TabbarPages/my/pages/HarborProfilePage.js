@@ -35,6 +35,7 @@ import HarborBadgeIcon from '../components/HarborBadgeIcon';
 import {
     fetchHarborProfileMetadata,
     fetchHarborUserProfile,
+    resolveCanUploadCustomAvatar,
     selectHarborAvatar,
     updateHarborAvatar,
     updateHarborProfile,
@@ -199,8 +200,23 @@ const HarborProfilePage = ({ navigation, route }) => {
         React.useState(false);
     const [pendingAvatar, setPendingAvatar] = React.useState(null);
     const [selectableAvatars, setSelectableAvatars] = React.useState([]);
-    const [canUploadCustomAvatar, setCanUploadCustomAvatar] =
-        React.useState(false);
+    const [selectableAvatarsMode, setSelectableAvatarsMode] =
+        React.useState('disabled');
+    const canUploadCustomAvatar = React.useMemo(
+        () =>
+            resolveCanUploadCustomAvatar(
+                {selectable_avatars_mode: selectableAvatarsMode},
+                user,
+            ),
+        [
+            selectableAvatarsMode,
+            user,
+            user?.canUploadAvatar,
+            user?.isAdmin,
+            user?.isModerator,
+            user?.trustLevel,
+        ],
+    );
 
     React.useEffect(() => {
         navigation.setOptions({ headerTitle: t('Harbor 個人資料') });
@@ -268,18 +284,20 @@ const HarborProfilePage = ({ navigation, route }) => {
             return undefined;
         }
 
-        fetchHarborProfileMetadata({ signal: controller.signal })
+        fetchHarborProfileMetadata({signal: controller.signal})
             .then(metadata => {
                 if (isActive) {
                     setWorkStatusField(metadata.workStatusField);
                     setSelectableAvatars(metadata.selectableAvatars);
-                    setCanUploadCustomAvatar(metadata.canUploadCustomAvatar);
+                    setSelectableAvatarsMode(
+                        metadata.selectableAvatarsMode || 'disabled',
+                    );
                     setMetadataError(!metadata.workStatusField);
                     if (__DEV__) {
                         console.log('[HarborProfile] avatar.metadata.loaded', {
                             count: metadata.selectableAvatars.length,
-                            canUploadCustomAvatar:
-                                metadata.canUploadCustomAvatar,
+                            selectableAvatarsMode:
+                                metadata.selectableAvatarsMode,
                         });
                     }
                 }
@@ -549,7 +567,7 @@ const HarborProfilePage = ({ navigation, route }) => {
     };
 
     const handleUploadAvatar = async () => {
-        if (isSaving || isUpdatingAvatar) {
+        if (isSaving || isUpdatingAvatar || !canUploadCustomAvatar) {
             return;
         }
 

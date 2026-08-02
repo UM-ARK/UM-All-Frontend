@@ -1395,6 +1395,21 @@ function normalizeProfile(
             matchingPreviousUser?.trustLevel ??
             0,
         ),
+        isAdmin: Boolean(
+            currentUser.admin ||
+                profile.admin ||
+                matchingPreviousUser?.isAdmin,
+        ),
+        isModerator: Boolean(
+            currentUser.moderator ||
+                profile.moderator ||
+                matchingPreviousUser?.isModerator,
+        ),
+        // Discourse /session/current.json 的 can_upload_avatar（含 uploaded_avatars_allowed_groups）
+        canUploadAvatar:
+            typeof currentUser.can_upload_avatar === 'boolean'
+                ? currentUser.can_upload_avatar
+                : Boolean(matchingPreviousUser?.canUploadAvatar),
         joinedAt,
         unreadNotifications: currentUnreadNotifications != null
             ? currentUnreadNotifications
@@ -1812,7 +1827,41 @@ export async function fetchHarborSiteCapabilities({ signal } = {}) {
     return normalizeSiteCapabilities(response.data);
 }
 
-export async function fetchHarborProfileMetadata({ signal } = {}) {
+// 對齊 Discourse AvatarSelectorModal.showCustomAvatarSelector
+function canShowCustomAvatarSelector(mode, user) {
+    switch (mode) {
+        case 'no_one':
+            return false;
+        case 'tl1':
+        case 'tl2':
+        case 'tl3':
+        case 'tl4': {
+            const allowedTl = Number(String(mode).replace('tl', ''));
+            return Boolean(
+                user?.isAdmin ||
+                    user?.isModerator ||
+                    Number(user?.trustLevel ?? 0) >= allowedTl,
+            );
+        }
+        case 'staff':
+            return Boolean(user?.isAdmin || user?.isModerator);
+        case 'everyone':
+        case 'disabled':
+        default:
+            return true;
+    }
+}
+
+// 對齊 Discourse：can_upload_avatar ∩ selectable_avatars_mode
+export function resolveCanUploadCustomAvatar(settings, user) {
+    const mode = settings?.selectable_avatars_mode || 'disabled';
+    if (!user || !canShowCustomAvatarSelector(mode, user)) {
+        return false;
+    }
+    return Boolean(user.canUploadAvatar);
+}
+
+export async function fetchHarborProfileMetadata({ signal, user } = {}) {
     const response = await harborApi.get('/site.json', { signal });
     const userFields = Array.isArray(response.data?.user_fields)
         ? response.data.user_fields
@@ -1862,9 +1911,8 @@ export async function fetchHarborProfileMetadata({ signal } = {}) {
                     : null;
             })
             .filter(Boolean),
-        canUploadCustomAvatar:
-            settings?.allow_uploaded_avatars !== false &&
-            settings?.selectable_avatars_mode !== 'no_one',
+        selectableAvatarsMode: settings?.selectable_avatars_mode || 'disabled',
+        canUploadCustomAvatar: resolveCanUploadCustomAvatar(settings, user),
     };
 }
 

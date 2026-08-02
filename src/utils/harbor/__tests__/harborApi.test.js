@@ -40,6 +40,7 @@ import {
     setActiveHarborCredentials,
     setHarborCredentialRejectedHandler,
     setHarborTopicNotificationLevel,
+    resolveCanUploadCustomAvatar,
     toggleHarborPostReaction,
     unlikeHarborPost,
     updateHarborAvatar,
@@ -195,6 +196,10 @@ describe('Harbor API 資料正規化', () => {
                     current_user: {
                         id: 7,
                         username: 'ark-user',
+                        admin: false,
+                        moderator: false,
+                        trust_level: 2,
+                        can_upload_avatar: true,
                     },
                 },
             })
@@ -226,6 +231,10 @@ describe('Harbor API 資料正規化', () => {
 
         expect(result.isUMer).toBe(true);
         expect(result.id).toBe(7);
+        expect(result.canUploadAvatar).toBe(true);
+        expect(result.isAdmin).toBe(false);
+        expect(result.isModerator).toBe(false);
+        expect(result.trustLevel).toBe(2);
         expect(result.profile).toEqual({
             bio: 'Harbor 簡介',
             location: '澳門',
@@ -262,7 +271,16 @@ describe('Harbor API 資料正規化', () => {
         });
         putSpy.mockResolvedValueOnce({data: {success: 'OK'}});
 
-        await expect(fetchHarborProfileMetadata()).resolves.toEqual({
+        await expect(
+            fetchHarborProfileMetadata({
+                user: {
+                    canUploadAvatar: true,
+                    trustLevel: 1,
+                    isAdmin: false,
+                    isModerator: false,
+                },
+            }),
+        ).resolves.toEqual({
             workStatusField: {
                 id: 1,
                 editable: true,
@@ -279,6 +297,7 @@ describe('Harbor API 資料正規化', () => {
                     url: 'https://harbor.example.com/uploads/avatar-2.png',
                 },
             ],
+            selectableAvatarsMode: 'everyone',
             canUploadCustomAvatar: true,
         });
         await expect(
@@ -300,6 +319,64 @@ describe('Harbor API 資料正規化', () => {
             },
             {signal: undefined},
         );
+    });
+
+    it('依 Discourse 權限判斷是否可上傳自訂頭像', () => {
+        const allowedUser = {
+            canUploadAvatar: true,
+            trustLevel: 2,
+            isAdmin: false,
+            isModerator: false,
+        };
+
+        expect(
+            resolveCanUploadCustomAvatar(
+                {selectable_avatars_mode: 'everyone'},
+                allowedUser,
+            ),
+        ).toBe(true);
+        expect(
+            resolveCanUploadCustomAvatar(
+                {selectable_avatars_mode: 'everyone'},
+                {...allowedUser, canUploadAvatar: false},
+            ),
+        ).toBe(false);
+        expect(
+            resolveCanUploadCustomAvatar(
+                {selectable_avatars_mode: 'no_one'},
+                allowedUser,
+            ),
+        ).toBe(false);
+        expect(
+            resolveCanUploadCustomAvatar(
+                {selectable_avatars_mode: 'tl3'},
+                allowedUser,
+            ),
+        ).toBe(false);
+        expect(
+            resolveCanUploadCustomAvatar(
+                {selectable_avatars_mode: 'tl2'},
+                allowedUser,
+            ),
+        ).toBe(true);
+        expect(
+            resolveCanUploadCustomAvatar(
+                {selectable_avatars_mode: 'staff'},
+                allowedUser,
+            ),
+        ).toBe(false);
+        expect(
+            resolveCanUploadCustomAvatar(
+                {selectable_avatars_mode: 'staff'},
+                {...allowedUser, isModerator: true},
+            ),
+        ).toBe(true);
+        expect(
+            resolveCanUploadCustomAvatar(
+                {selectable_avatars_mode: 'everyone'},
+                null,
+            ),
+        ).toBe(false);
     });
 
     it('上傳並套用 Harbor 頭像', async () => {
