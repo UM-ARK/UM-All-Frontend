@@ -51,8 +51,9 @@ const WikiArticlePage = ({route, navigation}) => {
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        navigation.setOptions({headerTitle: article?.title || title || 'ARK Wiki'});
-    }, [article?.title, navigation, title]);
+        // 導覽列只顯示簡短標題；完整條目名稱改由頁面內標題區換行展示
+        navigation.setOptions({headerTitle: 'ARK Wiki'});
+    }, [navigation]);
 
     const loadArticle = useCallback(async ({refresh = false} = {}) => {
         if (!title) {
@@ -215,54 +216,54 @@ const WikiArticlePage = ({route, navigation}) => {
     return (
         <View style={pageStyle}>
             <View style={[styles.metadata, {backgroundColor: theme.white}]}>
-                <View style={styles.metadataText}>
-                    <Text numberOfLines={2} style={[styles.title, {color: theme.black.main}]}>
+                <View style={styles.metadataHeader}>
+                    <Text style={[styles.title, {color: theme.black.main}]}>
                         {article.title}
                     </Text>
-                    <Text style={[styles.updated, {color: theme.black.third}]}>
-                        {article.timestamp
-                            ? t('最後更新：{{time}}', {time: moment(article.timestamp).format('YYYY-MM-DD HH:mm')})
-                            : t('由 ARK Wiki 提供')}
-                    </Text>
-                    {isCached ? (
-                        <Text style={[styles.cachedText, {color: theme.warning}]}>{t('目前顯示離線快取')}</Text>
-                    ) : null}
+                    <View style={styles.toolbar}>
+                        <Pressable
+                            accessibilityLabel={t('分享')}
+                            onPress={handleShare}
+                            style={({pressed}) => [styles.iconButton, {backgroundColor: pressed ? theme.tonal.primary30 : theme.tonal.primary15}]}>
+                            <MaterialCommunityIcons name="share-variant-outline" size={scale(20)} color={theme.themeColor} />
+                        </Pressable>
+                        <Pressable
+                            accessibilityLabel={t('重新整理')}
+                            disabled={isRefreshing}
+                            onPress={() => {
+                                trigger();
+                                loadArticle({refresh: true});
+                            }}
+                            style={({pressed}) => [styles.iconButton, {backgroundColor: pressed ? theme.tonal.primary30 : theme.tonal.primary15}]}>
+                            {isRefreshing
+                                ? <ActivityIndicator size="small" color={theme.themeColor} />
+                                : <MaterialCommunityIcons name="refresh" size={scale(21)} color={theme.themeColor} />}
+                        </Pressable>
+                        <MenuView
+                            actions={[
+                                {id: 'edit', title: t('編輯條目')},
+                                {id: 'history', title: t('查看歷史')},
+                                {id: 'browser', title: t('在瀏覽器開啟')},
+                            ]}
+                            onPressAction={handleMoreAction}
+                            onOpenMenu={() => trigger()}
+                            shouldOpenOnLongPress={false}>
+                            <View
+                                accessibilityLabel={t('更多操作')}
+                                style={[styles.iconButton, {backgroundColor: theme.tonal.primary15}]}>
+                                <MaterialCommunityIcons name="dots-horizontal" size={scale(21)} color={theme.themeColor} />
+                            </View>
+                        </MenuView>
+                    </View>
                 </View>
-                <View style={styles.toolbar}>
-                    <Pressable
-                        accessibilityLabel={t('分享')}
-                        onPress={handleShare}
-                        style={({pressed}) => [styles.iconButton, {backgroundColor: pressed ? theme.tonal.primary30 : theme.tonal.primary15}]}>
-                        <MaterialCommunityIcons name="share-variant-outline" size={scale(20)} color={theme.themeColor} />
-                    </Pressable>
-                    <Pressable
-                        accessibilityLabel={t('重新整理')}
-                        disabled={isRefreshing}
-                        onPress={() => {
-                            trigger();
-                            loadArticle({refresh: true});
-                        }}
-                        style={({pressed}) => [styles.iconButton, {backgroundColor: pressed ? theme.tonal.primary30 : theme.tonal.primary15}]}>
-                        {isRefreshing
-                            ? <ActivityIndicator size="small" color={theme.themeColor} />
-                            : <MaterialCommunityIcons name="refresh" size={scale(21)} color={theme.themeColor} />}
-                    </Pressable>
-                    <MenuView
-                        actions={[
-                            {id: 'edit', title: t('編輯條目')},
-                            {id: 'history', title: t('查看歷史')},
-                            {id: 'browser', title: t('在瀏覽器開啟')},
-                        ]}
-                        onPressAction={handleMoreAction}
-                        onOpenMenu={() => trigger()}
-                        shouldOpenOnLongPress={false}>
-                        <View
-                            accessibilityLabel={t('更多操作')}
-                            style={[styles.iconButton, {backgroundColor: theme.tonal.primary15}]}>
-                            <MaterialCommunityIcons name="dots-horizontal" size={scale(21)} color={theme.themeColor} />
-                        </View>
-                    </MenuView>
-                </View>
+                <Text style={[styles.updated, {color: theme.black.third}]}>
+                    {article.timestamp
+                        ? t('最後更新：{{time}}', {time: moment(article.timestamp).format('YYYY-MM-DD HH:mm')})
+                        : t('由 ARK Wiki 提供')}
+                </Text>
+                {isCached ? (
+                    <Text style={[styles.cachedText, {color: theme.warning}]}>{t('目前顯示離線快取')}</Text>
+                ) : null}
             </View>
             <WikiArticleWebView
                 html={article.html}
@@ -315,15 +316,15 @@ const styles = StyleSheet.create({
         paddingHorizontal: scale(16),
         paddingTop: verticalScale(10),
         paddingBottom: verticalScale(9),
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: scale(10),
     },
-    metadataText: {
-        flex: 1,
+    metadataHeader: {
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        gap: scale(10),
     },
     title: {
         ...uiStyle.defaultText,
+        flex: 1,
         fontSize: scale(18),
         fontWeight: '700',
     },
@@ -339,7 +340,9 @@ const styles = StyleSheet.create({
     },
     toolbar: {
         flexDirection: 'row',
+        flexShrink: 0,
         gap: scale(6),
+        marginTop: verticalScale(1),
     },
     iconButton: {
         width: scale(34),
