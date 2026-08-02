@@ -693,7 +693,7 @@ export const getFunctionArr = (t) => [
                 },
                 describe: t('查看澳大本學年的重要日期，包括預選課、增補選、考試等重要時間點', { ns: 'features' }),
                 key_name: '重要日期',
-                keywords: 'Important Dates, Academic Calendar, Deadline, 日期, 考試, 選課, 截止, 學年',
+                keywords: 'Important Dates, Academic Calendar, Deadline, Add Drop, 日期, 考試, 選課, 截止, 學年, 學期開始, 復學, 學分增修, 預選科目, 增選, 退選, 退修, 豁免修讀語言, 免修, 轉修, 退修副修, 期末, 成績表, 補考, 暑期研究項目, 夏季學期',
             },
             {
                 icon_type: iconTypes.materialCommunityIcons,

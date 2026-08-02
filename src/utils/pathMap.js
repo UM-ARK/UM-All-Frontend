@@ -325,7 +325,7 @@ export const UM_PAPER_PLAN = 'http://library2.um.edu.mo/html/services/reference/
 // 澳大 - 預選課Excel表格
 export const UM_PRE_ENROLMENT_EXCEL = 'https://reg.um.edu.mo/current-students/enrolment-and-examinations/course-enrolment/pre-enrolment/?lang=zh-hant';
 // 澳大 - 重要日期
-export const UM_IMPORTANT_DATE = 'https://reg.um.edu.mo/current-students/enrolment-and-examinations/important-dates/?lang=zh-hant';
+export const UM_IMPORTANT_DATE = 'https://reg.um.edu.mo/current-students/important-dates/?lang=zh-hant';
 
 // 澳大 - 失物認領
 export const UM_LOST_FOUND = 'https://lostandfound.cmdo.um.edu.mo';
