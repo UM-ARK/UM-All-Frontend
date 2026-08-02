@@ -23,14 +23,29 @@ import { ARK_WIKI } from '../../../utils/pathMap';
 import { trigger } from '../../../utils/trigger';
 import { fetchRandomWikiTitle, fetchWikiRecentChanges } from '../../../utils/wikiApi';
 
-const CURATED_TITLES = [
-    '新生推薦',
-    '澳大課程',
-    '選咩課',
-    '校園網',
-    '澳大交通工具',
-    'E2 圖書館',
-    '澳門大學金融攻略',
+const CURATED_ARTICLES = [
+    {title: 'ARK捐贈榜'},
+    {title: '電腦學會'},
+    {title: '澳大大事'},
+    {title: '常用口語黑話'},
+    {title: 'ARK ALL', label: '關於 ARK ALL'},
+    {title: 'CIS 計算機'},
+    {title: 'ECEN1000 ECEN1011 Digital System', label: 'ECEN1000 Digital System'},
+    {title: 'IET 英國機械工程師學會澳門大學學生分部', label: 'IET'},
+    {title: '更換學分'},
+    {title: '常用工具'},
+    {title: '三院', label: '光明三院'},
+    {title: 'ARK ALL開發踩坑指北', label: 'ARK ALL 開發踩坑指北'},
+    {title: 'ACCT 會計'},
+    {title: 'CISC1000'},
+    {title: '攝影學會'},
+    {title: 'CS/SP點', label: 'CS/SP 點'},
+    {title: 'ICTO 資訊及通訊科技部', label: 'ICTO'},
+    {title: 'ECE 電機及電腦工程系', label: 'ECE 電機'},
+    {title: 'GELH2001 Sex and the Arts'},
+    {title: '2FA 雙重認證'},
+    {title: '學生組織'},
+    {title: '澳門大學金融攻略'},
 ];
 
 const WikiHome = ({navigation}) => {
@@ -56,7 +71,7 @@ const WikiHome = ({navigation}) => {
     }, [navigation]);
 
     const items = useMemo(() => [
-        ...CURATED_TITLES.map(title => ({type: 'article', title, section: 'curated'})),
+        ...CURATED_ARTICLES.map(article => ({...article, type: 'article', section: 'curated'})),
         {type: 'heading', title: t('最近更新')},
         ...recentChanges.map(item => ({...item, type: 'article', section: 'recent'})),
     ], [recentChanges, t]);
@@ -111,7 +126,9 @@ const WikiHome = ({navigation}) => {
                     color={theme.themeColor}
                 />
                 <View style={styles.articleText}>
-                    <Text style={[styles.articleTitle, {color: theme.black.main}]}>{item.title}</Text>
+                    <Text style={[styles.articleTitle, {color: theme.black.main}]}>
+                        {item.label || item.title}
+                    </Text>
                     {item.timestamp ? (
                         <Text style={[styles.articleMeta, {color: theme.black.third}]}>
                             {moment(item.timestamp).format('YYYY-MM-DD HH:mm')}
@@ -157,7 +174,7 @@ const WikiHome = ({navigation}) => {
                     <Text style={[styles.quickText, {color: theme.secondThemeColor}]}>{t('前往 Wiki 貢獻')}</Text>
                 </Pressable>
             </View>
-            <Text style={[styles.heading, {color: theme.black.main}]}>{t('精選條目')}</Text>
+            <Text style={[styles.heading, {color: theme.black.main}]}>{t('精選文章')}</Text>
         </View>
     );
 
