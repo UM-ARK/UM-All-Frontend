@@ -288,7 +288,6 @@ const HarborTopicCard = ({
             ) : null}
 
             <Text
-                selectable
                 numberOfLines={3}
                 style={[styles.title, { color: theme.black.main }]}>
                 {topic.title}
