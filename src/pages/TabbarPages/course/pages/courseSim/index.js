@@ -226,9 +226,16 @@ function CourseSim({ route, navigation }) {
         importFromISW,
     } = useCoursePlan();
 
+    // 首次 lazy 掛載若已帶 check，必須用初始 index 打開 sheet。
+    // snapToIndex 在 layout 未完成時會被 gorhom 直接忽略。
+    const initialCheckCode =
+        typeof route.params?.check === 'string' && route.params.check.length > 0
+            ? route.params.check
+            : null;
+
     // state
     const [importTimeTableText, setImportTimeTableText] = useState(''); // 空課表引導的貼上導入
-    const [searchText, setSearchText] = useState(null);
+    const [searchText, setSearchText] = useState(initialCheckCode);
     const [perSearchText, setPerSearchText] = useState(null);
 
     const [dayFilterChoice, setDayFilterChoice] = useState(null);
@@ -238,7 +245,15 @@ function CourseSim({ route, navigation }) {
     // null：尚未讀完上次具體／概覽；讀完前不渲染課表，避免先閃 detail
     const [timetableView, setTimetableView] = useState(null);
 
-    const [hasOpenCourseSearch, setHasOpenCourseSearch] = useState(false);
+    const [hasOpenCourseSearch, setHasOpenCourseSearch] = useState(
+        !!initialCheckCode,
+    );
+    // 與 CustomBottomSheet 的 index 同步；關閉時須回到 -1，避免 prop 殘留把 sheet 拉回
+    const [sheetIndex, setSheetIndex] = useState(initialCheckCode ? 1 : -1);
+    // 已掛載後再帶 check 時 bump key remount，交給 animateOnMount 等 layout
+    const [sheetKey, setSheetKey] = useState(0);
+    // 首次掛載已用初始 index 打開時，focus 清參不必再 remount
+    const appliedInitialCheckRef = useRef(!!initialCheckCode);
     const [bottomSheetMode, setBottomSheetMode] = useState('search');
     const [replacementTarget, setReplacementTarget] = useState(null);
     const [replacementCourseCode, setReplacementCourseCode] = useState(null);
@@ -572,7 +587,7 @@ function CourseSim({ route, navigation }) {
                 navigation.setParams({ add: undefined });
             }
 
-            // 如果有check傳參
+            // 如果有check傳參（頁面已掛載後再次帶入；首次掛載靠初始 sheetIndex）
             if (route.params?.check) {
                 const { check } = route.params;
                 setBottomSheetMode('search');
@@ -584,11 +599,18 @@ function CourseSim({ route, navigation }) {
                 setHasOpenCourseSearch(true);
                 // 執行任務後，重置參數
                 navigation.setParams({ check: undefined });
-                bottomSheetRef?.current?.snapToIndex(1);
+
+                if (appliedInitialCheckRef.current) {
+                    // 首次掛載已用 index=1 交給 animateOnMount，勿再 remount
+                    appliedInitialCheckRef.current = false;
+                } else {
+                    // 已掛載過：bump key 讓 sheet 以 index=1 重新掛載並等 layout
+                    setSheetIndex(1);
+                    setSheetKey(key => key + 1);
+                }
             }
 
-            // 失焦時自動清理
-            return () => { };
+            return undefined;
         }, [route, navigation, addCourse]),
     );
 
@@ -1099,8 +1121,10 @@ function CourseSim({ route, navigation }) {
         setReplacementSearchText('');
 
         if (planSlots.length > 0) {
+            setSheetIndex(1);
             bottomSheetRef.current?.snapToIndex(1);
         } else {
+            setSheetIndex(3);
             bottomSheetRef.current?.expand();
         }
 
@@ -1119,6 +1143,7 @@ function CourseSim({ route, navigation }) {
         setReplacementCourseCode(null);
         setReplacementSearchText('');
         setHasOpenCourseSearch(true);
+        setSheetIndex(2);
         bottomSheetRef.current?.snapToIndex(2);
         verScroll.current?.scrollTo({ y: 0 });
 
@@ -2881,20 +2906,24 @@ E11-0000
             />
 
             <CustomBottomSheet
+                key={sheetKey}
                 ref={bottomSheetRef}
                 page={'courseSim'}
+                index={sheetIndex}
                 // Tab 已隱藏，sheet 需延伸至螢幕底部
                 bottomInset={0}
                 onAnimate={(fromIndex, toIndex) => {
                     // 開始關閉時即顯示 FAB，與 sheet 下滑並行淡入
                     if (toIndex === -1 && hasOpenCourseSearch) {
                         setHasOpenCourseSearch(false);
+                        setSheetIndex(-1);
                     }
                 }}
                 setHasOpenFalse={() => {
                     if (hasOpenCourseSearch) {
                         setHasOpenCourseSearch(false);
                     }
+                    setSheetIndex(-1);
                     setReplacementCourseCode(null);
                 }}>
                 {bottomSheetMode === 'replacement'
