@@ -48,6 +48,8 @@ export default {
         Application: '應用',
         'Clear Cache': '清除本機資料',
         'Check Update': '檢查更新',
+        'App Settings': '系統設定',
+        'App Settings Hint': '權限、預設開啟連結等',
         About: '關於',
         Version: '版本',
         'Open Source': '開源地址',

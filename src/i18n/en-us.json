@@ -941,6 +941,8 @@
         "Application": "Application",
         "Clear Cache": "Clear Local Data",
         "Check Update": "Check Update",
+        "App Settings": "System Settings",
+        "App Settings Hint": "Permissions, open links by default, etc.",
         "About": "About",
         "Version": "Version",
         "Open Source": "Open Source",

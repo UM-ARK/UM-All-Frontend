@@ -533,6 +533,14 @@ const SettingPage = ({ navigation }) => {
                     />
                     <SettingItem
                         grouped
+                        icon="settings-outline"
+                        iconColor="#5856D6"
+                        title={t('setting:App Settings')}
+                        subtitle={t('setting:App Settings Hint')}
+                        onPress={() => Linking.openSettings()}
+                    />
+                    <SettingItem
+                        grouped
                         icon="globe-outline"
                         iconColor="#007AFF"
                         title={t('setting:What2Reg Host')}
