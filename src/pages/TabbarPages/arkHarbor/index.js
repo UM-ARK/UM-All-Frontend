@@ -997,7 +997,7 @@ const HarborDrawerNavigator = () => {
                     backgroundColor: theme.bg_color,
                 },
                 sceneStyle: { backgroundColor: theme.bg_color },
-                swipeEdgeWidth: scale(28),
+                swipeEdgeWidth: scale(38),
                 swipeMinDistance: scale(18),
                 drawerHideStatusBarOnOpen: false,
             }}>
