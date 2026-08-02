@@ -144,4 +144,49 @@ const parseImportData = inputText => {
     );
 };
 
+/**
+ * 將選課清單轉成可再導入的純文字。
+ *
+ * 格式對齊 parseImportData 正則：每行一個 `COURSECODE(SECTION)`，
+ * 僅輸出導入所需欄位，方便分享後貼上還原課表。
+ *
+ * @param {Array<{'Course Code': string, Section: string}>} planList 選課清單
+ * @returns {string} 可貼上導入的純文字；無有效項目時回傳空字串
+ */
+export const buildImportText = planList => {
+    if (!Array.isArray(planList) || planList.length === 0) {
+        return '';
+    }
+
+    const lines = lodash
+        .uniqBy(
+            planList
+                .map(item => {
+                    const code = String(item?.['Course Code'] || '')
+                        .trim()
+                        .toUpperCase();
+                    const sectionRaw = String(item?.Section || '').trim();
+                    if (
+                        !/^[A-Z]{4}[0-9]{4}$/.test(code) ||
+                        !/^[0-9]{1,3}$/.test(sectionRaw)
+                    ) {
+                        return null;
+                    }
+
+                    // Section 必須為三位數才能被 parseImportData 匹配
+                    const section = sectionRaw.padStart(3, '0');
+                    return {
+                        'Course Code': code,
+                        Section: section,
+                        line: `${code}(${section})`,
+                    };
+                })
+                .filter(Boolean),
+            item => `${item['Course Code']}-${item.Section}`,
+        )
+        .map(item => item.line);
+
+    return lines.join('\n');
+};
+
 export default parseImportData;

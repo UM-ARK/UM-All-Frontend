@@ -20,6 +20,7 @@ import {
 
 import ActionSheet, { ScrollView } from 'react-native-actions-sheet';
 import Ionicons from "@react-native-vector-icons/ionicons";
+import Clipboard from '@react-native-clipboard/clipboard';
 import { scale, verticalScale } from 'react-native-size-matters';
 import { useTranslation } from 'react-i18next';
 import lodash from 'lodash';
@@ -38,6 +39,7 @@ import SegmentControl from '../../../../components/SegmentControl';
 import { trigger } from '../../../../utils/trigger';
 import { useCoursePlan } from '../context/CoursePlanContext';
 import { getSlotKey } from '../hooks/useConflict';
+import { buildImportText } from '../utils/parseImportData';
 import { computeOverviewCourseFrames } from '../pages/courseSim/utils/overviewLayout';
 import {
     OVERVIEW_ALIGNMENT_MINUTES,
@@ -581,10 +583,11 @@ const TimetableSharePreview = ({
 };
 
 /**
- * 課表分享預覽與 PNG 輸出。
+ * 課表分享預覽、PNG 輸出與純文字導出。
  *
  * 由外層透過 ref.show() 開啟；截圖範圍只包含上方純課表內容，
- * 分享／儲存按鈕位於截圖範圍之外。
+ * 分享／儲存／純文字按鈕位於截圖範圍之外。
+ * 純文字格式對齊 parseImportData，對方可貼上導入。
  */
 const TimetableShareSheet = forwardRef(({ courseVersion }, ref) => {
     const { t } = useTranslation(['common', 'timetable']);
@@ -593,7 +596,8 @@ const TimetableShareSheet = forwardRef(({ courseVersion }, ref) => {
     const insets = useSafeAreaInsets();
     const tabBarHeight =
         useContext(BottomTabBarHeightContext) ?? insets.bottom + 49;
-    const { planSlots, planCourseCodes, conflictSlotKeys } = useCoursePlan();
+    const { planList, planSlots, planCourseCodes, conflictSlotKeys } =
+        useCoursePlan();
     const {
         themeColor,
         tonal,
@@ -671,6 +675,17 @@ const TimetableShareSheet = forwardRef(({ courseVersion }, ref) => {
                     fontSize: scale(14),
                     fontWeight: 'bold',
                 },
+                textExportButton: {
+                    marginTop: verticalScale(10),
+                    minHeight: verticalScale(40),
+                    borderRadius: scale(9),
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexDirection: 'row',
+                    gap: scale(6),
+                    backgroundColor: tonal.primary15,
+                    marginHorizontal: scale(12),
+                },
                 cancelButton: {
                     marginTop: verticalScale(10),
                     minHeight: verticalScale(40),
@@ -692,6 +707,7 @@ const TimetableShareSheet = forwardRef(({ courseVersion }, ref) => {
             black.main,
             black.third,
             tonal.primary08,
+            tonal.primary15,
             windowHeight,
         ],
     );
@@ -802,6 +818,26 @@ const TimetableShareSheet = forwardRef(({ courseVersion }, ref) => {
         actionSheetRef.current?.hide();
     }, []);
 
+    /** 複製可導入的純文字課表（Course Code + Section）。 */
+    const handleCopyText = useCallback(() => {
+        if (isGenerating) {
+            return;
+        }
+        trigger();
+        const text = buildImportText(planList);
+        if (!text) {
+            Alert.alert(
+                t('無法導出純文字課表', { ns: 'timetable' }),
+                t('目前沒有可導出的課程', { ns: 'timetable' }),
+            );
+            return;
+        }
+        Clipboard.setString(text);
+        Toast.show(t('已複製純文字課表', { ns: 'timetable' }));
+        pendingActionRef.current = null;
+        actionSheetRef.current?.hide();
+    }, [isGenerating, planList, t]);
+
     return (
         <ActionSheet
             ref={actionSheetRef}
@@ -895,6 +931,25 @@ const TimetableShareSheet = forwardRef(({ courseVersion }, ref) => {
                     </Text>
                 </Pressable>
             </View>
+            <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('複製純文字課表', { ns: 'timetable' })}
+                disabled={isGenerating}
+                onPress={handleCopyText}
+                style={({ pressed }) => [
+                    styles.textExportButton,
+                    pressed && styles.actionButtonPressed,
+                ]}>
+                <Ionicons
+                    name="document-text-outline"
+                    size={scale(18)}
+                    color={themeColor}
+                />
+                <Text
+                    style={[styles.actionText, { color: themeColor }]}>
+                    {t('複製純文字課表', { ns: 'timetable' })}
+                </Text>
+            </Pressable>
             <Pressable
                 accessibilityRole="button"
                 disabled={isGenerating}

@@ -1,4 +1,7 @@
-import parseImportData, {normalizeImportText} from '../utils/parseImportData';
+import parseImportData, {
+    buildImportText,
+    normalizeImportText,
+} from '../utils/parseImportData';
 
 describe('normalizeImportText', () => {
     const toUtf16EndianMojibake = text =>
@@ -89,5 +92,39 @@ describe('parseImportData', () => {
             {'Course Code': 'LAWS4002', Section: '101'},
             {'Course Code': 'PORT2013', Section: '004'},
         ]);
+    });
+});
+
+describe('buildImportText', () => {
+    it('空清單或無效輸入回傳空字串', () => {
+        expect(buildImportText(null)).toBe('');
+        expect(buildImportText(undefined)).toBe('');
+        expect(buildImportText([])).toBe('');
+        expect(buildImportText([{'Course Code': 'BAD', Section: '001'}])).toBe(
+            '',
+        );
+    });
+
+    it('輸出可被 parseImportData 還原的純文字', () => {
+        const text = buildImportText([
+            {'Course Code': 'ECEN1000', Section: '001'},
+            {'Course Code': 'CISC2000', Section: '2'},
+        ]);
+        expect(text).toBe('ECEN1000(001)\nCISC2000(002)');
+        expect(parseImportData(text)).toEqual([
+            {'Course Code': 'ECEN1000', Section: '001'},
+            {'Course Code': 'CISC2000', Section: '002'},
+        ]);
+    });
+
+    it('去重並略過無效項目', () => {
+        expect(
+            buildImportText([
+                {'Course Code': 'GEGA1000', Section: '001'},
+                {'Course Code': 'gega1000', Section: '001'},
+                {'Course Code': 'XXXX', Section: '001'},
+                {'Course Code': 'PORT2013', Section: '004'},
+            ]),
+        ).toBe('GEGA1000(001)\nPORT2013(004)');
     });
 });
