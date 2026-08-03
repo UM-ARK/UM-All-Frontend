@@ -2,7 +2,14 @@ jest.mock('../../harbor/harborAuthStorage', () => ({
     loadHarborCredentials: jest.fn(),
 }));
 
+jest.mock('../schedulingAuthStorage', () => ({
+    loadSchedulingSession: jest.fn(async () => null),
+    saveSchedulingSession: jest.fn(async () => {}),
+    clearSchedulingSessionStorage: jest.fn(async () => {}),
+}));
+
 const mockAuthStorage = jest.requireMock('../../harbor/harborAuthStorage');
+const mockSessionStorage = jest.requireMock('../schedulingAuthStorage');
 
 import axios from 'axios';
 import {
@@ -28,6 +35,7 @@ describe('schedulingAuth', () => {
             userApiKey: 'harbor-key',
             clientId: 'harbor-client',
         });
+        mockSessionStorage.loadSchedulingSession.mockResolvedValue(null);
         postSpy = jest.spyOn(axios, 'post');
     });
 
@@ -96,6 +104,9 @@ describe('schedulingAuth', () => {
             }),
         );
         expect(getSchedulingSession()?.accessToken).toBe('jwt-token');
+        expect(mockSessionStorage.saveSchedulingSession).toHaveBeenCalledWith(
+            expect.objectContaining({accessToken: 'jwt-token'}),
+        );
     });
 
     it('expiresAt 前 30 秒即視為過期', () => {
@@ -129,15 +140,51 @@ describe('schedulingAuth', () => {
         expect(again.accessToken).toBe('jwt-token');
     });
 
+    it('記憶體空且 SecureStore 有效時 ensure 不換票', async () => {
+        const expiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+        mockSessionStorage.loadSchedulingSession.mockResolvedValue({
+            accessToken: 'stored-jwt',
+            expiresAt,
+            user: {harborUserId: 9, username: 'stored'},
+        });
+
+        const session = await ensureSchedulingSession();
+        expect(postSpy).not.toHaveBeenCalled();
+        expect(session.accessToken).toBe('stored-jwt');
+        expect(getSchedulingSession()?.accessToken).toBe('stored-jwt');
+    });
+
+    it('SecureStore 過期時會清盤並重新換票', async () => {
+        const expiredAt = new Date(
+            Date.now() + SCHEDULING_TOKEN_EXPIRY_SKEW_MS - 1000,
+        ).toISOString();
+        mockSessionStorage.loadSchedulingSession.mockResolvedValue({
+            accessToken: 'expired-jwt',
+            expiresAt: expiredAt,
+            user: {harborUserId: 1},
+        });
+        mockExchangeSuccess({accessToken: 'fresh-jwt'});
+
+        const session = await ensureSchedulingSession();
+        expect(
+            mockSessionStorage.clearSchedulingSessionStorage,
+        ).toHaveBeenCalled();
+        expect(postSpy).toHaveBeenCalledTimes(1);
+        expect(session.accessToken).toBe('fresh-jwt');
+    });
+
     it('接近過期時 ensureSchedulingSession 會重新換票', async () => {
         const almostExpired = new Date(
             Date.now() + SCHEDULING_TOKEN_EXPIRY_SKEW_MS - 1000,
         ).toISOString();
-        setSchedulingSession({
-            accessToken: 'old-jwt',
-            expiresAt: almostExpired,
-            user: {harborUserId: 1},
-        });
+        setSchedulingSession(
+            {
+                accessToken: 'old-jwt',
+                expiresAt: almostExpired,
+                user: {harborUserId: 1},
+            },
+            {persist: false},
+        );
 
         mockExchangeSuccess({accessToken: 'new-jwt'});
         const session = await ensureSchedulingSession();
@@ -145,13 +192,16 @@ describe('schedulingAuth', () => {
         expect(session.accessToken).toBe('new-jwt');
     });
 
-    it('clearSchedulingSession（登出）會清空記憶體 JWT', async () => {
+    it('clearSchedulingSession（登出）會清空記憶體與 SecureStore JWT', async () => {
         mockExchangeSuccess();
         await exchangeSchedulingToken();
         expect(getSchedulingSession()).not.toBeNull();
 
         clearSchedulingSession();
         expect(getSchedulingSession()).toBeNull();
+        expect(
+            mockSessionStorage.clearSchedulingSessionStorage,
+        ).toHaveBeenCalled();
     });
 
     it('exchange 回 401 harbor_auth_failed 時通知 handler 且不留下 JWT', async () => {
@@ -180,6 +230,9 @@ describe('schedulingAuth', () => {
             status: 401,
         });
         expect(getSchedulingSession()).toBeNull();
+        expect(
+            mockSessionStorage.clearSchedulingSessionStorage,
+        ).toHaveBeenCalled();
         expect(handler).toHaveBeenCalledTimes(1);
         expect(JSON.stringify(handler.mock.calls[0][0])).not.toContain(
             'harbor-key',

@@ -2,6 +2,12 @@ jest.mock('../../harbor/harborAuthStorage', () => ({
     loadHarborCredentials: jest.fn(),
 }));
 
+jest.mock('../schedulingAuthStorage', () => ({
+    loadSchedulingSession: jest.fn(async () => null),
+    saveSchedulingSession: jest.fn(async () => {}),
+    clearSchedulingSessionStorage: jest.fn(async () => {}),
+}));
+
 const mockAuthStorage = jest.requireMock('../../harbor/harborAuthStorage');
 
 import axios from 'axios';

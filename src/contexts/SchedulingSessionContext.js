@@ -22,7 +22,8 @@ import {
 const SchedulingSessionContext = createContext(null);
 
 /**
- * 監聽 Harbor session：僅在 signedIn 時允許換票；登出時清空記憶體 JWT。
+ * 監聽 Harbor session：僅在 signedIn 時允許換票；登出時清空記憶體與 SecureStore JWT。
+ * restoring／authorizing 不清盤，以便冷啟動重用未過期 JWT。
  * 不向頁面暴露 Harbor credentials。
  */
 export const SchedulingSessionProvider = ({children}) => {
@@ -56,7 +57,18 @@ export const SchedulingSessionProvider = ({children}) => {
             return;
         }
 
-        // restoring／signedOut／expired／authorizing：清空 Scheduling JWT
+        // restoring／authorizing：只重置 UI，保留 SecureStore JWT
+        if (
+            harborStatus === 'restoring' ||
+            harborStatus === 'authorizing'
+        ) {
+            setUser(null);
+            setError(null);
+            setStatus('idle');
+            return;
+        }
+
+        // signedOut／expired：清空記憶體與 SecureStore
         clearSchedulingSession();
         setUser(null);
         setError(null);
