@@ -4,7 +4,8 @@ import {
 } from '../storageKits';
 
 const HARBOR_LOGIN_INTENT_KEY = 'harbor_login_intent';
-const HARBOR_LOGIN_INTENT_TTL = 10 * 60 * 1000;
+// 與 Harbor auth pending 時間窗對齊：僅點擊登入後短時間內有效。
+const HARBOR_LOGIN_INTENT_TTL = 5 * 60 * 1000;
 // login intent params 只可含 eventId，不可含 invite token
 const HARBOR_LOGIN_INTENT_ROUTES = new Set([
     'HarborAccountSettings',

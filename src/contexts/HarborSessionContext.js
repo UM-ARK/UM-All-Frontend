@@ -7,14 +7,17 @@ import React, {
     useRef,
     useState,
 } from 'react';
-import { AppState } from 'react-native';
+import { AppState, Linking } from 'react-native';
 
 import * as Crypto from 'expo-crypto';
 
 import {
+    completeHarborAuthorization,
     completeInitialHarborCallback,
+    deliverHarborAuthDeepLink,
     ensureHarborRsaKeyPair,
     HARBOR_AUTH_ERROR,
+    isHarborAuthSessionActive,
     startHarborAuthorization,
 } from '../utils/harbor/harborAuth';
 import {
@@ -399,6 +402,72 @@ export const HarborSessionProvider = ({ children }) => {
         return () => subscription.remove();
     }, [refreshInboxUnreadCount, refreshProfile]);
 
+    const activateCredentialsFromCallback = useCallback(
+        async credentials => {
+            if (!credentials?.userApiKey) {
+                return false;
+            }
+            logHarborAuthEvent('login.credentials.ready', {
+                source: 'deeplink',
+            });
+            const loginIntent = await loadHarborLoginIntent();
+            const generation = activateSession(credentials);
+            await refreshProfile(credentials, generation);
+            await clearHarborLoginIntent();
+            if (mountedRef.current) {
+                setPendingLoginIntent(loginIntent);
+            }
+            return true;
+        },
+        [activateSession, refreshProfile],
+    );
+
+    // OEM／系統瀏覽器回傳的 auth deep link（暖啟動）；須已點擊登入且 pending 未逾時。
+    useEffect(() => {
+        const handleAuthUrl = async ({ url }) => {
+            if (!deliverHarborAuthDeepLink(url)) {
+                return;
+            }
+
+            // 進行中的 Auth Session 會自行競速完成，避免重複處理。
+            if (isHarborAuthSessionActive()) {
+                return;
+            }
+
+            // 已登入時忽略 stray callback，避免覆蓋現有工作階段。
+            if (credentialsRef.current) {
+                return;
+            }
+
+            try {
+                const credentials = await completeHarborAuthorization(url);
+                if (!mountedRef.current || credentialsRef.current) {
+                    return;
+                }
+                await activateCredentialsFromCallback(credentials);
+                logHarborAuthEvent('login.success', { source: 'deeplink' });
+            } catch (authError) {
+                if (
+                    authError.code === HARBOR_AUTH_ERROR.NO_PENDING_AUTH ||
+                    authError.code === HARBOR_AUTH_ERROR.EXPIRED ||
+                    authError.code === HARBOR_AUTH_ERROR.CANCELLED
+                ) {
+                    return;
+                }
+                logHarborAuthError('callback.deeplink.failed', authError);
+                if (mountedRef.current) {
+                    setError(authError);
+                    setStatus(
+                        credentialsRef.current ? 'signedIn' : 'signedOut',
+                    );
+                }
+            }
+        };
+
+        const subscription = Linking.addEventListener('url', handleAuthUrl);
+        return () => subscription.remove();
+    }, [activateCredentialsFromCallback]);
+
     const login = useCallback(async intent => {
         const startedAt = Date.now();
         logHarborAuthEvent('login.start');
@@ -430,7 +499,7 @@ export const HarborSessionProvider = ({ children }) => {
             await clearHarborLoginIntent();
             return true;
         } catch (authError) {
-            await clearHarborLoginIntent();
+            // 取消時保留 login intent，方便 OEM deep link 晚到後仍可導回目標頁。
             if (authError.code === HARBOR_AUTH_ERROR.CANCELLED) {
                 logHarborAuthEvent('login.cancelled', {
                     durationMs: Date.now() - startedAt,
@@ -442,6 +511,7 @@ export const HarborSessionProvider = ({ children }) => {
                 }
                 return false;
             }
+            await clearHarborLoginIntent();
             logHarborAuthError('login.failed', authError, {
                 durationMs: Date.now() - startedAt,
             });

@@ -29,7 +29,10 @@ const AUTH_PATH = '/user-api-key/new';
 const HTTPS_REDIRECT_URL = 'https://umall.one/auth/discourse';
 const CUSTOM_REDIRECT_URL = 'one.umall://auth/discourse';
 const AUTH_SCOPES = ['read', 'write'];
-const AUTH_TTL_MS = 10 * 60 * 1000;
+// 僅在使用者點擊登入後的時間窗內承認 callback（含 OEM 瀏覽器 deep link）。
+export const AUTH_TTL_MS = 5 * 60 * 1000;
+// Auth Session 關閉後，短暫等待 OEM 瀏覽器 deep link 到達。
+const AUTH_DEEPLINK_GRACE_MS = 2500;
 const RSA_BITS = 2048;
 const RSA_KEY_VERSION = 1;
 const RSA_AUTH_PADDING = 'oaep';
@@ -37,6 +40,10 @@ const RSA_OAEP_HASH = 'sha1';
 // umall.one 部署 AASA 與 assetlinks.json 後，才可安全切換為 HTTPS callback。
 const HTTPS_AUTH_CALLBACK_ENABLED = true;
 let harborRsaKeyPairPromise = null;
+let harborAuthCompletionPromise = null;
+let harborAuthSessionActive = false;
+let authDeepLinkBuffer = null;
+const authDeepLinkListeners = new Set();
 
 export const HARBOR_AUTH_ERROR = {
     CANCELLED: 'cancelled',
@@ -263,7 +270,73 @@ export function decryptHarborPayload(payload, privateKey) {
     }
 }
 
-export async function completeHarborAuthorization(url) {
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function clearAuthDeepLinkState() {
+    authDeepLinkBuffer = null;
+    authDeepLinkListeners.clear();
+}
+
+function waitForAuthDeepLink(timeoutMs) {
+    return new Promise(resolve => {
+        if (authDeepLinkBuffer) {
+            const url = authDeepLinkBuffer;
+            resolve(url);
+            return;
+        }
+
+        const timer = setTimeout(() => {
+            authDeepLinkListeners.delete(onLink);
+            resolve(null);
+        }, timeoutMs);
+
+        const onLink = url => {
+            clearTimeout(timer);
+            authDeepLinkListeners.delete(onLink);
+            resolve(url);
+        };
+        authDeepLinkListeners.add(onLink);
+    });
+}
+
+async function dismissHarborAuthBrowser() {
+    try {
+        WebBrowser.dismissAuthSession();
+    } catch (error) {
+        // 部分平台可能不支援 dismissAuthSession。
+    }
+    try {
+        await WebBrowser.dismissBrowser();
+    } catch (error) {
+        // Custom Tab / 外部瀏覽器可能已關閉。
+    }
+}
+
+/**
+ * 接收 OEM／系統瀏覽器回傳的 auth deep link。
+ * 若有進行中的 Auth Session，會優先交給 startHarborAuthorization 競速完成。
+ * @returns {boolean} 是否為合法 Harbor auth callback URL
+ */
+export function deliverHarborAuthDeepLink(url) {
+    if (!isHarborAuthCallback(url)) {
+        return false;
+    }
+
+    logHarborAuthEvent('callback.deeplink.received');
+    authDeepLinkBuffer = url;
+    for (const listener of [...authDeepLinkListeners]) {
+        listener(url);
+    }
+    return true;
+}
+
+export function isHarborAuthSessionActive() {
+    return harborAuthSessionActive;
+}
+
+async function completeHarborAuthorizationInternal(url) {
     logHarborAuthEvent('callback.complete.start');
 
     if (!isHarborAuthCallback(url)) {
@@ -277,6 +350,7 @@ export async function completeHarborAuthorization(url) {
         throw callbackError;
     }
 
+    // 安全門檻：必須先點擊登入寫入 pending；無 pending 的 deep link 一律拒絕。
     const pendingAuthorization = await loadPendingHarborAuthorization();
     if (!pendingAuthorization) {
         const pendingError = createAuthError(
@@ -344,13 +418,29 @@ export async function completeHarborAuthorization(url) {
         await saveHarborCredentials(credentials);
         stage = 'pending_clear';
         await clearPendingHarborAuthorization();
+        clearAuthDeepLinkState();
         logHarborAuthEvent('callback.complete.success');
         return credentials;
     } catch (error) {
         logHarborAuthError('callback.complete.failed', error, { stage });
         await clearPendingHarborAuthorization();
+        clearAuthDeepLinkState();
         throw error;
     }
+}
+
+export async function completeHarborAuthorization(url) {
+    // Auth Session 與 Linking 可能同時到達同一 callback，合併為單一完成流程。
+    if (harborAuthCompletionPromise) {
+        return harborAuthCompletionPromise;
+    }
+
+    harborAuthCompletionPromise = completeHarborAuthorizationInternal(
+        url,
+    ).finally(() => {
+        harborAuthCompletionPromise = null;
+    });
+    return harborAuthCompletionPromise;
 }
 
 export async function startHarborAuthorization() {
@@ -362,6 +452,7 @@ export async function startHarborAuthorization() {
 
         stage = 'pending_clear';
         await clearPendingHarborAuthorization();
+        clearAuthDeepLinkState();
         stage = 'client_id_prepare';
         const clientId = await getOrCreateHarborClientId();
         stage = 'nonce_generate';
@@ -394,7 +485,9 @@ export async function startHarborAuthorization() {
                 redirectScheme: new URL(redirectUrl).protocol.replace(':', ''),
                 browserPackage: browserPackage || null,
             });
-            const result = await WebBrowser.openAuthSessionAsync(
+
+            harborAuthSessionActive = true;
+            const browserPromise = WebBrowser.openAuthSessionAsync(
                 authUrl,
                 redirectUrl,
                 {
@@ -403,26 +496,85 @@ export async function startHarborAuthorization() {
                     ...(browserPackage ? { browserPackage } : {}),
                 },
             );
+            // 與 Auth Session 並行等待 OEM deep link；逾時後仍可由 grace / Linking 補完。
+            const deepLinkPromise = waitForAuthDeepLink(AUTH_TTL_MS);
 
-            logHarborAuthEvent('authorization.browser.result', {
-                type: result.type,
-                hasCallbackUrl: Boolean(result.url),
-            });
+            const raced = await Promise.race([
+                browserPromise.then(result => ({
+                    source: 'browser',
+                    result,
+                })),
+                deepLinkPromise.then(url =>
+                    url
+                        ? { source: 'deeplink', url }
+                        : { source: 'deeplink_timeout' },
+                ),
+            ]);
 
-            if (result.type !== 'success' || !result.url) {
-                throw createAuthError(
-                    HARBOR_AUTH_ERROR.CANCELLED,
-                    '已取消 Harbor 登入。',
+            if (raced.source === 'deeplink') {
+                logHarborAuthEvent('authorization.browser.result', {
+                    type: 'deeplink',
+                    hasCallbackUrl: true,
+                });
+                await dismissHarborAuthBrowser();
+                stage = 'callback_complete';
+                const credentials = await completeHarborAuthorization(
+                    raced.url,
                 );
+                logHarborAuthEvent('authorization.success', {
+                    source: 'deeplink',
+                });
+                return credentials;
             }
 
-            stage = 'callback_complete';
-            const credentials = await completeHarborAuthorization(result.url);
-            logHarborAuthEvent('authorization.success');
-            return credentials;
+            if (raced.source === 'browser') {
+                const { result } = raced;
+                logHarborAuthEvent('authorization.browser.result', {
+                    type: result.type,
+                    hasCallbackUrl: Boolean(result.url),
+                });
+
+                if (result.type === 'success' && result.url) {
+                    stage = 'callback_complete';
+                    const credentials = await completeHarborAuthorization(
+                        result.url,
+                    );
+                    logHarborAuthEvent('authorization.success', {
+                        source: 'auth_session',
+                    });
+                    return credentials;
+                }
+            }
+
+            // Auth Session 關閉但未帶回 URL：短暫等待 OEM 瀏覽器 deep link。
+            stage = 'deeplink_grace';
+            const lateUrl = await waitForAuthDeepLink(AUTH_DEEPLINK_GRACE_MS);
+            if (lateUrl) {
+                logHarborAuthEvent('authorization.browser.result', {
+                    type: 'deeplink_grace',
+                    hasCallbackUrl: true,
+                });
+                stage = 'callback_complete';
+                const credentials = await completeHarborAuthorization(lateUrl);
+                logHarborAuthEvent('authorization.success', {
+                    source: 'deeplink_grace',
+                });
+                return credentials;
+            }
+
+            throw createAuthError(
+                HARBOR_AUTH_ERROR.CANCELLED,
+                '已取消 Harbor 登入。',
+            );
         } catch (error) {
-            await clearPendingHarborAuthorization();
+            // 取消時保留 pending，讓稍後的 OEM deep link（5 分鐘內）仍可完成登入。
+            if (error.code !== HARBOR_AUTH_ERROR.CANCELLED) {
+                await clearPendingHarborAuthorization();
+                clearAuthDeepLinkState();
+            }
             throw error;
+        } finally {
+            harborAuthSessionActive = false;
         }
     } catch (error) {
         if (error.code === HARBOR_AUTH_ERROR.CANCELLED) {
