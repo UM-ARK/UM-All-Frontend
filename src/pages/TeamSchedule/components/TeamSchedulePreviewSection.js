@@ -10,6 +10,7 @@ import React, {
 } from 'react';
 import {Pressable, StyleSheet, Text, View} from 'react-native';
 
+import {useFocusEffect} from '@react-navigation/native';
 import {useTranslation} from 'react-i18next';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import {scale, verticalScale} from 'react-native-size-matters';
@@ -60,6 +61,13 @@ const TeamSchedulePreviewSection = forwardRef(
                 }
             };
         }, [handleApi, refreshHandle]);
+
+        // 從詳情返回時：cache 已失效則重抓，與列表頁一致
+        useFocusEffect(
+            useCallback(() => {
+                refresh({force: false}).catch(() => {});
+            }, [refresh]),
+        );
 
         const openList = useCallback(() => {
             trigger();

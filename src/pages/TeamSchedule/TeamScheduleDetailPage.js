@@ -57,7 +57,10 @@ import {
     formatSuggestionLabel,
     wallClockDateToOffsetIso,
 } from './components/scheduleWeekHelpers';
-import {clearTeamEventsCache} from './hooks/useTeamEvents';
+import {
+    clearTeamEventsCache,
+    removeTeamEventFromCache,
+} from './hooks/useTeamEvents';
 import {useAvailabilityEditor} from './hooks/useAvailabilityEditor';
 import {useTeamScheduleDetail} from './hooks/useTeamScheduleDetail';
 import {createAvailabilityDraftFromServer} from './utils/scheduleDraft';
@@ -538,7 +541,7 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                         setActionBusy(true);
                         try {
                             await deleteTeamEvent(eventId);
-                            clearTeamEventsCache();
+                            removeTeamEventFromCache(eventId);
                             allowLeaveRef.current = true;
                             if (navigation.canGoBack()) {
                                 navigation.goBack();
@@ -576,7 +579,7 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                         setActionBusy(true);
                         try {
                             await leaveTeamEvent(eventId);
-                            clearTeamEventsCache();
+                            removeTeamEventFromCache(eventId);
                             allowLeaveRef.current = true;
                             if (navigation.canGoBack()) {
                                 navigation.goBack();
@@ -920,13 +923,30 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
 
                 {heatmapBundle.suggestions.length > 0 ? (
                     <View style={styles.section}>
-                        <Text
-                            style={[
-                                styles.sectionTitle,
-                                {color: theme.black.main},
-                            ]}>
-                            {t('建議時段')}
-                        </Text>
+                        <View style={styles.suggestHeader}>
+                            <Text
+                                style={[
+                                    styles.sectionTitle,
+                                    styles.suggestTitle,
+                                    {color: theme.black.main},
+                                ]}>
+                                {stats.submittedCount < stats.memberCount
+                                    ? t('暫時最佳時段')
+                                    : t('建議時段')}
+                            </Text>
+                            {stats.memberCount > 0 ? (
+                                <Text
+                                    style={[
+                                        styles.suggestProgress,
+                                        {color: theme.black.third},
+                                    ]}>
+                                    {t('已提交 {{submitted}}／{{total}} 人', {
+                                        submitted: stats.submittedCount,
+                                        total: stats.memberCount,
+                                    })}
+                                </Text>
+                            ) : null}
+                        </View>
                         {heatmapBundle.suggestions.map((item, index) => (
                             <Pressable
                                 key={`suggest-${item.startAt}-${index}`}
@@ -944,7 +964,9 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                                         styles.suggestBadge,
                                         {color: theme.themeColor},
                                     ]}>
-                                    {t('建議')}
+                                    {stats.submittedCount < stats.memberCount
+                                        ? t('暫時最佳')
+                                        : t('建議')}
                                 </Text>
                                 <Text
                                     style={[
@@ -1317,6 +1339,22 @@ const styles = StyleSheet.create({
         fontSize: scale(14),
         fontWeight: '700',
         marginBottom: verticalScale(8),
+    },
+    suggestHeader: {
+        alignItems: 'baseline',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: verticalScale(8),
+    },
+    suggestTitle: {
+        flex: 1,
+        marginBottom: 0,
+        marginRight: scale(8),
+    },
+    suggestProgress: {
+        ...uiStyle.defaultText,
+        fontSize: scale(11),
+        fontWeight: '600',
     },
     suggestRow: {
         alignItems: 'center',

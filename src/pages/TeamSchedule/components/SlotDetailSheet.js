@@ -1,5 +1,5 @@
 /**
- * 時段詳情 Sheet：日期時間、有空人數、成員名單、未提交
+ * 時段詳情 Sheet：可出席人數、未提交、有空成員
  */
 import React, {memo, useMemo, useRef, useEffect} from 'react';
 import {Image, Pressable, StyleSheet, Text, View} from 'react-native';
@@ -141,10 +141,19 @@ const SlotDetailSheet = ({
                                 styles.countLine,
                                 {color: theme.themeColor},
                             ]}>
-                            {t('{{available}}／{{total}} 人有空', {
-                                available: info.availableCount,
-                                total: info.memberCount,
-                            })}
+                            {info.unsubmittedCount > 0
+                                ? t(
+                                      '{{available}}／{{total}} 人可出席 · {{unsubmitted}} 人未提交',
+                                      {
+                                          available: info.availableCount,
+                                          total: info.memberCount,
+                                          unsubmitted: info.unsubmittedCount,
+                                      },
+                                  )
+                                : t('{{available}}／{{total}} 人可出席', {
+                                      available: info.availableCount,
+                                      total: info.memberCount,
+                                  })}
                         </Text>
                         {info.myStatus === 'unsubmitted' ? (
                             <Text
@@ -171,17 +180,6 @@ const SlotDetailSheet = ({
                                 {t('你在此時段有空')}
                             </Text>
                         ) : null}
-                        {info.unsubmittedCount > 0 ? (
-                            <Text
-                                style={[
-                                    styles.hint,
-                                    {color: theme.black.third},
-                                ]}>
-                                {t('尚有 {{count}} 人未提交', {
-                                    count: info.unsubmittedCount,
-                                })}
-                            </Text>
-                        ) : null}
                         <Text
                             style={[
                                 styles.sectionTitle,
@@ -196,7 +194,9 @@ const SlotDetailSheet = ({
                                         styles.empty,
                                         {color: theme.black.third},
                                     ]}>
-                                    {t('此時段尚無人有空')}
+                                    {info.unsubmittedCount === info.memberCount
+                                        ? t('尚未有可用時間資料')
+                                        : t('此時段尚無人有空')}
                                 </Text>
                             ) : (
                                 info.freeMembers.map(member => {

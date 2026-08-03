@@ -21,14 +21,56 @@ let teamEventsCache = {
     fetchedAt: 0,
 };
 
+/** 已掛載 useTeamEvents 實例的 cache 變更訂閱 */
+const cacheListeners = new Set();
+
+function notifyCacheListeners() {
+    cacheListeners.forEach(listener => {
+        try {
+            listener();
+        } catch (_error) {
+            // 單一訂閱失敗不影響其他實例
+        }
+    });
+}
+
 /**
  * 清空列表 cache（Harbor 登出或手動 invalidate）
+ * 會通知已掛載實例，避免返回上一頁仍顯示舊資料
  */
 export function clearTeamEventsCache() {
     teamEventsCache = {
         events: null,
         fetchedAt: 0,
     };
+    notifyCacheListeners();
+}
+
+/**
+ * 樂觀移除單一活動（刪除／退出後立即同步已掛載列表）
+ * @param {string|number} eventId
+ */
+export function removeTeamEventFromCache(eventId) {
+    const id = eventId != null ? String(eventId) : '';
+    if (!id) {
+        clearTeamEventsCache();
+        return;
+    }
+    if (Array.isArray(teamEventsCache.events)) {
+        teamEventsCache = {
+            events: teamEventsCache.events.filter(
+                item => String(item?.event?.eventId) !== id,
+            ),
+            // 標記過期，下次 focus 仍會與伺服器對齊
+            fetchedAt: 0,
+        };
+    } else {
+        teamEventsCache = {
+            events: null,
+            fetchedAt: 0,
+        };
+    }
+    notifyCacheListeners();
 }
 
 /**
@@ -90,6 +132,9 @@ export function useTeamEvents({autoLoad = true} = {}) {
     const mountedRef = useRef(true);
     const eventsRef = useRef(events);
     eventsRef.current = events;
+    const harborStatusRef = useRef(harborStatus);
+    harborStatusRef.current = harborStatus;
+    const refreshRef = useRef(null);
 
     useEffect(() => {
         mountedRef.current = true;
@@ -103,7 +148,11 @@ export function useTeamEvents({autoLoad = true} = {}) {
         if (harborStatus === 'signedIn') {
             return;
         }
-        clearTeamEventsCache();
+        // 僅清記憶體，不經 notify，避免與下方 setState 重複
+        teamEventsCache = {
+            events: null,
+            fetchedAt: 0,
+        };
         if (!mountedRef.current) {
             return;
         }
@@ -119,7 +168,10 @@ export function useTeamEvents({autoLoad = true} = {}) {
     const refresh = useCallback(
         async ({force = false} = {}) => {
             if (harborStatus !== 'signedIn') {
-                clearTeamEventsCache();
+                teamEventsCache = {
+                    events: null,
+                    fetchedAt: 0,
+                };
                 if (mountedRef.current) {
                     setEvents([]);
                     setError(null);
@@ -176,6 +228,37 @@ export function useTeamEvents({autoLoad = true} = {}) {
         },
         [ensureSession, harborStatus],
     );
+    refreshRef.current = refresh;
+
+    // 其他頁面 invalidate／樂觀移除時，同步本實例畫面
+    useEffect(() => {
+        const onCacheChange = () => {
+            if (!mountedRef.current) {
+                return;
+            }
+            if (Array.isArray(teamEventsCache.events)) {
+                setEvents(teamEventsCache.events);
+                setError(null);
+                setStatus('ready');
+                return;
+            }
+            if (harborStatusRef.current !== 'signedIn') {
+                setEvents([]);
+                setError(null);
+                setStatus('idle');
+                return;
+            }
+            // cache 被清空：強制重抓，避免停留在舊列表
+            const refreshFn = refreshRef.current;
+            if (typeof refreshFn === 'function') {
+                refreshFn({force: true}).catch(() => {});
+            }
+        };
+        cacheListeners.add(onCacheChange);
+        return () => {
+            cacheListeners.delete(onCacheChange);
+        };
+    }, []);
 
     useEffect(() => {
         if (!autoLoad || harborStatus !== 'signedIn') {
