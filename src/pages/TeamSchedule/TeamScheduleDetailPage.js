@@ -9,7 +9,6 @@ import {
     Pressable,
     RefreshControl,
     ScrollView,
-    Share,
     StyleSheet,
     Text,
     TextInput,
@@ -35,7 +34,6 @@ import {useSchedulingSession} from '../../contexts/SchedulingSessionContext';
 import {uiStyle, useTheme} from '../../components/ThemeContext';
 import {
     deleteTeamEvent,
-    getInviteLink,
     leaveTeamEvent,
     updateTeamEvent,
 } from '../../utils/scheduling/schedulingApi';
@@ -417,32 +415,6 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
         }
     }, [eventId, login]);
 
-    const shareInviteQuick = useCallback(async () => {
-        trigger();
-        setActionBusy(true);
-        try {
-            const data = await getInviteLink(eventId);
-            // 後端契約：{ inviteLink: { shareUrl, ... } }
-            const url = data?.inviteLink?.shareUrl || null;
-            if (!url) {
-                Alert.alert(t('無法分享'), t('暫時無法取得邀請連結。'));
-                return;
-            }
-            await Share.share({
-                message: event?.title ? `${event.title}\n${url}` : url,
-                url,
-            });
-        } catch (requestError) {
-            const normalized = normalizeSchedulingError(requestError);
-            Alert.alert(
-                t('無法分享'),
-                errorMessageForCode(normalized.code, t),
-            );
-        } finally {
-            setActionBusy(false);
-        }
-    }, [event?.title, eventId, t]);
-
     const openEditBasics = useCallback(() => {
         trigger();
         setEditTitle(event?.title || '');
@@ -521,9 +493,17 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                         const data = await updateTeamEvent(eventId, {
                             status: next,
                         });
-                        const nextEvent =
-                            data?.event || {...event, status: next};
+                        const apiEvent = data?.event;
+                        const nextEvent = apiEvent
+                            ? {
+                                  ...event,
+                                  ...apiEvent,
+                                  status: apiEvent.status || next,
+                              }
+                            : {...event, status: next};
                         updateDetailEvent(nextEvent);
+                        // 關閉邀請 Sheet，避免仍顯示過期的邀請狀態
+                        setInviteSheetVisible(false);
                         clearTeamEventsCache();
                     } catch (requestError) {
                         const normalized =
@@ -617,22 +597,22 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
     }, [eventId, navigation, t]);
 
     const isOwner = membership?.role === 'owner';
+    const eventClosed = event?.status === 'closed';
 
     const menuActions = useMemo(() => {
         if (isInvitePending || phase !== 'ready' || !event) {
             return [];
         }
         if (isOwner) {
-            return [
+            // 活動關閉時邀請管理不可用；分享改由邀請管理 Sheet 內操作
+            const actions = [
                 {id: 'edit', title: t('編輯基本資料')},
-                {id: 'share', title: t('分享邀請')},
                 {id: 'invite', title: t('邀請管理')},
                 {
                     id: 'toggleStatus',
-                    title:
-                        event.status === 'closed'
-                            ? t('重新開啟活動')
-                            : t('關閉活動'),
+                    title: eventClosed
+                        ? t('重新開啟活動')
+                        : t('關閉活動'),
                 },
                 {
                     id: 'delete',
@@ -640,6 +620,13 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                     attributes: {destructive: true},
                 },
             ];
+            if (eventClosed) {
+                actions[1] = {
+                    ...actions[1],
+                    attributes: {disabled: true},
+                };
+            }
+            return actions;
         }
         return [
             {
@@ -648,7 +635,7 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                 attributes: {destructive: true},
             },
         ];
-    }, [event, isInvitePending, isOwner, phase, t]);
+    }, [event, eventClosed, isInvitePending, isOwner, phase, t]);
 
     const onMenuAction = useCallback(
         ({nativeEvent}) => {
@@ -657,10 +644,10 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                 case 'edit':
                     openEditBasics();
                     break;
-                case 'share':
-                    shareInviteQuick();
-                    break;
                 case 'invite':
+                    if (event?.status === 'closed') {
+                        break;
+                    }
                     setInviteSheetVisible(true);
                     break;
                 case 'toggleStatus':
@@ -677,10 +664,10 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
             }
         },
         [
+            event?.status,
             handleDelete,
             handleLeave,
             openEditBasics,
-            shareInviteQuick,
             toggleEventStatus,
         ],
     );
@@ -694,6 +681,7 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                 menuActions.length > 0
                     ? () => (
                           <MenuView
+                              key={`team-menu-${event?.status || 'none'}`}
                               actions={menuActions}
                               onPressAction={onMenuAction}
                               shouldOpenOnLongPress={false}>
@@ -1065,6 +1053,7 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                 visible={inviteSheetVisible}
                 eventId={eventId}
                 eventTitle={event?.title}
+                eventStatus={event?.status}
                 onClose={() => setInviteSheetVisible(false)}
             />
 

@@ -43,12 +43,14 @@ function pickInvitePayload(data) {
  * @param {() => void} props.onClose
  * @param {string} props.eventId
  * @param {string} [props.eventTitle]
+ * @param {string} [props.eventStatus] active／closed；活動關閉時邀請操作不可用
  */
 const InviteManagementSheet = ({
     visible,
     onClose,
     eventId,
     eventTitle = '',
+    eventStatus = 'active',
 }) => {
     const {theme} = useTheme();
     const {t} = useTranslation('my');
@@ -58,6 +60,10 @@ const InviteManagementSheet = ({
     const [inviteUrl, setInviteUrl] = useState(null);
     const [inviteStatus, setInviteStatus] = useState(null);
     const [errorMessage, setErrorMessage] = useState(null);
+
+    // 活動關閉時邀請連結即使仍 open，也無法加入
+    const eventClosed = eventStatus === 'closed';
+    const actionsDisabled = busy || loading || eventClosed;
 
     useEffect(() => {
         if (visible) {
@@ -90,8 +96,19 @@ const InviteManagementSheet = ({
         }
     };
 
+    const alertEventClosed = () => {
+        Alert.alert(
+            t('活動已關閉'),
+            t('請先重新開啟活動後，再管理邀請連結。'),
+        );
+    };
+
     const handleShare = async () => {
         trigger();
+        if (eventClosed) {
+            alertEventClosed();
+            return;
+        }
         setBusy(true);
         try {
             let url = inviteUrl;
@@ -125,6 +142,10 @@ const InviteManagementSheet = ({
 
     const handleToggleStatus = async () => {
         trigger();
+        if (eventClosed) {
+            alertEventClosed();
+            return;
+        }
         const next = inviteStatus === 'open' ? 'closed' : 'open';
         const title =
             next === 'closed' ? t('關閉邀請？') : t('開啟邀請？');
@@ -164,6 +185,10 @@ const InviteManagementSheet = ({
 
     const handleRotate = () => {
         trigger();
+        if (eventClosed) {
+            alertEventClosed();
+            return;
+        }
         Alert.alert(
             t('更換邀請連結？'),
             t('舊連結會立即失效，已分享的連結將無法再使用。'),
@@ -198,6 +223,12 @@ const InviteManagementSheet = ({
     };
 
     const isOpen = inviteStatus === 'open';
+    let statusLabel = t('邀請已關閉');
+    if (eventClosed) {
+        statusLabel = t('活動已關閉');
+    } else if (isOpen) {
+        statusLabel = t('邀請開放中');
+    }
 
     return (
         <ActionSheet
@@ -226,15 +257,31 @@ const InviteManagementSheet = ({
                         {errorMessage}
                     </Text>
                 ) : (
-                    <Text style={[styles.status, {color: theme.black.second}]}>
-                        {t('目前狀態')}：
-                        {isOpen ? t('邀請開放中') : t('邀請已關閉')}
-                    </Text>
+                    <>
+                        <Text
+                            style={[
+                                styles.status,
+                                {color: theme.black.second},
+                            ]}>
+                            {t('目前狀態')}：{statusLabel}
+                        </Text>
+                        {eventClosed ? (
+                            <Text
+                                style={[
+                                    styles.eventClosedHint,
+                                    {color: theme.black.third},
+                                ]}>
+                                {t(
+                                    '活動關閉期間無法加入；請先重新開啟活動後再管理邀請。',
+                                )}
+                            </Text>
+                        ) : null}
+                    </>
                 )}
 
                 <Pressable
                     accessibilityRole="button"
-                    disabled={busy || loading}
+                    disabled={actionsDisabled}
                     onPress={handleShare}
                     style={({pressed}) => [
                         styles.action,
@@ -242,7 +289,7 @@ const InviteManagementSheet = ({
                             backgroundColor: pressed
                                 ? theme.tonal.primary50
                                 : theme.themeColor,
-                            opacity: busy || loading ? 0.6 : 1,
+                            opacity: actionsDisabled ? 0.6 : 1,
                         },
                     ]}>
                     <Text
@@ -256,7 +303,7 @@ const InviteManagementSheet = ({
 
                 <Pressable
                     accessibilityRole="button"
-                    disabled={busy || loading || !inviteStatus}
+                    disabled={actionsDisabled || !inviteStatus}
                     onPress={handleToggleStatus}
                     style={({pressed}) => [
                         styles.action,
@@ -264,7 +311,8 @@ const InviteManagementSheet = ({
                             backgroundColor: pressed
                                 ? theme.tonal.primary30
                                 : theme.tonal.primary15,
-                            opacity: busy || loading ? 0.6 : 1,
+                            opacity:
+                                actionsDisabled || !inviteStatus ? 0.6 : 1,
                         },
                     ]}>
                     <Text
@@ -278,7 +326,7 @@ const InviteManagementSheet = ({
 
                 <Pressable
                     accessibilityRole="button"
-                    disabled={busy || loading}
+                    disabled={actionsDisabled}
                     onPress={handleRotate}
                     style={({pressed}) => [
                         styles.action,
@@ -286,7 +334,7 @@ const InviteManagementSheet = ({
                             backgroundColor: pressed
                                 ? theme.tonal.unread30
                                 : theme.tonal.unread15,
-                            opacity: busy || loading ? 0.6 : 1,
+                            opacity: actionsDisabled ? 0.6 : 1,
                         },
                     ]}>
                     <Text
@@ -355,6 +403,18 @@ const styles = StyleSheet.create({
         ...uiStyle.defaultText,
         fontSize: scale(13),
         marginTop: verticalScale(12),
+        marginBottom: verticalScale(8),
+    },
+    eventClosedHint: {
+        ...uiStyle.defaultText,
+        fontSize: scale(12),
+        lineHeight: verticalScale(18),
+        marginBottom: verticalScale(8),
+    },
+    eventClosedHint: {
+        ...uiStyle.defaultText,
+        fontSize: scale(12),
+        lineHeight: verticalScale(18),
         marginBottom: verticalScale(8),
     },
     action: {

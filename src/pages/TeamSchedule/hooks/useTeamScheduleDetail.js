@@ -464,6 +464,12 @@ export function useTeamScheduleDetail({
         const normalized = normalizeTeamEvent(nextEvent);
         if (normalized) {
             setDetailEvent(normalized);
+            // 同步 summary.status，避免合併顯示仍用舊狀態
+            if (normalized.status != null) {
+                setSummaryEvent(prev =>
+                    prev ? {...prev, status: normalized.status} : prev,
+                );
+            }
         }
     }, []);
 
