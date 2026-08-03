@@ -14,6 +14,10 @@ export const APP_LINKING = {
                     postNumber: Number,
                 },
             },
+            TeamScheduleDetail: {
+                path: 'team/:eventId',
+                parse: {eventId: String},
+            },
         },
     },
 };

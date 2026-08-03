@@ -38,6 +38,9 @@ import HarborProfilePage from './pages/TabbarPages/my/pages/HarborProfilePage';
 import HarborActivityPage from './pages/TabbarPages/my/pages/HarborActivityPage';
 import HarborBadgesPage from './pages/TabbarPages/my/pages/HarborBadgesPage';
 import HarborInboxPage from './pages/TabbarPages/my/pages/HarborInboxPage';
+import TeamScheduleListPage from './pages/TeamSchedule/TeamScheduleListPage';
+import TeamScheduleCreatePage from './pages/TeamSchedule/TeamScheduleCreatePage';
+import TeamScheduleDetailPage from './pages/TeamSchedule/TeamScheduleDetailPage';
 import WikiHome from './pages/TabbarPages/arkwiki';
 import WikiSearchPage from './pages/TabbarPages/arkwiki/WikiSearchPage';
 import WikiArticlePage from './pages/TabbarPages/arkwiki/WikiArticlePage';
@@ -60,7 +63,7 @@ const Stack = createNativeStackNavigator();
 const Nav = () => {
     const { theme } = useTheme();
     const { black } = theme;
-    const { t } = useTranslation(['common', 'features', 'event', 'home']);
+    const { t } = useTranslation(['common', 'features', 'event', 'home', 'my']);
     const {
         consumeLoginIntent,
         pendingLoginIntent,
@@ -444,6 +447,21 @@ const Nav = () => {
                     <Stack.Screen
                         name="HarborProfile"
                         component={HarborProfilePage}
+                    />
+                    <Stack.Screen
+                        name="TeamScheduleList"
+                        component={TeamScheduleListPage}
+                        options={{headerTitle: t('全部組隊約時間')}}
+                    />
+                    <Stack.Screen
+                        name="TeamScheduleCreate"
+                        component={TeamScheduleCreatePage}
+                        options={{headerTitle: t('建立組隊')}}
+                    />
+                    <Stack.Screen
+                        name="TeamScheduleDetail"
+                        component={TeamScheduleDetailPage}
+                        options={{headerTitle: t('活動詳情')}}
                     />
                 </Stack.Group>
             </Stack.Navigator>

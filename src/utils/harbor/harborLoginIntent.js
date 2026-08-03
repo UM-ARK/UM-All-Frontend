@@ -5,12 +5,14 @@ import {
 
 const HARBOR_LOGIN_INTENT_KEY = 'harbor_login_intent';
 const HARBOR_LOGIN_INTENT_TTL = 10 * 60 * 1000;
+// login intent params 只可含 eventId，不可含 invite token
 const HARBOR_LOGIN_INTENT_ROUTES = new Set([
     'HarborAccountSettings',
     'HarborComposer',
     'HarborDrafts',
     'HarborTopicDetail',
     'Tabbar',
+    'TeamScheduleDetail',
 ]);
 
 function normalizeHarborLoginIntent(intent) {
