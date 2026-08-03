@@ -520,24 +520,24 @@ function CourseSim({ route, navigation }) {
     const overviewDuration = Math.max(overviewEnd - overviewStart, 60);
     const measuredOverviewMaxHeight =
         overviewViewportHeight > 0 &&
-        overviewWeekdayHeight > 0 &&
-        overviewReminderHeight > 0 &&
-        viewSwitcherHeight > 0
+            overviewWeekdayHeight > 0 &&
+            overviewReminderHeight > 0 &&
+            viewSwitcherHeight > 0
             ? overviewViewportHeight -
-              overviewWeekdayHeight -
-              overviewReminderHeight -
-              floatingBottom -
-              viewSwitcherHeight -
-              scale(5) -
-              verticalScale(10)
+            overviewWeekdayHeight -
+            overviewReminderHeight -
+            floatingBottom -
+            viewSwitcherHeight -
+            scale(5) -
+            verticalScale(10)
             : null;
     const overviewMaxHeight = Math.max(
         OVERVIEW_HOUR_HEIGHT,
         measuredOverviewMaxHeight ??
-            windowHeight -
-                insets.top -
-                tabBarHeight -
-                OVERVIEW_RESERVED_HEIGHT,
+        windowHeight -
+        insets.top -
+        tabBarHeight -
+        OVERVIEW_RESERVED_HEIGHT,
     );
     const overviewHourHeight = Math.min(
         OVERVIEW_HOUR_HEIGHT,
@@ -632,11 +632,11 @@ function CourseSim({ route, navigation }) {
         );
     };
 
-    /** 建立所有課程 Menu 共用的四個查詢選項。 */
+    /** 建立所有課程 Menu 共用的查詢選項。 */
     const getCourseInfoMenuActions = () => [
         {
             id: 'wiki',
-            title: `${t('寫', { ns: 'catalog' })} ARK Wiki !!!`,
+            title: 'Wiki',
             image: Platform.select({
                 ios: 'book',
                 android: 'ic_menu_agenda',
@@ -645,8 +645,18 @@ function CourseSim({ route, navigation }) {
             titleColor: themeColor,
         },
         {
+            id: 'harbor-discuss',
+            title: t('討論', { ns: 'catalog' }),
+            image: Platform.select({
+                ios: 'bubble.left.and.bubble.right',
+                android: 'ic_btn_speak_now',
+            }),
+            imageColor: black.third,
+            titleColor: black.third,
+        },
+        {
             id: 'what2reg',
-            title: `${t('查', { ns: 'catalog' })} ${t('選咩課', { ns: 'catalog' })}`,
+            title: t('評價', { ns: 'catalog' }),
             image: Platform.select({
                 ios: 'star',
                 android: 'btn_star_big_on',
@@ -656,7 +666,7 @@ function CourseSim({ route, navigation }) {
         },
         {
             id: 'official',
-            title: `${t('查', { ns: 'catalog' })} ${t('官方', { ns: 'catalog' })}`,
+            title: t('官方', { ns: 'catalog' }),
             image: Platform.select({
                 ios: 'graduationcap',
                 android: 'ic_menu_info_details',
@@ -666,7 +676,7 @@ function CourseSim({ route, navigation }) {
         },
         {
             id: 'section',
-            title: `${t('查', { ns: 'catalog' })} ${t('Section / 老師', { ns: 'catalog' })}`,
+            title: t('Section / 老師', { ns: 'catalog' }),
             image: Platform.select({
                 ios: 'list.bullet',
                 android: 'ic_menu_sort_by_size',
@@ -704,6 +714,14 @@ function CourseSim({ route, navigation }) {
                     });
                 }
                 openLink(URL);
+                return true;
+            }
+            case 'harbor-discuss': {
+                logToFirebase('checkCourse', {
+                    courseCode,
+                    action: 'harbor-discuss',
+                });
+                navigation.navigate('HarborSearch', {query: courseCode});
                 return true;
             }
             case 'what2reg': {
@@ -2310,7 +2328,7 @@ E11-0000
                             {filterCourseList.map(item => {
                                 const sectionStatusObj =
                                     courseSectionStatusObj[
-                                        item['Course Code']
+                                    item['Course Code']
                                     ];
                                 const hasCourseConflict =
                                     allSectionsConflict(sectionStatusObj);
@@ -2478,7 +2496,7 @@ E11-0000
                                                     sectionObj[sectionKey][0];
                                                 const sectionStatus =
                                                     sectionStatusObj[
-                                                        sectionKey
+                                                    sectionKey
                                                     ];
                                                 const hasSectionConflict =
                                                     sectionStatus ===
@@ -2822,6 +2840,7 @@ E11-0000
                 style={{
                     width: '100%',
                     alignItems: 'center',
+                    marginTop: verticalScale(5),
                     marginBottom: scale(5),
                 }}>
                 <Text
@@ -2890,8 +2909,8 @@ E11-0000
 
             {/* 有排課時才顯示具體／概覽切換；與 FAB 同層，bottom 見 floatingBottom */}
             {planSlots.length > 0 &&
-            timetableView &&
-            !hasOpenCourseSearch
+                timetableView &&
+                !hasOpenCourseSearch
                 ? renderViewSwitcher()
                 : null}
 
