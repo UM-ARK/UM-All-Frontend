@@ -19,6 +19,7 @@ import {
 import {isLiquidGlassSupported} from '@callstack/liquid-glass';
 import {MenuView} from '@react-native-menu/menu';
 import {useHeaderHeight} from '@react-navigation/elements';
+import {usePreventRemove} from '@react-navigation/native';
 import moment from 'moment-timezone';
 import {useTranslation} from 'react-i18next';
 import {
@@ -239,36 +240,34 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
     });
 
     const allowLeaveRef = useRef(false);
-    useEffect(() => {
-        const unsubscribe = navigation.addListener('beforeRemove', evt => {
-            if (allowLeaveRef.current || !editor.isEditing || !editor.isDirty) {
-                return;
-            }
-            evt.preventDefault();
-            Alert.alert(
-                t('放棄修改？'),
-                t('尚未儲存的可用時間將會遺失。'),
-                [
-                    {
-                        text: t('繼續編輯'),
-                        style: 'cancel',
-                        onPress: () => trigger(),
+    // Native Stack 需用 usePreventRemove，才會在原生返回／手勢前攔截
+    usePreventRemove(editor.isEditing && editor.isDirty, ({data}) => {
+        if (allowLeaveRef.current) {
+            navigation.dispatch(data.action);
+            return;
+        }
+        Alert.alert(
+            t('放棄修改？'),
+            t('尚未儲存的可用時間將會遺失。'),
+            [
+                {
+                    text: t('繼續編輯'),
+                    style: 'cancel',
+                    onPress: () => trigger(),
+                },
+                {
+                    text: t('放棄修改'),
+                    style: 'destructive',
+                    onPress: () => {
+                        trigger();
+                        editor.discardEdit();
+                        allowLeaveRef.current = true;
+                        navigation.dispatch(data.action);
                     },
-                    {
-                        text: t('放棄修改'),
-                        style: 'destructive',
-                        onPress: () => {
-                            trigger();
-                            editor.discardEdit();
-                            allowLeaveRef.current = true;
-                            navigation.dispatch(evt.data.action);
-                        },
-                    },
-                ],
-            );
-        });
-        return unsubscribe;
-    }, [editor, navigation, t]);
+                },
+            ],
+        );
+    });
 
     const weekPages = useMemo(() => {
         if (!event?.candidateWindows) {

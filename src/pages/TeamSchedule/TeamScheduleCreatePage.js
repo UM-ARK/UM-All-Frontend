@@ -14,6 +14,7 @@ import {
 
 import {isLiquidGlassSupported} from '@callstack/liquid-glass';
 import {useHeaderHeight} from '@react-navigation/elements';
+import {usePreventRemove} from '@react-navigation/native';
 import moment from 'moment-timezone';
 import {useTranslation} from 'react-i18next';
 import {
@@ -152,32 +153,29 @@ const TeamScheduleCreatePage = ({navigation}) => {
         navigation.setOptions({headerTitle: t('新建組隊')});
     }, [navigation, t]);
 
-    // 未保存草稿攔截返回
-    useEffect(() => {
-        const unsubscribe = navigation.addListener('beforeRemove', event => {
-            if (allowLeaveRef.current || !hasUnsavedDraft) {
-                return;
-            }
-            event.preventDefault();
-            Alert.alert(t('放棄建立？'), t('目前的內容尚未送出，確定要離開嗎？'), [
-                {
-                    text: t('繼續編輯'),
-                    style: 'cancel',
-                    onPress: () => trigger(),
+    // Native Stack 需用 usePreventRemove，才會在原生返回／手勢前攔截
+    usePreventRemove(hasUnsavedDraft, ({data}) => {
+        if (allowLeaveRef.current) {
+            navigation.dispatch(data.action);
+            return;
+        }
+        Alert.alert(t('放棄建立？'), t('目前的內容尚未送出，確定要離開嗎？'), [
+            {
+                text: t('繼續編輯'),
+                style: 'cancel',
+                onPress: () => trigger(),
+            },
+            {
+                text: t('放棄建立'),
+                style: 'destructive',
+                onPress: () => {
+                    trigger();
+                    allowLeaveRef.current = true;
+                    navigation.dispatch(data.action);
                 },
-                {
-                    text: t('放棄建立'),
-                    style: 'destructive',
-                    onPress: () => {
-                        trigger();
-                        allowLeaveRef.current = true;
-                        navigation.dispatch(event.data.action);
-                    },
-                },
-            ]);
-        });
-        return unsubscribe;
-    }, [hasUnsavedDraft, navigation, t]);
+            },
+        ]);
+    });
 
     const handlePrevWeek = useCallback(() => {
         const prev = moment
