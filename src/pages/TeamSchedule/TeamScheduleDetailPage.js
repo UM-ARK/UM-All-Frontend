@@ -6,6 +6,7 @@ import {
     ActivityIndicator,
     Alert,
     Modal,
+    Platform,
     Pressable,
     RefreshControl,
     ScrollView,
@@ -639,10 +640,10 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
         ];
     }, [event, eventClosed, isInvitePending, isOwner, phase, t]);
 
-    const onMenuAction = useCallback(
-        ({nativeEvent}) => {
+    const runMenuAction = useCallback(
+        id => {
             trigger();
-            switch (nativeEvent.event) {
+            switch (id) {
                 case 'edit':
                     openEditBasics();
                     break;
@@ -675,38 +676,71 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
     );
 
     useEffect(() => {
+        const hasMenu = menuActions.length > 0;
         navigation.setOptions({
             headerTitle: isInvitePending
                 ? t('組隊邀請')
                 : event?.title || t('組隊詳情'),
+            // iOS：原生 UIBarButtonItem + UIMenu，液態玻璃才是標準圓形
             headerRight:
-                menuActions.length > 0
+                hasMenu && Platform.OS !== 'ios'
                     ? () => (
                           <MenuView
                               key={`team-menu-${event?.status || 'none'}`}
                               actions={menuActions}
-                              onPressAction={onMenuAction}
-                              shouldOpenOnLongPress={false}>
+                              onPressAction={({nativeEvent}) =>
+                                  runMenuAction(nativeEvent.event)
+                              }
+                              shouldOpenOnLongPress={false}
+                              style={styles.headerMore}>
                               <Pressable
                                   hitSlop={scale(8)}
                                   onPress={() => trigger()}
                                   style={styles.headerMore}>
                                   <Ionicons
                                       name="ellipsis-horizontal"
-                                      size={scale(22)}
+                                      size={scale(20)}
                                       color={theme.themeColor}
                                   />
                               </Pressable>
                           </MenuView>
                       )
                     : undefined,
+            unstable_headerRightItems:
+                hasMenu && Platform.OS === 'ios'
+                    ? () => [
+                          {
+                              type: 'menu',
+                              label: t('更多'),
+                              accessibilityLabel: t('更多'),
+                              icon: {
+                                  type: 'sfSymbol',
+                                  name: 'ellipsis',
+                              },
+                              tintColor: theme.themeColor,
+                              menu: {
+                                  items: menuActions.map(action => ({
+                                      type: 'action',
+                                      label: action.title,
+                                      destructive:
+                                          action.attributes?.destructive ===
+                                          true,
+                                      disabled:
+                                          action.attributes?.disabled === true,
+                                      onPress: () => runMenuAction(action.id),
+                                  })),
+                              },
+                          },
+                      ]
+                    : undefined,
         });
     }, [
+        event?.status,
         event?.title,
         isInvitePending,
         menuActions,
         navigation,
-        onMenuAction,
+        runMenuAction,
         t,
         theme.themeColor,
     ]);
@@ -1319,13 +1353,15 @@ const styles = StyleSheet.create({
         fontSize: scale(15),
         fontWeight: '700',
     },
+    // Android headerRight：固定正方形按鈕
     headerMore: {
         alignItems: 'center',
+        borderRadius: scale(18),
+        height: scale(36),
         justifyContent: 'center',
         marginRight: scale(4),
-        minHeight: scale(36),
-        minWidth: scale(36),
-        paddingHorizontal: scale(6),
+        overflow: 'hidden',
+        width: scale(36),
     },
     memberRow: {
         alignItems: 'center',
