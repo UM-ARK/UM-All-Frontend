@@ -97,7 +97,10 @@ const MyScreen = ({ navigation }) => {
                         typeof teamSchedulePreviewRef.current?.refresh ===
                         'function'
                     ) {
-                        await teamSchedulePreviewRef.current.refresh();
+                        // 下拉刷新必須強制重抓，不可吃 45s 列表 cache
+                        await teamSchedulePreviewRef.current.refresh({
+                            force: true,
+                        });
                     }
                 })(),
             ]);

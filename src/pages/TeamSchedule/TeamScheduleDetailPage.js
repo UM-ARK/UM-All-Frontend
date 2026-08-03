@@ -851,23 +851,39 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
             <View
                 style={[
                     styles.container,
-                    styles.center,
                     {backgroundColor: theme.bg_color},
-                    statePad,
                 ]}>
-                <TeamScheduleFullState
-                    icon="link-off"
-                    title={t('組隊邀請')}
-                    description={errorMessageForCode(code, t)}
-                    actionLabel={canRetry ? t('重試') : t('返回')}
-                    onAction={() => {
-                        if (canRetry) {
-                            retryJoin().catch(() => {});
-                        } else {
-                            navigation.goBack();
-                        }
-                    }}
-                />
+                <ScrollView
+                    contentContainerStyle={[styles.centerGrow, statePad]}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={isRefreshing}
+                            tintColor={theme.themeColor}
+                            colors={[theme.themeColor]}
+                            onRefresh={() => {
+                                trigger();
+                                if (canRetry) {
+                                    retryJoin().catch(() => {});
+                                } else {
+                                    refresh();
+                                }
+                            }}
+                        />
+                    }>
+                    <TeamScheduleFullState
+                        icon="link-off"
+                        title={t('組隊邀請')}
+                        description={errorMessageForCode(code, t)}
+                        actionLabel={canRetry ? t('重試') : t('返回')}
+                        onAction={() => {
+                            if (canRetry) {
+                                retryJoin().catch(() => {});
+                            } else {
+                                navigation.goBack();
+                            }
+                        }}
+                    />
+                </ScrollView>
             </View>
         );
     }
@@ -877,11 +893,26 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
             <View
                 style={[
                     styles.container,
-                    styles.center,
                     {backgroundColor: theme.bg_color},
-                    statePad,
                 ]}>
-                <ActivityIndicator color={theme.themeColor} size="large" />
+                <ScrollView
+                    contentContainerStyle={[styles.centerGrow, statePad]}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={isRefreshing}
+                            tintColor={theme.themeColor}
+                            colors={[theme.themeColor]}
+                            onRefresh={() => {
+                                trigger();
+                                refresh();
+                            }}
+                        />
+                    }>
+                    <ActivityIndicator
+                        color={theme.themeColor}
+                        size="large"
+                    />
+                </ScrollView>
             </View>
         );
     }
@@ -891,16 +922,28 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
             <View
                 style={[
                     styles.container,
-                    styles.center,
                     {backgroundColor: theme.bg_color},
-                    statePad,
                 ]}>
-                <TeamScheduleFullState
-                    icon="alert-circle-outline"
-                    title={errorMessageForCode(error?.code, t)}
-                    actionLabel={t('重試')}
-                    onAction={() => refresh()}
-                />
+                <ScrollView
+                    contentContainerStyle={[styles.centerGrow, statePad]}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={isRefreshing}
+                            tintColor={theme.themeColor}
+                            colors={[theme.themeColor]}
+                            onRefresh={() => {
+                                trigger();
+                                refresh();
+                            }}
+                        />
+                    }>
+                    <TeamScheduleFullState
+                        icon="alert-circle-outline"
+                        title={errorMessageForCode(error?.code, t)}
+                        actionLabel={t('重試')}
+                        onAction={() => refresh()}
+                    />
+                </ScrollView>
             </View>
         );
     }
@@ -924,9 +967,11 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                             if (editor.isEditing) {
                                 return;
                             }
+                            trigger();
                             refresh();
                         }}
                         tintColor={theme.themeColor}
+                        colors={[theme.themeColor]}
                     />
                 }>
                 <TeamScheduleEventHeader
@@ -1380,6 +1425,12 @@ const styles = StyleSheet.create({
     center: {
         alignItems: 'center',
         justifyContent: 'center',
+    },
+    centerGrow: {
+        flexGrow: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingHorizontal: scale(14),
     },
     joiningText: {
         ...uiStyle.defaultText,

@@ -17,6 +17,7 @@ import {
     normalizeMembership,
     normalizeTeamEvent,
 } from '../../../utils/scheduling/schedulingModels';
+import {clearTeamEventsCache} from './useTeamEvents';
 
 /** 前景／focus 時視為過期的 TTL */
 const DETAIL_STALE_MS = 45 * 1000;
@@ -306,6 +307,8 @@ export function useTeamScheduleDetail({
             await joinTeamEvent(eventId, token);
             clearInviteToken();
             hasInviteFlow.current = false;
+            // 與新建組隊一致：清列表 cache，返回「我的」／列表才會看到新 membership
+            clearTeamEventsCache();
             await loadDetailAndSummary({});
             return true;
         } catch (requestError) {

@@ -24,6 +24,7 @@ import {
     updateInviteLink,
 } from '../../../utils/scheduling/schedulingApi';
 import {normalizeSchedulingError} from '../../../utils/scheduling/schedulingErrors';
+import {buildTeamInviteShareMessage} from '../../../utils/scheduling/teamInviteLink';
 import {trigger} from '../../../utils/trigger';
 
 /**
@@ -125,10 +126,15 @@ const InviteManagementSheet = ({
                 Alert.alert(t('無法分享'), t('暫時無法取得邀請連結。'));
                 return;
             }
+            const message = buildTeamInviteShareMessage({
+                title: eventTitle,
+                url,
+                hint: t(
+                    '複製此條信息打開ARK ALL即可組隊，或瀏覽器打開下方鏈接。',
+                ),
+            });
             await Share.share({
-                message: eventTitle
-                    ? `${eventTitle}\n${url}`
-                    : url,
+                message,
                 url,
             });
         } catch (requestError) {

@@ -16,7 +16,10 @@ export const APP_LINKING = {
             },
             TeamScheduleDetail: {
                 path: 'team/:eventId',
-                parse: {eventId: String},
+                parse: {
+                    eventId: String,
+                    invite: String,
+                },
             },
         },
     },

@@ -1,5 +1,5 @@
 /**
- * 「我的」頁組隊約時間預覽：最近三筆、查看全部、新建組隊
+ * 「我的」頁組隊約時間預覽：最近三筆、查看全部、新建／加入組隊
  */
 import React, {
     forwardRef,
@@ -7,6 +7,7 @@ import React, {
     useEffect,
     useImperativeHandle,
     useMemo,
+    useState,
 } from 'react';
 import {Pressable, StyleSheet, Text, View} from 'react-native';
 
@@ -16,8 +17,10 @@ import Ionicons from '@react-native-vector-icons/ionicons';
 import {scale, verticalScale} from 'react-native-size-matters';
 
 import {uiStyle, useTheme} from '../../../components/ThemeContext';
+import {openTeamInviteDetail} from '../../../utils/scheduling/teamInviteLink';
 import {trigger} from '../../../utils/trigger';
 import {useTeamEvents} from '../hooks/useTeamEvents';
+import JoinTeamSheet from './JoinTeamSheet';
 import TeamScheduleEventRow from './TeamScheduleEventRow';
 import {
     TeamScheduleInlineError,
@@ -28,6 +31,7 @@ const TeamSchedulePreviewSection = forwardRef(
     ({navigation, refreshHandle}, ref) => {
         const {theme} = useTheme();
         const {t} = useTranslation('my');
+        const [joinSheetVisible, setJoinSheetVisible] = useState(false);
         const {
             recentEvents,
             status,
@@ -78,6 +82,19 @@ const TeamSchedulePreviewSection = forwardRef(
             trigger();
             navigation.navigate('TeamScheduleCreate');
         }, [navigation]);
+
+        const openJoin = useCallback(() => {
+            trigger();
+            setJoinSheetVisible(true);
+        }, []);
+
+        const handleJoinSubmit = useCallback(
+            ({eventId, invite}) => {
+                setJoinSheetVisible(false);
+                openTeamInviteDetail(navigation, {eventId, invite});
+            },
+            [navigation],
+        );
 
         const openDetail = useCallback(
             item => {
@@ -133,31 +150,58 @@ const TeamSchedulePreviewSection = forwardRef(
                     </Pressable>
                 </View>
 
-                <Pressable
-                    accessibilityRole="button"
-                    accessibilityLabel={t('新建組隊')}
-                    onPress={openCreate}
-                    style={({pressed}) => [
-                        styles.createButton,
-                        {
-                            backgroundColor: pressed
-                                ? theme.tonal.primary50
-                                : theme.tonal.primary15,
-                        },
-                    ]}>
-                    <Ionicons
-                        name="add-circle-outline"
-                        size={scale(18)}
-                        color={theme.themeColor}
-                    />
-                    <Text
-                        style={[
-                            styles.createButtonText,
-                            {color: theme.themeColor},
+                <View style={styles.actionRow}>
+                    <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel={t('新建組隊')}
+                        onPress={openCreate}
+                        style={({pressed}) => [
+                            styles.actionButton,
+                            {
+                                backgroundColor: pressed
+                                    ? theme.tonal.primary50
+                                    : theme.tonal.primary15,
+                            },
                         ]}>
-                        {t('新建組隊')}
-                    </Text>
-                </Pressable>
+                        <Ionicons
+                            name="add-circle-outline"
+                            size={scale(18)}
+                            color={theme.themeColor}
+                        />
+                        <Text
+                            style={[
+                                styles.actionButtonText,
+                                {color: theme.themeColor},
+                            ]}>
+                            {t('新建組隊')}
+                        </Text>
+                    </Pressable>
+                    <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel={t('加入隊伍')}
+                        onPress={openJoin}
+                        style={({pressed}) => [
+                            styles.actionButton,
+                            {
+                                backgroundColor: pressed
+                                    ? theme.tonal.primary50
+                                    : theme.tonal.primary15,
+                            },
+                        ]}>
+                        <Ionicons
+                            name="enter-outline"
+                            size={scale(18)}
+                            color={theme.themeColor}
+                        />
+                        <Text
+                            style={[
+                                styles.actionButtonText,
+                                {color: theme.themeColor},
+                            ]}>
+                            {t('加入隊伍')}
+                        </Text>
+                    </Pressable>
+                </View>
 
                 <View
                     style={[
@@ -232,6 +276,12 @@ const TeamSchedulePreviewSection = forwardRef(
                           ))
                         : null}
                 </View>
+
+                <JoinTeamSheet
+                    visible={joinSheetVisible}
+                    onClose={() => setJoinSheetVisible(false)}
+                    onSubmit={handleJoinSubmit}
+                />
             </View>
         );
     },
@@ -270,18 +320,23 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         marginRight: scale(2),
     },
-    createButton: {
+    actionRow: {
         flexDirection: 'row',
+        flexWrap: 'wrap',
         alignItems: 'center',
-        alignSelf: 'flex-start',
-        borderRadius: scale(10),
         marginHorizontal: scale(14),
         marginBottom: verticalScale(8),
+        gap: scale(8),
+    },
+    actionButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        borderRadius: scale(10),
         paddingHorizontal: scale(12),
         paddingVertical: verticalScale(8),
         gap: scale(6),
     },
-    createButtonText: {
+    actionButtonText: {
         ...uiStyle.defaultText,
         fontSize: scale(13),
         fontWeight: '700',
