@@ -27,6 +27,7 @@ import {trigger} from '../../../utils/trigger';
  * @param {Array} props.members
  * @param {string} props.timezone
  * @param {string|number|null} [props.myHarborUserId]
+ * @param {(username: string) => void} [props.onMemberPress]
  */
 const SlotDetailSheet = ({
     visible,
@@ -35,6 +36,7 @@ const SlotDetailSheet = ({
     members = [],
     timezone = 'Asia/Macau',
     myHarborUserId = null,
+    onMemberPress,
 }) => {
     const {theme} = useTheme();
     const {t} = useTranslation('my');
@@ -210,28 +212,48 @@ const SlotDetailSheet = ({
                                               72,
                                           )
                                         : null;
+                                    const canOpenProfile = Boolean(
+                                        onMemberPress && member.username,
+                                    );
                                     return (
                                         <View
                                             key={String(member.harborUserId)}
                                             style={styles.memberRow}>
-                                            {avatarUri ? (
-                                                <Image
-                                                    source={{uri: avatarUri}}
-                                                    style={styles.avatar}
-                                                />
-                                            ) : (
-                                                <View
-                                                    style={[
-                                                        styles.avatar,
-                                                        styles.avatarFallback,
-                                                        {
-                                                            backgroundColor:
-                                                                theme.tonal
-                                                                    .primary15,
+                                            <Pressable
+                                                accessibilityRole="link"
+                                                accessibilityLabel={name}
+                                                disabled={!canOpenProfile}
+                                                onPress={() => {
+                                                    trigger();
+                                                    onMemberPress(
+                                                        member.username,
+                                                    );
+                                                }}
+                                                style={({pressed}) => [
+                                                    pressed &&
+                                                        canOpenProfile && {
+                                                            opacity: 0.7,
                                                         },
-                                                    ]}
-                                                />
-                                            )}
+                                                ]}>
+                                                {avatarUri ? (
+                                                    <Image
+                                                        source={{uri: avatarUri}}
+                                                        style={styles.avatar}
+                                                    />
+                                                ) : (
+                                                    <View
+                                                        style={[
+                                                            styles.avatar,
+                                                            styles.avatarFallback,
+                                                            {
+                                                                backgroundColor:
+                                                                    theme.tonal
+                                                                        .primary15,
+                                                            },
+                                                        ]}
+                                                    />
+                                                )}
+                                            </Pressable>
                                             <Text
                                                 style={[
                                                     styles.memberName,

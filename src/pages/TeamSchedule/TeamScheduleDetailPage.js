@@ -5,6 +5,7 @@ import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {
     ActivityIndicator,
     Alert,
+    Image,
     Modal,
     Platform,
     Pressable,
@@ -34,6 +35,7 @@ import Ionicons from '@react-native-vector-icons/ionicons';
 import {useHarborSession} from '../../contexts/HarborSessionContext';
 import {useSchedulingSession} from '../../contexts/SchedulingSessionContext';
 import {uiStyle, useTheme} from '../../components/ThemeContext';
+import {ARK_HARBOR_AVATAR_TEMPLATE} from '../../utils/pathMap';
 import {
     deleteTeamEvent,
     leaveTeamEvent,
@@ -214,6 +216,19 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
 
     const myHarborUserId =
         membership?.harborUserId ?? schedulingUser?.harborUserId ?? null;
+
+    const openHarborProfile = useCallback(
+        username => {
+            if (!username) {
+                return;
+            }
+            navigation.navigate('HarborProfile', {
+                username,
+                mode: 'preview',
+            });
+        },
+        [navigation],
+    );
 
     const myAvailability = useMemo(() => {
         if (myHarborUserId == null) {
@@ -1078,10 +1093,49 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                                 myHarborUserId != null &&
                                 String(member.harborUserId) ===
                                     String(myHarborUserId);
+                            const avatarUri = member.avatarTemplate
+                                ? ARK_HARBOR_AVATAR_TEMPLATE(
+                                      member.avatarTemplate,
+                                      72,
+                                  )
+                                : null;
+                            const canOpenProfile = Boolean(member.username);
                             return (
                                 <View
                                     key={String(member.harborUserId)}
                                     style={styles.memberRow}>
+                                    <Pressable
+                                        accessibilityRole="link"
+                                        accessibilityLabel={name}
+                                        disabled={!canOpenProfile}
+                                        onPress={() => {
+                                            trigger();
+                                            openHarborProfile(member.username);
+                                        }}
+                                        style={({pressed}) => [
+                                            pressed &&
+                                                canOpenProfile && {
+                                                    opacity: 0.7,
+                                                },
+                                        ]}>
+                                        {avatarUri ? (
+                                            <Image
+                                                source={{uri: avatarUri}}
+                                                style={styles.memberAvatar}
+                                            />
+                                        ) : (
+                                            <View
+                                                style={[
+                                                    styles.memberAvatar,
+                                                    {
+                                                        backgroundColor:
+                                                            theme.tonal
+                                                                .primary15,
+                                                    },
+                                                ]}
+                                            />
+                                        )}
+                                    </Pressable>
                                     <Text
                                         style={[
                                             styles.memberName,
@@ -1137,6 +1191,7 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                 members={members}
                 timezone={event?.timezone}
                 myHarborUserId={myHarborUserId}
+                onMemberPress={openHarborProfile}
                 onClose={() => setSlotSheet({visible: false, slot: null})}
             />
 
@@ -1406,6 +1461,12 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         paddingVertical: verticalScale(6),
+    },
+    memberAvatar: {
+        borderRadius: scale(14),
+        height: scale(28),
+        marginRight: scale(10),
+        width: scale(28),
     },
     memberName: {
         ...uiStyle.defaultText,
