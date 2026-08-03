@@ -1,14 +1,18 @@
 import axios from 'axios';
 
-import {loadHarborCredentials} from '../harbor/harborAuthStorage';
+import { loadHarborCredentials } from '../harbor/harborAuthStorage';
 import {
     createSchedulingError,
     normalizeSchedulingError,
 } from './schedulingErrors';
+import {
+    logSchedulingAuthError,
+    logSchedulingAuthEvent,
+} from './schedulingLogger';
 
 // Scheduling API 專用 base（不可拼接以 /api/ 結尾的 BASE_URI）
 // TODO: 上線前修改 umall.one
-export const SCHEDULING_BASE_URI = 'http://127.0.0.1:8000/api/v2';
+export const SCHEDULING_BASE_URI = 'http://192.168.1.230:8000/api/v2';
 // export const SCHEDULING_BASE_URI = 'https://umall.one/api/v2';
 
 const REQUEST_TIMEOUT = 15000;
@@ -77,6 +81,13 @@ export function isSchedulingTokenExpired(session, now = Date.now()) {
 
 function normalizeExchangeResponse(data) {
     if (!data?.accessToken || !data?.expiresAt) {
+        logSchedulingAuthEvent('exchange.invalid_response', {
+            hasAccessToken: Boolean(data?.accessToken),
+            hasExpiresAt: Boolean(data?.expiresAt),
+            hasUser: Boolean(data?.user),
+            dataKeys:
+                data && typeof data === 'object' ? Object.keys(data) : null,
+        });
         throw createSchedulingError({
             code: 'invalid_exchange_response',
             message: '換票回應格式無效',
@@ -93,15 +104,28 @@ function normalizeExchangeResponse(data) {
 }
 
 async function performHarborExchange() {
+    const startedAt = Date.now();
     const credentials = await loadHarborCredentials();
     if (!credentials?.userApiKey || !credentials?.clientId) {
-        throw createSchedulingError({
+        const authError = createSchedulingError({
             code: 'authentication_required',
             message: '請先登入 Harbor',
             status: 401,
             retryable: false,
         });
+        logSchedulingAuthError('exchange.failed', authError, {
+            stage: 'credentials',
+            hasUserApiKey: Boolean(credentials?.userApiKey),
+            hasClientId: Boolean(credentials?.clientId),
+            durationMs: Date.now() - startedAt,
+        });
+        throw authError;
     }
+
+    logSchedulingAuthEvent('exchange.start', {
+        url: `${SCHEDULING_BASE_URI}/auth/harbor/exchange`,
+        hasCredentials: true,
+    });
 
     try {
         // Harbor key 只能出現在此換票請求，不得帶入其他組隊 API
@@ -118,9 +142,22 @@ async function performHarborExchange() {
                 },
             },
         );
-        return normalizeExchangeResponse(response.data);
+        const session = normalizeExchangeResponse(response.data);
+        logSchedulingAuthEvent('exchange.success', {
+            httpStatus: response.status,
+            expiresAt: session.expiresAt,
+            hasUser: Boolean(session.user),
+            durationMs: Date.now() - startedAt,
+        });
+        return session;
     } catch (error) {
         const normalized = normalizeSchedulingError(error);
+        logSchedulingAuthError('exchange.failed', normalized, {
+            stage: 'request',
+            axiosCode: error?.isAxiosError ? error.code : null,
+            rawHttpStatus: error?.response?.status ?? null,
+            durationMs: Date.now() - startedAt,
+        });
         // 503 harbor_unavailable：可重試，不應視為 Harbor 登出
         if (
             normalized.status === 401 &&
@@ -138,9 +175,11 @@ async function performHarborExchange() {
  */
 export function exchangeSchedulingToken() {
     if (exchangeInFlight) {
+        logSchedulingAuthEvent('exchange.reuse_inflight');
         return exchangeInFlight;
     }
 
+    logSchedulingAuthEvent('exchange.enqueue');
     const request = performHarborExchange().finally(() => {
         if (exchangeInFlight === request) {
             exchangeInFlight = null;
@@ -156,8 +195,15 @@ export function exchangeSchedulingToken() {
 export async function ensureSchedulingSession() {
     const current = getSchedulingSession();
     if (current && !isSchedulingTokenExpired(current)) {
+        logSchedulingAuthEvent('session.cache_hit', {
+            expiresAt: current.expiresAt,
+        });
         return current;
     }
+    logSchedulingAuthEvent('session.cache_miss', {
+        hasSession: Boolean(current),
+        expiresAt: current?.expiresAt ?? null,
+    });
     return exchangeSchedulingToken();
 }
 
