@@ -8,6 +8,7 @@ import moment from 'moment-timezone';
 import {useTranslation} from 'react-i18next';
 import ActionSheet, {ScrollView} from 'react-native-actions-sheet';
 import {scale, verticalScale} from 'react-native-size-matters';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 import {uiStyle, useTheme} from '../../../components/ThemeContext';
 import {ARK_HARBOR_AVATAR_TEMPLATE} from '../../../utils/pathMap';
@@ -37,6 +38,7 @@ const SlotDetailSheet = ({
 }) => {
     const {theme} = useTheme();
     const {t} = useTranslation('my');
+    const insets = useSafeAreaInsets();
     const sheetRef = useRef(null);
 
     useEffect(() => {
@@ -113,7 +115,15 @@ const SlotDetailSheet = ({
             onClose={() => {
                 onClose?.();
             }}>
-            <View style={styles.sheet}>
+            <View
+                style={[
+                    styles.sheet,
+                    {
+                        paddingBottom:
+                            verticalScale(20) +
+                            Math.max(insets.bottom, verticalScale(8)),
+                    },
+                ]}>
                 <Text style={[styles.title, {color: theme.black.main}]}>
                     {t('時段詳情')}
                 </Text>
@@ -271,7 +281,6 @@ const styles = StyleSheet.create({
     sheet: {
         paddingHorizontal: scale(16),
         paddingTop: verticalScale(12),
-        paddingBottom: verticalScale(20),
     },
     title: {
         ...uiStyle.defaultText,

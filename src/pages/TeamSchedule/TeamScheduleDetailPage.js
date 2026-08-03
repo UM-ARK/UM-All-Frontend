@@ -27,6 +27,7 @@ import {
 } from 'react-native-keyboard-controller';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import {scale, verticalScale} from 'react-native-size-matters';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import Ionicons from '@react-native-vector-icons/ionicons';
 
 import {useHarborSession} from '../../contexts/HarborSessionContext';
@@ -160,6 +161,7 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
     const {theme} = useTheme();
     const {t} = useTranslation('my');
     const headerHeight = useHeaderHeight();
+    const insets = useSafeAreaInsets();
     const {status: harborStatus, login} = useHarborSession();
     const {user: schedulingUser} = useSchedulingSession();
     const harborSignedIn = harborStatus === 'signedIn';
@@ -709,20 +711,33 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
         theme.themeColor,
     ]);
 
+    // 液態玻璃透明導覽列需手動避開 header；底部加上 Home Indicator
+    const topSafePad = isLiquidGlassSupported
+        ? headerHeight + verticalScale(8)
+        : verticalScale(8);
+    const bottomSafePad = Math.max(insets.bottom, verticalScale(16));
+    const statePad = {
+        paddingTop: topSafePad,
+        paddingBottom: bottomSafePad,
+    };
     const contentPad = {
-        paddingTop: isLiquidGlassSupported
-            ? headerHeight + verticalScale(8)
-            : verticalScale(8),
+        paddingTop: topSafePad,
         paddingBottom: editor.isEditing
-            ? verticalScale(90)
-            : verticalScale(40),
+            ? verticalScale(90) + insets.bottom
+            : verticalScale(40) + insets.bottom,
         paddingHorizontal: scale(14),
     };
 
     // —— 狀態畫面 ——
     if (!eventId) {
         return (
-            <View style={[styles.container, {backgroundColor: theme.bg_color}]}>
+            <View
+                style={[
+                    styles.container,
+                    styles.center,
+                    {backgroundColor: theme.bg_color},
+                    statePad,
+                ]}>
                 <TeamScheduleFullState
                     icon="alert-circle-outline"
                     title={t('活動不存在、無權查看或已刪除。')}
@@ -735,7 +750,13 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
 
     if (phase === 'need_login') {
         return (
-            <View style={[styles.container, {backgroundColor: theme.bg_color}]}>
+            <View
+                style={[
+                    styles.container,
+                    styles.center,
+                    {backgroundColor: theme.bg_color},
+                    statePad,
+                ]}>
                 <TeamScheduleFullState
                     icon="account-lock-outline"
                     title={t('組隊邀請')}
@@ -758,6 +779,7 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                     styles.container,
                     styles.center,
                     {backgroundColor: theme.bg_color},
+                    statePad,
                 ]}>
                 <ActivityIndicator color={theme.themeColor} size="large" />
                 <Text style={[styles.joiningText, {color: theme.black.third}]}>
@@ -774,7 +796,13 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
             code === 'harbor_unavailable' ||
             code === 'membership_create_pending';
         return (
-            <View style={[styles.container, {backgroundColor: theme.bg_color}]}>
+            <View
+                style={[
+                    styles.container,
+                    styles.center,
+                    {backgroundColor: theme.bg_color},
+                    statePad,
+                ]}>
                 <TeamScheduleFullState
                     icon="link-off"
                     title={t('組隊邀請')}
@@ -799,6 +827,7 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                     styles.container,
                     styles.center,
                     {backgroundColor: theme.bg_color},
+                    statePad,
                 ]}>
                 <ActivityIndicator color={theme.themeColor} size="large" />
             </View>
@@ -807,7 +836,13 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
 
     if (phase === 'error' && !event) {
         return (
-            <View style={[styles.container, {backgroundColor: theme.bg_color}]}>
+            <View
+                style={[
+                    styles.container,
+                    styles.center,
+                    {backgroundColor: theme.bg_color},
+                    statePad,
+                ]}>
                 <TeamScheduleFullState
                     icon="alert-circle-outline"
                     title={errorMessageForCode(error?.code, t)}
@@ -826,7 +861,7 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
         <View style={[styles.container, {backgroundColor: theme.bg_color}]}>
             <ScrollView
                 contentInsetAdjustmentBehavior={
-                    isLiquidGlassSupported ? null : 'automatic'
+                    isLiquidGlassSupported ? 'never' : 'automatic'
                 }
                 contentContainerStyle={contentPad}
                 scrollEnabled={!isPainting}
@@ -1069,7 +1104,11 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                         <View
                             style={[
                                 styles.modalCard,
-                                {backgroundColor: theme.bg_color},
+                                {
+                                    backgroundColor: theme.bg_color,
+                                    paddingBottom:
+                                        verticalScale(28) + insets.bottom,
+                                },
                             ]}>
                             <Text
                                 style={[
@@ -1318,7 +1357,6 @@ const styles = StyleSheet.create({
         borderTopRightRadius: scale(16),
         paddingHorizontal: scale(16),
         paddingTop: verticalScale(16),
-        paddingBottom: verticalScale(28),
     },
     modalTitle: {
         ...uiStyle.defaultText,

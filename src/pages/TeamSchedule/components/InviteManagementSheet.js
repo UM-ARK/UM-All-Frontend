@@ -15,6 +15,7 @@ import {
 import {useTranslation} from 'react-i18next';
 import ActionSheet from 'react-native-actions-sheet';
 import {scale, verticalScale} from 'react-native-size-matters';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 import {uiStyle, useTheme} from '../../../components/ThemeContext';
 import {
@@ -54,6 +55,7 @@ const InviteManagementSheet = ({
 }) => {
     const {theme} = useTheme();
     const {t} = useTranslation('my');
+    const insets = useSafeAreaInsets();
     const sheetRef = useRef(null);
     const [loading, setLoading] = useState(false);
     const [busy, setBusy] = useState(false);
@@ -240,7 +242,15 @@ const InviteManagementSheet = ({
                 borderTopRightRadius: scale(16),
             }}
             onClose={() => onClose?.()}>
-            <View style={styles.sheet}>
+            <View
+                style={[
+                    styles.sheet,
+                    {
+                        paddingBottom:
+                            verticalScale(24) +
+                            Math.max(insets.bottom, verticalScale(8)),
+                    },
+                ]}>
                 <Text style={[styles.title, {color: theme.black.main}]}>
                     {t('邀請管理')}
                 </Text>
@@ -378,7 +388,6 @@ const styles = StyleSheet.create({
     sheet: {
         paddingHorizontal: scale(16),
         paddingTop: verticalScale(12),
-        paddingBottom: verticalScale(24),
     },
     title: {
         ...uiStyle.defaultText,
