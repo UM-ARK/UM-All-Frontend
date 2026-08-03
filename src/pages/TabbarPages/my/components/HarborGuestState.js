@@ -25,6 +25,12 @@ const HarborGuestState = ({isAuthorizing, onLogin, onBrowse}) => {
     const [consentVisible, setConsentVisible] = React.useState(false);
     const features = [
         {
+            key: 'teamSchedule',
+            icon: 'calendar-outline',
+            title: t('組隊約時間'),
+            description: t('邀請同學標記空檔，找出共同空閒時段'),
+        },
+        {
             key: 'identity',
             icon: 'person-circle-outline',
             title: t('同步論壇身份'),
