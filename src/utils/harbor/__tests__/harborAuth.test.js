@@ -20,6 +20,14 @@ jest.mock('expo-crypto', () => ({
 
 jest.mock('expo-web-browser', () => ({
     openAuthSessionAsync: jest.fn(),
+    getCustomTabsSupportingBrowsersAsync: jest.fn().mockResolvedValue({
+        browserPackages: ['com.android.chrome'],
+        preferredBrowserPackage: 'com.android.chrome',
+    }),
+}));
+
+jest.mock('../../browserPackage', () => ({
+    getBestBrowserPackage: jest.fn().mockResolvedValue('com.android.chrome'),
 }));
 
 jest.mock('react-native-quick-crypto', () => {

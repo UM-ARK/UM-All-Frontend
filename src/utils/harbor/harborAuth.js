@@ -1,4 +1,4 @@
-import {Linking, Platform} from 'react-native';
+import { Linking, Platform } from 'react-native';
 
 import * as Crypto from 'expo-crypto';
 import * as WebBrowser from 'expo-web-browser';
@@ -9,7 +9,8 @@ import {
     privateDecrypt,
 } from 'react-native-quick-crypto';
 
-import {ARK_HARBOR} from '../pathMap';
+import { getBestBrowserPackage } from '../browserPackage';
+import { ARK_HARBOR } from '../pathMap';
 import {
     clearHarborRsaKeyPair,
     clearPendingHarborAuthorization,
@@ -21,7 +22,7 @@ import {
     saveHarborRsaKeyPair,
     savePendingHarborAuthorization,
 } from './harborAuthStorage';
-import {logHarborAuthError, logHarborAuthEvent} from './harborLogger';
+import { logHarborAuthError, logHarborAuthEvent } from './harborLogger';
 
 const APPLICATION_NAME = 'ARK ALL';
 const AUTH_PATH = '/user-api-key/new';
@@ -53,7 +54,7 @@ function createAuthError(code, message) {
 
 export function generateHarborRsaKeyPair() {
     const startedAt = Date.now();
-    logHarborAuthEvent('rsa.generate.start', {modulusLength: RSA_BITS});
+    logHarborAuthEvent('rsa.generate.start', { modulusLength: RSA_BITS });
 
     return new Promise((resolve, reject) => {
         generateKeyPair(
@@ -61,8 +62,8 @@ export function generateHarborRsaKeyPair() {
             {
                 modulusLength: RSA_BITS,
                 publicExponent: 0x10001,
-                publicKeyEncoding: {type: 'spki', format: 'pem'},
-                privateKeyEncoding: {type: 'pkcs8', format: 'pem'},
+                publicKeyEncoding: { type: 'spki', format: 'pem' },
+                privateKeyEncoding: { type: 'pkcs8', format: 'pem' },
             },
             (error, publicKey, privateKey) => {
                 if (error) {
@@ -88,7 +89,7 @@ export function generateHarborRsaKeyPair() {
                 logHarborAuthEvent('rsa.generate.success', {
                     durationMs: Date.now() - startedAt,
                 });
-                resolve({publicKey, privateKey});
+                resolve({ publicKey, privateKey });
             },
         );
     });
@@ -99,7 +100,7 @@ function isHarborRsaKeyPairUsable(keyPair) {
         return false;
     }
 
-    const {publicKey, privateKey} = keyPair;
+    const { publicKey, privateKey } = keyPair;
     return (
         typeof publicKey === 'string' &&
         typeof privateKey === 'string' &&
@@ -203,7 +204,7 @@ export function getHarborAuthRedirect() {
         : CUSTOM_REDIRECT_URL;
 }
 
-export function buildHarborAuthUrl({clientId, nonce, publicKey, redirectUrl}) {
+export function buildHarborAuthUrl({ clientId, nonce, publicKey, redirectUrl }) {
     const params = new URLSearchParams({
         application_name: APPLICATION_NAME,
         client_id: clientId,
@@ -346,7 +347,7 @@ export async function completeHarborAuthorization(url) {
         logHarborAuthEvent('callback.complete.success');
         return credentials;
     } catch (error) {
-        logHarborAuthError('callback.complete.failed', error, {stage});
+        logHarborAuthError('callback.complete.failed', error, { stage });
         await clearPendingHarborAuthorization();
         throw error;
     }
@@ -356,7 +357,7 @@ export async function startHarborAuthorization() {
     let stage = 'rsa_ensure';
     logHarborAuthEvent('authorization.start');
     try {
-        const {publicKey} = await ensureHarborRsaKeyPair();
+        const { publicKey } = await ensureHarborRsaKeyPair();
         logHarborAuthEvent('authorization.rsa.ready');
 
         stage = 'pending_clear';
@@ -387,8 +388,11 @@ export async function startHarborAuthorization() {
 
         try {
             stage = 'browser_open';
+            // Android：與 openLink 共用 Custom Tabs 瀏覽器選擇，避免落到系統預設華為瀏覽器。
+            const browserPackage = await getBestBrowserPackage();
             logHarborAuthEvent('authorization.browser.open', {
                 redirectScheme: new URL(redirectUrl).protocol.replace(':', ''),
+                browserPackage: browserPackage || null,
             });
             const result = await WebBrowser.openAuthSessionAsync(
                 authUrl,
@@ -396,6 +400,7 @@ export async function startHarborAuthorization() {
                 {
                     preferEphemeralSession: false,
                     preferUniversalLinks: redirectUrl === HTTPS_REDIRECT_URL,
+                    ...(browserPackage ? { browserPackage } : {}),
                 },
             );
 
@@ -421,9 +426,9 @@ export async function startHarborAuthorization() {
         }
     } catch (error) {
         if (error.code === HARBOR_AUTH_ERROR.CANCELLED) {
-            logHarborAuthEvent('authorization.cancelled', {stage});
+            logHarborAuthEvent('authorization.cancelled', { stage });
         } else {
-            logHarborAuthError('authorization.failed', error, {stage});
+            logHarborAuthError('authorization.failed', error, { stage });
         }
         throw error;
     }
