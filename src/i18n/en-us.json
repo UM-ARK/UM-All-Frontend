@@ -859,6 +859,7 @@
         "退出後你的可用時間會被刪除。": "Your availability will be deleted after leaving.",
         "儲存": "Save",
         "時段詳情": "Slot details",
+        "{{weekday}}空檔統計": "{{weekday}} availability",
         "{{available}}／{{total}} 人可出席": "{{available}}/{{total}} can attend",
         "{{available}}／{{total}} 人可出席 · {{unsubmitted}} 人未提交": "{{available}}/{{total}} can attend · {{unsubmitted}} not submitted",
         "你尚未提交此時段的可用時間": "You haven’t submitted availability for this slot",

@@ -32,6 +32,7 @@ import {
  * @param {boolean} props.visible
  * @param {() => void} props.onClose
  * @param {object|null} props.slot heatmap slot
+ * @param {Array} [props.slots] 同一天合併後的 heatmap slots
  * @param {Array} props.members
  * @param {string} props.timezone
  * @param {string|number|null} [props.myHarborUserId]
@@ -43,6 +44,7 @@ const SlotDetailSheet = ({
     visible,
     onClose,
     slot,
+    slots = [],
     members = [],
     timezone = 'Asia/Macau',
     myHarborUserId = null,
@@ -169,6 +171,19 @@ const SlotDetailSheet = ({
         timezone,
     ]);
 
+    const dayInfo = useMemo(() => {
+        if (!slot || !Array.isArray(slots) || slots.length === 0) {
+            return null;
+        }
+        const weekday = WEEKDAY_SHORT_LABELS[Number(slot.weekday) - 1] || '';
+        return {
+            weekdayLabel: weekday ? `週${weekday}` : '',
+            submittedCount: slots[0].submittedCount ?? 0,
+            memberCount: slots[0].memberCount ?? 0,
+            slots,
+        };
+    }, [slot, slots]);
+
     return (
         <ActionSheet
             ref={sheetRef}
@@ -191,9 +206,175 @@ const SlotDetailSheet = ({
                     },
                 ]}>
                 <Text style={[styles.title, {color: theme.black.main}]}>
-                    {t('時段詳情')}
+                    {dayInfo
+                        ? t('{{weekday}}空檔統計', {
+                              weekday: dayInfo.weekdayLabel,
+                          })
+                        : t('時段詳情')}
                 </Text>
-                {info ? (
+                {dayInfo ? (
+                    <>
+                        <Text
+                            style={[
+                                styles.timeLine,
+                                {color: theme.black.second},
+                            ]}>
+                            {t('已提交 {{submitted}}／{{total}} 人', {
+                                submitted: dayInfo.submittedCount,
+                                total: dayInfo.memberCount,
+                            })}
+                        </Text>
+                        <ScrollView
+                            nestedScrollEnabled
+                            showsVerticalScrollIndicator
+                            style={styles.dayList}>
+                            {dayInfo.slots.map(daySlot => {
+                                const freeMembers = Array.isArray(
+                                    daySlot.freeMembers,
+                                )
+                                    ? daySlot.freeMembers
+                                    : [];
+                                return (
+                                    <View
+                                        key={`${daySlot.weekday}:${daySlot.startMinute}`}
+                                        style={[
+                                            styles.daySlotRow,
+                                            {
+                                                borderBottomColor:
+                                                    theme.tonal.primary15,
+                                            },
+                                        ]}>
+                                        <View style={styles.daySlotHeader}>
+                                            <Text
+                                                style={[
+                                                    styles.daySlotTime,
+                                                    {color: theme.black.main},
+                                                ]}>
+                                                {formatMinuteOfDay(
+                                                    daySlot.startMinute,
+                                                )}{' '}
+                                                –{' '}
+                                                {formatMinuteOfDay(
+                                                    daySlot.endMinute,
+                                                )}
+                                            </Text>
+                                            <Text
+                                                style={[
+                                                    styles.daySlotCount,
+                                                    {color: theme.themeColor},
+                                                ]}>
+                                                {t(
+                                                    '{{available}}／{{total}} 人可出席',
+                                                    {
+                                                        available:
+                                                            daySlot.availableCount,
+                                                        total:
+                                                            daySlot.memberCount,
+                                                    },
+                                                )}
+                                            </Text>
+                                        </View>
+                                        {freeMembers.length > 0 ? (
+                                            <View
+                                                style={styles.dayMemberList}>
+                                                {freeMembers.map(member => {
+                                                    const name =
+                                                        member.displayName ||
+                                                        member.username ||
+                                                        t('成員');
+                                                    const avatarUri =
+                                                        member.avatarTemplate
+                                                            ? ARK_HARBOR_AVATAR_TEMPLATE(
+                                                                  member.avatarTemplate,
+                                                                  48,
+                                                              )
+                                                            : null;
+                                                    const canOpenProfile =
+                                                        Boolean(
+                                                            onMemberPress &&
+                                                                member.username,
+                                                        );
+                                                    return (
+                                                        <Pressable
+                                                            key={String(
+                                                                member.harborUserId ??
+                                                                    member.username,
+                                                            )}
+                                                            accessibilityRole="link"
+                                                            accessibilityLabel={
+                                                                name
+                                                            }
+                                                            disabled={
+                                                                !canOpenProfile
+                                                            }
+                                                            onPress={() => {
+                                                                trigger();
+                                                                onMemberPress(
+                                                                    member.username,
+                                                                );
+                                                            }}
+                                                            style={({pressed}) => [
+                                                                styles.dayMember,
+                                                                pressed &&
+                                                                    canOpenProfile && {
+                                                                        opacity: 0.7,
+                                                                    },
+                                                            ]}>
+                                                            {avatarUri ? (
+                                                                <Image
+                                                                    source={{
+                                                                        uri: avatarUri,
+                                                                    }}
+                                                                    style={
+                                                                        styles.dayMemberAvatar
+                                                                    }
+                                                                />
+                                                            ) : (
+                                                                <View
+                                                                    style={[
+                                                                        styles.dayMemberAvatar,
+                                                                        {
+                                                                            backgroundColor:
+                                                                                theme
+                                                                                    .tonal
+                                                                                    .primary15,
+                                                                        },
+                                                                    ]}
+                                                                />
+                                                            )}
+                                                            <Text
+                                                                style={[
+                                                                    styles.dayMemberName,
+                                                                    {
+                                                                        color: theme
+                                                                            .black
+                                                                            .third,
+                                                                    },
+                                                                ]}
+                                                                numberOfLines={
+                                                                    1
+                                                                }>
+                                                                {name}
+                                                            </Text>
+                                                        </Pressable>
+                                                    );
+                                                })}
+                                            </View>
+                                        ) : (
+                                            <Text
+                                                style={[
+                                                    styles.daySlotEmpty,
+                                                    {color: theme.black.third},
+                                                ]}>
+                                                {t('此時段尚無人有空')}
+                                            </Text>
+                                        )}
+                                    </View>
+                                );
+                            })}
+                        </ScrollView>
+                    </>
+                ) : info ? (
                     <>
                         <Text
                             style={[
@@ -447,6 +628,60 @@ const styles = StyleSheet.create({
     },
     memberList: {
         maxHeight: verticalScale(180),
+    },
+    dayList: {
+        maxHeight: verticalScale(360),
+        marginTop: verticalScale(8),
+    },
+    daySlotRow: {
+        borderBottomWidth: StyleSheet.hairlineWidth,
+        paddingVertical: verticalScale(10),
+    },
+    daySlotHeader: {
+        alignItems: 'center',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+    },
+    daySlotTime: {
+        ...uiStyle.defaultText,
+        fontSize: scale(13),
+        fontWeight: '600',
+    },
+    daySlotCount: {
+        ...uiStyle.defaultText,
+        flexShrink: 1,
+        fontSize: scale(12),
+        fontWeight: '700',
+        marginLeft: scale(8),
+        textAlign: 'right',
+    },
+    dayMemberList: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: scale(8),
+        marginTop: verticalScale(6),
+    },
+    dayMember: {
+        alignItems: 'center',
+        flexDirection: 'row',
+        maxWidth: '48%',
+    },
+    dayMemberAvatar: {
+        borderRadius: scale(10),
+        height: scale(20),
+        width: scale(20),
+    },
+    dayMemberName: {
+        ...uiStyle.defaultText,
+        flexShrink: 1,
+        fontSize: scale(11),
+        marginLeft: scale(4),
+    },
+    daySlotEmpty: {
+        ...uiStyle.defaultText,
+        fontSize: scale(12),
+        lineHeight: verticalScale(18),
+        marginTop: verticalScale(3),
     },
     empty: {
         ...uiStyle.defaultText,

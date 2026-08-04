@@ -84,6 +84,7 @@ import {
     aggregateHeatmapSlots,
     buildHeatmapWithSuggestions,
     getActiveMembers,
+    mergeHeatmapSlotsForDay,
 } from './utils/scheduleRecommendations';
 
 const DISPLAY_SLOT_MINUTES_STORAGE_KEY = 'ARK_TeamSchedule_Display_Slot_Minutes';
@@ -511,7 +512,11 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
         [members],
     );
 
-    const [slotSheet, setSlotSheet] = useState({visible: false, slot: null});
+    const [slotSheet, setSlotSheet] = useState({
+        visible: false,
+        slot: null,
+        slots: [],
+    });
     const [inviteSheetVisible, setInviteSheetVisible] = useState(false);
     const [scrollToStartMinute, setScrollToStartMinute] = useState(null);
 
@@ -543,9 +548,13 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                 memberCount: stats.memberCount,
                 freeMembers: [],
             };
-            setSlotSheet({visible: true, slot: heatSlot});
+            const daySlots = mergeHeatmapSlotsForDay(
+                heatmapBundle.heatmap?.slots,
+                slotItem.weekday,
+            );
+            setSlotSheet({visible: true, slot: heatSlot, slots: daySlots});
         },
-        [displayHeatmapByKey, editor.isEditing, stats.memberCount],
+        [displayHeatmapByKey, editor.isEditing, heatmapBundle, stats.memberCount],
     );
 
     const handleSuggestionPress = useCallback(
@@ -1759,6 +1768,7 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
             <SlotDetailSheet
                 visible={slotSheet.visible}
                 slot={slotSheet.slot}
+                slots={slotSheet.slots}
                 members={members}
                 timezone={event?.timezone}
                 myHarborUserId={myHarborUserId}
@@ -1769,7 +1779,9 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                 }
                 courseSlots={courseCatalogSlots}
                 onMemberPress={openHarborProfile}
-                onClose={() => setSlotSheet({visible: false, slot: null})}
+                onClose={() =>
+                    setSlotSheet({visible: false, slot: null, slots: []})
+                }
             />
 
             <InviteManagementSheet

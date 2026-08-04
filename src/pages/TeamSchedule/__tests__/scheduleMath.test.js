@@ -19,6 +19,7 @@ import {
     aggregateHeatmapSlots,
     buildHeatmap,
     computeAvailabilityStats,
+    mergeHeatmapSlotsForDay,
     suggestBestSlots,
 } from '../utils/scheduleRecommendations';
 import {
@@ -375,6 +376,59 @@ describe('scheduleRecommendations 熱力與建議', () => {
             representativeSlot: slots[0],
         });
         expect(bucket.childSlots).toEqual(slots);
+    });
+
+    test('整日統計只合併相鄰且有空成員相同的時段', () => {
+        const a = {harborUserId: 1};
+        const b = {harborUserId: 2};
+        const slots = [
+            {
+                weekday: 1,
+                startMinute: 600,
+                endMinute: 615,
+                memberCount: 2,
+                availableCount: 2,
+                freeMembers: [a, b],
+            },
+            {
+                weekday: 1,
+                startMinute: 615,
+                endMinute: 630,
+                memberCount: 2,
+                availableCount: 2,
+                freeMembers: [b, a],
+            },
+            {
+                weekday: 1,
+                startMinute: 630,
+                endMinute: 645,
+                memberCount: 2,
+                availableCount: 1,
+                freeMembers: [a],
+            },
+            {
+                weekday: 1,
+                startMinute: 660,
+                endMinute: 675,
+                memberCount: 2,
+                availableCount: 1,
+                freeMembers: [a],
+            },
+            {
+                weekday: 2,
+                startMinute: 600,
+                endMinute: 615,
+                memberCount: 2,
+                availableCount: 2,
+                freeMembers: [a, b],
+            },
+        ];
+
+        expect(mergeHeatmapSlotsForDay(slots, 1)).toEqual([
+            {...slots[0], endMinute: 630},
+            slots[2],
+            slots[3],
+        ]);
     });
 
     test('availability null／空 ranges／有 ranges 統計', () => {

@@ -157,6 +157,36 @@ export function aggregateHeatmapSlots(heatmapSlots, displaySlotMinutes, selfSele
 }
 
 /**
+ * 合併同一天相鄰且可出席成員相同的時段，供整日統計顯示。
+ */
+export function mergeHeatmapSlotsForDay(heatmapSlots, weekday) {
+    if (!Array.isArray(heatmapSlots) || !Number.isInteger(weekday)) {
+        return [];
+    }
+    const sorted = heatmapSlots
+        .filter(slot => slot?.weekday === weekday)
+        .slice()
+        .sort((a, b) => a.startMinute - b.startMinute);
+    const merged = [];
+    for (let i = 0; i < sorted.length; i++) {
+        const slot = sorted[i];
+        const previous = merged[merged.length - 1];
+        if (
+            previous &&
+            previous.endMinute === slot.startMinute &&
+            previous.memberCount === slot.memberCount &&
+            getFreeMemberSignature(previous.freeMembers) ===
+                getFreeMemberSignature(slot.freeMembers)
+        ) {
+            previous.endMinute = slot.endMinute;
+            continue;
+        }
+        merged.push({...slot});
+    }
+    return merged;
+}
+
+/**
  * 由 heatmap slots 推導最佳時段建議（最多 3 項）。
  * 同一 candidate window 內相鄰且人數相同才合併，不可跨 weekday 或 gap。
  */
@@ -267,4 +297,14 @@ function getHeatmapRepresentativeSlot(childSlots) {
 
 function getAvailableCount(slot) {
     return Number.isFinite(slot?.availableCount) ? slot.availableCount : 0;
+}
+
+function getFreeMemberSignature(members) {
+    if (!Array.isArray(members)) {
+        return '';
+    }
+    return members
+        .map(member => String(member?.harborUserId ?? member?.username ?? ''))
+        .sort()
+        .join('|');
 }
