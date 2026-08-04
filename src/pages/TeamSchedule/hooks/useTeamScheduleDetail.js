@@ -25,14 +25,18 @@ const DETAIL_STALE_MS = 45 * 1000;
 /**
  * 正規化 detail response
  * @param {object} data
- * @returns {{event: object|null, membership: object|null}}
+ * @returns {{event: object|null, membership: object|null, inviteLink: object|null}}
  */
 function normalizeDetailResponse(data) {
     const event = normalizeTeamEvent(data?.event || data);
     const membership = normalizeMembership(
         data?.membership || data?.event?.membership || null,
     );
-    return {event, membership};
+    const inviteLink =
+        data?.inviteLink && typeof data.inviteLink === 'object'
+            ? data.inviteLink
+            : null;
+    return {event, membership, inviteLink};
 }
 
 /**
@@ -100,6 +104,7 @@ export function useTeamScheduleDetail({
     });
     const [detailEvent, setDetailEvent] = useState(null);
     const [membership, setMembership] = useState(null);
+    const [inviteLink, setInviteLink] = useState(null);
     const [summaryEvent, setSummaryEvent] = useState(null);
     const [members, setMembers] = useState([]);
     const [summaryRevision, setSummaryRevision] = useState(null);
@@ -126,6 +131,7 @@ export function useTeamScheduleDetail({
     const applyDetail = useCallback(detail => {
         setDetailEvent(detail.event);
         setMembership(detail.membership);
+        setInviteLink(detail.inviteLink);
     }, []);
 
     const applySummary = useCallback(summary => {
@@ -519,6 +525,7 @@ export function useTeamScheduleDetail({
         detailEvent,
         summaryEvent,
         membership,
+        inviteLink,
         members,
         summaryRevision,
         error,
@@ -533,6 +540,7 @@ export function useTeamScheduleDetail({
         patchMyAvailability,
         replaceMembers,
         updateDetailEvent,
+        updateInviteLink: setInviteLink,
         clearInviteToken,
     };
 }

@@ -64,6 +64,7 @@ function formatDeadlineLine(responseDeadlineAt, timezone, t) {
  * @param {object|null} props.membership
  * @param {{submittedCount: number, memberCount: number}|null} props.stats
  * @param {string|null} [props.readOnlyReason]
+ * @param {'open'|'closed'|null} [props.inviteStatus]
  * @param {(() => void)|null} [props.onSharePress] 有傳入時顯示右上角分享 icon
  */
 const TeamScheduleEventHeader = ({
@@ -71,6 +72,7 @@ const TeamScheduleEventHeader = ({
     membership,
     stats,
     readOnlyReason,
+    inviteStatus,
     onSharePress,
 }) => {
     const {theme} = useTheme();
@@ -96,6 +98,10 @@ const TeamScheduleEventHeader = ({
         statusLabel = t('已過期');
     } else if (isClosed) {
         statusLabel = t('已關閉');
+    } else if (inviteStatus === 'open') {
+        statusLabel = t('邀請開放中');
+    } else if (inviteStatus === 'closed') {
+        statusLabel = t('邀請已關閉');
     }
 
     return (

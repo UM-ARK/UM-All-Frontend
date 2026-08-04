@@ -3,7 +3,6 @@
  */
 import React, {memo, useEffect, useRef, useState} from 'react';
 import {
-    ActivityIndicator,
     Alert,
     Pressable,
     Share,
@@ -19,7 +18,6 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 import {uiStyle, useTheme} from '../../../components/ThemeContext';
 import {
-    getInviteLink,
     rotateInviteLink,
     updateInviteLink,
 } from '../../../utils/scheduling/schedulingApi';
@@ -46,6 +44,8 @@ function pickInvitePayload(data) {
  * @param {string} props.eventId
  * @param {string} [props.eventTitle]
  * @param {string} [props.eventStatus] active／closed；活動關閉時邀請操作不可用
+ * @param {object|null} [props.initialInviteLink] detail 已帶入時避免再請求
+ * @param {(inviteLink: object) => void} [props.onInviteChange]
  */
 const InviteManagementSheet = ({
     visible,
@@ -53,12 +53,13 @@ const InviteManagementSheet = ({
     eventId,
     eventTitle = '',
     eventStatus = 'active',
+    initialInviteLink = null,
+    onInviteChange,
 }) => {
     const {theme} = useTheme();
     const {t} = useTranslation('my');
     const insets = useSafeAreaInsets();
     const sheetRef = useRef(null);
-    const [loading, setLoading] = useState(false);
     const [busy, setBusy] = useState(false);
     const [inviteUrl, setInviteUrl] = useState(null);
     const [inviteStatus, setInviteStatus] = useState(null);
@@ -66,38 +67,29 @@ const InviteManagementSheet = ({
 
     // 活動關閉時邀請連結即使仍 open，也無法加入
     const eventClosed = eventStatus === 'closed';
-    const actionsDisabled = busy || loading || eventClosed;
+    const actionsDisabled = busy || eventClosed;
 
     useEffect(() => {
         if (visible) {
             sheetRef.current?.show();
-            loadInvite();
         } else {
             sheetRef.current?.hide();
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [visible]);
 
-    const loadInvite = async () => {
-        if (!eventId) {
+    useEffect(() => {
+        if (!visible) {
             return;
         }
-        setLoading(true);
-        setErrorMessage(null);
-        try {
-            const data = await getInviteLink(eventId);
-            const picked = pickInvitePayload(data);
-            setInviteUrl(picked.url);
-            setInviteStatus(picked.status);
-        } catch (requestError) {
-            const normalized = normalizeSchedulingError(requestError);
-            setErrorMessage(
-                normalized.message || t('暫時無法完成，請稍後再試。'),
-            );
-        } finally {
-            setLoading(false);
-        }
-    };
+        const picked = pickInvitePayload(initialInviteLink);
+        setInviteUrl(picked.url);
+        setInviteStatus(picked.status);
+        setErrorMessage(
+            picked.url && picked.status
+                ? null
+                : t('暫時無法取得邀請連結。'),
+        );
+    }, [initialInviteLink, t, visible]);
 
     const alertEventClosed = () => {
         Alert.alert(
@@ -114,14 +106,7 @@ const InviteManagementSheet = ({
         }
         setBusy(true);
         try {
-            let url = inviteUrl;
-            if (!url) {
-                const data = await getInviteLink(eventId);
-                const picked = pickInvitePayload(data);
-                url = picked.url;
-                setInviteUrl(url);
-                setInviteStatus(picked.status);
-            }
+            const url = inviteUrl;
             if (!url) {
                 Alert.alert(t('無法分享'), t('暫時無法取得邀請連結。'));
                 return;
@@ -175,6 +160,7 @@ const InviteManagementSheet = ({
                         if (picked.url) {
                             setInviteUrl(picked.url);
                         }
+                        onInviteChange?.(data?.inviteLink || data);
                     } catch (requestError) {
                         const normalized =
                             normalizeSchedulingError(requestError);
@@ -213,6 +199,7 @@ const InviteManagementSheet = ({
                             const picked = pickInvitePayload(data);
                             setInviteUrl(picked.url);
                             setInviteStatus(picked.status || inviteStatus);
+                            onInviteChange?.(data?.inviteLink || data);
                         } catch (requestError) {
                             const normalized =
                                 normalizeSchedulingError(requestError);
@@ -263,12 +250,7 @@ const InviteManagementSheet = ({
                 <Text style={[styles.hint, {color: theme.black.third}]}>
                     {t('邀請連結僅影響新成員加入，不影響現有成員。')}
                 </Text>
-                {loading ? (
-                    <ActivityIndicator
-                        color={theme.themeColor}
-                        style={styles.loader}
-                    />
-                ) : errorMessage ? (
+                {errorMessage ? (
                     <Text style={[styles.error, {color: theme.unread}]}>
                         {errorMessage}
                     </Text>
@@ -406,9 +388,6 @@ const styles = StyleSheet.create({
         lineHeight: verticalScale(18),
         marginTop: verticalScale(6),
     },
-    loader: {
-        marginVertical: verticalScale(16),
-    },
     error: {
         ...uiStyle.defaultText,
         fontSize: scale(12),
@@ -418,12 +397,6 @@ const styles = StyleSheet.create({
         ...uiStyle.defaultText,
         fontSize: scale(13),
         marginTop: verticalScale(12),
-        marginBottom: verticalScale(8),
-    },
-    eventClosedHint: {
-        ...uiStyle.defaultText,
-        fontSize: scale(12),
-        lineHeight: verticalScale(18),
         marginBottom: verticalScale(8),
     },
     eventClosedHint: {

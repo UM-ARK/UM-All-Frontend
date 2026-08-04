@@ -39,7 +39,6 @@ import {uiStyle, useTheme} from '../../components/ThemeContext';
 import {ARK_HARBOR_AVATAR_TEMPLATE} from '../../utils/pathMap';
 import {
     deleteTeamEvent,
-    getInviteLink,
     leaveTeamEvent,
     updateTeamEvent,
 } from '../../utils/scheduling/schedulingApi';
@@ -206,6 +205,7 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
         phase,
         event,
         membership,
+        inviteLink,
         members,
         error,
         joinError,
@@ -215,6 +215,7 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
         retryJoin,
         patchMyAvailability,
         updateDetailEvent,
+        updateInviteLink,
     } = detail;
 
     const myHarborUserId =
@@ -624,24 +625,23 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
     const eventClosed = event?.status === 'closed';
 
     const handleShareInvite = useCallback(async () => {
-        if (!eventId || eventClosed) {
+        if (!eventId || eventClosed || inviteLink?.status !== 'open') {
             if (eventClosed) {
                 Alert.alert(
                     t('活動已關閉'),
                     t('請先重新開啟活動後，再管理邀請連結。'),
                 );
+            } else if (inviteLink?.status === 'closed') {
+                Alert.alert(t('邀請已關閉。'));
             }
             return;
         }
-        setActionBusy(true);
+        const url = inviteLink?.shareUrl || null;
+        if (!url) {
+            Alert.alert(t('無法分享'), t('暫時無法取得邀請連結。'));
+            return;
+        }
         try {
-            const data = await getInviteLink(eventId);
-            const nested = data?.inviteLink || data;
-            const url = nested?.shareUrl || null;
-            if (!url) {
-                Alert.alert(t('無法分享'), t('暫時無法取得邀請連結。'));
-                return;
-            }
             const message = buildTeamInviteShareMessage({
                 title: event?.title,
                 url,
@@ -659,10 +659,8 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                 t('無法分享'),
                 normalized.message || t('暫時無法完成，請稍後再試。'),
             );
-        } finally {
-            setActionBusy(false);
         }
-    }, [event?.title, eventClosed, eventId, t]);
+    }, [event?.title, eventClosed, eventId, inviteLink, t]);
 
     const menuActions = useMemo(() => {
         if (isInvitePending || phase !== 'ready' || !event) {
@@ -1023,8 +1021,11 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                     membership={membership}
                     stats={stats}
                     readOnlyReason={readOnlyReason}
+                    inviteStatus={inviteLink?.status || null}
                     onSharePress={
-                        isOwner && !isInvitePending && !eventClosed
+                        !isInvitePending &&
+                        !eventClosed &&
+                        inviteLink?.status === 'open'
                             ? handleShareInvite
                             : undefined
                     }
@@ -1294,6 +1295,8 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                 eventId={eventId}
                 eventTitle={event?.title}
                 eventStatus={event?.status}
+                initialInviteLink={inviteLink}
+                onInviteChange={updateInviteLink}
                 onClose={() => setInviteSheetVisible(false)}
             />
 
