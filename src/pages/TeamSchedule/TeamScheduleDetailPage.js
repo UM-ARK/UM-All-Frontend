@@ -1176,55 +1176,57 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
 
                 {event?.candidateWindows ? (
                     <View style={styles.section}>
-                        <View style={styles.displaySlotPicker}>
-                            <Text
-                                style={[
-                                    styles.displaySlotLabel,
-                                    {color: theme.black.second},
-                                ]}>
-                                {t('顯示粒度')}
-                            </Text>
-                            <View style={styles.displaySlotOptions}>
-                                {ALLOWED_SLOT_MINUTES.map(value => {
-                                    const selected =
-                                        value === displaySlotMinutes;
-                                    return (
-                                        <Pressable
-                                            key={value}
-                                            accessibilityRole="radio"
-                                            accessibilityState={{selected}}
-                                            onPress={() =>
-                                                handleDisplaySlotMinutesChange(
-                                                    value,
-                                                )
-                                            }
-                                            style={({pressed}) => [
-                                                styles.displaySlotOption,
-                                                {
-                                                    backgroundColor: selected
-                                                        ? theme.themeColor
-                                                        : pressed
-                                                          ? theme.tonal.primary30
-                                                          : theme.tonal.primary15,
-                                                },
-                                            ]}>
-                                            <Text
-                                                style={[
-                                                    styles.displaySlotOptionText,
+                        {!editor.isEditing ? (
+                            <View style={styles.displaySlotPicker}>
+                                <Text
+                                    style={[
+                                        styles.displaySlotLabel,
+                                        {color: theme.black.second},
+                                    ]}>
+                                    {t('顯示粒度')}
+                                </Text>
+                                <View style={styles.displaySlotOptions}>
+                                    {ALLOWED_SLOT_MINUTES.map(value => {
+                                        const selected =
+                                            value === displaySlotMinutes;
+                                        return (
+                                            <Pressable
+                                                key={value}
+                                                accessibilityRole="radio"
+                                                accessibilityState={{selected}}
+                                                onPress={() =>
+                                                    handleDisplaySlotMinutesChange(
+                                                        value,
+                                                    )
+                                                }
+                                                style={({pressed}) => [
+                                                    styles.displaySlotOption,
                                                     {
-                                                        color: selected
-                                                            ? theme.trueWhite
-                                                            : theme.themeColor,
+                                                        backgroundColor: selected
+                                                            ? theme.themeColor
+                                                            : pressed
+                                                              ? theme.tonal.primary30
+                                                              : theme.tonal.primary15,
                                                     },
                                                 ]}>
-                                                {value}
-                                                {t('分鐘')}
-                                            </Text>
-                                        </Pressable>
-                                    );
-                                })}
+                                                <Text
+                                                    style={[
+                                                        styles.displaySlotOptionText,
+                                                        {
+                                                            color: selected
+                                                                ? theme.trueWhite
+                                                                : theme.themeColor,
+                                                        },
+                                                    ]}>
+                                                    {value}
+                                                    {t('分鐘')}
+                                                </Text>
+                                            </Pressable>
+                                        );
+                                    })}
+                                </View>
                             </View>
-                        </View>
+                        ) : null}
                         {editor.isEditing ? (
                             <ScheduleTimeRangeInsert
                                 onInsert={handleInsertRange}
