@@ -739,6 +739,7 @@
         "時區": "Timezone",
         "澳門時間": "Macau Time",
         "時間粒度": "Slot size",
+        "顯示粒度": "Display slots",
         "分鐘": " min",
         "回覆截止（選填）": "Response deadline (optional)",
         "未設定": "Not set",

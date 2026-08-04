@@ -16,6 +16,7 @@ import {
     slotKey,
 } from '../utils/scheduleRanges';
 import {
+    aggregateHeatmapSlots,
     buildHeatmap,
     computeAvailabilityStats,
     suggestBestSlots,
@@ -117,6 +118,177 @@ describe('scheduleRanges 展開與合併', () => {
 });
 
 describe('scheduleRecommendations 熱力與建議', () => {
+    test('15 分鐘 heatmap 以午夜倍數聚合顯示格，不跨 weekday', () => {
+        const a = {harborUserId: 1};
+        const b = {harborUserId: 2};
+        const c = {harborUserId: 3};
+        const slots = [
+            {
+                weekday: 1,
+                startMinute: 585,
+                endMinute: 600,
+                availableCount: 1,
+                memberCount: 3,
+                heat: 1 / 3,
+                freeMembers: [a],
+                hasData: true,
+            },
+            {
+                weekday: 1,
+                startMinute: 600,
+                endMinute: 615,
+                availableCount: 1,
+                memberCount: 3,
+                heat: 1 / 3,
+                freeMembers: [b],
+                hasData: false,
+            },
+            {
+                weekday: 1,
+                startMinute: 615,
+                endMinute: 630,
+                availableCount: 2,
+                memberCount: 3,
+                heat: 2 / 3,
+                freeMembers: [b, c],
+                isSelfSelected: true,
+            },
+            {
+                weekday: 1,
+                startMinute: 630,
+                endMinute: 645,
+                availableCount: 2,
+                memberCount: 3,
+                heat: 2 / 3,
+                freeMembers: [a, c],
+            },
+            {
+                weekday: 2,
+                startMinute: 600,
+                endMinute: 615,
+                availableCount: 3,
+                memberCount: 3,
+                heat: 1,
+                freeMembers: [a, b, c],
+            },
+        ];
+
+        const fifteenMinuteSlots = aggregateHeatmapSlots(slots, 15);
+        expect(fifteenMinuteSlots).toHaveLength(5);
+        expect(fifteenMinuteSlots[1]).toMatchObject({
+            weekday: 1,
+            startMinute: 600,
+            endMinute: 615,
+            availableCount: 1,
+            freeMembers: [b],
+            hasData: false,
+        });
+        expect(fifteenMinuteSlots[1].childSlots).toEqual([slots[1]]);
+
+        expect(aggregateHeatmapSlots(slots, 30, ['1:600'])).toEqual([
+            {
+                weekday: 1,
+                startMinute: 570,
+                endMinute: 600,
+                childSlots: [slots[0]],
+                hasData: true,
+                isSelfSelected: false,
+                representativeSlot: slots[0],
+                availableCount: 1,
+                memberCount: 3,
+                heat: 1 / 3,
+                freeMembers: [a],
+            },
+            {
+                weekday: 1,
+                startMinute: 600,
+                endMinute: 630,
+                childSlots: [slots[1], slots[2]],
+                hasData: true,
+                isSelfSelected: true,
+                representativeSlot: slots[2],
+                availableCount: 2,
+                memberCount: 3,
+                heat: 2 / 3,
+                freeMembers: [b, c],
+            },
+            {
+                weekday: 1,
+                startMinute: 630,
+                endMinute: 660,
+                childSlots: [slots[3]],
+                hasData: true,
+                isSelfSelected: false,
+                representativeSlot: slots[3],
+                availableCount: 2,
+                memberCount: 3,
+                heat: 2 / 3,
+                freeMembers: [a, c],
+            },
+            {
+                weekday: 2,
+                startMinute: 600,
+                endMinute: 630,
+                childSlots: [slots[4]],
+                hasData: true,
+                isSelfSelected: false,
+                representativeSlot: slots[4],
+                availableCount: 3,
+                memberCount: 3,
+                heat: 1,
+                freeMembers: [a, b, c],
+            },
+        ]);
+    });
+
+    test('60 分鐘格同分取最早 child，且不合併不同時段成員', () => {
+        const firstMembers = [{harborUserId: 1}, {harborUserId: 2}];
+        const laterMembers = [{harborUserId: 3}, {harborUserId: 4}];
+        const slots = [
+            {
+                weekday: 1,
+                startMinute: 660,
+                endMinute: 675,
+                availableCount: 2,
+                memberCount: 4,
+                heat: 0.5,
+                freeMembers: firstMembers,
+            },
+            {
+                weekday: 1,
+                startMinute: 675,
+                endMinute: 690,
+                availableCount: 1,
+                memberCount: 4,
+                heat: 0.25,
+                freeMembers: [{harborUserId: 5}],
+            },
+            {
+                weekday: 1,
+                startMinute: 690,
+                endMinute: 705,
+                availableCount: 2,
+                memberCount: 4,
+                heat: 0.5,
+                freeMembers: laterMembers,
+            },
+        ];
+
+        const [bucket] = aggregateHeatmapSlots(slots, 60);
+        expect(bucket).toMatchObject({
+            weekday: 1,
+            startMinute: 660,
+            endMinute: 720,
+            availableCount: 2,
+            heat: 0.5,
+            freeMembers: firstMembers,
+            hasData: true,
+            isSelfSelected: false,
+            representativeSlot: slots[0],
+        });
+        expect(bucket.childSlots).toEqual(slots);
+    });
+
     test('availability null／空 ranges／有 ranges 統計', () => {
         const members = [
             {harborUserId: 1, status: 'active', availability: null},
@@ -215,18 +387,18 @@ describe('scheduleDraft 草稿', () => {
         let draft = createAvailabilityDraftFromServer({
             availability: null,
             candidateWindows: WINDOWS,
-            slotMinutes: 30,
+            slotMinutes: 15,
         });
         expect(draft.selectedKeys).toEqual([]);
         expect(draft.revision).toBe(0);
 
-        const allSlots = expandCandidateWindowsToSlots(WINDOWS, 30);
+        const allSlots = expandCandidateWindowsToSlots(WINDOWS, 15);
         draft = toggleDraftSlot(draft, allSlots[0]);
         draft = toggleDraftSlot(draft, allSlots[1]);
-        draft = toggleDraftSlot(draft, allSlots[2]);
+        draft = toggleDraftSlot(draft, allSlots[4]);
         expect(commitAvailabilityDraft(draft, WINDOWS).ranges).toEqual([
-            {weekday: 1, startMinute: 540, endMinute: 600},
-            {weekday: 1, startMinute: 840, endMinute: 870},
+            {weekday: 1, startMinute: 540, endMinute: 570},
+            {weekday: 1, startMinute: 840, endMinute: 855},
         ]);
         expect(resolveGestureMode(draft, allSlots[0])).toBe('erase');
         draft = applyDraftGesture(draft, [allSlots[0]], 'erase');

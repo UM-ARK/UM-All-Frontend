@@ -28,12 +28,9 @@ import {uiStyle, useTheme} from '../../components/ThemeContext';
 import {createTeamEvent} from '../../utils/scheduling/schedulingApi';
 import {normalizeSchedulingError} from '../../utils/scheduling/schedulingErrors';
 import {
-    ALLOWED_SLOT_MINUTES,
-    DEFAULT_SLOT_MINUTES,
     DEFAULT_TIMEZONE,
     DEFAULT_WEEKLY_SCROLL_MINUTE,
     FULL_WEEK_CANDIDATE_WINDOWS,
-    normalizeSlotMinutes,
 } from '../../utils/scheduling/schedulingModels';
 import {trigger} from '../../utils/trigger';
 import ScheduleWeekGrid from './components/ScheduleWeekGrid';
@@ -50,6 +47,7 @@ import {
 const TITLE_MAX = 200;
 const DESCRIPTION_MAX = 4000;
 const EVENT_EXPIRY_DAYS = 180;
+const EDIT_SLOT_MINUTES = 15;
 
 /**
  * 後端錯誤碼 → 可讀文案 key
@@ -87,13 +85,12 @@ const TeamScheduleCreatePage = ({navigation}) => {
 
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
-    const [slotMinutes, setSlotMinutes] = useState(DEFAULT_SLOT_MINUTES);
     const [responseDeadlineAt, setResponseDeadlineAt] = useState(null);
     const [deadlinePickerVisible, setDeadlinePickerVisible] = useState(false);
     const [draft, setDraft] = useState(() =>
         createEmptyDraft({
             mode: 'candidate',
-            slotMinutes: DEFAULT_SLOT_MINUTES,
+            slotMinutes: EDIT_SLOT_MINUTES,
             timezone: tz,
         }),
     );
@@ -101,8 +98,6 @@ const TeamScheduleCreatePage = ({navigation}) => {
     const [isPainting, setIsPainting] = useState(false);
     const submittingRef = useRef(false);
     const allowLeaveRef = useRef(false);
-    const draftRef = useRef(draft);
-    draftRef.current = draft;
 
     const hasUnsavedDraft = useMemo(() => {
         const trimmedTitle = title.trim();
@@ -113,10 +108,9 @@ const TeamScheduleCreatePage = ({navigation}) => {
             trimmedTitle.length > 0 ||
             trimmedDesc.length > 0 ||
             hasSlots ||
-            responseDeadlineAt != null ||
-            slotMinutes !== DEFAULT_SLOT_MINUTES
+            responseDeadlineAt != null
         );
-    }, [title, description, draft.selectedKeys, responseDeadlineAt, slotMinutes]);
+    }, [title, description, draft.selectedKeys, responseDeadlineAt]);
 
     useEffect(() => {
         navigation.setOptions({headerTitle: t('新建組隊')});
@@ -145,55 +139,6 @@ const TeamScheduleCreatePage = ({navigation}) => {
             },
         ]);
     });
-
-    const resetDraftForSlotMinutes = useCallback(nextSlot => {
-        setDraft(
-            createEmptyDraft({
-                mode: 'candidate',
-                slotMinutes: nextSlot,
-                timezone: tz,
-            }),
-        );
-    }, [tz]);
-
-    const handleSlotMinutesChange = useCallback(
-        nextSlot => {
-            const normalized = normalizeSlotMinutes(nextSlot);
-            if (normalized === slotMinutes) {
-                return;
-            }
-            trigger();
-            const hasSlots =
-                Array.isArray(draftRef.current.selectedKeys) &&
-                draftRef.current.selectedKeys.length > 0;
-            if (!hasSlots) {
-                setSlotMinutes(normalized);
-                resetDraftForSlotMinutes(normalized);
-                return;
-            }
-            Alert.alert(
-                t('變更時間粒度？'),
-                t('變更粒度會清空已選的候選時段，且不會自動換算。'),
-                [
-                    {
-                        text: t('取消'),
-                        style: 'cancel',
-                        onPress: () => trigger(),
-                    },
-                    {
-                        text: t('清空並變更'),
-                        style: 'destructive',
-                        onPress: () => {
-                            trigger();
-                            setSlotMinutes(normalized);
-                            resetDraftForSlotMinutes(normalized);
-                        },
-                    },
-                ],
-            );
-        },
-        [resetDraftForSlotMinutes, slotMinutes, t],
-    );
 
     const validateLocal = useCallback(() => {
         const trimmedTitle = title.trim();
@@ -233,14 +178,14 @@ const TeamScheduleCreatePage = ({navigation}) => {
     const buildPayload = useCallback(() => {
         const referenceSlots = buildWeeklySlots(
             FULL_WEEK_CANDIDATE_WINDOWS,
-            slotMinutes,
+            EDIT_SLOT_MINUTES,
         );
         const ownerRanges = commitCandidateDraft(draft, referenceSlots);
         const payload = {
             title: title.trim(),
             description: description.trim(),
             timezone: tz,
-            slotMinutes: normalizeSlotMinutes(slotMinutes),
+            slotMinutes: EDIT_SLOT_MINUTES,
             ownerAvailability: {
                 ranges: ownerRanges,
             },
@@ -255,7 +200,6 @@ const TeamScheduleCreatePage = ({navigation}) => {
         description,
         draft,
         responseDeadlineAt,
-        slotMinutes,
         title,
         tz,
     ]);
@@ -408,43 +352,6 @@ const TeamScheduleCreatePage = ({navigation}) => {
                 </View>
 
                 <Text style={[styles.label, {color: theme.black.second}]}>
-                    {t('時間粒度')}
-                </Text>
-                <View style={styles.chipRow}>
-                    {ALLOWED_SLOT_MINUTES.map(value => {
-                        const selected = value === slotMinutes;
-                        return (
-                            <Pressable
-                                key={value}
-                                onPress={() => handleSlotMinutesChange(value)}
-                                style={({pressed}) => [
-                                    styles.chip,
-                                    {
-                                        backgroundColor: selected
-                                            ? theme.themeColor
-                                            : pressed
-                                              ? theme.tonal.primary30
-                                              : theme.tonal.primary15,
-                                    },
-                                ]}>
-                                <Text
-                                    style={[
-                                        styles.chipText,
-                                        {
-                                            color: selected
-                                                ? theme.trueWhite
-                                                : theme.themeColor,
-                                        },
-                                    ]}>
-                                    {value}
-                                    {t('分鐘')}
-                                </Text>
-                            </Pressable>
-                        );
-                    })}
-                </View>
-
-                <Text style={[styles.label, {color: theme.black.second}]}>
                     {t('回覆截止（選填）')}
                 </Text>
                 <View style={styles.deadlineRow}>
@@ -513,7 +420,7 @@ const TeamScheduleCreatePage = ({navigation}) => {
 
                 <ScheduleWeekGrid
                     mode="candidate"
-                    slotMinutes={slotMinutes}
+                    slotMinutes={EDIT_SLOT_MINUTES}
                     draft={draft}
                     onDraftChange={setDraft}
                     onPaintingChange={setIsPainting}
@@ -618,21 +525,6 @@ const styles = StyleSheet.create({
         marginTop: verticalScale(12),
     },
     metaValue: {
-        ...uiStyle.defaultText,
-        fontSize: scale(13),
-        fontWeight: '600',
-    },
-    chipRow: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        gap: scale(8),
-    },
-    chip: {
-        borderRadius: scale(16),
-        paddingHorizontal: scale(14),
-        paddingVertical: verticalScale(8),
-    },
-    chipText: {
         ...uiStyle.defaultText,
         fontSize: scale(13),
         fontWeight: '600',

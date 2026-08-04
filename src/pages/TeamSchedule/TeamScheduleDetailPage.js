@@ -44,11 +44,13 @@ import {
 } from '../../utils/scheduling/schedulingApi';
 import {normalizeSchedulingError} from '../../utils/scheduling/schedulingErrors';
 import {
+    ALLOWED_SLOT_MINUTES,
     DEFAULT_WEEKLY_SCROLL_MINUTE,
     getEarliestAvailabilityStartMinute,
     isAvailabilitySubmitted,
     normalizeAvailability,
 } from '../../utils/scheduling/schedulingModels';
+import {getLocalStorage, setLocalStorage} from '../../utils/storageKits';
 import {buildTeamInviteShareMessage} from '../../utils/scheduling/teamInviteLink';
 import {trigger} from '../../utils/trigger';
 import AvailabilityEditorFooter from './components/AvailabilityEditorFooter';
@@ -71,12 +73,16 @@ import {useTeamScheduleDetail} from './hooks/useTeamScheduleDetail';
 import {createAvailabilityDraftFromServer} from './utils/scheduleDraft';
 import {slotKey} from './utils/scheduleRanges';
 import {
+    aggregateHeatmapSlots,
     buildHeatmapWithSuggestions,
     getActiveMembers,
 } from './utils/scheduleRecommendations';
 
 const TITLE_MAX = 200;
 const DESCRIPTION_MAX = 4000;
+const DISPLAY_SLOT_MINUTES_STORAGE_KEY = 'ARK_TeamSchedule_Display_Slot_Minutes';
+const DEFAULT_DISPLAY_SLOT_MINUTES = 30;
+const EDIT_SLOT_MINUTES = 15;
 
 /**
  * @param {string} code
@@ -258,6 +264,34 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
         canEdit,
         onSaved: onAvailabilitySaved,
     });
+    const [displaySlotMinutes, setDisplaySlotMinutes] = useState(
+        DEFAULT_DISPLAY_SLOT_MINUTES,
+    );
+
+    useEffect(() => {
+        let cancelled = false;
+        getLocalStorage(DISPLAY_SLOT_MINUTES_STORAGE_KEY).then(value => {
+            const persisted = Number(value);
+            if (!cancelled && ALLOWED_SLOT_MINUTES.includes(persisted)) {
+                setDisplaySlotMinutes(persisted);
+            }
+        });
+        return () => {
+            cancelled = true;
+        };
+    }, []);
+
+    const handleDisplaySlotMinutesChange = useCallback(nextSlotMinutes => {
+        if (!ALLOWED_SLOT_MINUTES.includes(nextSlotMinutes)) {
+            return;
+        }
+        trigger();
+        setDisplaySlotMinutes(nextSlotMinutes);
+        setLocalStorage(
+            DISPLAY_SLOT_MINUTES_STORAGE_KEY,
+            nextSlotMinutes,
+        ).catch(() => {});
+    }, []);
 
     const allowLeaveRef = useRef(false);
     // Native Stack 需用 usePreventRemove，才會在原生返回／手勢前攔截
@@ -295,7 +329,7 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
         }
         return buildHeatmapWithSuggestions({
             candidateWindows: event.candidateWindows,
-            slotMinutes: event.slotMinutes,
+            slotMinutes: EDIT_SLOT_MINUTES,
             timezone: event.timezone,
             members: getActiveMembers({members}),
         });
@@ -318,11 +352,41 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
         const draft = createAvailabilityDraftFromServer({
             availability: myAvailability,
             candidateWindows: event.candidateWindows,
-            slotMinutes: event.slotMinutes,
+            slotMinutes: EDIT_SLOT_MINUTES,
             timezone: event.timezone,
         });
         return draft.selectedKeys || [];
     }, [event, myAvailability]);
+
+    const displayHeatmapByKey = useMemo(() => {
+        const map = new Map();
+        const slots = aggregateHeatmapSlots(
+            heatmapBundle.heatmap?.slots,
+            displaySlotMinutes,
+            selfSelectedKeys,
+        );
+        for (let i = 0; i < slots.length; i++) {
+            const item = slots[i];
+            map.set(slotKey(item), item);
+        }
+        return map;
+    }, [displaySlotMinutes, heatmapBundle, selfSelectedKeys]);
+    const displayCandidateWindows = useMemo(
+        () =>
+            Array.from(displayHeatmapByKey.values()).map(item => ({
+                weekday: item.weekday,
+                startMinute: item.startMinute,
+                endMinute: item.endMinute,
+            })),
+        [displayHeatmapByKey],
+    );
+    const displaySelfSelectedKeys = useMemo(
+        () =>
+            Array.from(displayHeatmapByKey.values())
+                .filter(item => item.isSelfSelected)
+                .map(slotKey),
+        [displayHeatmapByKey],
+    );
 
     const stats = heatmapBundle.heatmap?.stats || {
         submittedCount: 0,
@@ -357,7 +421,7 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
             if (editor.isEditing) {
                 return;
             }
-            const heatSlot = heatmapByKey.get(slotKey(slotItem)) || {
+            const heatSlot = displayHeatmapByKey.get(slotKey(slotItem)) || {
                 ...slotItem,
                 availableCount: 0,
                 memberCount: stats.memberCount,
@@ -365,7 +429,7 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
             };
             setSlotSheet({visible: true, slot: heatSlot});
         },
-        [editor.isEditing, heatmapByKey, stats.memberCount],
+        [displayHeatmapByKey, editor.isEditing, stats.memberCount],
     );
 
     const handleSuggestionPress = useCallback(
@@ -1087,14 +1151,79 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
 
                 {event?.candidateWindows ? (
                     <View style={styles.section}>
+                        <View style={styles.displaySlotPicker}>
+                            <Text
+                                style={[
+                                    styles.displaySlotLabel,
+                                    {color: theme.black.second},
+                                ]}>
+                                {t('顯示粒度')}
+                            </Text>
+                            <View style={styles.displaySlotOptions}>
+                                {ALLOWED_SLOT_MINUTES.map(value => {
+                                    const selected =
+                                        value === displaySlotMinutes;
+                                    return (
+                                        <Pressable
+                                            key={value}
+                                            accessibilityRole="radio"
+                                            accessibilityState={{selected}}
+                                            onPress={() =>
+                                                handleDisplaySlotMinutesChange(
+                                                    value,
+                                                )
+                                            }
+                                            style={({pressed}) => [
+                                                styles.displaySlotOption,
+                                                {
+                                                    backgroundColor: selected
+                                                        ? theme.themeColor
+                                                        : pressed
+                                                          ? theme.tonal.primary30
+                                                          : theme.tonal.primary15,
+                                                },
+                                            ]}>
+                                            <Text
+                                                style={[
+                                                    styles.displaySlotOptionText,
+                                                    {
+                                                        color: selected
+                                                            ? theme.trueWhite
+                                                            : theme.themeColor,
+                                                    },
+                                                ]}>
+                                                {value}
+                                                {t('分鐘')}
+                                            </Text>
+                                        </Pressable>
+                                    );
+                                })}
+                            </View>
+                        </View>
                         <ScheduleWeekGrid
                             mode={
                                 editor.isEditing ? 'availability' : 'readonly'
                             }
-                            slotMinutes={event.slotMinutes}
-                            candidateWindows={event.candidateWindows}
-                            heatmapByKey={heatmapByKey}
-                            selfSelectedKeys={selfSelectedKeys}
+                            slotMinutes={
+                                editor.isEditing
+                                    ? EDIT_SLOT_MINUTES
+                                    : displaySlotMinutes
+                            }
+                            candidateWindows={
+                                editor.isEditing
+                                    ? event.candidateWindows
+                                    : displayCandidateWindows
+                            }
+                            heatmapByKey={
+                                editor.isEditing
+                                    ? heatmapByKey
+                                    : displayHeatmapByKey
+                            }
+                            selfSelectedKeys={
+                                editor.isEditing
+                                    ? selfSelectedKeys
+                                    : displaySelfSelectedKeys
+                            }
                             draft={editor.draft}
                             onDraftChange={editor.onDraftChange}
                             onPaintingChange={setIsPainting}
@@ -1462,6 +1591,34 @@ const styles = StyleSheet.create({
     },
     section: {
         marginTop: verticalScale(14),
+    },
+    displaySlotPicker: {
+        alignItems: 'center',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: verticalScale(8),
+    },
+    displaySlotLabel: {
+        ...uiStyle.defaultText,
+        fontSize: scale(12),
+        fontWeight: '600',
+    },
+    displaySlotOptions: {
+        flexDirection: 'row',
+    },
+    displaySlotOption: {
+        alignItems: 'center',
+        borderRadius: scale(6),
+        justifyContent: 'center',
+        marginLeft: scale(6),
+        minWidth: scale(48),
+        paddingHorizontal: scale(8),
+        paddingVertical: verticalScale(6),
+    },
+    displaySlotOptionText: {
+        ...uiStyle.defaultText,
+        fontSize: scale(11),
+        fontWeight: '600',
     },
     sectionTitle: {
         ...uiStyle.defaultText,

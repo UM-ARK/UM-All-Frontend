@@ -58,9 +58,11 @@ const SlotDetailSheet = ({
         if (!slot) {
             return null;
         }
-        const weekday = WEEKDAY_SHORT_LABELS[Number(slot.weekday) - 1] || '';
-        const freeMembers = Array.isArray(slot.freeMembers)
-            ? slot.freeMembers
+        const detailSlot = slot.representativeSlot || slot;
+        const weekday =
+            WEEKDAY_SHORT_LABELS[Number(detailSlot.weekday) - 1] || '';
+        const freeMembers = Array.isArray(detailSlot.freeMembers)
+            ? detailSlot.freeMembers
             : [];
         const freeIds = new Set(
             freeMembers.map(m => String(m.harborUserId)),
@@ -88,7 +90,7 @@ const SlotDetailSheet = ({
                 continue;
             }
             const covered = availability.ranges.some(range =>
-                rangeCoversSlot(range, slot),
+                rangeCoversSlot(range, detailSlot),
             );
             if (isMe) {
                 myStatus = covered ? 'free' : 'busy';
@@ -97,9 +99,10 @@ const SlotDetailSheet = ({
 
         return {
             weekdayLabel: weekday ? `週${weekday}` : '',
-            timeLabel: `${formatMinuteOfDay(slot.startMinute)} – ${formatMinuteOfDay(slot.endMinute)}`,
-            availableCount: slot.availableCount ?? freeMembers.length,
-            memberCount: slot.memberCount ?? list.length,
+            timeLabel: `${formatMinuteOfDay(detailSlot.startMinute)} – ${formatMinuteOfDay(detailSlot.endMinute)}`,
+            availableCount:
+                detailSlot.availableCount ?? freeMembers.length,
+            memberCount: detailSlot.memberCount ?? list.length,
             freeMembers,
             freeIds,
             unsubmittedCount,

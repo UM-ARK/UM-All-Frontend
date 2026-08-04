@@ -15,6 +15,8 @@ import {
     createEmptyDraft,
 } from '../utils/scheduleDraft';
 
+const EDIT_SLOT_MINUTES = 15;
+
 /**
  * @param {object} options
  * @param {string} options.eventId
@@ -40,7 +42,6 @@ export function useAvailabilityEditor({
     const savingRef = useRef(false);
 
     const candidateWindows = event?.candidateWindows;
-    const slotMinutes = event?.slotMinutes;
     const timezone = event?.timezone;
 
     const buildDraftFromAvailability = useCallback(
@@ -48,7 +49,7 @@ export function useAvailabilityEditor({
             return createAvailabilityDraftFromServer({
                 availability,
                 candidateWindows,
-                slotMinutes,
+                slotMinutes: EDIT_SLOT_MINUTES,
                 timezone,
                 revision:
                     availability && typeof availability.revision === 'number'
@@ -56,7 +57,7 @@ export function useAvailabilityEditor({
                         : 0,
             });
         },
-        [candidateWindows, slotMinutes, timezone],
+        [candidateWindows, timezone],
     );
 
     const isDirty = useMemo(() => {
@@ -200,10 +201,10 @@ export function useAvailabilityEditor({
         () =>
             createEmptyDraft({
                 mode: 'availability',
-                slotMinutes,
+                slotMinutes: EDIT_SLOT_MINUTES,
                 timezone,
             }),
-        [slotMinutes, timezone],
+        [timezone],
     );
 
     return {

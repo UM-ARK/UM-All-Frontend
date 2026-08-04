@@ -105,6 +105,58 @@ export function buildHeatmap({
 }
 
 /**
+ * 將固定 15 分鐘的 heatmap slots 聚合為顯示用格子。
+ * 統計資料取可出席人數最高的單一 child slot，避免合併不同時間的成員。
+ */
+export function aggregateHeatmapSlots(heatmapSlots, displaySlotMinutes, selfSelectedKeys) {
+    if (!Array.isArray(heatmapSlots)) {
+        return [];
+    }
+    const displaySlot = normalizeSlotMinutes(displaySlotMinutes);
+    const selectedKeys = selfSelectedKeys instanceof Set
+        ? selfSelectedKeys
+        : new Set(Array.isArray(selfSelectedKeys) ? selfSelectedKeys : []);
+    const buckets = new Map();
+    const sorted = heatmapSlots
+        .filter(isFifteenMinuteHeatmapSlot)
+        .slice()
+        .sort(compareSlotsByWindow);
+
+    for (let i = 0; i < sorted.length; i++) {
+        const slot = sorted[i];
+        const startMinute = Math.floor(slot.startMinute / displaySlot) * displaySlot;
+        const key = `${slot.weekday}:${startMinute}`;
+        const bucket = buckets.get(key);
+        if (bucket) {
+            bucket.childSlots.push(slot);
+            continue;
+        }
+        buckets.set(key, {
+            weekday: slot.weekday,
+            startMinute,
+            endMinute: startMinute + displaySlot,
+            childSlots: [slot],
+        });
+    }
+
+    return Array.from(buckets.values()).map(bucket => {
+        const representative = getHeatmapRepresentativeSlot(bucket.childSlots);
+        return {
+            ...bucket,
+            hasData: bucket.childSlots.some(slot => slot.hasData !== false),
+            isSelfSelected: bucket.childSlots.some(slot =>
+                slot.isSelfSelected || selectedKeys.has(`${slot.weekday}:${slot.startMinute}`),
+            ),
+            representativeSlot: representative,
+            availableCount: getAvailableCount(representative),
+            memberCount: representative.memberCount,
+            heat: representative.heat,
+            freeMembers: representative.freeMembers,
+        };
+    });
+}
+
+/**
  * 由 heatmap slots 推導最佳時段建議（最多 3 項）。
  * 同一 candidate window 內相鄰且人數相同才合併，不可跨 weekday 或 gap。
  */
@@ -188,4 +240,31 @@ function compareSlotsByWindow(a, b) {
         return a.windowStartMinute - b.windowStartMinute;
     }
     return a.startMinute - b.startMinute;
+}
+
+function isFifteenMinuteHeatmapSlot(slot) {
+    return (
+        slot &&
+        Number.isInteger(slot.weekday) &&
+        Number.isInteger(slot.startMinute) &&
+        Number.isInteger(slot.endMinute) &&
+        slot.startMinute >= 0 &&
+        slot.endMinute <= 1440 &&
+        slot.endMinute - slot.startMinute === 15
+    );
+}
+
+function getHeatmapRepresentativeSlot(childSlots) {
+    let representative = childSlots[0];
+    for (let i = 1; i < childSlots.length; i++) {
+        const slot = childSlots[i];
+        if (getAvailableCount(slot) > getAvailableCount(representative)) {
+            representative = slot;
+        }
+    }
+    return representative;
+}
+
+function getAvailableCount(slot) {
+    return Number.isFinite(slot?.availableCount) ? slot.availableCount : 0;
 }
