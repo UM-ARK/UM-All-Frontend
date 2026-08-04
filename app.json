@@ -136,7 +136,8 @@
       "expo-secure-store",
       "react-native-quick-crypto",
       "expo-quick-actions",
-      "expo-sharing"
+      "expo-sharing",
+      "@react-native-firebase/analytics"
     ],
     "extra": {
       "eas": {
