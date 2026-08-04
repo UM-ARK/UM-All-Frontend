@@ -102,12 +102,12 @@ const TeamSharedTimetableView = ({
     return (
         <View>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.memberSelector}>
-                <Pressable accessibilityRole="tab" accessibilityState={{selected: selectedId === 'all'}} onPress={() => { trigger(); setSelectedId('all'); }} style={({pressed}) => [styles.allSelector, {backgroundColor: selectedId === 'all' ? theme.themeColor : pressed ? theme.tonal.primary30 : theme.tonal.primary15}]}><Text style={[styles.allSelectorText, {color: selectedId === 'all' ? theme.trueWhite : theme.themeColor}]}>{t('全部')}</Text></Pressable>
+                <Pressable accessibilityRole="tab" accessibilityState={{selected: selectedId === 'all'}} onPress={() => { trigger(); setSelectedId('all'); }} style={({pressed}) => [styles.allSelector, {backgroundColor: selectedId === 'all' ? theme.tonal.primary15 : pressed ? theme.tonal.primary08 : undefined, borderColor: selectedId === 'all' ? theme.themeColor : theme.themeColorUltraLight}]}><Text style={[styles.allSelectorText, {color: theme.themeColor}]}>{t('全部')}</Text></Pressable>
                 {members.map(member => {
                     const name = memberName(member, t);
                     const avatarUri = member.avatarTemplate ? ARK_HARBOR_AVATAR_TEMPLATE(member.avatarTemplate, 72) : null;
                     const selected = String(selectedId) === String(member.harborUserId);
-                    return <View key={String(member.harborUserId)} style={styles.memberChoice}><Pressable accessibilityRole="tab" accessibilityState={{selected}} accessibilityLabel={name} onPress={() => { trigger(); setSelectedId(member.harborUserId); }} style={({pressed}) => [styles.memberChoicePress, selected ? {backgroundColor: theme.tonal.primary15} : pressed ? {backgroundColor: theme.tonal.primary08} : null]}>{avatarUri ? <Image source={{uri: avatarUri}} style={[styles.avatar, {borderColor: selected ? theme.themeColor : theme.themeColorUltraLight}]} /> : <View style={[styles.avatar, {backgroundColor: theme.tonal.primary15, borderColor: selected ? theme.themeColor : theme.themeColorUltraLight}]} />}<Text numberOfLines={1} style={[styles.memberLabel, {color: selected ? theme.themeColor : theme.black.third}]}>{name}</Text></Pressable></View>;
+                    return <View key={String(member.harborUserId)} style={styles.memberChoice}><Pressable accessibilityRole="tab" accessibilityState={{selected}} accessibilityLabel={name} onPress={() => { trigger(); setSelectedId(member.harborUserId); }} style={({pressed}) => [styles.memberChoicePress, {backgroundColor: selected ? theme.tonal.primary15 : pressed ? theme.tonal.primary08 : undefined, borderColor: selected ? theme.themeColor : theme.themeColorUltraLight}]}>{avatarUri ? <Image source={{uri: avatarUri}} style={[styles.avatar, {borderColor: selected ? theme.themeColor : theme.themeColorUltraLight, borderWidth: selected ? scale(2) : StyleSheet.hairlineWidth}]} /> : <View style={[styles.avatar, {backgroundColor: theme.tonal.primary15, borderColor: selected ? theme.themeColor : theme.themeColorUltraLight, borderWidth: selected ? scale(2) : StyleSheet.hairlineWidth}]} />}<Text numberOfLines={1} style={[styles.memberLabel, selected && styles.memberLabelSelected, {color: selected ? theme.themeColor : theme.black.third}]}>{name}</Text></Pressable></View>;
                 })}
             </ScrollView>
             {selectedId === 'all' ? (
@@ -292,12 +292,13 @@ const WeeklyOverview = ({meetings, aggregate = false, navigation}) => {
 
 const styles = StyleSheet.create({
     memberSelector: {gap: scale(10), paddingBottom: verticalScale(10)},
-    allSelector: {alignItems: 'center', borderRadius: scale(16), justifyContent: 'center', minWidth: scale(48), paddingHorizontal: scale(10)},
+    allSelector: {alignItems: 'center', borderRadius: scale(8), borderWidth: StyleSheet.hairlineWidth, justifyContent: 'center', width: scale(54)},
     allSelectorText: {...uiStyle.defaultText, fontSize: scale(12), fontWeight: '700'},
     memberChoice: {alignItems: 'center', width: scale(54)},
-    memberChoicePress: {alignItems: 'center', borderRadius: scale(8), paddingHorizontal: scale(3), paddingVertical: verticalScale(3), width: scale(54)},
+    memberChoicePress: {alignItems: 'center', borderRadius: scale(8), borderWidth: StyleSheet.hairlineWidth, paddingHorizontal: scale(3), paddingVertical: verticalScale(3), width: scale(54)},
     avatar: {borderRadius: scale(18), borderWidth: StyleSheet.hairlineWidth, height: scale(36), width: scale(36)},
     memberLabel: {...uiStyle.defaultText, fontSize: scale(10), marginTop: verticalScale(3), maxWidth: scale(48), textAlign: 'center'},
+    memberLabelSelected: {fontWeight: '700'},
     state: {alignItems: 'center', paddingVertical: verticalScale(16)},
     message: {...uiStyle.defaultText, fontSize: scale(12), lineHeight: verticalScale(18), paddingVertical: verticalScale(16), textAlign: 'center'},
     retry: {borderRadius: scale(8), paddingHorizontal: scale(12), paddingVertical: verticalScale(7)},
