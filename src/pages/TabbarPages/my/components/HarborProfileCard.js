@@ -143,18 +143,17 @@ const HarborProfileCard = ({user, onProfilePress, onSettingsPress}) => {
 
 const styles = StyleSheet.create({
     container: {
-        minHeight: verticalScale(112),
         flexDirection: 'row',
-        alignItems: 'center',
+        alignItems: 'flex-start',
         paddingHorizontal: scale(7),
         paddingTop: verticalScale(4),
-        paddingBottom: verticalScale(12),
+        paddingBottom: verticalScale(4),
     },
     profilePressable: {
         flex: 1,
         minWidth: 0,
         flexDirection: 'row',
-        alignItems: 'center',
+        alignItems: 'flex-start',
     },
     profilePressed: {
         opacity: 0.7,
@@ -165,8 +164,6 @@ const styles = StyleSheet.create({
         height: scale(28),
         alignItems: 'center',
         justifyContent: 'center',
-        alignSelf: 'flex-start',
-        marginTop: verticalScale(6),
     },
     avatarWrap: {
         marginRight: scale(13),
