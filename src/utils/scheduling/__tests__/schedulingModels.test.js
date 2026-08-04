@@ -2,7 +2,9 @@
  * schedulingModels 純函式測試
  */
 import {
-    getCandidateDates,
+    DEFAULT_WEEKLY_SCROLL_MINUTE,
+    FULL_WEEK_CANDIDATE_WINDOWS,
+    getEarliestAvailabilityStartMinute,
     hasAvailabilityRanges,
     isAvailabilityFullyBusy,
     isAvailabilitySubmitted,
@@ -11,7 +13,8 @@ import {
     normalizeSlotMinutes,
     normalizeTimezone,
     rangeCoversSlot,
-    summarizeCandidateDates,
+    rangesAreAdjacent,
+    rangesOverlap,
     takeRecentTeamEvents,
 } from '../schedulingModels';
 
@@ -23,24 +26,29 @@ describe('schedulingModels', () => {
         expect(normalizeSlotMinutes(7)).toBe(15);
     });
 
-    test('normalizeCandidateWindows 依 startAt 排序並補 date', () => {
-        const windows = normalizeCandidateWindows(
-            [
-                {
-                    startAt: '2026-03-10T03:00:00.000Z',
-                    endAt: '2026-03-10T04:00:00.000Z',
-                },
-                {
-                    date: '2026-03-09',
-                    startAt: '2026-03-09T02:00:00.000Z',
-                    endAt: '2026-03-09T03:00:00.000Z',
-                },
-            ],
-            'Asia/Macau',
-        );
-        expect(windows).toHaveLength(2);
-        expect(windows[0].date).toBe('2026-03-09');
-        expect(windows[1].date).toBe('2026-03-10');
+    test('全週候選範圍覆蓋七天 24 小時', () => {
+        expect(FULL_WEEK_CANDIDATE_WINDOWS).toHaveLength(7);
+        expect(FULL_WEEK_CANDIDATE_WINDOWS[0]).toEqual({
+            weekday: 1,
+            startMinute: 0,
+            endMinute: 1440,
+        });
+        expect(FULL_WEEK_CANDIDATE_WINDOWS[6].weekday).toBe(7);
+    });
+
+    test('normalizeCandidateWindows 只接受 weekly 座標並排序', () => {
+        const windows = normalizeCandidateWindows([
+            {weekday: 3, startMinute: 600, endMinute: 660},
+            {weekday: 1, startMinute: 840, endMinute: 900},
+            {weekday: 1, startMinute: 540, endMinute: 600},
+            {weekday: 8, startMinute: 540, endMinute: 600},
+            {weekday: 2, startMinute: 600, endMinute: 600},
+        ]);
+        expect(windows).toEqual([
+            {weekday: 1, startMinute: 540, endMinute: 600},
+            {weekday: 1, startMinute: 840, endMinute: 900},
+            {weekday: 3, startMinute: 600, endMinute: 660},
+        ]);
     });
 
     test('availability 三種語意', () => {
@@ -48,66 +56,87 @@ describe('schedulingModels', () => {
         expect(isAvailabilityFullyBusy(null)).toBe(false);
         expect(hasAvailabilityRanges(null)).toBe(false);
 
-        const empty = normalizeAvailability({ranges: []}, 'Asia/Macau');
+        const empty = normalizeAvailability({ranges: []});
         expect(isAvailabilitySubmitted(empty)).toBe(true);
         expect(isAvailabilityFullyBusy(empty)).toBe(true);
         expect(hasAvailabilityRanges(empty)).toBe(false);
 
-        const withRanges = normalizeAvailability(
-            {
-                ranges: [
-                    {
-                        startAt: '2026-03-09T02:00:00.000Z',
-                        endAt: '2026-03-09T02:30:00.000Z',
-                    },
-                ],
-            },
-            'Asia/Macau',
-        );
+        const withRanges = normalizeAvailability({
+            ranges: [{weekday: 1, startMinute: 540, endMinute: 570}],
+        });
+        expect(withRanges.ranges).toEqual([
+            {weekday: 1, startMinute: 540, endMinute: 570},
+        ]);
         expect(hasAvailabilityRanges(withRanges)).toBe(true);
         expect(isAvailabilityFullyBusy(withRanges)).toBe(false);
     });
 
-    test('rangeCoversSlot 需完整覆蓋半開 slot', () => {
-        const slot = {
-            startAt: '2026-03-09T02:00:00.000Z',
-            endAt: '2026-03-09T02:15:00.000Z',
-        };
+    test('展示時間預設 08:00，有 availability 時使用最早開始分鐘', () => {
+        expect(getEarliestAvailabilityStartMinute([])).toBe(
+            DEFAULT_WEEKLY_SCROLL_MINUTE,
+        );
+        expect(
+            getEarliestAvailabilityStartMinute([
+                {availability: null},
+                {
+                    availability: {
+                        ranges: [
+                            {weekday: 1, startMinute: 600, endMinute: 660},
+                            {weekday: 4, startMinute: 420, endMinute: 480},
+                        ],
+                    },
+                },
+                {
+                    availability: {
+                        ranges: [
+                            {weekday: 2, startMinute: 540, endMinute: 600},
+                        ],
+                    },
+                },
+            ]),
+        ).toBe(420);
+    });
+
+    test('rangeCoversSlot 和 ranges 語意使用同一 weekday', () => {
+        const slot = {weekday: 1, startMinute: 540, endMinute: 555};
         expect(
             rangeCoversSlot(
-                {
-                    startAt: '2026-03-09T02:00:00.000Z',
-                    endAt: '2026-03-09T02:15:00.000Z',
-                },
+                {weekday: 1, startMinute: 540, endMinute: 555},
                 slot,
             ),
         ).toBe(true);
         expect(
             rangeCoversSlot(
-                {
-                    startAt: '2026-03-09T02:00:00.000Z',
-                    endAt: '2026-03-09T02:14:00.000Z',
-                },
+                {weekday: 2, startMinute: 540, endMinute: 600},
                 slot,
             ),
         ).toBe(false);
         expect(
-            rangeCoversSlot(
-                {
-                    startAt: '2026-03-09T02:01:00.000Z',
-                    endAt: '2026-03-09T02:30:00.000Z',
-                },
-                slot,
+            rangesOverlap(
+                {weekday: 1, startMinute: 540, endMinute: 600},
+                {weekday: 1, startMinute: 570, endMinute: 630},
+            ),
+        ).toBe(true);
+        expect(
+            rangesAreAdjacent(
+                {weekday: 1, startMinute: 540, endMinute: 600},
+                {weekday: 1, startMinute: 600, endMinute: 630},
+            ),
+        ).toBe(true);
+        expect(
+            rangesAreAdjacent(
+                {weekday: 1, startMinute: 540, endMinute: 600},
+                {weekday: 2, startMinute: 600, endMinute: 630},
             ),
         ).toBe(false);
     });
 
     test('最近三個保留 API 順序且不重排', () => {
         const events = [
-            {event: {eventId: 'a', createdAt: '2026-01-01'}},
-            {event: {eventId: 'b', createdAt: '2026-06-01'}},
-            {event: {eventId: 'c', createdAt: '2025-01-01'}},
-            {event: {eventId: 'd', createdAt: '2026-12-01'}},
+            {event: {eventId: 'a'}},
+            {event: {eventId: 'b'}},
+            {event: {eventId: 'c'}},
+            {event: {eventId: 'd'}},
         ];
         expect(takeRecentTeamEvents(events).map(item => item.event.eventId)).toEqual([
             'a',
@@ -116,56 +145,4 @@ describe('schedulingModels', () => {
         ]);
     });
 
-    test('候選日期摘要', () => {
-        expect(summarizeCandidateDates([], 'Asia/Macau')).toEqual({kind: 'empty'});
-        expect(
-            summarizeCandidateDates(
-                [
-                    {
-                        date: '2026-03-09',
-                        startAt: '2026-03-09T02:00:00.000Z',
-                        endAt: '2026-03-09T03:00:00.000Z',
-                    },
-                ],
-                'Asia/Macau',
-            ),
-        ).toEqual({kind: 'single', date: '2026-03-09'});
-
-        const multi = summarizeCandidateDates(
-            [
-                {
-                    date: '2026-03-11',
-                    startAt: '2026-03-11T02:00:00.000Z',
-                    endAt: '2026-03-11T03:00:00.000Z',
-                },
-                {
-                    date: '2026-03-09',
-                    startAt: '2026-03-09T02:00:00.000Z',
-                    endAt: '2026-03-09T03:00:00.000Z',
-                },
-            ],
-            'Asia/Macau',
-        );
-        expect(multi).toEqual({
-            kind: 'range',
-            startDate: '2026-03-09',
-            endDate: '2026-03-11',
-            dayCount: 2,
-        });
-        expect(getCandidateDates(
-            [
-                {
-                    date: '2026-03-09',
-                    startAt: '2026-03-09T02:00:00.000Z',
-                    endAt: '2026-03-09T03:00:00.000Z',
-                },
-                {
-                    date: '2026-03-09',
-                    startAt: '2026-03-09T05:00:00.000Z',
-                    endAt: '2026-03-09T06:00:00.000Z',
-                },
-            ],
-            'Asia/Macau',
-        )).toEqual(['2026-03-09']);
-    });
 });

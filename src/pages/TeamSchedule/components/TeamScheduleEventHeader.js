@@ -1,5 +1,5 @@
 /**
- * 組隊詳情頁首：標題、狀態、說明、候選日、截止、提交進度
+ * 組隊詳情頁首：標題、狀態、說明、候選星期、截止、提交進度
  */
 import React, {memo} from 'react';
 import {Pressable, StyleSheet, Text, View} from 'react-native';
@@ -10,31 +10,7 @@ import {scale, verticalScale} from 'react-native-size-matters';
 import Ionicons from '@react-native-vector-icons/ionicons';
 
 import {uiStyle, useTheme} from '../../../components/ThemeContext';
-import {summarizeCandidateDates} from '../../../utils/scheduling/schedulingModels';
 import {trigger} from '../../../utils/trigger';
-
-/**
- * @param {{kind: string, date?: string, startDate?: string, endDate?: string, dayCount?: number}} summary
- * @param {Function} t
- */
-function formatCandidateSummary(summary, t) {
-    if (!summary || summary.kind === 'empty') {
-        return '';
-    }
-    if (summary.kind === 'single') {
-        return moment(summary.date, 'YYYY-MM-DD').format('M月D日');
-    }
-    if (summary.kind === 'range') {
-        const start = moment(summary.startDate, 'YYYY-MM-DD').format('M月D日');
-        const end = moment(summary.endDate, 'YYYY-MM-DD').format('M月D日');
-        return t('{{start}} 至 {{end}} · 共{{count}}天', {
-            start,
-            end,
-            count: summary.dayCount,
-        });
-    }
-    return '';
-}
 
 /**
  * @param {string|null|undefined} responseDeadlineAt
@@ -84,11 +60,6 @@ const TeamScheduleEventHeader = ({
         event?.expiresAt &&
         !moment.tz(event.expiresAt, timezone).isAfter(moment.tz(timezone));
 
-    const candidateSummary = summarizeCandidateDates(
-        event?.candidateWindows,
-        timezone,
-    );
-    const dateLabel = formatCandidateSummary(candidateSummary, t);
     const deadlineLine = isClosed
         ? null
         : formatDeadlineLine(event?.responseDeadlineAt, timezone, t);
@@ -164,11 +135,9 @@ const TeamScheduleEventHeader = ({
                     {event.description}
                 </Text>
             ) : null}
-            {dateLabel ? (
-                <Text style={[styles.metaLine, {color: theme.black.third}]}>
-                    {t('候選日期')}：{dateLabel}
-                </Text>
-            ) : null}
+            <Text style={[styles.metaLine, {color: theme.black.third}]}>
+                {t('每週 24 小時')}
+            </Text>
             {deadlineLine ? (
                 <Text style={[styles.metaLine, {color: theme.black.third}]}>
                     {deadlineLine}

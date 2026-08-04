@@ -1,16 +1,23 @@
 /**
- * 組隊約時間：共用模型正規化與語意輔助（純函式）
+ * 組隊約時間：共用 weekly 模型正規化與語意輔助（純函式）
  */
-import moment from 'moment-timezone';
-
 export const DEFAULT_TIMEZONE = 'Asia/Macau';
 export const DEFAULT_SLOT_MINUTES = 15;
 export const ALLOWED_SLOT_MINUTES = [15, 30, 60];
+export const DEFAULT_WEEKLY_SCROLL_MINUTE = 8 * 60;
+
+export const FULL_WEEK_CANDIDATE_WINDOWS = Array.from(
+    {length: 7},
+    (_, index) => ({
+        weekday: index + 1,
+        startMinute: 0,
+        endMinute: 1440,
+    }),
+);
 
 /**
- * 正規化時區字串，空白則回預設亞洲／澳門
- * @param {string|null|undefined} timezone
- * @returns {string}
+ * 正規化時區字串，空白則回預設亞洲／澳門。
+ * 時區只用於管理時間，例如回覆截止時間。
  */
 export function normalizeTimezone(timezone) {
     if (typeof timezone === 'string' && timezone.trim()) {
@@ -20,9 +27,7 @@ export function normalizeTimezone(timezone) {
 }
 
 /**
- * 正規化 slot 分鐘數，僅允許 15／30／60
- * @param {number|string|null|undefined} slotMinutes
- * @returns {number}
+ * 正規化 slot 分鐘數，僅允許 15／30／60。
  */
 export function normalizeSlotMinutes(slotMinutes) {
     const value = Number(slotMinutes);
@@ -33,141 +38,89 @@ export function normalizeSlotMinutes(slotMinutes) {
 }
 
 /**
- * 將 ISO／可解析時間轉為活動時區的 moment（無效則 null）
- * @param {string|number|Date|null|undefined} value
- * @param {string} timezone
- * @returns {import('moment').Moment|null}
+ * 正規化星期數，週一為 1、週日為 7。
  */
-export function parseInTimezone(value, timezone) {
-    if (value == null || value === '') {
-        return null;
+export function normalizeWeekday(weekday) {
+    const value = Number(weekday);
+    if (Number.isInteger(value) && value >= 1 && value <= 7) {
+        return value;
     }
-    const tz = normalizeTimezone(timezone);
-    const m = moment.tz(value, tz);
-    return m.isValid() ? m : null;
+    return null;
 }
 
 /**
- * 由 startAt 推導活動時區下的 YYYY-MM-DD
- * @param {string} startAt
- * @param {string} timezone
- * @returns {string|null}
+ * 正規化一天中的分鐘數。
  */
-export function dateKeyFromStartAt(startAt, timezone) {
-    const m = parseInTimezone(startAt, timezone);
-    return m ? m.format('YYYY-MM-DD') : null;
+export function normalizeMinute(value, {allowDayEnd = false} = {}) {
+    const minute = Number(value);
+    const maximum = allowDayEnd ? 1440 : 1439;
+    if (Number.isInteger(minute) && minute >= 0 && minute <= maximum) {
+        return minute;
+    }
+    return null;
 }
 
 /**
- * 正規化單一 candidate window，必要時由 startAt 補 date
- * @param {object} window
- * @param {string} timezone
- * @returns {{date: string, startAt: string, endAt: string}|null}
+ * 正規化單一 weekly candidate window。
  */
-export function normalizeCandidateWindow(window, timezone) {
+export function normalizeCandidateWindow(window) {
     if (!window || typeof window !== 'object') {
         return null;
     }
-    const start = parseInTimezone(window.startAt, timezone);
-    const end = parseInTimezone(window.endAt, timezone);
-    if (!start || !end || !end.isAfter(start)) {
+    const weekday = normalizeWeekday(window.weekday);
+    const startMinute = normalizeMinute(window.startMinute);
+    const endMinute = normalizeMinute(window.endMinute, {allowDayEnd: true});
+    if (weekday == null || startMinute == null || endMinute == null || endMinute <= startMinute) {
         return null;
     }
-    const date =
-        typeof window.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(window.date)
-            ? window.date
-            : start.format('YYYY-MM-DD');
-    return {
-        date,
-        startAt: start.toISOString(),
-        endAt: end.toISOString(),
-    };
+    return {weekday, startMinute, endMinute};
 }
 
 /**
- * 正規化並依 startAt 排序 candidateWindows
- * @param {Array} windows
- * @param {string} timezone
- * @returns {Array<{date: string, startAt: string, endAt: string}>}
+ * 正規化並依 weekday／startMinute 排序 candidate windows。
  */
-export function normalizeCandidateWindows(windows, timezone) {
+export function normalizeCandidateWindows(windows) {
     if (!Array.isArray(windows)) {
         return [];
     }
     return windows
-        .map(item => normalizeCandidateWindow(item, timezone))
+        .map(normalizeCandidateWindow)
         .filter(Boolean)
-        .sort((a, b) => {
-            if (a.startAt < b.startAt) {
-                return -1;
-            }
-            if (a.startAt > b.startAt) {
-                return 1;
-            }
-            return 0;
-        });
+        .sort(compareWeeklyRanges);
 }
 
 /**
- * 正規化單一可用區間
- * @param {object} range
- * @param {string} timezone
- * @returns {{startAt: string, endAt: string}|null}
+ * 正規化單一 weekly 可用區間。
  */
-export function normalizeAvailabilityRange(range, timezone) {
-    if (!range || typeof range !== 'object') {
-        return null;
-    }
-    const start = parseInTimezone(range.startAt, timezone);
-    const end = parseInTimezone(range.endAt, timezone);
-    if (!start || !end || !end.isAfter(start)) {
-        return null;
-    }
-    return {
-        startAt: start.toISOString(),
-        endAt: end.toISOString(),
-    };
+export function normalizeAvailabilityRange(range) {
+    return normalizeCandidateWindow(range);
 }
 
 /**
- * 正規化 availability：null／已提交空 ranges／有 ranges
- * @param {object|null|undefined} availability
- * @param {string} timezone
- * @returns {null|{ranges: Array<{startAt: string, endAt: string}>}}
+ * 正規化 availability：null／已提交空 ranges／有 ranges。
  */
-export function normalizeAvailability(availability, timezone) {
+export function normalizeAvailability(availability) {
     if (availability == null) {
         return null;
     }
     const rawRanges = Array.isArray(availability.ranges) ? availability.ranges : [];
-    const ranges = rawRanges
-        .map(item => normalizeAvailabilityRange(item, timezone))
-        .filter(Boolean)
-        .sort((a, b) => {
-            if (a.startAt < b.startAt) {
-                return -1;
-            }
-            if (a.startAt > b.startAt) {
-                return 1;
-            }
-            return 0;
-        });
-    return {ranges};
+    return {
+        ranges: rawRanges
+            .map(normalizeAvailabilityRange)
+            .filter(Boolean)
+            .sort(compareWeeklyRanges),
+    };
 }
 
 /**
- * 是否已提交可用時間（含全沒空）
- * @param {object|null|undefined} availability
- * @returns {boolean}
+ * 是否已提交可用時間（含全沒空）。
  */
 export function isAvailabilitySubmitted(availability) {
     return availability != null;
 }
 
 /**
- * 已提交且候選範圍內完全沒空
- * @param {object|null|undefined} availability
- * @returns {boolean}
+ * 已提交且候選範圍內完全沒空。
  */
 export function isAvailabilityFullyBusy(availability) {
     return (
@@ -178,9 +131,7 @@ export function isAvailabilityFullyBusy(availability) {
 }
 
 /**
- * 是否有至少一段空閒區間
- * @param {object|null|undefined} availability
- * @returns {boolean}
+ * 是否有至少一段空閒區間。
  */
 export function hasAvailabilityRanges(availability) {
     return (
@@ -191,41 +142,59 @@ export function hasAvailabilityRanges(availability) {
 }
 
 /**
- * 區間是否完整覆蓋半開 slot `[slotStart, slotEnd)`
- * @param {{startAt: string, endAt: string}} range
- * @param {{startAt: string, endAt: string}} slot
- * @returns {boolean}
+ * 取得所有成員 availability 中最早的每日開始分鐘；無資料時回預設 08:00。
  */
-export function rangeCoversSlot(range, slot) {
-    if (!range || !slot) {
-        return false;
+export function getEarliestAvailabilityStartMinute(
+    members,
+    fallback = DEFAULT_WEEKLY_SCROLL_MINUTE,
+) {
+    const list = Array.isArray(members) ? members : [];
+    let earliest = null;
+    for (let i = 0; i < list.length; i++) {
+        const availability = normalizeAvailability(list[i]?.availability);
+        if (!availability) {
+            continue;
+        }
+        for (let j = 0; j < availability.ranges.length; j++) {
+            const startMinute = availability.ranges[j].startMinute;
+            if (earliest == null || startMinute < earliest) {
+                earliest = startMinute;
+            }
+        }
     }
-    return range.startAt <= slot.startAt && range.endAt >= slot.endAt;
+    return earliest == null ? fallback : earliest;
 }
 
 /**
- * 正規化活動核心欄位（不改動未知欄位語意）
- * @param {object} event
- * @returns {object|null}
+ * 區間是否完整覆蓋半開 slot `[startMinute, endMinute)`。
+ */
+export function rangeCoversSlot(range, slot) {
+    if (!range || !slot || range.weekday !== slot.weekday) {
+        return false;
+    }
+    return (
+        range.startMinute <= slot.startMinute &&
+        range.endMinute >= slot.endMinute
+    );
+}
+
+/**
+ * 正規化活動核心欄位（不改動未知欄位語意）。
  */
 export function normalizeTeamEvent(event) {
     if (!event || typeof event !== 'object') {
         return null;
     }
-    const timezone = normalizeTimezone(event.timezone);
-    const slotMinutes = normalizeSlotMinutes(event.slotMinutes);
     return {
         ...event,
-        timezone,
-        slotMinutes,
-        candidateWindows: normalizeCandidateWindows(event.candidateWindows, timezone),
+        timezone: normalizeTimezone(event.timezone),
+        slotMinutes: normalizeSlotMinutes(event.slotMinutes),
+        candidateWindows: normalizeCandidateWindows(event.candidateWindows),
     };
 }
 
 /**
- * 正規化 membership
- * @param {object} membership
- * @returns {object|null}
+ * 正規化 membership。
  */
 export function normalizeMembership(membership) {
     if (!membership || typeof membership !== 'object') {
@@ -235,9 +204,7 @@ export function normalizeMembership(membership) {
 }
 
 /**
- * 列表「最近三個」：保留 API 回傳順序，取前三筆
- * @param {Array} events
- * @returns {Array}
+ * 列表「最近三個」：保留 API 回傳順序，取前三筆。
  */
 export function takeRecentTeamEvents(events) {
     if (!Array.isArray(events)) {
@@ -247,64 +214,36 @@ export function takeRecentTeamEvents(events) {
 }
 
 /**
- * 候選日期去重後由早到晚排序
- * @param {Array} windows
- * @param {string} timezone
- * @returns {string[]}
- */
-export function getCandidateDates(windows, timezone) {
-    const normalized = normalizeCandidateWindows(windows, timezone);
-    const dates = [];
-    const seen = new Set();
-    for (let i = 0; i < normalized.length; i++) {
-        const date = normalized[i].date;
-        if (!seen.has(date)) {
-            seen.add(date);
-            dates.push(date);
-        }
-    }
-    dates.sort();
-    return dates;
-}
-
-/**
- * 列表用候選日期摘要：單日／多日最早至最晚＋天數
- * @param {Array} windows
- * @param {string} timezone
- * @returns {{kind: 'empty'}|{kind: 'single', date: string}|{kind: 'range', startDate: string, endDate: string, dayCount: number}}
- */
-export function summarizeCandidateDates(windows, timezone) {
-    const dates = getCandidateDates(windows, timezone);
-    if (dates.length === 0) {
-        return {kind: 'empty'};
-    }
-    if (dates.length === 1) {
-        return {kind: 'single', date: dates[0]};
-    }
-    return {
-        kind: 'range',
-        startDate: dates[0],
-        endDate: dates[dates.length - 1],
-        dayCount: dates.length,
-    };
-}
-
-/**
- * 回傳區間與另一區間是否重疊（半開語意下相接不算重疊）
- * @param {{startAt: string, endAt: string}} a
- * @param {{startAt: string, endAt: string}} b
- * @returns {boolean}
+ * 回傳同一星期中的兩區間是否重疊（半開語意下相接不算重疊）。
  */
 export function rangesOverlap(a, b) {
-    return a.startAt < b.endAt && b.startAt < a.endAt;
+    return (
+        a &&
+        b &&
+        a.weekday === b.weekday &&
+        a.startMinute < b.endMinute &&
+        b.startMinute < a.endMinute
+    );
 }
 
 /**
- * 兩區間是否相鄰（a.end === b.start 或反向）
- * @param {{startAt: string, endAt: string}} a
- * @param {{startAt: string, endAt: string}} b
- * @returns {boolean}
+ * 兩區間是否相鄰（同一 weekday 且 endMinute === startMinute）。
  */
 export function rangesAreAdjacent(a, b) {
-    return a.endAt === b.startAt || b.endAt === a.startAt;
+    return (
+        a &&
+        b &&
+        a.weekday === b.weekday &&
+        (a.endMinute === b.startMinute || b.endMinute === a.startMinute)
+    );
+}
+
+function compareWeeklyRanges(a, b) {
+    if (a.weekday !== b.weekday) {
+        return a.weekday - b.weekday;
+    }
+    if (a.startMinute !== b.startMinute) {
+        return a.startMinute - b.startMinute;
+    }
+    return a.endMinute - b.endMinute;
 }

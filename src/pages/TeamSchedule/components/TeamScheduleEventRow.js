@@ -1,5 +1,5 @@
 /**
- * 組隊約時間列表列：標題、候選日摘要、角色、狀態／截止、chevron
+ * 組隊約時間列表列：標題、候選星期摘要、角色、狀態／截止、chevron
  */
 import React from 'react';
 import {Pressable, StyleSheet, Text, View} from 'react-native';
@@ -10,33 +10,7 @@ import moment from 'moment-timezone';
 import {scale, verticalScale} from 'react-native-size-matters';
 
 import {uiStyle, useTheme} from '../../../components/ThemeContext';
-import {summarizeCandidateDates} from '../../../utils/scheduling/schedulingModels';
 import {trigger} from '../../../utils/trigger';
-
-/**
- * 格式化候選日期摘要（保留 API／models 語意，僅做顯示）
- * @param {{kind: string, date?: string, startDate?: string, endDate?: string, dayCount?: number}} summary
- * @param {(key: string, options?: object) => string} t
- * @returns {string}
- */
-function formatCandidateSummary(summary, t) {
-    if (!summary || summary.kind === 'empty') {
-        return '';
-    }
-    if (summary.kind === 'single') {
-        return moment(summary.date, 'YYYY-MM-DD').format('M月D日');
-    }
-    if (summary.kind === 'range') {
-        const start = moment(summary.startDate, 'YYYY-MM-DD').format('M月D日');
-        const end = moment(summary.endDate, 'YYYY-MM-DD').format('M月D日');
-        return t('{{start}} 至 {{end}} · 共{{count}}天', {
-            start,
-            end,
-            count: summary.dayCount,
-        });
-    }
-    return '';
-}
 
 /**
  * 截止提示：已過→已截止填寫；未過→相對時間；無 deadline→不顯示
@@ -86,11 +60,6 @@ const TeamScheduleEventRow = ({
     const timezone = event.timezone || 'Asia/Macau';
     const isOwner = membership.role === 'owner';
     const isClosed = event.status === 'closed';
-    const candidateSummary = summarizeCandidateDates(
-        event.candidateWindows,
-        timezone,
-    );
-    const dateLabel = formatCandidateSummary(candidateSummary, t);
     const deadlineHint = isClosed
         ? null
         : formatDeadlineHint(event.responseDeadlineAt, timezone, t);
@@ -136,13 +105,11 @@ const TeamScheduleEventRow = ({
                     style={[styles.title, {color: theme.black.main}]}>
                     {event.title || t('未命名活動')}
                 </Text>
-                {dateLabel ? (
-                    <Text
-                        numberOfLines={1}
-                        style={[styles.dateLine, {color: theme.black.third}]}>
-                        {dateLabel}
-                    </Text>
-                ) : null}
+                <Text
+                    numberOfLines={1}
+                    style={[styles.dateLine, {color: theme.black.third}]}>
+                    {t('每週 24 小時')}
+                </Text>
             </View>
             <Ionicons
                 name="chevron-forward"

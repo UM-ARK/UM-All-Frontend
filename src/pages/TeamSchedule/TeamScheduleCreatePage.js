@@ -1,5 +1,5 @@
 /**
- * 新建組隊：基本資料表單＋七日候選時間編輯
+ * 新建組隊：基本資料表單＋每週可用時間編輯
  */
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {
@@ -31,18 +31,14 @@ import {
     ALLOWED_SLOT_MINUTES,
     DEFAULT_SLOT_MINUTES,
     DEFAULT_TIMEZONE,
+    DEFAULT_WEEKLY_SCROLL_MINUTE,
+    FULL_WEEK_CANDIDATE_WINDOWS,
     normalizeSlotMinutes,
 } from '../../utils/scheduling/schedulingModels';
 import {trigger} from '../../utils/trigger';
 import ScheduleWeekGrid from './components/ScheduleWeekGrid';
-import ScheduleWeekPager from './components/ScheduleWeekPager';
 import {
-    EVENT_EXPIRY_DAYS,
-    formatOffsetIso,
-    getEarliestSelectableStart,
-    getEventExpiryMoment,
-    isCandidateSlotSelectable,
-    slotsFromSelectedKeys,
+    buildWeeklySlots,
     wallClockDateToOffsetIso,
 } from './components/scheduleWeekHelpers';
 import {clearTeamEventsCache} from './hooks/useTeamEvents';
@@ -50,13 +46,10 @@ import {
     commitCandidateDraft,
     createEmptyDraft,
 } from './utils/scheduleDraft';
-import {
-    getWeekDateKeys,
-    getWeekStartDate,
-} from './utils/scheduleGrid';
 
 const TITLE_MAX = 200;
 const DESCRIPTION_MAX = 4000;
+const EVENT_EXPIRY_DAYS = 180;
 
 /**
  * 後端錯誤碼 → 可讀文案 key
@@ -65,18 +58,14 @@ const DESCRIPTION_MAX = 4000;
  */
 function errorMessageForCode(code) {
     switch (code) {
-        case 'candidate_after_expiry':
-            return '候選時段超出活動有效期（約 180 天），請調整後再試。';
         case 'deadline_after_expiry':
             return '回覆截止時間不能晚於活動有效期。';
         case 'invalid_title':
             return '請輸入 1 至 200 字的活動名稱。';
         case 'invalid_description':
             return '說明最多 4000 字。';
-        case 'invalid_candidate_windows':
-            return '請至少選擇一個有效的候選時段。';
-        case 'invalid_candidate_date':
-            return '候選時段日期與時間不一致，請重新選擇。';
+        case 'invalid_owner_availability':
+            return '請至少選擇一個有效的每週可用時段。';
         case 'slot_alignment_required':
             return '候選時段須對齊所選時間粒度。';
         case 'overlapping_candidate_windows':
@@ -108,32 +97,12 @@ const TeamScheduleCreatePage = ({navigation}) => {
             timezone: tz,
         }),
     );
-    const [weekStartDate, setWeekStartDate] = useState(() =>
-        getWeekStartDate(moment.tz(tz).format('YYYY-MM-DD'), tz),
-    );
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isPainting, setIsPainting] = useState(false);
     const submittingRef = useRef(false);
     const allowLeaveRef = useRef(false);
     const draftRef = useRef(draft);
     draftRef.current = draft;
-
-    const weekEndDate = useMemo(() => {
-        const keys = getWeekDateKeys(weekStartDate, tz);
-        return keys[6] || weekStartDate;
-    }, [weekStartDate, tz]);
-
-    const minWeekStart = useMemo(
-        () => getWeekStartDate(moment.tz(tz).format('YYYY-MM-DD'), tz),
-        [tz],
-    );
-    const maxWeekStart = useMemo(() => {
-        const expiry = getEventExpiryMoment(tz);
-        return getWeekStartDate(expiry.format('YYYY-MM-DD'), tz);
-    }, [tz]);
-
-    const canPrev = weekStartDate > minWeekStart;
-    const canNext = weekStartDate < maxWeekStart;
 
     const hasUnsavedDraft = useMemo(() => {
         const trimmedTitle = title.trim();
@@ -176,28 +145,6 @@ const TeamScheduleCreatePage = ({navigation}) => {
             },
         ]);
     });
-
-    const handlePrevWeek = useCallback(() => {
-        const prev = moment
-            .tz(weekStartDate, 'YYYY-MM-DD', tz)
-            .subtract(7, 'days')
-            .format('YYYY-MM-DD');
-        const nextStart = getWeekStartDate(prev, tz);
-        if (nextStart >= minWeekStart) {
-            setWeekStartDate(nextStart);
-        }
-    }, [minWeekStart, tz, weekStartDate]);
-
-    const handleNextWeek = useCallback(() => {
-        const next = moment
-            .tz(weekStartDate, 'YYYY-MM-DD', tz)
-            .add(7, 'days')
-            .format('YYYY-MM-DD');
-        const nextStart = getWeekStartDate(next, tz);
-        if (nextStart <= maxWeekStart) {
-            setWeekStartDate(nextStart);
-        }
-    }, [maxWeekStart, tz, weekStartDate]);
 
     const resetDraftForSlotMinutes = useCallback(nextSlot => {
         setDraft(
@@ -260,27 +207,9 @@ const TeamScheduleCreatePage = ({navigation}) => {
         if (selectedKeys.length === 0) {
             return t('請至少選擇一個候選時段。');
         }
-        const slots = slotsFromSelectedKeys(selectedKeys, tz);
-        const earliest = getEarliestSelectableStart(tz, slotMinutes);
-        const expiry = getEventExpiryMoment(tz);
-        for (let i = 0; i < slots.length; i++) {
-            if (
-                !isCandidateSlotSelectable(slots[i], {
-                    timezone: tz,
-                    slotMinutes,
-                    earliestStart: earliest,
-                    expiryAt: expiry,
-                })
-            ) {
-                const start = moment.tz(slots[i].startAt, tz);
-                if (start.isBefore(earliest)) {
-                    return t('候選時段不能早於現在。');
-                }
-                return t('候選時段超出活動有效期（約 180 天），請調整後再試。');
-            }
-        }
         if (responseDeadlineAt) {
             const deadline = moment.tz(responseDeadlineAt, tz);
+            const expiry = moment.tz(tz).add(EVENT_EXPIRY_DAYS, 'days');
             if (!deadline.isValid()) {
                 return t('回覆截止時間無效。');
             }
@@ -296,26 +225,25 @@ const TeamScheduleCreatePage = ({navigation}) => {
         description.length,
         draft.selectedKeys,
         responseDeadlineAt,
-        slotMinutes,
         t,
         title,
         tz,
     ]);
 
     const buildPayload = useCallback(() => {
-        const referenceSlots = slotsFromSelectedKeys(draft.selectedKeys, tz);
-        const windows = commitCandidateDraft(draft, referenceSlots);
-        const candidateWindows = windows.map(win => ({
-            date: win.date,
-            startAt: formatOffsetIso(win.startAt, tz),
-            endAt: formatOffsetIso(win.endAt, tz),
-        }));
+        const referenceSlots = buildWeeklySlots(
+            FULL_WEEK_CANDIDATE_WINDOWS,
+            slotMinutes,
+        );
+        const ownerRanges = commitCandidateDraft(draft, referenceSlots);
         const payload = {
             title: title.trim(),
             description: description.trim(),
             timezone: tz,
             slotMinutes: normalizeSlotMinutes(slotMinutes),
-            candidateWindows,
+            ownerAvailability: {
+                ranges: ownerRanges,
+            },
         };
         if (responseDeadlineAt) {
             payload.responseDeadlineAt = responseDeadlineAt;
@@ -572,34 +500,24 @@ const TeamScheduleCreatePage = ({navigation}) => {
                         styles.sectionSpacing,
                         {color: theme.black.main},
                     ]}>
-                    {t('候選時間')}
+                    {t('我的每週可用時間')}
                 </Text>
                 <Text style={[styles.hint, {color: theme.black.third}]}>
                     {t(
-                        '點選切換格子；長按後拖動可連續選取或清除。活動有效約 {{days}} 天。',
-                        {days: EVENT_EXPIRY_DAYS},
+                        '選出你每週可以開會的時間；隊員加入後，會在這些時間中填寫自己的時間。',
                     )}
                 </Text>
                 <Text style={[styles.hint, {color: theme.black.third}]}>
                     {t('已選 {{count}} 格', {count: selectedCount})}
                 </Text>
 
-                <ScheduleWeekPager
-                    weekStartDate={weekStartDate}
-                    weekEndDate={weekEndDate}
-                    onPrev={handlePrevWeek}
-                    onNext={handleNextWeek}
-                    canPrev={canPrev}
-                    canNext={canNext}
-                />
                 <ScheduleWeekGrid
                     mode="candidate"
-                    weekStartDate={weekStartDate}
-                    timezone={tz}
                     slotMinutes={slotMinutes}
                     draft={draft}
                     onDraftChange={setDraft}
                     onPaintingChange={setIsPainting}
+                    scrollToStartMinute={DEFAULT_WEEKLY_SCROLL_MINUTE}
                 />
 
                 <Pressable
@@ -634,6 +552,7 @@ const TeamScheduleCreatePage = ({navigation}) => {
                 mode="datetime"
                 date={pickerDate}
                 minimumDate={new Date()}
+                maximumDate={moment().add(EVENT_EXPIRY_DAYS, 'days').toDate()}
                 onConfirm={date => {
                     trigger();
                     setDeadlinePickerVisible(false);

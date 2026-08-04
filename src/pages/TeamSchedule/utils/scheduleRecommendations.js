@@ -1,5 +1,5 @@
 /**
- * 組隊約時間：熱力圖與最佳時段建議（純函式）
+ * 組隊約時間：weekly 熱力圖與最佳時段建議（純函式）
  */
 import {
     isAvailabilitySubmitted,
@@ -12,9 +12,7 @@ import {
 import {expandCandidateWindowsToSlots} from './scheduleRanges';
 
 /**
- * 取得 summary 中 active 成員列表
- * @param {object} summary
- * @returns {Array}
+ * 取得 summary 中 active 成員列表。
  */
 export function getActiveMembers(summary) {
     if (!summary || !Array.isArray(summary.members)) {
@@ -24,24 +22,20 @@ export function getActiveMembers(summary) {
         if (!member) {
             return false;
         }
-        // 未標 status 時視為 active；明確 left 等狀態排除
         return member.status == null || member.status === 'active';
     });
 }
 
 /**
- * 提交／空閒統計（availability 三種語意）
- * @param {Array} members
- * @param {string} timezone
- * @returns {{memberCount: number, submittedCount: number, fullyBusyCount: number, withRangesCount: number, unsubmittedCount: number}}
+ * 提交／空閒統計（availability 三種語意）。
  */
-export function computeAvailabilityStats(members, timezone) {
+export function computeAvailabilityStats(members) {
     const list = Array.isArray(members) ? members : [];
     let submittedCount = 0;
     let fullyBusyCount = 0;
     let withRangesCount = 0;
     for (let i = 0; i < list.length; i++) {
-        const availability = normalizeAvailability(list[i].availability, timezone);
+        const availability = normalizeAvailability(list[i].availability);
         if (!isAvailabilitySubmitted(availability)) {
             continue;
         }
@@ -63,13 +57,7 @@ export function computeAvailabilityStats(members, timezone) {
 }
 
 /**
- * 建立每個 slot 的熱力資料
- * @param {object} params
- * @param {Array} params.candidateWindows
- * @param {number} params.slotMinutes
- * @param {string} params.timezone
- * @param {Array} params.members active members（含 availability）
- * @returns {{slots: Array, memberCount: number, submittedCount: number, stats: object}}
+ * 建立每個 weekly slot 的熱力資料。
  */
 export function buildHeatmap({
     candidateWindows,
@@ -77,164 +65,112 @@ export function buildHeatmap({
     timezone,
     members,
 } = {}) {
-    const tz = normalizeTimezone(timezone);
     const slot = normalizeSlotMinutes(slotMinutes);
-    const windows = normalizeCandidateWindows(candidateWindows, tz);
+    const windows = normalizeCandidateWindows(candidateWindows);
     const activeMembers = Array.isArray(members) ? members : [];
-    const stats = computeAvailabilityStats(activeMembers, tz);
-    const memberCount = stats.memberCount;
-
+    const stats = computeAvailabilityStats(activeMembers);
     const normalizedMembers = activeMembers.map(member => ({
         ...member,
-        availability: normalizeAvailability(member.availability, tz),
+        availability: normalizeAvailability(member.availability),
     }));
-
-    const baseSlots = expandCandidateWindowsToSlots(windows, slot, tz);
-    const slots = baseSlots.map(base => {
+    const slots = expandCandidateWindowsToSlots(windows, slot).map(base => {
         const freeMembers = [];
-        let availableCount = 0;
         for (let i = 0; i < normalizedMembers.length; i++) {
             const member = normalizedMembers[i];
-            const availability = member.availability;
-            if (!isAvailabilitySubmitted(availability)) {
-                continue;
-            }
-            const covered = availability.ranges.some(range =>
-                rangeCoversSlot(range, base),
-            );
-            if (covered) {
-                availableCount += 1;
+            if (
+                isAvailabilitySubmitted(member.availability) &&
+                member.availability.ranges.some(range => rangeCoversSlot(range, base))
+            ) {
                 freeMembers.push(member);
             }
         }
-        const heat =
-            memberCount > 0 ? availableCount / memberCount : 0;
+        const availableCount = freeMembers.length;
         return {
             ...base,
             availableCount,
             submittedCount: stats.submittedCount,
-            memberCount,
-            heat,
+            memberCount: stats.memberCount,
+            heat: stats.memberCount > 0 ? availableCount / stats.memberCount : 0,
             freeMembers,
         };
     });
 
     return {
         slots,
-        memberCount,
+        memberCount: stats.memberCount,
         submittedCount: stats.submittedCount,
         stats,
+        timezone: normalizeTimezone(timezone),
     };
 }
 
 /**
- * 由 heatmap slots 推導最佳時段建議（最多 3 項）
- * - 取 availableCount 最高者
- * - 同一 candidate window 內相鄰且人數相同才合併
- * - 不可跨日／跨 gap
- * - 人數降序、開始升序；availableCount===0 不顯示
- * @param {Array} heatmapSlots
- * @returns {Array<{startAt: string, endAt: string, date: string, availableCount: number, memberCount: number, heat: number}>}
+ * 由 heatmap slots 推導最佳時段建議（最多 3 項）。
+ * 同一 candidate window 內相鄰且人數相同才合併，不可跨 weekday 或 gap。
  */
 export function suggestBestSlots(heatmapSlots) {
-    if (!Array.isArray(heatmapSlots) || heatmapSlots.length === 0) {
+    if (!Array.isArray(heatmapSlots)) {
         return [];
     }
-
-    const positive = heatmapSlots.filter(slot => slot.availableCount > 0);
-    if (positive.length === 0) {
-        return [];
-    }
-
-    // 依 window 再依 start 排序，方便相鄰合併
-    const sorted = positive.slice().sort((a, b) => {
-        if (a.windowStartAt !== b.windowStartAt) {
-            if (a.windowStartAt < b.windowStartAt) {
-                return -1;
-            }
-            if (a.windowStartAt > b.windowStartAt) {
-                return 1;
-            }
-        }
-        if (a.startAt < b.startAt) {
-            return -1;
-        }
-        if (a.startAt > b.startAt) {
-            return 1;
-        }
-        return 0;
-    });
-
+    const sorted = heatmapSlots
+        .filter(slot => slot.availableCount > 0)
+        .slice()
+        .sort(compareSlotsByWindow);
     const merged = [];
     let current = null;
     for (let i = 0; i < sorted.length; i++) {
         const slot = sorted[i];
-        if (!current) {
-            current = {
-                startAt: slot.startAt,
-                endAt: slot.endAt,
-                date: slot.date,
-                availableCount: slot.availableCount,
-                memberCount: slot.memberCount,
-                heat: slot.heat,
-                windowStartAt: slot.windowStartAt,
-                windowEndAt: slot.windowEndAt,
-            };
+        if (
+            current &&
+            current.weekday === slot.weekday &&
+            current.windowStartMinute === slot.windowStartMinute &&
+            current.windowEndMinute === slot.windowEndMinute &&
+            current.availableCount === slot.availableCount &&
+            current.endMinute === slot.startMinute
+        ) {
+            current.endMinute = slot.endMinute;
             continue;
         }
-        const sameWindow =
-            current.windowStartAt === slot.windowStartAt &&
-            current.windowEndAt === slot.windowEndAt;
-        const sameCount = current.availableCount === slot.availableCount;
-        const adjacent = current.endAt === slot.startAt;
-        const sameDay = current.date === slot.date;
-        if (sameWindow && sameCount && adjacent && sameDay) {
-            current.endAt = slot.endAt;
-        } else {
+        if (current) {
             merged.push(current);
-            current = {
-                startAt: slot.startAt,
-                endAt: slot.endAt,
-                date: slot.date,
-                availableCount: slot.availableCount,
-                memberCount: slot.memberCount,
-                heat: slot.heat,
-                windowStartAt: slot.windowStartAt,
-                windowEndAt: slot.windowEndAt,
-            };
         }
+        current = {
+            weekday: slot.weekday,
+            startMinute: slot.startMinute,
+            endMinute: slot.endMinute,
+            availableCount: slot.availableCount,
+            memberCount: slot.memberCount,
+            heat: slot.heat,
+            windowStartMinute: slot.windowStartMinute,
+            windowEndMinute: slot.windowEndMinute,
+        };
     }
     if (current) {
         merged.push(current);
     }
-
-    merged.sort((a, b) => {
-        if (b.availableCount !== a.availableCount) {
-            return b.availableCount - a.availableCount;
-        }
-        if (a.startAt < b.startAt) {
-            return -1;
-        }
-        if (a.startAt > b.startAt) {
-            return 1;
-        }
-        return 0;
-    });
-
-    return merged.slice(0, 3).map(item => ({
-        startAt: item.startAt,
-        endAt: item.endAt,
-        date: item.date,
-        availableCount: item.availableCount,
-        memberCount: item.memberCount,
-        heat: item.heat,
-    }));
+    return merged
+        .sort((a, b) => {
+            if (b.availableCount !== a.availableCount) {
+                return b.availableCount - a.availableCount;
+            }
+            if (a.weekday !== b.weekday) {
+                return a.weekday - b.weekday;
+            }
+            return a.startMinute - b.startMinute;
+        })
+        .slice(0, 3)
+        .map(item => ({
+            weekday: item.weekday,
+            startMinute: item.startMinute,
+            endMinute: item.endMinute,
+            availableCount: item.availableCount,
+            memberCount: item.memberCount,
+            heat: item.heat,
+        }));
 }
 
 /**
- * 一次建立 heatmap 與最佳建議
- * @param {object} params
- * @returns {{heatmap: object, suggestions: Array}}
+ * 一次建立 heatmap 與最佳建議。
  */
 export function buildHeatmapWithSuggestions(params) {
     const heatmap = buildHeatmap(params);
@@ -242,4 +178,14 @@ export function buildHeatmapWithSuggestions(params) {
         heatmap,
         suggestions: suggestBestSlots(heatmap.slots),
     };
+}
+
+function compareSlotsByWindow(a, b) {
+    if (a.weekday !== b.weekday) {
+        return a.weekday - b.weekday;
+    }
+    if (a.windowStartMinute !== b.windowStartMinute) {
+        return a.windowStartMinute - b.windowStartMinute;
+    }
+    return a.startMinute - b.startMinute;
 }

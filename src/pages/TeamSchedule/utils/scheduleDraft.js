@@ -74,7 +74,7 @@ export function selectedKeysToSlots(selectedKeys, allSlots) {
 /**
  * 切換單一 slot 選取狀態
  * @param {object} draft
- * @param {{startAt: string, endAt: string}} slot
+ * @param {{weekday: number, startMinute: number, endMinute: number}} slot
  * @returns {object}
  */
 export function toggleDraftSlot(draft, slot) {
@@ -120,7 +120,7 @@ export function applyDraftGesture(draft, slots, mode) {
 /**
  * 由第一格與目前選取狀態推導手勢模式
  * @param {object} draft
- * @param {{startAt: string, endAt: string}} firstSlot
+ * @param {{weekday: number, startMinute: number, endMinute: number}} firstSlot
  * @returns {'add'|'erase'}
  */
 export function resolveGestureMode(draft, firstSlot) {
@@ -210,7 +210,7 @@ export function createCandidateDraftFromWindows({
  * 將草稿轉成 PUT availability 用的 ranges
  * @param {object} draft
  * @param {Array} candidateWindows
- * @returns {{ranges: Array<{startAt: string, endAt: string}>, revision: number}}
+ * @returns {{ranges: Array<{weekday: number, startMinute: number, endMinute: number}>, revision: number}}
  */
 export function commitAvailabilityDraft(draft, candidateWindows) {
     const tz = normalizeTimezone(draft && draft.timezone);
@@ -237,7 +237,7 @@ export function commitAvailabilityDraft(draft, candidateWindows) {
  * 將候選草稿轉成建立活動用的 candidateWindows
  * @param {object} draft
  * @param {Array} [referenceSlots] 完整可選 slot 清單；缺省則無法還原
- * @returns {Array<{date: string, startAt: string, endAt: string}>}
+ * @returns {Array<{weekday: number, startMinute: number, endMinute: number}>}
  */
 export function commitCandidateDraft(draft, referenceSlots) {
     const tz = normalizeTimezone(draft && draft.timezone);

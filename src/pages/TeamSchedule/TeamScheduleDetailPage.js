@@ -44,6 +44,8 @@ import {
 } from '../../utils/scheduling/schedulingApi';
 import {normalizeSchedulingError} from '../../utils/scheduling/schedulingErrors';
 import {
+    DEFAULT_WEEKLY_SCROLL_MINUTE,
+    getEarliestAvailabilityStartMinute,
     isAvailabilitySubmitted,
     normalizeAvailability,
 } from '../../utils/scheduling/schedulingModels';
@@ -53,7 +55,6 @@ import AvailabilityEditorFooter from './components/AvailabilityEditorFooter';
 import AvailabilityLegend from './components/AvailabilityLegend';
 import InviteManagementSheet from './components/InviteManagementSheet';
 import ScheduleWeekGrid from './components/ScheduleWeekGrid';
-import ScheduleWeekPager from './components/ScheduleWeekPager';
 import SlotDetailSheet from './components/SlotDetailSheet';
 import TeamScheduleEventHeader from './components/TeamScheduleEventHeader';
 import {TeamScheduleFullState} from './components/TeamScheduleStateView';
@@ -68,10 +69,6 @@ import {
 import {useAvailabilityEditor} from './hooks/useAvailabilityEditor';
 import {useTeamScheduleDetail} from './hooks/useTeamScheduleDetail';
 import {createAvailabilityDraftFromServer} from './utils/scheduleDraft';
-import {
-    buildWeekPages,
-    findWeekPageIndexByDate,
-} from './utils/scheduleGrid';
 import {slotKey} from './utils/scheduleRanges';
 import {
     buildHeatmapWithSuggestions,
@@ -292,24 +289,6 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
         );
     });
 
-    const weekPages = useMemo(() => {
-        if (!event?.candidateWindows) {
-            return [];
-        }
-        return buildWeekPages({
-            candidateWindows: event.candidateWindows,
-            timezone: event.timezone,
-            slotMinutes: event.slotMinutes,
-        });
-    }, [event]);
-
-    const [weekIndex, setWeekIndex] = useState(0);
-    useEffect(() => {
-        setWeekIndex(0);
-    }, [event?.eventId]);
-
-    const currentWeek = weekPages[weekIndex] || weekPages[0] || null;
-
     const heatmapBundle = useMemo(() => {
         if (!event) {
             return {heatmap: null, suggestions: []};
@@ -349,13 +328,25 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
         submittedCount: 0,
         memberCount: 0,
     };
+    const earliestAvailabilityStartMinute = useMemo(
+        () =>
+            getEarliestAvailabilityStartMinute(
+                getActiveMembers({members}),
+                DEFAULT_WEEKLY_SCROLL_MINUTE,
+            ),
+        [members],
+    );
 
     const [slotSheet, setSlotSheet] = useState({visible: false, slot: null});
     const [inviteSheetVisible, setInviteSheetVisible] = useState(false);
-    const [scrollToStartAt, setScrollToStartAt] = useState(null);
+    const [scrollToStartMinute, setScrollToStartMinute] = useState(null);
     const [editModalVisible, setEditModalVisible] = useState(false);
     const [editTitle, setEditTitle] = useState('');
     const [editDescription, setEditDescription] = useState('');
+
+    useEffect(() => {
+        setScrollToStartMinute(null);
+    }, [event?.eventId, members]);
     const [editDeadline, setEditDeadline] = useState(null);
     const [deadlinePickerVisible, setDeadlinePickerVisible] = useState(false);
     const [isPainting, setIsPainting] = useState(false);
@@ -380,16 +371,12 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
     const handleSuggestionPress = useCallback(
         suggestion => {
             trigger();
-            if (!suggestion?.date || weekPages.length === 0) {
+            if (!Number.isInteger(suggestion?.startMinute)) {
                 return;
             }
-            const index = findWeekPageIndexByDate(weekPages, suggestion.date);
-            if (index >= 0) {
-                setWeekIndex(index);
-            }
-            setScrollToStartAt(suggestion.startAt);
+            setScrollToStartMinute(suggestion.startMinute);
         },
-        [weekPages],
+        [],
     );
 
     const handleConfirmEdit = useCallback(async () => {
@@ -1059,7 +1046,7 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                         </View>
                         {heatmapBundle.suggestions.map((item, index) => (
                             <Pressable
-                                key={`suggest-${item.startAt}-${index}`}
+                                key={`suggest-${item.weekday}-${item.startMinute}-${index}`}
                                 onPress={() => handleSuggestionPress(item)}
                                 style={({pressed}) => [
                                     styles.suggestRow,
@@ -1084,10 +1071,7 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                                         {color: theme.black.main},
                                     ]}
                                     numberOfLines={1}>
-                                    {formatSuggestionLabel(
-                                        item,
-                                        event.timezone,
-                                    )}
+                                    {formatSuggestionLabel(item)}
                                 </Text>
                                 <Text
                                     style={[
@@ -1101,28 +1085,12 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                     </View>
                 ) : null}
 
-                {currentWeek ? (
+                {event?.candidateWindows ? (
                     <View style={styles.section}>
-                        <ScheduleWeekPager
-                            weekStartDate={currentWeek.weekStartDate}
-                            weekEndDate={currentWeek.weekEndDate}
-                            canPrev={weekIndex > 0}
-                            canNext={weekIndex < weekPages.length - 1}
-                            onPrev={() =>
-                                setWeekIndex(i => Math.max(0, i - 1))
-                            }
-                            onNext={() =>
-                                setWeekIndex(i =>
-                                    Math.min(weekPages.length - 1, i + 1),
-                                )
-                            }
-                        />
                         <ScheduleWeekGrid
                             mode={
                                 editor.isEditing ? 'availability' : 'readonly'
                             }
-                            weekStartDate={currentWeek.weekStartDate}
-                            timezone={event.timezone}
                             slotMinutes={event.slotMinutes}
                             candidateWindows={event.candidateWindows}
                             heatmapByKey={heatmapByKey}
@@ -1131,7 +1099,10 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                             onDraftChange={editor.onDraftChange}
                             onPaintingChange={setIsPainting}
                             onSlotPress={handleSlotPress}
-                            scrollToStartAt={scrollToStartAt}
+                            scrollToStartMinute={
+                                scrollToStartMinute ??
+                                earliestAvailabilityStartMinute
+                            }
                         />
                         <AvailabilityLegend
                             submittedCount={stats.submittedCount}

@@ -4,7 +4,6 @@
 import React, {memo, useMemo, useRef, useEffect} from 'react';
 import {Image, Pressable, StyleSheet, Text, View} from 'react-native';
 
-import moment from 'moment-timezone';
 import {useTranslation} from 'react-i18next';
 import ActionSheet, {ScrollView} from 'react-native-actions-sheet';
 import {scale, verticalScale} from 'react-native-size-matters';
@@ -18,6 +17,10 @@ import {
     rangeCoversSlot,
 } from '../../../utils/scheduling/schedulingModels';
 import {trigger} from '../../../utils/trigger';
+import {
+    WEEKDAY_SHORT_LABELS,
+    formatMinuteOfDay,
+} from './scheduleWeekHelpers';
 
 /**
  * @param {object} props
@@ -55,8 +58,7 @@ const SlotDetailSheet = ({
         if (!slot) {
             return null;
         }
-        const start = moment.tz(slot.startAt, timezone);
-        const end = moment.tz(slot.endAt, timezone);
+        const weekday = WEEKDAY_SHORT_LABELS[Number(slot.weekday) - 1] || '';
         const freeMembers = Array.isArray(slot.freeMembers)
             ? slot.freeMembers
             : [];
@@ -94,8 +96,8 @@ const SlotDetailSheet = ({
         }
 
         return {
-            dateLabel: start.format('M月D日'),
-            timeLabel: `${start.format('HH:mm')} – ${end.format('HH:mm')}`,
+            weekdayLabel: weekday ? `週${weekday}` : '',
+            timeLabel: `${formatMinuteOfDay(slot.startMinute)} – ${formatMinuteOfDay(slot.endMinute)}`,
             availableCount: slot.availableCount ?? freeMembers.length,
             memberCount: slot.memberCount ?? list.length,
             freeMembers,
@@ -136,7 +138,7 @@ const SlotDetailSheet = ({
                                 styles.timeLine,
                                 {color: theme.black.second},
                             ]}>
-                            {info.dateLabel} · {info.timeLabel}
+                            {info.weekdayLabel} · {info.timeLabel}
                         </Text>
                         <Text
                             style={[
