@@ -56,6 +56,7 @@ import {buildTeamInviteShareMessage} from '../../utils/scheduling/teamInviteLink
 import {trigger} from '../../utils/trigger';
 import AvailabilityEditorFooter from './components/AvailabilityEditorFooter';
 import AvailabilityLegend from './components/AvailabilityLegend';
+import CourseSchedulePreviewLegend from './components/CourseSchedulePreviewLegend';
 import InviteManagementSheet from './components/InviteManagementSheet';
 import ScheduleWeekGrid from './components/ScheduleWeekGrid';
 import ScheduleTimeRangeInsert from './components/ScheduleTimeRangeInsert';
@@ -1325,76 +1326,16 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                         ) : null}
                         {editor.isEditing ? (
                             <View style={styles.coursePrefillRow}>
-                                <View style={styles.coursePrefillLabelRow}>
-                                    <Ionicons
-                                        name="calendar-outline"
-                                        size={scale(18)}
-                                        color={theme.themeColor}
-                                    />
-                                    <View style={styles.coursePrefillTextGroup}>
-                                        <Text
-                                            style={[
-                                                styles.coursePrefillLabel,
-                                                {color: theme.black.main},
-                                            ]}>
-                                            {t('課表預填')}
-                                        </Text>
-                                        <View
-                                            style={styles.courseConflictLegend}>
-                                            <View
-                                                style={[
-                                                    styles.courseConflictSwatch,
-                                                    {
-                                                        backgroundColor:
-                                                            theme.tonal.unread15,
-                                                    },
-                                                ]}
-                                            />
-                                            <Text
-                                                style={[
-                                                    styles.courseConflictText,
-                                                    {color: theme.black.third},
-                                                ]}>
-                                                {t('淺紅色＝課表時間')}
-                                            </Text>
-                                        </View>
-                                        <View
-                                            style={styles.courseConflictLegend}>
-                                            <View
-                                                style={[
-                                                    styles.courseConflictSwatch,
-                                                    {
-                                                        backgroundColor:
-                                                            theme.tonal.secondary30,
-                                                    },
-                                                ]}
-                                            />
-                                            <Text
-                                                style={[
-                                                    styles.courseConflictText,
-                                                    {color: theme.black.third},
-                                                ]}>
-                                                {t('淺橙色＝課表時間且已選')}
-                                            </Text>
-                                        </View>
-                                        {coursePrefillError ? (
-                                            <Text
-                                                style={[
-                                                    styles.coursePrefillError,
-                                                    {color: theme.unread},
-                                                ]}>
-                                                {coursePrefillError}
-                                            </Text>
-                                        ) : null}
-                                    </View>
-                                </View>
+                                <CourseSchedulePreviewLegend
+                                    error={coursePrefillError}
+                                />
                                 {coursePrefillLoading ? (
                                     <ActivityIndicator
                                         color={theme.themeColor}
                                     />
                                 ) : (
                                     <Switch
-                                        accessibilityLabel={t('課表預填')}
+                                        accessibilityLabel={t('課表預覽')}
                                         accessibilityRole="switch"
                                         accessibilityState={{
                                             checked:
@@ -1852,40 +1793,6 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         marginBottom: verticalScale(8),
         minHeight: scale(34),
-    },
-    coursePrefillLabelRow: {
-        alignItems: 'center',
-        flex: 1,
-        flexDirection: 'row',
-        marginRight: scale(12),
-    },
-    coursePrefillTextGroup: {
-        marginLeft: scale(8),
-    },
-    coursePrefillLabel: {
-        ...uiStyle.defaultText,
-        fontSize: scale(13),
-        fontWeight: '600',
-    },
-    courseConflictLegend: {
-        alignItems: 'center',
-        flexDirection: 'row',
-        marginTop: verticalScale(2),
-    },
-    courseConflictSwatch: {
-        borderRadius: scale(2),
-        height: scale(8),
-        marginRight: scale(4),
-        width: scale(12),
-    },
-    courseConflictText: {
-        ...uiStyle.defaultText,
-        fontSize: scale(10),
-    },
-    coursePrefillError: {
-        ...uiStyle.defaultText,
-        fontSize: scale(10),
-        marginTop: verticalScale(2),
     },
     sectionTitle: {
         ...uiStyle.defaultText,

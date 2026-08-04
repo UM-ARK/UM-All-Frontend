@@ -7,6 +7,7 @@ import {
     Alert,
     Pressable,
     StyleSheet,
+    Switch,
     Text,
     TextInput,
     View,
@@ -33,6 +34,7 @@ import {
     FULL_WEEK_CANDIDATE_WINDOWS,
 } from '../../utils/scheduling/schedulingModels';
 import {trigger} from '../../utils/trigger';
+import CourseSchedulePreviewLegend from './components/CourseSchedulePreviewLegend';
 import ScheduleWeekGrid from './components/ScheduleWeekGrid';
 import ScheduleTimeRangeInsert from './components/ScheduleTimeRangeInsert';
 import {
@@ -40,6 +42,8 @@ import {
     wallClockDateToOffsetIso,
 } from './components/scheduleWeekHelpers';
 import {clearTeamEventsCache} from './hooks/useTeamEvents';
+import {createCourseSchedulePrefill} from './utils/courseSchedulePrefill';
+import {loadSavedCourseSlots} from './utils/loadSavedCourseSlots';
 import {
     commitCandidateDraft,
     createEmptyDraft,
@@ -98,11 +102,16 @@ const TeamScheduleCreatePage = ({navigation}) => {
     );
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isPainting, setIsPainting] = useState(false);
+    const [coursePrefillEnabled, setCoursePrefillEnabled] = useState(true);
+    const [coursePrefillLoading, setCoursePrefillLoading] = useState(false);
+    const [coursePrefillError, setCoursePrefillError] = useState(null);
+    const [courseConflictKeys, setCourseConflictKeys] = useState([]);
     const [scrollToStartMinute, setScrollToStartMinute] = useState(
         DEFAULT_WEEKLY_SCROLL_MINUTE,
     );
     const submittingRef = useRef(false);
     const allowLeaveRef = useRef(false);
+    const coursePrefillRequestRef = useRef(0);
 
     const hasUnsavedDraft = useMemo(() => {
         const trimmedTitle = title.trim();
@@ -120,6 +129,70 @@ const TeamScheduleCreatePage = ({navigation}) => {
     useEffect(() => {
         navigation.setOptions({headerTitle: t('新建組隊')});
     }, [navigation, t]);
+
+    const loadCoursePrefill = useCallback(async () => {
+        const requestId = coursePrefillRequestRef.current + 1;
+        coursePrefillRequestRef.current = requestId;
+        setCoursePrefillLoading(true);
+        setCoursePrefillError(null);
+        try {
+            const {hasPlan, planSlots} = await loadSavedCourseSlots();
+            if (coursePrefillRequestRef.current !== requestId) {
+                return;
+            }
+            if (!hasPlan) {
+                setCoursePrefillEnabled(false);
+                setCourseConflictKeys([]);
+                setCoursePrefillError(t('尚未建立模擬課表'));
+                return;
+            }
+            if (planSlots.length === 0) {
+                setCoursePrefillEnabled(false);
+                setCourseConflictKeys([]);
+                setCoursePrefillError(t('無法讀取模擬課表'));
+                return;
+            }
+            const result = createCourseSchedulePrefill({
+                candidateWindows: FULL_WEEK_CANDIDATE_WINDOWS,
+                courseSlots: planSlots,
+                slotMinutes: EDIT_SLOT_MINUTES,
+            });
+            setCourseConflictKeys(result.courseConflictKeys);
+            setCoursePrefillEnabled(true);
+        } catch (_error) {
+            setCoursePrefillEnabled(false);
+            setCourseConflictKeys([]);
+            setCoursePrefillError(t('無法讀取模擬課表'));
+        } finally {
+            if (coursePrefillRequestRef.current === requestId) {
+                setCoursePrefillLoading(false);
+            }
+        }
+    }, [t]);
+
+    useEffect(() => {
+        loadCoursePrefill();
+        return () => {
+            coursePrefillRequestRef.current += 1;
+        };
+    }, [loadCoursePrefill]);
+
+    const handleCoursePrefillChange = useCallback(
+        enabled => {
+            trigger();
+            if (enabled) {
+                setCoursePrefillEnabled(true);
+                loadCoursePrefill();
+                return;
+            }
+            coursePrefillRequestRef.current += 1;
+            setCoursePrefillEnabled(false);
+            setCoursePrefillLoading(false);
+            setCoursePrefillError(null);
+            setCourseConflictKeys([]);
+        },
+        [loadCoursePrefill],
+    );
 
     // Native Stack 需用 usePreventRemove，才會在原生返回／手勢前攔截
     usePreventRemove(hasUnsavedDraft, ({data}) => {
@@ -443,11 +516,37 @@ const TeamScheduleCreatePage = ({navigation}) => {
                     {t('已選 {{count}} 格', {count: selectedCount})}
                 </Text>
 
+                <View style={styles.coursePrefillRow}>
+                    <CourseSchedulePreviewLegend
+                        error={coursePrefillError}
+                    />
+                    {coursePrefillLoading ? (
+                        <ActivityIndicator color={theme.themeColor} />
+                    ) : (
+                        <Switch
+                            accessibilityLabel={t('課表預覽')}
+                            accessibilityRole="switch"
+                            accessibilityState={{
+                                checked: coursePrefillEnabled,
+                            }}
+                            value={coursePrefillEnabled}
+                            onValueChange={handleCoursePrefillChange}
+                            trackColor={{
+                                false: theme.tonal.primary15,
+                                true: theme.tonal.primary50,
+                            }}
+                            thumbColor={theme.trueWhite}
+                            ios_backgroundColor={theme.tonal.primary15}
+                        />
+                    )}
+                </View>
+
                 <ScheduleTimeRangeInsert onInsert={handleInsertRange} />
                 <ScheduleWeekGrid
                     mode="candidate"
                     slotMinutes={EDIT_SLOT_MINUTES}
                     draft={draft}
+                    courseConflictKeys={courseConflictKeys}
                     onDraftChange={setDraft}
                     onPaintingChange={setIsPainting}
                     scrollToStartMinute={scrollToStartMinute}
@@ -586,6 +685,14 @@ const styles = StyleSheet.create({
         fontSize: scale(12),
         lineHeight: verticalScale(18),
         marginBottom: verticalScale(4),
+    },
+    coursePrefillRow: {
+        alignItems: 'center',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: verticalScale(8),
+        marginTop: verticalScale(8),
+        minHeight: scale(34),
     },
     submitButton: {
         alignItems: 'center',

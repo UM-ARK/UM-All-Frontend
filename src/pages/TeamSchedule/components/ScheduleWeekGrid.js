@@ -340,6 +340,11 @@ const ScheduleWeekGrid = ({
         let backgroundColor = theme.white;
         if (isCandidateMode) {
             backgroundColor = selected ? theme.tonal.primary30 : theme.white;
+            if (hasCourseConflict) {
+                backgroundColor = selected
+                    ? theme.tonal.secondary30
+                    : theme.tonal.unread15;
+            }
         } else {
             backgroundColor = heatToBackgroundColor(heat, theme, isEditMode);
             if (isEditMode && selected) {

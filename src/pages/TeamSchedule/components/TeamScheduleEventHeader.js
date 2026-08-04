@@ -1,8 +1,8 @@
 /**
- * 組隊詳情頁首：標題、狀態、說明、候選星期、截止、提交進度
+ * 組隊詳情頁首：標題、狀態、說明、截止、提交進度
  */
 import React, {memo} from 'react';
-import {Pressable, StyleSheet, Text, View} from 'react-native';
+import {Pressable, ScrollView, StyleSheet, Text, View} from 'react-native';
 
 import moment from 'moment-timezone';
 import {useTranslation} from 'react-i18next';
@@ -127,17 +127,23 @@ const TeamScheduleEventHeader = ({
                     ) : null}
                 </View>
             </View>
-            <Text style={[styles.title, {color: theme.black.main}]}>
-                {event?.title || t('未命名活動')}
-            </Text>
-            {event?.description ? (
-                <Text style={[styles.description, {color: theme.black.second}]}>
-                    {event.description}
+            <ScrollView
+                nestedScrollEnabled
+                showsVerticalScrollIndicator
+                style={styles.contentScroll}>
+                <Text style={[styles.title, {color: theme.black.main}]}>
+                    {event?.title || t('未命名活動')}
                 </Text>
-            ) : null}
-            <Text style={[styles.metaLine, {color: theme.black.third}]}>
-                {t('每週 24 小時')}
-            </Text>
+                {event?.description ? (
+                    <Text
+                        style={[
+                            styles.description,
+                            {color: theme.black.second},
+                        ]}>
+                        {event.description}
+                    </Text>
+                ) : null}
+            </ScrollView>
             {deadlineLine ? (
                 <Text style={[styles.metaLine, {color: theme.black.third}]}>
                     {deadlineLine}
@@ -210,6 +216,9 @@ const styles = StyleSheet.create({
         ...uiStyle.defaultText,
         fontSize: scale(18),
         fontWeight: '700',
+    },
+    contentScroll: {
+        maxHeight: verticalScale(180),
     },
     description: {
         ...uiStyle.defaultText,
