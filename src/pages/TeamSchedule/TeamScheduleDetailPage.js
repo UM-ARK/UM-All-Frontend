@@ -13,6 +13,7 @@ import {
     ScrollView,
     Share,
     StyleSheet,
+    Switch,
     Text,
     TextInput,
     View,
@@ -76,6 +77,8 @@ import {
     createAvailabilityDraftFromServer,
     insertDraftRange,
 } from './utils/scheduleDraft';
+import {createCourseSchedulePrefill} from './utils/courseSchedulePrefill';
+import {loadSavedCourseSlots} from './utils/loadSavedCourseSlots';
 import {slotKey} from './utils/scheduleRanges';
 import {
     aggregateHeatmapSlots,
@@ -440,6 +443,15 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
     const [deadlinePickerVisible, setDeadlinePickerVisible] = useState(false);
     const [isPainting, setIsPainting] = useState(false);
     const [actionBusy, setActionBusy] = useState(false);
+    const [coursePrefillLoading, setCoursePrefillLoading] = useState(false);
+    const coursePrefillRequestRef = useRef(0);
+
+    useEffect(() => {
+        if (!editor.isEditing) {
+            coursePrefillRequestRef.current += 1;
+            setCoursePrefillLoading(false);
+        }
+    }, [editor.isEditing]);
 
     const handleSlotPress = useCallback(
         slotItem => {
@@ -466,6 +478,120 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
             setScrollToStartMinute(suggestion.startMinute);
         },
         [],
+    );
+
+    const applyCoursePrefill = useCallback(async () => {
+        if (!event || coursePrefillLoading) {
+            return;
+        }
+        const requestId = coursePrefillRequestRef.current + 1;
+        coursePrefillRequestRef.current = requestId;
+        setCoursePrefillLoading(true);
+        try {
+            const {hasPlan, planSlots} = await loadSavedCourseSlots();
+            if (coursePrefillRequestRef.current !== requestId) {
+                return;
+            }
+            if (!hasPlan) {
+                Alert.alert(
+                    t('尚未建立模擬課表'),
+                    t('請先在課表功能加入課程，再回來依課表預填。'),
+                );
+                return;
+            }
+            if (planSlots.length === 0) {
+                Alert.alert(
+                    t('無法讀取模擬課表'),
+                    t('請先更新課表資料，再重新嘗試。'),
+                );
+                return;
+            }
+            const result = createCourseSchedulePrefill({
+                candidateWindows: event.candidateWindows,
+                courseSlots: planSlots,
+                slotMinutes: EDIT_SLOT_MINUTES,
+                timezone: event.timezone,
+                revision: editor.draft.revision,
+            });
+            editor.applyCoursePrefill(
+                result.draft,
+                result.courseConflictKeys,
+            );
+            Alert.alert(
+                t('已依課表預填'),
+                result.courseConflictKeys.length > 0
+                    ? t('與課堂重疊的時段仍可手動選為可用。')
+                    : t('沒有課堂與候選時間重疊，請檢查後儲存。'),
+            );
+        } catch (_error) {
+            Alert.alert(
+                t('無法讀取模擬課表'),
+                t('暫時無法完成，請稍後再試。'),
+            );
+        } finally {
+            if (coursePrefillRequestRef.current === requestId) {
+                setCoursePrefillLoading(false);
+            }
+        }
+    }, [coursePrefillLoading, editor, event, t]);
+
+    const handleCoursePrefillChange = useCallback(
+        enabled => {
+            trigger();
+            if (enabled) {
+                const hasExistingAvailability = isAvailabilitySubmitted(
+                    normalizeAvailability(myAvailability, event?.timezone),
+                );
+                if (editor.isDirty || hasExistingAvailability) {
+                    Alert.alert(
+                        t('依課表重新預填？'),
+                        t('這會取代目前草稿，但不會立即儲存。'),
+                        [
+                            {
+                                text: t('取消'),
+                                style: 'cancel',
+                                onPress: () => trigger(),
+                            },
+                            {
+                                text: t('確定'),
+                                onPress: () => {
+                                    trigger();
+                                    applyCoursePrefill();
+                                },
+                            },
+                        ],
+                    );
+                    return;
+                }
+                applyCoursePrefill();
+                return;
+            }
+
+            if (editor.isCoursePrefillDirty) {
+                Alert.alert(
+                    t('關閉課表預填？'),
+                    t('將還原開啟前的草稿，之後的修改會遺失。'),
+                    [
+                        {
+                            text: t('繼續編輯'),
+                            style: 'cancel',
+                            onPress: () => trigger(),
+                        },
+                        {
+                            text: t('還原'),
+                            style: 'destructive',
+                            onPress: () => {
+                                trigger();
+                                editor.disableCoursePrefill();
+                            },
+                        },
+                    ],
+                );
+                return;
+            }
+            editor.disableCoursePrefill();
+        },
+        [applyCoursePrefill, editor, event?.timezone, myAvailability, t],
     );
 
     const handleConfirmEdit = useCallback(async () => {
@@ -1228,6 +1354,78 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                             </View>
                         ) : null}
                         {editor.isEditing ? (
+                            <View style={styles.coursePrefillRow}>
+                                <View style={styles.coursePrefillLabelRow}>
+                                    <Ionicons
+                                        name="calendar-outline"
+                                        size={scale(18)}
+                                        color={theme.themeColor}
+                                    />
+                                    <View style={styles.coursePrefillTextGroup}>
+                                        <Text
+                                            style={[
+                                                styles.coursePrefillLabel,
+                                                {color: theme.black.main},
+                                            ]}>
+                                            {t('依課表預填')}
+                                        </Text>
+                                        {editor.courseConflictKeys.length > 0 ? (
+                                            <View
+                                                style={
+                                                    styles.courseConflictLegend
+                                                }>
+                                                <View
+                                                    style={[
+                                                        styles.courseConflictDot,
+                                                        {
+                                                            backgroundColor:
+                                                                theme.warning,
+                                                        },
+                                                    ]}
+                                                />
+                                                <Text
+                                                    style={[
+                                                        styles.courseConflictText,
+                                                        {
+                                                            color: theme.black
+                                                                .third,
+                                                        },
+                                                    ]}>
+                                                    {t('課表重疊')}
+                                                </Text>
+                                            </View>
+                                        ) : null}
+                                    </View>
+                                </View>
+                                {coursePrefillLoading ? (
+                                    <ActivityIndicator
+                                        color={theme.themeColor}
+                                    />
+                                ) : (
+                                    <Switch
+                                        accessibilityLabel={t('依課表預填')}
+                                        accessibilityRole="switch"
+                                        accessibilityState={{
+                                            checked:
+                                                editor.isCoursePrefillEnabled,
+                                        }}
+                                        value={editor.isCoursePrefillEnabled}
+                                        onValueChange={
+                                            handleCoursePrefillChange
+                                        }
+                                        trackColor={{
+                                            false: theme.tonal.primary15,
+                                            true: theme.tonal.primary50,
+                                        }}
+                                        thumbColor={theme.trueWhite}
+                                        ios_backgroundColor={
+                                            theme.tonal.primary15
+                                        }
+                                    />
+                                )}
+                            </View>
+                        ) : null}
+                        {editor.isEditing ? (
                             <ScheduleTimeRangeInsert
                                 onInsert={handleInsertRange}
                                 emptyRangeMessage={t(
@@ -1259,6 +1457,7 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                                     ? selfSelectedKeys
                                     : displaySelfSelectedKeys
                             }
+                            courseConflictKeys={editor.courseConflictKeys}
                             draft={editor.draft}
                             onDraftChange={editor.onDraftChange}
                             onPaintingChange={setIsPainting}
@@ -1654,6 +1853,42 @@ const styles = StyleSheet.create({
         ...uiStyle.defaultText,
         fontSize: scale(11),
         fontWeight: '600',
+    },
+    coursePrefillRow: {
+        alignItems: 'center',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: verticalScale(8),
+        minHeight: scale(34),
+    },
+    coursePrefillLabelRow: {
+        alignItems: 'center',
+        flex: 1,
+        flexDirection: 'row',
+        marginRight: scale(12),
+    },
+    coursePrefillTextGroup: {
+        marginLeft: scale(8),
+    },
+    coursePrefillLabel: {
+        ...uiStyle.defaultText,
+        fontSize: scale(13),
+        fontWeight: '600',
+    },
+    courseConflictLegend: {
+        alignItems: 'center',
+        flexDirection: 'row',
+        marginTop: verticalScale(2),
+    },
+    courseConflictDot: {
+        borderRadius: scale(2),
+        height: scale(4),
+        marginRight: scale(4),
+        width: scale(4),
+    },
+    courseConflictText: {
+        ...uiStyle.defaultText,
+        fontSize: scale(10),
     },
     sectionTitle: {
         ...uiStyle.defaultText,

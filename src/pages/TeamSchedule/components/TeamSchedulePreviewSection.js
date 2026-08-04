@@ -120,7 +120,11 @@ const TeamSchedulePreviewSection = forwardRef(
         const showRows = recentEvents.length > 0;
 
         return (
-            <View style={styles.container}>
+            <View
+                style={[
+                    styles.container,
+                    {backgroundColor: theme.white},
+                ]}>
                 <View style={styles.header}>
                     <Text
                         style={[styles.headerTitle, {color: theme.black.main}]}>
@@ -173,7 +177,7 @@ const TeamSchedulePreviewSection = forwardRef(
                                 styles.actionButtonText,
                                 {color: theme.themeColor},
                             ]}>
-                            {t('新建組隊')}
+                            {t('新建')}
                         </Text>
                     </Pressable>
                     <Pressable
@@ -198,28 +202,20 @@ const TeamSchedulePreviewSection = forwardRef(
                                 styles.actionButtonText,
                                 {color: theme.themeColor},
                             ]}>
-                            {t('加入隊伍')}
+                            {t('加入')}
                         </Text>
                     </Pressable>
                 </View>
 
-                <View
-                    style={[
-                        styles.card,
-                        {
-                            backgroundColor: theme.white,
-                            borderColor: theme.themeColorUltraLight,
-                        },
-                        theme.viewShadow,
-                    ]}>
+                <View style={styles.listWrap}>
                     {showSkeleton ? (
-                        <View style={styles.cardInner}>
+                        <View style={styles.listInner}>
                             <TeamScheduleSkeletonList rows={3} />
                         </View>
                     ) : null}
 
                     {showError || showSoftError ? (
-                        <View style={styles.cardInner}>
+                        <View style={styles.listInner}>
                             <TeamScheduleInlineError
                                 message={
                                     error?.message || t('無法載入')
@@ -291,8 +287,11 @@ TeamSchedulePreviewSection.displayName = 'TeamSchedulePreviewSection';
 
 const styles = StyleSheet.create({
     container: {
-        marginTop: verticalScale(10),
+        borderRadius: scale(10),
+        marginTop: verticalScale(8),
         marginBottom: verticalScale(6),
+        paddingBottom: verticalScale(10),
+        overflow: 'hidden',
     },
     header: {
         minHeight: verticalScale(30),
@@ -300,13 +299,13 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-between',
         paddingHorizontal: scale(14),
-        paddingBottom: verticalScale(6),
+        paddingTop: verticalScale(10),
+        paddingBottom: verticalScale(2),
     },
     headerTitle: {
         ...uiStyle.defaultText,
         flexShrink: 1,
         fontSize: scale(14),
-        fontWeight: '700',
     },
     headerAction: {
         flexDirection: 'row',
@@ -324,7 +323,8 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         flexWrap: 'wrap',
         alignItems: 'center',
-        marginHorizontal: scale(14),
+        justifyContent: 'center',
+        paddingHorizontal: scale(14),
         marginBottom: verticalScale(8),
         gap: scale(8),
     },
@@ -341,13 +341,10 @@ const styles = StyleSheet.create({
         fontSize: scale(13),
         fontWeight: '700',
     },
-    card: {
-        marginHorizontal: scale(14),
-        borderRadius: scale(16),
-        borderWidth: StyleSheet.hairlineWidth,
+    listWrap: {
         overflow: 'hidden',
     },
-    cardInner: {
+    listInner: {
         padding: scale(12),
     },
     emptyWrap: {

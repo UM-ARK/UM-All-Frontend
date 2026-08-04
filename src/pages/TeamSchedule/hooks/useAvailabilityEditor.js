@@ -36,9 +36,13 @@ export function useAvailabilityEditor({
     const [draft, setDraft] = useState(null);
     const [isSaving, setIsSaving] = useState(false);
     const [conflictPrompt, setConflictPrompt] = useState(null);
+    const [courseConflictKeys, setCourseConflictKeys] = useState([]);
+    const [isCoursePrefillEnabled, setIsCoursePrefillEnabled] = useState(false);
 
     const serverSnapshotRef = useRef(null);
     const baselineDraftRef = useRef(null);
+    const coursePrefillRestoreDraftRef = useRef(null);
+    const coursePrefillAppliedDraftRef = useRef(null);
     const savingRef = useRef(false);
 
     const candidateWindows = event?.candidateWindows;
@@ -74,8 +78,12 @@ export function useAvailabilityEditor({
         const next = buildDraftFromAvailability(myAvailability);
         serverSnapshotRef.current = myAvailability ?? null;
         baselineDraftRef.current = next;
+        coursePrefillRestoreDraftRef.current = null;
+        coursePrefillAppliedDraftRef.current = null;
         setDraft(next);
         setConflictPrompt(null);
+        setCourseConflictKeys([]);
+        setIsCoursePrefillEnabled(false);
         setIsEditing(true);
     }, [buildDraftFromAvailability, canEdit, event, myAvailability]);
 
@@ -83,7 +91,11 @@ export function useAvailabilityEditor({
         setDraft(null);
         baselineDraftRef.current = null;
         serverSnapshotRef.current = null;
+        coursePrefillRestoreDraftRef.current = null;
+        coursePrefillAppliedDraftRef.current = null;
         setConflictPrompt(null);
+        setCourseConflictKeys([]);
+        setIsCoursePrefillEnabled(false);
         setIsEditing(false);
         setIsSaving(false);
         savingRef.current = false;
@@ -127,7 +139,11 @@ export function useAvailabilityEditor({
             setDraft(null);
             baselineDraftRef.current = null;
             serverSnapshotRef.current = null;
+            coursePrefillRestoreDraftRef.current = null;
+            coursePrefillAppliedDraftRef.current = null;
             setConflictPrompt(null);
+            setCourseConflictKeys([]);
+            setIsCoursePrefillEnabled(false);
             return {ok: true, availability, summaryRevision: nextRevision};
         } catch (requestError) {
             const normalized = normalizeSchedulingError(requestError);
@@ -174,8 +190,12 @@ export function useAvailabilityEditor({
         const next = conflictPrompt.latestDraft;
         baselineDraftRef.current = next;
         serverSnapshotRef.current = conflictPrompt.latestAvailability;
+        coursePrefillRestoreDraftRef.current = null;
+        coursePrefillAppliedDraftRef.current = null;
         setDraft(next);
         setConflictPrompt(null);
+        setCourseConflictKeys([]);
+        setIsCoursePrefillEnabled(false);
     }, [conflictPrompt]);
 
     /**
@@ -190,12 +210,57 @@ export function useAvailabilityEditor({
         if (draft && typeof latestRevision === 'number') {
             const next = {...draft, revision: latestRevision};
             setDraft(next);
+            if (coursePrefillRestoreDraftRef.current) {
+                coursePrefillRestoreDraftRef.current = {
+                    ...coursePrefillRestoreDraftRef.current,
+                    revision: latestRevision,
+                };
+            }
+            if (coursePrefillAppliedDraftRef.current) {
+                coursePrefillAppliedDraftRef.current = {
+                    ...coursePrefillAppliedDraftRef.current,
+                    revision: latestRevision,
+                };
+            }
             if (latest) {
                 serverSnapshotRef.current = latest;
             }
         }
         setConflictPrompt(null);
     }, [conflictPrompt, draft]);
+
+    const applyCoursePrefill = useCallback((nextDraft, nextConflictKeys) => {
+        if (!nextDraft) {
+            return;
+        }
+        coursePrefillRestoreDraftRef.current = draft;
+        coursePrefillAppliedDraftRef.current = nextDraft;
+        setDraft(nextDraft);
+        setCourseConflictKeys(
+            Array.isArray(nextConflictKeys) ? nextConflictKeys : [],
+        );
+        setIsCoursePrefillEnabled(true);
+    }, [draft]);
+
+    const disableCoursePrefill = useCallback(() => {
+        if (coursePrefillRestoreDraftRef.current) {
+            setDraft(coursePrefillRestoreDraftRef.current);
+        }
+        coursePrefillRestoreDraftRef.current = null;
+        coursePrefillAppliedDraftRef.current = null;
+        setCourseConflictKeys([]);
+        setIsCoursePrefillEnabled(false);
+    }, []);
+
+    const isCoursePrefillDirty = useMemo(() => {
+        if (!isCoursePrefillEnabled || !coursePrefillAppliedDraftRef.current) {
+            return false;
+        }
+        return !areDraftSelectionsEqual(
+            draft,
+            coursePrefillAppliedDraftRef.current,
+        );
+    }, [draft, isCoursePrefillEnabled]);
 
     const emptyDraft = useMemo(
         () =>
@@ -213,9 +278,14 @@ export function useAvailabilityEditor({
         isDirty,
         isSaving,
         conflictPrompt,
+        courseConflictKeys,
+        isCoursePrefillEnabled,
+        isCoursePrefillDirty,
         enterEdit,
         discardEdit,
         onDraftChange,
+        applyCoursePrefill,
+        disableCoursePrefill,
         confirmEdit,
         adoptServerAvailability,
         keepEditingAfterConflict,

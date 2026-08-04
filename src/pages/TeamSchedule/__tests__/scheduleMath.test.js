@@ -30,6 +30,10 @@ import {
     resolveGestureMode,
     toggleDraftSlot,
 } from '../utils/scheduleDraft';
+import {
+    createCourseSchedulePrefill,
+    normalizeCourseScheduleSlot,
+} from '../utils/courseSchedulePrefill';
 
 const WINDOWS = [
     {weekday: 1, startMinute: 540, endMinute: 600},
@@ -115,6 +119,77 @@ describe('scheduleRanges 展開與合併', () => {
             30,
         );
         expect(slots.map(slotKey)).toEqual(['1:540', '1:570', '1:840', '1:870']);
+    });
+});
+
+describe('課表預填可用時間', () => {
+    test('候選時間預設可用，課堂重疊格取消選取', () => {
+        const result = createCourseSchedulePrefill({
+            candidateWindows: [
+                {weekday: 1, startMinute: 540, endMinute: 720},
+            ],
+            courseSlots: [
+                {Day: 'MON', 'Time From': '10:00', 'Time To': '11:15'},
+            ],
+            slotMinutes: 15,
+            revision: 3,
+        });
+
+        expect(result.courseConflictKeys).toEqual([
+            '1:600',
+            '1:615',
+            '1:630',
+            '1:645',
+            '1:660',
+        ]);
+        expect(result.draft.revision).toBe(3);
+        expect(result.draft.selectedKeys).toEqual([
+            '1:540',
+            '1:555',
+            '1:570',
+            '1:585',
+            '1:675',
+            '1:690',
+            '1:705',
+        ]);
+    });
+
+    test('課堂只要部分重疊仍標記，使用者可手動改回可用', () => {
+        const result = createCourseSchedulePrefill({
+            candidateWindows: [
+                {weekday: 2, startMinute: 660, endMinute: 720},
+            ],
+            courseSlots: [
+                {Day: 'TUE', 'Time From': '11:07', 'Time To': '11:22'},
+            ],
+            slotMinutes: 15,
+        });
+        const overridden = toggleDraftSlot(result.draft, {
+            weekday: 2,
+            startMinute: 660,
+            endMinute: 675,
+        });
+
+        expect(result.courseConflictKeys).toEqual(['2:660', '2:675']);
+        expect(overridden.selectedKeys).toContain('2:660');
+        expect(result.courseConflictKeys).toContain('2:660');
+    });
+
+    test('忽略無效星期與時間', () => {
+        expect(
+            normalizeCourseScheduleSlot({
+                Day: 'HOLIDAY',
+                'Time From': '10:00',
+                'Time To': '11:00',
+            }),
+        ).toBeNull();
+        expect(
+            normalizeCourseScheduleSlot({
+                Day: 'FRI',
+                'Time From': '12:00',
+                'Time To': '11:00',
+            }),
+        ).toBeNull();
     });
 });
 

@@ -49,6 +49,7 @@ const ScheduleWeekGrid = ({
     candidateWindows,
     heatmapByKey,
     selfSelectedKeys,
+    courseConflictKeys,
     onSlotPress,
     scrollToStartMinute,
 }) => {
@@ -124,6 +125,10 @@ const ScheduleWeekGrid = ({
         }
         return new Set(selfSelectedKeys || []);
     }, [isEditMode, selectedSet, selfSelectedKeys]);
+    const courseConflictSet = useMemo(
+        () => new Set(courseConflictKeys || []),
+        [courseConflictKeys],
+    );
     const heatMap = useMemo(() => {
         if (!heatmapByKey) {
             return null;
@@ -330,6 +335,7 @@ const ScheduleWeekGrid = ({
         const heat = heatMap?.get(key)?.heat ?? 0;
         const selected = selectedSet.has(key);
         const selfOutlined = selfOutlineSet.has(key);
+        const hasCourseConflict = courseConflictSet.has(key);
         const selectable = isSlotEditable(slotItem);
         let backgroundColor = theme.white;
         if (isCandidateMode) {
@@ -356,8 +362,16 @@ const ScheduleWeekGrid = ({
                 }, isCandidateMode && selected && selectable && {
                     borderColor: theme.themeColor,
                     borderWidth: StyleSheet.hairlineWidth * 2,
-                }]}
-            />
+                }]}>
+                {isEditMode && hasCourseConflict ? (
+                    <View
+                        style={[
+                            styles.courseConflictMarker,
+                            {backgroundColor: theme.warning},
+                        ]}
+                    />
+                ) : null}
+            </View>
         );
     };
 
@@ -487,6 +501,14 @@ const styles = StyleSheet.create({
     },
     slotCell: {
         position: 'absolute',
+    },
+    courseConflictMarker: {
+        borderRadius: scale(2),
+        height: scale(3),
+        position: 'absolute',
+        right: scale(1),
+        top: scale(1),
+        width: scale(3),
     },
     gridLineV: {
         position: 'absolute',
