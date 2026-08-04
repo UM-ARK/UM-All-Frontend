@@ -1,5 +1,5 @@
 /**
- * 組隊約時間列表列：標題、候選星期摘要、角色、狀態／截止、chevron
+ * 組隊約時間列表列：標題、建立時間、角色、狀態／截止、chevron
  */
 import React from 'react';
 import {Pressable, StyleSheet, Text, View} from 'react-native';
@@ -48,6 +48,26 @@ function formatDeadlineHint(responseDeadlineAt, timezone, t) {
     return t('{{count}} 日後截止', {count});
 }
 
+/**
+ * 建立時間：活動時區下的絕對時間；無效則不顯示
+ * @param {string|null|undefined} createdAt
+ * @param {string} timezone
+ * @param {(key: string, options?: object) => string} t
+ * @returns {string|null}
+ */
+function formatCreatedAt(createdAt, timezone, t) {
+    if (createdAt == null || createdAt === '') {
+        return null;
+    }
+    const created = moment.tz(createdAt, timezone);
+    if (!created.isValid()) {
+        return null;
+    }
+    return t('建立於 {{time}}', {
+        time: created.format('M月D日 HH:mm'),
+    });
+}
+
 const TeamScheduleEventRow = ({
     item,
     onPress,
@@ -65,6 +85,7 @@ const TeamScheduleEventRow = ({
         : formatDeadlineHint(event.responseDeadlineAt, timezone, t);
     const statusLabel = isClosed ? t('已關閉') : null;
     const roleLabel = isOwner ? t('我建立的') : t('我參加的');
+    const createdAtLabel = formatCreatedAt(event.createdAt, timezone, t);
 
     return (
         <>
@@ -106,11 +127,16 @@ const TeamScheduleEventRow = ({
                         style={[styles.title, {color: theme.black.main}]}>
                         {event.title || t('未命名活動')}
                     </Text>
-                    <Text
-                        numberOfLines={1}
-                        style={[styles.dateLine, {color: theme.black.third}]}>
-                        {t('每週 24 小時')}
-                    </Text>
+                    {createdAtLabel ? (
+                        <Text
+                            numberOfLines={1}
+                            style={[
+                                styles.createdAt,
+                                {color: theme.black.third},
+                            ]}>
+                            {createdAtLabel}
+                        </Text>
+                    ) : null}
                 </View>
                 <Ionicons
                     name="chevron-forward"
@@ -132,12 +158,11 @@ const TeamScheduleEventRow = ({
 
 const styles = StyleSheet.create({
     container: {
-        minHeight: verticalScale(72),
         flexDirection: 'row',
         alignItems: 'center',
         gap: scale(10),
         paddingHorizontal: scale(14),
-        paddingVertical: verticalScale(11),
+        paddingVertical: verticalScale(8),
     },
     content: {
         flex: 1,
@@ -168,11 +193,11 @@ const styles = StyleSheet.create({
         fontWeight: '650',
         lineHeight: verticalScale(18),
     },
-    dateLine: {
+    createdAt: {
         ...uiStyle.defaultText,
         fontSize: scale(11),
-        lineHeight: verticalScale(16),
-        marginTop: verticalScale(3),
+        lineHeight: verticalScale(15),
+        marginTop: verticalScale(2),
     },
     // 與 HarborTopicDetail topicHeaderDivider 一致：內縮髮絲線
     divider: {
