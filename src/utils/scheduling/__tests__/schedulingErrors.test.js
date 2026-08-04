@@ -72,6 +72,21 @@ describe('schedulingErrors', () => {
         expect(JSON.stringify(normalized)).not.toContain('invite-token');
     });
 
+    it('429 標記為可重試', () => {
+        const normalized = normalizeSchedulingError({
+            response: {
+                status: 429,
+                data: {error: {code: 'rate_limited', message: '請稍後再試'}},
+            },
+        });
+
+        expect(normalized).toMatchObject({
+            code: 'rate_limited',
+            status: 429,
+            retryable: true,
+        });
+    });
+
     it('已正規化錯誤直接回傳同一物件', () => {
         const original = createSchedulingError({
             code: 'event_not_found',

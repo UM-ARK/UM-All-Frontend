@@ -44,6 +44,7 @@ import {
     loadHarborLoginIntent,
     saveHarborLoginIntent,
 } from '../utils/harbor/harborLoginIntent';
+import { logoutSchedulingSession } from '../utils/scheduling/schedulingAuth';
 import { syncAppIconBadgeCount } from '../utils/appIconBadge';
 import { getLocalStorage, setLocalStorage } from '../utils/storageKits';
 
@@ -170,6 +171,7 @@ export const HarborSessionProvider = ({ children }) => {
                 return false;
             }
 
+            await logoutSchedulingSession().catch(() => {});
             applySignedOutState('expired');
             await clearHarborCredentials();
             await setLocalStorage(PROFILE_CACHE_KEY, null);
@@ -526,6 +528,8 @@ export const HarborSessionProvider = ({ children }) => {
     const logout = useCallback(async () => {
         const credentials = credentialsRef.current;
         setError(null);
+
+        await logoutSchedulingSession().catch(() => {});
 
         if (credentials) {
             // 先持久化撤銷工作，確保任何時間 crash 都不會遺失需要撤銷的 key。

@@ -1,8 +1,10 @@
+import { Platform } from 'react-native';
 import axios from 'axios';
 
 import { loadHarborCredentials } from '../harbor/harborAuthStorage';
 import {
     clearSchedulingSessionStorage,
+    getSchedulingDeviceId,
     loadSchedulingSession,
     saveSchedulingSession,
 } from './schedulingAuthStorage';
@@ -21,20 +23,80 @@ export const SCHEDULING_BASE_URI = 'http://192.168.1.230:8000/api/v2';
 // export const SCHEDULING_BASE_URI = 'https://umall.one/api/v2';
 
 const REQUEST_TIMEOUT = 15000;
-// 過期前預留約 30 秒，避免邊界請求帶上即將失效的 JWT
-export const SCHEDULING_TOKEN_EXPIRY_SKEW_MS = 30 * 1000;
+// 過期前預留五分鐘，避免邊界請求帶上即將失效的 JWT。
+export const SCHEDULING_TOKEN_EXPIRY_SKEW_MS = 5 * 60 * 1000;
+const AUTH_RETRY_BASE_DELAY_MS = 500;
+const AUTH_RETRY_MAX_DELAY_MS = 5000;
 
-/** @type {{accessToken: string, expiresAt: string, user: object}|null} */
+/** @type {{accessToken: string, expiresAt: string, refreshToken: string, refreshIdleExpiresAt: string, refreshAbsoluteExpiresAt: string, harborReverifyAfter: string, sessionId: string, user: object}|null} */
 let schedulingSession = null;
 /** @type {Promise<object>|null} */
 let exchangeInFlight = null;
+/** @type {Promise<object>|null} */
+let refreshInFlight = null;
+/** @type {Promise<object>|null} */
+let reverifyInFlight = null;
 /** @type {Promise<object|null>|null} */
 let hydrateInFlight = null;
 /** @type {((error: Error) => void)|null} */
 let harborAuthFailureHandler = null;
+let authRetryCount = 0;
+let authCooldownUntil = 0;
 
 export function getSchedulingSession() {
     return schedulingSession;
+}
+
+function hasCompleteSchedulingSession(session) {
+    return Boolean(
+        session?.accessToken &&
+            session?.expiresAt &&
+            session?.refreshToken &&
+            session?.refreshIdleExpiresAt &&
+            session?.refreshAbsoluteExpiresAt &&
+            session?.harborReverifyAfter &&
+            session?.sessionId &&
+            session?.user &&
+            typeof session.accessToken === 'string' &&
+            typeof session.expiresAt === 'string' &&
+            typeof session.refreshToken === 'string' &&
+            typeof session.refreshIdleExpiresAt === 'string' &&
+            typeof session.refreshAbsoluteExpiresAt === 'string' &&
+            typeof session.harborReverifyAfter === 'string' &&
+            typeof session.sessionId === 'string' &&
+            typeof session.user === 'object' &&
+            !Array.isArray(session.user),
+    );
+}
+
+function toSchedulingSession(data, previousSession = null) {
+    const session = {
+        ...data,
+        user: data?.user || previousSession?.user || null,
+    };
+    if (!hasCompleteSchedulingSession(session)) {
+        logSchedulingAuthEvent('auth.invalid_response', {
+            dataKeys:
+                data && typeof data === 'object' ? Object.keys(data) : null,
+        });
+        throw createSchedulingError({
+            code: 'invalid_auth_response',
+            message: '認證回應格式無效',
+            status: null,
+            retryable: false,
+        });
+    }
+
+    return {
+        accessToken: session.accessToken,
+        expiresAt: session.expiresAt,
+        refreshToken: session.refreshToken,
+        refreshIdleExpiresAt: session.refreshIdleExpiresAt,
+        refreshAbsoluteExpiresAt: session.refreshAbsoluteExpiresAt,
+        harborReverifyAfter: session.harborReverifyAfter,
+        sessionId: session.sessionId,
+        user: session.user,
+    };
 }
 
 /**
@@ -43,11 +105,7 @@ export function getSchedulingSession() {
  * @param {{persist?: boolean}=} options persist 預設 true，寫入 SecureStore（非 AsyncStorage）
  */
 export function setSchedulingSession(session, {persist = true} = {}) {
-    if (
-        !session?.accessToken ||
-        !session?.expiresAt ||
-        typeof session.accessToken !== 'string'
-    ) {
+    if (!hasCompleteSchedulingSession(session)) {
         schedulingSession = null;
         if (persist) {
             clearSchedulingSessionStorage().catch(() => {});
@@ -55,11 +113,7 @@ export function setSchedulingSession(session, {persist = true} = {}) {
         return null;
     }
 
-    schedulingSession = {
-        accessToken: session.accessToken,
-        expiresAt: session.expiresAt,
-        user: session.user || null,
-    };
+    schedulingSession = toSchedulingSession(session);
     if (persist) {
         saveSchedulingSession(schedulingSession).catch(() => {});
     }
@@ -67,11 +121,11 @@ export function setSchedulingSession(session, {persist = true} = {}) {
 }
 
 /**
- * 清空記憶體與 SecureStore 中的 Scheduling JWT。
+ * 清空記憶體與 SecureStore 中的 Scheduling session。
  */
 export function clearSchedulingSession() {
     schedulingSession = null;
-    clearSchedulingSessionStorage().catch(() => {});
+    return clearSchedulingSessionStorage().catch(() => {});
 }
 
 export function setSchedulingHarborAuthFailureHandler(handler) {
@@ -82,8 +136,13 @@ export function signalSchedulingHarborAuthFailure(error) {
     harborAuthFailureHandler?.(error);
 }
 
+function clearAndSignalHarborAuthFailure(error) {
+    clearSchedulingSession();
+    signalSchedulingHarborAuthFailure(error);
+}
+
 /**
- * 若 now >= expiresAt - 30s 則視為已過期。
+ * 若 now >= expiresAt - 5min 則視為已過期。
  */
 export function isSchedulingTokenExpired(session, now = Date.now()) {
     if (!session?.accessToken || !session?.expiresAt) {
@@ -98,36 +157,63 @@ export function isSchedulingTokenExpired(session, now = Date.now()) {
     return now >= expiresAtMs - SCHEDULING_TOKEN_EXPIRY_SKEW_MS;
 }
 
-function normalizeExchangeResponse(data) {
-    if (!data?.accessToken || !data?.expiresAt) {
-        logSchedulingAuthEvent('exchange.invalid_response', {
-            hasAccessToken: Boolean(data?.accessToken),
-            hasExpiresAt: Boolean(data?.expiresAt),
-            hasUser: Boolean(data?.user),
-            dataKeys:
-                data && typeof data === 'object' ? Object.keys(data) : null,
-        });
-        throw createSchedulingError({
-            code: 'invalid_exchange_response',
-            message: '換票回應格式無效',
-            status: null,
-            retryable: false,
-        });
-    }
+function isHarborReverificationDue(session, now = Date.now()) {
+    const reverifyAtMs = Date.parse(session?.harborReverifyAfter);
+    return Number.isFinite(reverifyAtMs) && now >= reverifyAtMs;
+}
 
-    // 由 performHarborExchange await 落盤，此處只更新記憶體
-    return setSchedulingSession(
-        {
-            accessToken: data.accessToken,
-            expiresAt: data.expiresAt,
-            user: data.user || null,
-        },
-        {persist: false},
+function isHarborAuthFailure(error) {
+    return (
+        error?.status === 401 &&
+        (error.code === 'harbor_auth_failed' ||
+            error.code === 'harbor_account_mismatch')
     );
 }
 
+function isInvalidRefresh(error) {
+    return (
+        error?.status === 401 &&
+        (error.code === 'invalid_refresh_token' ||
+            error.code === 'refresh_token_reused')
+    );
+}
+
+function createCooldownError() {
+    return createSchedulingError({
+        code: 'scheduling_auth_cooldown',
+        message: '身分服務暫時不可用，請稍後再試',
+        status: null,
+        retryable: true,
+    });
+}
+
+function ensureAuthCooldownHasPassed() {
+    if (Date.now() < authCooldownUntil) {
+        throw createCooldownError();
+    }
+}
+
+function recordAuthFailure(error) {
+    if (!error?.retryable) {
+        return;
+    }
+
+    authRetryCount = Math.min(authRetryCount + 1, 4);
+    const jitterMs = Math.floor(Math.random() * 250);
+    const delayMs = Math.min(
+        AUTH_RETRY_MAX_DELAY_MS,
+        AUTH_RETRY_BASE_DELAY_MS * 2 ** (authRetryCount - 1) + jitterMs,
+    );
+    authCooldownUntil = Date.now() + delayMs;
+}
+
+function resetAuthCooldown() {
+    authRetryCount = 0;
+    authCooldownUntil = 0;
+}
+
 /**
- * 自 SecureStore 還原未過期的 JWT 至記憶體（single-flight）。
+ * 自 SecureStore 還原 session 至記憶體（single-flight）。
  */
 async function hydrateSchedulingSessionFromStorage() {
     if (hydrateInFlight) {
@@ -139,24 +225,11 @@ async function hydrateSchedulingSessionFromStorage() {
         if (!stored) {
             return null;
         }
-        if (isSchedulingTokenExpired(stored)) {
-            logSchedulingAuthEvent('session.secure_store_expired', {
-                expiresAt: stored.expiresAt,
-            });
+        if (!hasCompleteSchedulingSession(stored)) {
             await clearSchedulingSessionStorage();
-            if (
-                schedulingSession?.accessToken === stored.accessToken
-            ) {
-                schedulingSession = null;
-            }
             return null;
         }
-        // 已在盤上，只灌記憶體，避免重複寫入
-        schedulingSession = {
-            accessToken: stored.accessToken,
-            expiresAt: stored.expiresAt,
-            user: stored.user || null,
-        };
+        schedulingSession = toSchedulingSession(stored);
         return schedulingSession;
     })().finally(() => {
         if (hydrateInFlight === request) {
@@ -168,35 +241,44 @@ async function hydrateSchedulingSessionFromStorage() {
     return request;
 }
 
-async function performHarborExchange() {
-    const startedAt = Date.now();
+async function getHarborCredentialsOrThrow() {
     const credentials = await loadHarborCredentials();
     if (!credentials?.userApiKey || !credentials?.clientId) {
-        const authError = createSchedulingError({
+        throw createSchedulingError({
             code: 'authentication_required',
             message: '請先登入 Harbor',
             status: 401,
             retryable: false,
         });
-        logSchedulingAuthError('exchange.failed', authError, {
-            stage: 'credentials',
-            hasUserApiKey: Boolean(credentials?.userApiKey),
-            hasClientId: Boolean(credentials?.clientId),
-            durationMs: Date.now() - startedAt,
-        });
-        throw authError;
     }
+    return credentials;
+}
 
-    logSchedulingAuthEvent('exchange.start', {
-        url: `${SCHEDULING_BASE_URI}/auth/harbor/exchange`,
-        hasCredentials: true,
-    });
+async function saveAuthenticatedSession(data, previousSession = null) {
+    const session = toSchedulingSession(data, previousSession);
+    // rotation 後必須先落盤，才可讓等候中的 API 使用新 token。
+    await saveSchedulingSession(session);
+    schedulingSession = session;
+    resetAuthCooldown();
+    return session;
+}
+
+async function performHarborExchange() {
+    const startedAt = Date.now();
+    ensureAuthCooldownHasPassed();
+    const [credentials, deviceId] = await Promise.all([
+        getHarborCredentialsOrThrow(),
+        getSchedulingDeviceId(),
+    ]);
 
     try {
-        // Harbor key 只能出現在此換票請求，不得帶入其他組隊 API
         const response = await axios.post(
             `${SCHEDULING_BASE_URI}/auth/harbor/exchange`,
-            {},
+            {
+                deviceId,
+                deviceName: null,
+                platform: Platform.OS,
+            },
             {
                 timeout: REQUEST_TIMEOUT,
                 headers: {
@@ -207,90 +289,165 @@ async function performHarborExchange() {
                 },
             },
         );
-        const session = normalizeExchangeResponse(response.data);
-        // 確保換票成功後 JWT 已落盤，冷啟動可重用至 expiresAt
-        if (session) {
-            try {
-                await saveSchedulingSession(session);
-            } catch (persistError) {
-                logSchedulingAuthError('session.persist_failed', persistError, {
-                    expiresAt: session.expiresAt,
-                });
-            }
-        }
-        logSchedulingAuthEvent('exchange.success', {
-            httpStatus: response.status,
-            expiresAt: session.expiresAt,
-            hasUser: Boolean(session.user),
-            durationMs: Date.now() - startedAt,
-        });
-        return session;
+        return await saveAuthenticatedSession(response.data);
     } catch (error) {
         const normalized = normalizeSchedulingError(error);
+        recordAuthFailure(normalized);
         logSchedulingAuthError('exchange.failed', normalized, {
-            stage: 'request',
-            axiosCode: error?.isAxiosError ? error.code : null,
-            rawHttpStatus: error?.response?.status ?? null,
             durationMs: Date.now() - startedAt,
         });
-        // 503 harbor_unavailable：可重試，不應視為 Harbor 登出
-        if (
-            normalized.status === 401 &&
-            normalized.code === 'harbor_auth_failed'
-        ) {
-            clearSchedulingSession();
-            signalSchedulingHarborAuthFailure(normalized);
+        if (isHarborAuthFailure(normalized)) {
+            clearAndSignalHarborAuthFailure(normalized);
         }
         throw normalized;
     }
 }
 
-/**
- * 以 Harbor 憑證換取 Scheduling JWT；同一時間只允許一個 in-flight promise。
- */
-export function exchangeSchedulingToken() {
-    if (exchangeInFlight) {
-        logSchedulingAuthEvent('exchange.reuse_inflight');
-        return exchangeInFlight;
+async function performRefresh(session) {
+    ensureAuthCooldownHasPassed();
+    try {
+        const response = await axios.post(
+            `${SCHEDULING_BASE_URI}/auth/refresh`,
+            {refreshToken: session.refreshToken},
+            {timeout: REQUEST_TIMEOUT},
+        );
+        return await saveAuthenticatedSession(response.data, session);
+    } catch (error) {
+        const normalized = normalizeSchedulingError(error);
+        recordAuthFailure(normalized);
+        if (isHarborAuthFailure(normalized)) {
+            clearAndSignalHarborAuthFailure(normalized);
+        }
+        throw normalized;
     }
+}
 
-    logSchedulingAuthEvent('exchange.enqueue');
-    const request = performHarborExchange().finally(() => {
-        if (exchangeInFlight === request) {
-            exchangeInFlight = null;
+async function performHarborReverify(session) {
+    ensureAuthCooldownHasPassed();
+    const [credentials, deviceId] = await Promise.all([
+        getHarborCredentialsOrThrow(),
+        getSchedulingDeviceId(),
+    ]);
+    try {
+        const response = await axios.post(
+            `${SCHEDULING_BASE_URI}/auth/harbor/reverify`,
+            {refreshToken: session.refreshToken, deviceId},
+            {
+                timeout: REQUEST_TIMEOUT,
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json',
+                    'User-Api-Key': credentials.userApiKey,
+                    'User-Api-Client-Id': credentials.clientId,
+                },
+            },
+        );
+        return await saveAuthenticatedSession(response.data, session);
+    } catch (error) {
+        const normalized = normalizeSchedulingError(error);
+        recordAuthFailure(normalized);
+        if (isHarborAuthFailure(normalized)) {
+            clearAndSignalHarborAuthFailure(normalized);
+        }
+        throw normalized;
+    }
+}
+
+function runSingleFlight(current, setCurrent, operation) {
+    if (current()) {
+        return current();
+    }
+    const request = operation().finally(() => {
+        if (current() === request) {
+            setCurrent(null);
         }
     });
-    exchangeInFlight = request;
+    setCurrent(request);
     return request;
 }
 
+/** 以 Harbor 憑證換取 Scheduling token。 */
+export function exchangeSchedulingToken() {
+    return runSingleFlight(
+        () => exchangeInFlight,
+        value => {
+            exchangeInFlight = value;
+        },
+        performHarborExchange,
+    );
+}
+
+/** 使用 refresh token 續期；與 exchange 採獨立 single-flight。 */
+export function refreshSchedulingToken(session = schedulingSession) {
+    if (!session?.refreshToken) {
+        return exchangeSchedulingToken();
+    }
+    return runSingleFlight(
+        () => refreshInFlight,
+        value => {
+            refreshInFlight = value;
+        },
+        () => performRefresh(session),
+    );
+}
+
+/** 使用現有 Harbor 憑證重新驗證目前裝置 session。 */
+export function reverifySchedulingSession(session = schedulingSession) {
+    if (!session?.refreshToken) {
+        return exchangeSchedulingToken();
+    }
+    return runSingleFlight(
+        () => reverifyInFlight,
+        value => {
+            reverifyInFlight = value;
+        },
+        () => performHarborReverify(session),
+    );
+}
+
+async function refreshOrReverify(session) {
+    try {
+        if (isHarborReverificationDue(session)) {
+            return await reverifySchedulingSession(session);
+        }
+        try {
+            return await refreshSchedulingToken(session);
+        } catch (error) {
+            if (error.code === 'harbor_reverification_required') {
+                return await reverifySchedulingSession(session);
+            }
+            throw error;
+        }
+    } catch (error) {
+        if (isInvalidRefresh(error)) {
+            await clearSchedulingSession();
+            return exchangeSchedulingToken();
+        }
+        throw error;
+    }
+}
+
 /**
- * 記憶體或 SecureStore 中的 JWT 仍有效則直接回傳，否則觸發 single-flight exchange。
+ * 有效 access token 直接回傳；接近到期時 refresh 或 reverify。
  */
 export async function ensureSchedulingSession() {
-    const current = getSchedulingSession();
-    if (current && !isSchedulingTokenExpired(current)) {
-        logSchedulingAuthEvent('session.cache_hit', {
-            source: 'memory',
-            expiresAt: current.expiresAt,
-        });
-        return current;
+    if (refreshInFlight) {
+        return refreshInFlight;
     }
-
-    const hydrated = await hydrateSchedulingSessionFromStorage();
-    if (hydrated && !isSchedulingTokenExpired(hydrated)) {
-        logSchedulingAuthEvent('session.cache_hit', {
-            source: 'secure_store',
-            expiresAt: hydrated.expiresAt,
-        });
-        return hydrated;
+    if (reverifyInFlight) {
+        return reverifyInFlight;
     }
-
-    logSchedulingAuthEvent('session.cache_miss', {
-        hasSession: Boolean(current),
-        expiresAt: current?.expiresAt ?? null,
-    });
-    return exchangeSchedulingToken();
+    let session = getSchedulingSession();
+    if (!session) {
+        session = await hydrateSchedulingSessionFromStorage();
+    }
+    if (!session) {
+        return exchangeSchedulingToken();
+    }
+    if (!isSchedulingTokenExpired(session)) {
+        return session;
+    }
+    return refreshOrReverify(session);
 }
 
 export async function ensureSchedulingAccessToken() {
@@ -298,10 +455,47 @@ export async function ensureSchedulingAccessToken() {
     return session.accessToken;
 }
 
+/**
+ * API 已確認 access token 失效時，直接使用仍有效的 refresh chain 恢復一次。
+ */
+export async function refreshSchedulingAfterUnauthorized() {
+    const session =
+        schedulingSession || (await hydrateSchedulingSessionFromStorage());
+    if (!session) {
+        return exchangeSchedulingToken();
+    }
+    // 原 access token 已被服務端拒絕，refresh 進行期間不可再供其他請求重用。
+    schedulingSession = null;
+    return refreshOrReverify(session);
+}
+
+/**
+ * 撤銷目前裝置的 refresh session；網絡失敗仍清除本機資料。
+ */
+export async function logoutSchedulingSession() {
+    const session =
+        schedulingSession || (await hydrateSchedulingSessionFromStorage());
+    try {
+        if (session?.refreshToken) {
+            await axios.post(
+                `${SCHEDULING_BASE_URI}/auth/logout`,
+                {refreshToken: session.refreshToken},
+                {timeout: REQUEST_TIMEOUT},
+            );
+        }
+    } finally {
+        schedulingSession = null;
+        await clearSchedulingSessionStorage();
+    }
+}
+
 /** 測試用：重置模組狀態 */
 export function __resetSchedulingAuthForTests() {
     schedulingSession = null;
     exchangeInFlight = null;
+    refreshInFlight = null;
+    reverifyInFlight = null;
     hydrateInFlight = null;
     harborAuthFailureHandler = null;
+    resetAuthCooldown();
 }

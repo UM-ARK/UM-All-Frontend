@@ -4,7 +4,7 @@ import {
     SCHEDULING_BASE_URI,
     clearSchedulingSession,
     ensureSchedulingAccessToken,
-    exchangeSchedulingToken,
+    refreshSchedulingAfterUnauthorized,
     signalSchedulingHarborAuthFailure,
 } from './schedulingAuth';
 import {normalizeSchedulingError} from './schedulingErrors';
@@ -38,7 +38,7 @@ function shouldReexchangeOnUnauthorized(error) {
 }
 
 /**
- * 帶 Bearer JWT 的請求；遇 401 invalid_token 時清票、換票並最多重試一次。
+ * 帶 Bearer JWT 的請求；遇 401 invalid_token 時 refresh 並最多重試一次。
  */
 async function requestWithAuth(config, hasRetried = false) {
     const accessToken = await ensureSchedulingAccessToken();
@@ -59,14 +59,14 @@ async function requestWithAuth(config, hasRetried = false) {
             !hasRetried &&
             shouldReexchangeOnUnauthorized(normalized)
         ) {
-            clearSchedulingSession();
-            await exchangeSchedulingToken();
+            await refreshSchedulingAfterUnauthorized();
             return requestWithAuth(config, true);
         }
 
         if (
             normalized.status === 401 &&
-            normalized.code === 'harbor_auth_failed'
+            (normalized.code === 'harbor_auth_failed' ||
+                normalized.code === 'harbor_account_mismatch')
         ) {
             clearSchedulingSession();
             signalSchedulingHarborAuthFailure(normalized);

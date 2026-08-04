@@ -67,6 +67,7 @@ export function normalizeSchedulingError(error) {
         '暫時無法完成，請稍後再試';
 
     const retryable =
+        status === 429 ||
         status === 503 ||
         RETRYABLE_CODES.has(code) ||
         code === 'ECONNABORTED' ||

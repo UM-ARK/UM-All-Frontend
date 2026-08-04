@@ -6,6 +6,7 @@ jest.mock('../schedulingAuthStorage', () => ({
     loadSchedulingSession: jest.fn(async () => null),
     saveSchedulingSession: jest.fn(async () => {}),
     clearSchedulingSessionStorage: jest.fn(async () => {}),
+    getSchedulingDeviceId: jest.fn(async () => 'device-id'),
 }));
 
 const mockAuthStorage = jest.requireMock('../../harbor/harborAuthStorage');
@@ -43,25 +44,30 @@ describe('schedulingApi 授權與重試', () => {
         __resetSchedulingAuthForTests();
     });
 
-    function mockExchange(accessToken = 'jwt-1') {
-        axiosPostSpy.mockResolvedValue({
-            data: {
-                accessToken,
-                tokenType: 'Bearer',
-                expiresAt: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
-                user: {harborUserId: 7, username: 'ark'},
-            },
-        });
+    function makeSession(overrides = {}) {
+        return {
+            accessToken: 'jwt-1',
+            expiresAt: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
+            refreshToken: 'refresh-token',
+            refreshIdleExpiresAt: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString(),
+            refreshAbsoluteExpiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+            harborReverifyAfter: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
+            sessionId: 'session-id',
+            user: {harborUserId: 7, username: 'ark'},
+            ...overrides,
+        };
     }
 
-    it('401 invalid_token 時清票、換票並只重試原請求一次', async () => {
-        setSchedulingSession({
-            accessToken: 'stale-jwt',
-            expiresAt: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
-            user: {harborUserId: 7},
-        });
+    function mockAuthResponse(accessToken = 'jwt-1') {
+        return {data: makeSession({accessToken})};
+    }
 
-        mockExchange('fresh-jwt');
+    it('401 invalid_token 時 refresh 並只重試原請求一次', async () => {
+        setSchedulingSession(makeSession({
+            accessToken: 'stale-jwt',
+        }));
+
+        axiosPostSpy.mockResolvedValue(mockAuthResponse('fresh-jwt'));
 
         httpRequestSpy
             .mockRejectedValueOnce({
@@ -94,6 +100,11 @@ describe('schedulingApi 授權與重試', () => {
         const result = await getTeamEvent('evt-1');
         expect(result).toEqual({event: {eventId: 'evt-1'}});
         expect(axiosPostSpy).toHaveBeenCalledTimes(1);
+        expect(axiosPostSpy).toHaveBeenCalledWith(
+            expect.stringMatching(/\/auth\/refresh$/),
+            {refreshToken: 'refresh-token'},
+            expect.any(Object),
+        );
         expect(httpRequestSpy).toHaveBeenCalledTimes(2);
 
         expect(httpRequestSpy.mock.calls[0][0]).toMatchObject({
@@ -114,28 +125,9 @@ describe('schedulingApi 授權與重試', () => {
     });
 
     it('重試後仍 401 時不再無限交換', async () => {
-        mockExchange('jwt-a');
         axiosPostSpy
-            .mockResolvedValueOnce({
-                data: {
-                    accessToken: 'jwt-a',
-                    tokenType: 'Bearer',
-                    expiresAt: new Date(
-                        Date.now() + 30 * 60 * 1000,
-                    ).toISOString(),
-                    user: {harborUserId: 7},
-                },
-            })
-            .mockResolvedValueOnce({
-                data: {
-                    accessToken: 'jwt-b',
-                    tokenType: 'Bearer',
-                    expiresAt: new Date(
-                        Date.now() + 30 * 60 * 1000,
-                    ).toISOString(),
-                    user: {harborUserId: 7},
-                },
-            });
+            .mockResolvedValueOnce(mockAuthResponse('jwt-a'))
+            .mockResolvedValueOnce(mockAuthResponse('jwt-b'));
 
         httpRequestSpy.mockRejectedValue({
             response: {
@@ -154,17 +146,15 @@ describe('schedulingApi 授權與重試', () => {
             status: 401,
         });
 
-        // 初次 ensure 一次 + invalid_token 後再 exchange 一次
+        // 初次 exchange 一次 + invalid_token 後 refresh 一次
         expect(axiosPostSpy).toHaveBeenCalledTimes(2);
         expect(httpRequestSpy).toHaveBeenCalledTimes(2);
     });
 
     it('401 harbor_auth_failed 不清無限重試，錯誤不含敏感資訊', async () => {
-        setSchedulingSession({
+        setSchedulingSession(makeSession({
             accessToken: 'jwt-ok',
-            expiresAt: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
-            user: {harborUserId: 7},
-        });
+        }));
 
         httpRequestSpy.mockRejectedValue({
             response: {
@@ -211,11 +201,9 @@ describe('schedulingApi 授權與重試', () => {
     });
 
     it('路徑參數會 encodeURIComponent', async () => {
-        setSchedulingSession({
+        setSchedulingSession(makeSession({
             accessToken: 'jwt-ok',
-            expiresAt: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
-            user: {harborUserId: 7},
-        });
+        }));
         httpRequestSpy.mockResolvedValue({
             data: {ok: true},
         });

@@ -6,6 +6,7 @@ jest.mock('../schedulingAuthStorage', () => ({
     loadSchedulingSession: jest.fn(async () => null),
     saveSchedulingSession: jest.fn(async () => {}),
     clearSchedulingSessionStorage: jest.fn(async () => {}),
+    getSchedulingDeviceId: jest.fn(async () => 'device-id'),
 }));
 
 const mockAuthStorage = jest.requireMock('../../harbor/harborAuthStorage');
@@ -21,6 +22,9 @@ import {
     ensureSchedulingSession,
     getSchedulingSession,
     isSchedulingTokenExpired,
+    logoutSchedulingSession,
+    refreshSchedulingToken,
+    reverifySchedulingSession,
     setSchedulingHarborAuthFailureHandler,
     setSchedulingSession,
 } from '../schedulingAuth';
@@ -51,6 +55,11 @@ describe('schedulingAuth', () => {
                 accessToken: 'jwt-token',
                 tokenType: 'Bearer',
                 expiresAt,
+                refreshToken: 'refresh-token',
+                refreshIdleExpiresAt: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString(),
+                refreshAbsoluteExpiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+                harborReverifyAfter: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
+                sessionId: 'session-id',
                 user: {
                     harborUserId: 42,
                     username: 'ark',
@@ -61,6 +70,20 @@ describe('schedulingAuth', () => {
             },
         });
         return expiresAt;
+    }
+
+    function makeSession(overrides = {}) {
+        return {
+            accessToken: 'jwt-token',
+            expiresAt: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
+            refreshToken: 'refresh-token',
+            refreshIdleExpiresAt: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString(),
+            refreshAbsoluteExpiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+            harborReverifyAfter: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
+            sessionId: 'session-id',
+            user: {harborUserId: 42, username: 'ark'},
+            ...overrides,
+        };
     }
 
     it('exchange 共用同一個 in-flight promise（single-flight）', async () => {
@@ -78,6 +101,7 @@ describe('schedulingAuth', () => {
         // loadHarborCredentials 為 async，需等到後續 microtask 才會呼叫 axios.post
         await Promise.resolve();
         await Promise.resolve();
+        await Promise.resolve();
         expect(postSpy).toHaveBeenCalledTimes(1);
 
         const expiresAt = new Date(Date.now() + 30 * 60 * 1000).toISOString();
@@ -86,6 +110,11 @@ describe('schedulingAuth', () => {
                 accessToken: 'jwt-token',
                 tokenType: 'Bearer',
                 expiresAt,
+                refreshToken: 'refresh-token',
+                refreshIdleExpiresAt: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString(),
+                refreshAbsoluteExpiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+                harborReverifyAfter: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
+                sessionId: 'session-id',
                 user: {harborUserId: 1, username: 'u'},
             },
         });
@@ -95,7 +124,11 @@ describe('schedulingAuth', () => {
         expect(postSpy).toHaveBeenCalledTimes(1);
         expect(postSpy).toHaveBeenCalledWith(
             `${SCHEDULING_BASE_URI}/auth/harbor/exchange`,
-            {},
+            {
+                deviceId: 'device-id',
+                deviceName: null,
+                platform: expect.any(String),
+            },
             expect.objectContaining({
                 headers: expect.objectContaining({
                     'User-Api-Key': 'harbor-key',
@@ -109,11 +142,9 @@ describe('schedulingAuth', () => {
         );
     });
 
-    it('expiresAt 前 30 秒即視為過期', () => {
+    it('expiresAt 前五分鐘即視為過期', () => {
         const now = Date.parse('2026-08-03T12:00:00.000Z');
-        const expiresAt = new Date(
-            now + SCHEDULING_TOKEN_EXPIRY_SKEW_MS,
-        ).toISOString();
+        const expiresAt = new Date(now + SCHEDULING_TOKEN_EXPIRY_SKEW_MS).toISOString();
 
         expect(
             isSchedulingTokenExpired(
@@ -142,11 +173,9 @@ describe('schedulingAuth', () => {
 
     it('記憶體空且 SecureStore 有效時 ensure 不換票', async () => {
         const expiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString();
-        mockSessionStorage.loadSchedulingSession.mockResolvedValue({
-            accessToken: 'stored-jwt',
-            expiresAt,
-            user: {harborUserId: 9, username: 'stored'},
-        });
+        mockSessionStorage.loadSchedulingSession.mockResolvedValue(
+            makeSession({accessToken: 'stored-jwt', expiresAt}),
+        );
 
         const session = await ensureSchedulingSession();
         expect(postSpy).not.toHaveBeenCalled();
@@ -154,37 +183,33 @@ describe('schedulingAuth', () => {
         expect(getSchedulingSession()?.accessToken).toBe('stored-jwt');
     });
 
-    it('SecureStore 過期時會清盤並重新換票', async () => {
+    it('SecureStore 接近過期時以 refresh token 續期', async () => {
         const expiredAt = new Date(
             Date.now() + SCHEDULING_TOKEN_EXPIRY_SKEW_MS - 1000,
         ).toISOString();
-        mockSessionStorage.loadSchedulingSession.mockResolvedValue({
-            accessToken: 'expired-jwt',
-            expiresAt: expiredAt,
-            user: {harborUserId: 1},
-        });
+        mockSessionStorage.loadSchedulingSession.mockResolvedValue(
+            makeSession({accessToken: 'expired-jwt', expiresAt: expiredAt}),
+        );
         mockExchangeSuccess({accessToken: 'fresh-jwt'});
 
         const session = await ensureSchedulingSession();
-        expect(
-            mockSessionStorage.clearSchedulingSessionStorage,
-        ).toHaveBeenCalled();
         expect(postSpy).toHaveBeenCalledTimes(1);
+        expect(postSpy).toHaveBeenCalledWith(
+            `${SCHEDULING_BASE_URI}/auth/refresh`,
+            {refreshToken: 'refresh-token'},
+            expect.any(Object),
+        );
         expect(session.accessToken).toBe('fresh-jwt');
     });
 
-    it('接近過期時 ensureSchedulingSession 會重新換票', async () => {
+    it('接近過期時 ensureSchedulingSession 會 refresh', async () => {
         const almostExpired = new Date(
             Date.now() + SCHEDULING_TOKEN_EXPIRY_SKEW_MS - 1000,
         ).toISOString();
-        setSchedulingSession(
-            {
-                accessToken: 'old-jwt',
-                expiresAt: almostExpired,
-                user: {harborUserId: 1},
-            },
-            {persist: false},
-        );
+        setSchedulingSession(makeSession({
+            accessToken: 'old-jwt',
+            expiresAt: almostExpired,
+        }), {persist: false});
 
         mockExchangeSuccess({accessToken: 'new-jwt'});
         const session = await ensureSchedulingSession();
@@ -261,5 +286,171 @@ describe('schedulingAuth', () => {
         });
         expect(handler).not.toHaveBeenCalled();
         expect(getSchedulingSession()).toBeNull();
+    });
+
+    it('429 會建立冷卻時間，避免重複 exchange storm', async () => {
+        postSpy.mockRejectedValue({
+            response: {
+                status: 429,
+                data: {error: {code: 'rate_limited', message: '請稍後再試'}},
+            },
+        });
+
+        await expect(exchangeSchedulingToken()).rejects.toMatchObject({
+            code: 'rate_limited',
+            retryable: true,
+        });
+        await expect(exchangeSchedulingToken()).rejects.toMatchObject({
+            code: 'scheduling_auth_cooldown',
+            retryable: true,
+        });
+        expect(postSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('refresh 共用獨立 in-flight promise，且落盤後才完成', async () => {
+        setSchedulingSession(makeSession(), {persist: false});
+        let resolvePost;
+        let resolveSave;
+        postSpy.mockReturnValue(new Promise(resolve => {
+            resolvePost = resolve;
+        }));
+        mockSessionStorage.saveSchedulingSession.mockReturnValue(
+            new Promise(resolve => {
+                resolveSave = resolve;
+            }),
+        );
+
+        const first = refreshSchedulingToken();
+        const second = refreshSchedulingToken();
+        expect(first).toBe(second);
+        await Promise.resolve();
+        resolvePost({data: makeSession({accessToken: 'fresh-jwt'})});
+        let resolved = false;
+        first.then(() => {
+            resolved = true;
+        });
+        await Promise.resolve();
+        expect(resolved).toBe(false);
+        resolveSave();
+        await expect(first).resolves.toMatchObject({accessToken: 'fresh-jwt'});
+        expect(postSpy).toHaveBeenCalledWith(
+            `${SCHEDULING_BASE_URI}/auth/refresh`,
+            {refreshToken: 'refresh-token'},
+            expect.any(Object),
+        );
+    });
+
+    it('refresh 未回 user snapshot 時保留既有 snapshot', async () => {
+        const session = makeSession({
+            user: {harborUserId: 42, username: 'ark'},
+        });
+        setSchedulingSession(session, {persist: false});
+        postSpy.mockResolvedValue({
+            data: {
+                ...makeSession({accessToken: 'fresh-jwt'}),
+                user: undefined,
+            },
+        });
+
+        await expect(refreshSchedulingToken()).resolves.toMatchObject({
+            accessToken: 'fresh-jwt',
+            user: session.user,
+        });
+    });
+
+    it('reverify 使用 Harbor 憑證與同一裝置，不會改走 exchange', async () => {
+        setSchedulingSession(makeSession(), {persist: false});
+        mockExchangeSuccess({accessToken: 'reverified-jwt'});
+
+        await reverifySchedulingSession();
+
+        expect(postSpy).toHaveBeenCalledWith(
+            `${SCHEDULING_BASE_URI}/auth/harbor/reverify`,
+            {refreshToken: 'refresh-token', deviceId: 'device-id'},
+            expect.objectContaining({
+                headers: expect.objectContaining({
+                    'User-Api-Key': 'harbor-key',
+                    'User-Api-Client-Id': 'harbor-client',
+                }),
+            }),
+        );
+    });
+
+    it('缺少 refresh contract 欄位時拒絕回應且不保留 access token', async () => {
+        postSpy.mockResolvedValue({
+            data: {accessToken: 'jwt-token', expiresAt: new Date().toISOString()},
+        });
+
+        await expect(exchangeSchedulingToken()).rejects.toMatchObject({
+            code: 'invalid_auth_response',
+        });
+        expect(getSchedulingSession()).toBeNull();
+    });
+
+    it('invalid_refresh_token 清盤後只重新 exchange 一次', async () => {
+        setSchedulingSession(makeSession({
+            expiresAt: new Date(
+                Date.now() + SCHEDULING_TOKEN_EXPIRY_SKEW_MS - 1,
+            ).toISOString(),
+        }), {persist: false});
+        postSpy
+            .mockRejectedValueOnce({
+                response: {
+                    status: 401,
+                    data: {error: {code: 'invalid_refresh_token'}},
+                },
+            })
+            .mockResolvedValueOnce({data: makeSession({accessToken: 'exchanged-jwt'})});
+
+        await expect(ensureSchedulingSession()).resolves.toMatchObject({
+            accessToken: 'exchanged-jwt',
+        });
+        expect(postSpy.mock.calls[0][0]).toBe(
+            `${SCHEDULING_BASE_URI}/auth/refresh`,
+        );
+        expect(postSpy.mock.calls[1][0]).toBe(
+            `${SCHEDULING_BASE_URI}/auth/harbor/exchange`,
+        );
+    });
+
+    it('reverify 的 invalid_refresh_token 也只清盤並重新 exchange 一次', async () => {
+        setSchedulingSession(makeSession({
+            expiresAt: new Date(
+                Date.now() + SCHEDULING_TOKEN_EXPIRY_SKEW_MS - 1,
+            ).toISOString(),
+            harborReverifyAfter: new Date(Date.now() - 1).toISOString(),
+        }), {persist: false});
+        postSpy
+            .mockRejectedValueOnce({
+                response: {
+                    status: 401,
+                    data: {error: {code: 'invalid_refresh_token'}},
+                },
+            })
+            .mockResolvedValueOnce({data: makeSession({accessToken: 'exchanged-jwt'})});
+
+        await expect(ensureSchedulingSession()).resolves.toMatchObject({
+            accessToken: 'exchanged-jwt',
+        });
+        expect(postSpy.mock.calls[0][0]).toBe(
+            `${SCHEDULING_BASE_URI}/auth/harbor/reverify`,
+        );
+        expect(postSpy.mock.calls[1][0]).toBe(
+            `${SCHEDULING_BASE_URI}/auth/harbor/exchange`,
+        );
+    });
+
+    it('logout 帶 refresh token，網絡失敗仍清除 session', async () => {
+        setSchedulingSession(makeSession(), {persist: false});
+        postSpy.mockRejectedValue(new Error('offline'));
+
+        await expect(logoutSchedulingSession()).rejects.toThrow('offline');
+        expect(postSpy).toHaveBeenCalledWith(
+            `${SCHEDULING_BASE_URI}/auth/logout`,
+            {refreshToken: 'refresh-token'},
+            expect.any(Object),
+        );
+        expect(getSchedulingSession()).toBeNull();
+        expect(mockSessionStorage.clearSchedulingSessionStorage).toHaveBeenCalled();
     });
 });
