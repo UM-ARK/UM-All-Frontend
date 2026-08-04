@@ -118,6 +118,29 @@ export function applyDraftGesture(draft, slots, mode) {
 }
 
 /**
+ * 將指定時段內的可用 slots 批次加入草稿
+ * @param {object} draft
+ * @param {{weekday: number, startMinute: number, endMinute: number}} range
+ * @param {Array} availableSlots
+ * @returns {object}
+ */
+export function insertDraftRange(draft, range, availableSlots) {
+    const base = draft || createEmptyDraft();
+    const slots = Array.isArray(availableSlots)
+        ? availableSlots.filter(
+              item =>
+                  item.weekday === range?.weekday &&
+                  item.startMinute >= range?.startMinute &&
+                  item.endMinute <= range?.endMinute,
+          )
+        : [];
+    if (slots.length === 0) {
+        return base;
+    }
+    return applyDraftGesture(base, slots, 'add');
+}
+
+/**
  * 由第一格與目前選取狀態推導手勢模式
  * @param {object} draft
  * @param {{weekday: number, startMinute: number, endMinute: number}} firstSlot

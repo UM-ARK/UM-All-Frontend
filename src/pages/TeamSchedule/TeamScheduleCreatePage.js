@@ -34,6 +34,7 @@ import {
 } from '../../utils/scheduling/schedulingModels';
 import {trigger} from '../../utils/trigger';
 import ScheduleWeekGrid from './components/ScheduleWeekGrid';
+import ScheduleTimeRangeInsert from './components/ScheduleTimeRangeInsert';
 import {
     buildWeeklySlots,
     wallClockDateToOffsetIso,
@@ -42,6 +43,7 @@ import {clearTeamEventsCache} from './hooks/useTeamEvents';
 import {
     commitCandidateDraft,
     createEmptyDraft,
+    insertDraftRange,
 } from './utils/scheduleDraft';
 
 const TITLE_MAX = 200;
@@ -96,6 +98,9 @@ const TeamScheduleCreatePage = ({navigation}) => {
     );
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isPainting, setIsPainting] = useState(false);
+    const [scrollToStartMinute, setScrollToStartMinute] = useState(
+        DEFAULT_WEEKLY_SCROLL_MINUTE,
+    );
     const submittingRef = useRef(false);
     const allowLeaveRef = useRef(false);
 
@@ -275,6 +280,26 @@ const TeamScheduleCreatePage = ({navigation}) => {
     }, [responseDeadlineAt, tz]);
 
     const selectedCount = (draft.selectedKeys || []).length;
+    const candidateSlots = useMemo(
+        () =>
+            buildWeeklySlots(
+                FULL_WEEK_CANDIDATE_WINDOWS,
+                EDIT_SLOT_MINUTES,
+            ),
+        [],
+    );
+    const handleInsertRange = useCallback(
+        range => {
+            const next = insertDraftRange(draft, range, candidateSlots);
+            if (next === draft) {
+                return false;
+            }
+            setDraft(next);
+            setScrollToStartMinute(range.startMinute);
+            return true;
+        },
+        [candidateSlots, draft],
+    );
 
     return (
         <View style={[styles.container, {backgroundColor: theme.bg_color}]}>
@@ -418,13 +443,14 @@ const TeamScheduleCreatePage = ({navigation}) => {
                     {t('已選 {{count}} 格', {count: selectedCount})}
                 </Text>
 
+                <ScheduleTimeRangeInsert onInsert={handleInsertRange} />
                 <ScheduleWeekGrid
                     mode="candidate"
                     slotMinutes={EDIT_SLOT_MINUTES}
                     draft={draft}
                     onDraftChange={setDraft}
                     onPaintingChange={setIsPainting}
-                    scrollToStartMinute={DEFAULT_WEEKLY_SCROLL_MINUTE}
+                    scrollToStartMinute={scrollToStartMinute}
                 />
 
                 <Pressable

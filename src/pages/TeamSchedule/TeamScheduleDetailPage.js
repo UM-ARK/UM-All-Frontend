@@ -57,10 +57,12 @@ import AvailabilityEditorFooter from './components/AvailabilityEditorFooter';
 import AvailabilityLegend from './components/AvailabilityLegend';
 import InviteManagementSheet from './components/InviteManagementSheet';
 import ScheduleWeekGrid from './components/ScheduleWeekGrid';
+import ScheduleTimeRangeInsert from './components/ScheduleTimeRangeInsert';
 import SlotDetailSheet from './components/SlotDetailSheet';
 import TeamScheduleEventHeader from './components/TeamScheduleEventHeader';
 import {TeamScheduleFullState} from './components/TeamScheduleStateView';
 import {
+    buildWeeklySlots,
     formatSuggestionLabel,
     wallClockDateToOffsetIso,
 } from './components/scheduleWeekHelpers';
@@ -70,7 +72,10 @@ import {
 } from './hooks/useTeamEvents';
 import {useAvailabilityEditor} from './hooks/useAvailabilityEditor';
 import {useTeamScheduleDetail} from './hooks/useTeamScheduleDetail';
-import {createAvailabilityDraftFromServer} from './utils/scheduleDraft';
+import {
+    createAvailabilityDraftFromServer,
+    insertDraftRange,
+} from './utils/scheduleDraft';
 import {slotKey} from './utils/scheduleRanges';
 import {
     aggregateHeatmapSlots,
@@ -386,6 +391,26 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                 .filter(item => item.isSelfSelected)
                 .map(slotKey),
         [displayHeatmapByKey],
+    );
+    const candidateSlots = useMemo(
+        () =>
+            buildWeeklySlots(
+                event?.candidateWindows,
+                EDIT_SLOT_MINUTES,
+            ),
+        [event?.candidateWindows],
+    );
+    const handleInsertRange = useCallback(
+        range => {
+            const next = insertDraftRange(editor.draft, range, candidateSlots);
+            if (next === editor.draft) {
+                return false;
+            }
+            editor.onDraftChange(next);
+            setScrollToStartMinute(range.startMinute);
+            return true;
+        },
+        [candidateSlots, editor],
     );
 
     const stats = heatmapBundle.heatmap?.stats || {
@@ -1200,6 +1225,14 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                                 })}
                             </View>
                         </View>
+                        {editor.isEditing ? (
+                            <ScheduleTimeRangeInsert
+                                onInsert={handleInsertRange}
+                                emptyRangeMessage={t(
+                                    '所選時段不在可填寫範圍內。',
+                                )}
+                            />
+                        ) : null}
                         <ScheduleWeekGrid
                             mode={
                                 editor.isEditing ? 'availability' : 'readonly'

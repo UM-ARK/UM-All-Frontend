@@ -26,6 +26,7 @@ import {
     commitAvailabilityDraft,
     createAvailabilityDraftFromServer,
     createCandidateDraftFromWindows,
+    insertDraftRange,
     resolveGestureMode,
     toggleDraftSlot,
 } from '../utils/scheduleDraft';
@@ -411,5 +412,36 @@ describe('scheduleDraft 草稿', () => {
             slotMinutes: 30,
         });
         expect(draft.selectedKeys).toEqual(['1:540', '1:570']);
+    });
+
+    test('快速插入長時段只加入候選範圍內的連續格', () => {
+        const draft = createAvailabilityDraftFromServer({
+            availability: null,
+            candidateWindows: WINDOWS,
+            slotMinutes: 15,
+        });
+        const allSlots = expandCandidateWindowsToSlots(WINDOWS, 15);
+        const inserted = insertDraftRange(
+            draft,
+            {weekday: 1, startMinute: 540, endMinute: 900},
+            allSlots,
+        );
+        expect(inserted.selectedKeys).toEqual([
+            '1:540',
+            '1:555',
+            '1:570',
+            '1:585',
+            '1:840',
+            '1:855',
+            '1:870',
+            '1:885',
+        ]);
+        expect(
+            insertDraftRange(
+                inserted,
+                {weekday: 7, startMinute: 540, endMinute: 600},
+                allSlots,
+            ),
+        ).toBe(inserted);
     });
 });
