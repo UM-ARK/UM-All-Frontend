@@ -5,7 +5,6 @@ import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {
     ActivityIndicator,
     Alert,
-    Image,
     Platform,
     Pressable,
     RefreshControl,
@@ -21,6 +20,7 @@ import {isLiquidGlassSupported} from '@callstack/liquid-glass';
 import {MenuView} from '@react-native-menu/menu';
 import {useHeaderHeight} from '@react-navigation/elements';
 import {usePreventRemove} from '@react-navigation/native';
+import {Image} from 'expo-image';
 import moment from 'moment-timezone';
 import {useTranslation} from 'react-i18next';
 import {scale, verticalScale} from 'react-native-size-matters';

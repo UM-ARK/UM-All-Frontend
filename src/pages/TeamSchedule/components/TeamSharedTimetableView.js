@@ -2,8 +2,9 @@
  * 小組課表模式：成員選擇、個人課表與全體上課概覽。
  */
 import React, {memo, useMemo, useState} from 'react';
-import {Image, Pressable, ScrollView, StyleSheet, Text, View} from 'react-native';
+import {Pressable, ScrollView, StyleSheet, Text, View} from 'react-native';
 
+import {Image} from 'expo-image';
 import {useTranslation} from 'react-i18next';
 import {scale, verticalScale} from 'react-native-size-matters';
 
