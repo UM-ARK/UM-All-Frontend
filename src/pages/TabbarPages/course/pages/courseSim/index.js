@@ -24,15 +24,6 @@ import { scale, verticalScale } from 'react-native-size-matters';
 import Ionicons from "@react-native-vector-icons/ionicons";
 import Clipboard from '@react-native-clipboard/clipboard';
 import moment from 'moment';
-// 課表一次掛多張卡片：不可用 @expo/ui MenuView（SwiftUI Host matchContents
-// 會在 Tab 切換／版面提交時反寫 Fabric ShadowTree 並 abort）。
-// 改用 @react-native-menu/menu（原生 UIButton）；縮放改由 onOpenMenu/onCloseMenu 驅動。
-import { MenuView } from '@react-native-menu/menu';
-import Animated, {
-    useAnimatedStyle,
-    useSharedValue,
-    withSpring,
-} from 'react-native-reanimated';
 import Toast from 'react-native-simple-toast';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { t } from 'i18next';
@@ -51,12 +42,7 @@ import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
 
 import { useTheme, uiStyle } from '../../../../../components/ThemeContext';
 import { openLink } from '../../../../../utils/browser';
-import {
-    ARK_WIKI_SEARCH,
-    OFFICIAL_COURSE_SEARCH,
-    UM_ISW,
-} from '../../../../../utils/pathMap';
-import { getCurrentUmehHost } from '../../../../../utils/umehHost';
+import { UM_ISW } from '../../../../../utils/pathMap';
 import { logToFirebase } from '../../../../../utils/firebaseAnalytics';
 import { trigger } from '../../../../../utils/trigger';
 import {
@@ -72,8 +58,13 @@ import {
 } from '../../hooks/useConflict';
 import { normalizeImportText } from '../../utils/parseImportData';
 import AddCourseFab from '../../components/AddCourseFab';
+import CourseActionMenuCard from '../../components/CourseActionMenuCard';
 import CourseTimeRangePicker from '../../components/CourseTimeRangePicker';
 import { TIME_RANGE_PRESETS } from '../../constants';
+import {
+    getCourseInfoMenuActions,
+    handleCourseInfoMenuAction,
+} from '../../utils/courseInfoMenu';
 import SegmentControl from '../../../../../components/SegmentControl';
 import { COURSE_SEARCH_SEGMENT } from '../../../../../utils/courseNavigation';
 import { getReplacementCourses } from './utils/replacementCourses';
@@ -130,52 +121,6 @@ const daySort = objArr => {
 
 const isTimetableView = value =>
     value === 'detail' || value === 'overview';
-
-/** 與 TouchableScale 預設相近的彈簧參數 */
-const COURSE_CARD_SPRING = {
-    damping: 18,
-    stiffness: 280,
-    mass: 0.4,
-};
-
-/**
- * 共用課程卡片選單（@react-native-menu/menu）。
- * 原生 UIButton 會吃掉子層 Pressable 的 pressIn，故改以選單開合驅動縮放回饋。
- */
-function CourseActionMenuCard({
-    actions,
-    onPressAction,
-    onOpen,
-    menuStyle,
-    cardStyle,
-    accessibilityLabel,
-    children,
-}) {
-    const cardScale = useSharedValue(1);
-    const animatedStyle = useAnimatedStyle(() => ({
-        transform: [{ scale: cardScale.value }],
-    }));
-
-    return (
-        <MenuView
-            actions={actions}
-            onPressAction={onPressAction}
-            accessibilityLabel={accessibilityLabel}
-            shouldOpenOnLongPress={false}
-            onOpenMenu={() => {
-                cardScale.value = withSpring(0.96, COURSE_CARD_SPRING);
-                onOpen?.();
-            }}
-            onCloseMenu={() => {
-                cardScale.value = withSpring(1, COURSE_CARD_SPRING);
-            }}
-            style={menuStyle}>
-            <Animated.View style={[cardStyle, animatedStyle]}>
-                {children}
-            </Animated.View>
-        </MenuView>
-    );
-}
 
 /** 課表欄內使用的固定尺寸課程卡片選單。 */
 function TimetableCourseMenuCard({
@@ -632,119 +577,6 @@ function CourseSim({ route, navigation }) {
         );
     };
 
-    /** 建立所有課程 Menu 共用的查詢選項。 */
-    const getCourseInfoMenuActions = () => [
-        {
-            id: 'wiki',
-            title: 'Wiki',
-            image: Platform.select({
-                ios: 'book',
-                android: 'ic_menu_agenda',
-            }),
-            imageColor: themeColor,
-            titleColor: themeColor,
-        },
-        {
-            id: 'harbor-discuss',
-            title: t('討論', { ns: 'catalog' }),
-            image: Platform.select({
-                ios: 'bubble.left.and.bubble.right',
-                android: 'ic_btn_speak_now',
-            }),
-            imageColor: black.third,
-            titleColor: black.third,
-        },
-        {
-            id: 'what2reg',
-            title: t('評價', { ns: 'catalog' }),
-            image: Platform.select({
-                ios: 'star',
-                android: 'btn_star_big_on',
-            }),
-            imageColor: black.third,
-            titleColor: black.third,
-        },
-        {
-            id: 'official',
-            title: t('官方', { ns: 'catalog' }),
-            image: Platform.select({
-                ios: 'graduationcap',
-                android: 'ic_menu_info_details',
-            }),
-            imageColor: black.third,
-            titleColor: black.third,
-        },
-        {
-            id: 'section',
-            title: t('Section / 老師', { ns: 'catalog' }),
-            image: Platform.select({
-                ios: 'list.bullet',
-                android: 'ic_menu_sort_by_size',
-            }),
-            imageColor: black.third,
-            titleColor: black.third,
-        },
-    ];
-
-    /**
-     * 處理所有課程 Menu 共用的查詢選項。
-     *
-     * @param {string} actionId Menu action id
-     * @param {Object} course 課程或課節資料
-     * @returns {boolean} 是否已處理
-     */
-    const handleCourseInfoMenuAction = (actionId, course) => {
-        const courseCode = course['Course Code'];
-        const profName = course['Teacher Information'];
-
-        switch (actionId) {
-            case 'wiki': {
-                let URL = ARK_WIKI_SEARCH + encodeURIComponent(courseCode);
-                if (profName) {
-                    URL = ARK_WIKI_SEARCH + encodeURIComponent(profName);
-                    logToFirebase('checkCourse', {
-                        courseCode,
-                        profName,
-                        action: 'ark-wiki',
-                    });
-                } else {
-                    logToFirebase('checkCourse', {
-                        courseCode,
-                        action: 'ark-wiki',
-                    });
-                }
-                openLink(URL);
-                return true;
-            }
-            case 'harbor-discuss': {
-                logToFirebase('checkCourse', {
-                    courseCode,
-                    action: 'harbor-discuss',
-                });
-                navigation.navigate('HarborSearch', {query: courseCode});
-                return true;
-            }
-            case 'what2reg': {
-                const URI =
-                    getCurrentUmehHost() +
-                    '/reviews/' +
-                    encodeURIComponent(courseCode) +
-                    '/' +
-                    encodeURIComponent(lodash.deburr(profName || ''));
-                openLink(URI);
-                return true;
-            }
-            case 'official':
-                openLink(OFFICIAL_COURSE_SEARCH + courseCode);
-                return true;
-            case 'section':
-                navigation.navigate('LocalCourse', courseCode);
-                return true;
-            default:
-                return false;
-        }
-    };
-
     // 渲染一列（一天）的課表
     const renderDay = day => {
         // 獲取該天所有的課程數據
@@ -803,7 +635,11 @@ function CourseSim({ route, navigation }) {
         const hasDuplicate =
             lodash.countBy(planList, 'Course Code')[course['Course Code']] > 1;
         const actions = [
-            ...getCourseInfoMenuActions(),
+            ...getCourseInfoMenuActions({
+                t,
+                themeColor,
+                secondaryColor: black.third,
+            }),
             {
                 id: 'replacement',
                 title: t('查看平替', { ns: 'timetable' }),
@@ -855,7 +691,11 @@ function CourseSim({ route, navigation }) {
             onPressAction: event => {
                 trigger();
                 const actionId = event.nativeEvent.event;
-                if (handleCourseInfoMenuAction(actionId, course)) {
+                if (handleCourseInfoMenuAction({
+                    actionId,
+                    course,
+                    navigation,
+                })) {
                     return;
                 }
 
@@ -1967,7 +1807,11 @@ E11-0000
             const sortedSlots = daySort(item.slots);
             const courseInfo = item.slots[0];
             const replacementMenuActions = [
-                ...getCourseInfoMenuActions(),
+                ...getCourseInfoMenuActions({
+                    t,
+                    themeColor,
+                    secondaryColor: black.third,
+                }),
                 {
                     id: 'replace-course',
                     title: `${t('替換', { ns: 'timetable' })} ${selectedCourse['Course Code']}-${item.section}`,
@@ -1988,7 +1832,11 @@ E11-0000
                     onPressAction={event => {
                         trigger();
                         const actionId = event.nativeEvent.event;
-                        if (handleCourseInfoMenuAction(actionId, courseInfo)) {
+                        if (handleCourseInfoMenuAction({
+                            actionId,
+                            course: courseInfo,
+                            navigation,
+                        })) {
                             return;
                         }
                         if (actionId === 'replace-course') {

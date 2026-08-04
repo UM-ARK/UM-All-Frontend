@@ -12,7 +12,12 @@ import Ionicons from '@react-native-vector-icons/ionicons';
 import {uiStyle, useTheme} from '../../../components/ThemeContext';
 import {ARK_HARBOR_AVATAR_TEMPLATE} from '../../../utils/pathMap';
 import {trigger} from '../../../utils/trigger';
+import CourseActionMenuCard from '../../TabbarPages/course/components/CourseActionMenuCard';
 import {getSlotKey} from '../../TabbarPages/course/hooks/useConflict';
+import {
+    getCourseInfoMenuActions,
+    handleCourseInfoMenuAction,
+} from '../../TabbarPages/course/utils/courseInfoMenu';
 import {computeOverviewCourseFrames} from '../../TabbarPages/course/pages/courseSim/utils/overviewLayout';
 import {
     OVERVIEW_COURSE_H_GAP,
@@ -51,6 +56,7 @@ const TeamSharedTimetableView = ({
     loading = false,
     error = null,
     onRetry,
+    navigation,
 }) => {
     const {theme} = useTheme();
     const {t} = useTranslation('my');
@@ -106,7 +112,7 @@ const TeamSharedTimetableView = ({
             </ScrollView>
             {selectedId === 'all' ? (
                 <>
-                    {resolvedMembers.every(member => !member.sharedTimetable) ? <Text style={[styles.message, {color: theme.black.third}]}>{t('目前尚無成員共享課表。')}</Text> : <WeeklyOverview meetings={aggregateMeetings} aggregate />}
+                    {resolvedMembers.every(member => !member.sharedTimetable) ? <Text style={[styles.message, {color: theme.black.third}]}>{t('目前尚無成員共享課表。')}</Text> : <WeeklyOverview meetings={aggregateMeetings} aggregate navigation={navigation} />}
                     {unresolvedCount > 0 ? <Text style={[styles.unresolved, {color: theme.black.third}]}>{t('有 {{count}} 門課的時間暫不可用；全部模式只計入已成功還原的課程。', {count: unresolvedCount})}</Text> : null}
                 </>
             ) : !selectedMember?.sharedTimetable ? (
@@ -117,7 +123,7 @@ const TeamSharedTimetableView = ({
                         <Ionicons name={selectedResolved?.sharedTimetable?.sharingLevel === 'course_identity' ? 'school-outline' : 'time-outline'} color={theme.themeColor} size={scale(14)} />
                         <Text style={[styles.sharingBadgeText, {color: theme.black.second}]}>{selectedResolved?.sharedTimetable?.sharingLevel === 'course_identity' ? t('共享 Course Code + Section') : t('只共享上課時間')}</Text>
                     </View>
-                    <WeeklyOverview meetings={selectedResolved?.resolved.meetings || []} />
+                    <WeeklyOverview meetings={selectedResolved?.resolved.meetings || []} navigation={navigation} />
                     {selectedResolved?.resolved.unresolvedCourses.length > 0 ? <View style={[styles.unresolvedBox, {backgroundColor: theme.tonal.primary08}]}><Text style={[styles.unresolved, {color: theme.black.second}]}>{t('課程時間暫不可用')}</Text>{selectedResolved.resolved.unresolvedCourses.map(item => <Text key={`${item.courseCode}-${item.section}`} style={[styles.unresolved, {color: theme.black.third}]}>{item.courseCode} · {item.section}</Text>)}</View> : null}
                 </>
             )}
@@ -125,10 +131,18 @@ const TeamSharedTimetableView = ({
     );
 };
 
-const WeeklyOverview = ({meetings, aggregate = false}) => {
+const WeeklyOverview = ({meetings, aggregate = false, navigation}) => {
     const {theme} = useTheme();
     const {t} = useTranslation('my');
     const [gridWidth, setGridWidth] = useState(0);
+    const courseMenuActions = useMemo(
+        () => getCourseInfoMenuActions({
+            t,
+            themeColor: theme.themeColor,
+            secondaryColor: theme.black.third,
+        }),
+        [t, theme.black.third, theme.themeColor],
+    );
     const slots = useMemo(
         () => (Array.isArray(meetings) ? meetings : []).map((meeting, index) => ({
             ...meeting,
@@ -238,12 +252,34 @@ const WeeklyOverview = ({meetings, aggregate = false}) => {
                                     courseCode && !tiny && courseCode.length > 4
                                         ? `${courseCode.substring(0, 4)}\n${courseCode.substring(4)}`
                                         : courseCode;
-                                return (
-                                    <View key={getSlotKey(slot)} style={[styles.overviewMeeting, {backgroundColor: cardColor, height: frame.height, left: frame.left, top: frame.top, width: frame.width}]}>
+                                const card = (
+                                    <View style={[styles.overviewMeeting, styles.overviewMeetingFill, {backgroundColor: cardColor}]}>
                                         <Text numberOfLines={tiny ? 1 : 2} style={[styles.meetingText, {color: aggregate || !courseCode ? theme.themeColor : theme.black.main}]}>{aggregate ? t('{{count}} 人', {count: meetingCount}) : courseLabel || t('上課')}</Text>
                                         {!aggregate && courseCode && !tiny ? <Text numberOfLines={1} style={[styles.sectionText, {color: theme.black.second}]}>{slot.identity.section}</Text> : null}
                                         {!tiny ? <Text numberOfLines={1} style={[styles.meetingTime, {color: theme.black.third}]}>{formatMinute(slot.startMinute)}–{formatMinute(slot.endMinute)}</Text> : null}
                                     </View>
+                                );
+                                if (aggregate || !courseCode) {
+                                    return <View key={getSlotKey(slot)} style={[styles.overviewMeetingFrame, {height: frame.height, left: frame.left, top: frame.top, width: frame.width}]}>{card}</View>;
+                                }
+                                return (
+                                    <CourseActionMenuCard
+                                        key={getSlotKey(slot)}
+                                        actions={courseMenuActions}
+                                        accessibilityLabel={`${courseCode}-${slot.identity.section}`}
+                                        cardStyle={styles.overviewMeetingFill}
+                                        menuStyle={[styles.overviewMeetingFrame, {height: frame.height, left: frame.left, top: frame.top, width: frame.width}]}
+                                        onOpen={() => trigger('rigid')}
+                                        onPressAction={event => {
+                                            trigger();
+                                            handleCourseInfoMenuAction({
+                                                actionId: event.nativeEvent.event,
+                                                course: slot,
+                                                navigation,
+                                            });
+                                        }}>
+                                        {card}
+                                    </CourseActionMenuCard>
                                 );
                             })}
                         </View>
@@ -275,6 +311,8 @@ const styles = StyleSheet.create({
     overviewDay: {borderLeftWidth: StyleSheet.hairlineWidth, position: 'absolute', top: 0},
     dayLabel: {...uiStyle.defaultText, fontSize: scale(11), fontWeight: '700', textAlign: 'center'},
     overviewMeeting: {alignItems: 'center', borderRadius: scale(5), justifyContent: 'center', overflow: 'hidden', paddingHorizontal: scale(2), position: 'absolute'},
+    overviewMeetingFill: {height: '100%', width: '100%'},
+    overviewMeetingFrame: {position: 'absolute'},
     meetingText: {...uiStyle.defaultText, fontSize: scale(9), fontWeight: '700', textAlign: 'center'},
     sectionText: {...uiStyle.defaultText, fontSize: scale(7), fontWeight: '600', textAlign: 'center'},
     meetingTime: {...uiStyle.defaultText, fontSize: scale(6.5), marginTop: verticalScale(1), textAlign: 'center'},

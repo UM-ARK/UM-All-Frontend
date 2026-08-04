@@ -1505,6 +1505,7 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                         <TeamSharedTimetableView
                             members={sharedTimetables.members}
                             courseSlots={courseCatalogSlots}
+                            navigation={navigation}
                             loading={sharedTimetables.phase === 'loading'}
                             error={sharedTimetables.error}
                             onRetry={() => loadSharedTimetables()}
