@@ -869,22 +869,59 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
         const favoriteAction = {
             id: 'favorite',
             title: isFavorite ? t('取消收藏') : t('收藏'),
+            image: Platform.select({
+                ios: isFavorite ? 'star.fill' : 'star',
+                android: isFavorite
+                    ? 'btn_star_big_on'
+                    : 'btn_star_big_off',
+            }),
+            imageColor: theme.warning,
         };
         if (isOwner) {
             // 活動關閉時邀請管理不可用；分享改由邀請管理 Sheet 內操作
             const actions = [
                 favoriteAction,
-                {id: 'edit', title: t('編輯基本資料')},
-                {id: 'invite', title: t('邀請管理')},
+                {
+                    id: 'edit',
+                    title: t('編輯基本資料'),
+                    image: Platform.select({
+                        ios: 'pencil',
+                        android: 'ic_menu_edit',
+                    }),
+                    imageColor: theme.black.third,
+                },
+                {
+                    id: 'invite',
+                    title: t('邀請管理'),
+                    image: Platform.select({
+                        ios: 'person.crop.circle.badge.plus',
+                        android: 'ic_menu_add',
+                    }),
+                    imageColor: theme.themeColor,
+                },
                 {
                     id: 'toggleStatus',
                     title: eventClosed
                         ? t('重新開啟活動')
                         : t('關閉活動'),
+                    image: Platform.select({
+                        ios: eventClosed ? 'lock.open' : 'lock',
+                        android: eventClosed
+                            ? 'ic_media_play'
+                            : 'ic_menu_close_clear_cancel',
+                    }),
+                    imageColor: eventClosed
+                        ? theme.themeColor
+                        : theme.warning,
                 },
                 {
                     id: 'delete',
                     title: t('永久刪除'),
+                    image: Platform.select({
+                        ios: 'trash',
+                        android: 'ic_menu_delete',
+                    }),
+                    imageColor: theme.unread,
                     attributes: {destructive: true},
                 },
             ];
@@ -901,10 +938,27 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
             {
                 id: 'leave',
                 title: t('退出活動'),
+                image: Platform.select({
+                    ios: 'rectangle.portrait.and.arrow.right',
+                    android: 'ic_menu_close_clear_cancel',
+                }),
+                imageColor: theme.unread,
                 attributes: {destructive: true},
             },
         ];
-    }, [event, eventClosed, isFavorite, isInvitePending, isOwner, phase, t]);
+    }, [
+        event,
+        eventClosed,
+        isFavorite,
+        isInvitePending,
+        isOwner,
+        phase,
+        t,
+        theme.black.third,
+        theme.themeColor,
+        theme.unread,
+        theme.warning,
+    ]);
 
     const runMenuAction = useCallback(
         id => {
@@ -957,7 +1011,7 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                 hasMenu && Platform.OS !== 'ios'
                     ? () => (
                           <MenuView
-                              key={`team-menu-${event?.status || 'none'}`}
+                              key={`team-menu-${event?.status}-${isFavorite}`}
                               actions={menuActions}
                               onPressAction={({nativeEvent}) =>
                                   runMenuAction(nativeEvent.event)
@@ -993,6 +1047,12 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                                   items: menuActions.map(action => ({
                                       type: 'action',
                                       label: action.title,
+                                      icon: action.image
+                                          ? {
+                                                type: 'sfSymbol',
+                                                name: action.image,
+                                            }
+                                          : undefined,
                                       destructive:
                                           action.attributes?.destructive ===
                                           true,
@@ -1008,6 +1068,7 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
     }, [
         event?.status,
         event?.title,
+        isFavorite,
         isInvitePending,
         menuActions,
         navigation,
