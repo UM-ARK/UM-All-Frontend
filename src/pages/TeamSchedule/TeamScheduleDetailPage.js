@@ -74,6 +74,7 @@ import {
 import {useAvailabilityEditor} from './hooks/useAvailabilityEditor';
 import {useTeamScheduleDetail} from './hooks/useTeamScheduleDetail';
 import {
+    clearDraftRange,
     createAvailabilityDraftFromServer,
     insertDraftRange,
 } from './utils/scheduleDraft';
@@ -415,6 +416,18 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
         },
         [candidateSlots, editor],
     );
+    const handleClearRange = useCallback(
+        range => {
+            const next = clearDraftRange(editor.draft, range, candidateSlots);
+            if (next === editor.draft) {
+                return false;
+            }
+            editor.onDraftChange(next);
+            setScrollToStartMinute(range.startMinute);
+            return true;
+        },
+        [candidateSlots, editor],
+    );
 
     const stats = heatmapBundle.heatmap?.stats || {
         submittedCount: 0,
@@ -509,13 +522,8 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                 candidateWindows: event.candidateWindows,
                 courseSlots: planSlots,
                 slotMinutes: EDIT_SLOT_MINUTES,
-                timezone: event.timezone,
-                revision: editor.draft.revision,
             });
-            editor.applyCoursePrefill(
-                result.draft,
-                result.courseConflictKeys,
-            );
+            editor.applyCoursePrefill(result.courseConflictKeys);
         } catch (_error) {
             editor.disableCoursePrefill();
             setCoursePrefillError(t('無法讀取模擬課表'));
@@ -1329,7 +1337,7 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                                                 styles.coursePrefillLabel,
                                                 {color: theme.black.main},
                                             ]}>
-                                            {t('依課表預填')}
+                                            {t('課表預填')}
                                         </Text>
                                         <View
                                             style={styles.courseConflictLegend}>
@@ -1350,6 +1358,25 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                                                 {t('淺紅色＝課表時間')}
                                             </Text>
                                         </View>
+                                        <View
+                                            style={styles.courseConflictLegend}>
+                                            <View
+                                                style={[
+                                                    styles.courseConflictSwatch,
+                                                    {
+                                                        backgroundColor:
+                                                            theme.tonal.secondary30,
+                                                    },
+                                                ]}
+                                            />
+                                            <Text
+                                                style={[
+                                                    styles.courseConflictText,
+                                                    {color: theme.black.third},
+                                                ]}>
+                                                {t('淺橙色＝課表時間且已選')}
+                                            </Text>
+                                        </View>
                                         {coursePrefillError ? (
                                             <Text
                                                 style={[
@@ -1367,7 +1394,7 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                                     />
                                 ) : (
                                     <Switch
-                                        accessibilityLabel={t('依課表預填')}
+                                        accessibilityLabel={t('課表預填')}
                                         accessibilityRole="switch"
                                         accessibilityState={{
                                             checked:
@@ -1391,6 +1418,7 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                         ) : null}
                         {editor.isEditing ? (
                             <ScheduleTimeRangeInsert
+                                onClear={handleClearRange}
                                 onInsert={handleInsertRange}
                                 emptyRangeMessage={t(
                                     '所選時段不在可填寫範圍內。',

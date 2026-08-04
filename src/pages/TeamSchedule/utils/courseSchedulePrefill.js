@@ -1,15 +1,11 @@
 /**
- * 將本地模擬課表轉成可用時間預填草稿。
+ * 將本地模擬課表轉成課堂時間遮罩。
  */
-import {
-    normalizeSlotMinutes,
-    normalizeTimezone,
-} from '../../../utils/scheduling/schedulingModels';
+import {normalizeSlotMinutes} from '../../../utils/scheduling/schedulingModels';
 import {
     expandCandidateWindowsToSlots,
     slotKey,
 } from './scheduleRanges';
-import {slotsToSelectedKeys} from './scheduleDraft';
 
 const COURSE_DAY_TO_WEEKDAY = {
     MON: 1,
@@ -20,8 +16,6 @@ const COURSE_DAY_TO_WEEKDAY = {
     SAT: 6,
     SUN: 7,
 };
-const DEFAULT_PREFILL_START_MINUTE = 9 * 60;
-const DEFAULT_PREFILL_END_MINUTE = 20 * 60;
 
 function timeToMinute(value) {
     if (typeof value !== 'string') {
@@ -63,17 +57,14 @@ export function normalizeCourseScheduleSlot(courseSlot) {
 }
 
 /**
- * 平日 09:00 至 20:00 候選時間預設可用，與課堂重疊的格子取消選取。
+ * 找出候選時間中與課堂重疊的格子，不修改可用時間。
  */
 export function createCourseSchedulePrefill({
     candidateWindows,
     courseSlots,
     slotMinutes,
-    timezone,
-    revision,
 } = {}) {
     const slot = normalizeSlotMinutes(slotMinutes);
-    const tz = normalizeTimezone(timezone);
     const candidateSlots = expandCandidateWindowsToSlots(
         candidateWindows,
         slot,
@@ -81,7 +72,6 @@ export function createCourseSchedulePrefill({
     const normalizedCourseSlots = (Array.isArray(courseSlots) ? courseSlots : [])
         .map(normalizeCourseScheduleSlot)
         .filter(Boolean);
-    const selectedSlots = [];
     const courseConflictKeys = [];
 
     for (let i = 0; i < candidateSlots.length; i++) {
@@ -94,23 +84,10 @@ export function createCourseSchedulePrefill({
         );
         if (hasCourseConflict) {
             courseConflictKeys.push(slotKey(candidateSlot));
-        } else if (
-            candidateSlot.weekday <= 5 &&
-            candidateSlot.startMinute >= DEFAULT_PREFILL_START_MINUTE &&
-            candidateSlot.endMinute <= DEFAULT_PREFILL_END_MINUTE
-        ) {
-            selectedSlots.push(candidateSlot);
         }
     }
 
     return {
-        draft: {
-            mode: 'availability',
-            slotMinutes: slot,
-            timezone: tz,
-            revision: typeof revision === 'number' ? revision : 0,
-            selectedKeys: slotsToSelectedKeys(selectedSlots),
-        },
         courseConflictKeys,
     };
 }

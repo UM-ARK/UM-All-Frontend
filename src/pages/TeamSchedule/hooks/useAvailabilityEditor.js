@@ -41,9 +41,6 @@ export function useAvailabilityEditor({
 
     const serverSnapshotRef = useRef(null);
     const baselineDraftRef = useRef(null);
-    const coursePrefillRestoreDraftRef = useRef(null);
-    const coursePrefillAppliedDraftRef = useRef(null);
-    const coursePrefillExcludedKeysRef = useRef(new Set());
     const savingRef = useRef(false);
 
     const candidateWindows = event?.candidateWindows;
@@ -79,9 +76,6 @@ export function useAvailabilityEditor({
         const next = buildDraftFromAvailability(myAvailability);
         serverSnapshotRef.current = myAvailability ?? null;
         baselineDraftRef.current = next;
-        coursePrefillRestoreDraftRef.current = null;
-        coursePrefillAppliedDraftRef.current = null;
-        coursePrefillExcludedKeysRef.current = new Set();
         setDraft(next);
         setConflictPrompt(null);
         setCourseConflictKeys([]);
@@ -93,9 +87,6 @@ export function useAvailabilityEditor({
         setDraft(null);
         baselineDraftRef.current = null;
         serverSnapshotRef.current = null;
-        coursePrefillRestoreDraftRef.current = null;
-        coursePrefillAppliedDraftRef.current = null;
-        coursePrefillExcludedKeysRef.current = new Set();
         setConflictPrompt(null);
         setCourseConflictKeys([]);
         setIsCoursePrefillEnabled(false);
@@ -105,50 +96,8 @@ export function useAvailabilityEditor({
     }, []);
 
     const onDraftChange = useCallback(next => {
-        if (
-            !isCoursePrefillEnabled ||
-            !coursePrefillRestoreDraftRef.current ||
-            !coursePrefillAppliedDraftRef.current
-        ) {
-            setDraft(next);
-            return;
-        }
-        const currentKeys = new Set(draft?.selectedKeys || []);
-        const nextKeys = new Set(next?.selectedKeys || []);
-        const manualKeys = new Set(
-            coursePrefillRestoreDraftRef.current.selectedKeys || [],
-        );
-        const prefillKeys = new Set(
-            coursePrefillAppliedDraftRef.current.selectedKeys || [],
-        );
-        currentKeys.forEach(key => {
-            if (!nextKeys.has(key)) {
-                manualKeys.delete(key);
-                if (prefillKeys.has(key)) {
-                    coursePrefillExcludedKeysRef.current.add(key);
-                }
-            }
-        });
-        nextKeys.forEach(key => {
-            if (!currentKeys.has(key)) {
-                manualKeys.add(key);
-                coursePrefillExcludedKeysRef.current.delete(key);
-            }
-        });
-        const manualDraft = {
-            ...coursePrefillRestoreDraftRef.current,
-            revision: next.revision,
-            selectedKeys: Array.from(manualKeys),
-        };
-        const combinedKeys = new Set([
-            ...manualKeys,
-            ...Array.from(prefillKeys).filter(
-                key => !coursePrefillExcludedKeysRef.current.has(key),
-            ),
-        ]);
-        coursePrefillRestoreDraftRef.current = manualDraft;
-        setDraft({...next, selectedKeys: Array.from(combinedKeys)});
-    }, [draft, isCoursePrefillEnabled]);
+        setDraft(next);
+    }, []);
 
     /**
      * 確定送出 PUT；失敗回滾畫面至 server snapshot，保留 draft 供重試
@@ -184,9 +133,6 @@ export function useAvailabilityEditor({
             setDraft(null);
             baselineDraftRef.current = null;
             serverSnapshotRef.current = null;
-            coursePrefillRestoreDraftRef.current = null;
-            coursePrefillAppliedDraftRef.current = null;
-            coursePrefillExcludedKeysRef.current = new Set();
             setConflictPrompt(null);
             setCourseConflictKeys([]);
             setIsCoursePrefillEnabled(false);
@@ -236,9 +182,6 @@ export function useAvailabilityEditor({
         const next = conflictPrompt.latestDraft;
         baselineDraftRef.current = next;
         serverSnapshotRef.current = conflictPrompt.latestAvailability;
-        coursePrefillRestoreDraftRef.current = null;
-        coursePrefillAppliedDraftRef.current = null;
-        coursePrefillExcludedKeysRef.current = new Set();
         setDraft(next);
         setConflictPrompt(null);
         setCourseConflictKeys([]);
@@ -257,18 +200,6 @@ export function useAvailabilityEditor({
         if (draft && typeof latestRevision === 'number') {
             const next = {...draft, revision: latestRevision};
             setDraft(next);
-            if (coursePrefillRestoreDraftRef.current) {
-                coursePrefillRestoreDraftRef.current = {
-                    ...coursePrefillRestoreDraftRef.current,
-                    revision: latestRevision,
-                };
-            }
-            if (coursePrefillAppliedDraftRef.current) {
-                coursePrefillAppliedDraftRef.current = {
-                    ...coursePrefillAppliedDraftRef.current,
-                    revision: latestRevision,
-                };
-            }
             if (latest) {
                 serverSnapshotRef.current = latest;
             }
@@ -276,33 +207,14 @@ export function useAvailabilityEditor({
         setConflictPrompt(null);
     }, [conflictPrompt, draft]);
 
-    const applyCoursePrefill = useCallback((nextDraft, nextConflictKeys) => {
-        if (!nextDraft) {
-            return;
-        }
-        coursePrefillRestoreDraftRef.current = draft;
-        coursePrefillAppliedDraftRef.current = nextDraft;
-        setDraft({
-            ...nextDraft,
-            selectedKeys: Array.from(new Set([
-                ...(draft?.selectedKeys || []),
-                ...(nextDraft.selectedKeys || []).filter(
-                    key => !coursePrefillExcludedKeysRef.current.has(key),
-                ),
-            ])),
-        });
+    const applyCoursePrefill = useCallback(nextConflictKeys => {
         setCourseConflictKeys(
             Array.isArray(nextConflictKeys) ? nextConflictKeys : [],
         );
         setIsCoursePrefillEnabled(true);
-    }, [draft]);
+    }, []);
 
     const disableCoursePrefill = useCallback(() => {
-        if (coursePrefillRestoreDraftRef.current) {
-            setDraft(coursePrefillRestoreDraftRef.current);
-        }
-        coursePrefillRestoreDraftRef.current = null;
-        coursePrefillAppliedDraftRef.current = null;
         setCourseConflictKeys([]);
         setIsCoursePrefillEnabled(false);
     }, []);

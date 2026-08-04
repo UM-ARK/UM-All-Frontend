@@ -342,14 +342,14 @@ const ScheduleWeekGrid = ({
             backgroundColor = selected ? theme.tonal.primary30 : theme.white;
         } else {
             backgroundColor = heatToBackgroundColor(heat, theme, isEditMode);
-            if (isEditMode && hasCourseConflict) {
-                backgroundColor = theme.tonal.unread15;
-            }
             if (isEditMode && selected) {
                 backgroundColor = theme.tonal.primary50;
             }
+            if (isEditMode && hasCourseConflict) {
+                backgroundColor = theme.tonal.unread15;
+            }
             if (isEditMode && hasCourseConflict && selected) {
-                backgroundColor = theme.warning;
+                backgroundColor = theme.tonal.secondary30;
             }
         }
         return (

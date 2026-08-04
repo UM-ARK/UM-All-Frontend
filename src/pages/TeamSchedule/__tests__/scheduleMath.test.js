@@ -23,6 +23,7 @@ import {
 } from '../utils/scheduleRecommendations';
 import {
     applyDraftGesture,
+    clearDraftRange,
     commitAvailabilityDraft,
     createAvailabilityDraftFromServer,
     createCandidateDraftFromWindows,
@@ -122,8 +123,8 @@ describe('scheduleRanges 展開與合併', () => {
     });
 });
 
-describe('課表預填可用時間', () => {
-    test('候選時間預設可用，課堂重疊格取消選取', () => {
+describe('課表預填遮罩', () => {
+    test('只標記與課堂重疊的候選時間', () => {
         const result = createCourseSchedulePrefill({
             candidateWindows: [
                 {weekday: 1, startMinute: 540, endMinute: 720},
@@ -132,29 +133,20 @@ describe('課表預填可用時間', () => {
                 {Day: 'MON', 'Time From': '10:00', 'Time To': '11:15'},
             ],
             slotMinutes: 15,
-            revision: 3,
         });
 
-        expect(result.courseConflictKeys).toEqual([
-            '1:600',
-            '1:615',
-            '1:630',
-            '1:645',
-            '1:660',
-        ]);
-        expect(result.draft.revision).toBe(3);
-        expect(result.draft.selectedKeys).toEqual([
-            '1:540',
-            '1:555',
-            '1:570',
-            '1:585',
-            '1:675',
-            '1:690',
-            '1:705',
-        ]);
+        expect(result).toEqual({
+            courseConflictKeys: [
+                '1:600',
+                '1:615',
+                '1:630',
+                '1:645',
+                '1:660',
+            ],
+        });
     });
 
-    test('課堂只要部分重疊仍標記，使用者可手動改回可用', () => {
+    test('課堂只要部分重疊仍標記', () => {
         const result = createCourseSchedulePrefill({
             candidateWindows: [
                 {weekday: 2, startMinute: 660, endMinute: 720},
@@ -164,18 +156,11 @@ describe('課表預填可用時間', () => {
             ],
             slotMinutes: 15,
         });
-        const overridden = toggleDraftSlot(result.draft, {
-            weekday: 2,
-            startMinute: 660,
-            endMinute: 675,
-        });
 
         expect(result.courseConflictKeys).toEqual(['2:660', '2:675']);
-        expect(overridden.selectedKeys).toContain('2:660');
-        expect(result.courseConflictKeys).toContain('2:660');
     });
 
-    test('預填只自動選取 09:00 至 20:00', () => {
+    test('沒有課堂就沒有遮罩', () => {
         const result = createCourseSchedulePrefill({
             candidateWindows: [
                 {weekday: 3, startMinute: 510, endMinute: 1230},
@@ -184,30 +169,22 @@ describe('課表預填可用時間', () => {
             slotMinutes: 15,
         });
 
-        expect(result.draft.selectedKeys).toHaveLength(44);
-        expect(result.draft.selectedKeys[0]).toBe('3:540');
-        expect(result.draft.selectedKeys.at(-1)).toBe('3:1185');
-        expect(result.draft.selectedKeys).not.toContain('3:525');
-        expect(result.draft.selectedKeys).not.toContain('3:1200');
+        expect(result.courseConflictKeys).toEqual([]);
     });
 
-    test('預填不自動選取週六日', () => {
+    test('週末課堂仍顯示遮罩，但不決定可用時間', () => {
         const result = createCourseSchedulePrefill({
             candidateWindows: [
-                {weekday: 5, startMinute: 540, endMinute: 600},
                 {weekday: 6, startMinute: 540, endMinute: 600},
                 {weekday: 7, startMinute: 540, endMinute: 600},
             ],
-            courseSlots: [],
+            courseSlots: [
+                {Day: 'SAT', 'Time From': '09:15', 'Time To': '09:45'},
+            ],
             slotMinutes: 15,
         });
 
-        expect(result.draft.selectedKeys).toEqual([
-            '5:540',
-            '5:555',
-            '5:570',
-            '5:585',
-        ]);
+        expect(result.courseConflictKeys).toEqual(['6:555', '6:570']);
     });
 
     test('忽略無效星期與時間', () => {
@@ -553,5 +530,33 @@ describe('scheduleDraft 草稿', () => {
                 allSlots,
             ),
         ).toBe(inserted);
+    });
+
+    test('快速清除只移除指定星期與時段內的選擇', () => {
+        const allSlots = expandCandidateWindowsToSlots(WINDOWS, 15);
+        const draft = {
+            ...createAvailabilityDraftFromServer({
+                availability: null,
+                candidateWindows: WINDOWS,
+                slotMinutes: 15,
+            }),
+            selectedKeys: allSlots.map(slotKey),
+        };
+        const cleared = clearDraftRange(
+            draft,
+            {weekday: 1, startMinute: 555, endMinute: 855},
+            allSlots,
+        );
+
+        expect(cleared.selectedKeys).toEqual([
+            '1:540',
+            '1:855',
+            '1:870',
+            '1:885',
+            '2:540',
+            '2:555',
+            '2:570',
+            '2:585',
+        ]);
     });
 });

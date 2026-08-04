@@ -25,7 +25,7 @@ function minuteToDate(minute) {
     return new Date(2000, 0, 1, Math.floor(value / 60), value % 60, 0, 0);
 }
 
-const ScheduleTimeRangeInsert = ({onInsert, emptyRangeMessage}) => {
+const ScheduleTimeRangeInsert = ({onClear, onInsert, emptyRangeMessage}) => {
     const {theme} = useTheme();
     const {t} = useTranslation('my');
     const [weekday, setWeekday] = useState(1);
@@ -83,6 +83,22 @@ const ScheduleTimeRangeInsert = ({onInsert, emptyRangeMessage}) => {
             Alert.alert(t('無法插入'), emptyRangeMessage);
         }
     }, [emptyRangeMessage, endMinute, onInsert, startMinute, t, weekday]);
+
+    const handleClear = useCallback(() => {
+        trigger();
+        if (endMinute <= startMinute) {
+            Alert.alert(t('無法清除'), t('結束時間須晚於開始時間。'));
+            return;
+        }
+        const cleared = onClear?.({
+            weekday,
+            startMinute,
+            endMinute,
+        });
+        if (cleared === false && emptyRangeMessage) {
+            Alert.alert(t('無法清除'), emptyRangeMessage);
+        }
+    }, [emptyRangeMessage, endMinute, onClear, startMinute, t, weekday]);
 
     const pickerMinute = pickerTarget === 'end' ? endMinute : startMinute;
 
@@ -151,6 +167,24 @@ const ScheduleTimeRangeInsert = ({onInsert, emptyRangeMessage}) => {
                     </Text>
                 </Pressable>
             </View>
+
+            {onClear ? (
+                <Pressable
+                    accessibilityRole="button"
+                    onPress={handleClear}
+                    style={({pressed}) => [
+                        styles.clearButton,
+                        {
+                            backgroundColor: pressed
+                                ? theme.tonal.primary30
+                                : theme.tonal.primary15,
+                        },
+                    ]}>
+                    <Text style={[styles.insertText, {color: theme.themeColor}]}>
+                        {t('清除')}
+                    </Text>
+                </Pressable>
+            ) : null}
 
             <Pressable
                 accessibilityRole="button"
@@ -235,6 +269,14 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         minHeight: verticalScale(28),
         paddingHorizontal: scale(12),
+    },
+    clearButton: {
+        alignItems: 'center',
+        borderRadius: scale(7),
+        justifyContent: 'center',
+        marginRight: scale(5),
+        minHeight: verticalScale(28),
+        paddingHorizontal: scale(10),
     },
     insertText: {
         ...uiStyle.defaultText,
