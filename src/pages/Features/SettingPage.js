@@ -60,7 +60,7 @@ const SettingSectionCard = ({ children }) => {
         <View
             style={{
                 marginHorizontal: scale(15),
-                marginBottom: verticalScale(8),
+                marginBottom: verticalScale(4),
                 borderRadius: scale(16),
                 backgroundColor: white,
                 overflow: 'hidden',
@@ -98,7 +98,7 @@ const SettingSection = ({ title, icon }) => {
                 flexDirection: 'row',
                 alignItems: 'center',
                 marginHorizontal: scale(15),
-                marginTop: verticalScale(20),
+                marginTop: verticalScale(12),
                 marginBottom: verticalScale(6),
             }}>
             {icon && (
