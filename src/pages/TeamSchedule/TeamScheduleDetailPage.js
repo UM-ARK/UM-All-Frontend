@@ -6,7 +6,6 @@ import {
     ActivityIndicator,
     Alert,
     Image,
-    Modal,
     Platform,
     Pressable,
     RefreshControl,
@@ -15,7 +14,6 @@ import {
     StyleSheet,
     Switch,
     Text,
-    TextInput,
     View,
 } from 'react-native';
 
@@ -25,11 +23,6 @@ import {useHeaderHeight} from '@react-navigation/elements';
 import {usePreventRemove} from '@react-navigation/native';
 import moment from 'moment-timezone';
 import {useTranslation} from 'react-i18next';
-import {
-    KeyboardAwareScrollView,
-    KeyboardToolbar,
-} from 'react-native-keyboard-controller';
-import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import {scale, verticalScale} from 'react-native-size-matters';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import Ionicons from '@react-native-vector-icons/ionicons';
@@ -66,7 +59,6 @@ import {TeamScheduleFullState} from './components/TeamScheduleStateView';
 import {
     buildWeeklySlots,
     formatSuggestionLabel,
-    wallClockDateToOffsetIso,
 } from './components/scheduleWeekHelpers';
 import {
     clearTeamEventsCache,
@@ -88,8 +80,6 @@ import {
     getActiveMembers,
 } from './utils/scheduleRecommendations';
 
-const TITLE_MAX = 200;
-const DESCRIPTION_MAX = 4000;
 const DISPLAY_SLOT_MINUTES_STORAGE_KEY = 'ARK_TeamSchedule_Display_Slot_Minutes';
 const DEFAULT_DISPLAY_SLOT_MINUTES = 30;
 const EDIT_SLOT_MINUTES = 15;
@@ -446,15 +436,10 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
     const [slotSheet, setSlotSheet] = useState({visible: false, slot: null});
     const [inviteSheetVisible, setInviteSheetVisible] = useState(false);
     const [scrollToStartMinute, setScrollToStartMinute] = useState(null);
-    const [editModalVisible, setEditModalVisible] = useState(false);
-    const [editTitle, setEditTitle] = useState('');
-    const [editDescription, setEditDescription] = useState('');
 
     useEffect(() => {
         setScrollToStartMinute(null);
     }, [event?.eventId, members]);
-    const [editDeadline, setEditDeadline] = useState(null);
-    const [deadlinePickerVisible, setDeadlinePickerVisible] = useState(false);
     const [isPainting, setIsPainting] = useState(false);
     const [actionBusy, setActionBusy] = useState(false);
     const [coursePrefillLoading, setCoursePrefillLoading] = useState(false);
@@ -615,61 +600,24 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
 
     const openEditBasics = useCallback(() => {
         trigger();
-        setEditTitle(event?.title || '');
-        setEditDescription(event?.description || '');
-        setEditDeadline(
-            event?.responseDeadlineAt
-                ? moment(event.responseDeadlineAt).toDate()
-                : null,
-        );
-        setEditModalVisible(true);
-    }, [event]);
+        navigation.navigate('TeamScheduleEdit', {
+            eventId,
+            title: event?.title || '',
+            description: event?.description || '',
+            responseDeadlineAt: event?.responseDeadlineAt || null,
+            timezone: event?.timezone,
+        });
+    }, [event, eventId, navigation]);
 
-    const saveEditBasics = useCallback(async () => {
-        trigger();
-        const title = editTitle.trim();
-        if (title.length < 1 || title.length > TITLE_MAX) {
-            Alert.alert(t('無法儲存'), t('請輸入 1 至 200 字的活動名稱。'));
+    // 編輯頁儲存成功後帶回更新
+    useEffect(() => {
+        const editedBasics = route?.params?.editedBasics;
+        if (!editedBasics) {
             return;
         }
-        if (editDescription.length > DESCRIPTION_MAX) {
-            Alert.alert(t('無法儲存'), t('說明最多 4000 字。'));
-            return;
-        }
-        setActionBusy(true);
-        try {
-            const patch = {
-                title,
-                description: editDescription.trim(),
-                responseDeadlineAt: editDeadline
-                    ? wallClockDateToOffsetIso(
-                          editDeadline,
-                          event?.timezone,
-                      )
-                    : null,
-            };
-            const data = await updateTeamEvent(eventId, patch);
-            const nextEvent = data?.event || {...event, ...patch};
-            updateDetailEvent(nextEvent);
-            setEditModalVisible(false);
-        } catch (requestError) {
-            const normalized = normalizeSchedulingError(requestError);
-            Alert.alert(
-                t('無法儲存'),
-                errorMessageForCode(normalized.code, t),
-            );
-        } finally {
-            setActionBusy(false);
-        }
-    }, [
-        editDeadline,
-        editDescription,
-        editTitle,
-        event,
-        eventId,
-        t,
-        updateDetailEvent,
-    ]);
+        updateDetailEvent(editedBasics);
+        navigation.setParams({editedBasics: undefined});
+    }, [navigation, route?.params?.editedBasics, updateDetailEvent]);
 
     const toggleEventStatus = useCallback(() => {
         trigger();
@@ -1566,173 +1514,6 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                 onInviteChange={updateInviteLink}
                 onClose={() => setInviteSheetVisible(false)}
             />
-
-            <Modal
-                visible={editModalVisible}
-                animationType="slide"
-                transparent
-                onRequestClose={() => setEditModalVisible(false)}>
-                <View style={styles.modalBackdrop}>
-                    <KeyboardAwareScrollView
-                        contentContainerStyle={styles.modalScroll}
-                        keyboardDismissMode="on-drag">
-                        <View
-                            style={[
-                                styles.modalCard,
-                                {
-                                    backgroundColor: theme.bg_color,
-                                    paddingBottom:
-                                        verticalScale(28) + insets.bottom,
-                                },
-                            ]}>
-                            <Text
-                                style={[
-                                    styles.modalTitle,
-                                    {color: theme.black.main},
-                                ]}>
-                                {t('編輯基本資料')}
-                            </Text>
-                            <Text
-                                style={[
-                                    styles.fieldLabel,
-                                    {color: theme.black.third},
-                                ]}>
-                                {t('活動名稱')}
-                            </Text>
-                            <TextInput
-                                value={editTitle}
-                                onChangeText={setEditTitle}
-                                maxLength={TITLE_MAX}
-                                style={[
-                                    styles.input,
-                                    {
-                                        color: theme.black.main,
-                                        backgroundColor: theme.white,
-                                        borderColor:
-                                            theme.themeColorUltraLight,
-                                    },
-                                ]}
-                            />
-                            <Text
-                                style={[
-                                    styles.fieldLabel,
-                                    {color: theme.black.third},
-                                ]}>
-                                {t('說明（選填）')}
-                            </Text>
-                            <TextInput
-                                value={editDescription}
-                                onChangeText={setEditDescription}
-                                maxLength={DESCRIPTION_MAX}
-                                multiline
-                                style={[
-                                    styles.input,
-                                    styles.inputMultiline,
-                                    {
-                                        color: theme.black.main,
-                                        backgroundColor: theme.white,
-                                        borderColor:
-                                            theme.themeColorUltraLight,
-                                    },
-                                ]}
-                            />
-                            <Pressable
-                                onPress={() => {
-                                    trigger();
-                                    setDeadlinePickerVisible(true);
-                                }}
-                                style={styles.deadlineRow}>
-                                <Text
-                                    style={[
-                                        styles.fieldLabel,
-                                        {color: theme.black.third},
-                                    ]}>
-                                    {t('回覆截止（選填）')}
-                                </Text>
-                                <Text
-                                    style={[
-                                        styles.deadlineValue,
-                                        {color: theme.themeColor},
-                                    ]}>
-                                    {editDeadline
-                                        ? moment(editDeadline).format(
-                                              'M/D HH:mm',
-                                          )
-                                        : t('未設定')}
-                                </Text>
-                            </Pressable>
-                            {editDeadline ? (
-                                <Pressable
-                                    onPress={() => {
-                                        trigger();
-                                        setEditDeadline(null);
-                                    }}>
-                                    <Text
-                                        style={{
-                                            color: theme.black.third,
-                                            marginBottom: verticalScale(8),
-                                        }}>
-                                        {t('清除')}
-                                    </Text>
-                                </Pressable>
-                            ) : null}
-                            <View style={styles.modalActions}>
-                                <Pressable
-                                    onPress={() => {
-                                        trigger();
-                                        setEditModalVisible(false);
-                                    }}
-                                    style={({pressed}) => [
-                                        styles.modalBtn,
-                                        {
-                                            backgroundColor: pressed
-                                                ? theme.tonal.primary30
-                                                : theme.tonal.primary15,
-                                        },
-                                    ]}>
-                                    <Text
-                                        style={[
-                                            styles.modalBtnText,
-                                            {color: theme.themeColor},
-                                        ]}>
-                                        {t('取消')}
-                                    </Text>
-                                </Pressable>
-                                <Pressable
-                                    onPress={saveEditBasics}
-                                    style={({pressed}) => [
-                                        styles.modalBtn,
-                                        {
-                                            backgroundColor: pressed
-                                                ? theme.tonal.primary50
-                                                : theme.themeColor,
-                                        },
-                                    ]}>
-                                    <Text
-                                        style={[
-                                            styles.modalBtnText,
-                                            {color: theme.trueWhite},
-                                        ]}>
-                                        {t('儲存')}
-                                    </Text>
-                                </Pressable>
-                            </View>
-                        </View>
-                    </KeyboardAwareScrollView>
-                    <KeyboardToolbar />
-                </View>
-            </Modal>
-
-            <DateTimePickerModal
-                isVisible={deadlinePickerVisible}
-                mode="datetime"
-                date={editDeadline || new Date()}
-                onConfirm={date => {
-                    setDeadlinePickerVisible(false);
-                    setEditDeadline(date);
-                }}
-                onCancel={() => setDeadlinePickerVisible(false)}
-            />
         </View>
     );
 };
@@ -1883,68 +1664,6 @@ const styles = StyleSheet.create({
         ...uiStyle.defaultText,
         fontSize: scale(12),
         fontWeight: '600',
-    },
-    modalBackdrop: {
-        flex: 1,
-        justifyContent: 'flex-end',
-    },
-    modalScroll: {
-        flexGrow: 1,
-        justifyContent: 'flex-end',
-    },
-    modalCard: {
-        borderTopLeftRadius: scale(16),
-        borderTopRightRadius: scale(16),
-        paddingHorizontal: scale(16),
-        paddingTop: verticalScale(16),
-    },
-    modalTitle: {
-        ...uiStyle.defaultText,
-        fontSize: scale(16),
-        fontWeight: '700',
-        marginBottom: verticalScale(12),
-    },
-    fieldLabel: {
-        ...uiStyle.defaultText,
-        fontSize: scale(12),
-        marginBottom: verticalScale(4),
-    },
-    input: {
-        ...uiStyle.defaultText,
-        borderRadius: scale(10),
-        borderWidth: StyleSheet.hairlineWidth,
-        fontSize: scale(14),
-        marginBottom: verticalScale(10),
-        paddingHorizontal: scale(10),
-        paddingVertical: verticalScale(8),
-    },
-    inputMultiline: {
-        minHeight: verticalScale(80),
-        textAlignVertical: 'top',
-    },
-    deadlineRow: {
-        marginBottom: verticalScale(4),
-    },
-    deadlineValue: {
-        ...uiStyle.defaultText,
-        fontSize: scale(14),
-        fontWeight: '600',
-    },
-    modalActions: {
-        flexDirection: 'row',
-        gap: scale(10),
-        marginTop: verticalScale(8),
-    },
-    modalBtn: {
-        alignItems: 'center',
-        borderRadius: scale(12),
-        flex: 1,
-        paddingVertical: verticalScale(12),
-    },
-    modalBtnText: {
-        ...uiStyle.defaultText,
-        fontSize: scale(14),
-        fontWeight: '700',
     },
 });
 

@@ -41,6 +41,7 @@ import HarborInboxPage from './pages/TabbarPages/my/pages/HarborInboxPage';
 import TeamScheduleListPage from './pages/TeamSchedule/TeamScheduleListPage';
 import TeamScheduleCreatePage from './pages/TeamSchedule/TeamScheduleCreatePage';
 import TeamScheduleDetailPage from './pages/TeamSchedule/TeamScheduleDetailPage';
+import TeamScheduleEditPage from './pages/TeamSchedule/TeamScheduleEditPage';
 import WikiHome from './pages/TabbarPages/arkwiki';
 import WikiSearchPage from './pages/TabbarPages/arkwiki/WikiSearchPage';
 import WikiArticlePage from './pages/TabbarPages/arkwiki/WikiArticlePage';
@@ -462,6 +463,11 @@ const Nav = () => {
                         name="TeamScheduleDetail"
                         component={TeamScheduleDetailPage}
                         options={{headerTitle: t('活動詳情')}}
+                    />
+                    <Stack.Screen
+                        name="TeamScheduleEdit"
+                        component={TeamScheduleEditPage}
+                        options={{headerTitle: t('編輯基本資料')}}
                     />
                 </Stack.Group>
             </Stack.Navigator>
