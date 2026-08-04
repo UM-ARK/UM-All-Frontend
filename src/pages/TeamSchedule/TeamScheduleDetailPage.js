@@ -86,8 +86,12 @@ import {
 } from './utils/scheduleRecommendations';
 
 const DISPLAY_SLOT_MINUTES_STORAGE_KEY = 'ARK_TeamSchedule_Display_Slot_Minutes';
+const SCHEDULE_MODE_STORAGE_KEY = 'ARK_TeamSchedule_Schedule_Mode';
 const DEFAULT_DISPLAY_SLOT_MINUTES = 30;
 const EDIT_SLOT_MINUTES = 15;
+
+const isScheduleMode = value =>
+    value === 'availability' || value === 'shared';
 
 /**
  * @param {string} code
@@ -260,6 +264,7 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
     });
     const [scheduleMode, setScheduleMode] = useState('availability');
     const [courseCatalogSlots, setCourseCatalogSlots] = useState([]);
+    const loadedSharedTimetableEventRef = useRef(null);
     const [sharedTimetableSheetVisible, setSharedTimetableSheetVisible] =
         useState(false);
 
@@ -303,17 +308,36 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                 return;
             }
             setScheduleMode(nextMode);
-            if (nextMode === 'shared') {
-                loadSharedTimetables();
-            }
+            setLocalStorage(SCHEDULE_MODE_STORAGE_KEY, nextMode);
         },
-        [editor.isEditing, loadSharedTimetables],
+        [editor.isEditing],
     );
 
     useEffect(() => {
-        setScheduleMode('availability');
+        let cancelled = false;
+        getLocalStorage(SCHEDULE_MODE_STORAGE_KEY).then(value => {
+            if (!cancelled && isScheduleMode(value)) {
+                setScheduleMode(value);
+            }
+        });
+        return () => {
+            cancelled = true;
+        };
+    }, []);
+
+    useEffect(() => {
+        if (scheduleMode !== 'shared') {
+            loadedSharedTimetableEventRef.current = null;
+            setCourseCatalogSlots([]);
+            return;
+        }
+        if (loadedSharedTimetableEventRef.current === eventId) {
+            return;
+        }
+        loadedSharedTimetableEventRef.current = eventId;
         setCourseCatalogSlots([]);
-    }, [eventId]);
+        loadSharedTimetables();
+    }, [eventId, loadSharedTimetables, scheduleMode]);
     const [displaySlotMinutes, setDisplaySlotMinutes] = useState(
         DEFAULT_DISPLAY_SLOT_MINUTES,
     );
