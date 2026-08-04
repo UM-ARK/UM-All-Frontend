@@ -784,6 +784,7 @@
         "活動已關閉。": "This event is closed.",
         "邀請已關閉。": "This invite is closed.",
         "邀請連結無效或已更換，請索取新連結。": "Invite link is invalid or rotated. Ask for a new one.",
+        "此活動人數已達上限，暫時無法加入。": "This event has reached its member limit. You can’t join right now.",
         "另一部裝置已更新你的時間，請重新檢查後再儲存。": "Your availability was updated on another device. Review and save again.",
         "正在處理中，請稍後再試。": "Still processing. Please try again shortly.",
         "建立者無法退出，請關閉或刪除活動。": "Owners can’t leave. Close or delete the event instead.",

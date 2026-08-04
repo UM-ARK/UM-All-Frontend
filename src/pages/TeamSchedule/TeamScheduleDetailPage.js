@@ -114,6 +114,8 @@ function errorMessageForCode(code, t) {
             return t('邀請連結無效或已更換，請索取新連結。');
         case 'joined_event_limit_reached':
             return t('你最多可同時加入 100 個尚未過期的活動，請先退出其他活動。');
+        case 'event_member_limit_reached':
+            return t('此活動人數已達上限，暫時無法加入。');
         case 'response_deadline_passed':
             return t('已截止填寫');
         case 'revision_conflict':
