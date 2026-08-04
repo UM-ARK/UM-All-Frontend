@@ -1164,6 +1164,37 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
     const hasSubmitted = isAvailabilitySubmitted(
         normalizeAvailability(myAvailability, event?.timezone),
     );
+    const mySharingLevel = sharedTimetables.mySharedTimetable?.sharingLevel;
+    const mySharingStatus = sharedTimetables.phase === 'loading' ||
+        sharedTimetables.phase === 'idle'
+        ? {
+              title: t('正在載入小組課表…'),
+              hint: null,
+              icon: 'hourglass-outline',
+          }
+        : sharedTimetables.phase === 'error'
+          ? {
+                title: t('暫時無法載入小組課表。'),
+                hint: null,
+                icon: 'alert-circle-outline',
+            }
+          : mySharingLevel === 'course_identity'
+            ? {
+                  title: t('已共享 Course Code + Section'),
+                  hint: t('組員會看到 Course Code、Section 與可還原的上課時間。'),
+                  icon: 'school-outline',
+              }
+            : mySharingLevel === 'time_only'
+              ? {
+                    title: t('已共享上課時間'),
+                    hint: t('組員只會看到上課與時間。'),
+                    icon: 'time-outline',
+                }
+              : {
+                    title: t('尚未共享課表'),
+                    hint: t('選擇要向組員顯示的內容。'),
+                    icon: 'calendar-outline',
+                };
 
     return (
         <View style={[styles.container, {backgroundColor: theme.bg_color}]}>
@@ -1422,14 +1453,6 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
 
                 {scheduleMode === 'shared' ? (
                     <View style={styles.section}>
-                        <TeamSharedTimetableView
-                            members={sharedTimetables.members}
-                            courseSlots={courseCatalogSlots}
-                            loading={sharedTimetables.phase === 'loading'}
-                            error={sharedTimetables.error}
-                            onRetry={() => loadSharedTimetables()}
-                            onProfilePress={openHarborProfile}
-                        />
                         <Pressable
                             accessibilityRole="button"
                             onPress={() => {
@@ -1444,16 +1467,48 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                                         : theme.tonal.primary15,
                                 },
                             ]}>
-                            <Text
+                            <View
                                 style={[
-                                    styles.sharedTimetableCtaText,
-                                    {color: theme.themeColor},
+                                    styles.sharedTimetableStatusIcon,
+                                    {backgroundColor: theme.tonal.primary30},
                                 ]}>
-                                {sharedTimetables.mySharedTimetable
-                                    ? t('管理共享')
-                                    : t('共享我的課表')}
-                            </Text>
+                                <Ionicons
+                                    name={mySharingStatus.icon}
+                                    color={theme.themeColor}
+                                    size={scale(18)}
+                                />
+                            </View>
+                            <View style={styles.sharedTimetableStatusContent}>
+                                <Text
+                                    style={[
+                                        styles.sharedTimetableCtaText,
+                                        {color: theme.themeColor},
+                                    ]}>
+                                    {mySharingStatus.title}
+                                </Text>
+                                {mySharingStatus.hint ? (
+                                    <Text
+                                        style={[
+                                            styles.sharedTimetableStatusHint,
+                                            {color: theme.black.third},
+                                        ]}>
+                                        {mySharingStatus.hint}
+                                    </Text>
+                                ) : null}
+                            </View>
+                            <Ionicons
+                                name="chevron-forward"
+                                color={theme.themeColor}
+                                size={scale(17)}
+                            />
                         </Pressable>
+                        <TeamSharedTimetableView
+                            members={sharedTimetables.members}
+                            courseSlots={courseCatalogSlots}
+                            loading={sharedTimetables.phase === 'loading'}
+                            error={sharedTimetables.error}
+                            onRetry={() => loadSharedTimetables()}
+                        />
                     </View>
                 ) : null}
 
@@ -1761,13 +1816,32 @@ const styles = StyleSheet.create({
     sharedTimetableCta: {
         alignItems: 'center',
         borderRadius: scale(10),
-        marginTop: verticalScale(12),
-        paddingVertical: verticalScale(10),
+        flexDirection: 'row',
+        marginBottom: verticalScale(12),
+        paddingHorizontal: scale(10),
+        paddingVertical: verticalScale(9),
+    },
+    sharedTimetableStatusIcon: {
+        alignItems: 'center',
+        borderRadius: scale(17),
+        height: scale(34),
+        justifyContent: 'center',
+        width: scale(34),
+    },
+    sharedTimetableStatusContent: {
+        flex: 1,
+        marginHorizontal: scale(9),
     },
     sharedTimetableCtaText: {
         ...uiStyle.defaultText,
         fontSize: scale(13),
         fontWeight: '700',
+    },
+    sharedTimetableStatusHint: {
+        ...uiStyle.defaultText,
+        fontSize: scale(10),
+        lineHeight: verticalScale(15),
+        marginTop: verticalScale(2),
     },
     // Android headerRight：固定正方形按鈕
     headerMore: {

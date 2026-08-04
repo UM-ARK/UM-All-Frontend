@@ -168,6 +168,9 @@ const SharedTimetableSheet = ({
                 <Text style={[styles.hint, {color: theme.black.third}]}> 
                     {t('只會向此組隊的成員顯示；可隨時停止共享。')}
                 </Text>
+                <Text style={[styles.hint, {color: theme.black.third}]}>
+                    {t('每個組隊的共享內容彼此獨立。本機課表變更後不會自動更新此組隊，需再次點擊「確定更新」。')}
+                </Text>
                 {loading ? <ActivityIndicator color={theme.themeColor} /> : null}
                 {loadError ? <Text style={[styles.error, {color: theme.unread}]}>{loadError}</Text> : null}
                 {!loading && !loadError && !local?.hasPlan ? (

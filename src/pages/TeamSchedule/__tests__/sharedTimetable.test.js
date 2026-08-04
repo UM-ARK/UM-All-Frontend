@@ -1,5 +1,6 @@
 import {buildImportText} from '../../TabbarPages/course/utils/parseImportData';
 import {
+    aggregateSharedTimetableMeetings,
     areSharedTimetablePayloadsEqual,
     buildSharedTimetablePayload,
     resolveSharedTimetableMeetings,
@@ -90,5 +91,67 @@ describe('小組共享課表 payload', () => {
                 },
             ),
         ).toBe(true);
+    });
+});
+
+describe('小組共享課表概覽', () => {
+    test('依重疊邊界計算每段上課人數', () => {
+        const members = [
+            {
+                harborUserId: 1,
+                resolved: {
+                    meetings: [
+                        {weekday: 1, startMinute: 600, endMinute: 660},
+                    ],
+                },
+            },
+            {
+                harborUserId: 2,
+                resolved: {
+                    meetings: [
+                        {weekday: 1, startMinute: 600, endMinute: 690},
+                    ],
+                },
+            },
+        ];
+
+        expect(aggregateSharedTimetableMeetings(members)).toEqual([
+            {
+                weekday: 1,
+                startMinute: 600,
+                endMinute: 660,
+                members,
+                memberKeys: ['1', '2'],
+            },
+            {
+                weekday: 1,
+                startMinute: 660,
+                endMinute: 690,
+                members: [members[1]],
+                memberKeys: ['2'],
+            },
+        ]);
+    });
+
+    test('同一人的重疊課堂不會重複計數', () => {
+        const member = {
+            harborUserId: 1,
+            resolved: {
+                meetings: [
+                    {weekday: 3, startMinute: 600, endMinute: 660},
+                    {weekday: 3, startMinute: 630, endMinute: 690},
+                ],
+            },
+        };
+
+        expect(aggregateSharedTimetableMeetings([member])).toEqual([
+            {
+                weekday: 3,
+                startMinute: 600,
+                endMinute: 690,
+                members: [member],
+                memberKeys: ['1'],
+            },
+        ]);
     });
 });

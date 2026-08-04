@@ -141,6 +141,74 @@ export function resolveSharedTimetableMeetings(sharedTimetable, courseSlots) {
     };
 }
 
+export function aggregateSharedTimetableMeetings(members) {
+    const result = [];
+
+    for (let weekday = 1; weekday <= 7; weekday += 1) {
+        const meetings = [];
+        (Array.isArray(members) ? members : []).forEach((member, memberIndex) => {
+            member?.resolved?.meetings?.forEach(meeting => {
+                if (
+                    meeting?.weekday === weekday &&
+                    meeting.startMinute < meeting.endMinute
+                ) {
+                    meetings.push({
+                        ...meeting,
+                        member,
+                        memberKey: String(
+                            member?.harborUserId ?? `member-${memberIndex}`,
+                        ),
+                    });
+                }
+            });
+        });
+        const boundaries = Array.from(
+            new Set(
+                meetings.flatMap(meeting => [
+                    meeting.startMinute,
+                    meeting.endMinute,
+                ]),
+            ),
+        ).sort((a, b) => a - b);
+
+        for (let index = 0; index < boundaries.length - 1; index += 1) {
+            const startMinute = boundaries[index];
+            const endMinute = boundaries[index + 1];
+            const activeMembers = new Map();
+            meetings.forEach(meeting => {
+                if (
+                    meeting.startMinute < endMinute &&
+                    startMinute < meeting.endMinute
+                ) {
+                    activeMembers.set(meeting.memberKey, meeting.member);
+                }
+            });
+            if (activeMembers.size === 0) {
+                continue;
+            }
+            const memberKeys = Array.from(activeMembers.keys()).sort();
+            const previous = result[result.length - 1];
+            if (
+                previous?.weekday === weekday &&
+                previous.endMinute === startMinute &&
+                previous.memberKeys.join('\u0000') === memberKeys.join('\u0000')
+            ) {
+                previous.endMinute = endMinute;
+                continue;
+            }
+            result.push({
+                weekday,
+                startMinute,
+                endMinute,
+                members: Array.from(activeMembers.values()),
+                memberKeys,
+            });
+        }
+    }
+
+    return result;
+}
+
 export function meetingOverlapsSlot(meeting, slot) {
     return Boolean(
         meeting &&
