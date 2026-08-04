@@ -1,6 +1,6 @@
 // 專門存放路由，其他頁面可使用this.props.navigation.navigate("對應下方創建棧的路由名")進行跳轉
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import { Alert, Platform, TouchableOpacity } from 'react-native';
+import { Platform, TouchableOpacity } from 'react-native';
 import Ionicons from "@react-native-vector-icons/ionicons";
 import {
     NavigationContainer,
@@ -57,12 +57,6 @@ import SettingPage from './pages/Features/SettingPage';
 import { useTheme } from './components/ThemeContext';
 import { useHarborSession } from './contexts/HarborSessionContext';
 import { APP_LINKING } from './utils/appLinks';
-import { createClipboardDeepLinkScanner } from './utils/clipboardDeepLink';
-import {
-    TEAM_INVITE_PARSER_ID,
-    createTeamInviteClipboardParser,
-    openTeamInviteDetail,
-} from './utils/scheduling/teamInviteLink';
 
 const Stack = createNativeStackNavigator();
 
@@ -199,70 +193,6 @@ const Nav = () => {
     useEffect(() => {
         flushPendingLoginIntent();
     }, [flushPendingLoginIntent]);
-
-    // 剪貼板 deep link：回前景掃描；parser 可擴充供其他功能共用
-    useEffect(() => {
-        const scanner = createClipboardDeepLinkScanner({
-            parsers: [createTeamInviteClipboardParser()],
-            shouldScan: () => navigationRef.isReady(),
-            onMatch: match => {
-                if (
-                    match?.parserId !== TEAM_INVITE_PARSER_ID ||
-                    !match?.payload?.eventId ||
-                    !match?.payload?.invite
-                ) {
-                    return;
-                }
-                const {eventId, invite} = match.payload;
-                Alert.alert(
-                    t('偵測到組隊邀請', {ns: 'my'}),
-                    t('剪貼板中有組隊邀請連結，是否立即加入？', {
-                        ns: 'my',
-                    }),
-                    [
-                        {
-                            text: t('稍後', {ns: 'my'}),
-                            style: 'cancel',
-                            onPress: () => trigger(),
-                        },
-                        {
-                            text: t('加入', {ns: 'my'}),
-                            onPress: () => {
-                                trigger();
-                                if (!navigationRef.isReady()) {
-                                    return;
-                                }
-                                openTeamInviteDetail(navigationRef, {
-                                    eventId,
-                                    invite,
-                                });
-                            },
-                        },
-                    ],
-                    {cancelable: true},
-                );
-            },
-        });
-
-        // 導覽就緒後再掃一次（冷啟動複製後開 App）
-        let cancelled = false;
-        const tryInitialScan = () => {
-            if (cancelled || !navigationRef.isReady()) {
-                return;
-            }
-            scanner.scan().catch(() => {});
-        };
-        const readyTimer = setTimeout(tryInitialScan, 600);
-        const unsubscribe = scanner.subscribeAppState({
-            scanOnStart: false,
-        });
-
-        return () => {
-            cancelled = true;
-            clearTimeout(readyTimer);
-            unsubscribe();
-        };
-    }, [navigationRef, t]);
 
     return (
         <NavigationContainer

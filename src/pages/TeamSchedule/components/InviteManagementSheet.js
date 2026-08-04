@@ -130,7 +130,7 @@ const InviteManagementSheet = ({
                 title: eventTitle,
                 url,
                 hint: t(
-                    '複製此條信息打開ARK ALL即可組隊，或瀏覽器打開下方鏈接。',
+                    '請用瀏覽器開啟下方連結，或於組隊頁手動貼上即可加入。',
                 ),
             });
             await Share.share({

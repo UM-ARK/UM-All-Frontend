@@ -10,7 +10,7 @@ export const TEAM_INVITE_PARSER_ID = 'team-invite';
 
 // 分享時預設提示（繁中；UI 層可用 i18n 覆寫）
 export const TEAM_INVITE_SHARE_HINT_ZH =
-    '複製此條信息打開ARK ALL即可組隊，或瀏覽器打開下方鏈接。';
+    '請用瀏覽器開啟下方連結，或於組隊頁手動貼上即可加入。';
 
 const HTTPS_TEAM_INVITE_RE =
     /https?:\/\/(?:www\.)?umall\.one\/app\/team\/([^/?#\s]+)(?:\?([^#\s]*))?/gi;
@@ -112,7 +112,7 @@ export function createTeamInviteClipboardParser() {
 }
 
 /**
- * 組裝分享訊息（含剪貼板自動匯入提示）
+ * 組裝分享訊息（瀏覽器開啟／手動貼上提示）
  * @param {object} options
  * @param {string} options.url
  * @param {string} [options.title]

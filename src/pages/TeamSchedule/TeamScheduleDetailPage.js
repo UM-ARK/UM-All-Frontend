@@ -11,6 +11,7 @@ import {
     Pressable,
     RefreshControl,
     ScrollView,
+    Share,
     StyleSheet,
     Text,
     TextInput,
@@ -38,6 +39,7 @@ import {uiStyle, useTheme} from '../../components/ThemeContext';
 import {ARK_HARBOR_AVATAR_TEMPLATE} from '../../utils/pathMap';
 import {
     deleteTeamEvent,
+    getInviteLink,
     leaveTeamEvent,
     updateTeamEvent,
 } from '../../utils/scheduling/schedulingApi';
@@ -46,6 +48,7 @@ import {
     isAvailabilitySubmitted,
     normalizeAvailability,
 } from '../../utils/scheduling/schedulingModels';
+import {buildTeamInviteShareMessage} from '../../utils/scheduling/teamInviteLink';
 import {trigger} from '../../utils/trigger';
 import AvailabilityEditorFooter from './components/AvailabilityEditorFooter';
 import AvailabilityLegend from './components/AvailabilityLegend';
@@ -620,6 +623,47 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
     const isOwner = membership?.role === 'owner';
     const eventClosed = event?.status === 'closed';
 
+    const handleShareInvite = useCallback(async () => {
+        if (!eventId || eventClosed) {
+            if (eventClosed) {
+                Alert.alert(
+                    t('活動已關閉'),
+                    t('請先重新開啟活動後，再管理邀請連結。'),
+                );
+            }
+            return;
+        }
+        setActionBusy(true);
+        try {
+            const data = await getInviteLink(eventId);
+            const nested = data?.inviteLink || data;
+            const url = nested?.shareUrl || null;
+            if (!url) {
+                Alert.alert(t('無法分享'), t('暫時無法取得邀請連結。'));
+                return;
+            }
+            const message = buildTeamInviteShareMessage({
+                title: event?.title,
+                url,
+                hint: t(
+                    '請用瀏覽器開啟下方連結，或於組隊頁手動貼上即可加入。',
+                ),
+            });
+            await Share.share({
+                message,
+                url,
+            });
+        } catch (requestError) {
+            const normalized = normalizeSchedulingError(requestError);
+            Alert.alert(
+                t('無法分享'),
+                normalized.message || t('暫時無法完成，請稍後再試。'),
+            );
+        } finally {
+            setActionBusy(false);
+        }
+    }, [event?.title, eventClosed, eventId, t]);
+
     const menuActions = useMemo(() => {
         if (isInvitePending || phase !== 'ready' || !event) {
             return [];
@@ -979,6 +1023,11 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                     membership={membership}
                     stats={stats}
                     readOnlyReason={readOnlyReason}
+                    onSharePress={
+                        isOwner && !isInvitePending && !eventClosed
+                            ? handleShareInvite
+                            : undefined
+                    }
                 />
 
                 {heatmapBundle.suggestions.length > 0 ? (
