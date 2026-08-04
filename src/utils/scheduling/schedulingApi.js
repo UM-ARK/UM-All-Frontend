@@ -135,6 +135,35 @@ export function putMyAvailability(eventId, payload) {
     });
 }
 
+export function getMySharedTimetable(eventId) {
+    return requestWithAuth({
+        method: 'get',
+        url: `${teamEventPath(eventId)}/me/shared-timetable`,
+    });
+}
+
+export function putMySharedTimetable(eventId, payload) {
+    return requestWithAuth({
+        method: 'put',
+        url: `${teamEventPath(eventId)}/me/shared-timetable`,
+        data: payload,
+    });
+}
+
+export function deleteMySharedTimetable(eventId) {
+    return requestWithAuth({
+        method: 'delete',
+        url: `${teamEventPath(eventId)}/me/shared-timetable`,
+    });
+}
+
+export function getTeamSharedTimetables(eventId) {
+    return requestWithAuth({
+        method: 'get',
+        url: `${teamEventPath(eventId)}/shared-timetables`,
+    });
+}
+
 export function joinTeamEvent(eventId, inviteToken) {
     const data = {};
     if (inviteToken != null && inviteToken !== '') {

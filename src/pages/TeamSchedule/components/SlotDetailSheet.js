@@ -18,6 +18,10 @@ import {
 } from '../../../utils/scheduling/schedulingModels';
 import {trigger} from '../../../utils/trigger';
 import {
+    meetingOverlapsSlot,
+    resolveSharedTimetableMeetings,
+} from '../utils/sharedTimetable';
+import {
     WEEKDAY_SHORT_LABELS,
     formatMinuteOfDay,
 } from './scheduleWeekHelpers';
@@ -30,6 +34,8 @@ import {
  * @param {Array} props.members
  * @param {string} props.timezone
  * @param {string|number|null} [props.myHarborUserId]
+ * @param {Array|null} [props.sharedTimetableMembers]
+ * @param {Array} [props.courseSlots]
  * @param {(username: string) => void} [props.onMemberPress]
  */
 const SlotDetailSheet = ({
@@ -39,6 +45,8 @@ const SlotDetailSheet = ({
     members = [],
     timezone = 'Asia/Macau',
     myHarborUserId = null,
+    sharedTimetableMembers = null,
+    courseSlots = [],
     onMemberPress,
 }) => {
     const {theme} = useTheme();
@@ -97,6 +105,48 @@ const SlotDetailSheet = ({
             }
         }
 
+        const sharedGroups = Array.isArray(sharedTimetableMembers)
+            ? {
+                  free: [],
+                  inClass: [],
+                  busyOther: [],
+                  unsubmitted: [],
+              }
+            : null;
+        if (sharedGroups) {
+            sharedTimetableMembers.forEach(sharedMember => {
+                const member = list.find(item =>
+                    String(item?.harborUserId) ===
+                    String(sharedMember?.harborUserId),
+                ) || sharedMember;
+                const availability = normalizeAvailability(
+                    member?.availability,
+                    timezone,
+                );
+                if (!isAvailabilitySubmitted(availability)) {
+                    sharedGroups.unsubmitted.push(member);
+                    return;
+                }
+                const isFree = availability.ranges.some(range =>
+                    rangeCoversSlot(range, detailSlot),
+                );
+                const {meetings} = resolveSharedTimetableMeetings(
+                    sharedMember?.sharedTimetable,
+                    courseSlots,
+                );
+                const hasClass = meetings.some(meeting =>
+                    meetingOverlapsSlot(meeting, detailSlot),
+                );
+                if (isFree) {
+                    sharedGroups.free.push({...member, hasClass});
+                } else if (hasClass) {
+                    sharedGroups.inClass.push(member);
+                } else {
+                    sharedGroups.busyOther.push(member);
+                }
+            });
+        }
+
         return {
             weekdayLabel: weekday ? `週${weekday}` : '',
             timeLabel: `${formatMinuteOfDay(detailSlot.startMinute)} – ${formatMinuteOfDay(detailSlot.endMinute)}`,
@@ -107,8 +157,16 @@ const SlotDetailSheet = ({
             freeIds,
             unsubmittedCount,
             myStatus,
+            sharedGroups,
         };
-    }, [members, myHarborUserId, slot, timezone]);
+    }, [
+        courseSlots,
+        members,
+        myHarborUserId,
+        sharedTimetableMembers,
+        slot,
+        timezone,
+    ]);
 
     return (
         <ActionSheet
@@ -195,7 +253,8 @@ const SlotDetailSheet = ({
                             {t('有空成員')}
                         </Text>
                         <ScrollView style={styles.memberList}>
-                            {info.freeMembers.length === 0 ? (
+                            {(info.sharedGroups?.free || info.freeMembers)
+                                .length === 0 ? (
                                 <Text
                                     style={[
                                         styles.empty,
@@ -206,7 +265,7 @@ const SlotDetailSheet = ({
                                         : t('此時段尚無人有空')}
                                 </Text>
                             ) : (
-                                info.freeMembers.map(member => {
+                                (info.sharedGroups?.free || info.freeMembers).map(member => {
                                     const name =
                                         member.displayName ||
                                         member.username ||
@@ -270,11 +329,39 @@ const SlotDetailSheet = ({
                                                 numberOfLines={1}>
                                                 {name}
                                             </Text>
+                                            {member.hasClass ? (
+                                                <Text
+                                                    style={[
+                                                        styles.classBadge,
+                                                        {
+                                                            color: theme.black
+                                                                .third,
+                                                        },
+                                                    ]}>
+                                                    {t('課表有課')}
+                                                </Text>
+                                            ) : null}
                                         </View>
                                     );
                                 })
                             )}
                         </ScrollView>
+                        {info.sharedGroups ? (
+                            <>
+                                <MemberGroup
+                                    members={info.sharedGroups.inClass}
+                                    title={t('上課中')}
+                                />
+                                <MemberGroup
+                                    members={info.sharedGroups.busyOther}
+                                    title={t('其他原因沒空')}
+                                />
+                                <MemberGroup
+                                    members={info.sharedGroups.unsubmitted}
+                                    title={t('未提交')}
+                                />
+                            </>
+                        ) : null}
                     </>
                 ) : null}
                 <Pressable
@@ -301,6 +388,26 @@ const SlotDetailSheet = ({
                 </Pressable>
             </View>
         </ActionSheet>
+    );
+};
+
+const MemberGroup = ({members, title}) => {
+    const {theme} = useTheme();
+    if (!Array.isArray(members) || members.length === 0) {
+        return null;
+    }
+    return (
+        <View style={styles.statusGroup}>
+            <Text style={[styles.statusTitle, {color: theme.black.second}]}>
+                {title}
+            </Text>
+            <Text style={[styles.statusNames, {color: theme.black.third}]}>
+                {members
+                    .map(member => member.displayName || member.username || '')
+                    .filter(Boolean)
+                    .join('、')}
+            </Text>
+        </View>
     );
 };
 
@@ -360,6 +467,25 @@ const styles = StyleSheet.create({
         flex: 1,
         fontSize: scale(13),
         marginLeft: scale(10),
+    },
+    classBadge: {
+        ...uiStyle.defaultText,
+        fontSize: scale(10),
+        marginLeft: scale(6),
+    },
+    statusGroup: {
+        marginTop: verticalScale(10),
+    },
+    statusTitle: {
+        ...uiStyle.defaultText,
+        fontSize: scale(12),
+        fontWeight: '600',
+    },
+    statusNames: {
+        ...uiStyle.defaultText,
+        fontSize: scale(12),
+        lineHeight: verticalScale(18),
+        marginTop: verticalScale(3),
     },
     closeBtn: {
         alignItems: 'center',

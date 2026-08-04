@@ -30,6 +30,8 @@ import Ionicons from '@react-native-vector-icons/ionicons';
 import {useHarborSession} from '../../contexts/HarborSessionContext';
 import {useSchedulingSession} from '../../contexts/SchedulingSessionContext';
 import {uiStyle, useTheme} from '../../components/ThemeContext';
+import SegmentControl from '../../components/SegmentControl';
+import {getCourseData} from '../../utils/checkCoursesKits';
 import {ARK_HARBOR_AVATAR_TEMPLATE} from '../../utils/pathMap';
 import {
     deleteTeamEvent,
@@ -53,7 +55,9 @@ import CourseSchedulePreviewLegend from './components/CourseSchedulePreviewLegen
 import InviteManagementSheet from './components/InviteManagementSheet';
 import ScheduleWeekGrid from './components/ScheduleWeekGrid';
 import ScheduleTimeRangeInsert from './components/ScheduleTimeRangeInsert';
+import SharedTimetableSheet from './components/SharedTimetableSheet';
 import SlotDetailSheet from './components/SlotDetailSheet';
+import TeamSharedTimetableView from './components/TeamSharedTimetableView';
 import TeamScheduleEventHeader from './components/TeamScheduleEventHeader';
 import {TeamScheduleFullState} from './components/TeamScheduleStateView';
 import {
@@ -65,6 +69,7 @@ import {
     removeTeamEventFromCache,
 } from './hooks/useTeamEvents';
 import {useAvailabilityEditor} from './hooks/useAvailabilityEditor';
+import {useSharedTimetables} from './hooks/useSharedTimetables';
 import {useTeamScheduleDetail} from './hooks/useTeamScheduleDetail';
 import {
     clearDraftRange,
@@ -249,6 +254,15 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
         return me ? me.availability : null;
     }, [members, myHarborUserId]);
 
+    const sharedTimetables = useSharedTimetables({
+        eventId,
+        myHarborUserId,
+    });
+    const [scheduleMode, setScheduleMode] = useState('availability');
+    const [courseCatalogSlots, setCourseCatalogSlots] = useState([]);
+    const [sharedTimetableSheetVisible, setSharedTimetableSheetVisible] =
+        useState(false);
+
     const canEdit = computeCanEdit(event, event?.timezone);
     const readOnlyReason = readOnlyReasonFor(event, t);
 
@@ -266,6 +280,40 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
         canEdit,
         onSaved: onAvailabilitySaved,
     });
+
+    const loadSharedTimetables = useCallback(async () => {
+        const [sharedResult, courseResult] = await Promise.allSettled([
+            sharedTimetables.load(),
+            getCourseData('adddrop'),
+        ]);
+        if (courseResult.status === 'fulfilled') {
+            const slots = courseResult.value?.timetable?.Courses;
+            setCourseCatalogSlots(Array.isArray(slots) ? slots : []);
+        }
+        if (sharedResult.status === 'rejected') {
+            return false;
+        }
+        return true;
+    }, [sharedTimetables]);
+
+    const handleScheduleModeChange = useCallback(
+        index => {
+            const nextMode = index === 1 ? 'shared' : 'availability';
+            if (nextMode === 'shared' && editor.isEditing) {
+                return;
+            }
+            setScheduleMode(nextMode);
+            if (nextMode === 'shared') {
+                loadSharedTimetables();
+            }
+        },
+        [editor.isEditing, loadSharedTimetables],
+    );
+
+    useEffect(() => {
+        setScheduleMode('availability');
+        setCourseCatalogSlots([]);
+    }, [eventId]);
     const [displaySlotMinutes, setDisplaySlotMinutes] = useState(
         DEFAULT_DISPLAY_SLOT_MINUTES,
     );
@@ -1154,7 +1202,22 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                     }
                 />
 
-                {heatmapBundle.suggestions.length > 0 ? (
+                <View style={styles.scheduleModeControl}>
+                    <SegmentControl
+                        options={[
+                            {key: 'availability', label: t('共同空檔')},
+                            {key: 'shared', label: t('小組課表')},
+                        ]}
+                        selectedIndex={
+                            scheduleMode === 'shared' ? 1 : 0
+                        }
+                        onChange={handleScheduleModeChange}
+                        trackBackgroundColor={theme.tonal.primary08}
+                    />
+                </View>
+
+                {scheduleMode === 'availability' &&
+                heatmapBundle.suggestions.length > 0 ? (
                     <View style={styles.section}>
                         <View style={styles.suggestHeader}>
                             <Text
@@ -1221,7 +1284,7 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                     </View>
                 ) : null}
 
-                {event?.candidateWindows ? (
+                {scheduleMode === 'availability' && event?.candidateWindows ? (
                     <View style={styles.section}>
                         {!editor.isEditing ? (
                             <View style={styles.displaySlotPicker}>
@@ -1357,7 +1420,46 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                     </View>
                 ) : null}
 
-                {!editor.isEditing && canEdit ? (
+                {scheduleMode === 'shared' ? (
+                    <View style={styles.section}>
+                        <TeamSharedTimetableView
+                            members={sharedTimetables.members}
+                            courseSlots={courseCatalogSlots}
+                            loading={sharedTimetables.phase === 'loading'}
+                            error={sharedTimetables.error}
+                            onRetry={() => loadSharedTimetables()}
+                            onProfilePress={openHarborProfile}
+                        />
+                        <Pressable
+                            accessibilityRole="button"
+                            onPress={() => {
+                                trigger();
+                                setSharedTimetableSheetVisible(true);
+                            }}
+                            style={({pressed}) => [
+                                styles.sharedTimetableCta,
+                                {
+                                    backgroundColor: pressed
+                                        ? theme.tonal.primary30
+                                        : theme.tonal.primary15,
+                                },
+                            ]}>
+                            <Text
+                                style={[
+                                    styles.sharedTimetableCtaText,
+                                    {color: theme.themeColor},
+                                ]}>
+                                {sharedTimetables.mySharedTimetable
+                                    ? t('管理共享')
+                                    : t('共享我的課表')}
+                            </Text>
+                        </Pressable>
+                    </View>
+                ) : null}
+
+                {scheduleMode === 'availability' &&
+                !editor.isEditing &&
+                canEdit ? (
                     <Pressable
                         accessibilityRole="button"
                         onPress={() => {
@@ -1503,6 +1605,12 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                 members={members}
                 timezone={event?.timezone}
                 myHarborUserId={myHarborUserId}
+                sharedTimetableMembers={
+                    sharedTimetables.phase === 'ready'
+                        ? sharedTimetables.members
+                        : null
+                }
+                courseSlots={courseCatalogSlots}
                 onMemberPress={openHarborProfile}
                 onClose={() => setSlotSheet({visible: false, slot: null})}
             />
@@ -1515,6 +1623,18 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                 initialInviteLink={inviteLink}
                 onInviteChange={updateInviteLink}
                 onClose={() => setInviteSheetVisible(false)}
+            />
+
+            <SharedTimetableSheet
+                visible={sharedTimetableSheetVisible}
+                eventStatus={event?.status}
+                serverSnapshot={sharedTimetables.mySharedTimetable}
+                onLoadLocal={() =>
+                    loadSavedCourseSlots({includePlanList: true})
+                }
+                onSave={sharedTimetables.save}
+                onStop={sharedTimetables.stopSharing}
+                onClose={() => setSharedTimetableSheetVisible(false)}
             />
         </View>
     );
@@ -1540,6 +1660,10 @@ const styles = StyleSheet.create({
         marginTop: verticalScale(12),
     },
     section: {
+        marginTop: verticalScale(14),
+    },
+    scheduleModeControl: {
+        alignItems: 'center',
         marginTop: verticalScale(14),
     },
     displaySlotPicker: {
@@ -1632,6 +1756,17 @@ const styles = StyleSheet.create({
     editCtaText: {
         ...uiStyle.defaultText,
         fontSize: scale(15),
+        fontWeight: '700',
+    },
+    sharedTimetableCta: {
+        alignItems: 'center',
+        borderRadius: scale(10),
+        marginTop: verticalScale(12),
+        paddingVertical: verticalScale(10),
+    },
+    sharedTimetableCtaText: {
+        ...uiStyle.defaultText,
+        fontSize: scale(13),
         fontWeight: '700',
     },
     // Android headerRight：固定正方形按鈕

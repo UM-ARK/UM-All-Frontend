@@ -18,8 +18,12 @@ import {
     setSchedulingSession,
 } from '../schedulingAuth';
 import {
+    deleteMySharedTimetable,
+    getMySharedTimetable,
     getTeamEvent,
+    getTeamSharedTimetables,
     listMyTeamEvents,
+    putMySharedTimetable,
     schedulingHttp,
 } from '../schedulingApi';
 
@@ -214,5 +218,40 @@ describe('schedulingApi 授權與重試', () => {
                 url: `/team-events/${encodeURIComponent('a/b c')}`,
             }),
         );
+    });
+
+    it('共享課表 endpoints 使用 strict method 與路徑', async () => {
+        setSchedulingSession(makeSession({accessToken: 'jwt-ok'}));
+        httpRequestSpy.mockResolvedValue({data: {ok: true}});
+        const payload = {
+            sharingLevel: 'time_only',
+            busyRanges: [{weekday: 1, startMinute: 600, endMinute: 675}],
+            revision: 0,
+        };
+
+        await putMySharedTimetable('evt-1', payload);
+        await getMySharedTimetable('evt-1');
+        await getTeamSharedTimetables('evt-1');
+        await deleteMySharedTimetable('evt-1');
+
+        expect(httpRequestSpy.mock.calls.map(call => call[0])).toEqual([
+            expect.objectContaining({
+                method: 'put',
+                url: '/team-events/evt-1/me/shared-timetable',
+                data: payload,
+            }),
+            expect.objectContaining({
+                method: 'get',
+                url: '/team-events/evt-1/me/shared-timetable',
+            }),
+            expect.objectContaining({
+                method: 'get',
+                url: '/team-events/evt-1/shared-timetables',
+            }),
+            expect.objectContaining({
+                method: 'delete',
+                url: '/team-events/evt-1/me/shared-timetable',
+            }),
+        ]);
     });
 });

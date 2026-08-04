@@ -9,10 +9,12 @@ const PLAN_STORAGE_KEY = 'ARK_Timetable_Storage';
 /**
  * 讀取已選課程並展開成完整課堂時間。
  */
-export async function loadSavedCourseSlots() {
+export async function loadSavedCourseSlots({includePlanList = false} = {}) {
     const planList = await getLocalStorage(PLAN_STORAGE_KEY);
     if (!Array.isArray(planList) || planList.length === 0) {
-        return {hasPlan: false, planSlots: []};
+        return includePlanList
+            ? {hasPlan: false, planList: [], planSlots: []}
+            : {hasPlan: false, planSlots: []};
     }
 
     const courseData = await getCourseData('adddrop');
@@ -30,7 +32,9 @@ export async function loadSavedCourseSlots() {
         ),
     );
 
-    return {hasPlan: true, planSlots};
+    return includePlanList
+        ? {hasPlan: true, planList, planSlots}
+        : {hasPlan: true, planSlots};
 }
 
 export default loadSavedCourseSlots;

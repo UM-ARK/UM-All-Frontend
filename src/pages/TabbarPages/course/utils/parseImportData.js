@@ -1,4 +1,5 @@
 import lodash from 'lodash';
+import {normalizeCourseIdentities} from '../../../../utils/courseIdentity';
 
 /**
  * 修復剪貼簿常見的 UTF-16 位元組序錯亂。
@@ -158,33 +159,9 @@ export const buildImportText = planList => {
         return '';
     }
 
-    const lines = lodash
-        .uniqBy(
-            planList
-                .map(item => {
-                    const code = String(item?.['Course Code'] || '')
-                        .trim()
-                        .toUpperCase();
-                    const sectionRaw = String(item?.Section || '').trim();
-                    if (
-                        !/^[A-Z]{4}[0-9]{4}$/.test(code) ||
-                        !/^[0-9]{1,3}$/.test(sectionRaw)
-                    ) {
-                        return null;
-                    }
-
-                    // Section 必須為三位數才能被 parseImportData 匹配
-                    const section = sectionRaw.padStart(3, '0');
-                    return {
-                        'Course Code': code,
-                        Section: section,
-                        line: `${code}(${section})`,
-                    };
-                })
-                .filter(Boolean),
-            item => `${item['Course Code']}-${item.Section}`,
-        )
-        .map(item => item.line);
+    const lines = normalizeCourseIdentities(planList).map(
+        item => `${item.courseCode}(${item.section})`,
+    );
 
     return lines.join('\n');
 };
