@@ -40,11 +40,7 @@ const HarborProfileCard = ({user, onProfilePress, onSettingsPress}) => {
                     trigger();
                     onProfilePress();
                 }}>
-                <View
-                    style={[
-                        styles.avatarRing,
-                        {backgroundColor: theme.tonal.primary30},
-                    ]}>
+                <View style={styles.avatarWrap}>
                     <Image
                         source={
                             user.avatarUrl ? {uri: user.avatarUrl} : AVATAR_SOURCE
@@ -172,12 +168,7 @@ const styles = StyleSheet.create({
         alignSelf: 'flex-start',
         marginTop: verticalScale(6),
     },
-    avatarRing: {
-        width: scale(66),
-        height: scale(66),
-        borderRadius: scale(33),
-        alignItems: 'center',
-        justifyContent: 'center',
+    avatarWrap: {
         marginRight: scale(13),
     },
     avatar: {
@@ -187,8 +178,8 @@ const styles = StyleSheet.create({
     },
     connectedDot: {
         position: 'absolute',
-        right: scale(1),
-        bottom: scale(1),
+        right: scale(-1),
+        bottom: scale(-1),
         width: scale(16),
         height: scale(16),
         borderRadius: scale(8),
