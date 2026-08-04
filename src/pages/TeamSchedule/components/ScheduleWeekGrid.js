@@ -36,8 +36,8 @@ import {
     heatToBackgroundColor,
 } from './scheduleWeekHelpers';
 
-const TIME_LABEL_WIDTH = scale(40);
-const DAY_HEADER_HEIGHT = verticalScale(40);
+const TIME_LABEL_WIDTH = scale(32);
+const DAY_HEADER_HEIGHT = verticalScale(25);
 const SLOT_HEIGHT = scale(16);
 
 const ScheduleWeekGrid = ({
@@ -144,6 +144,22 @@ const ScheduleWeekGrid = ({
     const colWidth = gridWidth > TIME_LABEL_WIDTH
         ? (gridWidth - TIME_LABEL_WIDTH) / 7
         : 0;
+
+    // 整數像素對齊，避免 hairline 因浮點尺寸被吃掉
+    const getColFrame = useCallback(col => {
+        if (colWidth <= 0) {
+            return {left: TIME_LABEL_WIDTH, width: 0};
+        }
+        const left = TIME_LABEL_WIDTH + Math.round(col * colWidth);
+        const nextLeft = TIME_LABEL_WIDTH + Math.round((col + 1) * colWidth);
+        return {left, width: nextLeft - left};
+    }, [colWidth]);
+
+    const getRowFrame = useCallback(row => {
+        const top = Math.round(row * SLOT_HEIGHT);
+        const nextTop = Math.round((row + 1) * SLOT_HEIGHT);
+        return {top, height: nextTop - top};
+    }, []);
 
     const hitTest = useCallback((x, y) => {
         if (colWidth <= 0) {
@@ -287,8 +303,10 @@ const ScheduleWeekGrid = ({
         }
     }, [axis.startMinute, scrollToStartMinute, slot]);
 
-    const bodyHeight = rows.length * SLOT_HEIGHT;
+    const bodyHeight = Math.round(rows.length * SLOT_HEIGHT);
     const renderSlotCell = (col, row) => {
+        const {left, width} = getColFrame(col);
+        const {top, height} = getRowFrame(row);
         const slotItem = slotsByColRow.get(`${col}:${row}`);
         if (!slotItem && !isCandidateMode) {
             return (
@@ -296,12 +314,11 @@ const ScheduleWeekGrid = ({
                     key={`empty-${col}-${row}`}
                     pointerEvents="none"
                     style={[styles.slotCell, styles.slotDisabled, {
-                        top: row * SLOT_HEIGHT,
-                        left: TIME_LABEL_WIDTH + col * colWidth,
-                        width: colWidth,
-                        height: SLOT_HEIGHT,
+                        top,
+                        left,
+                        width,
+                        height,
                         backgroundColor: theme.tonal.primary08,
-                        borderColor: theme.themeColorUltraLight,
                     }]}
                 />
             );
@@ -328,12 +345,11 @@ const ScheduleWeekGrid = ({
                 key={key}
                 pointerEvents="none"
                 style={[styles.slotCell, {
-                    top: row * SLOT_HEIGHT,
-                    left: TIME_LABEL_WIDTH + col * colWidth,
-                    width: colWidth,
-                    height: SLOT_HEIGHT,
+                    top,
+                    left,
+                    width,
+                    height,
                     backgroundColor,
-                    borderColor: theme.themeColorUltraLight,
                 }, selfOutlined && {
                     borderColor: theme.themeColor,
                     borderWidth: StyleSheet.hairlineWidth * 2,
@@ -357,7 +373,7 @@ const ScheduleWeekGrid = ({
                 {WEEKDAY_SHORT_LABELS.map((label, index) => (
                     <View
                         key={label}
-                        style={[styles.dayHeaderCell, {width: colWidth}]}>
+                        style={[styles.dayHeaderCell, {width: getColFrame(index).width}]}>
                         <Text style={[styles.weekdayText, {color: theme.black.main}]}>
                             {`週${label}`}
                         </Text>
@@ -374,13 +390,14 @@ const ScheduleWeekGrid = ({
                     <View style={[styles.body, {height: bodyHeight}]}>
                         {rows.map((minute, row) => {
                             const showLabel = slot >= 60 || minute % 60 === 0;
+                            const {top, height} = getRowFrame(row);
                             return (
                                 <View
                                     key={`label-${minute}`}
                                     pointerEvents="none"
                                     style={[styles.timeLabel, {
-                                        top: row * SLOT_HEIGHT,
-                                        height: SLOT_HEIGHT,
+                                        top,
+                                        height,
                                     }]}>
                                     {showLabel || row === 0 ? (
                                         <Text style={[styles.timeLabelText, {color: theme.black.third}]}>
@@ -393,6 +410,35 @@ const ScheduleWeekGrid = ({
                         {Array.from({length: 7}, (__, col) =>
                             rows.map((___, row) => renderSlotCell(col, row)),
                         )}
+                        {/* 獨立格線：避免每格 hairline 在半像素列消失 */}
+                        {Array.from({length: 7}, (_, col) => {
+                            const {left, width} = getColFrame(col);
+                            return (
+                                <View
+                                    key={`vline-${col}`}
+                                    pointerEvents="none"
+                                    style={[styles.gridLineV, {
+                                        left: left + width - StyleSheet.hairlineWidth,
+                                        height: bodyHeight,
+                                        backgroundColor: theme.themeColorUltraLight,
+                                    }]}
+                                />
+                            );
+                        })}
+                        {rows.map((_, row) => {
+                            const {top, height} = getRowFrame(row);
+                            return (
+                                <View
+                                    key={`hline-${row}`}
+                                    pointerEvents="none"
+                                    style={[styles.gridLineH, {
+                                        top: top + height - StyleSheet.hairlineWidth,
+                                        left: TIME_LABEL_WIDTH,
+                                        backgroundColor: theme.themeColorUltraLight,
+                                    }]}
+                                />
+                            );
+                        })}
                     </View>
                 </GestureDetector>
             </ScrollView>
@@ -408,7 +454,6 @@ const styles = StyleSheet.create({
     },
     headerRow: {
         alignItems: 'center',
-        borderBottomWidth: StyleSheet.hairlineWidth,
         flexDirection: 'row',
         height: DAY_HEADER_HEIGHT,
     },
@@ -441,9 +486,17 @@ const styles = StyleSheet.create({
         fontSize: scale(9),
     },
     slotCell: {
-        borderBottomWidth: StyleSheet.hairlineWidth,
-        borderRightWidth: StyleSheet.hairlineWidth,
         position: 'absolute',
+    },
+    gridLineV: {
+        position: 'absolute',
+        top: 0,
+        width: StyleSheet.hairlineWidth,
+    },
+    gridLineH: {
+        position: 'absolute',
+        right: 0,
+        height: StyleSheet.hairlineWidth,
     },
     slotDisabled: {
         opacity: 0.45,
