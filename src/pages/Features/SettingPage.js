@@ -53,39 +53,32 @@ import {
  */
 const SettingSectionCard = ({ children }) => {
     const { theme } = useTheme();
-    const { white, bg_color, viewShadow } = theme;
+    const { white, bg_color } = theme;
     const items = React.Children.toArray(children).filter(Boolean);
 
     return (
-        // 外層承載陰影；內層 overflow 裁切內容，避免陰影被裁掉
         <View
             style={{
                 marginHorizontal: scale(15),
                 marginBottom: verticalScale(8),
                 borderRadius: scale(16),
                 backgroundColor: white,
-                ...viewShadow,
+                overflow: 'hidden',
             }}>
-            <View
-                style={{
-                    borderRadius: scale(16),
-                    overflow: 'hidden',
-                }}>
-                {items.map((child, index) => (
-                    <React.Fragment key={index}>
-                        {index > 0 ? (
-                            <View
-                                style={{
-                                    height: verticalScale(2),
-                                    width: '100%',
-                                    backgroundColor: bg_color,
-                                }}
-                            />
-                        ) : null}
-                        {child}
-                    </React.Fragment>
-                ))}
-            </View>
+            {items.map((child, index) => (
+                <React.Fragment key={index}>
+                    {index > 0 ? (
+                        <View
+                            style={{
+                                height: verticalScale(2),
+                                width: '100%',
+                                backgroundColor: bg_color,
+                            }}
+                        />
+                    ) : null}
+                    {child}
+                </React.Fragment>
+            ))}
         </View>
     );
 };
@@ -140,7 +133,7 @@ const SettingSection = ({ title, icon }) => {
  * @param {Function} onPress - 點擊回調函數
  * @param {ReactNode} rightElement - 右側自定義元素（可選）
  * @param {boolean} showArrow - 是否顯示右箭頭，默認為 true
- * @param {boolean} grouped - 是否置於 SettingSectionCard 內（共用外層圓角與陰影）
+ * @param {boolean} grouped - 是否置於 SettingSectionCard 內（共用外層圓角）
  */
 const SettingItem = ({
     icon,
@@ -153,7 +146,7 @@ const SettingItem = ({
     grouped = false,
 }) => {
     const { theme } = useTheme();
-    const { white, black, viewShadow } = theme;
+    const { white, black } = theme;
     // 無 onPress 時用 View，供 MenuView 作為觸發錨點（避免內層 Touchable 搶手勢）
     const Container = onPress ? TouchableOpacity : View;
 
@@ -180,7 +173,6 @@ const SettingItem = ({
                         borderRadius: scale(16),
                         marginHorizontal: scale(15),
                         marginBottom: verticalScale(8),
-                        ...viewShadow,
                     }),
             }}>
             {/* 圖標 */}

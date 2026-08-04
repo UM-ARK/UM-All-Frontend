@@ -184,7 +184,6 @@ const HarborAccountSettingsPage = ({navigation}) => {
                     style={[
                         styles.settingsCard,
                         {backgroundColor: theme.white},
-                        theme.viewShadow,
                     ]}>
                     {sections.map((item, index) => (
                         <Pressable
