@@ -91,6 +91,7 @@ export const HarborSessionProvider = ({ children }) => {
     const lastValidationRef = useRef(0);
     const lastValidationAttemptRef = useRef(0);
     const validationInFlightRef = useRef(null);
+    const revocationInFlightRef = useRef(null);
     const sessionGenerationRef = useRef(0);
 
     useEffect(() => {
@@ -249,26 +250,37 @@ export const HarborSessionProvider = ({ children }) => {
         [expireSession, isCurrentSession],
     );
 
-    const retryPendingRevocation = useCallback(async () => {
-        const pendingQueue = await loadPendingHarborRevocation();
-        const attemptedCredentialKeys = new Set();
-        let remainingCount = 0;
-
-        for (const pendingCredentials of pendingQueue) {
-            attemptedCredentialKeys.add(pendingCredentials.userApiKey);
-            try {
-                await revokeHarborCredentials(pendingCredentials);
-                await clearPendingHarborRevocation(pendingCredentials);
-            } catch (requestError) {
-                if (isHarborCredentialRejected(requestError, true)) {
-                    await clearPendingHarborRevocation(pendingCredentials);
-                } else {
-                    remainingCount += 1;
-                }
-            }
+    const retryPendingRevocation = useCallback(pendingQueue => {
+        if (revocationInFlightRef.current) {
+            return revocationInFlightRef.current;
         }
 
-        return { attemptedCredentialKeys, remainingCount };
+        const request = (async () => {
+            const queue =
+                pendingQueue || (await loadPendingHarborRevocation());
+            let remainingCount = 0;
+
+            for (const pendingCredentials of queue) {
+                try {
+                    await revokeHarborCredentials(pendingCredentials);
+                    await clearPendingHarborRevocation(pendingCredentials);
+                } catch (requestError) {
+                    if (isHarborCredentialRejected(requestError, true)) {
+                        await clearPendingHarborRevocation(pendingCredentials);
+                    } else {
+                        remainingCount += 1;
+                    }
+                }
+            }
+
+            return { remainingCount };
+        })().finally(() => {
+            if (revocationInFlightRef.current === request) {
+                revocationInFlightRef.current = null;
+            }
+        });
+        revocationInFlightRef.current = request;
+        return request;
     }, []);
 
     useEffect(() => {
@@ -295,8 +307,19 @@ export const HarborSessionProvider = ({ children }) => {
 
         const restore = async () => {
             try {
-                const { attemptedCredentialKeys } =
-                    await retryPendingRevocation();
+                // pending key 是本地拒絕清單，實際撤銷不可阻塞首屏。
+                const pendingQueue = await loadPendingHarborRevocation();
+                const pendingCredentialKeys = new Set(
+                    pendingQueue.map(item => item.userApiKey),
+                );
+                const retryRevocationInBackground = () => {
+                    retryPendingRevocation(pendingQueue).catch(revokeError => {
+                        logHarborAuthError(
+                            'revocation.background.failed',
+                            revokeError,
+                        );
+                    });
+                };
 
                 let credentials = null;
                 try {
@@ -314,22 +337,57 @@ export const HarborSessionProvider = ({ children }) => {
 
                 if (!credentials) {
                     applySignedOutState();
+                    retryRevocationInBackground();
                     return;
                 }
 
-                if (attemptedCredentialKeys.has(credentials.userApiKey)) {
+                if (pendingCredentialKeys.has(credentials.userApiKey)) {
+                    applySignedOutState();
                     await clearHarborCredentials();
                     await setLocalStorage(PROFILE_CACHE_KEY, null);
-                    applySignedOutState();
+                    retryRevocationInBackground();
                     return;
                 }
 
+                const credentialCacheId = await getCredentialCacheId(
+                    credentials,
+                );
+                const cachedProfile = await getLocalStorage(PROFILE_CACHE_KEY);
+                const cachedUser =
+                    cachedProfile?.credentialCacheId === credentialCacheId
+                        ? cachedProfile.user
+                        : null;
                 const generation = activateSession(credentials);
-                await refreshProfile(credentials, generation);
-                const loginIntent = await loadHarborLoginIntent();
-                if (mountedRef.current && loginIntent) {
-                    setPendingLoginIntent(loginIntent);
+                if (isCurrentSession(credentials, generation)) {
+                    // 先用同一組憑證的快取進頁，再於背景向 Harbor 驗證。
+                    setUser(cachedUser || createFallbackUser());
+                    setStatus('signedIn');
                 }
+                retryRevocationInBackground();
+
+                const validationRequest = refreshProfile(
+                    credentials,
+                    generation,
+                ).catch(() => {});
+                validationInFlightRef.current = validationRequest;
+                validationRequest.finally(() => {
+                    if (validationInFlightRef.current === validationRequest) {
+                        validationInFlightRef.current = null;
+                    }
+                });
+
+                loadHarborLoginIntent()
+                    .then(loginIntent => {
+                        if (mountedRef.current && loginIntent) {
+                            setPendingLoginIntent(loginIntent);
+                        }
+                    })
+                    .catch(intentError => {
+                        logHarborAuthError(
+                            'login.intent.restore.failed',
+                            intentError,
+                        );
+                    });
             } catch (restoreError) {
                 logHarborAuthError('session.restore.failed', restoreError);
                 if (
@@ -354,6 +412,7 @@ export const HarborSessionProvider = ({ children }) => {
         activateSession,
         applySignedOutState,
         expireSession,
+        isCurrentSession,
         refreshProfile,
         retryPendingRevocation,
     ]);
