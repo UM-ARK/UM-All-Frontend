@@ -74,6 +74,8 @@ function errorMessageForCode(code) {
             return '候選時段須對齊所選時間粒度。';
         case 'overlapping_candidate_windows':
             return '候選時段不可重疊。';
+        case 'owned_event_limit_reached':
+            return '你最多可建立 100 個尚未過期的活動，請先刪除或等待現有活動過期。';
         case 'harbor_unavailable':
             return '身分服務暫時不可用，請稍後再試。';
         case 'harbor_auth_failed':
