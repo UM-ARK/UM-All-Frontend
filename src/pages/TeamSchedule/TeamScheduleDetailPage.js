@@ -444,12 +444,14 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
     const [isPainting, setIsPainting] = useState(false);
     const [actionBusy, setActionBusy] = useState(false);
     const [coursePrefillLoading, setCoursePrefillLoading] = useState(false);
+    const [coursePrefillError, setCoursePrefillError] = useState(null);
     const coursePrefillRequestRef = useRef(0);
 
     useEffect(() => {
         if (!editor.isEditing) {
             coursePrefillRequestRef.current += 1;
             setCoursePrefillLoading(false);
+            setCoursePrefillError(null);
         }
     }, [editor.isEditing]);
 
@@ -487,23 +489,20 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
         const requestId = coursePrefillRequestRef.current + 1;
         coursePrefillRequestRef.current = requestId;
         setCoursePrefillLoading(true);
+        setCoursePrefillError(null);
         try {
             const {hasPlan, planSlots} = await loadSavedCourseSlots();
             if (coursePrefillRequestRef.current !== requestId) {
                 return;
             }
             if (!hasPlan) {
-                Alert.alert(
-                    t('尚未建立模擬課表'),
-                    t('請先在課表功能加入課程，再回來依課表預填。'),
-                );
+                editor.disableCoursePrefill();
+                setCoursePrefillError(t('尚未建立模擬課表'));
                 return;
             }
             if (planSlots.length === 0) {
-                Alert.alert(
-                    t('無法讀取模擬課表'),
-                    t('請先更新課表資料，再重新嘗試。'),
-                );
+                editor.disableCoursePrefill();
+                setCoursePrefillError(t('無法讀取模擬課表'));
                 return;
             }
             const result = createCourseSchedulePrefill({
@@ -517,17 +516,9 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                 result.draft,
                 result.courseConflictKeys,
             );
-            Alert.alert(
-                t('已依課表預填'),
-                result.courseConflictKeys.length > 0
-                    ? t('與課堂重疊的時段仍可手動選為可用。')
-                    : t('沒有課堂與候選時間重疊，請檢查後儲存。'),
-            );
         } catch (_error) {
-            Alert.alert(
-                t('無法讀取模擬課表'),
-                t('暫時無法完成，請稍後再試。'),
-            );
+            editor.disableCoursePrefill();
+            setCoursePrefillError(t('無法讀取模擬課表'));
         } finally {
             if (coursePrefillRequestRef.current === requestId) {
                 setCoursePrefillLoading(false);
@@ -539,60 +530,31 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
         enabled => {
             trigger();
             if (enabled) {
-                const hasExistingAvailability = isAvailabilitySubmitted(
-                    normalizeAvailability(myAvailability, event?.timezone),
-                );
-                if (editor.isDirty || hasExistingAvailability) {
-                    Alert.alert(
-                        t('依課表重新預填？'),
-                        t('這會取代目前草稿，但不會立即儲存。'),
-                        [
-                            {
-                                text: t('取消'),
-                                style: 'cancel',
-                                onPress: () => trigger(),
-                            },
-                            {
-                                text: t('確定'),
-                                onPress: () => {
-                                    trigger();
-                                    applyCoursePrefill();
-                                },
-                            },
-                        ],
-                    );
-                    return;
-                }
                 applyCoursePrefill();
                 return;
             }
-
-            if (editor.isCoursePrefillDirty) {
-                Alert.alert(
-                    t('關閉課表預填？'),
-                    t('將還原開啟前的草稿，之後的修改會遺失。'),
-                    [
-                        {
-                            text: t('繼續編輯'),
-                            style: 'cancel',
-                            onPress: () => trigger(),
-                        },
-                        {
-                            text: t('還原'),
-                            style: 'destructive',
-                            onPress: () => {
-                                trigger();
-                                editor.disableCoursePrefill();
-                            },
-                        },
-                    ],
-                );
-                return;
-            }
+            coursePrefillRequestRef.current += 1;
+            setCoursePrefillLoading(false);
+            setCoursePrefillError(null);
             editor.disableCoursePrefill();
         },
-        [applyCoursePrefill, editor, event?.timezone, myAvailability, t],
+        [applyCoursePrefill, editor],
     );
+
+    const coursePrefillAutoAppliedRef = useRef(false);
+    useEffect(() => {
+        if (!editor.isEditing) {
+            coursePrefillAutoAppliedRef.current = false;
+            return;
+        }
+        if (
+            editor.isCoursePrefillEnabled &&
+            !coursePrefillAutoAppliedRef.current
+        ) {
+            coursePrefillAutoAppliedRef.current = true;
+            applyCoursePrefill();
+        }
+    }, [applyCoursePrefill, editor.isCoursePrefillEnabled, editor.isEditing]);
 
     const handleConfirmEdit = useCallback(async () => {
         const result = await editor.confirmEdit();
@@ -1369,31 +1331,33 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                                             ]}>
                                             {t('依課表預填')}
                                         </Text>
-                                        {editor.courseConflictKeys.length > 0 ? (
+                                        <View
+                                            style={styles.courseConflictLegend}>
                                             <View
-                                                style={
-                                                    styles.courseConflictLegend
-                                                }>
-                                                <View
-                                                    style={[
-                                                        styles.courseConflictDot,
-                                                        {
-                                                            backgroundColor:
-                                                                theme.unread,
-                                                        },
-                                                    ]}
-                                                />
-                                                <Text
-                                                    style={[
-                                                        styles.courseConflictText,
-                                                        {
-                                                            color: theme.black
-                                                                .third,
-                                                        },
-                                                    ]}>
-                                                    {t('課表重疊')}
-                                                </Text>
-                                            </View>
+                                                style={[
+                                                    styles.courseConflictSwatch,
+                                                    {
+                                                        backgroundColor:
+                                                            theme.tonal.unread15,
+                                                    },
+                                                ]}
+                                            />
+                                            <Text
+                                                style={[
+                                                    styles.courseConflictText,
+                                                    {color: theme.black.third},
+                                                ]}>
+                                                {t('淺紅色＝課表時間')}
+                                            </Text>
+                                        </View>
+                                        {coursePrefillError ? (
+                                            <Text
+                                                style={[
+                                                    styles.coursePrefillError,
+                                                    {color: theme.unread},
+                                                ]}>
+                                                {coursePrefillError}
+                                            </Text>
                                         ) : null}
                                     </View>
                                 </View>
@@ -1880,15 +1844,20 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         marginTop: verticalScale(2),
     },
-    courseConflictDot: {
+    courseConflictSwatch: {
         borderRadius: scale(2),
-        height: scale(4),
+        height: scale(8),
         marginRight: scale(4),
-        width: scale(4),
+        width: scale(12),
     },
     courseConflictText: {
         ...uiStyle.defaultText,
         fontSize: scale(10),
+    },
+    coursePrefillError: {
+        ...uiStyle.defaultText,
+        fontSize: scale(10),
+        marginTop: verticalScale(2),
     },
     sectionTitle: {
         ...uiStyle.defaultText,

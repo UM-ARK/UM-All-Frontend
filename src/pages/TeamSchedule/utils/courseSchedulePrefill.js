@@ -63,7 +63,7 @@ export function normalizeCourseScheduleSlot(courseSlot) {
 }
 
 /**
- * 09:00 至 20:00 候選時間預設可用，與課堂重疊的格子取消選取。
+ * 平日 09:00 至 20:00 候選時間預設可用，與課堂重疊的格子取消選取。
  */
 export function createCourseSchedulePrefill({
     candidateWindows,
@@ -95,6 +95,7 @@ export function createCourseSchedulePrefill({
         if (hasCourseConflict) {
             courseConflictKeys.push(slotKey(candidateSlot));
         } else if (
+            candidateSlot.weekday <= 5 &&
             candidateSlot.startMinute >= DEFAULT_PREFILL_START_MINUTE &&
             candidateSlot.endMinute <= DEFAULT_PREFILL_END_MINUTE
         ) {

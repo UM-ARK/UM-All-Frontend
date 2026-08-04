@@ -191,6 +191,25 @@ describe('課表預填可用時間', () => {
         expect(result.draft.selectedKeys).not.toContain('3:1200');
     });
 
+    test('預填不自動選取週六日', () => {
+        const result = createCourseSchedulePrefill({
+            candidateWindows: [
+                {weekday: 5, startMinute: 540, endMinute: 600},
+                {weekday: 6, startMinute: 540, endMinute: 600},
+                {weekday: 7, startMinute: 540, endMinute: 600},
+            ],
+            courseSlots: [],
+            slotMinutes: 15,
+        });
+
+        expect(result.draft.selectedKeys).toEqual([
+            '5:540',
+            '5:555',
+            '5:570',
+            '5:585',
+        ]);
+    });
+
     test('忽略無效星期與時間', () => {
         expect(
             normalizeCourseScheduleSlot({

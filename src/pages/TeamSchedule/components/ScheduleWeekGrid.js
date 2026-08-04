@@ -348,6 +348,9 @@ const ScheduleWeekGrid = ({
             if (isEditMode && selected) {
                 backgroundColor = theme.tonal.primary50;
             }
+            if (isEditMode && hasCourseConflict && selected) {
+                backgroundColor = theme.warning;
+            }
         }
         return (
             <View

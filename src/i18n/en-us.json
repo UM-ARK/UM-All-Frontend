@@ -816,6 +816,7 @@
         "請先更新課表資料，再重新嘗試。": "Update the timetable data and try again.",
         "已依課表預填": "Availability prefilled",
         "與課堂重疊的時段仍可手動選為可用。": "You can still mark timetable conflicts as available.",
+        "淺紅色＝課表時間": "Light red = class time",
         "沒有課堂與候選時間重疊，請檢查後儲存。": "No classes overlap the candidate times. Review and save.",
         "依課表重新預填？": "Prefill from timetable again?",
         "這會取代目前草稿，但不會立即儲存。": "This replaces the current draft but won’t save it yet.",
