@@ -32,7 +32,7 @@ const TeamScheduleListPage = ({ navigation }) => {
     const { theme } = useTheme();
     const { t } = useTranslation('my');
     const headerHeight = useHeaderHeight();
-    const { events, status, error, refresh } = useTeamEvents({ autoLoad: true });
+    const { events, favoriteEventIds, status, error, refresh } = useTeamEvents({ autoLoad: true });
     const [isRefreshing, setIsRefreshing] = useState(false);
 
     useEffect(() => {
@@ -85,10 +85,16 @@ const TeamScheduleListPage = ({ navigation }) => {
                     { backgroundColor: theme.white },
                     theme.viewShadow,
                 ]}>
-                <TeamScheduleEventRow item={item} onPress={openDetail} />
+                <TeamScheduleEventRow
+                    item={item}
+                    isFavorite={favoriteEventIds.includes(
+                        String(item?.event?.eventId),
+                    )}
+                    onPress={openDetail}
+                />
             </View>
         ),
-        [openDetail, theme.viewShadow, theme.white],
+        [favoriteEventIds, openDetail, theme.viewShadow, theme.white],
     );
 
     const showInitialLoading =

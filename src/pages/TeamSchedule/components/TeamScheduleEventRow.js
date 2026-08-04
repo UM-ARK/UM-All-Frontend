@@ -70,6 +70,7 @@ function formatCreatedAt(createdAt, timezone, t) {
 
 const TeamScheduleEventRow = ({
     item,
+    isFavorite = false,
     onPress,
     showDivider = false,
 }) => {
@@ -138,11 +139,20 @@ const TeamScheduleEventRow = ({
                         </Text>
                     ) : null}
                 </View>
-                <Ionicons
-                    name="chevron-forward"
-                    size={scale(17)}
-                    color={theme.black.third}
-                />
+                <View style={styles.trailing}>
+                    {isFavorite ? (
+                        <Ionicons
+                            name="star"
+                            size={scale(17)}
+                            color={theme.warning}
+                        />
+                    ) : null}
+                    <Ionicons
+                        name="chevron-forward"
+                        size={scale(17)}
+                        color={theme.black.third}
+                    />
+                </View>
             </Pressable>
             {showDivider ? (
                 <View
@@ -167,6 +177,11 @@ const styles = StyleSheet.create({
     content: {
         flex: 1,
         minWidth: 0,
+    },
+    trailing: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: scale(7),
     },
     metaRow: {
         flexDirection: 'row',

@@ -330,7 +330,9 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
     useEffect(() => {
         if (scheduleMode !== 'shared') {
             loadedSharedTimetableEventRef.current = null;
-            setCourseCatalogSlots([]);
+            setCourseCatalogSlots(current =>
+                current.length > 0 ? [] : current,
+            );
             return;
         }
         if (loadedSharedTimetableEventRef.current === eventId) {

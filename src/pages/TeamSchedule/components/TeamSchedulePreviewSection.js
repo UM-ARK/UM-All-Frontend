@@ -34,6 +34,7 @@ const TeamSchedulePreviewSection = forwardRef(
         const [joinSheetVisible, setJoinSheetVisible] = useState(false);
         const {
             recentEvents,
+            favoriteEventIds,
             status,
             error,
             refresh,
@@ -264,6 +265,9 @@ const TeamSchedulePreviewSection = forwardRef(
                                       item?.event?.eventId || index,
                                   )}
                                   item={item}
+                                  isFavorite={favoriteEventIds.includes(
+                                      String(item?.event?.eventId),
+                                  )}
                                   onPress={openDetail}
                                   showDivider={
                                       index < recentEvents.length - 1

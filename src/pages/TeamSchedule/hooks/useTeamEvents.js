@@ -113,6 +113,7 @@ function isCacheFresh(now = Date.now()) {
  * @returns {{
  *   events: Array,
  *   recentEvents: Array,
+ *   favoriteEventIds: Array<string>,
  *   status: 'idle'|'loading'|'ready'|'error',
  *   error: object|null,
  *   refresh: (options?: {force?: boolean}) => Promise<Array>,
@@ -285,6 +286,7 @@ export function useTeamEvents({autoLoad = true} = {}) {
     return {
         events: sortedEvents,
         recentEvents,
+        favoriteEventIds,
         status,
         error,
         refresh,
