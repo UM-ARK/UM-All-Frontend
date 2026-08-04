@@ -1281,19 +1281,19 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
             }
           : mySharingLevel === 'course_identity'
             ? {
-                  title: t('已共享 Course Code + Section'),
-                  hint: t('組員會看到 Course Code、Section 與可還原的上課時間。'),
+                  title: t('我的課表共享'),
+                  hint: t('共享 Course Code + Section'),
                   icon: 'school-outline',
               }
             : mySharingLevel === 'time_only'
               ? {
-                    title: t('已共享上課時間'),
-                    hint: t('組員只會看到上課與時間。'),
+                    title: t('我的課表共享'),
+                    hint: t('只共享上課時間'),
                     icon: 'time-outline',
                 }
               : {
-                    title: t('尚未共享課表'),
-                    hint: t('選擇要向組員顯示的內容。'),
+                    title: t('我的課表共享'),
+                    hint: t('尚未共享課表'),
                     icon: 'calendar-outline',
                 };
 

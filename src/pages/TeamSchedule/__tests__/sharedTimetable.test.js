@@ -2,6 +2,7 @@ import {buildImportText} from '../../TabbarPages/course/utils/parseImportData';
 import {
     aggregateSharedTimetableMeetings,
     areSharedTimetablePayloadsEqual,
+    buildSharedTimetableHeatmapSlots,
     buildSharedTimetablePayload,
     resolveSharedTimetableMeetings,
 } from '../utils/sharedTimetable';
@@ -153,5 +154,95 @@ describe('小組共享課表概覽', () => {
                 memberKeys: ['1'],
             },
         ]);
+    });
+
+    test('固定 30 分鐘格保留每位成員的實際課堂明細', () => {
+        const firstMember = {
+            harborUserId: 1,
+            resolved: {
+                meetings: [
+                    {
+                        weekday: 2,
+                        startMinute: 545,
+                        endMinute: 645,
+                        identity: {
+                            courseCode: 'COMP1000',
+                            section: '001',
+                        },
+                    },
+                ],
+            },
+        };
+        const secondMember = {
+            harborUserId: 2,
+            resolved: {
+                meetings: [
+                    {weekday: 2, startMinute: 600, endMinute: 660},
+                ],
+            },
+        };
+
+        const slots = buildSharedTimetableHeatmapSlots([
+            firstMember,
+            secondMember,
+        ]);
+
+        expect(slots.map(slot => ({
+            startMinute: slot.startMinute,
+            endMinute: slot.endMinute,
+            memberCount: slot.members.length,
+        }))).toEqual([
+            {startMinute: 540, endMinute: 600, memberCount: 1},
+            {startMinute: 600, endMinute: 660, memberCount: 2},
+        ]);
+        expect(slots[0].memberEntries[0].meetings[0]).toEqual(
+            firstMember.resolved.meetings[0],
+        );
+    });
+
+    test('同一成員在固定格內的重疊課堂只計算一次', () => {
+        const member = {
+            harborUserId: 1,
+            resolved: {
+                meetings: [
+                    {weekday: 4, startMinute: 600, endMinute: 630},
+                    {weekday: 4, startMinute: 615, endMinute: 645},
+                ],
+            },
+        };
+
+        const slots = buildSharedTimetableHeatmapSlots([member]);
+
+        expect(slots).toHaveLength(1);
+        expect(slots[0].members).toEqual([member]);
+        expect(slots[0].memberEntries[0].meetings).toHaveLength(2);
+    });
+
+    test('相鄰格人數相同但成員不同時不會合併', () => {
+        const firstMember = {
+            harborUserId: 1,
+            resolved: {
+                meetings: [
+                    {weekday: 5, startMinute: 600, endMinute: 630},
+                ],
+            },
+        };
+        const secondMember = {
+            harborUserId: 2,
+            resolved: {
+                meetings: [
+                    {weekday: 5, startMinute: 630, endMinute: 660},
+                ],
+            },
+        };
+
+        const slots = buildSharedTimetableHeatmapSlots([
+            firstMember,
+            secondMember,
+        ]);
+
+        expect(slots).toHaveLength(2);
+        expect(slots[0].members).toEqual([firstMember]);
+        expect(slots[1].members).toEqual([secondMember]);
     });
 });

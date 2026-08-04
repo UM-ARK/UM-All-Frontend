@@ -209,6 +209,108 @@ export function aggregateSharedTimetableMeetings(members) {
     return result;
 }
 
+export function buildSharedTimetableHeatmapSlots(members, slotMinutes = 30) {
+    const slot = Number.isInteger(slotMinutes) && slotMinutes > 0
+        ? slotMinutes
+        : 30;
+    const buckets = new Map();
+
+    (Array.isArray(members) ? members : []).forEach((member, memberIndex) => {
+        const memberKey = String(
+            member?.harborUserId ?? `member-${memberIndex}`,
+        );
+        member?.resolved?.meetings?.forEach(meeting => {
+            if (
+                !Number.isInteger(meeting?.weekday) ||
+                !Number.isInteger(meeting.startMinute) ||
+                !Number.isInteger(meeting.endMinute) ||
+                meeting.weekday < 1 ||
+                meeting.weekday > 7 ||
+                meeting.startMinute >= meeting.endMinute
+            ) {
+                return;
+            }
+            const firstSlot = Math.floor(meeting.startMinute / slot) * slot;
+            for (
+                let startMinute = firstSlot;
+                startMinute < meeting.endMinute;
+                startMinute += slot
+            ) {
+                const endMinute = startMinute + slot;
+                if (
+                    meeting.startMinute >= endMinute ||
+                    startMinute >= meeting.endMinute
+                ) {
+                    continue;
+                }
+                const key = `${meeting.weekday}:${startMinute}`;
+                let bucket = buckets.get(key);
+                if (!bucket) {
+                    bucket = {
+                        weekday: meeting.weekday,
+                        startMinute,
+                        endMinute,
+                        memberEntries: new Map(),
+                    };
+                    buckets.set(key, bucket);
+                }
+                let entry = bucket.memberEntries.get(memberKey);
+                if (!entry) {
+                    entry = {memberKey, member, meetings: []};
+                    bucket.memberEntries.set(memberKey, entry);
+                }
+                entry.meetings.push(meeting);
+            }
+        });
+    });
+
+    const slots = Array.from(buckets.values())
+        .sort((a, b) => {
+            if (a.weekday !== b.weekday) {
+                return a.weekday - b.weekday;
+            }
+            return a.startMinute - b.startMinute;
+        })
+        .map(bucket => {
+            const memberEntries = Array.from(bucket.memberEntries.values());
+            return {
+                weekday: bucket.weekday,
+                startMinute: bucket.startMinute,
+                endMinute: bucket.endMinute,
+                members: memberEntries.map(entry => entry.member),
+                memberKeys: memberEntries
+                    .map(entry => entry.memberKey)
+                    .sort(),
+                memberEntries,
+            };
+        });
+
+    return slots.reduce((merged, current) => {
+        const previous = merged[merged.length - 1];
+        if (
+            previous?.weekday === current.weekday &&
+            previous.endMinute === current.startMinute &&
+            previous.memberKeys.join('\u0000') ===
+                current.memberKeys.join('\u0000')
+        ) {
+            previous.endMinute = current.endMinute;
+            current.memberEntries.forEach(currentEntry => {
+                const previousEntry = previous.memberEntries.find(
+                    entry => entry.memberKey === currentEntry.memberKey,
+                );
+                currentEntry.meetings.forEach(meeting => {
+                    if (!previousEntry.meetings.includes(meeting)) {
+                        previousEntry.meetings.push(meeting);
+                    }
+                });
+            });
+            return merged;
+        }
+        merged.push(current);
+        return merged;
+    }, []);
+}
+
 export function meetingOverlapsSlot(meeting, slot) {
     return Boolean(
         meeting &&

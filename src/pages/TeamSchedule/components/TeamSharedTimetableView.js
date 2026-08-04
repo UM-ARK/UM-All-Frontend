@@ -26,12 +26,14 @@ import {
     OVERVIEW_MAX_COURSE_HEIGHT,
 } from '../../TabbarPages/course/pages/courseSim/utils/overviewConfig';
 import {
-    aggregateSharedTimetableMeetings,
+    buildSharedTimetableHeatmapSlots,
     resolveSharedTimetableMeetings,
 } from '../utils/sharedTimetable';
+import SharedTimetableSlotDetailSheet from './SharedTimetableSlotDetailSheet';
 
 const WEEKDAY_LABELS = ['一', '二', '三', '四', '五', '六', '日'];
 const WEEKDAY_CODES = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
+const OVERVIEW_TIME_LABEL_WIDTH = scale(34);
 
 function formatMinute(minute) {
     const hours = Math.floor(minute / 60);
@@ -61,6 +63,7 @@ const TeamSharedTimetableView = ({
     const {theme} = useTheme();
     const {t} = useTranslation('my');
     const [selectedId, setSelectedId] = useState('all');
+    const [selectedSlot, setSelectedSlot] = useState(null);
     const selectedMember = useMemo(
         () => members.find(member => String(member?.harborUserId) === String(selectedId)),
         [members, selectedId],
@@ -82,10 +85,13 @@ const TeamSharedTimetableView = ({
         (count, member) => count + member.resolved.unresolvedCourses.length,
         0,
     );
-    const aggregateMeetings = useMemo(
-        () => aggregateSharedTimetableMeetings(resolvedMembers),
+    const heatmapSlots = useMemo(
+        () => buildSharedTimetableHeatmapSlots(resolvedMembers),
         [resolvedMembers],
     );
+    const sharingMemberCount = resolvedMembers.filter(
+        member => member.sharedTimetable,
+    ).length;
 
     if (loading) {
         return <Text style={[styles.message, {color: theme.black.third}]}>{t('正在載入小組課表…')}</Text>;
@@ -102,7 +108,7 @@ const TeamSharedTimetableView = ({
     return (
         <View>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.memberSelector}>
-                <Pressable accessibilityRole="tab" accessibilityState={{selected: selectedId === 'all'}} onPress={() => { trigger(); setSelectedId('all'); }} style={({pressed}) => [styles.allSelector, {backgroundColor: selectedId === 'all' ? theme.tonal.primary15 : pressed ? theme.tonal.primary08 : undefined, borderColor: selectedId === 'all' ? theme.themeColor : theme.themeColorUltraLight}]}><Text style={[styles.allSelectorText, {color: theme.themeColor}]}>{t('全部')}</Text></Pressable>
+                <Pressable accessibilityRole="tab" accessibilityState={{selected: selectedId === 'all'}} onPress={() => { trigger(); setSelectedId('all'); }} style={({pressed}) => [styles.allSelector, {backgroundColor: selectedId === 'all' ? theme.tonal.primary15 : pressed ? theme.tonal.primary08 : undefined, borderColor: selectedId === 'all' ? theme.themeColor : theme.themeColorUltraLight}]}><Text style={[styles.allSelectorText, {color: theme.themeColor}]}>{t('總覽')}</Text></Pressable>
                 {members.map(member => {
                     const name = memberName(member, t);
                     const avatarUri = member.avatarTemplate ? ARK_HARBOR_AVATAR_TEMPLATE(member.avatarTemplate, 72) : null;
@@ -112,7 +118,7 @@ const TeamSharedTimetableView = ({
             </ScrollView>
             {selectedId === 'all' ? (
                 <>
-                    {resolvedMembers.every(member => !member.sharedTimetable) ? <Text style={[styles.message, {color: theme.black.third}]}>{t('目前尚無成員共享課表。')}</Text> : <WeeklyOverview meetings={aggregateMeetings} aggregate navigation={navigation} />}
+                    {resolvedMembers.every(member => !member.sharedTimetable) ? <Text style={[styles.message, {color: theme.black.third}]}>{t('目前尚無成員共享課表。')}</Text> : <><View style={styles.overviewSummary}><Text style={[styles.overviewSummaryText, {color: theme.black.second}]}>{t('{{shared}}／{{total}} 人已共享課表', {shared: sharingMemberCount, total: resolvedMembers.length})}</Text><View style={styles.heatLegend}><View style={[styles.heatLegendDot, {backgroundColor: theme.tonal.primary50}]} /><Text style={[styles.heatLegendText, {color: theme.black.third}]}>{t('格內數字為上課人數')}</Text></View></View><WeeklyOverview meetings={heatmapSlots} aggregate aggregateMemberCount={sharingMemberCount} navigation={navigation} onMeetingPress={setSelectedSlot} /></>}
                     {unresolvedCount > 0 ? <Text style={[styles.unresolved, {color: theme.black.third}]}>{t('有 {{count}} 門課的時間暫不可用；全部模式只計入已成功還原的課程。', {count: unresolvedCount})}</Text> : null}
                 </>
             ) : !selectedMember?.sharedTimetable ? (
@@ -127,11 +133,16 @@ const TeamSharedTimetableView = ({
                     {selectedResolved?.resolved.unresolvedCourses.length > 0 ? <View style={[styles.unresolvedBox, {backgroundColor: theme.tonal.primary08}]}><Text style={[styles.unresolved, {color: theme.black.second}]}>{t('課程時間暫不可用')}</Text>{selectedResolved.resolved.unresolvedCourses.map(item => <Text key={`${item.courseCode}-${item.section}`} style={[styles.unresolved, {color: theme.black.third}]}>{item.courseCode} · {item.section}</Text>)}</View> : null}
                 </>
             )}
+            <SharedTimetableSlotDetailSheet
+                visible={Boolean(selectedSlot)}
+                slot={selectedSlot}
+                onClose={() => setSelectedSlot(null)}
+            />
         </View>
     );
 };
 
-const WeeklyOverview = ({meetings, aggregate = false, navigation}) => {
+const WeeklyOverview = ({meetings, aggregate = false, aggregateMemberCount = 0, navigation, onMeetingPress}) => {
     const {theme} = useTheme();
     const {t} = useTranslation('my');
     const [gridWidth, setGridWidth] = useState(0);
@@ -184,9 +195,18 @@ const WeeklyOverview = ({meetings, aggregate = false, navigation}) => {
         ),
     );
     const overviewHeight = (overviewDuration / 60) * hourHeight;
-    const dayWidth = dayCount > 0 ? gridWidth / dayCount : 0;
+    const timeLabelWidth = aggregate ? OVERVIEW_TIME_LABEL_WIDTH : 0;
+    const dayWidth = dayCount > 0
+        ? (gridWidth - timeLabelWidth) / dayCount
+        : 0;
+    const timeLabels = aggregate
+        ? [overviewStart, ...hourLines.filter(minute => minute !== overviewStart)]
+        : [];
     const framesByDay = useMemo(() => {
         const result = {};
+        if (aggregate) {
+            return result;
+        }
         WEEKDAY_CODES.slice(0, dayCount).forEach(day => {
             result[day] = computeOverviewCourseFrames({
                 courses: slots.filter(slot => slot.Day === day),
@@ -202,7 +222,7 @@ const WeeklyOverview = ({meetings, aggregate = false, navigation}) => {
             });
         });
         return result;
-    }, [dayCount, dayWidth, hourHeight, overviewHeight, overviewStart, slots]);
+    }, [aggregate, dayCount, dayWidth, hourHeight, overviewHeight, overviewStart, slots]);
 
     if (slots.length === 0) {
         return <Text style={[styles.message, {color: theme.black.third}]}>{t('沒有可顯示的上課時間')}</Text>;
@@ -213,6 +233,7 @@ const WeeklyOverview = ({meetings, aggregate = false, navigation}) => {
             onLayout={event => setGridWidth(event.nativeEvent.layout.width)}
             style={[styles.overview, {backgroundColor: theme.white, borderColor: theme.themeColorUltraLight}]}>
             <View style={styles.overviewHeader}>
+                {aggregate ? <View style={{width: timeLabelWidth}} /> : null}
                 {WEEKDAY_LABELS.slice(0, dayCount).map(label => (
                     <Text key={label} style={[styles.dayLabel, {color: theme.black.second, width: dayWidth}]}>週{label}</Text>
                 ))}
@@ -226,6 +247,7 @@ const WeeklyOverview = ({meetings, aggregate = false, navigation}) => {
                                 styles.overviewGridLine,
                                 {
                                     backgroundColor: theme.themeColorUltraLight,
+                                    left: timeLabelWidth,
                                     top:
                                         ((minute - overviewStart) / 60) *
                                         hourHeight,
@@ -233,17 +255,56 @@ const WeeklyOverview = ({meetings, aggregate = false, navigation}) => {
                             ]}
                         />
                     ))}
+                    {timeLabels.map(minute => (
+                        <Text
+                            key={`time-${minute}`}
+                            pointerEvents="none"
+                            style={[
+                                styles.overviewTimeLabel,
+                                {
+                                    color: theme.black.third,
+                                    top: Math.max(
+                                        0,
+                                        ((minute - overviewStart) / 60) *
+                                            hourHeight -
+                                            verticalScale(6),
+                                    ),
+                                    width: timeLabelWidth,
+                                },
+                            ]}>
+                            {formatMinute(minute)}
+                        </Text>
+                    ))}
                     {WEEKDAY_CODES.slice(0, dayCount).map((day, dayIndex) => (
-                        <View key={day} style={[styles.overviewDay, {borderColor: theme.themeColorUltraLight, height: overviewHeight, left: dayIndex * dayWidth, width: dayWidth}]}>
+                        <View key={day} style={[styles.overviewDay, {borderColor: theme.themeColorUltraLight, height: overviewHeight, left: timeLabelWidth + dayIndex * dayWidth, width: dayWidth}]}>
                             {slots.filter(slot => slot.Day === day).map(slot => {
-                                const frame = framesByDay[day]?.get(getSlotKey(slot));
+                                const frame = aggregate
+                                    ? {
+                                          height: Math.max(
+                                              verticalScale(16),
+                                              ((slot.endMinute - slot.startMinute) / 60) * hourHeight - verticalScale(2),
+                                          ),
+                                          left: scale(2),
+                                          top: ((slot.startMinute - overviewStart) / 60) * hourHeight + verticalScale(1),
+                                          width: Math.max(0, dayWidth - scale(4)),
+                                      }
+                                    : framesByDay[day]?.get(getSlotKey(slot));
                                 if (!frame) {
                                     return null;
                                 }
-                                const meetingCount = slot.members?.length || 1;
+                                const meetingCount = aggregate
+                                    ? slot.members?.length || 0
+                                    : 1;
                                 const courseCode = slot.identity?.courseCode || '';
+                                const heat = aggregateMemberCount > 0
+                                    ? meetingCount / aggregateMemberCount
+                                    : 0;
                                 const cardColor = aggregate
-                                    ? theme.tonal.primary30
+                                    ? heat >= 0.67
+                                        ? theme.tonal.primary50
+                                        : heat >= 0.34
+                                          ? theme.tonal.primary30
+                                          : theme.tonal.primary15
                                     : courseCode
                                       ? theme.TIME_TABLE_COLOR[colorIndexForCourse(courseCode, theme.TIME_TABLE_COLOR.length)]
                                       : theme.tonal.primary15;
@@ -254,12 +315,15 @@ const WeeklyOverview = ({meetings, aggregate = false, navigation}) => {
                                         : courseCode;
                                 const card = (
                                     <View style={[styles.overviewMeeting, styles.overviewMeetingFill, {backgroundColor: cardColor}]}>
-                                        <Text numberOfLines={tiny ? 1 : 2} style={[styles.meetingText, {color: aggregate || !courseCode ? theme.themeColor : theme.black.main}]}>{aggregate ? t('{{count}} 人', {count: meetingCount}) : courseLabel || t('上課')}</Text>
+                                        <Text numberOfLines={tiny ? 1 : 2} style={[styles.meetingText, {color: aggregate || !courseCode ? theme.themeColor : theme.black.main}]}>{aggregate ? t('{{count}} 人上課', {count: meetingCount}) : courseLabel || t('上課')}</Text>
                                         {!aggregate && courseCode && !tiny ? <Text numberOfLines={1} style={[styles.sectionText, {color: theme.black.second}]}>{slot.identity.section}</Text> : null}
                                         {!tiny ? <Text numberOfLines={1} style={[styles.meetingTime, {color: theme.black.third}]}>{formatMinute(slot.startMinute)}–{formatMinute(slot.endMinute)}</Text> : null}
                                     </View>
                                 );
-                                if (aggregate || !courseCode) {
+                                if (aggregate) {
+                                    return <Pressable key={getSlotKey(slot)} accessibilityRole="button" accessibilityLabel={t('{{count}} 人正在上課', {count: meetingCount})} onPress={() => { trigger(); onMeetingPress?.(slot); }} style={({pressed}) => [styles.overviewMeetingFrame, {height: frame.height, left: frame.left, opacity: pressed ? 0.7 : 1, top: frame.top, width: frame.width}]}>{card}</Pressable>;
+                                }
+                                if (!courseCode) {
                                     return <View key={getSlotKey(slot)} style={[styles.overviewMeetingFrame, {height: frame.height, left: frame.left, top: frame.top, width: frame.width}]}>{card}</View>;
                                 }
                                 return (
@@ -305,10 +369,16 @@ const styles = StyleSheet.create({
     retryText: {...uiStyle.defaultText, fontSize: scale(12), fontWeight: '700'},
     sharingBadge: {alignItems: 'center', alignSelf: 'flex-start', borderRadius: scale(6), flexDirection: 'row', marginBottom: verticalScale(8), paddingHorizontal: scale(8), paddingVertical: verticalScale(5)},
     sharingBadgeText: {...uiStyle.defaultText, fontSize: scale(11), fontWeight: '600', marginLeft: scale(5)},
+    overviewSummary: {alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between', marginBottom: verticalScale(8)},
+    overviewSummaryText: {...uiStyle.defaultText, fontSize: scale(11), fontWeight: '600'},
+    heatLegend: {alignItems: 'center', flexDirection: 'row', marginLeft: scale(8)},
+    heatLegendDot: {borderRadius: scale(3), height: scale(6), marginRight: scale(4), width: scale(6)},
+    heatLegendText: {...uiStyle.defaultText, fontSize: scale(10)},
     overview: {borderRadius: scale(8), borderWidth: StyleSheet.hairlineWidth, overflow: 'hidden'},
     overviewHeader: {flexDirection: 'row'},
     overviewBody: {position: 'relative'},
     overviewGridLine: {height: StyleSheet.hairlineWidth, left: 0, position: 'absolute', right: 0},
+    overviewTimeLabel: {...uiStyle.defaultText, fontSize: scale(8), paddingRight: scale(4), position: 'absolute', textAlign: 'right'},
     overviewDay: {borderLeftWidth: StyleSheet.hairlineWidth, position: 'absolute', top: 0},
     dayLabel: {...uiStyle.defaultText, fontSize: scale(11), fontWeight: '700', textAlign: 'center'},
     overviewMeeting: {alignItems: 'center', borderRadius: scale(5), justifyContent: 'center', overflow: 'hidden', paddingHorizontal: scale(2), position: 'absolute'},
