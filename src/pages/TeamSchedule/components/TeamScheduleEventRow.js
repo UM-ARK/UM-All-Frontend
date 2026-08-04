@@ -67,64 +67,66 @@ const TeamScheduleEventRow = ({
     const roleLabel = isOwner ? t('我建立的') : t('我參加的');
 
     return (
-        <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={event.title || t('組隊約時間')}
-            style={({pressed}) => [
-                styles.container,
-                pressed && {backgroundColor: theme.tonal.primary08},
-            ]}
-            onPress={() => {
-                trigger();
-                onPress?.(item);
-            }}>
-            <View style={styles.content}>
-                <View style={styles.metaRow}>
-                    <Text
-                        numberOfLines={1}
-                        style={[styles.meta, {color: theme.themeColor}]}>
-                        {roleLabel}
-                    </Text>
-                    {statusLabel || deadlineHint ? (
+        <>
+            <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={event.title || t('組隊約時間')}
+                style={({pressed}) => [
+                    styles.container,
+                    pressed && {backgroundColor: theme.tonal.primary08},
+                ]}
+                onPress={() => {
+                    trigger();
+                    onPress?.(item);
+                }}>
+                <View style={styles.content}>
+                    <View style={styles.metaRow}>
                         <Text
                             numberOfLines={1}
-                            style={[
-                                styles.status,
-                                {
-                                    color: isClosed
-                                        ? theme.black.third
-                                        : theme.unread || theme.black.third,
-                                },
-                            ]}>
-                            {statusLabel || deadlineHint}
+                            style={[styles.meta, {color: theme.themeColor}]}>
+                            {roleLabel}
                         </Text>
-                    ) : null}
+                        {statusLabel || deadlineHint ? (
+                            <Text
+                                numberOfLines={1}
+                                style={[
+                                    styles.status,
+                                    {
+                                        color: isClosed
+                                            ? theme.black.third
+                                            : theme.unread || theme.black.third,
+                                    },
+                                ]}>
+                                {statusLabel || deadlineHint}
+                            </Text>
+                        ) : null}
+                    </View>
+                    <Text
+                        numberOfLines={2}
+                        style={[styles.title, {color: theme.black.main}]}>
+                        {event.title || t('未命名活動')}
+                    </Text>
+                    <Text
+                        numberOfLines={1}
+                        style={[styles.dateLine, {color: theme.black.third}]}>
+                        {t('每週 24 小時')}
+                    </Text>
                 </View>
-                <Text
-                    numberOfLines={2}
-                    style={[styles.title, {color: theme.black.main}]}>
-                    {event.title || t('未命名活動')}
-                </Text>
-                <Text
-                    numberOfLines={1}
-                    style={[styles.dateLine, {color: theme.black.third}]}>
-                    {t('每週 24 小時')}
-                </Text>
-            </View>
-            <Ionicons
-                name="chevron-forward"
-                size={scale(17)}
-                color={theme.black.third}
-            />
+                <Ionicons
+                    name="chevron-forward"
+                    size={scale(17)}
+                    color={theme.black.third}
+                />
+            </Pressable>
             {showDivider ? (
                 <View
                     style={[
                         styles.divider,
-                        {backgroundColor: theme.themeColorUltraLight},
+                        {backgroundColor: theme.disabled},
                     ]}
                 />
             ) : null}
-        </Pressable>
+        </>
     );
 };
 
@@ -172,12 +174,10 @@ const styles = StyleSheet.create({
         lineHeight: verticalScale(16),
         marginTop: verticalScale(3),
     },
+    // 與 HarborTopicDetail topicHeaderDivider 一致：內縮髮絲線
     divider: {
-        position: 'absolute',
-        right: scale(14),
-        bottom: 0,
-        left: scale(14),
         height: StyleSheet.hairlineWidth,
+        marginHorizontal: scale(16),
     },
 });
 

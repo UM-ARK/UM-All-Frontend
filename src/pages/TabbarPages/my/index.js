@@ -198,6 +198,13 @@ const MyScreen = ({ navigation }) => {
                                 ref={teamSchedulePreviewRef}
                                 navigation={navigation}
                             />
+                            <Text
+                                style={[
+                                    styles.footnote,
+                                    {color: theme.black.third},
+                                ]}>
+                                {t('更新可能會有延遲', {ns: 'my'})}
+                            </Text>
                         </>
                     ) : status === 'restoring' ? (
                         <HarborRestoringState />
@@ -233,6 +240,15 @@ const styles = StyleSheet.create({
         ...uiStyle.defaultText,
         fontSize: scale(12),
         lineHeight: verticalScale(18),
+    },
+    footnote: {
+        ...uiStyle.defaultText,
+        fontSize: scale(10),
+        lineHeight: verticalScale(13),
+        textAlign: 'center',
+        paddingHorizontal: scale(12),
+        paddingTop: verticalScale(8),
+        paddingBottom: verticalScale(2),
     },
 });
 

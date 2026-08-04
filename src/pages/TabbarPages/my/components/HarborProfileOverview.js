@@ -174,10 +174,6 @@ const HarborProfileOverview = ({
                     )}
                 </View>
             </Pressable>
-
-            <Text style={[styles.footnote, {color: theme.black.third}]}>
-                {t('更新可能會有延遲')}
-            </Text>
         </View>
     );
 };
@@ -232,14 +228,6 @@ const styles = StyleSheet.create({
         ...uiStyle.defaultText,
         fontSize: scale(11),
         textAlign: 'center',
-    },
-    footnote: {
-        ...uiStyle.defaultText,
-        fontSize: scale(10),
-        lineHeight: verticalScale(13),
-        textAlign: 'center',
-        paddingHorizontal: scale(12),
-        paddingVertical: verticalScale(2),
     },
 });
 
