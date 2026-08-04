@@ -1379,7 +1379,7 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                                                         styles.courseConflictDot,
                                                         {
                                                             backgroundColor:
-                                                                theme.warning,
+                                                                theme.unread,
                                                         },
                                                     ]}
                                                 />

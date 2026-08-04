@@ -342,6 +342,9 @@ const ScheduleWeekGrid = ({
             backgroundColor = selected ? theme.tonal.primary30 : theme.white;
         } else {
             backgroundColor = heatToBackgroundColor(heat, theme, isEditMode);
+            if (isEditMode && hasCourseConflict) {
+                backgroundColor = theme.tonal.unread15;
+            }
             if (isEditMode && selected) {
                 backgroundColor = theme.tonal.primary50;
             }
@@ -367,7 +370,7 @@ const ScheduleWeekGrid = ({
                     <View
                         style={[
                             styles.courseConflictMarker,
-                            {backgroundColor: theme.warning},
+                            {backgroundColor: theme.unread},
                         ]}
                     />
                 ) : null}

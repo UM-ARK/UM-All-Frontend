@@ -20,6 +20,8 @@ const COURSE_DAY_TO_WEEKDAY = {
     SAT: 6,
     SUN: 7,
 };
+const DEFAULT_PREFILL_START_MINUTE = 9 * 60;
+const DEFAULT_PREFILL_END_MINUTE = 20 * 60;
 
 function timeToMinute(value) {
     if (typeof value !== 'string') {
@@ -61,7 +63,7 @@ export function normalizeCourseScheduleSlot(courseSlot) {
 }
 
 /**
- * 候選時間預設可用，與課堂重疊的格子取消選取。
+ * 09:00 至 20:00 候選時間預設可用，與課堂重疊的格子取消選取。
  */
 export function createCourseSchedulePrefill({
     candidateWindows,
@@ -92,7 +94,10 @@ export function createCourseSchedulePrefill({
         );
         if (hasCourseConflict) {
             courseConflictKeys.push(slotKey(candidateSlot));
-        } else {
+        } else if (
+            candidateSlot.startMinute >= DEFAULT_PREFILL_START_MINUTE &&
+            candidateSlot.endMinute <= DEFAULT_PREFILL_END_MINUTE
+        ) {
             selectedSlots.push(candidateSlot);
         }
     }

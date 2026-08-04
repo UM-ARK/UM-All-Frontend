@@ -290,16 +290,15 @@ const styles = StyleSheet.create({
         borderRadius: scale(10),
         marginTop: verticalScale(8),
         marginBottom: verticalScale(6),
-        paddingBottom: verticalScale(10),
+        paddingBottom: verticalScale(4),
         overflow: 'hidden',
     },
     header: {
-        minHeight: verticalScale(30),
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
         paddingHorizontal: scale(14),
-        paddingTop: verticalScale(10),
+        paddingTop: verticalScale(8),
         paddingBottom: verticalScale(2),
     },
     headerTitle: {
@@ -325,7 +324,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         paddingHorizontal: scale(14),
-        marginBottom: verticalScale(8),
+        marginBottom: verticalScale(4),
         gap: scale(8),
     },
     actionButton: {
@@ -333,7 +332,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         borderRadius: scale(10),
         paddingHorizontal: scale(12),
-        paddingVertical: verticalScale(8),
+        paddingVertical: verticalScale(6),
         gap: scale(6),
     },
     actionButtonText: {

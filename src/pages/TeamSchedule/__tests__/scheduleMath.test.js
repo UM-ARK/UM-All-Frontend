@@ -175,6 +175,22 @@ describe('課表預填可用時間', () => {
         expect(result.courseConflictKeys).toContain('2:660');
     });
 
+    test('預填只自動選取 09:00 至 20:00', () => {
+        const result = createCourseSchedulePrefill({
+            candidateWindows: [
+                {weekday: 3, startMinute: 510, endMinute: 1230},
+            ],
+            courseSlots: [],
+            slotMinutes: 15,
+        });
+
+        expect(result.draft.selectedKeys).toHaveLength(44);
+        expect(result.draft.selectedKeys[0]).toBe('3:540');
+        expect(result.draft.selectedKeys.at(-1)).toBe('3:1185');
+        expect(result.draft.selectedKeys).not.toContain('3:525');
+        expect(result.draft.selectedKeys).not.toContain('3:1200');
+    });
+
     test('忽略無效星期與時間', () => {
         expect(
             normalizeCourseScheduleSlot({
