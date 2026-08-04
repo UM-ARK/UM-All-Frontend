@@ -68,6 +68,7 @@ import {
     clearTeamEventsCache,
     removeTeamEventFromCache,
 } from './hooks/useTeamEvents';
+import {useTeamEventFavorites} from './hooks/useTeamEventFavorites';
 import {useAvailabilityEditor} from './hooks/useAvailabilityEditor';
 import {useSharedTimetables} from './hooks/useSharedTimetables';
 import {useTeamScheduleDetail} from './hooks/useTeamScheduleDetail';
@@ -186,6 +187,7 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
     const insets = useSafeAreaInsets();
     const {status: harborStatus, login} = useHarborSession();
     const {user: schedulingUser} = useSchedulingSession();
+    const {favoriteEventIds, toggleFavorite} = useTeamEventFavorites();
     const harborSignedIn = harborStatus === 'signedIn';
 
     const eventId = route?.params?.eventId
@@ -818,6 +820,7 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
 
     const isOwner = membership?.role === 'owner';
     const eventClosed = event?.status === 'closed';
+    const isFavorite = favoriteEventIds.includes(eventId);
 
     const handleShareInvite = useCallback(async () => {
         if (!eventId || eventClosed || inviteLink?.status !== 'open') {
@@ -861,9 +864,14 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
         if (isInvitePending || phase !== 'ready' || !event) {
             return [];
         }
+        const favoriteAction = {
+            id: 'favorite',
+            title: isFavorite ? t('取消收藏') : t('收藏'),
+        };
         if (isOwner) {
             // 活動關閉時邀請管理不可用；分享改由邀請管理 Sheet 內操作
             const actions = [
+                favoriteAction,
                 {id: 'edit', title: t('編輯基本資料')},
                 {id: 'invite', title: t('邀請管理')},
                 {
@@ -879,26 +887,30 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                 },
             ];
             if (eventClosed) {
-                actions[1] = {
-                    ...actions[1],
+                actions[2] = {
+                    ...actions[2],
                     attributes: {disabled: true},
                 };
             }
             return actions;
         }
         return [
+            favoriteAction,
             {
                 id: 'leave',
                 title: t('退出活動'),
                 attributes: {destructive: true},
             },
         ];
-    }, [event, eventClosed, isInvitePending, isOwner, phase, t]);
+    }, [event, eventClosed, isFavorite, isInvitePending, isOwner, phase, t]);
 
     const runMenuAction = useCallback(
         id => {
             trigger();
             switch (id) {
+                case 'favorite':
+                    toggleFavorite(eventId);
+                    break;
                 case 'edit':
                     openEditBasics();
                     break;
@@ -923,9 +935,11 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
         },
         [
             event?.status,
+            eventId,
             handleDelete,
             handleLeave,
             openEditBasics,
+            toggleFavorite,
             toggleEventStatus,
         ],
     );

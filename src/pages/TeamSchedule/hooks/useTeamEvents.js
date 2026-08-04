@@ -9,8 +9,10 @@ import {normalizeSchedulingError} from '../../../utils/scheduling/schedulingErro
 import {
     normalizeMembership,
     normalizeTeamEvent,
+    sortTeamEvents,
     takeRecentTeamEvents,
 } from '../../../utils/scheduling/schedulingModels';
+import {useTeamEventFavorites} from './useTeamEventFavorites';
 
 /** 短時間切頁可重用，避免重複 request */
 const TEAM_EVENTS_CACHE_TTL_MS = 45 * 1000;
@@ -119,6 +121,7 @@ function isCacheFresh(now = Date.now()) {
  */
 export function useTeamEvents({autoLoad = true} = {}) {
     const {ensureSession, harborStatus} = useSchedulingSession();
+    const {favoriteEventIds} = useTeamEventFavorites();
     const [events, setEvents] = useState(() =>
         Array.isArray(teamEventsCache.events) ? teamEventsCache.events : [],
     );
@@ -270,13 +273,17 @@ export function useTeamEvents({autoLoad = true} = {}) {
         return undefined;
     }, [autoLoad, harborStatus, refresh]);
 
+    const sortedEvents = useMemo(
+        () => sortTeamEvents(events, favoriteEventIds),
+        [events, favoriteEventIds],
+    );
     const recentEvents = useMemo(
-        () => takeRecentTeamEvents(events),
-        [events],
+        () => takeRecentTeamEvents(sortedEvents),
+        [sortedEvents],
     );
 
     return {
-        events,
+        events: sortedEvents,
         recentEvents,
         status,
         error,

@@ -204,13 +204,46 @@ export function normalizeMembership(membership) {
 }
 
 /**
- * 列表「最近三個」：保留 API 回傳順序，取前三筆。
+ * 收藏活動優先，其餘依建立時間由新至舊；時間相同時保留原始順序。
+ */
+export function sortTeamEvents(events, favoriteEventIds = []) {
+    if (!Array.isArray(events)) {
+        return [];
+    }
+    const favoriteIds = new Set(
+        Array.isArray(favoriteEventIds)
+            ? favoriteEventIds.map(eventId => String(eventId))
+            : [],
+    );
+    return events
+        .map((item, index) => ({item, index}))
+        .sort((a, b) => {
+            const aFavorite = favoriteIds.has(String(a.item?.event?.eventId));
+            const bFavorite = favoriteIds.has(String(b.item?.event?.eventId));
+            if (aFavorite !== bFavorite) {
+                return aFavorite ? -1 : 1;
+            }
+            const aCreatedAt = Date.parse(a.item?.event?.createdAt);
+            const bCreatedAt = Date.parse(b.item?.event?.createdAt);
+            if (Number.isFinite(aCreatedAt) && Number.isFinite(bCreatedAt)) {
+                return bCreatedAt - aCreatedAt || a.index - b.index;
+            }
+            if (Number.isFinite(aCreatedAt) !== Number.isFinite(bCreatedAt)) {
+                return Number.isFinite(aCreatedAt) ? -1 : 1;
+            }
+            return a.index - b.index;
+        })
+        .map(entry => entry.item);
+}
+
+/**
+ * 「我的」頁最多顯示五個活動。
  */
 export function takeRecentTeamEvents(events) {
     if (!Array.isArray(events)) {
         return [];
     }
-    return events.slice(0, 3);
+    return events.slice(0, 5);
 }
 
 /**

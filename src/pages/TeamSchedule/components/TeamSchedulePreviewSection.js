@@ -1,5 +1,5 @@
 /**
- * 「我的」頁組隊約時間預覽：最近三筆、查看全部、新建／加入組隊
+ * 「我的」頁組隊約時間預覽：最多五筆、查看全部、新建／加入組隊
  */
 import React, {
     forwardRef,
@@ -210,7 +210,7 @@ const TeamSchedulePreviewSection = forwardRef(
                 <View style={styles.listWrap}>
                     {showSkeleton ? (
                         <View style={styles.listInner}>
-                            <TeamScheduleSkeletonList rows={3} />
+                            <TeamScheduleSkeletonList rows={5} />
                         </View>
                     ) : null}
 

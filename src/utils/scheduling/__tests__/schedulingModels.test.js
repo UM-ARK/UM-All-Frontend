@@ -15,6 +15,7 @@ import {
     rangeCoversSlot,
     rangesAreAdjacent,
     rangesOverlap,
+    sortTeamEvents,
     takeRecentTeamEvents,
 } from '../schedulingModels';
 
@@ -131,17 +132,27 @@ describe('schedulingModels', () => {
         ).toBe(false);
     });
 
-    test('最近三個保留 API 順序且不重排', () => {
+    test('收藏優先，其餘按建立時間由新至舊', () => {
         const events = [
-            {event: {eventId: 'a'}},
-            {event: {eventId: 'b'}},
-            {event: {eventId: 'c'}},
-            {event: {eventId: 'd'}},
+            {event: {eventId: 'a', createdAt: '2026-08-01T10:00:00Z'}},
+            {event: {eventId: 'b', createdAt: '2026-08-03T10:00:00Z'}},
+            {event: {eventId: 'c', createdAt: '2026-08-02T10:00:00Z'}},
         ];
+        expect(
+            sortTeamEvents(events, ['a']).map(item => item.event.eventId),
+        ).toEqual(['a', 'b', 'c']);
+    });
+
+    test('我的頁最多取排序後五個活動', () => {
+        const events = ['a', 'b', 'c', 'd', 'e', 'f'].map(eventId => ({
+            event: {eventId},
+        }));
         expect(takeRecentTeamEvents(events).map(item => item.event.eventId)).toEqual([
             'a',
             'b',
             'c',
+            'd',
+            'e',
         ]);
     });
 
