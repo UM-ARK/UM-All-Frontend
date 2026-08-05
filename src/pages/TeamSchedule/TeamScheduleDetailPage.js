@@ -1104,6 +1104,10 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
             : verticalScale(40) + insets.bottom,
         paddingHorizontal: scale(14),
     };
+    // 液態玻璃透明導覽列：indicator 需下移，否則會藏在 header 後方
+    const refreshProgressOffset = isLiquidGlassSupported
+        ? headerHeight + verticalScale(8)
+        : undefined;
 
     // —— 狀態畫面 ——
     if (!eventId) {
@@ -1185,6 +1189,7 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                             refreshing={isRefreshing}
                             tintColor={theme.themeColor}
                             colors={[theme.themeColor]}
+                            progressViewOffset={refreshProgressOffset}
                             onRefresh={() => {
                                 trigger();
                                 if (canRetry) {
@@ -1227,6 +1232,7 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                             refreshing={isRefreshing}
                             tintColor={theme.themeColor}
                             colors={[theme.themeColor]}
+                            progressViewOffset={refreshProgressOffset}
                             onRefresh={() => {
                                 trigger();
                                 refresh();
@@ -1256,6 +1262,7 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                             refreshing={isRefreshing}
                             tintColor={theme.themeColor}
                             colors={[theme.themeColor]}
+                            progressViewOffset={refreshProgressOffset}
                             onRefresh={() => {
                                 trigger();
                                 refresh();
@@ -1328,6 +1335,7 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                         }}
                         tintColor={theme.themeColor}
                         colors={[theme.themeColor]}
+                        progressViewOffset={refreshProgressOffset}
                     />
                 }>
                 <TeamScheduleEventHeader
