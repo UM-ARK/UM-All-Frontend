@@ -11,7 +11,7 @@ describe('Firebase Analytics 封裝', () => {
     beforeEach(() => {
         jest.clearAllMocks();
         getAnalytics.mockReturnValue({});
-        logEvent.mockResolvedValue(undefined);
+        logEvent.mockReturnValue(undefined);
     });
 
     it('傳送事件名稱與分析參數', async () => {
@@ -30,7 +30,9 @@ describe('Firebase Analytics 封裝', () => {
     });
 
     it('Firebase 失敗時不影響主要操作', async () => {
-        logEvent.mockRejectedValue(new Error('analytics unavailable'));
+        logEvent.mockImplementation(() => {
+            throw new Error('analytics unavailable');
+        });
 
         await expect(
             logToFirebase('team_schedule_create', {}),

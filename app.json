@@ -68,6 +68,7 @@
     },
     "plugins": [
       "./plugins/withAndroidSigning",
+      "./plugins/withRNFirebaseDisableSPM",
       [
         "expo-dev-client",
         {
