@@ -22,6 +22,7 @@ import {trigger} from '../../../utils/trigger';
 import {useTeamEvents} from '../hooks/useTeamEvents';
 import JoinTeamSheet from './JoinTeamSheet';
 import TeamScheduleEventRow from './TeamScheduleEventRow';
+import TeamScheduleIntroSheet from './TeamScheduleIntroSheet';
 import {
     TeamScheduleInlineError,
     TeamScheduleSkeletonList,
@@ -32,6 +33,7 @@ const TeamSchedulePreviewSection = forwardRef(
         const {theme} = useTheme();
         const {t} = useTranslation('my');
         const [joinSheetVisible, setJoinSheetVisible] = useState(false);
+        const [introSheetVisible, setIntroSheetVisible] = useState(false);
         const {
             recentEvents,
             favoriteEventIds,
@@ -78,6 +80,11 @@ const TeamSchedulePreviewSection = forwardRef(
             trigger();
             navigation.navigate('TeamScheduleList');
         }, [navigation]);
+
+        const openIntro = useCallback(() => {
+            trigger();
+            setIntroSheetVisible(true);
+        }, []);
 
         const openCreate = useCallback(() => {
             trigger();
@@ -127,10 +134,30 @@ const TeamSchedulePreviewSection = forwardRef(
                     {backgroundColor: theme.white},
                 ]}>
                 <View style={styles.header}>
-                    <Text
-                        style={[styles.headerTitle, {color: theme.black.main}]}>
-                        {t('組隊約時間')}
-                    </Text>
+                    <View style={styles.headerTitleWrap}>
+                        <Text
+                            style={[
+                                styles.headerTitle,
+                                {color: theme.black.main},
+                            ]}>
+                            {t('組隊約時間')}
+                        </Text>
+                        <Pressable
+                            accessibilityRole="button"
+                            accessibilityLabel={t('了解組隊約時間')}
+                            hitSlop={scale(8)}
+                            onPress={openIntro}
+                            style={({pressed}) => [
+                                styles.infoButton,
+                                pressed && {opacity: 0.65},
+                            ]}>
+                            <Ionicons
+                                name="information-circle-outline"
+                                size={scale(17)}
+                                color={theme.black.third}
+                            />
+                        </Pressable>
+                    </View>
                     <Pressable
                         accessibilityRole="button"
                         accessibilityLabel={t('查看全部')}
@@ -282,6 +309,10 @@ const TeamSchedulePreviewSection = forwardRef(
                     onClose={() => setJoinSheetVisible(false)}
                     onSubmit={handleJoinSubmit}
                 />
+                <TeamScheduleIntroSheet
+                    visible={introSheetVisible}
+                    onClose={() => setIntroSheetVisible(false)}
+                />
             </View>
         );
     },
@@ -309,6 +340,18 @@ const styles = StyleSheet.create({
         ...uiStyle.defaultText,
         flexShrink: 1,
         fontSize: scale(14),
+    },
+    headerTitleWrap: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        flexShrink: 1,
+    },
+    infoButton: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: scale(26),
+        height: scale(26),
+        marginLeft: scale(2),
     },
     headerAction: {
         flexDirection: 'row',
