@@ -734,11 +734,7 @@ const HarborProfilePage = ({ navigation, route }) => {
                 ) : (
                     <>
                         <View style={styles.identityCard}>
-                            <View
-                                style={[
-                                    styles.avatarRing,
-                                    { backgroundColor: theme.tonal.primary30 },
-                                ]}>
+                            <View style={styles.avatarRing}>
                                 <Image
                                     source={
                                         viewedUser?.avatarUrl
@@ -1416,9 +1412,9 @@ const styles = StyleSheet.create({
         overflow: 'visible',
     },
     avatarRing: {
-        width: scale(94),
-        height: scale(94),
-        borderRadius: scale(47),
+        width: scale(84),
+        height: scale(84),
+        borderRadius: scale(42),
         alignItems: 'center',
         justifyContent: 'center',
         overflow: 'visible',
