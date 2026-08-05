@@ -145,7 +145,7 @@ const CourseCard = memo(
             },
             {
                 id: 'what2reg',
-                title: t('評價', { ns: 'catalog' }),
+                title: t('選咩課', { ns: 'catalog' }),
                 image: Platform.select({
                     ios: 'star',
                     android: 'btn_star_big_on',
