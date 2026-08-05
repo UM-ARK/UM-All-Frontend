@@ -2,15 +2,14 @@
  * 小組課表模式：成員選擇、個人課表與全體上課概覽。
  */
 import React, {memo, useMemo, useState} from 'react';
-import {Pressable, ScrollView, StyleSheet, Text, View} from 'react-native';
+import {Pressable, StyleSheet, Text, View} from 'react-native';
 
-import {Image} from 'expo-image';
+import {useIsFocused} from '@react-navigation/native';
 import {useTranslation} from 'react-i18next';
 import {scale, verticalScale} from 'react-native-size-matters';
 import Ionicons from '@react-native-vector-icons/ionicons';
 
 import {uiStyle, useTheme} from '../../../components/ThemeContext';
-import {ARK_HARBOR_AVATAR_TEMPLATE} from '../../../utils/pathMap';
 import {trigger} from '../../../utils/trigger';
 import CourseActionMenuCard from '../../TabbarPages/course/components/CourseActionMenuCard';
 import {getSlotKey} from '../../TabbarPages/course/hooks/useConflict';
@@ -29,6 +28,9 @@ import {
     buildSharedTimetableHeatmapSlots,
     resolveSharedTimetableMeetings,
 } from '../utils/sharedTimetable';
+import {useSharedTimetableMemberSelection} from '../hooks/useSharedTimetableMemberSelection';
+import SharedTimetableMemberPickerSheet from './SharedTimetableMemberPickerSheet';
+import SharedTimetableMemberSelector from './SharedTimetableMemberSelector';
 import SharedTimetableSlotDetailSheet from './SharedTimetableSlotDetailSheet';
 
 const WEEKDAY_LABELS = ['一', '二', '三', '四', '五', '六', '日'];
@@ -39,10 +41,6 @@ function formatMinute(minute) {
     const hours = Math.floor(minute / 60);
     const minutes = minute % 60;
     return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
-}
-
-function memberName(member, t) {
-    return member?.username || t('成員');
 }
 
 function colorIndexForCourse(courseCode, colorCount) {
@@ -59,11 +57,20 @@ const TeamSharedTimetableView = ({
     error = null,
     onRetry,
     navigation,
+    myHarborUserId = null,
+    eventId = '',
 }) => {
     const {theme} = useTheme();
     const {t} = useTranslation('my');
-    const [selectedId, setSelectedId] = useState('all');
+    const isFocused = useIsFocused();
+    const [memberPickerVisible, setMemberPickerVisible] = useState(false);
     const [selectedSlot, setSelectedSlot] = useState(null);
+    const {
+        quickMembers,
+        selectedId,
+        selectAll,
+        selectMember,
+    } = useSharedTimetableMemberSelection(members, {eventId, isFocused});
     const selectedMember = useMemo(
         () => members.find(member => String(member?.harborUserId) === String(selectedId)),
         [members, selectedId],
@@ -107,15 +114,13 @@ const TeamSharedTimetableView = ({
 
     return (
         <View>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.memberSelector}>
-                <Pressable accessibilityRole="tab" accessibilityState={{selected: selectedId === 'all'}} onPress={() => { trigger(); setSelectedId('all'); }} style={({pressed}) => [styles.allSelector, {backgroundColor: selectedId === 'all' ? theme.tonal.primary15 : pressed ? theme.tonal.primary08 : undefined, borderColor: selectedId === 'all' ? theme.themeColor : theme.themeColorUltraLight}]}><Text style={[styles.allSelectorText, {color: theme.themeColor}]}>{t('總覽')}</Text></Pressable>
-                {members.map(member => {
-                    const name = memberName(member, t);
-                    const avatarUri = member.avatarTemplate ? ARK_HARBOR_AVATAR_TEMPLATE(member.avatarTemplate, 72) : null;
-                    const selected = String(selectedId) === String(member.harborUserId);
-                    return <View key={String(member.harborUserId)} style={styles.memberChoice}><Pressable accessibilityRole="tab" accessibilityState={{selected}} accessibilityLabel={name} onPress={() => { trigger(); setSelectedId(member.harborUserId); }} style={({pressed}) => [styles.memberChoicePress, {backgroundColor: selected ? theme.tonal.primary15 : pressed ? theme.tonal.primary08 : undefined, borderColor: selected ? theme.themeColor : theme.themeColorUltraLight}]}>{avatarUri ? <Image source={{uri: avatarUri}} style={[styles.avatar, {borderColor: selected ? theme.themeColor : theme.themeColorUltraLight, borderWidth: selected ? scale(2) : StyleSheet.hairlineWidth}]} /> : <View style={[styles.avatar, {backgroundColor: theme.tonal.primary15, borderColor: selected ? theme.themeColor : theme.themeColorUltraLight, borderWidth: selected ? scale(2) : StyleSheet.hairlineWidth}]} />}<Text numberOfLines={1} style={[styles.memberLabel, selected && styles.memberLabelSelected, {color: selected ? theme.themeColor : theme.black.third}]}>{name}</Text></Pressable></View>;
-                })}
-            </ScrollView>
+            <SharedTimetableMemberSelector
+                quickMembers={quickMembers}
+                selectedId={selectedId}
+                onSelectAll={selectAll}
+                onSelectMember={selectMember}
+                onOpenSearch={() => setMemberPickerVisible(true)}
+            />
             {selectedId === 'all' ? (
                 <>
                     {resolvedMembers.every(member => !member.sharedTimetable) ? <Text style={[styles.message, {color: theme.black.third}]}>{t('目前尚無成員共享課表。')}</Text> : <><View style={styles.overviewSummary}><Text style={[styles.overviewSummaryText, {color: theme.black.second}]}>{t('{{shared}}／{{total}} 人已共享課表', {shared: sharingMemberCount, total: resolvedMembers.length})}</Text><View style={styles.heatLegend}><View style={[styles.heatLegendDot, {backgroundColor: theme.tonal.primary50}]} /><Text style={[styles.heatLegendText, {color: theme.black.third}]}>{t('格內數字為上課人數')}</Text></View></View><WeeklyOverview meetings={heatmapSlots} aggregate aggregateMemberCount={sharingMemberCount} navigation={navigation} onMeetingPress={setSelectedSlot} /></>}
@@ -137,6 +142,14 @@ const TeamSharedTimetableView = ({
                 visible={Boolean(selectedSlot)}
                 slot={selectedSlot}
                 onClose={() => setSelectedSlot(null)}
+            />
+            <SharedTimetableMemberPickerSheet
+                visible={memberPickerVisible}
+                members={members}
+                myHarborUserId={myHarborUserId}
+                selectedId={selectedId}
+                onClose={() => setMemberPickerVisible(false)}
+                onSelect={selectMember}
             />
         </View>
     );
@@ -355,14 +368,6 @@ const WeeklyOverview = ({meetings, aggregate = false, aggregateMemberCount = 0, 
 };
 
 const styles = StyleSheet.create({
-    memberSelector: {gap: scale(10), paddingBottom: verticalScale(10)},
-    allSelector: {alignItems: 'center', borderRadius: scale(8), borderWidth: StyleSheet.hairlineWidth, justifyContent: 'center', width: scale(54)},
-    allSelectorText: {...uiStyle.defaultText, fontSize: scale(12), fontWeight: '700'},
-    memberChoice: {alignItems: 'center', width: scale(54)},
-    memberChoicePress: {alignItems: 'center', borderRadius: scale(8), borderWidth: StyleSheet.hairlineWidth, paddingHorizontal: scale(3), paddingVertical: verticalScale(3), width: scale(54)},
-    avatar: {borderRadius: scale(18), borderWidth: StyleSheet.hairlineWidth, height: scale(36), width: scale(36)},
-    memberLabel: {...uiStyle.defaultText, fontSize: scale(10), marginTop: verticalScale(3), maxWidth: scale(48), textAlign: 'center'},
-    memberLabelSelected: {fontWeight: '700'},
     state: {alignItems: 'center', paddingVertical: verticalScale(16)},
     message: {...uiStyle.defaultText, fontSize: scale(12), lineHeight: verticalScale(18), paddingVertical: verticalScale(16), textAlign: 'center'},
     retry: {borderRadius: scale(8), paddingHorizontal: scale(12), paddingVertical: verticalScale(7)},

@@ -6,6 +6,44 @@ import {
     buildSharedTimetablePayload,
     resolveSharedTimetableMeetings,
 } from '../utils/sharedTimetable';
+import {
+    getSharedTimetableMemberOptions,
+    getSharedTimetableQuickMembers,
+} from '../utils/sharedTimetableMembers';
+
+describe('共享課表成員選擇器', () => {
+    const members = [
+        {harborUserId: 1, username: 'zeta', sharedTimetable: {}},
+        {harborUserId: 2, username: 'Alpha', sharedTimetable: null},
+        {harborUserId: 3, username: 'beta', sharedTimetable: {}},
+        {harborUserId: 4, username: 'Me', sharedTimetable: null},
+    ];
+
+    test('本人置頂，其次依共享狀態與 username 排序', () => {
+        expect(
+            getSharedTimetableMemberOptions(members, {myHarborUserId: 4})
+                .map(member => member.harborUserId),
+        ).toEqual([4, 3, 1, 2]);
+    });
+
+    test('username 搜尋不區分大小寫', () => {
+        expect(
+            getSharedTimetableMemberOptions(members, {query: 'ALP'})
+                .map(member => member.harborUserId),
+        ).toEqual([2]);
+    });
+
+    test('未搜尋時顯示預設成員，最近選擇的人排在最前', () => {
+        expect(
+            getSharedTimetableQuickMembers(members, ['3', '1'], 3)
+                .map(member => member.harborUserId),
+        ).toEqual([3, 1, 2]);
+        expect(
+            getSharedTimetableQuickMembers(members, [], 3)
+                .map(member => member.harborUserId),
+        ).toEqual([1, 2, 3]);
+    });
+});
 
 describe('小組共享課表 payload', () => {
     test('課程身份會 trim、轉大寫、補足 Section 並去重', () => {
