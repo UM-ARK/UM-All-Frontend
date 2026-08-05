@@ -2,6 +2,7 @@ import { Platform } from 'react-native';
 import axios from 'axios';
 
 import { loadHarborCredentials } from '../harbor/harborAuthStorage';
+import { SCHEDULING_BASE_URI } from '../pathMap';
 import {
     clearSchedulingSessionStorage,
     getSchedulingDeviceId,
@@ -16,11 +17,6 @@ import {
     logSchedulingAuthError,
     logSchedulingAuthEvent,
 } from './schedulingLogger';
-
-// Scheduling API 專用 base（不可拼接以 /api/ 結尾的 BASE_URI）
-// TODO: 上線前修改 umall.one
-export const SCHEDULING_BASE_URI = 'http://192.168.1.230:8000/api/v2';
-// export const SCHEDULING_BASE_URI = 'https://umall.one/api/v2';
 
 const REQUEST_TIMEOUT = 15000;
 // 過期前預留五分鐘，避免邊界請求帶上即將失效的 JWT。

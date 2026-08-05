@@ -2,6 +2,10 @@
 
 // 服務器基地址，其他分地址可以直接寫'/bus'、'/login'
 export const BASE_URI = 'https://umall.one/api/';
+// Scheduling API 專用 base（不可拼接以 /api/ 結尾的 BASE_URI）
+// TODO: 上線前修改 umall.one
+// export const SCHEDULING_BASE_URI = 'http://192.168.1.230:8000/api/v2';
+export const SCHEDULING_BASE_URI = 'https://umall.one/api/v2';
 // 用適配API返回的圖片相對路徑
 export const BASE_HOST = 'https://umall.one';
 

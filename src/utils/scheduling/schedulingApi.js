@@ -1,7 +1,7 @@
 import axios from 'axios';
 
+import {SCHEDULING_BASE_URI} from '../pathMap';
 import {
-    SCHEDULING_BASE_URI,
     clearSchedulingSession,
     ensureSchedulingAccessToken,
     refreshSchedulingAfterUnauthorized,
@@ -9,10 +9,8 @@ import {
 } from './schedulingAuth';
 import {normalizeSchedulingError} from './schedulingErrors';
 
-export {
-    SCHEDULING_BASE_URI,
-    exchangeSchedulingToken,
-} from './schedulingAuth';
+export {SCHEDULING_BASE_URI} from '../pathMap';
+export {exchangeSchedulingToken} from './schedulingAuth';
 
 const REQUEST_TIMEOUT = 15000;
 
