@@ -13,15 +13,6 @@ import {
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { useIsFocused } from '@react-navigation/native';
 import PagerView from 'react-native-pager-view';
-import Reanimated, {
-    cancelAnimation,
-    Easing,
-    Extrapolation,
-    interpolate,
-    useAnimatedStyle,
-    useSharedValue,
-    withTiming,
-} from 'react-native-reanimated';
 import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import { moderateScale, scale, verticalScale } from 'react-native-size-matters';
 import { SafeAreaView } from 'react-native-screens/experimental';
@@ -46,27 +37,9 @@ const VIEW_CONFIG = {
 // 對齊資訊頁 Top Tab（~30），並預留搜尋列高度
 const STICKY_TOOLBAR_HEIGHT = verticalScale(36);
 const SEARCH_BAR_ROW_HEIGHT = verticalScale(38);
-const TOP_VISIBILITY_THRESHOLD = verticalScale(4);
-const SEARCH_SNAP_THRESHOLD = 0.5;
-const SEARCH_INTERACTIVE_THRESHOLD = 0.85;
-const SEARCH_SHOW_TIMING = {
-    duration: 280,
-    easing: Easing.bezier(0.22, 1, 0.36, 1),
-};
-const SEARCH_HIDE_TIMING = {
-    duration: 220,
-    easing: Easing.bezier(0.4, 0, 0.2, 1),
-};
 const HARBOR_TAB_INDICATOR_WIDTH = moderateScale(25, 0.1);
 const Drawer = createDrawerNavigator();
 const AnimatedPagerView = Animated.createAnimatedComponent(PagerView);
-
-const createScrollState = () => ({
-    lastOffset: 0,
-    progress: 1,
-});
-
-const clampSearchProgress = value => Math.min(1, Math.max(0, value));
 
 const HarborFeedTabs = ({ options, selectedIndex, position, onChange }) => {
     const { theme } = useTheme();
@@ -165,9 +138,6 @@ const HarborStickyToolbar = ({
     onComposePress,
     onSearchPress,
     onToolbarLayout,
-    searchBarCollapseStyle,
-    searchBarContentStyle,
-    isSearchInteractive,
 }) => {
     const { theme } = useTheme();
     const { t } = useTranslation('harbor');
@@ -266,42 +236,37 @@ const HarborStickyToolbar = ({
                     </View>
                 </View>
             </View>
-            <Reanimated.View
-                pointerEvents={isSearchInteractive ? 'auto' : 'none'}
-                style={[styles.searchBarCollapse, searchBarCollapseStyle]}>
-                <Reanimated.View
-                    style={[styles.searchBarRow, searchBarContentStyle]}>
-                    <Pressable
-                        accessibilityRole="button"
-                        accessibilityLabel={t('搜尋 Harbor')}
-                        onPress={() => {
-                            trigger();
-                            onSearchPress();
-                        }}
-                        style={({ pressed }) => [
-                            styles.searchBar,
-                            {
-                                backgroundColor: theme.white,
-                                borderColor: theme.themeColorUltraLight,
-                            },
-                            pressed && { opacity: 0.85 },
+            <View style={styles.searchBarRow}>
+                <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={t('搜尋 Harbor')}
+                    onPress={() => {
+                        trigger();
+                        onSearchPress();
+                    }}
+                    style={({ pressed }) => [
+                        styles.searchBar,
+                        {
+                            backgroundColor: theme.white,
+                            borderColor: theme.themeColorUltraLight,
+                        },
+                        pressed && { opacity: 0.85 },
+                    ]}>
+                    <MaterialCommunityIcons
+                        name="magnify"
+                        size={scale(16)}
+                        color={theme.black.third}
+                    />
+                    <Text
+                        numberOfLines={1}
+                        style={[
+                            styles.searchBarText,
+                            { color: theme.black.third },
                         ]}>
-                        <MaterialCommunityIcons
-                            name="magnify"
-                            size={scale(16)}
-                            color={theme.black.third}
-                        />
-                        <Text
-                            numberOfLines={1}
-                            style={[
-                                styles.searchBarText,
-                                { color: theme.black.third },
-                            ]}>
-                            {t('搜尋 Harbor')}
-                        </Text>
-                    </Pressable>
-                </Reanimated.View>
-            </Reanimated.View>
+                        {t('搜尋 Harbor')}
+                    </Text>
+                </Pressable>
+            </View>
         </View>
     );
 };
@@ -314,9 +279,6 @@ const HarborFeedPane = ({
     contentContainerStyle,
     refreshProgressViewOffset,
     isActive,
-    onScroll,
-    onScrollEndDrag,
-    onMomentumScrollEnd,
 }) => {
     const source = useMemo(() => ({ view }), [view]);
 
@@ -330,9 +292,6 @@ const HarborFeedPane = ({
                 contentContainerStyle={contentContainerStyle}
                 refreshProgressViewOffset={refreshProgressViewOffset}
                 isActive={isActive}
-                onScroll={onScroll}
-                onScrollEndDrag={onScrollEndDrag}
-                onMomentumScrollEnd={onMomentumScrollEnd}
             />
         </View>
     );
@@ -353,10 +312,8 @@ const ForumPage = ({ navigation }) => {
     const blockTopicPressUntilRef = useRef(0);
     const capabilitiesRef = useRef(null);
     const capabilitiesControllerRef = useRef(null);
-    const scrollStatesRef = useRef({});
     const [currentIndex, setCurrentIndex] = useState(0);
     const [toolbarHeight, setToolbarHeight] = useState(STICKY_TOOLBAR_HEIGHT);
-    const [isSearchInteractive, setIsSearchInteractive] = useState(true);
     const [capabilities, setCapabilities] = useState(null);
     const [capabilitiesUnavailable, setCapabilitiesUnavailable] = useState(false);
     const [mountedViews, setMountedViews] = useState({
@@ -364,114 +321,10 @@ const ForumPage = ({ navigation }) => {
         top: false,
     });
     const [consentVisible, setConsentVisible] = useState(false);
-    const searchProgress = useSharedValue(1);
 
     useEffect(() => {
         logToFirebase('openPage', { page: 'HarborNativeHome' });
     }, []);
-
-    const getScrollState = useCallback(view => {
-        if (!scrollStatesRef.current[view]) {
-            scrollStatesRef.current[view] = createScrollState();
-        }
-        return scrollStatesRef.current[view];
-    }, []);
-
-    const syncSearchInteractive = useCallback(progress => {
-        const nextInteractive = progress >= SEARCH_INTERACTIVE_THRESHOLD;
-        setIsSearchInteractive(current =>
-            current === nextInteractive ? current : nextInteractive,
-        );
-    }, []);
-
-    const setSearchProgress = useCallback(
-        (progress, { animated = false, view } = {}) => {
-            const nextProgress = clampSearchProgress(progress);
-            if (view) {
-                getScrollState(view).progress = nextProgress;
-            }
-            cancelAnimation(searchProgress);
-            if (animated) {
-                const timing =
-                    nextProgress >= searchProgress.value
-                        ? SEARCH_SHOW_TIMING
-                        : SEARCH_HIDE_TIMING;
-                searchProgress.value = withTiming(nextProgress, timing);
-            } else {
-                searchProgress.value = nextProgress;
-            }
-            syncSearchInteractive(nextProgress);
-        },
-        [getScrollState, searchProgress, syncSearchInteractive],
-    );
-
-    const showSearchForView = useCallback(
-        view => {
-            setSearchProgress(1, { animated: true, view });
-        },
-        [setSearchProgress],
-    );
-
-    const onContentScroll = useCallback(
-        (view, offsetY) => {
-            const nextOffset = Math.max(0, offsetY);
-            const scrollState = getScrollState(view);
-            const delta = nextOffset - scrollState.lastOffset;
-            scrollState.lastOffset = nextOffset;
-
-            if (currentViewRef.current !== view) {
-                return;
-            }
-
-            if (nextOffset <= TOP_VISIBILITY_THRESHOLD) {
-                if (scrollState.progress !== 1) {
-                    setSearchProgress(1, { view });
-                }
-                return;
-            }
-
-            if (delta === 0) {
-                return;
-            }
-
-            // 上滑／下滑進度與位移 1:1；列表 translateY 同步補償，避免 padding 跳動
-            cancelAnimation(searchProgress);
-            const nextProgress = clampSearchProgress(
-                searchProgress.value - delta / SEARCH_BAR_ROW_HEIGHT,
-            );
-            scrollState.progress = nextProgress;
-            searchProgress.value = nextProgress;
-            syncSearchInteractive(nextProgress);
-        },
-        [
-            getScrollState,
-            searchProgress,
-            setSearchProgress,
-            syncSearchInteractive,
-        ],
-    );
-
-    const snapSearchProgress = useCallback(
-        view => {
-            if (currentViewRef.current !== view) {
-                return;
-            }
-            const target =
-                searchProgress.value >= SEARCH_SNAP_THRESHOLD ? 1 : 0;
-            if (Math.abs(searchProgress.value - target) < 0.001) {
-                getScrollState(view).progress = target;
-                syncSearchInteractive(target);
-                return;
-            }
-            setSearchProgress(target, { animated: true, view });
-        },
-        [
-            getScrollState,
-            searchProgress,
-            setSearchProgress,
-            syncSearchInteractive,
-        ],
-    );
 
     const loadCapabilities = useCallback(() => {
         capabilitiesControllerRef.current?.abort();
@@ -555,46 +408,6 @@ const ForumPage = ({ navigation }) => {
             ),
         [pageScrollOffset, pageScrollPosition],
     );
-    const searchBarCollapseStyle = useAnimatedStyle(() => ({
-        height: interpolate(
-            searchProgress.value,
-            [0, 1],
-            [0, SEARCH_BAR_ROW_HEIGHT],
-            Extrapolation.CLAMP,
-        ),
-    }));
-    const searchBarContentStyle = useAnimatedStyle(() => ({
-        opacity: interpolate(
-            searchProgress.value,
-            [0, 0.2, 1],
-            [0, 0.7, 1],
-            Extrapolation.CLAMP,
-        ),
-        transform: [
-            {
-                translateY: interpolate(
-                    searchProgress.value,
-                    [0, 1],
-                    [-SEARCH_BAR_ROW_HEIGHT * 0.45, 0],
-                    Extrapolation.CLAMP,
-                ),
-            },
-        ],
-    }));
-    // 列表上移量與搜尋列收起量相同；同時以負 marginBottom 拉高佈局，避免底部騰空
-    const feedTranslateStyle = useAnimatedStyle(() => {
-        const collapseOffset = interpolate(
-            searchProgress.value,
-            [0, 1],
-            [SEARCH_BAR_ROW_HEIGHT, 0],
-            Extrapolation.CLAMP,
-        );
-        return {
-            marginBottom: -collapseOffset,
-            transform: [{ translateY: -collapseOffset }],
-        };
-    });
-
     const ensureMounted = useCallback(view => {
         setMountedViews(current =>
             current[view] ? current : { ...current, [view]: true },
@@ -623,13 +436,12 @@ const ForumPage = ({ navigation }) => {
             ensureMounted(view);
             currentViewRef.current = view;
             setCurrentIndex(index);
-            showSearchForView(view);
             pagerRef.current?.setPage(index);
             logToFirebase('harbor_feed_view', {
                 view: VIEW_CONFIG[view].analytics,
             });
         },
-        [enabledViews, ensureMounted, showSearchForView],
+        [enabledViews, ensureMounted],
     );
 
     const handlePageSelected = useCallback(
@@ -642,12 +454,11 @@ const ForumPage = ({ navigation }) => {
             ensureMounted(view);
             currentViewRef.current = view;
             setCurrentIndex(index);
-            showSearchForView(view);
             logToFirebase('harbor_feed_view', {
                 view: VIEW_CONFIG[view].analytics,
             });
         },
-        [enabledViews, ensureMounted, showSearchForView],
+        [enabledViews, ensureMounted],
     );
 
     useEffect(() => {
@@ -766,57 +577,37 @@ const ForumPage = ({ navigation }) => {
         <SafeAreaView
             style={[styles.page, { backgroundColor: theme.bg_color }]}
             edges={{ top: true }}>
-            {/*
-              裁切必須在 top inset 下方：列表下滑時 translateY 若畫進
-              SafeAreaView padding 區，Android edge-to-edge 透明狀態欄圖示會被蓋住
-            */}
             <View style={styles.contentClip}>
-                <Reanimated.View style={[styles.pager, feedTranslateStyle]}>
-                    <AnimatedPagerView
-                        ref={pagerRef}
-                        style={styles.pager}
-                        initialPage={0}
-                        onPageScroll={handlePageScroll}
-                        onPageSelected={handlePageSelected}
-                        onPageScrollStateChanged={handlePageScrollStateChanged}>
-                        {enabledViews.map(view => (
-                            <View
-                                key={view}
-                                style={styles.feedPage}
-                                collapsable={false}>
-                                {mountedViews[view] ? (
-                                    <HarborFeedPane
-                                        view={view}
-                                        navigation={navigation}
-                                        onCapabilities={handleCapabilities}
-                                        isTopicPressAllowed={isTopicPressAllowed}
-                                        contentContainerStyle={
-                                            contentContainerStyle
-                                        }
-                                        refreshProgressViewOffset={
-                                            refreshProgressViewOffset
-                                        }
-                                        isActive={
-                                            enabledViews[currentIndex] === view
-                                        }
-                                        onScroll={event =>
-                                            onContentScroll(
-                                                view,
-                                                event.nativeEvent.contentOffset.y,
-                                            )
-                                        }
-                                        onScrollEndDrag={() =>
-                                            snapSearchProgress(view)
-                                        }
-                                        onMomentumScrollEnd={() =>
-                                            snapSearchProgress(view)
-                                        }
-                                    />
-                                ) : null}
-                            </View>
-                        ))}
-                    </AnimatedPagerView>
-                </Reanimated.View>
+                <AnimatedPagerView
+                    ref={pagerRef}
+                    style={styles.pager}
+                    initialPage={0}
+                    onPageScroll={handlePageScroll}
+                    onPageSelected={handlePageSelected}
+                    onPageScrollStateChanged={handlePageScrollStateChanged}>
+                    {enabledViews.map(view => (
+                        <View
+                            key={view}
+                            style={styles.feedPage}
+                            collapsable={false}>
+                            {mountedViews[view] ? (
+                                <HarborFeedPane
+                                    view={view}
+                                    navigation={navigation}
+                                    onCapabilities={handleCapabilities}
+                                    isTopicPressAllowed={isTopicPressAllowed}
+                                    contentContainerStyle={contentContainerStyle}
+                                    refreshProgressViewOffset={
+                                        refreshProgressViewOffset
+                                    }
+                                    isActive={
+                                        enabledViews[currentIndex] === view
+                                    }
+                                />
+                            ) : null}
+                        </View>
+                    ))}
+                </AnimatedPagerView>
                 <View pointerEvents="box-none" style={styles.sharedHeader}>
                     <HarborStickyToolbar
                         segmentOptions={segmentOptions}
@@ -834,9 +625,6 @@ const ForumPage = ({ navigation }) => {
                         }
                         onSearchPress={() => navigation.navigate('HarborSearch')}
                         onToolbarLayout={handleToolbarLayout}
-                        searchBarCollapseStyle={searchBarCollapseStyle}
-                        searchBarContentStyle={searchBarContentStyle}
-                        isSearchInteractive={isSearchInteractive}
                     />
                 </View>
             </View>
@@ -939,9 +727,6 @@ const styles = StyleSheet.create({
     },
     feedTabIndicatorHidden: {
         opacity: 0,
-    },
-    searchBarCollapse: {
-        overflow: 'hidden',
     },
     searchBarRow: {
         height: SEARCH_BAR_ROW_HEIGHT,
