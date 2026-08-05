@@ -307,6 +307,8 @@ export const UM_LOCKER =
 export const UM_CMMS = 'https://cmms.um.edu.mo';
 // 澳大 - 體育場所預約
 export const UM_SPORT_BOOKING = 'https://isw.um.edu.mo/cdweb/pages/booking';
+// 澳大 - 健身房使用人數
+export const UM_FITNESS_ROOM_USAGE = 'https://isw.um.edu.mo/cdweb/pages/fitnessRoomUsage';
 // 澳大 - 圖書館
 export const UM_LIBRARY = 'https://library.um.edu.mo';
 // 澳大 - UM Pass

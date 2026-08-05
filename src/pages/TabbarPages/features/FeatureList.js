@@ -3,6 +3,7 @@ import {
     UM_RBS,
     UM_COMPUTER_ROOM,
     UM_SPORT_BOOKING,
+    UM_FITNESS_ROOM_USAGE,
     UM_CMMS,
     UM_LOCKER,
     UM_PORTAL,
@@ -139,6 +140,20 @@ export const getFunctionArr = (t) => [
                 describe: t('查看當前澳大停車場剩餘車位', { ns: 'features' }),
                 key_name: '車位',
                 keywords: 'Parking, Car Park, Parking Lot, Available Spaces, 車位, 停車, 泊車, 車場, 剩餘',
+            },
+            {
+                icon_type: iconTypes.materialCommunityIcons,
+                icon_name: 'dumbbell',
+                fn_name: t('健身人數', { ns: 'features' }),
+                needLogin: false,
+                go_where: 'Linking',
+                webview_param: {
+                    url: UM_FITNESS_ROOM_USAGE,
+                    title: '健身房使用人數',
+                },
+                describe: t('查看健身房當前使用人數', { ns: 'features' }),
+                key_name: '健身人數',
+                keywords: 'Fitness Room, Gym, Usage, Occupancy, 健身, 健身房, 人數, 使用情況, 佔用',
             },
             {
                 icon_type: iconTypes.materialCommunityIcons,
