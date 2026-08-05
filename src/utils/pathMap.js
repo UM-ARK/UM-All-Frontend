@@ -32,6 +32,8 @@ export function ARK_HARBOR_TOPIC_SHARE_URL(topicId, postNumber) {
 }
 
 export const APPSTORE_URL = 'https://apps.apple.com/app/id1636670554';
+export const PLAYSTORE_URL = 'https://play.google.com/store/apps/details?id=one.umall';
+export const GITHUB_RELEASE_URL = 'https://github.com/UM-ARK/UM-All-Frontend/releases/latest';
 
 export const MAIL = 'umacark@gmail.com';
 

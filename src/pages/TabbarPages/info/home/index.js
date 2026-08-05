@@ -3,6 +3,7 @@ import {
     ScrollView,
     View,
     Text,
+    Pressable,
     TouchableOpacity,
     RefreshControl,
     TouchableWithoutFeedback,
@@ -18,10 +19,12 @@ import {
 import { useTheme, uiStyle } from '../../../../components/ThemeContext';
 import {
     GITHUB_DONATE,
-    BASE_HOST,
     BASE_URI,
     GET,
     APPSTORE_URL,
+    PLAYSTORE_URL,
+    GITHUB_RELEASE_URL,
+    ARK_APP_LINK,
     MAIL,
     ARK_WIKI,
     UM_Moodle,
@@ -57,9 +60,11 @@ import { BottomSheetScrollView, BottomSheetFlatList } from '@gorhom/bottom-sheet
 import ScrollToTopButton from '../../../../components/ScrollToTopButton';
 import TouchableScale from '../../../../components/TouchableScale';
 import FeatureIcon from './search/components/FeatureIcon';
+import Ionicons from '@react-native-vector-icons/ionicons';
 
 const MIN_REFRESH_DURATION = 800;
 const DONATE_PROBE_TIMEOUT_MS = 2500;
+const DEBUG_SHOW_UPDATE_INFO = __DEV__ && false;
 const wait = duration => new Promise(resolve => setTimeout(resolve, duration));
 
 const openDonateLink = async () => {
@@ -169,9 +174,12 @@ const HomeScreen = ({ navigation }) => {
     const [isShowModal, setIsShowModal] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
-    const [showUpdateInfo, setShowUpdateInfo] = useState(false);
-    const [app_version, setAppVersion] = useState({ lastest: '', local: '' });
-    const [version_info, setVersionInfo] = useState(null);
+    const [showUpdateInfo, setShowUpdateInfo] = useState(DEBUG_SHOW_UPDATE_INFO);
+    const [app_version, setAppVersion] = useState({
+        lastest: DEBUG_SHOW_UPDATE_INFO ? 'DEBUG' : '',
+        local: getLocalAppVersion(),
+    });
+    const [version_info, setVersionInfo] = useState(DEBUG_SHOW_UPDATE_INFO ? '這是開發模式的更新提示預覽，用於檢查版面與下載入口。' : null);
     const [networkError, setNetworkError] = useState(false);
     const [isLoadMore, setIsLoadMore] = useState(false);
     const [inputText, setInputText] = useState('');
@@ -563,83 +571,136 @@ const HomeScreen = ({ navigation }) => {
                 {/* 更新提示 */}
                 {showUpdateInfo ?
                     <HomeCard style={{ alignSelf: 'center' }}>
-                        <View>
-                            <Text
-                                style={{
-                                    ...uiStyle.defaultText,
-                                    color: black.second,
-                                    fontWeight: 'bold',
-                                    marginTop: scale(2),
-                                    alignSelf: 'center',
-                                    textAlign: 'center',
+                        <View style={{ padding: scale(4) }}>
+                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                <View style={{
+                                    width: scale(38),
+                                    height: scale(38),
+                                    borderRadius: scale(8),
+                                    backgroundColor: themeColorUltraLight,
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    marginRight: scale(10),
                                 }}>
-                                {'🔥🔥🔥🔥🔥新版本來了‼️🔥🔥🔥🔥🔥'}
-                            </Text>
-                            {/* 版本更新說明 */}
+                                    <Ionicons name="arrow-up-circle" size={scale(24)} color={themeColor} />
+                                </View>
+                                <View style={{ flex: 1 }}>
+                                    <Text style={{
+                                        ...uiStyle.defaultText,
+                                        color: black.main,
+                                        fontSize: scale(16),
+                                        fontWeight: 'bold',
+                                    }}>
+                                        新版本現已推出
+                                    </Text>
+                                    <Text style={{
+                                        ...uiStyle.defaultText,
+                                        color: black.third,
+                                        fontSize: scale(11),
+                                        marginTop: verticalScale(2),
+                                    }}>
+                                        更新以取得最新功能與修正
+                                    </Text>
+                                </View>
+                                {DEBUG_SHOW_UPDATE_INFO ? (
+                                    <Text style={{
+                                        ...uiStyle.defaultText,
+                                        color: theme.warning,
+                                        fontSize: scale(9),
+                                        fontWeight: 'bold',
+                                    }}>
+                                        DEBUG
+                                    </Text>
+                                ) : null}
+                            </View>
+
+                            <View style={{
+                                flexDirection: 'row',
+                                marginTop: verticalScale(12),
+                                gap: scale(8),
+                            }}>
+                                <View style={{
+                                    flex: 1,
+                                    backgroundColor: bg_color,
+                                    borderRadius: scale(8),
+                                    padding: scale(10),
+                                }}>
+                                    <Text style={{ ...uiStyle.defaultText, color: black.third, fontSize: scale(10) }}>目前版本</Text>
+                                    <Text style={{ ...uiStyle.defaultText, color: black.second, fontWeight: 'bold', marginTop: verticalScale(2) }}>
+                                        {app_version.local || '—'}
+                                    </Text>
+                                </View>
+                                <View style={{
+                                    flex: 1,
+                                    backgroundColor: white,
+                                    borderWidth: 1,
+                                    borderColor: themeColor,
+                                    borderRadius: scale(8),
+                                    padding: scale(10),
+                                }}>
+                                    <Text style={{ ...uiStyle.defaultText, color: themeColor, fontSize: scale(10) }}>最新版本</Text>
+                                    <Text style={{ ...uiStyle.defaultText, color: themeColor, fontWeight: 'bold', marginTop: verticalScale(2) }}>
+                                        {app_version.lastest || '—'}
+                                    </Text>
+                                </View>
+                            </View>
+
                             {version_info ? (
-                                <Text style={{
-                                    ...uiStyle.defaultText,
-                                    color: black.second,
-                                    fontWeight: 'bold',
-                                    marginTop: scale(2),
-                                    alignSelf: 'center',
-                                }}>
-                                    {'\n更新內容：\n' + version_info + '\n'}
-                                </Text>
+                                <View style={{ marginTop: verticalScale(12) }}>
+                                    <Text style={{ ...uiStyle.defaultText, color: black.second, fontWeight: 'bold' }}>更新內容</Text>
+                                    <Text style={{
+                                        ...uiStyle.defaultText,
+                                        color: black.third,
+                                        fontSize: scale(11),
+                                        lineHeight: scale(17),
+                                        marginTop: verticalScale(4),
+                                    }}>
+                                        {version_info}
+                                    </Text>
+                                </View>
                             ) : null}
-                            <Text
-                                style={{
-                                    ...uiStyle.defaultText,
-                                    color: themeColor,
-                                    marginTop: scale(5),
-                                    fontWeight: 'bold',
-                                }}>
-                                {`最新版本: ${app_version.lastest}`}
+
+                            <Text style={{
+                                ...uiStyle.defaultText,
+                                color: black.second,
+                                fontWeight: 'bold',
+                                marginTop: verticalScale(12),
+                                marginBottom: verticalScale(6),
+                            }}>
+                                {Platform.OS === 'ios' ? '前往 App Store 更新' : '選擇安裝方式'}
                             </Text>
-                            <Text
-                                style={{
-                                    ...uiStyle.defaultText,
-                                    color: black.third,
-                                    marginTop: scale(5),
-                                    fontWeight: 'bold',
-                                }}>
-                                {`你的版本: ${app_version.local}`}
-                            </Text>
-                            {Platform.OS === 'ios' ? null : (
-                                <Text
-                                    style={{
-                                        ...uiStyle.defaultText,
-                                        alignSelf: 'center', textAlign: 'center',
-                                        color: themeColor,
-                                        marginTop: scale(5),
-                                        fontWeight: 'bold',
+                            {(Platform.OS === 'ios' ? [
+                                { label: 'App Store', detail: '官方商店更新', icon: 'logo-apple', url: APPSTORE_URL },
+                            ] : [
+                                { label: 'Google Play Store', detail: '推薦，自動接收後續更新', icon: 'logo-google-playstore', url: PLAYSTORE_URL },
+                                { label: 'GitHub Release APK', detail: '從 GitHub 下載最新版 APK', icon: 'logo-github', url: GITHUB_RELEASE_URL },
+                                { label: '官網 APK', detail: '從 ARK ALL 官網下載安裝', icon: 'globe-outline', url: ARK_APP_LINK },
+                            ]).map(item => (
+                                <Pressable
+                                    key={item.label}
+                                    style={({ pressed }) => ({
+                                        flexDirection: 'row',
+                                        alignItems: 'center',
+                                        minHeight: verticalScale(48),
+                                        backgroundColor: bg_color,
+                                        opacity: pressed ? 0.7 : 1,
+                                        borderRadius: scale(8),
+                                        paddingHorizontal: scale(12),
+                                        paddingVertical: verticalScale(8),
+                                        marginTop: verticalScale(5),
+                                    })}
+                                    onPress={() => {
+                                        trigger();
+                                        Linking.openURL(item.url);
                                     }}>
-                                    {'無Google Play Store用戶可以通過APK方式安裝~'}
-                                </Text>
-                            )}
-                            <TouchableOpacity
-                                style={{
-                                    alignSelf: 'center',
-                                    marginTop: scale(5),
-                                    backgroundColor: `${themeColor}15`,
-                                    borderRadius: scale(10),
-                                    paddingVertical: scale(5), paddingHorizontal: scale(8),
-                                }}
-                                activeOpacity={0.8}
-                                onPress={() => {
-                                    trigger();
-                                    const url = Platform.OS === 'ios' ? APPSTORE_URL : BASE_HOST;
-                                    Linking.openURL(url);
-                                }}>
-                                <Text
-                                    style={{
-                                        ...uiStyle.defaultText,
-                                        color: themeColor,
-                                        fontWeight: 'bold',
-                                    }}>
-                                    {`${t('點我更新', { ns: 'home' })}` + '😉~'}
-                                </Text>
-                            </TouchableOpacity>
+                                    <Ionicons name={item.icon} size={scale(21)} color={themeColor} />
+                                    <View style={{ flex: 1, marginLeft: scale(10) }}>
+                                        <Text style={{ ...uiStyle.defaultText, color: black.main, fontWeight: 'bold' }}>{item.label}</Text>
+                                        <Text style={{ ...uiStyle.defaultText, color: black.third, fontSize: scale(10), marginTop: verticalScale(1) }}>{item.detail}</Text>
+                                    </View>
+                                    <Ionicons name="chevron-forward" size={scale(18)} color={black.third} />
+                                </Pressable>
+                            ))}
                         </View>
                     </HomeCard>
                     : null}
