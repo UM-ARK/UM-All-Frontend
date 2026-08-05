@@ -272,6 +272,7 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
     const loadedSharedTimetableEventRef = useRef(null);
     const [sharedTimetableSheetVisible, setSharedTimetableSheetVisible] =
         useState(false);
+    const [isPullRefreshing, setIsPullRefreshing] = useState(false);
 
     const canEdit = computeCanEdit(event, event?.timezone);
     const readOnlyReason = readOnlyReasonFor(event, t);
@@ -291,9 +292,9 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
         onSaved: onAvailabilitySaved,
     });
 
-    const loadSharedTimetables = useCallback(async () => {
+    const loadSharedTimetables = useCallback(async ({force = false} = {}) => {
         const [sharedResult, courseResult] = await Promise.allSettled([
-            sharedTimetables.load(),
+            sharedTimetables.load({force}),
             getCourseData('adddrop'),
         ]);
         if (courseResult.status === 'fulfilled') {
@@ -305,6 +306,34 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
         }
         return true;
     }, [sharedTimetables]);
+
+    const handlePullRefresh = useCallback(async () => {
+        if (editor.isEditing || isPullRefreshing) {
+            return;
+        }
+        trigger();
+        setIsPullRefreshing(true);
+        try {
+            const shouldRefreshShared =
+                scheduleMode === 'shared' ||
+                loadedSharedTimetableEventRef.current === eventId;
+            await Promise.allSettled([
+                refresh(),
+                shouldRefreshShared
+                    ? loadSharedTimetables({force: true})
+                    : Promise.resolve(true),
+            ]);
+        } finally {
+            setIsPullRefreshing(false);
+        }
+    }, [
+        editor.isEditing,
+        eventId,
+        isPullRefreshing,
+        loadSharedTimetables,
+        refresh,
+        scheduleMode,
+    ]);
 
     const handleScheduleModeChange = useCallback(
         index => {
@@ -1325,14 +1354,8 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                 scrollEnabled={!isPainting}
                 refreshControl={
                     <RefreshControl
-                        refreshing={isRefreshing}
-                        onRefresh={() => {
-                            if (editor.isEditing) {
-                                return;
-                            }
-                            trigger();
-                            refresh();
-                        }}
+                        refreshing={isRefreshing || isPullRefreshing}
+                        onRefresh={handlePullRefresh}
                         tintColor={theme.themeColor}
                         colors={[theme.themeColor]}
                         progressViewOffset={refreshProgressOffset}

@@ -69,7 +69,10 @@ export function useSharedTimetables({eventId, myHarborUserId} = {}) {
             return members;
         }
         const requestId = ++requestIdRef.current;
-        setPhase('loading');
+        // 強制刷新且已有內容時不切 loading，避免下拉時整頁閃爍
+        if (!(force && phase === 'ready')) {
+            setPhase('loading');
+        }
         setError(null);
         try {
             const data = await getTeamSharedTimetables(eventId);
