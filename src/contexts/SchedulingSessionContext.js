@@ -12,6 +12,7 @@ import {
     clearSchedulingSession,
     ensureSchedulingSession,
     getSchedulingSession,
+    reverifyExistingSchedulingSession,
     setSchedulingHarborAuthFailureHandler,
 } from '../utils/scheduling/schedulingAuth';
 import {
@@ -117,6 +118,34 @@ export const SchedulingSessionProvider = ({children}) => {
         setStatus('idle');
     }, []);
 
+    const syncIdentity = useCallback(async () => {
+        try {
+            const session = await reverifyExistingSchedulingSession();
+            if (!session) {
+                return null;
+            }
+            setUser(session.user);
+            setError(null);
+            setStatus('ready');
+            return session;
+        } catch (requestError) {
+            const normalized = normalizeSchedulingError(requestError);
+            setError(normalized);
+            if (
+                normalized.code === 'harbor_auth_failed' ||
+                normalized.code === 'harbor_account_mismatch'
+            ) {
+                setStatus('idle');
+                setUser(null);
+            } else if (getSchedulingSession()) {
+                setStatus('ready');
+            } else {
+                setStatus('error');
+            }
+            throw normalized;
+        }
+    }, []);
+
     const value = useMemo(
         () => ({
             status,
@@ -124,9 +153,18 @@ export const SchedulingSessionProvider = ({children}) => {
             error,
             harborStatus,
             ensureSession,
+            syncIdentity,
             clearSession,
         }),
-        [clearSession, ensureSession, error, harborStatus, status, user],
+        [
+            clearSession,
+            ensureSession,
+            error,
+            harborStatus,
+            status,
+            syncIdentity,
+            user,
+        ],
     );
 
     return (

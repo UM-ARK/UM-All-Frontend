@@ -401,6 +401,16 @@ export function reverifySchedulingSession(session = schedulingSession) {
     );
 }
 
+/** 僅重新驗證既有 session；從未使用 Scheduling 時不主動換票。 */
+export async function reverifyExistingSchedulingSession() {
+    const session =
+        schedulingSession || (await hydrateSchedulingSessionFromStorage());
+    if (!session) {
+        return null;
+    }
+    return reverifySchedulingSession(session);
+}
+
 async function refreshOrReverify(session) {
     try {
         if (isHarborReverificationDue(session)) {

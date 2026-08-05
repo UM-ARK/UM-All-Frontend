@@ -30,6 +30,7 @@ import { scale, verticalScale } from 'react-native-size-matters';
 
 import { uiStyle, useTheme } from '../../../../components/ThemeContext';
 import { useHarborSession } from '../../../../contexts/HarborSessionContext';
+import { useSchedulingSession } from '../../../../contexts/SchedulingSessionContext';
 import HarborAvatarPickerModal from '../components/HarborAvatarPickerModal';
 import HarborBadgeIcon from '../components/HarborBadgeIcon';
 import {
@@ -158,6 +159,7 @@ const ProfileTextField = ({
 
 const HarborProfilePage = ({ navigation, route }) => {
     const { theme } = useTheme();
+    const {syncIdentity} = useSchedulingSession();
     const { t } = useTranslation('my');
     const { user, refresh } = useHarborSession();
     const headerHeight = useHeaderHeight();
@@ -645,6 +647,7 @@ const HarborProfilePage = ({ navigation, route }) => {
             } else {
                 await selectHarborAvatar(username, pendingAvatar.value);
             }
+            syncIdentity().catch(() => null);
             await refresh();
             handleCloseAvatarPicker();
         } catch (error) {

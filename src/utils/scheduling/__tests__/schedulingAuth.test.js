@@ -9,12 +9,16 @@ jest.mock('../schedulingAuthStorage', () => ({
     getSchedulingDeviceId: jest.fn(async () => 'device-id'),
 }));
 
+jest.mock('../../pathMap', () => ({
+    SCHEDULING_BASE_URI: 'https://umall.one/api/v2',
+}));
+
 const mockAuthStorage = jest.requireMock('../../harbor/harborAuthStorage');
 const mockSessionStorage = jest.requireMock('../schedulingAuthStorage');
+const {SCHEDULING_BASE_URI} = jest.requireMock('../../pathMap');
 
 import axios from 'axios';
 import {
-    SCHEDULING_BASE_URI,
     SCHEDULING_TOKEN_EXPIRY_SKEW_MS,
     __resetSchedulingAuthForTests,
     clearSchedulingSession,
@@ -24,6 +28,7 @@ import {
     isSchedulingTokenExpired,
     logoutSchedulingSession,
     refreshSchedulingToken,
+    reverifyExistingSchedulingSession,
     reverifySchedulingSession,
     setSchedulingHarborAuthFailureHandler,
     setSchedulingSession,
@@ -373,6 +378,39 @@ describe('schedulingAuth', () => {
                     'User-Api-Client-Id': 'harbor-client',
                 }),
             }),
+        );
+    });
+
+    it('沒有既有 Scheduling session 時同步身分不換票', async () => {
+        await expect(reverifyExistingSchedulingSession()).resolves.toBeNull();
+
+        expect(
+            mockSessionStorage.loadSchedulingSession,
+        ).toHaveBeenCalledTimes(1);
+        expect(mockAuthStorage.loadHarborCredentials).not.toHaveBeenCalled();
+        expect(postSpy).not.toHaveBeenCalled();
+    });
+
+    it('SecureStore 有既有 session 時同步身分只 reverify 一次', async () => {
+        mockSessionStorage.loadSchedulingSession.mockResolvedValue(
+            makeSession({accessToken: 'stored-jwt'}),
+        );
+        mockExchangeSuccess({
+            accessToken: 'reverified-jwt',
+            user: {
+                harborUserId: 42,
+                username: 'ark',
+                avatarTemplate: '/new/{size}.png',
+            },
+        });
+
+        await expect(reverifyExistingSchedulingSession()).resolves.toMatchObject({
+            accessToken: 'reverified-jwt',
+            user: {avatarTemplate: '/new/{size}.png'},
+        });
+        expect(postSpy).toHaveBeenCalledTimes(1);
+        expect(postSpy.mock.calls[0][0]).toBe(
+            `${SCHEDULING_BASE_URI}/auth/harbor/reverify`,
         );
     });
 
