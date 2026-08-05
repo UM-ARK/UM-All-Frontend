@@ -109,10 +109,7 @@ const SharedTimetableSlotDetailSheet = ({
                         <ScrollView style={styles.memberList}>
                             {entries.map((entry, index) => {
                                 const member = entry.member || {};
-                                const name =
-                                    member.displayName ||
-                                    member.username ||
-                                    t('成員');
+                                const name = member.username || t('成員');
                                 const avatarUri = member.avatarTemplate
                                     ? ARK_HARBOR_AVATAR_TEMPLATE(
                                           member.avatarTemplate,

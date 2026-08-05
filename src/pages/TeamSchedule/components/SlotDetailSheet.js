@@ -279,7 +279,6 @@ const SlotDetailSheet = ({
                                                 style={styles.dayMemberList}>
                                                 {freeMembers.map(member => {
                                                     const name =
-                                                        member.displayName ||
                                                         member.username ||
                                                         t('成員');
                                                     const avatarUri =
@@ -449,9 +448,7 @@ const SlotDetailSheet = ({
                             ) : (
                                 (info.sharedGroups?.free || info.freeMembers).map(member => {
                                     const name =
-                                        member.displayName ||
-                                        member.username ||
-                                        t('成員');
+                                        member.username || t('成員');
                                     const avatarUri = member.avatarTemplate
                                         ? ARK_HARBOR_AVATAR_TEMPLATE(
                                               member.avatarTemplate,
@@ -585,7 +582,7 @@ const MemberGroup = ({members, title}) => {
             </Text>
             <Text style={[styles.statusNames, {color: theme.black.third}]}>
                 {members
-                    .map(member => member.displayName || member.username || '')
+                    .map(member => member.username || '')
                     .filter(Boolean)
                     .join('、')}
             </Text>

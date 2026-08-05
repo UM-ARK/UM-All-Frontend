@@ -1698,10 +1698,7 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                             const submitted = isAvailabilitySubmitted(
                                 member.availability,
                             );
-                            const name =
-                                member.displayName ||
-                                member.username ||
-                                t('成員');
+                            const name = member.username || t('成員');
                             const isMe =
                                 myHarborUserId != null &&
                                 String(member.harborUserId) ===

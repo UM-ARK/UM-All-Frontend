@@ -42,7 +42,7 @@ function formatMinute(minute) {
 }
 
 function memberName(member, t) {
-    return member?.displayName || member?.username || t('成員');
+    return member?.username || t('成員');
 }
 
 function colorIndexForCourse(courseCode, colorCount) {
