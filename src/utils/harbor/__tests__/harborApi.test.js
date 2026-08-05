@@ -1246,7 +1246,7 @@ describe('Harbor API 資料正規化', () => {
         });
     });
 
-    it('按話題去重計算上次進入論壇後的新貼文', async () => {
+    it('只按新建立話題去重，普通回覆不計入論壇角標', async () => {
         getSpy
             .mockResolvedValueOnce({
                 data: {
@@ -1254,11 +1254,13 @@ describe('Harbor API 資料正規化', () => {
                         topics: [
                             {
                                 id: 1,
+                                created_at: '2026-07-31T07:00:00Z',
                                 last_posted_at: '2026-07-31T10:00:00Z',
                             },
                             {
                                 id: 2,
-                                last_posted_at: '2026-07-31T09:00:00Z',
+                                created_at: '2026-07-31T09:00:00Z',
+                                last_posted_at: '2026-07-31T09:30:00Z',
                             },
                         ],
                         more_topics_url: '/latest?page=1',
@@ -1271,11 +1273,13 @@ describe('Harbor API 資料正規化', () => {
                         topics: [
                             {
                                 id: 2,
-                                last_posted_at: '2026-07-31T09:00:00Z',
+                                created_at: '2026-07-31T09:00:00Z',
+                                last_posted_at: '2026-07-31T09:30:00Z',
                             },
                             {
                                 id: 3,
-                                last_posted_at: '2026-07-31T07:00:00Z',
+                                created_at: '2026-07-31T08:30:00Z',
+                                last_posted_at: '2026-07-31T08:45:00Z',
                             },
                         ],
                         more_topics_url: '/latest?page=2',
@@ -1288,6 +1292,7 @@ describe('Harbor API 資料正規化', () => {
                         topics: [
                             {
                                 id: 4,
+                                created_at: '2026-07-30T22:00:00Z',
                                 last_posted_at: '2026-07-30T23:00:00Z',
                             },
                         ],
@@ -1318,12 +1323,13 @@ describe('Harbor API 資料正規化', () => {
         });
     });
 
-    it('論壇角標最多計算 100 個更新話題', async () => {
+    it('論壇角標最多計算 100 個新話題', async () => {
         getSpy.mockResolvedValueOnce({
             data: {
                 topic_list: {
                     topics: Array.from({length: 120}, (_, index) => ({
                         id: index + 1,
+                        created_at: '2026-07-31T10:00:00Z',
                         last_posted_at: '2026-07-31T10:00:00Z',
                     })),
                     more_topics_url: null,
@@ -1339,6 +1345,35 @@ describe('Harbor API 資料正規化', () => {
             latestAt: '2026-07-31T10:00:00.000Z',
             topicCount: 100,
         });
+    });
+
+    it('達掃描頁數上限時不把普通回覆誤報為新話題', async () => {
+        getSpy.mockImplementation((_url, {params}) =>
+            Promise.resolve({
+                data: {
+                    topic_list: {
+                        topics: [
+                            {
+                                id: params.page + 1,
+                                created_at: '2026-07-30T08:00:00Z',
+                                last_posted_at: '2026-07-31T10:00:00Z',
+                            },
+                        ],
+                        more_topics_url: `/latest?page=${params.page + 1}`,
+                    },
+                },
+            }),
+        );
+
+        await expect(
+            fetchHarborForumBadgeSnapshot({
+                since: '2026-07-31T08:00:00Z',
+            }),
+        ).resolves.toEqual({
+            latestAt: '2026-07-31T10:00:00.000Z',
+            topicCount: 0,
+        });
+        expect(getSpy).toHaveBeenCalledTimes(10);
     });
 
     it('論壇角標回應格式錯誤時拒絕更新舊狀態', async () => {

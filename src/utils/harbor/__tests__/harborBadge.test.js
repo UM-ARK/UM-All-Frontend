@@ -26,7 +26,7 @@ describe('Harbor 論壇 Tab 角標', () => {
         setLocalStorage.mockClear();
     });
 
-    it('顯示更新數量並將超過 99 的數量縮寫', () => {
+    it('顯示新話題數量並將超過 99 的數量縮寫', () => {
         expect(formatHarborTabBadge(0)).toBeUndefined();
         expect(formatHarborTabBadge(8)).toBe(8);
         expect(formatHarborTabBadge(100)).toBe('99+');
@@ -46,7 +46,7 @@ describe('Harbor 論壇 Tab 角標', () => {
         expect(getHarborForumBadgeCount(state, 'ark-user')).toBe(0);
     });
 
-    it('只顯示上次進入論壇後有更新的話題數', () => {
+    it('只顯示上次進入論壇後新建立的話題數', () => {
         let state = updateHarborForumBadgeState(
             createHarborForumBadgeState('ark-user'),
             'ark-user',
@@ -116,7 +116,7 @@ describe('Harbor 論壇 Tab 角標', () => {
 
     it('APP 重啟後恢復尚未進入論壇的角標', async () => {
         mockStoredBadgeState = {
-            version: 1,
+            version: 2,
             accounts: [
                 {
                     username: 'ARK-User',
@@ -140,9 +140,29 @@ describe('Harbor 論壇 Tab 角標', () => {
         expect(getHarborForumBadgeCount(state, 'ark-user')).toBe(3);
     });
 
-    it('進入論壇後持久保存清零游標', async () => {
+    it('升級角標語意時保留確認游標但捨棄舊計數', async () => {
         mockStoredBadgeState = {
             version: 1,
+            accounts: [
+                {
+                    username: 'ARK-User',
+                    acknowledgedAt: '2026-07-31T08:00:00Z',
+                    latestObservedAt: '2026-07-31T09:00:00Z',
+                    badgeCount: 3,
+                },
+            ],
+        };
+
+        const state = await loadHarborForumBadgeState('ark-user');
+
+        expect(state.acknowledgedAt).toBe('2026-07-31T08:00:00.000Z');
+        expect(state.latestObservedAt).toBe('2026-07-31T09:00:00.000Z');
+        expect(getHarborForumBadgeCount(state, 'ark-user')).toBe(0);
+    });
+
+    it('進入論壇後持久保存清零游標', async () => {
+        mockStoredBadgeState = {
+            version: 2,
             accounts: [
                 {
                     username: 'ark-user',
@@ -169,7 +189,7 @@ describe('Harbor 論壇 Tab 角標', () => {
 
     it('Storage 只保留最近三個帳號並覆寫同一帳號', async () => {
         mockStoredBadgeState = {
-            version: 1,
+            version: 2,
             accounts: [
                 {username: 'user-b', badgeCount: 2},
                 {username: 'user-c', badgeCount: 3},
@@ -193,7 +213,7 @@ describe('Harbor 論壇 Tab 角標', () => {
         expect(setLocalStorage).toHaveBeenLastCalledWith(
             'ARK_Harbor_Forum_Badge_State',
             expect.objectContaining({
-                version: 1,
+                version: 2,
                 accounts: [
                     expect.objectContaining({
                         username: 'user-a',

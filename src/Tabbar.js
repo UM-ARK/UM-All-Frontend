@@ -482,7 +482,7 @@ const Tabbar = () => {
         });
     }, [signedInUsername]);
 
-    const forumUpdatesSinceEntry = getHarborForumBadgeCount(
+    const forumNewTopicsSinceEntry = getHarborForumBadgeCount(
         forumBadgeState,
         signedInUsername,
     );
@@ -490,11 +490,11 @@ const Tabbar = () => {
     const badges = useMemo(
         () => ({
             ForumTabbar: formatHarborTabBadge(
-                isSignedIn ? forumUpdatesSinceEntry : 0,
+                isSignedIn ? forumNewTopicsSinceEntry : 0,
             ),
             MyTabbar: formatHarborTabBadge(myUnreadTotal),
         }),
-        [forumUpdatesSinceEntry, isSignedIn, myUnreadTotal],
+        [forumNewTopicsSinceEntry, isSignedIn, myUnreadTotal],
     );
 
     const badgeListeners = useMemo(

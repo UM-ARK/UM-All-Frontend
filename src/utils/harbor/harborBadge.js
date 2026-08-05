@@ -1,7 +1,8 @@
 import { getLocalStorage, setLocalStorage } from '../storageKits';
 
 const HARBOR_FORUM_BADGE_STORAGE_KEY = 'ARK_Harbor_Forum_Badge_State';
-const HARBOR_FORUM_BADGE_STORAGE_VERSION = 1;
+const HARBOR_FORUM_BADGE_STORAGE_VERSION = 2;
+const HARBOR_FORUM_BADGE_LEGACY_STORAGE_VERSION = 1;
 const HARBOR_FORUM_BADGE_MAX_COUNT = 100;
 const HARBOR_FORUM_BADGE_MAX_ACCOUNTS = 3;
 
@@ -33,6 +34,10 @@ const normalizeBadgeCount = count =>
         HARBOR_FORUM_BADGE_MAX_COUNT,
         Math.max(0, Math.floor(Number(count) || 0)),
     );
+
+const isSupportedStorageVersion = version =>
+    version === HARBOR_FORUM_BADGE_STORAGE_VERSION ||
+    version === HARBOR_FORUM_BADGE_LEGACY_STORAGE_VERSION;
 
 export function formatHarborTabBadge(count) {
     const normalized = Math.max(0, Number(count) || 0);
@@ -124,7 +129,7 @@ export async function loadHarborForumBadgeState(username) {
     const stored = await getLocalStorage(HARBOR_FORUM_BADGE_STORAGE_KEY);
     if (
         stored instanceof Error ||
-        stored?.version !== HARBOR_FORUM_BADGE_STORAGE_VERSION ||
+        !isSupportedStorageVersion(stored?.version) ||
         !Array.isArray(stored.accounts)
     ) {
         return nextState;
@@ -141,7 +146,10 @@ export async function loadHarborForumBadgeState(username) {
         username,
         acknowledgedAt: normalizeTimestamp(account.acknowledgedAt),
         latestObservedAt: normalizeTimestamp(account.latestObservedAt),
-        badgeCount: normalizeBadgeCount(account.badgeCount),
+        badgeCount:
+            stored.version === HARBOR_FORUM_BADGE_STORAGE_VERSION
+                ? normalizeBadgeCount(account.badgeCount)
+                : 0,
         loaded: true,
         acknowledgePending: false,
     };
@@ -171,9 +179,14 @@ export function saveHarborForumBadgeState(state) {
                 throw stored;
             }
             const previousAccounts =
-                stored?.version === HARBOR_FORUM_BADGE_STORAGE_VERSION &&
+                isSupportedStorageVersion(stored?.version) &&
                 Array.isArray(stored.accounts)
-                    ? stored.accounts
+                    ? stored.accounts.map(item =>
+                        stored.version ===
+                        HARBOR_FORUM_BADGE_LEGACY_STORAGE_VERSION
+                            ? { ...item, badgeCount: 0 }
+                            : item,
+                    )
                     : [];
             const accounts = [
                 account,

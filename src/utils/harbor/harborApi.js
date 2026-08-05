@@ -2344,8 +2344,8 @@ export async function fetchHarborInboxUnreadCount(
 }
 
 /**
- * 論壇 Tab 角標用：計算指定時間後有新貼文的話題數。
- * 首次建立基準時只讀取第一頁；既有基準最多掃描 100 個更新話題。
+ * 論壇 Tab 角標用：計算指定時間後新建立的話題數。
+ * 首次建立基準時只讀取第一頁；既有基準最多掃描 10 頁、計算 100 個新話題。
  */
 export async function fetchHarborForumBadgeSnapshot({
     since,
@@ -2353,7 +2353,7 @@ export async function fetchHarborForumBadgeSnapshot({
 } = {}) {
     const sinceTimestamp = Date.parse(since);
     const hasValidSince = Number.isFinite(sinceTimestamp);
-    const updatedTopicIds = new Set();
+    const newTopicIds = new Set();
     let latestTimestamp = null;
     let page = 0;
     let scannedPages = 0;
@@ -2374,6 +2374,7 @@ export async function fetchHarborForumBadgeSnapshot({
         pageHasUpdates = false;
         topics.forEach(topic => {
             const topicId = toNumberOrNull(topic?.id);
+            const createdTimestamp = Date.parse(topic?.created_at);
             const postedAt =
                 topic?.last_posted_at || topic?.created_at || '';
             const postedTimestamp = Date.parse(postedAt);
@@ -2384,13 +2385,16 @@ export async function fetchHarborForumBadgeSnapshot({
                 latestTimestamp ?? postedTimestamp,
                 postedTimestamp,
             );
+            if (hasValidSince && postedTimestamp > sinceTimestamp) {
+                pageHasUpdates = true;
+            }
             if (
                 hasValidSince &&
-                postedTimestamp > sinceTimestamp &&
+                Number.isFinite(createdTimestamp) &&
+                createdTimestamp > sinceTimestamp &&
                 topicId != null
             ) {
-                pageHasUpdates = true;
-                updatedTopicIds.add(topicId);
+                newTopicIds.add(topicId);
             }
         });
 
@@ -2406,24 +2410,16 @@ export async function fetchHarborForumBadgeSnapshot({
         hasValidSince &&
         hasMore &&
         pageHasUpdates &&
-        updatedTopicIds.size < 100 &&
+        newTopicIds.size < 100 &&
         scannedPages < 10
     );
-
-    const reachedScanLimit =
-        hasValidSince &&
-        hasMore &&
-        pageHasUpdates &&
-        scannedPages >= 10;
 
     return {
         latestAt:
             latestTimestamp == null
                 ? ''
                 : new Date(latestTimestamp).toISOString(),
-        topicCount: reachedScanLimit
-            ? 100
-            : Math.min(100, updatedTopicIds.size),
+        topicCount: Math.min(100, newTopicIds.size),
     };
 }
 
