@@ -17,6 +17,7 @@ import { useTranslation } from 'react-i18next';
 import { scale, verticalScale } from 'react-native-size-matters';
 
 import { useTheme } from '../../components/ThemeContext';
+import { logToFirebase } from '../../utils/firebaseAnalytics';
 import { trigger } from '../../utils/trigger';
 import { useTeamEvents } from './hooks/useTeamEvents';
 import TeamScheduleEventRow from './components/TeamScheduleEventRow';
@@ -38,6 +39,10 @@ const TeamScheduleListPage = ({ navigation }) => {
     useEffect(() => {
         navigation.setOptions({ headerTitle: t('全部組隊約時間') });
     }, [navigation, t]);
+
+    useEffect(() => {
+        logToFirebase('screen_view', { screen_name: 'TeamScheduleList' });
+    }, []);
 
     // 重新 focus 且 cache 過期時更新
     useFocusEffect(

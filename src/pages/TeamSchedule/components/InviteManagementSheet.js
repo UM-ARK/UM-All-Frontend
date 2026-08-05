@@ -17,6 +17,7 @@ import {scale, verticalScale} from 'react-native-size-matters';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 import {uiStyle, useTheme} from '../../../components/ThemeContext';
+import {logToFirebase} from '../../../utils/firebaseAnalytics';
 import {
     rotateInviteLink,
     updateInviteLink,
@@ -118,10 +119,15 @@ const InviteManagementSheet = ({
                     '請用瀏覽器開啟下方連結，或於組隊頁手動貼上即可加入。',
                 ),
             });
-            await Share.share({
+            const result = await Share.share({
                 message,
                 url,
             });
+            if (result?.action !== Share.dismissedAction) {
+                logToFirebase('team_schedule_invite_share', {
+                    source: 'management_sheet',
+                });
+            }
         } catch (requestError) {
             const normalized = normalizeSchedulingError(requestError);
             Alert.alert(
@@ -161,6 +167,9 @@ const InviteManagementSheet = ({
                             setInviteUrl(picked.url);
                         }
                         onInviteChange?.(data?.inviteLink || data);
+                        logToFirebase('team_schedule_invite_status', {
+                            status: picked.status || next,
+                        });
                     } catch (requestError) {
                         const normalized =
                             normalizeSchedulingError(requestError);
@@ -200,6 +209,7 @@ const InviteManagementSheet = ({
                             setInviteUrl(picked.url);
                             setInviteStatus(picked.status || inviteStatus);
                             onInviteChange?.(data?.inviteLink || data);
+                            logToFirebase('team_schedule_invite_rotate', {});
                         } catch (requestError) {
                             const normalized =
                                 normalizeSchedulingError(requestError);

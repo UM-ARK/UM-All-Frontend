@@ -7,6 +7,7 @@ import {AppState} from 'react-native';
 import {useIsFocused} from '@react-navigation/native';
 
 import {useSchedulingSession} from '../../../contexts/SchedulingSessionContext';
+import {logToFirebase} from '../../../utils/firebaseAnalytics';
 import {
     getTeamEvent,
     getTeamEventSummary,
@@ -311,6 +312,7 @@ export function useTeamScheduleDetail({
         try {
             await ensureSession();
             await joinTeamEvent(eventId, token);
+            logToFirebase('team_schedule_join', {method: 'invite'});
             clearInviteToken();
             hasInviteFlow.current = false;
             // 與新建組隊一致：清列表 cache，返回「我的」／列表才會看到新 membership

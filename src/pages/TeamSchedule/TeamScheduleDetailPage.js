@@ -32,6 +32,7 @@ import {useSchedulingSession} from '../../contexts/SchedulingSessionContext';
 import {uiStyle, useTheme} from '../../components/ThemeContext';
 import SegmentControl from '../../components/SegmentControl';
 import {getCourseData} from '../../utils/checkCoursesKits';
+import {logToFirebase} from '../../utils/firebaseAnalytics';
 import {ARK_HARBOR_AVATAR_TEMPLATE} from '../../utils/pathMap';
 import {
     deleteTeamEvent,
@@ -273,6 +274,35 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
     const [sharedTimetableSheetVisible, setSharedTimetableSheetVisible] =
         useState(false);
     const [isPullRefreshing, setIsPullRefreshing] = useState(false);
+    const detailViewLoggedRef = useRef(false);
+    const sharedViewLoggedRef = useRef(false);
+
+    useEffect(() => {
+        if (phase !== 'ready' || !event || detailViewLoggedRef.current) {
+            return;
+        }
+        detailViewLoggedRef.current = true;
+        logToFirebase('screen_view', {
+            screen_name: 'TeamScheduleDetail',
+            role: membership?.role || 'unknown',
+            event_status: event.status || 'unknown',
+            entry_method: inviteBootRef.current ? 'invite' : 'direct',
+        });
+    }, [event, membership?.role, phase]);
+
+    useEffect(() => {
+        if (
+            scheduleMode !== 'shared' ||
+            phase !== 'ready' ||
+            sharedViewLoggedRef.current
+        ) {
+            return;
+        }
+        sharedViewLoggedRef.current = true;
+        logToFirebase('team_timetable_view', {
+            role: membership?.role || 'unknown',
+        });
+    }, [membership?.role, phase, scheduleMode]);
 
     const canEdit = computeCanEdit(event, event?.timezone);
     const readOnlyReason = readOnlyReasonFor(event, t);
@@ -669,8 +699,14 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
     }, [applyCoursePrefill, editor.isCoursePrefillEnabled, editor.isEditing]);
 
     const handleConfirmEdit = useCallback(async () => {
+        const usedCoursePrefill = editor.isCoursePrefillEnabled;
+        const isUpdate = myAvailability != null;
         const result = await editor.confirmEdit();
         if (result.ok) {
+            logToFirebase('team_schedule_availability_save', {
+                is_update: isUpdate ? 1 : 0,
+                used_course_prefill: usedCoursePrefill ? 1 : 0,
+            });
             return;
         }
         if (result.code === 'revision_conflict') {
@@ -701,7 +737,7 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
             t('儲存失敗'),
             errorMessageForCode(result.code, t),
         );
-    }, [editor, t]);
+    }, [editor, myAvailability, t]);
 
     const handleLogin = useCallback(async () => {
         trigger();
@@ -766,6 +802,9 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                               }
                             : {...event, status: next};
                         updateDetailEvent(nextEvent);
+                        logToFirebase('team_schedule_status_change', {
+                            status: next,
+                        });
                         // 關閉邀請 Sheet，避免仍顯示過期的邀請狀態
                         setInviteSheetVisible(false);
                         clearTeamEventsCache();
@@ -799,6 +838,7 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                         setActionBusy(true);
                         try {
                             await deleteTeamEvent(eventId);
+                            logToFirebase('team_schedule_delete', {});
                             removeTeamEventFromCache(eventId);
                             allowLeaveRef.current = true;
                             if (navigation.canGoBack()) {
@@ -837,6 +877,7 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                         setActionBusy(true);
                         try {
                             await leaveTeamEvent(eventId);
+                            logToFirebase('team_schedule_leave', {});
                             removeTeamEventFromCache(eventId);
                             allowLeaveRef.current = true;
                             if (navigation.canGoBack()) {
@@ -889,10 +930,15 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                     '請用瀏覽器開啟下方連結，或於組隊頁手動貼上即可加入。',
                 ),
             });
-            await Share.share({
+            const result = await Share.share({
                 message,
                 url,
             });
+            if (result?.action !== Share.dismissedAction) {
+                logToFirebase('team_schedule_invite_share', {
+                    source: 'detail_header',
+                });
+            }
         } catch (requestError) {
             const normalized = normalizeSchedulingError(requestError);
             Alert.alert(

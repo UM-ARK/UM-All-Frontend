@@ -12,6 +12,10 @@ import { getAnalytics, logEvent } from '@react-native-firebase/analytics';
 
 // 傳輸到Firebase事件
 export async function logToFirebase(eventName, optionObj) {
-    const a = getAnalytics();
-    await logEvent(a, eventName, optionObj);
+    try {
+        const a = getAnalytics();
+        await logEvent(a, eventName, optionObj);
+    } catch (_error) {
+        // Analytics 失敗不可阻塞主要操作
+    }
 }

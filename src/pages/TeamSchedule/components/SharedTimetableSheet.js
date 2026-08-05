@@ -10,6 +10,7 @@ import {scale, verticalScale} from 'react-native-size-matters';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 import {uiStyle, useTheme} from '../../../components/ThemeContext';
+import {logToFirebase} from '../../../utils/firebaseAnalytics';
 import {trigger} from '../../../utils/trigger';
 import {buildSharedTimetablePayload} from '../utils/sharedTimetable';
 
@@ -110,6 +111,10 @@ const SharedTimetableSheet = ({
                 );
                 return;
             }
+            logToFirebase('team_timetable_share', {
+                sharing_level: sharingLevel,
+                is_update: serverSnapshot != null ? 1 : 0,
+            });
             sheetRef.current?.hide();
         } catch (error) {
             Alert.alert(
@@ -136,6 +141,7 @@ const SharedTimetableSheet = ({
                         setSaving(true);
                         try {
                             await onStop?.();
+                            logToFirebase('team_timetable_stop', {});
                             sheetRef.current?.hide();
                         } catch (error) {
                             Alert.alert(

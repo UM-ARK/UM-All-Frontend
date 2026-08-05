@@ -36,6 +36,7 @@ import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
 
 import { useTheme, uiStyle } from '../../../../components/ThemeContext';
 import SegmentControl from '../../../../components/SegmentControl';
+import { logToFirebase } from '../../../../utils/firebaseAnalytics';
 import { trigger } from '../../../../utils/trigger';
 import { useCoursePlan } from '../context/CoursePlanContext';
 import { getSlotKey } from '../hooks/useConflict';
@@ -715,9 +716,14 @@ const TimetableShareSheet = forwardRef(({ courseVersion }, ref) => {
     useImperativeHandle(
         ref,
         () => ({
-            show: () => actionSheetRef.current?.show(),
+            show: () => {
+                logToFirebase('course_timetable_share_open', {
+                    course_count: planList.length,
+                });
+                actionSheetRef.current?.show();
+            },
         }),
-        [],
+        [planList.length],
     );
 
     const captureTimetable = useCallback(
@@ -742,6 +748,11 @@ const TimetableShareSheet = forwardRef(({ courseVersion }, ref) => {
                     UTI: 'public.png',
                     dialogTitle: t('分享課表', { ns: 'timetable' }),
                 });
+                logToFirebase('course_timetable_export', {
+                    method: 'share_image',
+                    mode: shareMode,
+                    course_count: planList.length,
+                });
             } catch (error) {
                 Alert.alert(
                     t('分享失敗，請稍後再試', { ns: 'timetable' }),
@@ -752,7 +763,7 @@ const TimetableShareSheet = forwardRef(({ courseVersion }, ref) => {
                 setIsGenerating(false);
             }
         },
-        [t],
+        [planList.length, shareMode, t],
     );
 
     const saveImage = useCallback(
@@ -765,6 +776,11 @@ const TimetableShareSheet = forwardRef(({ courseVersion }, ref) => {
                     throw new Error('Media library permission denied');
                 }
                 await Asset.create(uri);
+                logToFirebase('course_timetable_export', {
+                    method: 'save_image',
+                    mode: shareMode,
+                    course_count: planList.length,
+                });
                 Toast.show(t('課表圖片已儲存', { ns: 'timetable' }));
             } catch (error) {
                 Alert.alert(
@@ -776,7 +792,7 @@ const TimetableShareSheet = forwardRef(({ courseVersion }, ref) => {
                 setIsGenerating(false);
             }
         },
-        [t],
+        [planList.length, shareMode, t],
     );
 
     const handleSheetClose = useCallback(() => {
@@ -833,10 +849,15 @@ const TimetableShareSheet = forwardRef(({ courseVersion }, ref) => {
             return;
         }
         Clipboard.setString(text);
+        logToFirebase('course_timetable_export', {
+            method: 'copy_text',
+            mode: shareMode,
+            course_count: planList.length,
+        });
         Toast.show(t('已複製純文字課表', { ns: 'timetable' }));
         pendingActionRef.current = null;
         actionSheetRef.current?.hide();
-    }, [isGenerating, planList, t]);
+    }, [isGenerating, planList, shareMode, t]);
 
     return (
         <ActionSheet

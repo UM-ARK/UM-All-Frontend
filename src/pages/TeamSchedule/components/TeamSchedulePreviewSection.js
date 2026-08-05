@@ -17,6 +17,7 @@ import Ionicons from '@react-native-vector-icons/ionicons';
 import {scale, verticalScale} from 'react-native-size-matters';
 
 import {uiStyle, useTheme} from '../../../components/ThemeContext';
+import {logToFirebase} from '../../../utils/firebaseAnalytics';
 import {openTeamInviteDetail} from '../../../utils/scheduling/teamInviteLink';
 import {trigger} from '../../../utils/trigger';
 import {useTeamEvents} from '../hooks/useTeamEvents';
@@ -53,6 +54,10 @@ const TeamSchedulePreviewSection = forwardRef(
 
         useImperativeHandle(ref, () => handleApi, [handleApi]);
 
+        useEffect(() => {
+            logToFirebase('team_schedule_feature_view', {});
+        }, []);
+
         // 供「我的」頁下拉更新掛接（與 forwardRef 並存）
         useEffect(() => {
             if (refreshHandle && typeof refreshHandle === 'object') {
@@ -83,6 +88,7 @@ const TeamSchedulePreviewSection = forwardRef(
 
         const openIntro = useCallback(() => {
             trigger();
+            logToFirebase('team_schedule_intro_view', {});
             setIntroSheetVisible(true);
         }, []);
 

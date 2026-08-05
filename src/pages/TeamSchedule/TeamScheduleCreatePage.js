@@ -26,6 +26,7 @@ import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import {scale, verticalScale} from 'react-native-size-matters';
 
 import {uiStyle, useTheme} from '../../components/ThemeContext';
+import {logToFirebase} from '../../utils/firebaseAnalytics';
 import {createTeamEvent} from '../../utils/scheduling/schedulingApi';
 import {normalizeSchedulingError} from '../../utils/scheduling/schedulingErrors';
 import {
@@ -131,6 +132,10 @@ const TeamScheduleCreatePage = ({navigation}) => {
     useEffect(() => {
         navigation.setOptions({headerTitle: t('新建組隊')});
     }, [navigation, t]);
+
+    useEffect(() => {
+        logToFirebase('screen_view', {screen_name: 'TeamScheduleCreate'});
+    }, []);
 
     const loadCoursePrefill = useCallback(async () => {
         const requestId = coursePrefillRequestRef.current + 1;
@@ -300,6 +305,10 @@ const TeamScheduleCreatePage = ({navigation}) => {
             const payload = buildPayload();
             const result = await createTeamEvent(payload);
             const eventId = result?.event?.eventId;
+            logToFirebase('team_schedule_create', {
+                has_deadline: responseDeadlineAt != null ? 1 : 0,
+                used_course_prefill: coursePrefillEnabled ? 1 : 0,
+            });
             clearTeamEventsCache();
             allowLeaveRef.current = true;
             if (eventId) {
@@ -317,7 +326,14 @@ const TeamScheduleCreatePage = ({navigation}) => {
             submittingRef.current = false;
             setIsSubmitting(false);
         }
-    }, [buildPayload, navigation, t, validateLocal]);
+    }, [
+        buildPayload,
+        coursePrefillEnabled,
+        navigation,
+        responseDeadlineAt,
+        t,
+        validateLocal,
+    ]);
 
     const deadlineDisplay = useMemo(() => {
         if (!responseDeadlineAt) {

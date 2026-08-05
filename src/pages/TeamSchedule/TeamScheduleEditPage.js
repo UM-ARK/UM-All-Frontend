@@ -25,6 +25,7 @@ import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import {scale, verticalScale} from 'react-native-size-matters';
 
 import {uiStyle, useTheme} from '../../components/ThemeContext';
+import {logToFirebase} from '../../utils/firebaseAnalytics';
 import {updateTeamEvent} from '../../utils/scheduling/schedulingApi';
 import {normalizeSchedulingError} from '../../utils/scheduling/schedulingErrors';
 import {DEFAULT_TIMEZONE} from '../../utils/scheduling/schedulingModels';
@@ -171,6 +172,9 @@ const TeamScheduleEditPage = ({navigation, route}) => {
                 responseDeadlineAt: responseDeadlineAt || null,
             };
             const data = await updateTeamEvent(eventId, patch);
+            logToFirebase('team_schedule_update', {
+                has_deadline: responseDeadlineAt != null ? 1 : 0,
+            });
             const nextEvent = data?.event || {
                 eventId,
                 ...patch,
