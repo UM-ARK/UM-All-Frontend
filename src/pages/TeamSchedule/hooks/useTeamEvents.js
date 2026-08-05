@@ -12,6 +12,11 @@ import {
     sortTeamEvents,
     takeRecentTeamEvents,
 } from '../../../utils/scheduling/schedulingModels';
+import {
+    clearTeamScheduleDataCache,
+    clearTeamScheduleEventCache,
+    ensureTeamScheduleCacheScope,
+} from '../utils/teamScheduleDataCache';
 import {useTeamEventFavorites} from './useTeamEventFavorites';
 
 /** 短時間切頁可重用，避免重複 request */
@@ -22,6 +27,8 @@ let teamEventsCache = {
     events: null,
     fetchedAt: 0,
 };
+let teamEventsCacheGeneration = 0;
+let teamEventsRequest = null;
 
 /** 已掛載 useTeamEvents 實例的 cache 變更訂閱 */
 const cacheListeners = new Set();
@@ -41,6 +48,7 @@ function notifyCacheListeners() {
  * 會通知已掛載實例，避免返回上一頁仍顯示舊資料
  */
 export function clearTeamEventsCache() {
+    teamEventsCacheGeneration += 1;
     teamEventsCache = {
         events: null,
         fetchedAt: 0,
@@ -58,6 +66,8 @@ export function removeTeamEventFromCache(eventId) {
         clearTeamEventsCache();
         return;
     }
+    teamEventsCacheGeneration += 1;
+    clearTeamScheduleEventCache(id);
     if (Array.isArray(teamEventsCache.events)) {
         teamEventsCache = {
             events: teamEventsCache.events.filter(
@@ -121,7 +131,17 @@ function isCacheFresh(now = Date.now()) {
  * }}
  */
 export function useTeamEvents({autoLoad = true} = {}) {
-    const {ensureSession, harborStatus} = useSchedulingSession();
+    const {ensureSession, harborStatus, user} = useSchedulingSession();
+    const cacheScopeChanged = ensureTeamScheduleCacheScope(
+        user?.harborUserId,
+    );
+    if (cacheScopeChanged) {
+        teamEventsCacheGeneration += 1;
+        teamEventsCache = {
+            events: null,
+            fetchedAt: 0,
+        };
+    }
     const {favoriteEventIds} = useTeamEventFavorites();
     const [events, setEvents] = useState(() =>
         Array.isArray(teamEventsCache.events) ? teamEventsCache.events : [],
@@ -152,6 +172,9 @@ export function useTeamEvents({autoLoad = true} = {}) {
         if (harborStatus === 'signedIn') {
             return;
         }
+        requestIdRef.current += 1;
+        teamEventsCacheGeneration += 1;
+        clearTeamScheduleDataCache();
         // 僅清記憶體，不經 notify，避免與下方 setState 重複
         teamEventsCache = {
             events: null,
@@ -206,13 +229,33 @@ export function useTeamEvents({autoLoad = true} = {}) {
             }
 
             try {
-                await ensureSession();
-                const data = await listMyTeamEvents();
-                const nextEvents = normalizeTeamEventList(data?.events);
-                teamEventsCache = {
-                    events: nextEvents,
-                    fetchedAt: Date.now(),
-                };
+                const generation = teamEventsCacheGeneration;
+                if (
+                    !teamEventsRequest ||
+                    teamEventsRequest.generation !== generation
+                ) {
+                    const promise = (async () => {
+                        const session = await ensureSession();
+                        ensureTeamScheduleCacheScope(
+                            session?.user?.harborUserId,
+                        );
+                        const data = await listMyTeamEvents();
+                        const nextEvents = normalizeTeamEventList(data?.events);
+                        if (generation === teamEventsCacheGeneration) {
+                            teamEventsCache = {
+                                events: nextEvents,
+                                fetchedAt: Date.now(),
+                            };
+                        }
+                        return nextEvents;
+                    })().finally(() => {
+                        if (teamEventsRequest?.promise === promise) {
+                            teamEventsRequest = null;
+                        }
+                    });
+                    teamEventsRequest = {generation, promise};
+                }
+                const nextEvents = await teamEventsRequest.promise;
                 if (!mountedRef.current || requestId !== requestIdRef.current) {
                     return nextEvents;
                 }

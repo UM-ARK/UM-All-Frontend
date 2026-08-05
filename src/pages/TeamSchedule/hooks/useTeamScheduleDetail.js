@@ -18,10 +18,19 @@ import {
     normalizeMembership,
     normalizeTeamEvent,
 } from '../../../utils/scheduling/schedulingModels';
+import {
+    clearTeamScheduleDataCache,
+    clearTeamScheduleEventCache,
+    ensureTeamScheduleCacheScope,
+    loadCachedTeamEventDetail,
+    loadCachedTeamEventSummary,
+    patchCachedTeamEventDetail,
+    patchCachedTeamEventSummary,
+    peekCachedTeamEventDetail,
+    peekCachedTeamEventSummary,
+    TEAM_EVENT_SUMMARY_CACHE_TTL_MS,
+} from '../utils/teamScheduleDataCache';
 import {clearTeamEventsCache} from './useTeamEvents';
-
-/** 前景／focus 時視為過期的 TTL */
-const DETAIL_STALE_MS = 45 * 1000;
 
 /**
  * 正規化 detail response
@@ -84,8 +93,9 @@ export function useTeamScheduleDetail({
     initialInviteToken = null,
     harborSignedIn = false,
 } = {}) {
-    const {ensureSession} = useSchedulingSession();
+    const {ensureSession, user} = useSchedulingSession();
     const isFocused = useIsFocused();
+    ensureTeamScheduleCacheScope(user?.harborUserId);
 
     const inviteTokenRef = useRef(
         initialInviteToken != null && initialInviteToken !== ''
@@ -93,6 +103,14 @@ export function useTeamScheduleDetail({
             : null,
     );
     const hasInviteFlow = useRef(Boolean(inviteTokenRef.current));
+    const initialDetailCache = peekCachedTeamEventDetail(eventId);
+    const initialSummaryCache = peekCachedTeamEventSummary(eventId);
+    const canUseInitialCache = Boolean(
+        harborSignedIn &&
+            !inviteTokenRef.current &&
+            initialDetailCache &&
+            initialSummaryCache,
+    );
 
     const [phase, setPhase] = useState(() => {
         if (!harborSignedIn) {
@@ -101,21 +119,35 @@ export function useTeamScheduleDetail({
         if (inviteTokenRef.current) {
             return 'joining';
         }
-        return 'loading';
+        return canUseInitialCache ? 'ready' : 'loading';
     });
-    const [detailEvent, setDetailEvent] = useState(null);
-    const [membership, setMembership] = useState(null);
-    const [inviteLink, setInviteLink] = useState(null);
-    const [summaryEvent, setSummaryEvent] = useState(null);
-    const [members, setMembers] = useState([]);
-    const [summaryRevision, setSummaryRevision] = useState(null);
+    const [detailEvent, setDetailEvent] = useState(() =>
+        canUseInitialCache ? initialDetailCache.value.event : null,
+    );
+    const [membership, setMembership] = useState(() =>
+        canUseInitialCache ? initialDetailCache.value.membership : null,
+    );
+    const [inviteLink, setInviteLink] = useState(() =>
+        canUseInitialCache ? initialDetailCache.value.inviteLink : null,
+    );
+    const [summaryEvent, setSummaryEvent] = useState(() =>
+        canUseInitialCache ? initialSummaryCache.value.event : null,
+    );
+    const [members, setMembers] = useState(() =>
+        canUseInitialCache ? initialSummaryCache.value.members : [],
+    );
+    const [summaryRevision, setSummaryRevision] = useState(() =>
+        canUseInitialCache ? initialSummaryCache.value.summaryRevision : null,
+    );
     const [error, setError] = useState(null);
     const [joinError, setJoinError] = useState(null);
     const [isRefreshing, setIsRefreshing] = useState(false);
 
     const requestIdRef = useRef(0);
     const mountedRef = useRef(true);
-    const fetchedAtRef = useRef(0);
+    const fetchedAtRef = useRef(
+        canUseInitialCache ? initialSummaryCache.fetchedAt : 0,
+    );
     const appStateRef = useRef(AppState.currentState);
 
     useEffect(() => {
@@ -146,7 +178,7 @@ export function useTeamScheduleDetail({
      * @param {{force?: boolean, showRefresh?: boolean}} [options]
      */
     const loadDetailAndSummary = useCallback(
-        async ({showRefresh = false} = {}) => {
+        async ({force = false, showRefresh = false} = {}) => {
             if (!eventId || !harborSignedIn) {
                 return null;
             }
@@ -163,19 +195,31 @@ export function useTeamScheduleDetail({
             }
 
             try {
-                await ensureSession();
-                const [detailRaw, summaryRaw] = await Promise.all([
-                    getTeamEvent(eventId),
-                    getTeamEventSummary(eventId),
-                ]);
-                const detail = normalizeDetailResponse(detailRaw);
-                const summary = normalizeSummaryResponse(
-                    summaryRaw,
-                    eventId,
+                const session = await ensureSession();
+                ensureTeamScheduleCacheScope(
+                    session?.user?.harborUserId,
                 );
+                const [detailEntry, summaryEntry] = await Promise.all([
+                    loadCachedTeamEventDetail(
+                        eventId,
+                        async () => normalizeDetailResponse(
+                            await getTeamEvent(eventId),
+                        ),
+                        {force},
+                    ),
+                    loadCachedTeamEventSummary(
+                        eventId,
+                        async () => normalizeSummaryResponse(
+                            await getTeamEventSummary(eventId),
+                            eventId,
+                        ),
+                        {force},
+                    ),
+                ]);
+                const detail = detailEntry.value;
+                const summary = summaryEntry.value;
                 const detailId = detail.event?.eventId;
-                const summaryId =
-                    summary.event?.eventId || summaryRaw?.event?.eventId;
+                const summaryId = summary.event?.eventId;
                 if (
                     detailId &&
                     summaryId &&
@@ -195,7 +239,7 @@ export function useTeamScheduleDetail({
 
                 applyDetail(detail);
                 applySummary(summary);
-                fetchedAtRef.current = Date.now();
+                fetchedAtRef.current = summaryEntry.fetchedAt;
                 setError(null);
                 setJoinError(null);
                 setPhase('ready');
@@ -236,17 +280,28 @@ export function useTeamScheduleDetail({
             }
             const requestId = ++requestIdRef.current;
             try {
-                await ensureSession();
+                const session = await ensureSession();
+                ensureTeamScheduleCacheScope(
+                    session?.user?.harborUserId,
+                );
                 if (includeDetail) {
-                    const [detailRaw, summaryRaw] = await Promise.all([
-                        getTeamEvent(eventId),
-                        getTeamEventSummary(eventId),
+                    const [detailEntry, summaryEntry] = await Promise.all([
+                        loadCachedTeamEventDetail(
+                            eventId,
+                            async () => normalizeDetailResponse(
+                                await getTeamEvent(eventId),
+                            ),
+                        ),
+                        loadCachedTeamEventSummary(
+                            eventId,
+                            async () => normalizeSummaryResponse(
+                                await getTeamEventSummary(eventId),
+                                eventId,
+                            ),
+                        ),
                     ]);
-                    const detail = normalizeDetailResponse(detailRaw);
-                    const summary = normalizeSummaryResponse(
-                        summaryRaw,
-                        eventId,
-                    );
+                    const detail = detailEntry.value;
+                    const summary = summaryEntry.value;
                     if (
                         !mountedRef.current ||
                         requestId !== requestIdRef.current
@@ -255,12 +310,16 @@ export function useTeamScheduleDetail({
                     }
                     applyDetail(detail);
                     applySummary(summary);
+                    fetchedAtRef.current = summaryEntry.fetchedAt;
                 } else {
-                    const summaryRaw = await getTeamEventSummary(eventId);
-                    const summary = normalizeSummaryResponse(
-                        summaryRaw,
+                    const summaryEntry = await loadCachedTeamEventSummary(
                         eventId,
+                        async () => normalizeSummaryResponse(
+                            await getTeamEventSummary(eventId),
+                            eventId,
+                        ),
                     );
+                    const summary = summaryEntry.value;
                     if (
                         !mountedRef.current ||
                         requestId !== requestIdRef.current
@@ -268,8 +327,8 @@ export function useTeamScheduleDetail({
                         return {summary};
                     }
                     applySummary(summary);
+                    fetchedAtRef.current = summaryEntry.fetchedAt;
                 }
-                fetchedAtRef.current = Date.now();
                 setError(null);
                 setPhase('ready');
                 return true;
@@ -317,7 +376,8 @@ export function useTeamScheduleDetail({
             hasInviteFlow.current = false;
             // 與新建組隊一致：清列表 cache，返回「我的」／列表才會看到新 membership
             clearTeamEventsCache();
-            await loadDetailAndSummary({});
+            clearTeamScheduleEventCache(eventId);
+            await loadDetailAndSummary({force: true});
             return true;
         } catch (requestError) {
             const normalized = normalizeSchedulingError(requestError);
@@ -361,6 +421,7 @@ export function useTeamScheduleDetail({
         }
 
         if (!harborSignedIn) {
+            clearTeamScheduleDataCache();
             setPhase('need_login');
             return undefined;
         }
@@ -407,7 +468,8 @@ export function useTeamScheduleDetail({
                 return;
             }
             const stale =
-                Date.now() - fetchedAtRef.current >= DETAIL_STALE_MS;
+                Date.now() - fetchedAtRef.current >=
+                TEAM_EVENT_SUMMARY_CACHE_TTL_MS;
             if (!stale) {
                 return;
             }
@@ -421,7 +483,9 @@ export function useTeamScheduleDetail({
         if (!isFocused || phase !== 'ready' || !harborSignedIn) {
             return;
         }
-        const stale = Date.now() - fetchedAtRef.current >= DETAIL_STALE_MS;
+        const stale =
+            Date.now() - fetchedAtRef.current >=
+            TEAM_EVENT_SUMMARY_CACHE_TTL_MS;
         if (!stale) {
             return;
         }
@@ -430,7 +494,7 @@ export function useTeamScheduleDetail({
 
     const refresh = useCallback(async () => {
         try {
-            await loadDetailAndSummary({showRefresh: true});
+            await loadDetailAndSummary({force: true, showRefresh: true});
         } catch (_error) {
             // 錯誤已寫入
         }
@@ -441,6 +505,7 @@ export function useTeamScheduleDetail({
      */
     const patchMyAvailability = useCallback(
         (availability, nextSummaryRevision) => {
+            requestIdRef.current += 1;
             setMembers(current => {
                 if (!Array.isArray(current)) {
                     return current;
@@ -462,27 +527,71 @@ export function useTeamScheduleDetail({
             if (typeof nextSummaryRevision === 'number') {
                 setSummaryRevision(nextSummaryRevision);
             }
+            patchCachedTeamEventSummary(eventId, current => {
+                if (!current) {
+                    return current;
+                }
+                const myId = membership?.harborUserId;
+                return {
+                    ...current,
+                    members: current.members.map(member =>
+                        myId != null &&
+                        String(member?.harborUserId) === String(myId)
+                            ? {...member, availability}
+                            : member,
+                    ),
+                    summaryRevision:
+                        typeof nextSummaryRevision === 'number'
+                            ? nextSummaryRevision
+                            : current.summaryRevision,
+                };
+            });
             fetchedAtRef.current = Date.now();
         },
-        [membership?.harborUserId],
+        [eventId, membership?.harborUserId],
     );
 
     const replaceMembers = useCallback(nextMembers => {
-        setMembers(Array.isArray(nextMembers) ? nextMembers : []);
-    }, []);
+        requestIdRef.current += 1;
+        const normalizedMembers = Array.isArray(nextMembers) ? nextMembers : [];
+        setMembers(normalizedMembers);
+        patchCachedTeamEventSummary(eventId, current =>
+            current ? {...current, members: normalizedMembers} : current,
+        );
+    }, [eventId]);
 
     const updateDetailEvent = useCallback(nextEvent => {
         const normalized = normalizeTeamEvent(nextEvent);
         if (normalized) {
+            requestIdRef.current += 1;
             setDetailEvent(normalized);
+            patchCachedTeamEventDetail(eventId, current =>
+                current ? {...current, event: normalized} : current,
+            );
             // 同步 summary.status，避免合併顯示仍用舊狀態
             if (normalized.status != null) {
                 setSummaryEvent(prev =>
                     prev ? {...prev, status: normalized.status} : prev,
                 );
+                patchCachedTeamEventSummary(eventId, current =>
+                    current?.event
+                        ? {
+                              ...current,
+                              event: {...current.event, status: normalized.status},
+                          }
+                        : current,
+                );
             }
         }
-    }, []);
+    }, [eventId]);
+
+    const updateInviteLink = useCallback(nextInviteLink => {
+        requestIdRef.current += 1;
+        setInviteLink(nextInviteLink);
+        patchCachedTeamEventDetail(eventId, current =>
+            current ? {...current, inviteLink: nextInviteLink} : current,
+        );
+    }, [eventId]);
 
     // 顯示用 event：標題／說明以 detail 為準（summary 省略 description）
     const event = useMemo(() => {
@@ -542,7 +651,7 @@ export function useTeamScheduleDetail({
         patchMyAvailability,
         replaceMembers,
         updateDetailEvent,
-        updateInviteLink: setInviteLink,
+        updateInviteLink,
         clearInviteToken,
     };
 }

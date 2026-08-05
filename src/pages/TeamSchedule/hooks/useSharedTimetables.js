@@ -11,6 +11,13 @@ import {
 } from '../../../utils/scheduling/schedulingApi';
 import {normalizeSchedulingError} from '../../../utils/scheduling/schedulingErrors';
 import {normalizeSharedTimetable} from '../utils/sharedTimetable';
+import {
+    getCachedSharedTimetables,
+    ensureTeamScheduleCacheScope,
+    loadCachedSharedTimetables,
+    patchCachedSharedTimetables,
+    peekCachedSharedTimetables,
+} from '../utils/teamScheduleDataCache';
 
 function pickSharedTimetable(data) {
     return normalizeSharedTimetable(data?.sharedTimetable || data);
@@ -25,9 +32,20 @@ function pickMembers(data) {
 }
 
 export function useSharedTimetables({eventId, myHarborUserId} = {}) {
-    const [phase, setPhase] = useState('idle');
-    const [members, setMembers] = useState([]);
-    const [mySharedTimetable, setMySharedTimetable] = useState(null);
+    ensureTeamScheduleCacheScope(myHarborUserId);
+    const initialCache = peekCachedSharedTimetables(eventId);
+    const initialMembers = Array.isArray(initialCache?.value)
+        ? initialCache.value
+        : [];
+    const initialMine = initialMembers.find(member =>
+        myHarborUserId != null &&
+        String(member?.harborUserId) === String(myHarborUserId),
+    );
+    const [phase, setPhase] = useState(initialCache ? 'ready' : 'idle');
+    const [members, setMembers] = useState(initialMembers);
+    const [mySharedTimetable, setMySharedTimetable] = useState(() =>
+        normalizeSharedTimetable(initialMine?.sharedTimetable),
+    );
     const [error, setError] = useState(null);
     const requestIdRef = useRef(0);
     const mountedRef = useRef(true);
@@ -41,17 +59,26 @@ export function useSharedTimetables({eventId, myHarborUserId} = {}) {
 
     useEffect(() => {
         requestIdRef.current += 1;
-        setPhase('idle');
-        setMembers([]);
-        setMySharedTimetable(null);
+        const cached = peekCachedSharedTimetables(eventId);
+        const nextMembers = Array.isArray(cached?.value) ? cached.value : [];
+        const mine = nextMembers.find(member =>
+            myHarborUserId != null &&
+            String(member?.harborUserId) === String(myHarborUserId),
+        );
+        setPhase(cached ? 'ready' : 'idle');
+        setMembers(nextMembers);
+        setMySharedTimetable(
+            normalizeSharedTimetable(mine?.sharedTimetable),
+        );
         setError(null);
-    }, [eventId]);
+    }, [eventId, myHarborUserId]);
 
     const patchMySnapshot = useCallback(snapshot => {
         const normalized = normalizeSharedTimetable(snapshot);
+        requestIdRef.current += 1;
         setMySharedTimetable(normalized);
-        setMembers(current =>
-            current.map(member => {
+        setMembers(current => {
+            const nextMembers = current.map(member => {
                 if (
                     myHarborUserId != null &&
                     String(member?.harborUserId) === String(myHarborUserId)
@@ -59,24 +86,38 @@ export function useSharedTimetables({eventId, myHarborUserId} = {}) {
                     return {...member, sharedTimetable: normalized};
                 }
                 return member;
-            }),
-        );
+            });
+            patchCachedSharedTimetables(eventId, nextMembers);
+            return nextMembers;
+        });
         return normalized;
-    }, [myHarborUserId]);
+    }, [eventId, myHarborUserId]);
 
     const load = useCallback(async ({force = false} = {}) => {
-        if (!eventId || (!force && phase === 'ready')) {
+        if (!eventId) {
             return members;
+        }
+        if (!force) {
+            const cached = getCachedSharedTimetables(eventId);
+            if (cached) {
+                return cached.value;
+            }
         }
         const requestId = ++requestIdRef.current;
         // 強制刷新且已有內容時不切 loading，避免下拉時整頁閃爍
-        if (!(force && phase === 'ready')) {
+        if (phase !== 'ready') {
             setPhase('loading');
         }
         setError(null);
         try {
-            const data = await getTeamSharedTimetables(eventId);
-            const nextMembers = pickMembers(data);
+            const entry = await loadCachedSharedTimetables(
+                eventId,
+                async () => pickMembers(
+                    await getTeamSharedTimetables(eventId),
+                ),
+                {force},
+            );
+            const nextMembers = entry.value;
             if (!mountedRef.current || requestId !== requestIdRef.current) {
                 return nextMembers;
             }
