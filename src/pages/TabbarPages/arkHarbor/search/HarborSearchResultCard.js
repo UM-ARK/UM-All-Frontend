@@ -22,7 +22,7 @@ const HarborSearchResultCard = memo(({user, onPress, onAvatarPress}) => {
     return (
         <Pressable
             accessibilityRole="button"
-            accessibilityLabel={user.name || user.username}
+            accessibilityLabel={user.username || t('Harbor 會員')}
             onPress={() => {
                 trigger();
                 onPress(user);
@@ -38,7 +38,7 @@ const HarborSearchResultCard = memo(({user, onPress, onAvatarPress}) => {
             ]}>
             <Pressable
                 accessibilityRole="link"
-                accessibilityLabel={user.name || user.username}
+                accessibilityLabel={user.username || t('Harbor 會員')}
                 onPress={event => {
                     event.stopPropagation?.();
                     trigger();
@@ -79,7 +79,7 @@ const HarborSearchResultCard = memo(({user, onPress, onAvatarPress}) => {
                         styles.resultTitle,
                         {color: theme.black.main},
                     ]}>
-                    {user.name || user.username}
+                    {user.username || t('Harbor 會員')}
                 </Text>
                 <Text
                     numberOfLines={1}

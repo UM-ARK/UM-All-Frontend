@@ -78,15 +78,7 @@ const formatTopicDateLabel = (iso, t) => {
     return activity.format('YYYY-MM-DD');
 };
 
-const resolveUserId = (user, fallback) => {
-    return (
-        user?.username ||
-        user?.name ||
-        user?.displayName ||
-        fallback ||
-        ''
-    );
-};
+const resolveUserId = (user, fallback) => user?.username || fallback || '';
 
 const Metric = ({ icon, value, color }) => (
     <View style={styles.metric}>

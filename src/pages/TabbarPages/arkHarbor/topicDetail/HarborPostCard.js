@@ -202,7 +202,8 @@ const HarborPostCard = memo(
             post.avatar_template,
             isNestedReply ? NESTED_AVATAR_SIZE : AVATAR_SIZE,
         );
-        const displayName = post.name || post.display_username || post.username;
+        const displayName =
+            post.username || post.display_username || t('Harbor 會員');
         const wasEdited =
             post.updated_at &&
             post.created_at &&
