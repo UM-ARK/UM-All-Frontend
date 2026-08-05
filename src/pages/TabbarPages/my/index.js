@@ -16,6 +16,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { uiStyle, useTheme } from '../../../components/ThemeContext';
 import { useHarborSession } from '../../../contexts/HarborSessionContext';
 import { trigger } from '../../../utils/trigger';
+import TeamSchedulePreviewSection from '../../TeamSchedule/components/TeamSchedulePreviewSection';
 import HarborGuestState from './components/HarborGuestState';
 import HarborPageHeader from './components/HarborPageHeader';
 import HarborProfileOverview from './components/HarborProfileOverview';
@@ -38,6 +39,7 @@ const MyScreen = ({ navigation }) => {
     const contentWidth = Math.min(width - scale(20), scale(680));
     const contentTopInset = insets.top + verticalScale(8);
     const [isRefreshing, setIsRefreshing] = React.useState(false);
+    const teamSchedulePreviewRef = React.useRef(null);
     // 暫時關閉下滑頂部頭像動畫
     // const scrollY = React.useRef(new Animated.Value(0)).current;
     const isSignedIn = status === 'signedIn' && !!user;
@@ -86,12 +88,26 @@ const MyScreen = ({ navigation }) => {
         trigger();
         setIsRefreshing(true);
         try {
-            await Promise.all([
+            // Harbor 與 Scheduling 隔離：Scheduling 失敗不彈 Harbor 錯誤
+            const results = await Promise.allSettled([
                 refresh(),
-                refreshInboxUnreadCount().catch(() => null),
+                refreshInboxUnreadCount(),
+                (async () => {
+                    if (
+                        typeof teamSchedulePreviewRef.current?.refresh ===
+                        'function'
+                    ) {
+                        // 下拉刷新必須強制重抓，不可吃 45s 列表 cache
+                        await teamSchedulePreviewRef.current.refresh({
+                            force: true,
+                        });
+                    }
+                })(),
             ]);
-        } catch (sessionError) {
-            presentHarborError(sessionError);
+            if (results[0].status === 'rejected') {
+                presentHarborError(results[0].reason);
+            }
+            // results[2] Scheduling 失敗：由 PreviewSection 自行顯示錯誤 UI
         } finally {
             setIsRefreshing(false);
         }
@@ -169,14 +185,27 @@ const MyScreen = ({ navigation }) => {
                     />
                     {harborError}
                     {isSignedIn ? (
-                        <HarborProfileOverview
-                            user={user}
-                            unreadCount={inboxUnreadCount}
-                            navigation={navigation}
-                            onSettingsPress={() =>
-                                navigation.navigate('SettingPage')
-                            }
-                        />
+                        <>
+                            <HarborProfileOverview
+                                user={user}
+                                unreadCount={inboxUnreadCount}
+                                navigation={navigation}
+                                onSettingsPress={() =>
+                                    navigation.navigate('SettingPage')
+                                }
+                            />
+                            <TeamSchedulePreviewSection
+                                ref={teamSchedulePreviewRef}
+                                navigation={navigation}
+                            />
+                            <Text
+                                style={[
+                                    styles.footnote,
+                                    {color: theme.black.third},
+                                ]}>
+                                {t('更新可能會有延遲', {ns: 'my'})}
+                            </Text>
+                        </>
                     ) : status === 'restoring' ? (
                         <HarborRestoringState />
                     ) : (
@@ -211,6 +240,15 @@ const styles = StyleSheet.create({
         ...uiStyle.defaultText,
         fontSize: scale(12),
         lineHeight: verticalScale(18),
+    },
+    footnote: {
+        ...uiStyle.defaultText,
+        fontSize: scale(10),
+        lineHeight: verticalScale(13),
+        textAlign: 'center',
+        paddingHorizontal: scale(12),
+        paddingTop: verticalScale(8),
+        paddingBottom: verticalScale(2),
     },
 });
 

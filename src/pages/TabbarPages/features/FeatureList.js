@@ -3,6 +3,7 @@ import {
     UM_RBS,
     UM_COMPUTER_ROOM,
     UM_SPORT_BOOKING,
+    UM_FITNESS_ROOM_USAGE,
     UM_CMMS,
     UM_LOCKER,
     UM_PORTAL,
@@ -37,11 +38,10 @@ import {
     SCAME,
     NEW_REG,
     UM_LIB_USING,
-    UM_PAPER_PLAN,
+    // UM_PAPER_PLAN,
     UM_RC,
     UM_ALUMNI,
     ARK_HARBOR,
-    ARK_WIKI,
     CANTEEN_QUEUE,
 } from '../../../utils/pathMap';
 import { getCurrentUmehHost } from '../../../utils/umehHost';
@@ -103,6 +103,8 @@ export const getFunctionArr = (t) => [
                     bg_color_diy: '#fff',
                     // 狀態欄字體是否黑色，默認true
                     // isBarStyleBlack: false,
+                    // 地圖適合全螢幕瀏覽；其餘連結預設仍走 Modal
+                    mode: 'fullScreen',
                 },
                 describe: t('查看澳大校園地圖', { ns: 'features' }),
                 key_name: '校園地圖',
@@ -138,6 +140,20 @@ export const getFunctionArr = (t) => [
                 describe: t('查看當前澳大停車場剩餘車位', { ns: 'features' }),
                 key_name: '車位',
                 keywords: 'Parking, Car Park, Parking Lot, Available Spaces, 車位, 停車, 泊車, 車場, 剩餘',
+            },
+            {
+                icon_type: iconTypes.materialCommunityIcons,
+                icon_name: 'dumbbell',
+                fn_name: t('健身人數', { ns: 'features' }),
+                needLogin: false,
+                go_where: 'Linking',
+                webview_param: {
+                    url: UM_FITNESS_ROOM_USAGE,
+                    title: '健身房使用人數',
+                },
+                describe: t('查看健身房當前使用人數', { ns: 'features' }),
+                key_name: '健身人數',
+                keywords: 'Fitness Room, Gym, Usage, Occupancy, 健身, 健身房, 人數, 使用情況, 佔用',
             },
             {
                 icon_type: iconTypes.materialCommunityIcons,
@@ -569,12 +585,7 @@ export const getFunctionArr = (t) => [
                 icon_name: 'file-document-edit-outline',
                 fn_name: 'Wiki',
                 needLogin: false,
-                go_where: 'Linking',
-                webview_param: {
-                    // import pathMap的鏈接進行跳轉
-                    url: ARK_WIKI,
-                    title: 'ARK Wiki',
-                },
+                go_where: 'WikiHome',
                 describe: t('ARK Wiki，希望集成澳大的所有資訊、攻略、學習方法等', { ns: 'features' }),
                 key_name: 'Wiki',
                 keywords: 'Wiki, Guide, Information, Knowledge Base, 百科, 攻略, 資訊, 知識庫',
@@ -691,7 +702,7 @@ export const getFunctionArr = (t) => [
                 },
                 describe: t('查看澳大本學年的重要日期，包括預選課、增補選、考試等重要時間點', { ns: 'features' }),
                 key_name: '重要日期',
-                keywords: 'Important Dates, Academic Calendar, Deadline, 日期, 考試, 選課, 截止, 學年',
+                keywords: 'Important Dates, Academic Calendar, Deadline, Add Drop, 日期, 考試, 選課, 截止, 學年, 學期開始, 復學, 學分增修, 預選科目, 增選, 退選, 退修, 豁免修讀語言, 免修, 轉修, 退修副修, 期末, 成績表, 補考, 暑期研究項目, 夏季學期',
             },
             {
                 icon_type: iconTypes.materialCommunityIcons,
@@ -756,20 +767,20 @@ export const getFunctionArr = (t) => [
                 key_name: '資源搜索',
                 keywords: 'Resource Search, Library Search, Books, Papers, 搜索, 文獻, 書籍, 資料',
             },
-            {
-                icon_type: iconTypes.materialCommunityIcons,
-                icon_name: 'typewriter',
-                fn_name: t('論文計劃', { ns: 'features' }),
-                needLogin: false,
-                go_where: 'Linking',
-                webview_param: {
-                    url: UM_PAPER_PLAN,
-                    title: '論文計劃',
-                },
-                describe: t('你的論文計劃小幫手', { ns: 'features' }),
-                key_name: '論文計劃',
-                keywords: 'Thesis Planning, Paper, Research, Writing, 論文, 研究, 寫作, 計劃',
-            },
+            // {
+            //     icon_type: iconTypes.materialCommunityIcons,
+            //     icon_name: 'typewriter',
+            //     fn_name: t('論文計劃', { ns: 'features' }),
+            //     needLogin: false,
+            //     go_where: 'Linking',
+            //     webview_param: {
+            //         url: UM_PAPER_PLAN,
+            //         title: '論文計劃',
+            //     },
+            //     describe: t('你的論文計劃小幫手', { ns: 'features' }),
+            //     key_name: '論文計劃',
+            //     keywords: 'Thesis Planning, Paper, Research, Writing, 論文, 研究, 寫作, 計劃',
+            // },
         ],
     },
     {

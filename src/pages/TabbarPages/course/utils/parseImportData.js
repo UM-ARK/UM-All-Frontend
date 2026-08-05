@@ -1,4 +1,5 @@
 import lodash from 'lodash';
+import {normalizeCourseIdentities} from '../../../../utils/courseIdentity';
 
 /**
  * 修復剪貼簿常見的 UTF-16 位元組序錯亂。
@@ -142,6 +143,27 @@ const parseImportData = inputText => {
         parsed,
         item => `${item['Course Code']}-${item.Section}`,
     );
+};
+
+/**
+ * 將選課清單轉成可再導入的純文字。
+ *
+ * 格式對齊 parseImportData 正則：每行一個 `COURSECODE(SECTION)`，
+ * 僅輸出導入所需欄位，方便分享後貼上還原課表。
+ *
+ * @param {Array<{'Course Code': string, Section: string}>} planList 選課清單
+ * @returns {string} 可貼上導入的純文字；無有效項目時回傳空字串
+ */
+export const buildImportText = planList => {
+    if (!Array.isArray(planList) || planList.length === 0) {
+        return '';
+    }
+
+    const lines = normalizeCourseIdentities(planList).map(
+        item => `${item.courseCode}(${item.section})`,
+    );
+
+    return lines.join('\n');
 };
 
 export default parseImportData;

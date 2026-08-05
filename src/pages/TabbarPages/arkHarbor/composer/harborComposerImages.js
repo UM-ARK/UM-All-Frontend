@@ -4,7 +4,9 @@ import {
     SaveFormat,
 } from 'expo-image-manipulator';
 
-export const MAX_IMAGES_PER_POST = 6;
+import {persistHarborDraftImage} from '../../../../utils/harbor/harborDraftImages';
+
+export const MAX_IMAGES_PER_POST = 9;
 export const MAX_CONCURRENT_IMAGE_UPLOADS = 3;
 
 const MAX_COMPRESSED_IMAGE_DIMENSION = 2048;
@@ -28,14 +30,27 @@ export async function compressComposerImage(asset, imageId) {
         compress: IMAGE_COMPRESSION_QUALITY,
         format: SaveFormat.JPEG,
     });
-    const compressedFile = new File(compressedImage.uri);
     const originalName = asset.fileName || `image_${imageId}`;
     const fileName = originalName.replace(/\.[^.]+$/, '') + '.jpg';
+    const persisted = await persistHarborDraftImage(
+        compressedImage.uri,
+        imageId,
+    );
+
+    // 壓縮產物在 cache，已複製到持久目錄後可嘗試清理
+    try {
+        const compressedFile = new File(compressedImage.uri);
+        if (compressedFile.exists) {
+            compressedFile.delete();
+        }
+    } catch {
+        // 忽略 cache 清理失敗
+    }
 
     return {
-        localUri: compressedImage.uri,
+        localUri: persisted.localUri,
         fileName,
         mimeType: 'image/jpeg',
-        fileSize: compressedFile.size,
+        fileSize: persisted.fileSize,
     };
 }

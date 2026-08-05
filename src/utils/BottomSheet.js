@@ -25,7 +25,10 @@ const CustomBottomSheet = forwardRef((props, ref) => {
     });
 
     // 最低 30%，避免過矮只露出把手、視覺上貼在 Tab Bar
-    const snapPoints = useMemo(() => ['30%', '45%', '60%', '80%'], []);
+    const snapPoints = useMemo(
+        () => props.snapPoints ?? ['30%', '45%', '60%', '80%'],
+        [props.snapPoints],
+    );
     const [currentIdx, setIdx] = useState(-1);
 
     const shadowRadiusValue = currentIdx !== -1 ? verticalScale(12) : 0;
@@ -44,7 +47,10 @@ const CustomBottomSheet = forwardRef((props, ref) => {
     return (
         <BottomSheet
             ref={ref}
-            index={-1}
+            // 允許呼叫端指定初始／目標檔位；預設關閉。
+            // 首次掛載就要打開時必須傳 index（勿只靠 snapToIndex：
+            // layout 未完成時 snap 會被 gorhom 直接忽略）。
+            index={props.index ?? -1}
             snapPoints={snapPoints}
             enableDynamicSizing={false} // 修復v5無法snapToIndex問題
             topInset={insets.top + verticalScale(10)}

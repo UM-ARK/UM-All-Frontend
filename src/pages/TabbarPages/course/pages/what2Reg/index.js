@@ -168,7 +168,7 @@ const CourseCardRow = ({
                     onMeasureHeight={height => handleMeasureHeight(entry.key, height)}
                     sectionStatuses={
                         sectionStatusesByCourseCode?.[
-                            entry.item['Course Code'] || entry.item.New_code
+                        entry.item['Course Code'] || entry.item.New_code
                         ]
                     }
                 />
@@ -424,14 +424,6 @@ const What2Reg = () => {
             style={{
                 rowGap: COURSE_CARD_GAP,
                 paddingHorizontal: COURSE_GRID_HORIZONTAL_PADDING,
-            }}
-            onLayout={({ nativeEvent }) => {
-                const availableWidth = nativeEvent.layout.width - COURSE_GRID_HORIZONTAL_PADDING * 2;
-                setCourseGridWidth(currentWidth => (
-                    Math.abs(currentWidth - availableWidth) > 0.5
-                        ? availableWidth
-                        : currentWidth
-                ));
             }}>
             {courseGridWidth > 0
                 ? groupCourseCardsByRow(list).map(entries => (
@@ -462,6 +454,14 @@ const What2Reg = () => {
                 alignItems: 'center',
                 justifyContent: 'center',
             }}
+            onLayout={({ nativeEvent }) => {
+                const availableWidth = nativeEvent.layout.width - COURSE_GRID_HORIZONTAL_PADDING * 2;
+                setCourseGridWidth(currentWidth => (
+                    Math.abs(currentWidth - availableWidth) > 0.5
+                        ? availableWidth
+                        : currentWidth
+                ));
+            }}
         >
             <KeyboardAwareScrollView
                 ref={scrollViewRef}
@@ -486,7 +486,7 @@ const What2Reg = () => {
                 />
 
                 {hasSearchResult ? (
-                    <View>
+                    <View style={{ width: '100%' }}>
                         <View style={{ alignSelf: 'center' }}>
                             <Text style={{ ...uiStyle.defaultText, fontSize: verticalScale(10), color: black.third }}>
                                 燕子，答應我，要好好上課
@@ -525,12 +525,12 @@ const What2Reg = () => {
                             ? renderCourseCards(
                                 filterCourseList,
                                 isTimeFilterActive ||
-                                    isRecommendationFilterActive,
+                                isRecommendationFilterActive,
                             )
                             : null}
 
                         {(isTimeFilterActive || isRecommendationFilterActive) &&
-                        filterCourseList?.length === 0 ? (
+                            filterCourseList?.length === 0 ? (
                             <View style={{ paddingHorizontal: scale(20), paddingVertical: scale(20) }}>
                                 <Text style={{
                                     ...uiStyle.defaultText,

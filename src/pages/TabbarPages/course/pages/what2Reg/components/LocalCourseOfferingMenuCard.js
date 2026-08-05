@@ -15,11 +15,11 @@ import { t } from 'i18next';
 
 import { useTheme, uiStyle } from '../../../../../../components/ThemeContext';
 import { trigger } from '../../../../../../utils/trigger';
-import { ARK_WIKI_SEARCH } from '../../../../../../utils/pathMap';
 import { useUmehHost } from '../../../../../../utils/umehHost';
 import { openLink } from '../../../../../../utils/browser';
 import { logToFirebase } from '../../../../../../utils/firebaseAnalytics';
 import { navigateToCourseTab } from '../../../../../../utils/courseNavigation';
+import { navigateToWikiSearch } from '../../../../../../utils/wikiNavigation';
 import { getCourseSectionDisplayTitle } from '../utils/courseTitle';
 
 /** 與 LocalCourse 列表左右內距一致 */
@@ -92,7 +92,7 @@ const LocalCourseOfferingMenuCard = ({
     const offeringActions = [
         {
             id: `${keyPrefix}-wiki`,
-            title: `${t('寫', { ns: 'catalog' })} Wiki`,
+            title: 'Wiki',
             image: Platform.select({
                 ios: 'book',
                 android: 'ic_menu_agenda',
@@ -101,8 +101,18 @@ const LocalCourseOfferingMenuCard = ({
             titleColor: themeColor,
         },
         {
+            id: `${keyPrefix}-harbor-discuss`,
+            title: t('討論', { ns: 'catalog' }),
+            image: Platform.select({
+                ios: 'bubble.left.and.bubble.right',
+                android: 'ic_btn_speak_now',
+            }),
+            imageColor: black.third,
+            titleColor: black.third,
+        },
+        {
             id: `${keyPrefix}-what2reg`,
-            title: `${t('查', { ns: 'catalog' })} ${t('選咩課', { ns: 'catalog' })}`,
+            title: t('選咩課', { ns: 'catalog' }),
             image: Platform.select({
                 ios: 'star',
                 android: 'btn_star_big_on',
@@ -112,7 +122,7 @@ const LocalCourseOfferingMenuCard = ({
         },
         {
             id: `${keyPrefix}-coursesim`,
-            title: `${t('查', { ns: 'catalog' })} ${t('模擬課表', { ns: 'catalog' })}`,
+            title: t('模擬課表', { ns: 'catalog' }),
             image: Platform.select({
                 ios: 'calendar',
                 android: 'ic_menu_my_calendar',
@@ -122,7 +132,7 @@ const LocalCourseOfferingMenuCard = ({
         },
         {
             id: `${keyPrefix}-add-coursesim`,
-            title: `${t('添加至模擬課表', { ns: 'catalog' })}`,
+            title: t('添加至模擬課表', { ns: 'catalog' }),
             image: Platform.select({
                 ios: 'plus.circle',
                 android: 'ic_menu_add',
@@ -138,9 +148,9 @@ const LocalCourseOfferingMenuCard = ({
             case `${keyPrefix}-wiki`: {
                 const cc = courseRow['Course Code'];
                 const prof = courseRow['Teacher Information'];
-                let URL = ARK_WIKI_SEARCH + encodeURIComponent(cc);
+                let wikiQuery = cc;
                 if (prof) {
-                    URL = ARK_WIKI_SEARCH + encodeURIComponent(prof);
+                    wikiQuery = prof;
                     logToFirebase('checkCourse', {
                         courseCode: cc,
                         profName: prof,
@@ -152,7 +162,16 @@ const LocalCourseOfferingMenuCard = ({
                         action: 'ark-wiki',
                     });
                 }
-                openLink(URL);
+                navigateToWikiSearch(navigation, wikiQuery, {autoOpenUnique: true});
+                break;
+            }
+            case `${keyPrefix}-harbor-discuss`: {
+                const cc = courseRow['Course Code'];
+                logToFirebase('checkCourse', {
+                    courseCode: cc,
+                    action: 'harbor-discuss',
+                });
+                navigation.navigate('HarborSearch', {query: cc});
                 break;
             }
             case `${keyPrefix}-what2reg`: {

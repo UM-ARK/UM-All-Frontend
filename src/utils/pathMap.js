@@ -2,10 +2,38 @@
 
 // 服務器基地址，其他分地址可以直接寫'/bus'、'/login'
 export const BASE_URI = 'https://umall.one/api/';
+// Scheduling API 專用 base（不可拼接以 /api/ 結尾的 BASE_URI）
+// TODO: 上線前修改 umall.one
+// export const SCHEDULING_BASE_URI = 'http://192.168.1.230:8000/api/v2';
+export const SCHEDULING_BASE_URI = 'https://umall.one/api/v2';
 // 用適配API返回的圖片相對路徑
 export const BASE_HOST = 'https://umall.one';
 
-export const APPSTORE_URL = 'https://apps.apple.com/us/app/um-all/id1636670554';
+export const ARK_APP_LINK = BASE_HOST + '/app';
+
+export function ARK_COURSE_SHARE_URL(courseCode) {
+    return ARK_APP_LINK + `/course/${encodeURIComponent(courseCode)}`;
+}
+
+export function ARK_CLUB_SHARE_URL(clubNum) {
+    return ARK_APP_LINK + `/club/${encodeURIComponent(clubNum)}`;
+}
+
+export function ARK_EVENT_SHARE_URL(eventId) {
+    return ARK_APP_LINK + `/event/${encodeURIComponent(eventId)}`;
+}
+
+export function ARK_HARBOR_TOPIC_SHARE_URL(topicId, postNumber) {
+    const topicPath = ARK_APP_LINK +
+        `/harbor/topic/${encodeURIComponent(topicId)}`;
+    return postNumber
+        ? `${topicPath}/${encodeURIComponent(postNumber)}`
+        : topicPath;
+}
+
+export const APPSTORE_URL = 'https://apps.apple.com/app/id1636670554';
+export const PLAYSTORE_URL = 'https://play.google.com/store/apps/details?id=one.umall';
+export const GITHUB_RELEASE_URL = 'https://github.com/UM-ARK/UM-All-Frontend/releases/latest';
 
 export const MAIL = 'umacark@gmail.com';
 
@@ -25,6 +53,7 @@ export const MARKDOWN_BASIC_SYNTAX_URL = 'https://markdown.com.cn/basic-syntax/h
 export const ARK_WEB_CLUB_SIGNIN = BASE_HOST + '/clubsignin';
 
 export const ARK_HARBOR = 'https://harbor.umall.one';
+export const ARK_HARBOR_ASSET_HOST = 'https://assert.umall.one';
 export const ARK_HARBOR_LOGIN = ARK_HARBOR + '/login';
 export const ARK_HARBOR_TOP = ARK_HARBOR + '/top.json';
 export const ARK_HARBOR_LATEST = ARK_HARBOR + '/latest.json';
@@ -59,6 +88,16 @@ export function ARK_HARBOR_ABSOLUTE_URL(url) {
     return ARK_HARBOR + (url.startsWith('/') ? url : `/${url}`);
 }
 
+export function ARK_HARBOR_UPLOAD_URL(url) {
+    const absoluteUrl = ARK_HARBOR_ABSOLUTE_URL(url);
+    const r2ObjectPath = absoluteUrl.match(
+        /^https?:\/\/[^/]+\.r2\.cloudflarestorage\.com(\/.*)$/i,
+    );
+    return r2ObjectPath
+        ? ARK_HARBOR_ASSET_HOST + r2ObjectPath[1]
+        : absoluteUrl;
+}
+
 export function ARK_HARBOR_AVATAR_TEMPLATE(avatarTemplate, size = 96) {
     if (!avatarTemplate || typeof avatarTemplate !== 'string') {
         return '';
@@ -68,8 +107,18 @@ export function ARK_HARBOR_AVATAR_TEMPLATE(avatarTemplate, size = 96) {
     );
 }
 
-export function ARK_HARBOR_AVATAR(username) {
-    return ARK_HARBOR + `/user_avatar/harbor.umall.one/${username}/16/52_2.png`;
+export function ARK_HARBOR_AVATAR(username, size = 96) {
+    if (!username || typeof username !== 'string') {
+        return '';
+    }
+    const safeUsername = username.trim();
+    if (!safeUsername) {
+        return '';
+    }
+    return (
+        ARK_HARBOR +
+        `/user_avatar/harbor.umall.one/${encodeURIComponent(safeUsername)}/${size}/1.png`
+    );
 }
 
 // Discourse 標準 emoji 路徑；name 為 shortcode（如 heart、+1），不含冒號
@@ -96,6 +145,10 @@ export const ARK_HARBOR_FEEDBACK =
     `/c/${ARK_HARBOR_FEEDBACK_CATEGORY_SLUG}/${ARK_HARBOR_FEEDBACK_CATEGORY_ID}`;
 
 export const ARK_WIKI = 'https://wiki.umall.one';
+
+export const ARK_WIKI_API = ARK_WIKI + '/api.php';
+
+export const ARK_WIKI_REST = ARK_WIKI + '/rest.php/v1';
 
 export const ARK_WIKI_SEARCH = ARK_WIKI + '/wiki/Special:Search?search=';
 
@@ -256,6 +309,8 @@ export const UM_LOCKER =
 export const UM_CMMS = 'https://cmms.um.edu.mo';
 // 澳大 - 體育場所預約
 export const UM_SPORT_BOOKING = 'https://isw.um.edu.mo/cdweb/pages/booking';
+// 澳大 - 健身房使用人數
+export const UM_FITNESS_ROOM_USAGE = 'https://isw.um.edu.mo/cdweb/pages/fitnessRoomUsage';
 // 澳大 - 圖書館
 export const UM_LIBRARY = 'https://library.um.edu.mo';
 // 澳大 - UM Pass
@@ -304,7 +359,7 @@ export const UM_PAPER_PLAN = 'http://library2.um.edu.mo/html/services/reference/
 // 澳大 - 預選課Excel表格
 export const UM_PRE_ENROLMENT_EXCEL = 'https://reg.um.edu.mo/current-students/enrolment-and-examinations/course-enrolment/pre-enrolment/?lang=zh-hant';
 // 澳大 - 重要日期
-export const UM_IMPORTANT_DATE = 'https://reg.um.edu.mo/current-students/enrolment-and-examinations/important-dates/?lang=zh-hant';
+export const UM_IMPORTANT_DATE = 'https://reg.um.edu.mo/current-students/important-dates/?lang=zh-hant';
 
 // 澳大 - 失物認領
 export const UM_LOST_FOUND = 'https://lostandfound.cmdo.um.edu.mo';

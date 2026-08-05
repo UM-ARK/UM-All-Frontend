@@ -1,47 +1,8 @@
 import { Linking, Platform, Appearance, Alert } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
 import { themes } from '../components/ThemeContext';
-
-// 定義 Android 上支持 Custom Tabs 的常見瀏覽器包名
-// 優先級：Chrome > Edge > Firefox > 其他
-const PREFERRED_BROWSERS = [
-    'com.android.chrome', // Chrome Stable
-    'com.chrome.beta',    // Chrome Beta
-    'com.chrome.dev',     // Chrome Dev
-    'com.google.android.apps.chrome', // 某些舊版 Chrome
-    'com.microsoft.emmx', // Microsoft Edge
-    'org.mozilla.firefox', // Firefox
-];
-
-/**
- * 獲取最佳瀏覽器配置 (僅限 Android)
- */
-async function getBestBrowserPackage() {
-    if (Platform.OS !== 'android') {return undefined;}
-
-    try {
-        // 獲取所有支持 Custom Tabs 的瀏覽器
-        const result = await WebBrowser.getCustomTabsSupportingBrowsersAsync();
-        const supportedPackages = result?.browserPackages || [];
-
-        // 如果沒有任何瀏覽器支持 Custom Tabs，返回 null
-        if (supportedPackages.length === 0) {
-            return null;
-        }
-
-        // 從我們偏好的列表中尋找已安裝的瀏覽器
-        const bestPackage = PREFERRED_BROWSERS.find(pkg =>
-            supportedPackages.includes(pkg)
-        );
-
-        // 如果沒找到偏好的，但設備支持 Custom Tabs，就用系統默認支持的那一個
-        // 否則返回 null，後續會降級處理
-        return result?.preferredBrowserPackage || bestPackage || null;
-    } catch (error) {
-        console.log('Failed to detect browsers:', error);
-        return null;
-    }
-}
+import { getBestBrowserPackage } from './browserPackage';
+import { ARK_WIKI } from './pathMap';
 
 export const openLink = async (input) => {
     let url, mode;
@@ -53,6 +14,11 @@ export const openLink = async (input) => {
         mode = input.mode;
     } else {
         throw new Error('openLink: Invalid input');
+    }
+
+    // Wiki 連結預設全螢幕（呼叫端可顯式傳 mode 覆寫）
+    if (!mode && typeof url === 'string' && url.startsWith(ARK_WIKI)) {
+        mode = 'fullScreen';
     }
 
     const colorScheme = Appearance.getColorScheme(); // 'light' 或 'dark'

@@ -18,6 +18,7 @@ import { getApp } from '@react-native-firebase/app';
 import { getAnalytics, setUserProperty } from '@react-native-firebase/analytics';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { HarborSessionProvider } from './src/contexts/HarborSessionContext';
+import { SchedulingSessionProvider } from './src/contexts/SchedulingSessionContext';
 
 const { width: PAGE_WIDTH } = Dimensions.get('window');
 const LOGO_WIDTH = PAGE_WIDTH * 0.5;
@@ -222,7 +223,9 @@ const App = () => {
             <KeyboardProvider>
                 <ThemeProvider>
                     <HarborSessionProvider>
-                        <Nav />
+                        <SchedulingSessionProvider>
+                            <Nav />
+                        </SchedulingSessionProvider>
                     </HarborSessionProvider>
                 </ThemeProvider>
                 <Toast config={toastConfig} />

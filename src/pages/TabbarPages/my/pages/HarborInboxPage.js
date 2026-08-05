@@ -11,9 +11,10 @@ import {
 import {isLiquidGlassSupported} from '@callstack/liquid-glass';
 import {HeaderHeightContext} from '@react-navigation/elements';
 import {FlashList} from '@shopify/flash-list';
+import {Image} from 'expo-image';
 import {useTranslation} from 'react-i18next';
 import Toast from 'react-native-simple-toast';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from "@react-native-vector-icons/ionicons";
 import {scale, verticalScale} from 'react-native-size-matters';
 
 import SegmentControl from '../../../../components/SegmentControl';
@@ -27,17 +28,64 @@ import {
     fetchHarborUnreadNotificationCount,
     markHarborNotificationRead,
 } from '../../../../utils/harbor/harborApi';
-import {ARK_HARBOR_ABSOLUTE_URL} from '../../../../utils/pathMap';
+import {ARK_HARBOR_ABSOLUTE_URL, ARK_HARBOR_AVATAR} from '../../../../utils/pathMap';
 import {trigger} from '../../../../utils/trigger';
 import {HarborInlineRetry} from '../../arkHarbor/components/HarborListStates';
 import HarborEmptyState from '../components/HarborEmptyState';
 import {
     formatRelativeTime,
+    getHarborInboxActor,
     getHarborNotificationPresentation,
     getHarborNotificationTarget,
 } from '../utils/harborUi';
 
 const ListSeparator = () => <View style={styles.separator} />;
+
+const HarborInboxLeading = ({
+    avatarUrl,
+    accentColor,
+    fallbackIcon,
+    unread,
+    theme,
+}) => {
+    const [failed, setFailed] = React.useState(false);
+    React.useEffect(() => {
+        setFailed(false);
+    }, [avatarUrl]);
+    if (avatarUrl && !failed) {
+        return (
+            <Image
+                source={{uri: avatarUrl}}
+                style={[
+                    styles.avatar,
+                    {backgroundColor: theme.trueWhite},
+                ]}
+                contentFit="cover"
+                placeholder={theme.imagePlaceholder}
+                placeholderContentFit="cover"
+                transition={200}
+                onError={() => setFailed(true)}
+            />
+        );
+    }
+    return (
+        <View
+            style={[
+                styles.iconWrap,
+                {
+                    backgroundColor: unread
+                        ? theme.tonal.primary30
+                        : theme.tonal.primary15,
+                },
+            ]}>
+            <Ionicons
+                name={fallbackIcon}
+                size={scale(20)}
+                color={accentColor}
+            />
+        </View>
+    );
+};
 
 const sortInboxItems = items => {
     return [...items].sort((a, b) => {
@@ -375,6 +423,12 @@ const HarborInboxPage = ({
             isNotification && presentation.isAdmin
                 ? theme.warning
                 : theme.themeColor;
+        const avatarActor = getHarborInboxActor(item);
+        const avatarUrl =
+            avatarActor.avatarUrl ||
+            (avatarActor.username
+                ? ARK_HARBOR_AVATAR(avatarActor.username, 72)
+                : '');
         return (
             <Pressable
                 accessibilityRole="button"
@@ -388,25 +442,33 @@ const HarborInboxPage = ({
                     pressed && {backgroundColor: theme.tonal.primary08},
                 ]}
                 onPress={() => handlePress(item)}>
-                <View
-                    style={[
-                        styles.iconWrap,
-                        {
-                            backgroundColor: unread
-                                ? theme.tonal.primary30
-                                : theme.tonal.primary15,
-                        },
+                <Pressable
+                    accessibilityRole="link"
+                    accessibilityLabel={avatarActor.username}
+                    disabled={!avatarActor.username}
+                    onPress={event => {
+                        event.stopPropagation?.();
+                        trigger();
+                        navigation.navigate('HarborProfile', {
+                            username: avatarActor.username,
+                            mode: 'preview',
+                        });
+                    }}
+                    style={({pressed}) => [
+                        pressed && styles.avatarPressed,
                     ]}>
-                    <Ionicons
-                        name={
+                    <HarborInboxLeading
+                        avatarUrl={avatarUrl}
+                        accentColor={accentColor}
+                        fallbackIcon={
                             isNotification
                                 ? presentation.icon
                                 : 'mail-outline'
                         }
-                        size={scale(20)}
-                        color={accentColor}
+                        unread={unread}
+                        theme={theme}
                     />
-                </View>
+                </Pressable>
                 <View style={styles.rowContent}>
                     <View style={styles.rowHeader}>
                         <Text
@@ -640,6 +702,14 @@ const styles = StyleSheet.create({
         borderRadius: scale(12),
         alignItems: 'center',
         justifyContent: 'center',
+    },
+    avatar: {
+        width: scale(38),
+        height: scale(38),
+        borderRadius: scale(19),
+    },
+    avatarPressed: {
+        opacity: 0.65,
     },
     rowContent: {
         flex: 1,

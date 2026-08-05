@@ -1,5 +1,6 @@
 import {
     formatRelativeTime,
+    getHarborInboxActor,
     getHarborNotificationPresentation,
     getHarborNotificationTarget,
 } from '../harborUi';
@@ -209,5 +210,52 @@ describe('Harbor 消息中心', () => {
             kind: 'web',
             path: '/chat/c/-/4/9',
         });
+    });
+
+    it('為點讚與私信提供操作者資訊', () => {
+        expect(
+            getHarborInboxActor({
+                inboxType: 'notification',
+                typeName: 'reaction',
+                actingUsername: 'yyyyyyounger',
+            }),
+        ).toEqual({
+            username: 'yyyyyyounger',
+            avatarUrl: '',
+        });
+        expect(
+            getHarborInboxActor({
+                inboxType: 'notification',
+                typeName: 'liked',
+                actingUsername: 'reader',
+            }),
+        ).toEqual({
+            username: 'reader',
+            avatarUrl: '',
+        });
+        expect(
+            getHarborInboxActor({
+                inboxType: 'message',
+                actingUsername: 'reader',
+                avatarUrl: 'https://harbor.umall.one/avatar.png',
+            }),
+        ).toEqual({
+            username: 'reader',
+            avatarUrl: 'https://harbor.umall.one/avatar.png',
+        });
+        expect(
+            getHarborInboxActor({
+                inboxType: 'notification',
+                typeName: 'granted_badge',
+                actingUsername: 'reader',
+            }),
+        ).toEqual({username: '', avatarUrl: ''});
+        expect(
+            getHarborInboxActor({
+                inboxType: 'notification',
+                typeName: 'replied',
+                actingUsername: 'reader',
+            }),
+        ).toEqual({username: '', avatarUrl: ''});
     });
 });

@@ -1,14 +1,53 @@
-import {
-    deleteHarborDraft,
-    fetchHarborDraft,
-    saveHarborDraft,
-} from './harborApi';
+import {deleteHarborDraftImageFiles} from './harborDraftImages';
 import {
     getLocalStorage,
     setLocalStorage,
 } from '../storageKits';
 
 export const HARBOR_DRAFTS_STORAGE_KEY = 'ARK_Harbor_Drafts_v1';
+
+const getDraftTagNames = tags =>
+    (Array.isArray(tags) ? tags : [])
+        .map(tag => String(tag?.name || tag || '').trim())
+        .filter(Boolean)
+        .sort()
+        .join('\n');
+
+export const hasHarborEditDraftConflict = (
+    draftData,
+    serverText,
+    {title, categoryId, tags} = {},
+) => {
+    if (
+        typeof draftData?.original_text === 'string' &&
+        draftData.original_text !== String(serverText || '')
+    ) {
+        return true;
+    }
+    if (
+        typeof draftData?.original_title === 'string' &&
+        draftData.original_title !== String(title || '')
+    ) {
+        return true;
+    }
+    if (
+        Object.prototype.hasOwnProperty.call(
+            draftData || {},
+            'original_category_id',
+        ) &&
+        (draftData.original_category_id == null
+            ? null
+            : Number(draftData.original_category_id)) !==
+            (categoryId == null ? null : Number(categoryId))
+    ) {
+        return true;
+    }
+    return (
+        Array.isArray(draftData?.original_tags) &&
+        getDraftTagNames(draftData.original_tags) !==
+            getDraftTagNames(tags)
+    );
+};
 
 const HARBOR_DRAFT_ACTIONS = {
     edit: 'edit',
@@ -20,10 +59,8 @@ const HARBOR_DRAFT_MODES = {
     edit: 'edit',
     reply: 'reply',
 };
-const HARBOR_REMOTE_DRAFT_CHECK_TTL = 30 * 1000;
 
 let storageQueue = Promise.resolve();
-const remoteDraftCheckCache = new Map();
 
 const normalizeSequence = value => {
     const sequence = Number(value);
@@ -68,20 +105,6 @@ const normalizePendingDelete = value => {
     };
 };
 
-const getRemoteDraftCheckKey = (accountId, draftKey) =>
-    `${accountId || 'anonymous'}:${draftKey}`;
-
-const markRemoteDraftChecked = (accountId, draftKey) => {
-    remoteDraftCheckCache.set(
-        getRemoteDraftCheckKey(accountId, draftKey),
-        Date.now(),
-    );
-};
-
-export function clearHarborDraftRemoteCheckCache() {
-    remoteDraftCheckCache.clear();
-}
-
 const normalizeLocalDraft = value => {
     const draftKey = normalizeDraftKey(value?.draftKey);
     const data = parseDraftData(value?.data);
@@ -96,10 +119,8 @@ const normalizeLocalDraft = value => {
         data,
         createdAt: normalizeTimestamp(value?.createdAt) || Date.now(),
         updatedAt: normalizeTimestamp(value?.updatedAt) || Date.now(),
-        syncStatus:
-            typeof value?.syncStatus === 'string'
-                ? value.syncStatus
-                : 'local',
+        // 草稿改為本機專用；舊的 synced / conflict / offline 一律視為 local
+        syncStatus: 'local',
         source: 'local',
     };
 };
@@ -120,6 +141,7 @@ const sanitizeStore = value => {
             drafts: (Array.isArray(account.drafts) ? account.drafts : [])
                 .map(normalizeLocalDraft)
                 .filter(Boolean),
+            // 保留讀取相容；本機專用後不再新增 pendingDeletes
             pendingDeletes: (
                 Array.isArray(account.pendingDeletes)
                     ? account.pendingDeletes
@@ -202,47 +224,6 @@ export function getHarborDraftMode(data, fallbackMode) {
     );
 }
 
-export const normalizeHarborRemoteDraft = value => {
-    const draftKey = normalizeDraftKey(
-        value?.draft_key ?? value?.draftKey,
-    );
-    const data = parseDraftData(value?.data ?? value?.draft);
-    const mode = getHarborDraftMode(data);
-    if (!draftKey || !mode) {
-        return null;
-    }
-    return {
-        draftKey,
-        sequence: normalizeSequence(
-            value?.sequence ?? value?.draft_sequence,
-        ),
-        mode,
-        data: {
-            ...data,
-            topicId:
-                data.topicId ??
-                data.topic_id ??
-                value?.topic_id ??
-                null,
-            topicTitle:
-                data.topicTitle ??
-                (mode === 'newTopic' ? '' : value?.title) ??
-                '',
-        },
-        createdAt:
-            Date.parse(value?.created_at || '') ||
-            normalizeTimestamp(value?.createdAt) ||
-            Date.now(),
-        updatedAt:
-            Date.parse(value?.updated_at || '') ||
-            normalizeTimestamp(value?.updatedAt) ||
-            Date.parse(value?.created_at || '') ||
-            Date.now(),
-        syncStatus: 'synced',
-        source: 'remote',
-    };
-};
-
 export const getLocalHarborDrafts = accountId => {
     if (!accountId) {
         return Promise.resolve([]);
@@ -274,6 +255,7 @@ export const saveLocalHarborDraft = (accountId, draft) => {
         );
         const nextDraft = {
             ...normalizedDraft,
+            syncStatus: 'local',
             createdAt:
                 existingDraft?.createdAt || normalizedDraft.createdAt,
             updatedAt: Date.now(),
@@ -295,263 +277,30 @@ export const saveLocalHarborDraft = (accountId, draft) => {
     });
 };
 
-export const syncLocalHarborDraft = async (accountId, draft, options = {}) => {
-    const result = await saveHarborDraft(draft.draftKey, {
-        data: options.data ?? draft.data,
-        sequence: draft.sequence,
-        signal: options.signal,
-    });
-    let syncedDraft = {
-        ...draft,
-        sequence: result.sequence,
-        syncStatus: result.conflictUser ? 'conflict' : 'synced',
-    };
-    if (accountId) {
-        const latestDraft = await getLocalHarborDraft(
-            accountId,
-            draft.draftKey,
-        );
-        if (
-            latestDraft &&
-            JSON.stringify(latestDraft.data) !==
-                JSON.stringify(draft.data)
-        ) {
-            syncedDraft = {
-                ...latestDraft,
-                sequence: result.sequence,
-                syncStatus: result.conflictUser
-                    ? 'conflict'
-                    : latestDraft.syncStatus,
-            };
-        }
-        syncedDraft = await saveLocalHarborDraft(accountId, syncedDraft);
-    }
-    markRemoteDraftChecked(accountId, draft.draftKey);
-    return {
-        draft: syncedDraft,
-        conflictUser: result.conflictUser,
-    };
-};
+export const loadHarborComposerDraft = async (accountId, draftKey) =>
+    getLocalHarborDraft(accountId, draftKey);
 
-export const getPendingHarborDraftDeletes = accountId => {
-    if (!accountId) {
-        return Promise.resolve([]);
-    }
-    return enqueueStorageTask(async () => {
-        const store = await readStore();
-        return getAccount(store, accountId).pendingDeletes;
-    });
-};
-
-export const markHarborDraftForDeletion = (
-    accountId,
-    draftKey,
-    sequence,
-) => {
+export const deleteHarborComposerDraft = async (accountId, draftKey) => {
     if (!accountId || !normalizeDraftKey(draftKey)) {
-        return Promise.resolve(null);
+        return false;
     }
-    return enqueueStorageTask(async () => {
+    const removedDraft = await enqueueStorageTask(async () => {
         const store = await readStore();
         const account = getAccount(store, accountId);
-        const pendingDelete = {
-            draftKey,
-            sequence: normalizeSequence(sequence),
-            requestedAt: Date.now(),
-        };
+        const draft =
+            account.drafts.find(item => item.draftKey === draftKey) ||
+            null;
         store.accounts[accountId] = {
             drafts: account.drafts.filter(
-                draft => draft.draftKey !== draftKey,
+                item => item.draftKey !== draftKey,
             ),
-            pendingDeletes: [
-                pendingDelete,
-                ...account.pendingDeletes.filter(
-                    item => item.draftKey !== draftKey,
-                ),
-            ],
-        };
-        await writeStore(store);
-        return pendingDelete;
-    });
-};
-
-export const completeHarborDraftDeletion = (accountId, draftKey) => {
-    if (!accountId) {
-        return Promise.resolve();
-    }
-    return enqueueStorageTask(async () => {
-        const store = await readStore();
-        const account = getAccount(store, accountId);
-        store.accounts[accountId] = {
-            ...account,
             pendingDeletes: account.pendingDeletes.filter(
                 item => item.draftKey !== draftKey,
             ),
         };
         await writeStore(store);
+        return draft;
     });
-};
-
-export const deleteHarborDraftAtLatestSequence = async (
-    draftKey,
-    fallbackSequence = 0,
-) => {
-    const latestDraft = await fetchHarborDraft(draftKey);
-    const sequence = normalizeSequence(
-        latestDraft?.sequence ?? fallbackSequence,
-    );
-    await deleteHarborDraft(draftKey, sequence);
-    return sequence;
-};
-
-export const deleteHarborComposerDraft = async (
-    accountId,
-    draftKey,
-    sequence,
-) => {
-    await markHarborDraftForDeletion(accountId, draftKey, sequence);
-    try {
-        await deleteHarborDraftAtLatestSequence(draftKey, sequence);
-        await completeHarborDraftDeletion(accountId, draftKey);
-        return true;
-    } catch {
-        return false;
-    }
-};
-
-export const flushPendingHarborDraftDeletes = async accountId => {
-    const pendingDeletes = await getPendingHarborDraftDeletes(accountId);
-    await Promise.all(
-        pendingDeletes.map(async item => {
-            try {
-                await deleteHarborDraftAtLatestSequence(
-                    item.draftKey,
-                    item.sequence,
-                );
-                await completeHarborDraftDeletion(
-                    accountId,
-                    item.draftKey,
-                );
-            } catch {
-                return null;
-            }
-            return item.draftKey;
-        }),
-    );
-};
-
-export const loadHarborComposerDraft = async (
-    accountId,
-    draftKey,
-    {signal} = {},
-) => {
-    const [
-        localDraft,
-        pendingDeletes,
-    ] = await Promise.all([
-        getLocalHarborDraft(accountId, draftKey),
-        getPendingHarborDraftDeletes(accountId),
-    ]);
-    const pendingDelete = pendingDeletes.find(
-        item => item.draftKey === draftKey,
-    );
-    const lastRemoteCheck = remoteDraftCheckCache.get(
-        getRemoteDraftCheckKey(accountId, draftKey),
-    );
-    if (
-        lastRemoteCheck &&
-        Date.now() - lastRemoteCheck < HARBOR_REMOTE_DRAFT_CHECK_TTL
-    ) {
-        if (pendingDelete) {
-            return {
-                draftKey,
-                sequence: pendingDelete.sequence,
-                pendingDeletion: true,
-            };
-        }
-        return localDraft;
-    }
-    let remoteDraft = null;
-    try {
-        const result = await fetchHarborDraft(draftKey, {signal});
-        markRemoteDraftChecked(accountId, draftKey);
-        if (pendingDelete) {
-            return {
-                draftKey,
-                sequence: result.sequence,
-                pendingDeletion: true,
-            };
-        }
-        if (result.data) {
-            remoteDraft = normalizeHarborRemoteDraft({
-                draft_key: draftKey,
-                draft_sequence: result.sequence,
-                draft: result.data,
-            });
-        }
-    } catch {
-        if (pendingDelete) {
-            return {
-                draftKey,
-                sequence: pendingDelete.sequence,
-                pendingDeletion: true,
-            };
-        }
-        return localDraft;
-    }
-
-    if (!remoteDraft) {
-        return localDraft;
-    }
-    if (
-        localDraft &&
-        ['conflict', 'local', 'offline'].includes(localDraft.syncStatus)
-    ) {
-        return localDraft;
-    }
-    const selectedDraft =
-        !localDraft || remoteDraft.sequence > localDraft.sequence
-            ? remoteDraft
-            : localDraft;
-    if (selectedDraft === remoteDraft && accountId) {
-        await saveLocalHarborDraft(accountId, remoteDraft);
-    }
-    return selectedDraft;
-};
-
-export const mergeHarborDrafts = (
-    localDrafts,
-    remoteDrafts,
-    pendingDeletes = [],
-) => {
-    const pendingKeys = new Set(
-        pendingDeletes.map(item => item.draftKey),
-    );
-    const draftsByKey = new Map();
-    (Array.isArray(remoteDrafts) ? remoteDrafts : [])
-        .map(normalizeHarborRemoteDraft)
-        .filter(Boolean)
-        .forEach(draft => {
-            if (!pendingKeys.has(draft.draftKey)) {
-                draftsByKey.set(draft.draftKey, draft);
-            }
-        });
-    (Array.isArray(localDrafts) ? localDrafts : [])
-        .map(normalizeLocalDraft)
-        .filter(Boolean)
-        .forEach(draft => {
-            if (!pendingKeys.has(draft.draftKey)) {
-                const remoteDraft = draftsByKey.get(draft.draftKey);
-                if (
-                    !remoteDraft ||
-                    draft.syncStatus !== 'synced' ||
-                    draft.sequence >= remoteDraft.sequence
-                ) {
-                    draftsByKey.set(draft.draftKey, draft);
-                }
-            }
-        });
-    return [...draftsByKey.values()].sort(
-        (first, second) => second.updatedAt - first.updatedAt,
-    );
+    deleteHarborDraftImageFiles(removedDraft?.data?.appImages);
+    return true;
 };

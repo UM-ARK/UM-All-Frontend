@@ -12,7 +12,7 @@ import {
 
 import { WebView } from 'react-native-webview';
 import SimpleProgressBar from './SimpleProgressBar';
-import Icon from 'react-native-vector-icons/AntDesign';
+import Icon from "@react-native-vector-icons/ant-design";
 import { NavigationContext } from '@react-navigation/native';
 import { scale } from 'react-native-size-matters';
 import { useTheme } from './ThemeContext';
@@ -172,36 +172,34 @@ const NavigationView = ({
 }) => {
     return (
         // 判斷: 網站能前後跳轉的時候才顯示WebView底部導航欄
-        (canGoBack || canGoForward) && (
-            <Animated.View
-                style={[
-                    styles.container,
-                    // { transform: [{ translateY: translateY }] },
-                ]}>
-                {/* 後退按鈕 */}
-                <TouchableOpacity
-                    style={styles.button}
-                    onPress={onBackPress}
-                    disabled={canGoBack ? false : true}>
-                    <Icon
-                        name={'leftcircle'}
-                        size={22}
-                        color={canGoBack ? 'black' : 'grey'}
-                    />
-                </TouchableOpacity>
-                {/* 前進按鈕 */}
-                <TouchableOpacity
-                    style={styles.button}
-                    onPress={onForwardPress}
-                    disabled={canGoForward ? false : true}>
-                    <Icon
-                        name={'rightcircle'}
-                        size={22}
-                        color={canGoForward ? 'black' : 'grey'}
-                    />
-                </TouchableOpacity>
-            </Animated.View>
-        )
+        ((canGoBack || canGoForward) && (<Animated.View
+            style={[
+                styles.container,
+                // { transform: [{ translateY: translateY }] },
+            ]}>
+            {/* 後退按鈕 */}
+            <TouchableOpacity
+                style={styles.button}
+                onPress={onBackPress}
+                disabled={canGoBack ? false : true}>
+                <Icon
+                    name={'leftcircle'}
+                    size={22}
+                    color={canGoBack ? 'black' : 'grey'}
+                />
+            </TouchableOpacity>
+            {/* 前進按鈕 */}
+            <TouchableOpacity
+                style={styles.button}
+                onPress={onForwardPress}
+                disabled={canGoForward ? false : true}>
+                <Icon
+                    name={'rightcircle'}
+                    size={22}
+                    color={canGoForward ? 'black' : 'grey'}
+                />
+            </TouchableOpacity>
+        </Animated.View>))
     );
 };
 

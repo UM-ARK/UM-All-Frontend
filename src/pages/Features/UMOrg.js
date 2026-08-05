@@ -8,7 +8,7 @@ import { openLink } from '../../utils/browser';
 import { logToFirebase } from '../../utils/firebaseAnalytics';
 import { trigger } from '../../utils/trigger';
 
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from "@react-native-vector-icons/ionicons";
 import { scale, verticalScale } from 'react-native-size-matters';
 import axios from 'axios';
 import { t } from 'i18next';

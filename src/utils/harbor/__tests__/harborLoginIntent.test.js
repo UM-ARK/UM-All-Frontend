@@ -47,7 +47,7 @@ describe('Harbor 登入意圖', () => {
             params: {mode: 'newTopic'},
             createdAt: 1000,
         };
-        Date.now.mockReturnValue(11 * 60 * 1000);
+        Date.now.mockReturnValue(6 * 60 * 1000);
 
         await expect(loadHarborLoginIntent()).resolves.toBeNull();
         expect(mockStoredIntent).toBeNull();

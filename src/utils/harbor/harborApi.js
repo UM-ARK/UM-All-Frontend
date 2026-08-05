@@ -1,7 +1,12 @@
 import axios from 'axios';
 import qs from 'qs';
 
-import { ARK_HARBOR, ARK_HARBOR_AVATAR_TEMPLATE } from '../pathMap';
+import {
+    ARK_HARBOR,
+    ARK_HARBOR_ABSOLUTE_URL,
+    ARK_HARBOR_AVATAR_TEMPLATE,
+    ARK_HARBOR_UPLOAD_URL,
+} from '../pathMap';
 import {
     getHarborHtmlAttribute,
     replaceHarborEmojiShortcodes,
@@ -801,7 +806,8 @@ function normalizeSearchResult(data, page, additionalUsers = []) {
                 likeCount: toCount(post?.like_count),
                 category: topic.category,
                 tags: topic.tags,
-                topic,
+                // 寫回搜尋命中作者，讓複用 HarborTopicCard 時頭像／ID 正確
+                topic: author ? {...topic, author} : topic,
             };
         })
         .filter(Boolean);
@@ -1092,6 +1098,39 @@ function normalizeReactionGiven(item, index) {
     };
 }
 
+// discourse-reactions「收到的讚」列表項目（含按讚者頭像）
+function normalizeReactionReceived(item, index) {
+    const post = item?.post || {};
+    const topic = post.topic || {};
+    const actor = item?.user || {};
+    const reaction = item?.reaction || {};
+    const reactionId = item?.id;
+    const avatarTemplate =
+        actor.avatar_template || actor.avatarTemplate || '';
+    return {
+        id: String(
+            reactionId ||
+            item?.post_id ||
+            post.id ||
+            `reaction-received-${index}`,
+        ),
+        kind: 'likeReceived',
+        title: post.topic_title || topic.title || topic.fancy_title || '',
+        excerpt: stripHtml(post.excerpt || ''),
+        createdAt: item?.created_at || reaction.created_at || '',
+        topicId: Number(post.topic_id || topic.id) || null,
+        postNumber: Number(post.post_number) || null,
+        actingUsername: actor.username || '',
+        avatarUrl: avatarTemplate
+            ? ARK_HARBOR_AVATAR_TEMPLATE(avatarTemplate, 72)
+            : '',
+        reactionValue:
+            typeof reaction.reaction_value === 'string'
+                ? reaction.reaction_value.trim()
+                : '',
+    };
+}
+
 function mergeLikeActivityItems(primaryItems, secondaryItems) {
     const seen = new Set();
     const merged = [];
@@ -1162,7 +1201,51 @@ function normalizeNotification(notification, index) {
     };
 }
 
-function normalizeMessage(topic, index) {
+// 私信列表：取對方會員（優先最新發言者，排除自己）
+function resolvePrivateMessageCounterpart(topic, users, currentUsername) {
+    const posters = Array.isArray(topic?.posters) ? topic.posters : [];
+    let latestOther = null;
+    let firstOther = null;
+    posters.forEach(poster => {
+        const user = users.usersById.get(toNumberOrNull(poster?.user_id));
+        if (!user?.username || user.username === currentUsername) {
+            return;
+        }
+        if (!firstOther) {
+            firstOther = user;
+        }
+        if (
+            String(poster?.extras || '')
+                .split(/\s+/)
+                .includes('latest')
+        ) {
+            latestOther = user;
+        }
+    });
+    if (latestOther || firstOther) {
+        return latestOther || firstOther;
+    }
+    const lastPosterUsername = topic?.last_poster_username || '';
+    if (lastPosterUsername && lastPosterUsername !== currentUsername) {
+        return (
+            users.usersByUsername.get(lastPosterUsername) || {
+                id: null,
+                username: lastPosterUsername,
+                name: '',
+                avatarUrl: null,
+            }
+        );
+    }
+    return null;
+}
+
+function normalizeMessage(topic, index, { users, currentUsername } = {}) {
+    const emptyUsers = { usersById: new Map(), usersByUsername: new Map() };
+    const counterpart = resolvePrivateMessageCounterpart(
+        topic,
+        users || emptyUsers,
+        currentUsername || '',
+    );
     return {
         id: String(topic.id || `message-${index}`),
         title: topic.title || '',
@@ -1171,6 +1254,8 @@ function normalizeMessage(topic, index) {
         unreadCount: Number(topic.unread_posts || topic.new_posts || 0),
         topicId: Number(topic.id) || null,
         slug: topic.slug || '',
+        actingUsername: counterpart?.username || '',
+        avatarUrl: counterpart?.avatarUrl || null,
     };
 }
 
@@ -1278,8 +1363,25 @@ function normalizeProfile(
     const currentUnreadMessages = toNumberOrNull(
         currentUser.unread_private_messages,
     );
+    const previousProfile = matchingPreviousUser?.profile || {};
+    const profileGroups = Array.isArray(profile.groups)
+        ? profile.groups
+        : null;
+    const isUMer = profileGroups
+        ? profileGroups.some(group => group?.name === 'UMer')
+        : Boolean(matchingPreviousUser?.isUMer);
+    const groups = profileGroups
+        ? profileGroups
+              .map(group => group?.full_name || group?.name || '')
+              .filter(Boolean)
+        : matchingPreviousUser?.groups || [];
 
     return {
+        id:
+            toNumberOrNull(currentUser.id) ??
+            toNumberOrNull(profile.id) ??
+            matchingPreviousUser?.id ??
+            null,
         displayName:
             currentUser.name ||
             profile.name ||
@@ -1293,6 +1395,21 @@ function normalizeProfile(
             matchingPreviousUser?.trustLevel ??
             0,
         ),
+        isAdmin: Boolean(
+            currentUser.admin ||
+                profile.admin ||
+                matchingPreviousUser?.isAdmin,
+        ),
+        isModerator: Boolean(
+            currentUser.moderator ||
+                profile.moderator ||
+                matchingPreviousUser?.isModerator,
+        ),
+        // Discourse /session/current.json 的 can_upload_avatar（含 uploaded_avatars_allowed_groups）
+        canUploadAvatar:
+            typeof currentUser.can_upload_avatar === 'boolean'
+                ? currentUser.can_upload_avatar
+                : Boolean(matchingPreviousUser?.canUploadAvatar),
         joinedAt,
         unreadNotifications: currentUnreadNotifications != null
             ? currentUnreadNotifications
@@ -1303,6 +1420,44 @@ function normalizeProfile(
         avatarUrl: avatarTemplate
             ? ARK_HARBOR_AVATAR_TEMPLATE(avatarTemplate, 144)
             : matchingPreviousUser?.avatarUrl || null,
+        isUMer,
+        groups,
+        profile: {
+            bio:
+                typeof profile.bio_raw === 'string'
+                    ? profile.bio_raw
+                    : typeof profile.bio_cooked === 'string'
+                    ? stripHtml(profile.bio_cooked)
+                    : previousProfile.bio || '',
+            location:
+                typeof profile.location === 'string'
+                    ? profile.location
+                    : previousProfile.location || '',
+            website:
+                typeof profile.website === 'string'
+                    ? profile.website
+                    : previousProfile.website || '',
+            workStatus:
+                typeof profile.user_fields?.['1'] === 'string'
+                    ? profile.user_fields['1']
+                    : previousProfile.workStatus || '',
+            canEdit:
+                typeof profile.can_edit === 'boolean'
+                    ? profile.can_edit
+                    : Boolean(previousProfile.canEdit),
+            canChangeBio:
+                typeof profile.can_change_bio === 'boolean'
+                    ? profile.can_change_bio
+                    : Boolean(previousProfile.canChangeBio),
+            canChangeLocation:
+                typeof profile.can_change_location === 'boolean'
+                    ? profile.can_change_location
+                    : Boolean(previousProfile.canChangeLocation),
+            canChangeWebsite:
+                typeof profile.can_change_website === 'boolean'
+                    ? profile.can_change_website
+                    : Boolean(previousProfile.canChangeWebsite),
+        },
         contributions: [
             {
                 key: 'topicsCreated',
@@ -1320,7 +1475,7 @@ function normalizeProfile(
                     'postsCreated',
                     summary.post_count,
                 ),
-                label: '發布貼文',
+                label: '評論',
             },
             {
                 key: 'likesReceived',
@@ -1358,15 +1513,6 @@ function normalizeProfile(
                 ),
                 label: '閱讀時間（分鐘）',
             },
-            {
-                key: 'topicsRead',
-                value: summaryMetric(
-                    'stats',
-                    'topicsRead',
-                    summary.topics_entered,
-                ),
-                label: '已讀話題',
-            },
         ],
         badges,
         partialProfile: unavailableProfileSections.length > 0,
@@ -1374,6 +1520,47 @@ function normalizeProfile(
             matchingPreviousUser && unavailableProfileSections.length > 0,
         ),
         unavailableProfileSections,
+    };
+}
+
+async function buildNormalizedTopicListResult(data, page) {
+    const topicList = data?.topic_list;
+    const rawTopics = topicList?.topics;
+    if (!topicList || !Array.isArray(rawTopics)) {
+        throw new Error('Invalid Harbor topic list response');
+    }
+
+    let categories = normalizeCategories(data);
+    if (rawTopics.length > 0 && categories.length === 0) {
+        try {
+            categories = await fetchHarborDiscoveryCategories();
+        } catch {
+            categories = [];
+        }
+    }
+    const categoriesById = new Map(
+        categories.map(category => [category.id, category]),
+    );
+    const users = getTopicUsers(data);
+    const items = rawTopics
+        .filter(Boolean)
+        .map(topic =>
+            normalizeTopicSummary(topic, {
+                categoriesById,
+                users,
+            }),
+        )
+        .filter(topic => topic.id != null);
+    const pageInfo = getTopicPageInfo(topicList, page, rawTopics.length);
+
+    return {
+        items,
+        ...pageInfo,
+        categories,
+        capabilities: {
+            canCreateTopic: Boolean(topicList.can_create_topic),
+            solved: items.some(topic => topic.capabilities.solved),
+        },
     };
 }
 
@@ -1396,48 +1583,27 @@ export async function fetchHarborTopicList({
         params: { page: normalizedPage },
         signal,
     });
-    const topicList = response.data?.topic_list;
-    const rawTopics = topicList?.topics;
-    if (!topicList || !Array.isArray(rawTopics)) {
-        throw new Error('Invalid Harbor topic list response');
-    }
+    return buildNormalizedTopicListResult(response.data, normalizedPage);
+}
 
-    let categories = normalizeCategories(response.data);
-    if (rawTopics.length > 0 && categories.length === 0) {
-        try {
-            categories = await fetchHarborDiscoveryCategories();
-        } catch {
-            categories = [];
-        }
+// 使用者建立的話題列表（發佈頁）
+export async function fetchHarborUserCreatedTopics(
+    username,
+    { page = 0, signal } = {},
+) {
+    if (typeof username !== 'string' || !username.trim()) {
+        throw new TypeError('Harbor username is required');
     }
-    const categoriesById = new Map(
-        categories.map(category => [category.id, category]),
-    );
-    const users = getTopicUsers(response.data);
-    const items = rawTopics
-        .filter(Boolean)
-        .map(topic =>
-            normalizeTopicSummary(topic, {
-                categoriesById,
-                users,
-            }),
-        )
-        .filter(topic => topic.id != null);
-    const pageInfo = getTopicPageInfo(
-        topicList,
-        normalizedPage,
-        rawTopics.length,
-    );
-
-    return {
-        items,
-        ...pageInfo,
-        categories,
-        capabilities: {
-            canCreateTopic: Boolean(topicList.can_create_topic),
-            solved: items.some(topic => topic.capabilities.solved),
+    const normalizedPage = Math.max(0, Math.floor(Number(page) || 0));
+    const encodedUsername = encodeURIComponent(username.trim());
+    const response = await harborApi.get(
+        `/topics/created-by/${encodedUsername}.json`,
+        {
+            params: { page: normalizedPage },
+            signal,
         },
-    };
+    );
+    return buildNormalizedTopicListResult(response.data, normalizedPage);
 }
 
 export async function fetchHarborSearch({
@@ -1661,6 +1827,243 @@ export async function fetchHarborSiteCapabilities({ signal } = {}) {
     return normalizeSiteCapabilities(response.data);
 }
 
+// 對齊 Discourse AvatarSelectorModal.showCustomAvatarSelector
+function canShowCustomAvatarSelector(mode, user) {
+    switch (mode) {
+        case 'no_one':
+            return false;
+        case 'tl1':
+        case 'tl2':
+        case 'tl3':
+        case 'tl4': {
+            const allowedTl = Number(String(mode).replace('tl', ''));
+            return Boolean(
+                user?.isAdmin ||
+                    user?.isModerator ||
+                    Number(user?.trustLevel ?? 0) >= allowedTl,
+            );
+        }
+        case 'staff':
+            return Boolean(user?.isAdmin || user?.isModerator);
+        case 'everyone':
+        case 'disabled':
+        default:
+            return true;
+    }
+}
+
+// 對齊 Discourse：can_upload_avatar ∩ selectable_avatars_mode
+export function resolveCanUploadCustomAvatar(settings, user) {
+    const mode = settings?.selectable_avatars_mode || 'disabled';
+    if (!user || !canShowCustomAvatarSelector(mode, user)) {
+        return false;
+    }
+    return Boolean(user.canUploadAvatar);
+}
+
+export async function fetchHarborProfileMetadata({ signal, user } = {}) {
+    const response = await harborApi.get('/site.json', { signal });
+    const userFields = Array.isArray(response.data?.user_fields)
+        ? response.data.user_fields
+        : [];
+    const workStatusField = userFields.find(
+        field => field?.name === '工作狀態' || Number(field?.id) === 1,
+    );
+    const settingsResponse = await harborApi.get('/site/settings.json', {
+        signal,
+    });
+    const settings = settingsResponse.data?.site_settings ||
+        settingsResponse.data;
+    const selectableAvatarValues = Array.isArray(
+        settings?.selectable_avatars,
+    )
+        ? settings.selectable_avatars
+        : typeof settings?.selectable_avatars === 'string'
+        ? settings.selectable_avatars.split('|')
+        : [];
+
+    return {
+        workStatusField: workStatusField
+            ? {
+                id: Number(workStatusField.id),
+                editable: workStatusField.editable !== false,
+                required: Boolean(workStatusField.required),
+                options: Array.isArray(workStatusField.options)
+                    ? workStatusField.options.filter(
+                        option =>
+                            typeof option === 'string' && option.trim(),
+                    )
+                    : [],
+            }
+            : null,
+        selectableAvatars: selectableAvatarValues
+            .map(item => {
+                const value = typeof item === 'string'
+                    ? item.trim()
+                    : typeof item?.url === 'string'
+                    ? item.url.trim()
+                    : '';
+                return value
+                    ? {
+                        value,
+                        url: ARK_HARBOR_UPLOAD_URL(value),
+                    }
+                    : null;
+            })
+            .filter(Boolean),
+        selectableAvatarsMode: settings?.selectable_avatars_mode || 'disabled',
+        canUploadCustomAvatar: resolveCanUploadCustomAvatar(settings, user),
+    };
+}
+
+export async function fetchHarborUserProfile(username, { signal } = {}) {
+    if (typeof username !== 'string' || !username.trim()) {
+        throw new TypeError('Invalid Harbor username');
+    }
+
+    const encodedUsername = encodeURIComponent(username.trim());
+    const [profileResult, summaryResult, badgeResult] =
+        await Promise.allSettled([
+            harborApi.get(`/u/${encodedUsername}.json`, {signal}),
+            harborApi.get(`/u/${encodedUsername}/summary.json`, {signal}),
+            harborApi.get(`/user-badges/${encodedUsername}.json`, {signal}),
+        ]);
+    if (profileResult.status === 'rejected') {
+        throw profileResult.reason;
+    }
+
+    const profile = profileResult.value.data?.user;
+    if (!profile?.username) {
+        throw new Error('Invalid Harbor user profile response');
+    }
+
+    return normalizeProfile(
+        profile,
+        profileResult.value.data,
+        summaryResult.status === 'fulfilled' ? summaryResult.value.data : null,
+        badgeResult.status === 'fulfilled' ? badgeResult.value.data : null,
+        {
+            profile: true,
+            summary: summaryResult.status === 'fulfilled',
+            badges: badgeResult.status === 'fulfilled',
+        },
+        null,
+    );
+}
+
+export async function updateHarborProfile(
+    username,
+    {
+        bio,
+        location,
+        website,
+        workStatus,
+        workStatusFieldId,
+    },
+    { signal } = {},
+) {
+    if (typeof username !== 'string' || !username.trim()) {
+        throw new TypeError('Invalid Harbor username');
+    }
+
+    const payload = {};
+    if (bio != null) {
+        payload.bio_raw = String(bio).trim();
+    }
+    if (location != null) {
+        payload.location = String(location).trim();
+    }
+    if (website != null) {
+        payload.website = String(website).trim();
+    }
+    if (workStatus != null) {
+        const fieldId = Number(workStatusFieldId);
+        if (!Number.isInteger(fieldId) || fieldId <= 0) {
+            throw new TypeError('Invalid Harbor work status field');
+        }
+        payload.user_fields = {
+            [fieldId]: String(workStatus).trim(),
+        };
+    }
+
+    const encodedUsername = encodeURIComponent(username.trim());
+    const response = await harborApi.put(
+        `/u/${encodedUsername}.json`,
+        payload,
+        { signal },
+    );
+    return response.data;
+}
+
+export async function updateHarborAvatar(
+    username,
+    image,
+    { signal, userId } = {},
+) {
+    if (typeof username !== 'string' || !username.trim()) {
+        throw new TypeError('Invalid Harbor username');
+    }
+    if (!image || typeof image.uri !== 'string' || !image.uri.trim()) {
+        throw new TypeError('Invalid Harbor avatar image');
+    }
+    const normalizedUserId = toNumberOrNull(userId);
+    if (!Number.isInteger(normalizedUserId) || normalizedUserId <= 0) {
+        throw new TypeError('Invalid Harbor user id');
+    }
+
+    const data = new FormData();
+    data.append('upload_type', 'avatar');
+    data.append('user_id', String(normalizedUserId));
+    data.append('synchronous', 'true');
+    data.append('file', {
+        uri: image.uri,
+        name: image.fileName || 'avatar.jpg',
+        type: image.mimeType || 'image/jpeg',
+    });
+
+    const uploadResponse = await harborApi.post('/uploads.json', data, {
+        headers: {'Content-Type': 'multipart/form-data'},
+        signal,
+    });
+    const upload = uploadResponse.data?.upload || uploadResponse.data;
+    const uploadId = toNumberOrNull(upload?.id);
+    if (!Number.isInteger(uploadId) || uploadId <= 0) {
+        throw new Error('Invalid Harbor avatar upload response');
+    }
+
+    const encodedUsername = encodeURIComponent(username.trim());
+    const response = await harborApi.put(
+        `/u/${encodedUsername}/preferences/avatar/pick.json`,
+        {
+            upload_id: uploadId,
+            type: 'uploaded',
+        },
+        { signal },
+    );
+    return response.data;
+}
+
+export async function selectHarborAvatar(
+    username,
+    avatarUrl,
+    { signal } = {},
+) {
+    if (typeof username !== 'string' || !username.trim()) {
+        throw new TypeError('Invalid Harbor username');
+    }
+    if (typeof avatarUrl !== 'string' || !avatarUrl.trim()) {
+        throw new TypeError('Invalid Harbor selectable avatar');
+    }
+
+    const encodedUsername = encodeURIComponent(username.trim());
+    const response = await harborApi.put(
+        `/u/${encodedUsername}/preferences/avatar/select.json`,
+        { url: avatarUrl.trim() },
+        { signal },
+    );
+    return response.data;
+}
+
 function flagTypeRequiresMessage(type) {
     if (type?.is_custom_flag) {
         return true;
@@ -1812,6 +2215,40 @@ export async function fetchHarborUserActions(
         };
     }
 
+    // 收到的讚：discourse-reactions reactions-received
+    if (kind === 'likesReceived') {
+        const beforeReactionUserId = Math.max(0, Number(offset) || 0);
+        const reactionParams = { username };
+        if (beforeReactionUserId > 0) {
+            reactionParams.before_reaction_user_id = beforeReactionUserId;
+        }
+
+        const reactionResponse = await harborApi.get(
+            '/discourse-reactions/posts/reactions-received.json',
+            {
+                params: reactionParams,
+                signal,
+            },
+        );
+        const reactionRows = Array.isArray(reactionResponse.data)
+            ? reactionResponse.data
+            : reactionResponse.data?.user_reactions ||
+              reactionResponse.data?.reactions ||
+              [];
+        const reactionItems = reactionRows.map(normalizeReactionReceived);
+        const hasMoreReactions =
+            reactionItems.length >= REACTION_GIVEN_PAGE_SIZE;
+        const nextReactionOffset = hasMoreReactions
+            ? Number(reactionItems[reactionItems.length - 1]?.id) || null
+            : null;
+
+        return {
+            items: reactionItems,
+            hasMore: hasMoreReactions,
+            nextOffset: nextReactionOffset,
+        };
+    }
+
     const response = await harborApi.get('/user_actions.json', {
         params: {
             offset,
@@ -1907,8 +2344,8 @@ export async function fetchHarborInboxUnreadCount(
 }
 
 /**
- * 論壇 Tab 角標用：計算指定時間後有新貼文的話題數。
- * 首次建立基準時只讀取第一頁；既有基準最多掃描 100 個更新話題。
+ * 論壇 Tab 角標用：計算指定時間後新建立的話題數。
+ * 首次建立基準時只讀取第一頁；既有基準最多掃描 10 頁、計算 100 個新話題。
  */
 export async function fetchHarborForumBadgeSnapshot({
     since,
@@ -1916,7 +2353,7 @@ export async function fetchHarborForumBadgeSnapshot({
 } = {}) {
     const sinceTimestamp = Date.parse(since);
     const hasValidSince = Number.isFinite(sinceTimestamp);
-    const updatedTopicIds = new Set();
+    const newTopicIds = new Set();
     let latestTimestamp = null;
     let page = 0;
     let scannedPages = 0;
@@ -1937,6 +2374,7 @@ export async function fetchHarborForumBadgeSnapshot({
         pageHasUpdates = false;
         topics.forEach(topic => {
             const topicId = toNumberOrNull(topic?.id);
+            const createdTimestamp = Date.parse(topic?.created_at);
             const postedAt =
                 topic?.last_posted_at || topic?.created_at || '';
             const postedTimestamp = Date.parse(postedAt);
@@ -1947,13 +2385,16 @@ export async function fetchHarborForumBadgeSnapshot({
                 latestTimestamp ?? postedTimestamp,
                 postedTimestamp,
             );
+            if (hasValidSince && postedTimestamp > sinceTimestamp) {
+                pageHasUpdates = true;
+            }
             if (
                 hasValidSince &&
-                postedTimestamp > sinceTimestamp &&
+                Number.isFinite(createdTimestamp) &&
+                createdTimestamp > sinceTimestamp &&
                 topicId != null
             ) {
-                pageHasUpdates = true;
-                updatedTopicIds.add(topicId);
+                newTopicIds.add(topicId);
             }
         });
 
@@ -1969,24 +2410,16 @@ export async function fetchHarborForumBadgeSnapshot({
         hasValidSince &&
         hasMore &&
         pageHasUpdates &&
-        updatedTopicIds.size < 100 &&
+        newTopicIds.size < 100 &&
         scannedPages < 10
     );
-
-    const reachedScanLimit =
-        hasValidSince &&
-        hasMore &&
-        pageHasUpdates &&
-        scannedPages >= 10;
 
     return {
         latestAt:
             latestTimestamp == null
                 ? ''
                 : new Date(latestTimestamp).toISOString(),
-        topicCount: reachedScanLimit
-            ? 100
-            : Math.min(100, updatedTopicIds.size),
+        topicCount: Math.min(100, newTopicIds.size),
     };
 }
 
@@ -2004,7 +2437,13 @@ export async function fetchHarborMessages(username, { signal } = {}) {
         `/topics/private-messages/${encodedUsername}.json`,
         { signal },
     );
-    return (response.data?.topic_list?.topics || []).map(normalizeMessage);
+    const users = getTopicUsers(response.data);
+    return (response.data?.topic_list?.topics || []).map((topic, index) =>
+        normalizeMessage(topic, index, {
+            users,
+            currentUsername: username,
+        }),
+    );
 }
 
 export async function fetchHarborTopic(
@@ -2505,6 +2944,18 @@ export async function fetchHarborPostForEdit(postId, { signal } = {}) {
         throw new Error('Invalid Harbor editable post response: missing raw');
     }
 
+    const imageUrls = typeof post.cooked === 'string'
+        ? (post.cooked.match(/<img\b[^>]*>/gi) || [])
+            .filter(tag => {
+                const className = getHarborHtmlAttribute(tag, 'class');
+                return !className.split(/\s+/).includes('emoji');
+            })
+            .map(tag => ARK_HARBOR_ABSOLUTE_URL(
+                getHarborHtmlAttribute(tag, 'src'),
+            ))
+            .filter(Boolean)
+        : [];
+
     return {
         id: toNumberOrNull(post.id) ?? id,
         raw: post.raw,
@@ -2517,6 +2968,9 @@ export async function fetchHarborPostForEdit(postId, { signal } = {}) {
             : null,
         canDelete: Boolean(post.can_delete),
         canEdit: Boolean(post.can_edit),
+        ...(typeof post.cooked === 'string'
+            ? {cooked: post.cooked, imageUrls}
+            : {}),
     };
 }
 

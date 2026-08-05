@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 
 import {FlashList} from '@shopify/flash-list';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import {scale, verticalScale} from 'react-native-size-matters';
 import {useTranslation} from 'react-i18next';
 
@@ -189,11 +189,7 @@ const SearchOptionModal = ({
                 trigger();
                 onClose();
             }}>
-            <View
-                style={[
-                    styles.modalBackdrop,
-                    {backgroundColor: theme.tonal.primary50},
-                ]}>
+            <View style={styles.modalPage}>
                 <Pressable
                     accessibilityRole="button"
                     accessibilityLabel={t('關閉')}
@@ -201,7 +197,11 @@ const SearchOptionModal = ({
                         trigger();
                         onClose();
                     }}
-                    style={StyleSheet.absoluteFill}
+                    style={[
+                        StyleSheet.absoluteFill,
+                        styles.modalBackdrop,
+                        {backgroundColor: theme.trueBlack},
+                    ]}
                 />
                 <View
                     style={[
@@ -255,11 +255,14 @@ const SearchOptionModal = ({
 };
 
 const styles = StyleSheet.create({
-    modalBackdrop: {
+    modalPage: {
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
         padding: scale(20),
+    },
+    modalBackdrop: {
+        opacity: 0.55,
     },
     optionModal: {
         width: '100%',

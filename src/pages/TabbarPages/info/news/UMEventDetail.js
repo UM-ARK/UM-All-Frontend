@@ -13,7 +13,7 @@ import {
     View,
 } from 'react-native';
 import { Image } from 'expo-image';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from "@react-native-vector-icons/ionicons";
 import moment from 'moment-timezone';
 import Animated, {
     Extrapolation,

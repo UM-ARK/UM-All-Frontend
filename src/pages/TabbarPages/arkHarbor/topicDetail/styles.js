@@ -8,13 +8,6 @@ const styles = StyleSheet.create({
     page: {
         flex: 1,
     },
-    headerShareButton: {
-        width: scale(36),
-        height: scale(36),
-        borderRadius: scale(18),
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
     centeredPage: {
         flex: 1,
         alignItems: 'center',
@@ -239,6 +232,23 @@ const styles = StyleSheet.create({
     firstPostBody: {
         marginTop: verticalScale(4),
     },
+    postBodyCollapsed: {
+        maxHeight: verticalScale(132),
+        overflow: 'hidden',
+    },
+    postContentToggle: {
+        minHeight: verticalScale(34),
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingTop: verticalScale(4),
+    },
+    postContentToggleText: {
+        ...uiStyle.defaultText,
+        fontSize: scale(12),
+        fontWeight: '600',
+        marginLeft: scale(2),
+    },
     firstPostPlainTagRow: {
         marginTop: verticalScale(4),
     },
@@ -411,6 +421,54 @@ const styles = StyleSheet.create({
         overflow: 'hidden',
         borderRadius: scale(10),
         marginVertical: verticalScale(8),
+    },
+    iframeExpandButton: {
+        position: 'absolute',
+        bottom: scale(8),
+        right: scale(8),
+        zIndex: 2,
+        width: scale(36),
+        height: scale(36),
+        borderRadius: scale(18),
+        alignItems: 'center',
+        justifyContent: 'center',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.35,
+        shadowRadius: scale(4),
+        elevation: 6,
+    },
+    iframeFullscreenModal: {
+        flex: 1,
+    },
+    iframeFullscreenWebView: {
+        flex: 1,
+    },
+    iframeFullscreenClose: {
+        position: 'absolute',
+        right: scale(16),
+        zIndex: 2,
+        width: scale(44),
+        height: scale(44),
+        borderRadius: scale(22),
+        alignItems: 'center',
+        justifyContent: 'center',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.35,
+        shadowRadius: scale(4),
+        elevation: 6,
+    },
+    imageGrid: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        marginVertical: verticalScale(5),
+    },
+    imageGridItem: {
+        borderRadius: scale(8),
+        overflow: 'hidden',
+    },
+    imageGridImage: {
+        width: '100%',
+        height: '100%',
     },
     interactiveFallback: {
         alignSelf: 'flex-start',
@@ -795,6 +853,32 @@ const styles = StyleSheet.create({
         fontWeight: '700',
         marginLeft: scale(6),
     },
+    postNavigation: {
+        position: 'absolute',
+        left: scale(72),
+        right: scale(72),
+        minHeight: verticalScale(32),
+        borderWidth: StyleSheet.hairlineWidth,
+        borderRadius: scale(16),
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 22,
+    },
+    postNavigationButton: {
+        flex: 1,
+        minHeight: verticalScale(32),
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingHorizontal: scale(6),
+    },
+    postNavigationText: {
+        ...uiStyle.defaultText,
+        fontSize: scale(11),
+        fontWeight: '600',
+        marginLeft: scale(4),
+    },
     modalPage: {
         flex: 1,
         alignItems: 'center',
@@ -888,14 +972,6 @@ const styles = StyleSheet.create({
         ...uiStyle.defaultText,
         fontSize: scale(11),
         fontWeight: '700',
-    },
-    reactionGlyph: {
-        textAlign: 'center',
-    },
-    reactionFallbackText: {
-        ...uiStyle.defaultText,
-        fontWeight: '600',
-        textAlign: 'center',
     },
     notificationOption: {
         minHeight: verticalScale(54),

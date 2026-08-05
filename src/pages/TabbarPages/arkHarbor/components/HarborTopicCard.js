@@ -1,16 +1,33 @@
-import React, { memo } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import React, { memo, useEffect, useState } from 'react';
+import {
+    Pressable,
+    StyleSheet,
+    Text,
+    useWindowDimensions,
+    View,
+} from 'react-native';
 
 import { Image } from 'expo-image';
 import moment from 'moment-timezone';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import { scale, verticalScale } from 'react-native-size-matters';
 import { useTranslation } from 'react-i18next';
 
 import { uiStyle, useTheme } from '../../../../components/ThemeContext';
-import { ARK_HARBOR_AVATAR_TEMPLATE } from '../../../../utils/pathMap';
+import {
+    ARK_HARBOR_ABSOLUTE_URL,
+    ARK_HARBOR_AVATAR_TEMPLATE,
+} from '../../../../utils/pathMap';
 import { trigger } from '../../../../utils/trigger';
 import HarborCategoryIcon from './HarborCategoryIcon';
+
+const CARD_MARGIN_HORIZONTAL = scale(6);
+const CARD_PADDING_HORIZONTAL = scale(12);
+// 豎圖預覽比例（相對螢幕）
+const COVER_PORTRAIT_WIDTH_RATIO = 1 / 2.3;
+const COVER_PORTRAIT_HEIGHT_RATIO = 1 / 3.6;
+// 橫圖：更寬、更矮
+const COVER_LANDSCAPE_HEIGHT_RATIO = 1 / 4;
 
 const STATUS_CONFIG = {
     pinned: { icon: 'pin-outline', label: '置頂' },
@@ -61,15 +78,7 @@ const formatTopicDateLabel = (iso, t) => {
     return activity.format('YYYY-MM-DD');
 };
 
-const resolveUserId = (user, fallback) => {
-    return (
-        user?.username ||
-        user?.name ||
-        user?.displayName ||
-        fallback ||
-        ''
-    );
-};
+const resolveUserId = (user, fallback) => user?.username || fallback || '';
 
 const Metric = ({ icon, value, color }) => (
     <View style={styles.metric}>
@@ -107,11 +116,13 @@ const StatusChip = ({ status }) => {
 const HarborTopicCard = ({
     topic,
     onPress,
+    onAuthorPress,
     onCategoryPress,
     isPressAllowed,
 }) => {
     const { theme } = useTheme();
     const { t } = useTranslation('harbor');
+    const { width: windowWidth, height: windowHeight } = useWindowDimensions();
     const author = topic.author || {};
     const authorId = resolveUserId(author, t('Harbor 會員'));
     const avatarTemplate = author.avatarTemplate || author.avatar_template;
@@ -120,6 +131,12 @@ const HarborTopicCard = ({
         (avatarTemplate
             ? ARK_HARBOR_AVATAR_TEMPLATE(avatarTemplate, 72)
             : null);
+    const coverUrl = topic.imageUrl
+        ? ARK_HARBOR_ABSOLUTE_URL(topic.imageUrl)
+        : '';
+    const [coverFailed, setCoverFailed] = useState(false);
+    // null：尚未得知比例，先用豎圖尺寸佔位
+    const [isLandscape, setIsLandscape] = useState(null);
     const category = topic.category?.name ? topic.category : null;
     const statuses = Object.keys(STATUS_CONFIG).filter(status => {
         if (status === 'pinned') {
@@ -145,6 +162,18 @@ const HarborTopicCard = ({
         borderRadius: AVATAR_SIZE / 2,
         backgroundColor: theme.tonal.primary15,
     };
+    // 豎圖：半屏左右寬 × 約 1/3.5 屏高；橫圖：貼齊內容區寬、高度更矮
+    const coverWidth = isLandscape
+        ? windowWidth / 1.5
+        : windowWidth * COVER_PORTRAIT_WIDTH_RATIO;
+    const coverHeight = isLandscape
+        ? windowHeight * COVER_LANDSCAPE_HEIGHT_RATIO
+        : windowHeight * COVER_PORTRAIT_HEIGHT_RATIO;
+
+    useEffect(() => {
+        setCoverFailed(false);
+        setIsLandscape(null);
+    }, [coverUrl]);
 
     return (
         <Pressable
@@ -167,24 +196,37 @@ const HarborTopicCard = ({
                 },
             ]}>
             <View style={styles.authorRow}>
-                {avatarUrl ? (
-                    <Image
-                        source={{ uri: avatarUrl }}
-                        style={avatarStyle}
-                        contentFit="cover"
-                        placeholder={theme.imagePlaceholder}
-                        placeholderContentFit="cover"
-                        transition={180}
-                    />
-                ) : (
-                    <View style={[styles.avatarFallback, avatarStyle]}>
-                        <MaterialCommunityIcons
-                            name="account-outline"
-                            size={scale(14)}
-                            color={theme.themeColor}
+                <Pressable
+                    accessibilityRole="link"
+                    accessibilityLabel={authorId}
+                    disabled={!onAuthorPress || !author.username}
+                    onPress={event => {
+                        event.stopPropagation?.();
+                        trigger();
+                        onAuthorPress(author.username);
+                    }}
+                    style={({ pressed }) => [
+                        pressed && styles.avatarPressed,
+                    ]}>
+                    {avatarUrl ? (
+                        <Image
+                            source={{ uri: avatarUrl }}
+                            style={avatarStyle}
+                            contentFit="cover"
+                            placeholder={theme.imagePlaceholder}
+                            placeholderContentFit="cover"
+                            transition={180}
                         />
-                    </View>
-                )}
+                    ) : (
+                        <View style={[styles.avatarFallback, avatarStyle]}>
+                            <MaterialCommunityIcons
+                                name="account-outline"
+                                size={scale(14)}
+                                color={theme.themeColor}
+                            />
+                        </View>
+                    )}
+                </Pressable>
                 <View style={styles.authorText}>
                     <Text
                         numberOfLines={1}
@@ -238,7 +280,6 @@ const HarborTopicCard = ({
             ) : null}
 
             <Text
-                selectable
                 numberOfLines={3}
                 style={[styles.title, { color: theme.black.main }]}>
                 {topic.title}
@@ -250,6 +291,36 @@ const HarborTopicCard = ({
                     style={[styles.excerpt, { color: theme.black.third }]}>
                     {topic.excerpt}
                 </Text>
+            ) : null}
+
+            {coverUrl && !coverFailed ? (
+                <View
+                    style={[
+                        styles.coverWrap,
+                        {
+                            backgroundColor: theme.tonal.primary08,
+                            width: coverWidth,
+                            height: coverHeight,
+                        },
+                    ]}>
+                    <Image
+                        source={{ uri: coverUrl }}
+                        style={styles.coverImage}
+                        contentFit="cover"
+                        placeholder={theme.imagePlaceholder}
+                        placeholderContentFit="cover"
+                        transition={180}
+                        recyclingKey={coverUrl}
+                        onLoad={event => {
+                            const width = Number(event?.source?.width);
+                            const height = Number(event?.source?.height);
+                            if (width > 0 && height > 0) {
+                                setIsLandscape(width > height);
+                            }
+                        }}
+                        onError={() => setCoverFailed(true)}
+                    />
+                </View>
             ) : null}
 
             {statuses.length > 0 ? (
@@ -342,9 +413,9 @@ const styles = StyleSheet.create({
     card: {
         borderWidth: StyleSheet.hairlineWidth,
         borderRadius: scale(12),
-        marginHorizontal: scale(6),
+        marginHorizontal: CARD_MARGIN_HORIZONTAL,
         marginBottom: verticalScale(4),
-        paddingHorizontal: scale(12),
+        paddingHorizontal: CARD_PADDING_HORIZONTAL,
         paddingTop: verticalScale(11),
         overflow: 'hidden',
     },
@@ -355,6 +426,9 @@ const styles = StyleSheet.create({
     avatarFallback: {
         alignItems: 'center',
         justifyContent: 'center',
+    },
+    avatarPressed: {
+        opacity: 0.65,
     },
     authorText: {
         flex: 1,
@@ -402,6 +476,16 @@ const styles = StyleSheet.create({
         fontSize: scale(11),
         lineHeight: scale(17),
         marginTop: verticalScale(3),
+    },
+    coverWrap: {
+        alignSelf: 'flex-start',
+        marginTop: verticalScale(8),
+        borderRadius: scale(8),
+        overflow: 'hidden',
+    },
+    coverImage: {
+        width: '100%',
+        height: '100%',
     },
     categoryChip: {
         maxWidth: scale(150),

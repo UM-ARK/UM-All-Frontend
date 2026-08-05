@@ -10,7 +10,6 @@ import {
     ActivityIndicator,
     Alert,
     InteractionManager,
-    Platform,
     Pressable,
     RefreshControl,
     Share,
@@ -24,11 +23,12 @@ import { FlashList } from '@shopify/flash-list';
 import { isLiquidGlassSupported } from '@callstack/liquid-glass';
 import { useHeaderHeight } from '@react-navigation/elements';
 import Toast from 'react-native-simple-toast';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import { scale, verticalScale } from 'react-native-size-matters';
 import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '../../../components/ThemeContext';
+import { getDeepLinkShareHeaderOptions } from '../../../components/DeepLinkShareButton';
 import { useHarborSession } from '../../../contexts/HarborSessionContext';
 import { openLink } from '../../../utils/browser';
 import {
@@ -40,6 +40,7 @@ import {
 } from '../../../utils/harbor/harborNavigation';
 import {
     ARK_HARBOR,
+    ARK_HARBOR_TOPIC_SHARE_URL,
     ARK_HARBOR_TOPIC_URL,
 } from '../../../utils/pathMap';
 import { trigger } from '../../../utils/trigger';
@@ -51,6 +52,7 @@ import HarborTopicDetailSkeleton from './topicDetail/HarborTopicDetailSkeleton';
 import {
     canShowFlagMenu,
     canUpdatePostReaction,
+    extractPostImages,
     getLikeAction,
     getReactionCount,
 } from './topicDetail/harborTopicModels';
@@ -99,31 +101,6 @@ const TOPIC_NOTIFICATION_OPTIONS = [
     },
 ];
 
-const HarborTopicShareButton = ({
-    accessibilityLabel,
-    onPress,
-    themeColor,
-}) => (
-    <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={accessibilityLabel}
-        onPress={() => {
-            trigger();
-            onPress();
-        }}
-        style={styles.headerShareButton}>
-        <MaterialCommunityIcons
-            name="share-variant-outline"
-            size={scale(20)}
-            color={themeColor}
-        />
-    </Pressable>
-);
-
-const createHarborTopicShareButton = props => () => (
-    <HarborTopicShareButton {...props} />
-);
-
 const HarborTopicDetail = ({ route, navigation }) => {
     const { theme } = useTheme();
     const { t } = useTranslation('harbor');
@@ -132,7 +109,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
         status: sessionStatus,
         user: harborUser,
     } = useHarborSession();
-    const { width } = useWindowDimensions();
+    const { height, width } = useWindowDimensions();
     const headerHeight = useHeaderHeight();
     const {
         black,
@@ -258,6 +235,8 @@ const HarborTopicDetail = ({ route, navigation }) => {
     const [topicActionBarHeight, setTopicActionBarHeight] = useState(
         verticalScale(48),
     );
+    const [postBodyHeights, setPostBodyHeights] = useState({});
+    const [collapsedPostNumbers, setCollapsedPostNumbers] = useState({});
 
     const firstPost = useMemo(
         () =>
@@ -273,6 +252,44 @@ const HarborTopicDetail = ({ route, navigation }) => {
         firstPost &&
         !canUpdatePostReaction(firstPost);
     const commentCount = Math.max(Number(topic?.posts_count || 1) - 1, 0);
+    const postLongThreshold = Math.max(
+        height - headerHeight - topicActionBarHeight - verticalScale(24),
+        verticalScale(320),
+    );
+    const isCurrentPostLong =
+        Number(postBodyHeights[currentPostNumber] || 0) > postLongThreshold;
+    const isCurrentPostCollapsed = Boolean(
+        collapsedPostNumbers[currentPostNumber],
+    );
+    const showPostNavigation =
+        isCurrentPostLong && !isCurrentPostCollapsed;
+
+    useEffect(() => {
+        setPostBodyHeights({});
+        setCollapsedPostNumbers({});
+    }, [topicId]);
+
+    const handlePostBodyLayout = useCallback((postNumber, event) => {
+        if (collapsedPostNumbers[postNumber]) {
+            return;
+        }
+        const bodyHeight = event.nativeEvent.layout.height;
+        setPostBodyHeights(current =>
+            current[postNumber] === bodyHeight
+                ? current
+                : { ...current, [postNumber]: bodyHeight },
+        );
+    }, [collapsedPostNumbers]);
+
+    const togglePostCollapsed = useCallback(postNumber => {
+        setCollapsedPostNumbers(current => ({
+            ...current,
+            [postNumber]: !current[postNumber],
+        }));
+        requestAnimationFrame(() => {
+            scrollToPost(postNumber, { animated: false, allowFetch: false });
+        });
+    }, [scrollToPost]);
 
     const listBottomInset =
         topicActionBarHeight + verticalScale(8);
@@ -323,6 +340,14 @@ const HarborTopicDetail = ({ route, navigation }) => {
                 return;
             }
 
+            if (target?.type === 'user' && target.username) {
+                navigation.navigate('HarborProfile', {
+                    username: target.username,
+                    mode: 'preview',
+                });
+                return;
+            }
+
             const fallbackUrl = target?.url || url;
             console.warn(
                 '[HarborPostContent] Web fallback link:',
@@ -341,9 +366,12 @@ const HarborTopicDetail = ({ route, navigation }) => {
             if (!username) {
                 return;
             }
-            openHarborLink(`${ARK_HARBOR}/u/${encodeURIComponent(username)}`);
+            navigation.navigate('HarborProfile', {
+                username,
+                mode: 'preview',
+            });
         },
-        [openHarborLink],
+        [navigation],
     );
 
     const openCategory = useCallback(
@@ -372,7 +400,10 @@ const HarborTopicDetail = ({ route, navigation }) => {
 
     const sharePost = useCallback(
         post => {
-            const url = ARK_HARBOR_TOPIC_URL(topicId, post?.post_number);
+            const url = ARK_HARBOR_TOPIC_SHARE_URL(
+                topicId,
+                post?.post_number,
+            );
             Share.share({
                 message: `${topic?.title || 'Harbor'}\n${url}`,
                 url,
@@ -384,7 +415,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
     );
 
     const shareCurrentPost = useCallback(() => {
-        const url = ARK_HARBOR_TOPIC_URL(
+        const url = ARK_HARBOR_TOPIC_SHARE_URL(
             topicId,
             currentPostNumber > 0 ? currentPostNumber : undefined,
         );
@@ -399,34 +430,11 @@ const HarborTopicDetail = ({ route, navigation }) => {
     useLayoutEffect(() => {
         navigation.setOptions({
             headerTitle: '',
-            // iOS：原生 UIBarButtonItem，液態玻璃下才是標準圓形
-            headerRight:
-                Platform.OS === 'ios'
-                    ? undefined
-                    : createHarborTopicShareButton({
-                          accessibilityLabel: t('分享'),
-                          onPress: shareCurrentPost,
-                          themeColor,
-                      }),
-            unstable_headerRightItems:
-                Platform.OS === 'ios'
-                    ? () => [
-                          {
-                              type: 'button',
-                              label: t('分享'),
-                              accessibilityLabel: t('分享'),
-                              icon: {
-                                  type: 'sfSymbol',
-                                  name: 'square.and.arrow.up',
-                              },
-                              tintColor: themeColor,
-                              onPress: () => {
-                                  trigger();
-                                  shareCurrentPost();
-                              },
-                          },
-                      ]
-                    : undefined,
+            ...getDeepLinkShareHeaderOptions({
+                accessibilityLabel: t('分享'),
+                onPress: shareCurrentPost,
+                themeColor,
+            }),
         });
     }, [navigation, shareCurrentPost, t, themeColor]);
 
@@ -600,17 +608,21 @@ const HarborTopicDetail = ({ route, navigation }) => {
         post => {
             openHarborComposer(navigation, {
                 mode: 'edit',
+                fromTopicDetail: true,
                 postId: post.id,
                 postNumber: post.post_number,
                 topicId,
                 topicTitle: topic?.title || initialTopicTitle,
                 categoryId: topic?.category_id,
+                tags: topic?.tags,
+                editImageUrls: extractPostImages(post?.cooked),
             });
         },
         [
             initialTopicTitle,
             navigation,
             topic?.category_id,
+            topic?.tags,
             topic?.title,
             topicId,
         ],
@@ -686,6 +698,12 @@ const HarborTopicDetail = ({ route, navigation }) => {
                 (postIndex === 0 ||
                     previousPostNumber <= unreadAfterPostNumber);
             const isFirstPost = Number(item.post_number) === 1;
+            const postNumber = Number(item.post_number);
+            const isPostCollapsed = Boolean(
+                collapsedPostNumbers[postNumber],
+            );
+            const isPostLong =
+                Number(postBodyHeights[postNumber] || 0) > postLongThreshold;
 
             return (
                 <View>
@@ -744,6 +762,10 @@ const HarborTopicDetail = ({ route, navigation }) => {
                         onPressOpenOriginal={
                             isFirstPost ? openOriginalTopic : undefined
                         }
+                        onPostBodyLayout={event =>
+                            handlePostBodyLayout(postNumber, event)
+                        }
+                        onTogglePost={() => togglePostCollapsed(postNumber)}
                         onPressReply={scrollToPost}
                         onPressShare={sharePost}
                         onPressTag={openTag}
@@ -800,6 +822,8 @@ const HarborTopicDetail = ({ route, navigation }) => {
                         }
                         reactions={validReactions}
                         reactionsEnabled={validReactions.length > 0}
+                        isPostCollapsed={isPostCollapsed}
+                        isPostLong={isPostLong}
                     />
                 </View>
             );
@@ -807,6 +831,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
         [
             canReplyToTopic,
             black.third,
+            collapsedPostNumbers,
             contentWidth,
             imageUrls,
             isLoadingPrevious,
@@ -814,6 +839,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
             confirmDeletePost,
             explainPostReactionDisabled,
             harborUser?.username,
+            handlePostBodyLayout,
             openAuthor,
             openBookmarkEditor,
             openCategory,
@@ -827,6 +853,8 @@ const HarborTopicDetail = ({ route, navigation }) => {
             openTag,
             pendingMutations,
             pendingNestedPostNumbers,
+            postBodyHeights,
+            postLongThreshold,
             posts,
             scrollToPost,
             selectPostReaction,
@@ -835,6 +863,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
             t,
             themeColor,
             theme.disabled,
+            togglePostCollapsed,
             togglePostLike,
             topic,
             topicId,
@@ -1014,6 +1043,47 @@ const HarborTopicDetail = ({ route, navigation }) => {
                 reactionsEnabled={validReactions.length > 0}
             />
 
+            {showPostNavigation ? (
+                <View
+                    style={[
+                        styles.postNavigation,
+                        {
+                            bottom: topicActionBarHeight + verticalScale(6),
+                            backgroundColor: white,
+                            borderColor: theme.disabled,
+                        },
+                    ]}>
+                    <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel={t('收起 {{postNumber}} 樓的正文', {
+                            postNumber: currentPostNumber,
+                        })}
+                        onPress={() => {
+                            trigger();
+                            togglePostCollapsed(currentPostNumber);
+                        }}
+                        style={({ pressed }) => [
+                            styles.postNavigationButton,
+                            pressed ? styles.pressedLink : null,
+                        ]}>
+                        <MaterialCommunityIcons
+                            name="arrow-collapse-vertical"
+                            size={scale(15)}
+                            color={themeColor}
+                        />
+                        <Text
+                            style={[
+                                styles.postNavigationText,
+                                { color: themeColor },
+                            ]}>
+                            {t('收起 {{postNumber}} 樓的正文', {
+                                postNumber: currentPostNumber,
+                            })}
+                        </Text>
+                    </Pressable>
+                </View>
+            ) : null}
+
             {pendingNewPostIds.length > 0 ? (
                 <Pressable
                     onPress={() => {
@@ -1023,7 +1093,11 @@ const HarborTopicDetail = ({ route, navigation }) => {
                     style={({ pressed }) => [
                         styles.newRepliesButton,
                         {
-                            bottom: topicActionBarHeight + verticalScale(10),
+                            bottom:
+                                topicActionBarHeight +
+                                verticalScale(
+                                    showPostNavigation ? 48 : 10,
+                                ),
                             backgroundColor: pressed
                                 ? tonal.primary50
                                 : themeColor,

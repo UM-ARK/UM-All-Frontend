@@ -13,7 +13,7 @@ import {
 import { MenuView } from '@react-native-menu/menu';
 import { Image } from 'expo-image';
 import moment from 'moment-timezone';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import { scale } from 'react-native-size-matters';
 import { useTranslation } from 'react-i18next';
 
@@ -21,13 +21,16 @@ import { useTheme } from '../../../../components/ThemeContext';
 import { parseHarborPostEvent } from '../../../../utils/harbor/harborPostEvent';
 import {
     ARK_HARBOR_AVATAR_TEMPLATE,
-    ARK_HARBOR_EMOJI_URL,
     ARK_HARBOR_TOPIC_URL,
 } from '../../../../utils/pathMap';
 import { trigger } from '../../../../utils/trigger';
 import HarborCategoryIcon from '../components/HarborCategoryIcon';
 import HarborPostContent from './HarborPostContent';
 import HarborPostEventCard from './HarborPostEventCard';
+import HarborReactionControl, {
+    getHarborReactionLabel,
+    HarborReactionIcon,
+} from './HarborReactionControl';
 import {
     canDeleteHarborPost,
     getLikeAction,
@@ -69,96 +72,6 @@ const formatHarborPostTime = (iso, language) => {
     }
     return created.format('YYYY/MM/DD HH:mm');
 };
-// 常見 Discourse reaction shortcode → Unicode，優先於遠端圖片以提升清晰度
-const HARBOR_REACTION_UNICODE = Object.freeze({
-    heart: '❤️',
-    '+1': '👍',
-    '-1': '👎',
-    laughing: '😆',
-    open_mouth: '😮',
-    clap: '👏',
-    confetti_ball: '🎊',
-    hugs: '🤗',
-    smile: '😄',
-    tada: '🎉',
-    pray: '🙏',
-    eyes: '👀',
-    rocket: '🚀',
-    heart_eyes: '😍',
-    slightly_smiling_face: '🙂',
-});
-const HARBOR_REACTION_LABEL = Object.freeze({
-    heart: '愛心',
-    '+1': '讚同',
-    '-1': '不讚同',
-    laughing: '好笑',
-    open_mouth: '驚訝',
-    clap: '拍手',
-    confetti_ball: '慶祝',
-    hugs: '擁抱',
-    smile: '微笑',
-    tada: '太棒了',
-    pray: '祈禱',
-    eyes: '留意',
-    rocket: '火箭',
-    heart_eyes: '喜愛',
-    slightly_smiling_face: '淡淡微笑',
-});
-const normalizeHarborReactionName = name => {
-    if (!name || typeof name !== 'string') {
-        return '';
-    }
-    return name.replace(/^:|:$/g, '').trim();
-};
-
-const HarborReactionIcon = ({ name, size = scale(24), color }) => {
-    const reactionName = normalizeHarborReactionName(name);
-    const unicode = HARBOR_REACTION_UNICODE[reactionName];
-    if (unicode) {
-        return (
-            <Text
-                allowFontScaling={false}
-                style={[
-                    styles.reactionGlyph,
-                    {
-                        color: color || undefined,
-                        fontSize: size,
-                        lineHeight: size * 1.15,
-                    },
-                ]}>
-                {unicode}
-            </Text>
-        );
-    }
-
-    const emojiUrl = ARK_HARBOR_EMOJI_URL(reactionName);
-    if (emojiUrl) {
-        return (
-            <Image
-                source={{ uri: emojiUrl }}
-                style={{ width: size, height: size }}
-                contentFit="contain"
-                accessibilityLabel={`:${reactionName}:`}
-            />
-        );
-    }
-
-    if (!reactionName) {
-        return null;
-    }
-
-    return (
-        <Text
-            numberOfLines={1}
-            style={[
-                styles.reactionFallbackText,
-                { color: color || undefined, fontSize: size * 0.45 },
-            ]}>
-            :{reactionName}:
-        </Text>
-    );
-};
-
 const MetaItem = ({ icon, value, color, style }) => {
     if (!value) {
         return null;
@@ -195,6 +108,8 @@ const HarborPostCard = memo(
         onPressLink,
         onPressOpenNotifications,
         onPressOpenOriginal,
+        onPostBodyLayout,
+        onTogglePost,
         onPressReply,
         onPressShare,
         onPressTag,
@@ -217,6 +132,8 @@ const HarborPostCard = memo(
         reactionDisabled,
         reactions,
         reactionsEnabled,
+        isPostCollapsed,
+        isPostLong,
     }) => {
         const { theme } = useTheme();
         const { t, i18n } = useTranslation('harbor');
@@ -285,7 +202,8 @@ const HarborPostCard = memo(
             post.avatar_template,
             isNestedReply ? NESTED_AVATAR_SIZE : AVATAR_SIZE,
         );
-        const displayName = post.name || post.display_username || post.username;
+        const displayName =
+            post.username || post.display_username || t('Harbor 會員');
         const wasEdited =
             post.updated_at &&
             post.created_at &&
@@ -298,29 +216,6 @@ const HarborPostCard = memo(
             post.small_action ||
             post.post_type === 3,
         );
-        const reactionMenuActions = useMemo(() => {
-            return reactions.map(reaction => {
-                const reactionName = normalizeHarborReactionName(reaction);
-                const unicode = HARBOR_REACTION_UNICODE[reactionName];
-                const label = t(
-                    HARBOR_REACTION_LABEL[reactionName] ||
-                        reactionName.replace(/_/g, ' '),
-                );
-                return {
-                    id: reaction,
-                    title: unicode
-                        ? `${unicode}  ${label}`
-                        : label,
-                    state:
-                        currentReaction === reaction
-                            ? 'on'
-                            : 'off',
-                    attributes: {
-                        disabled: Boolean(pendingLike || pendingReaction),
-                    },
-                };
-            });
-        }, [currentReaction, pendingLike, pendingReaction, reactions, t]);
         const moreMenuActions = useMemo(() => {
             // @react-native-menu/menu：iOS 用 SF Symbol；Android 用系統 drawable 名稱
             const actions = [];
@@ -608,12 +503,7 @@ const HarborPostCard = memo(
                             key={reaction.id}
                             accessible
                             accessibilityLabel={`${t(
-                                HARBOR_REACTION_LABEL[
-                                    normalizeHarborReactionName(reaction.id)
-                                ] ||
-                                    normalizeHarborReactionName(
-                                        reaction.id,
-                                    ).replace(/_/g, ' '),
+                                getHarborReactionLabel(reaction.id),
                             )} ${reaction.count}`}
                             style={styles.reactionSummaryItem}>
                             <HarborReactionIcon
@@ -634,15 +524,19 @@ const HarborPostCard = memo(
 
         // 右側操作圖示統一尺寸，搭配固定按鈕框對齊
         const metaIconSize = scale(16);
+        const showCurrentReaction =
+            reactionsEnabled &&
+            currentReaction &&
+            currentReaction !== 'heart';
         const reactionIcon = pendingReaction || pendingLike ? (
             <ActivityIndicator size="small" color={themeColor} />
-        ) : reactionsEnabled && currentReaction ? (
+        ) : showCurrentReaction ? (
             <HarborReactionIcon name={currentReaction} size={metaIconSize} />
         ) : reactionsEnabled ? (
             <MaterialCommunityIcons
-                name="emoticon-outline"
+                name={currentReaction ? 'heart' : 'heart-outline'}
                 size={metaIconSize}
-                color={black.third}
+                color={currentReaction ? themeColor : black.third}
             />
         ) : (
             <MaterialCommunityIcons
@@ -652,52 +546,42 @@ const HarborPostCard = memo(
             />
         );
 
-        const reactionControl =
-            reactionsEnabled && reactionDisabled ? (
-                <Pressable
-                    accessibilityRole="button"
-                    accessibilityLabel={t('回應')}
-                    hitSlop={8}
-                    onPress={() => {
-                        trigger();
-                        onPressDisabledReaction(post.id);
-                    }}
+        const reactionControl = reactionsEnabled ? (
+            <HarborReactionControl
+                currentReaction={currentReaction}
+                disabled={reactionDisabled}
+                hitSlop={8}
+                onPressDisabled={() => onPressDisabledReaction(post.id)}
+                onSelectReaction={reaction => {
+                    onSelectReaction(post.id, reaction);
+                }}
+                pending={Boolean(pendingLike || pendingReaction)}
+                reactions={reactions}
+                style={styles.postMetaIconMenu}>
+                <View
                     style={[
                         styles.postMetaIconButton,
                         reactionDisabled ? styles.disabledAction : null,
                     ]}>
                     {reactionIcon}
-                </Pressable>
-            ) : reactionsEnabled ? (
-                <MenuView
-                    actions={reactionMenuActions}
-                    onOpenMenu={() => trigger()}
-                    onPressAction={event => {
-                        trigger();
-                        onSelectReaction(post.id, event.nativeEvent.event);
-                    }}
-                    shouldOpenOnLongPress={false}
-                    style={styles.postMetaIconMenu}>
-                    <View style={styles.postMetaIconButton}>
-                        {reactionIcon}
-                    </View>
-                </MenuView>
-            ) : (
-                <Pressable
-                    accessibilityRole="button"
-                    accessibilityLabel={
-                        isLiked ? t('取消讚好') : t('讚好')
-                    }
-                    disabled={pendingLike}
-                    hitSlop={8}
-                    onPress={() => {
-                        trigger();
-                        onPressLike(post);
-                    }}
-                    style={styles.postMetaIconButton}>
-                    {reactionIcon}
-                </Pressable>
-            );
+                </View>
+            </HarborReactionControl>
+        ) : (
+            <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={
+                    isLiked ? t('取消讚好') : t('讚好')
+                }
+                disabled={pendingLike}
+                hitSlop={8}
+                onPress={() => {
+                    trigger();
+                    onPressLike(post);
+                }}
+                style={styles.postMetaIconButton}>
+                {reactionIcon}
+            </Pressable>
+        );
 
         const replyControl = canReply ? (
             <Pressable
@@ -714,6 +598,35 @@ const HarborPostCard = memo(
                     size={metaIconSize}
                     color={black.third}
                 />
+            </Pressable>
+        ) : null;
+
+        const postContentToggle = isPostLong ? (
+            <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={
+                    isPostCollapsed ? t('展開正文') : t('收起正文')
+                }
+                onPress={() => {
+                    trigger();
+                    onTogglePost?.();
+                }}
+                style={({ pressed }) => [
+                    styles.postContentToggle,
+                    pressed ? styles.pressedLink : null,
+                ]}>
+                <MaterialCommunityIcons
+                    name={isPostCollapsed ? 'chevron-down' : 'chevron-up'}
+                    size={scale(18)}
+                    color={themeColor}
+                />
+                <Text
+                    style={[
+                        styles.postContentToggleText,
+                        { color: themeColor },
+                    ]}>
+                    {isPostCollapsed ? t('展開正文') : t('收起正文')}
+                </Text>
             </Pressable>
         ) : null;
 
@@ -895,23 +808,30 @@ const HarborPostCard = memo(
                             style={[
                                 styles.postBody,
                                 styles.firstPostBody,
+                                isPostCollapsed
+                                    ? styles.postBodyCollapsed
+                                    : null,
                             ]}>
-                            <HarborPostContent
-                                cooked={post.cooked}
-                                contentWidth={contentWidth}
-                                imageUrls={imageUrls}
-                                onOpenImage={onOpenImage}
-                                onPressLink={onPressLink}
-                                postUrl={postUrl}
-                                forceInteractiveFallback={Boolean(postEvent)}>
-                                {postEvent ? (
-                                    <HarborPostEventCard
-                                        event={postEvent}
-                                        postUrl={postUrl}
-                                    />
-                                ) : null}
-                            </HarborPostContent>
+                            <View onLayout={onPostBodyLayout}>
+                                <HarborPostContent
+                                    cooked={post.cooked}
+                                    contentWidth={contentWidth}
+                                    imageUrls={imageUrls}
+                                    onOpenImage={onOpenImage}
+                                    onPressLink={onPressLink}
+                                    postUrl={postUrl}
+                                    forceInteractiveFallback={Boolean(postEvent)}>
+                                    {postEvent ? (
+                                        <HarborPostEventCard
+                                            event={postEvent}
+                                            postUrl={postUrl}
+                                        />
+                                    ) : null}
+                                </HarborPostContent>
+                            </View>
                         </View>
+
+                        {postContentToggle}
 
                         {hasTopicTags ? (
                             <View
@@ -1129,31 +1049,41 @@ const HarborPostCard = memo(
                                 </View>
                             </View>
 
-                            <View style={styles.replyBody}>
-                                <HarborPostContent
-                                    cooked={post.cooked}
-                                    contentWidth={
-                                        contentWidth -
-                                        (isNestedReply
-                                            ? scale(28)
-                                            : scale(38))
-                                    }
-                                    imageUrls={imageUrls}
-                                    onOpenImage={onOpenImage}
-                                    onPressLink={onPressLink}
-                                    postUrl={postUrl}
-                                    compact
-                                    forceInteractiveFallback={Boolean(
-                                        postEvent,
-                                    )}>
-                                    {postEvent ? (
-                                        <HarborPostEventCard
-                                            event={postEvent}
-                                            postUrl={postUrl}
-                                        />
-                                    ) : null}
-                                </HarborPostContent>
+                            <View
+                                style={[
+                                    styles.replyBody,
+                                    isPostCollapsed
+                                        ? styles.postBodyCollapsed
+                                        : null,
+                                ]}>
+                                <View onLayout={onPostBodyLayout}>
+                                    <HarborPostContent
+                                        cooked={post.cooked}
+                                        contentWidth={
+                                            contentWidth -
+                                            (isNestedReply
+                                                ? scale(28)
+                                                : scale(38))
+                                        }
+                                        imageUrls={imageUrls}
+                                        onOpenImage={onOpenImage}
+                                        onPressLink={onPressLink}
+                                        postUrl={postUrl}
+                                        compact
+                                        forceInteractiveFallback={Boolean(
+                                            postEvent,
+                                        )}>
+                                        {postEvent ? (
+                                            <HarborPostEventCard
+                                                event={postEvent}
+                                                postUrl={postUrl}
+                                            />
+                                        ) : null}
+                                    </HarborPostContent>
+                                </View>
                             </View>
+
+                            {postContentToggle}
 
                             <View style={styles.postMetaRow}>
                                 <Text

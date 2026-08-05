@@ -14,7 +14,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { isLiquidGlassSupported } from '@callstack/liquid-glass';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { scale, verticalScale } from 'react-native-size-matters';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from "@react-native-vector-icons/ionicons";
 import * as OpenCC from 'opencc-js';
 import { useTranslation } from 'react-i18next';
 
@@ -252,7 +252,11 @@ const SearchScreen = ({ navigation }) => {
 
             if (item.go_where === 'Webview' || item.go_where === 'Linking') {
                 if (item.webview_param?.url) {
-                    openLink(item.webview_param.url);
+                    // 有指定 mode（如校園地圖 fullScreen）時傳入；其餘預設 Modal
+                    openLink({
+                        URL: item.webview_param.url,
+                        mode: item.webview_param.mode,
+                    });
                 }
                 return;
             }
@@ -458,102 +462,63 @@ const SearchScreen = ({ navigation }) => {
                         )}
                     </Pressable>,
                 )}
-                <View
-                    style={[styles.card, { backgroundColor: white }, viewShadow]}>
-                    {history.map((record, index) => {
-                        const selectedFeature = record.selectedKey
-                            ? featureByKey.get(record.selectedKey)
-                            : null;
-
-                        return (
-                            <View key={record.query.toLowerCase()}>
-                                <Pressable
-                                    onPress={() => handleHistoryPress(record)}
-                                    accessibilityRole="button"
-                                    style={({ pressed }) => [
-                                        styles.historyRow,
-                                        pressed && {
-                                            backgroundColor: tonal.primary08,
-                                        },
+                <View style={styles.chips}>
+                    {history.map(record => (
+                        <View
+                            key={record.query.toLowerCase()}
+                            style={[
+                                styles.chip,
+                                { backgroundColor: tonal.primary15 },
+                            ]}>
+                            <Pressable
+                                onPress={() => handleHistoryPress(record)}
+                                accessibilityRole="button"
+                                style={({ pressed }) => [
+                                    styles.historyChipMain,
+                                    pressed && {
+                                        opacity: 0.55,
+                                    },
+                                ]}>
+                                <Ionicons
+                                    name="time-outline"
+                                    size={scale(14)}
+                                    color={themeColor}
+                                />
+                                <Text
+                                    numberOfLines={1}
+                                    style={[
+                                        uiStyle.defaultText,
+                                        styles.chipText,
+                                        { color: themeColor },
                                     ]}>
-                                    <View
-                                        style={[
-                                            styles.historyIcon,
-                                            {
-                                                backgroundColor:
-                                                    tonal.primary15,
-                                            },
-                                        ]}>
-                                        <Ionicons
-                                            name="time-outline"
-                                            size={scale(17)}
-                                            color={themeColor}
-                                        />
-                                    </View>
-                                    <View style={styles.rowText}>
-                                        <Text
-                                            numberOfLines={1}
-                                            style={[
-                                                uiStyle.defaultText,
-                                                styles.rowTitle,
-                                                { color: black.main },
-                                            ]}>
-                                            {record.query}
-                                        </Text>
-                                        {selectedFeature ? (
-                                            <Text
-                                                numberOfLines={1}
-                                                style={[
-                                                    uiStyle.defaultText,
-                                                    styles.rowDescription,
-                                                    { color: black.third },
-                                                ]}>
-                                                {selectedFeature.fn_name}
-                                            </Text>
-                                        ) : null}
-                                    </View>
-                                    <Pressable
-                                        onPress={event => {
-                                            event.stopPropagation();
-                                            handleRemoveHistory(record);
-                                        }}
-                                        hitSlop={scale(8)}
-                                        accessibilityRole="button"
-                                        accessibilityLabel={t(
-                                            '刪除搜索記錄：{{query}}',
-                                            {
-                                                ns: 'home',
-                                                query: record.query,
-                                            },
-                                        )}
-                                        style={({ pressed }) => [
-                                            styles.removeButton,
-                                            pressed && {
-                                                backgroundColor:
-                                                    tonal.primary15,
-                                            },
-                                        ]}>
-                                        <Ionicons
-                                            name="close"
-                                            size={scale(17)}
-                                            color={black.third}
-                                        />
-                                    </Pressable>
-                                </Pressable>
-                                {index < history.length - 1 ? (
-                                    <View
-                                        style={[
-                                            styles.divider,
-                                            {
-                                                backgroundColor:
-                                                    themeColorUltraLight,
-                                            },
-                                        ]}
-                                    />
-                                ) : null}
-                            </View>
-                        );
-                    })}
+                                    {record.query}
+                                </Text>
+                            </Pressable>
+                            <Pressable
+                                onPress={() => handleRemoveHistory(record)}
+                                hitSlop={scale(6)}
+                                accessibilityRole="button"
+                                accessibilityLabel={t(
+                                    '刪除搜索記錄：{{query}}',
+                                    {
+                                        ns: 'home',
+                                        query: record.query,
+                                    },
+                                )}
+                                style={({ pressed }) => [
+                                    styles.historyChipRemove,
+                                    pressed && {
+                                        backgroundColor: tonal.primary30,
+                                    },
+                                ]}>
+                                <Ionicons
+                                    name="close"
+                                    size={scale(14)}
+                                    color={black.third}
+                                />
+                            </Pressable>
+                        </View>
+                    ))}
                 </View>
             </>
         );
@@ -866,18 +831,16 @@ const styles = StyleSheet.create({
         borderRadius: scale(18),
         overflow: 'hidden',
     },
-    historyRow: {
-        minHeight: verticalScale(58),
-        paddingLeft: scale(12),
-        paddingRight: scale(7),
-        paddingVertical: verticalScale(8),
+    historyChipMain: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: scale(10),
+        gap: scale(6),
+        maxWidth: scale(150),
     },
-    historyIcon: {
-        width: scale(34),
-        height: scale(34),
+    historyChipRemove: {
+        width: scale(22),
+        height: scale(22),
+        marginLeft: scale(2),
         borderRadius: scale(11),
         alignItems: 'center',
         justifyContent: 'center',
@@ -886,20 +849,9 @@ const styles = StyleSheet.create({
         flex: 1,
         minWidth: 0,
     },
-    rowTitle: {
-        fontSize: scale(13),
-        fontWeight: '600',
-    },
     rowDescription: {
         marginTop: verticalScale(2),
         fontSize: scale(11),
-    },
-    removeButton: {
-        width: scale(40),
-        height: scale(40),
-        borderRadius: scale(20),
-        alignItems: 'center',
-        justifyContent: 'center',
     },
     divider: {
         height: StyleSheet.hairlineWidth,

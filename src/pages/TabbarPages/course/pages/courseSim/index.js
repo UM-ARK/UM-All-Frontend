@@ -21,18 +21,9 @@ import {
 } from 'react-native';
 
 import { scale, verticalScale } from 'react-native-size-matters';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from "@react-native-vector-icons/ionicons";
 import Clipboard from '@react-native-clipboard/clipboard';
 import moment from 'moment';
-// 課表一次掛多張卡片：不可用 @expo/ui MenuView（SwiftUI Host matchContents
-// 會在 Tab 切換／版面提交時反寫 Fabric ShadowTree 並 abort）。
-// 改用 @react-native-menu/menu（原生 UIButton）；縮放改由 onOpenMenu/onCloseMenu 驅動。
-import { MenuView } from '@react-native-menu/menu';
-import Animated, {
-    useAnimatedStyle,
-    useSharedValue,
-    withSpring,
-} from 'react-native-reanimated';
 import Toast from 'react-native-simple-toast';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { t } from 'i18next';
@@ -51,12 +42,7 @@ import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
 
 import { useTheme, uiStyle } from '../../../../../components/ThemeContext';
 import { openLink } from '../../../../../utils/browser';
-import {
-    ARK_WIKI_SEARCH,
-    OFFICIAL_COURSE_SEARCH,
-    UM_ISW,
-} from '../../../../../utils/pathMap';
-import { getCurrentUmehHost } from '../../../../../utils/umehHost';
+import { UM_ISW } from '../../../../../utils/pathMap';
 import { logToFirebase } from '../../../../../utils/firebaseAnalytics';
 import { trigger } from '../../../../../utils/trigger';
 import {
@@ -72,8 +58,13 @@ import {
 } from '../../hooks/useConflict';
 import { normalizeImportText } from '../../utils/parseImportData';
 import AddCourseFab from '../../components/AddCourseFab';
+import CourseActionMenuCard from '../../components/CourseActionMenuCard';
 import CourseTimeRangePicker from '../../components/CourseTimeRangePicker';
 import { TIME_RANGE_PRESETS } from '../../constants';
+import {
+    getCourseInfoMenuActions,
+    handleCourseInfoMenuAction,
+} from '../../utils/courseInfoMenu';
 import SegmentControl from '../../../../../components/SegmentControl';
 import { COURSE_SEARCH_SEGMENT } from '../../../../../utils/courseNavigation';
 import { getReplacementCourses } from './utils/replacementCourses';
@@ -131,52 +122,6 @@ const daySort = objArr => {
 const isTimetableView = value =>
     value === 'detail' || value === 'overview';
 
-/** 與 TouchableScale 預設相近的彈簧參數 */
-const COURSE_CARD_SPRING = {
-    damping: 18,
-    stiffness: 280,
-    mass: 0.4,
-};
-
-/**
- * 共用課程卡片選單（@react-native-menu/menu）。
- * 原生 UIButton 會吃掉子層 Pressable 的 pressIn，故改以選單開合驅動縮放回饋。
- */
-function CourseActionMenuCard({
-    actions,
-    onPressAction,
-    onOpen,
-    menuStyle,
-    cardStyle,
-    accessibilityLabel,
-    children,
-}) {
-    const cardScale = useSharedValue(1);
-    const animatedStyle = useAnimatedStyle(() => ({
-        transform: [{ scale: cardScale.value }],
-    }));
-
-    return (
-        <MenuView
-            actions={actions}
-            onPressAction={onPressAction}
-            accessibilityLabel={accessibilityLabel}
-            shouldOpenOnLongPress={false}
-            onOpenMenu={() => {
-                cardScale.value = withSpring(0.96, COURSE_CARD_SPRING);
-                onOpen?.();
-            }}
-            onCloseMenu={() => {
-                cardScale.value = withSpring(1, COURSE_CARD_SPRING);
-            }}
-            style={menuStyle}>
-            <Animated.View style={[cardStyle, animatedStyle]}>
-                {children}
-            </Animated.View>
-        </MenuView>
-    );
-}
-
 /** 課表欄內使用的固定尺寸課程卡片選單。 */
 function TimetableCourseMenuCard({
     actions,
@@ -226,9 +171,16 @@ function CourseSim({ route, navigation }) {
         importFromISW,
     } = useCoursePlan();
 
+    // 首次 lazy 掛載若已帶 check，必須用初始 index 打開 sheet。
+    // snapToIndex 在 layout 未完成時會被 gorhom 直接忽略。
+    const initialCheckCode =
+        typeof route.params?.check === 'string' && route.params.check.length > 0
+            ? route.params.check
+            : null;
+
     // state
     const [importTimeTableText, setImportTimeTableText] = useState(''); // 空課表引導的貼上導入
-    const [searchText, setSearchText] = useState(null);
+    const [searchText, setSearchText] = useState(initialCheckCode);
     const [perSearchText, setPerSearchText] = useState(null);
 
     const [dayFilterChoice, setDayFilterChoice] = useState(null);
@@ -238,7 +190,15 @@ function CourseSim({ route, navigation }) {
     // null：尚未讀完上次具體／概覽；讀完前不渲染課表，避免先閃 detail
     const [timetableView, setTimetableView] = useState(null);
 
-    const [hasOpenCourseSearch, setHasOpenCourseSearch] = useState(false);
+    const [hasOpenCourseSearch, setHasOpenCourseSearch] = useState(
+        !!initialCheckCode,
+    );
+    // 與 CustomBottomSheet 的 index 同步；關閉時須回到 -1，避免 prop 殘留把 sheet 拉回
+    const [sheetIndex, setSheetIndex] = useState(initialCheckCode ? 1 : -1);
+    // 已掛載後再帶 check 時 bump key remount，交給 animateOnMount 等 layout
+    const [sheetKey, setSheetKey] = useState(0);
+    // 首次掛載已用初始 index 打開時，focus 清參不必再 remount
+    const appliedInitialCheckRef = useRef(!!initialCheckCode);
     const [bottomSheetMode, setBottomSheetMode] = useState('search');
     const [replacementTarget, setReplacementTarget] = useState(null);
     const [replacementCourseCode, setReplacementCourseCode] = useState(null);
@@ -505,24 +465,24 @@ function CourseSim({ route, navigation }) {
     const overviewDuration = Math.max(overviewEnd - overviewStart, 60);
     const measuredOverviewMaxHeight =
         overviewViewportHeight > 0 &&
-        overviewWeekdayHeight > 0 &&
-        overviewReminderHeight > 0 &&
-        viewSwitcherHeight > 0
+            overviewWeekdayHeight > 0 &&
+            overviewReminderHeight > 0 &&
+            viewSwitcherHeight > 0
             ? overviewViewportHeight -
-              overviewWeekdayHeight -
-              overviewReminderHeight -
-              floatingBottom -
-              viewSwitcherHeight -
-              scale(5) -
-              verticalScale(10)
+            overviewWeekdayHeight -
+            overviewReminderHeight -
+            floatingBottom -
+            viewSwitcherHeight -
+            scale(5) -
+            verticalScale(10)
             : null;
     const overviewMaxHeight = Math.max(
         OVERVIEW_HOUR_HEIGHT,
         measuredOverviewMaxHeight ??
-            windowHeight -
-                insets.top -
-                tabBarHeight -
-                OVERVIEW_RESERVED_HEIGHT,
+        windowHeight -
+        insets.top -
+        tabBarHeight -
+        OVERVIEW_RESERVED_HEIGHT,
     );
     const overviewHourHeight = Math.min(
         OVERVIEW_HOUR_HEIGHT,
@@ -572,7 +532,7 @@ function CourseSim({ route, navigation }) {
                 navigation.setParams({ add: undefined });
             }
 
-            // 如果有check傳參
+            // 如果有check傳參（頁面已掛載後再次帶入；首次掛載靠初始 sheetIndex）
             if (route.params?.check) {
                 const { check } = route.params;
                 setBottomSheetMode('search');
@@ -584,11 +544,18 @@ function CourseSim({ route, navigation }) {
                 setHasOpenCourseSearch(true);
                 // 執行任務後，重置參數
                 navigation.setParams({ check: undefined });
-                bottomSheetRef?.current?.snapToIndex(1);
+
+                if (appliedInitialCheckRef.current) {
+                    // 首次掛載已用 index=1 交給 animateOnMount，勿再 remount
+                    appliedInitialCheckRef.current = false;
+                } else {
+                    // 已掛載過：bump key 讓 sheet 以 index=1 重新掛載並等 layout
+                    setSheetIndex(1);
+                    setSheetKey(key => key + 1);
+                }
             }
 
-            // 失焦時自動清理
-            return () => { };
+            return undefined;
         }, [route, navigation, addCourse]),
     );
 
@@ -608,101 +575,6 @@ function CourseSim({ route, navigation }) {
                 section: course.Section,
             }),
         );
-    };
-
-    /** 建立所有課程 Menu 共用的四個查詢選項。 */
-    const getCourseInfoMenuActions = () => [
-        {
-            id: 'wiki',
-            title: `${t('寫', { ns: 'catalog' })} ARK Wiki !!!`,
-            image: Platform.select({
-                ios: 'book',
-                android: 'ic_menu_agenda',
-            }),
-            imageColor: themeColor,
-            titleColor: themeColor,
-        },
-        {
-            id: 'what2reg',
-            title: `${t('查', { ns: 'catalog' })} ${t('選咩課', { ns: 'catalog' })}`,
-            image: Platform.select({
-                ios: 'star',
-                android: 'btn_star_big_on',
-            }),
-            imageColor: black.third,
-            titleColor: black.third,
-        },
-        {
-            id: 'official',
-            title: `${t('查', { ns: 'catalog' })} ${t('官方', { ns: 'catalog' })}`,
-            image: Platform.select({
-                ios: 'graduationcap',
-                android: 'ic_menu_info_details',
-            }),
-            imageColor: black.third,
-            titleColor: black.third,
-        },
-        {
-            id: 'section',
-            title: `${t('查', { ns: 'catalog' })} ${t('Section / 老師', { ns: 'catalog' })}`,
-            image: Platform.select({
-                ios: 'list.bullet',
-                android: 'ic_menu_sort_by_size',
-            }),
-            imageColor: black.third,
-            titleColor: black.third,
-        },
-    ];
-
-    /**
-     * 處理所有課程 Menu 共用的查詢選項。
-     *
-     * @param {string} actionId Menu action id
-     * @param {Object} course 課程或課節資料
-     * @returns {boolean} 是否已處理
-     */
-    const handleCourseInfoMenuAction = (actionId, course) => {
-        const courseCode = course['Course Code'];
-        const profName = course['Teacher Information'];
-
-        switch (actionId) {
-            case 'wiki': {
-                let URL = ARK_WIKI_SEARCH + encodeURIComponent(courseCode);
-                if (profName) {
-                    URL = ARK_WIKI_SEARCH + encodeURIComponent(profName);
-                    logToFirebase('checkCourse', {
-                        courseCode,
-                        profName,
-                        action: 'ark-wiki',
-                    });
-                } else {
-                    logToFirebase('checkCourse', {
-                        courseCode,
-                        action: 'ark-wiki',
-                    });
-                }
-                openLink(URL);
-                return true;
-            }
-            case 'what2reg': {
-                const URI =
-                    getCurrentUmehHost() +
-                    '/reviews/' +
-                    encodeURIComponent(courseCode) +
-                    '/' +
-                    encodeURIComponent(lodash.deburr(profName || ''));
-                openLink(URI);
-                return true;
-            }
-            case 'official':
-                openLink(OFFICIAL_COURSE_SEARCH + courseCode);
-                return true;
-            case 'section':
-                navigation.navigate('LocalCourse', courseCode);
-                return true;
-            default:
-                return false;
-        }
     };
 
     // 渲染一列（一天）的課表
@@ -763,7 +635,11 @@ function CourseSim({ route, navigation }) {
         const hasDuplicate =
             lodash.countBy(planList, 'Course Code')[course['Course Code']] > 1;
         const actions = [
-            ...getCourseInfoMenuActions(),
+            ...getCourseInfoMenuActions({
+                t,
+                themeColor,
+                secondaryColor: black.third,
+            }),
             {
                 id: 'replacement',
                 title: t('查看平替', { ns: 'timetable' }),
@@ -815,7 +691,11 @@ function CourseSim({ route, navigation }) {
             onPressAction: event => {
                 trigger();
                 const actionId = event.nativeEvent.event;
-                if (handleCourseInfoMenuAction(actionId, course)) {
+                if (handleCourseInfoMenuAction({
+                    actionId,
+                    course,
+                    navigation,
+                })) {
                     return;
                 }
 
@@ -1099,8 +979,10 @@ function CourseSim({ route, navigation }) {
         setReplacementSearchText('');
 
         if (planSlots.length > 0) {
+            setSheetIndex(1);
             bottomSheetRef.current?.snapToIndex(1);
         } else {
+            setSheetIndex(3);
             bottomSheetRef.current?.expand();
         }
 
@@ -1119,6 +1001,7 @@ function CourseSim({ route, navigation }) {
         setReplacementCourseCode(null);
         setReplacementSearchText('');
         setHasOpenCourseSearch(true);
+        setSheetIndex(2);
         bottomSheetRef.current?.snapToIndex(2);
         verScroll.current?.scrollTo({ y: 0 });
 
@@ -1924,7 +1807,11 @@ E11-0000
             const sortedSlots = daySort(item.slots);
             const courseInfo = item.slots[0];
             const replacementMenuActions = [
-                ...getCourseInfoMenuActions(),
+                ...getCourseInfoMenuActions({
+                    t,
+                    themeColor,
+                    secondaryColor: black.third,
+                }),
                 {
                     id: 'replace-course',
                     title: `${t('替換', { ns: 'timetable' })} ${selectedCourse['Course Code']}-${item.section}`,
@@ -1945,7 +1832,11 @@ E11-0000
                     onPressAction={event => {
                         trigger();
                         const actionId = event.nativeEvent.event;
-                        if (handleCourseInfoMenuAction(actionId, courseInfo)) {
+                        if (handleCourseInfoMenuAction({
+                            actionId,
+                            course: courseInfo,
+                            navigation,
+                        })) {
                             return;
                         }
                         if (actionId === 'replace-course') {
@@ -2285,7 +2176,7 @@ E11-0000
                             {filterCourseList.map(item => {
                                 const sectionStatusObj =
                                     courseSectionStatusObj[
-                                        item['Course Code']
+                                    item['Course Code']
                                     ];
                                 const hasCourseConflict =
                                     allSectionsConflict(sectionStatusObj);
@@ -2453,7 +2344,7 @@ E11-0000
                                                     sectionObj[sectionKey][0];
                                                 const sectionStatus =
                                                     sectionStatusObj[
-                                                        sectionKey
+                                                    sectionKey
                                                     ];
                                                 const hasSectionConflict =
                                                     sectionStatus ===
@@ -2797,6 +2688,7 @@ E11-0000
                 style={{
                     width: '100%',
                     alignItems: 'center',
+                    marginTop: verticalScale(5),
                     marginBottom: scale(5),
                 }}>
                 <Text
@@ -2865,8 +2757,8 @@ E11-0000
 
             {/* 有排課時才顯示具體／概覽切換；與 FAB 同層，bottom 見 floatingBottom */}
             {planSlots.length > 0 &&
-            timetableView &&
-            !hasOpenCourseSearch
+                timetableView &&
+                !hasOpenCourseSearch
                 ? renderViewSwitcher()
                 : null}
 
@@ -2881,20 +2773,24 @@ E11-0000
             />
 
             <CustomBottomSheet
+                key={sheetKey}
                 ref={bottomSheetRef}
                 page={'courseSim'}
+                index={sheetIndex}
                 // Tab 已隱藏，sheet 需延伸至螢幕底部
                 bottomInset={0}
                 onAnimate={(fromIndex, toIndex) => {
                     // 開始關閉時即顯示 FAB，與 sheet 下滑並行淡入
                     if (toIndex === -1 && hasOpenCourseSearch) {
                         setHasOpenCourseSearch(false);
+                        setSheetIndex(-1);
                     }
                 }}
                 setHasOpenFalse={() => {
                     if (hasOpenCourseSearch) {
                         setHasOpenCourseSearch(false);
                     }
+                    setSheetIndex(-1);
                     setReplacementCourseCode(null);
                 }}>
                 {bottomSheetMode === 'replacement'

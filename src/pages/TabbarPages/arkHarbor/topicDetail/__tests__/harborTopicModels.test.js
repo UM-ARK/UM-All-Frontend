@@ -10,15 +10,72 @@ import {
     canFlagPost,
     canShowFlagMenu,
     canUpdatePostReaction,
+    extractPostImages,
     flattenNestedPosts,
     formatHarborFlagTypesForPost,
     getFlagActions,
+    getHarborImagePressAction,
     interpolateHarborI18nTemplate,
     isHarborPostDeleted,
     mergeAvailableFlagTypes,
     updateNestedPostTree,
     updateOptimisticFlag,
 } from '../harborTopicModels';
+
+describe('extractPostImages', () => {
+    it('以 lightbox 原圖地址提供 Composer 預覽映射', () => {
+        expect(
+            extractPostImages(
+                '<a class="lightbox" ' +
+                'href="https://assert.umall.one/original/1X/b27fa981.jpeg">' +
+                '<img src="https://assert.umall.one/optimized/1X/b27fa981.jpeg">' +
+                '</a>',
+            ),
+        ).toEqual([
+            'https://assert.umall.one/original/1X/b27fa981.jpeg',
+        ]);
+    });
+});
+
+describe('getHarborImagePressAction', () => {
+    it('優先以父連結或圖片來源開啟相簿', () => {
+        const imageUrls = ['/uploads/original.jpeg', '/uploads/plain.jpeg'];
+
+        expect(
+            getHarborImagePressAction({
+                parentUrl: '/uploads/original.jpeg',
+                sourceUrl: '/uploads/thumbnail.jpeg',
+                imageUrls,
+            }),
+        ).toEqual({ type: 'image', imageIndex: 0 });
+        expect(
+            getHarborImagePressAction({
+                sourceUrl: '/uploads/plain.jpeg',
+                imageUrls,
+            }),
+        ).toEqual({ type: 'image', imageIndex: 1 });
+    });
+
+    it('非相簿圖片優先開啟父連結，並忽略頁內錨點', () => {
+        expect(
+            getHarborImagePressAction({
+                parentUrl: 'https://www.youtube.com/watch?v=I78NqlA0EWI',
+                sourceUrl: '/uploads/youtube-thumbnail.jpeg',
+                imageUrls: ['/uploads/youtube-thumbnail.jpeg'],
+            }),
+        ).toEqual({
+            type: 'link',
+            url: 'https://www.youtube.com/watch?v=I78NqlA0EWI',
+        });
+        expect(
+            getHarborImagePressAction({
+                parentUrl: '#heading',
+                sourceUrl: '/uploads/thumbnail.jpeg',
+                imageUrls: [],
+            }),
+        ).toBeNull();
+    });
+});
 
 describe('canDeleteHarborPost', () => {
     it('回覆只依帖子權限判斷', () => {

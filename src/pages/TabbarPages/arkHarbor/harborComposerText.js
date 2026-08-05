@@ -29,12 +29,85 @@ export function getHarborComposerResult(result) {
 
 export function buildHarborComposerRaw(text, images = []) {
     const imageMarkdown = images
-        .map(image => image?.shortUrl)
+        .map(image => {
+            if (typeof image?.markdown === 'string' && image.markdown.trim()) {
+                return image.markdown.trim();
+            }
+            return image?.shortUrl
+                ? `![圖片](${image.shortUrl})`
+                : '';
+        })
         .filter(Boolean)
-        .map(shortUrl => `![圖片](${shortUrl})`)
         .join('\n\n');
 
     return [String(text || '').trim(), imageMarkdown]
         .filter(Boolean)
         .join('\n\n');
+}
+
+const HARBOR_UPLOAD_IMAGE_LINE_PATTERN =
+    /^\s*(!\[[^\]\n]*\]\(\s*(upload:\/\/[^)\s]+)(?:\s+["'][^)]*["'])?\s*\))\s*$/i;
+const HARBOR_IMAGE_PATTERN = /!\[[^\]\n]*\]\([^\n)]+\)|<img\b/i;
+
+export function canUseHarborComposerImageGrid(raw) {
+    let imageBlockStarted = false;
+    const lines = String(raw || '').split('\n');
+
+    for (const line of lines) {
+        if (HARBOR_UPLOAD_IMAGE_LINE_PATTERN.test(line)) {
+            imageBlockStarted = true;
+            continue;
+        }
+        if (!line.trim()) {
+            continue;
+        }
+        if (imageBlockStarted || HARBOR_IMAGE_PATTERN.test(line)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+export function splitHarborComposerRaw(
+    raw,
+    {existingImages = [], previewUrls = []} = {},
+) {
+    const imagesByShortUrl = new Map(
+        existingImages
+            .filter(image => image?.shortUrl)
+            .map(image => [image.shortUrl, image]),
+    );
+    const images = [];
+    const textLines = String(raw || '').split('\n').filter(line => {
+        const match = line.match(HARBOR_UPLOAD_IMAGE_LINE_PATTERN);
+        if (!match) {
+            return true;
+        }
+        const markdown = match[1];
+        const shortUrl = match[2];
+        const existingImage = imagesByShortUrl.get(shortUrl);
+        const remoteUrl =
+            existingImage?.remoteUrl ||
+            existingImage?.localUri ||
+            previewUrls[images.length] ||
+            '';
+        images.push({
+            ...(existingImage || {}),
+            id:
+                existingImage?.id ||
+                `edit-image-${images.length}-${shortUrl}`,
+            localUri: existingImage?.localUri || remoteUrl,
+            remoteUrl,
+            shortUrl,
+            markdown,
+            progress: 1,
+            status: 'uploaded',
+        });
+        return false;
+    });
+
+    return {
+        text: textLines.join('\n').replace(/\n{3,}/g, '\n\n').trim(),
+        images,
+    };
 }

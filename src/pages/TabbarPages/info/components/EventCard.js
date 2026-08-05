@@ -10,7 +10,7 @@ import { NavigationContext } from '@react-navigation/native';
 import { Image } from 'expo-image';
 import moment from 'moment-timezone';
 import { scale, verticalScale } from 'react-native-size-matters';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from "@react-native-vector-icons/ionicons";
 import TouchableScale from '../../../../components/TouchableScale';
 
 const DEFAULT_IMAGE_SIZE = scale(160);

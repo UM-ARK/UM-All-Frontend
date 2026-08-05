@@ -11,7 +11,7 @@ import {
 import {isLiquidGlassSupported} from '@callstack/liquid-glass';
 import {useHeaderHeight} from '@react-navigation/elements';
 import {useTranslation} from 'react-i18next';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from "@react-native-vector-icons/ionicons";
 import {scale, verticalScale} from 'react-native-size-matters';
 
 import {uiStyle, useTheme} from '../../../../components/ThemeContext';
@@ -96,9 +96,10 @@ const HarborAccountSettingsPage = ({navigation}) => {
         {
             key: 'profile',
             title: t('編輯 Harbor 個人資料'),
-            description: t('更新頭像、簡介與公開資料'),
+            description: t('更新工作狀態、簡介與公開資料'),
             icon: 'person-outline',
-            onPress: () => openHarborPath(`/u/${username}/preferences/profile`),
+            onPress: () =>
+                navigation.navigate('HarborProfile', {mode: 'edit'}),
         },
         {
             key: 'web',
@@ -183,7 +184,6 @@ const HarborAccountSettingsPage = ({navigation}) => {
                     style={[
                         styles.settingsCard,
                         {backgroundColor: theme.white},
-                        theme.viewShadow,
                     ]}>
                     {sections.map((item, index) => (
                         <Pressable

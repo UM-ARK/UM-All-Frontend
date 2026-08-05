@@ -15,7 +15,7 @@ import {
 } from 'react-native';
 
 import Toast from 'react-native-simple-toast';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import {scale, verticalScale} from 'react-native-size-matters';
 import {useTranslation} from 'react-i18next';
 
@@ -25,6 +25,7 @@ import {deleteHarborPost} from '../../../utils/harbor/harborApi';
 import {publishHarborTopicUpdate} from '../../../utils/harbor/harborTopicUpdates';
 import {
     ARK_HARBOR_NEW_TOPIC,
+    ARK_HARBOR_TOPIC_URL,
     MARKDOWN_BASIC_SYNTAX_URL,
 } from '../../../utils/pathMap';
 import {trigger} from '../../../utils/trigger';
@@ -43,6 +44,7 @@ const HarborComposerPage = ({route, navigation}) => {
     const categorySheetRef = useRef(null);
     const tagSheetRef = useRef(null);
     const deletingRef = useRef(false);
+    const webImageAlertShownRef = useRef(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const {
         allTags,
@@ -51,6 +53,7 @@ const HarborComposerPage = ({route, navigation}) => {
         categoryId,
         composerSettings,
         editMetadata,
+        initialEditImages,
         isEdit,
         isEditingFirstPost,
         isLoading,
@@ -72,6 +75,7 @@ const HarborComposerPage = ({route, navigation}) => {
         originalText,
         publishRestriction,
         raw,
+        requiresWebImageEditing,
         requiresCategory,
         routePostNumber,
         selectedCategory,
@@ -80,6 +84,7 @@ const HarborComposerPage = ({route, navigation}) => {
         sessionStatus,
         setCategoryId,
         setLoadError,
+        setRequiresWebImageEditing,
         setRaw,
         setSelectedTags,
         setTitle,
@@ -96,18 +101,24 @@ const HarborComposerPage = ({route, navigation}) => {
         hasReachedImageLimit,
         hasUnreadyImages,
         handleAddImages,
+        handleMoveImage,
         handleRemoveImage,
         handleRetryImage,
         isPreparingImages,
         isUploadingImages,
         restoreDraftImages,
         uploadImages,
-    } = useHarborComposerImages({composerSettings, t});
+    } = useHarborComposerImages({composerSettings, isEdit, t});
+
+    useEffect(() => {
+        if (isEdit && !isLoading) {
+            restoreDraftImages(initialEditImages);
+        }
+    }, [initialEditImages, isEdit, isLoading, restoreDraftImages]);
 
     const {
         clearDraftAfterPublish,
         discardDraftAndExit,
-        draftKey,
         hasDraftContent,
         isDraftLoading,
     } = useHarborDraft({
@@ -116,6 +127,7 @@ const HarborComposerPage = ({route, navigation}) => {
         editMetadata,
         images,
         isComposerLoading: isLoading,
+        isEditingBlocked: requiresWebImageEditing,
         isEditingFirstPost,
         mode,
         navigation,
@@ -128,6 +140,7 @@ const HarborComposerPage = ({route, navigation}) => {
         sessionStatus,
         setCategoryId,
         setRaw,
+        setRequiresWebImageEditing,
         setSelectedTags,
         setTitle,
         supportsImages,
@@ -167,59 +180,76 @@ const HarborComposerPage = ({route, navigation}) => {
         );
     }, [discardDraftAndExit, t]);
 
-    useEffect(() => {
-        const shouldShowDiscard =
-            sessionStatus === 'signedIn' &&
-            !isLoading &&
-            !isDraftLoading &&
-            !loadError &&
-            hasDraftContent;
-        navigation.setOptions({
-            headerTitle: isNewTopic
-                ? t('發佈話題')
-                : isReply
-                    ? t('回覆話題')
-                    : t('編輯貼文'),
-            headerRight: shouldShowDiscard
-                ? () => (
-                    <Pressable
-                        accessibilityLabel={t('捨棄這次修改')}
-                        accessibilityRole="button"
-                        hitSlop={scale(8)}
-                        onPress={handleDiscard}
-                        style={({pressed}) => [
-                            styles.discardButton,
-                            pressed && {opacity: 0.6},
-                        ]}>
-                        <Text
-                            style={[
-                                styles.discardButtonText,
-                                {color: theme.unread},
-                            ]}>
-                            {t('捨棄')}
-                        </Text>
-                    </Pressable>
-                )
-                : undefined,
-        });
-    }, [
-        handleDiscard,
-        hasDraftContent,
-        isDraftLoading,
-        isLoading,
-        isNewTopic,
-        isReply,
-        loadError,
-        navigation,
-        sessionStatus,
-        t,
-        theme.unread,
-    ]);
-
     const handleOpenWebComposer = useCallback(() => {
         trigger();
-        openLink({URL: ARK_HARBOR_NEW_TOPIC, mode: 'fullScreen'});
-    }, []);
+        const topicId = Number(
+            editMetadata.topicId ??
+            editMetadata.topic_id ??
+            route.params?.topicId,
+        );
+        const postNumber = Number(
+            editMetadata.postNumber ??
+            editMetadata.post_number ??
+            route.params?.postNumber,
+        );
+        openLink({
+            URL:
+                isEdit && Number.isInteger(topicId) && topicId > 0
+                    ? ARK_HARBOR_TOPIC_URL(topicId, postNumber)
+                    : ARK_HARBOR_NEW_TOPIC,
+            mode: 'fullScreen',
+        });
+    }, [
+        editMetadata.postNumber,
+        editMetadata.post_number,
+        editMetadata.topicId,
+        editMetadata.topic_id,
+        isEdit,
+        route.params?.postNumber,
+        route.params?.topicId,
+    ]);
+
+    const showWebImageEditingAlert = useCallback(() => {
+        Alert.alert(
+            t('此帖子需在網頁版編輯'),
+            t('這篇帖子有圖片不在正文末尾的連續圖片區塊中，App 無法安全編輯。請前往 Harbor 網頁版操作。'),
+            [
+                {
+                    text: t('返回'),
+                    style: 'cancel',
+                    onPress: () => {
+                        trigger();
+                        navigation.goBack();
+                    },
+                },
+                {
+                    text: t('前往網頁版'),
+                    onPress: handleOpenWebComposer,
+                },
+            ],
+            {cancelable: false},
+        );
+    }, [handleOpenWebComposer, navigation, t]);
+
+    useEffect(() => {
+        if (
+            !isEdit ||
+            isLoading ||
+            isDraftLoading ||
+            !requiresWebImageEditing ||
+            webImageAlertShownRef.current
+        ) {
+            return;
+        }
+        webImageAlertShownRef.current = true;
+        showWebImageEditingAlert();
+    }, [
+        isDraftLoading,
+        isEdit,
+        isLoading,
+        requiresWebImageEditing,
+        showWebImageEditingAlert,
+    ]);
 
     const handleOpenMarkdownGuide = useCallback(() => {
         trigger();
@@ -480,8 +510,108 @@ const HarborComposerPage = ({route, navigation}) => {
         title,
         titleLength,
         uploadImages,
-        draftKey,
     });
+
+    useEffect(() => {
+        const canShowHeaderActions =
+            sessionStatus === 'signedIn' &&
+            !isLoading &&
+            !isDraftLoading &&
+            !loadError &&
+            !requiresWebImageEditing &&
+            !isReply;
+        const shouldShowDiscard =
+            canShowHeaderActions && hasDraftContent;
+        const isPublishDisabled =
+            isSubmitDisabled || isDeleting;
+        navigation.setOptions({
+            headerTitle: isNewTopic
+                ? t('發佈話題')
+                : isReply
+                    ? t('回覆話題')
+                    : t('編輯貼文'),
+            headerRight: canShowHeaderActions
+                ? () => (
+                    <View style={styles.headerRightRow}>
+                        {shouldShowDiscard ? (
+                            <Pressable
+                                accessibilityLabel={t('捨棄這次修改')}
+                                accessibilityRole="button"
+                                hitSlop={scale(8)}
+                                onPress={handleDiscard}
+                                style={({pressed}) => [
+                                    styles.headerActionButton,
+                                    pressed && {opacity: 0.6},
+                                ]}>
+                                <Text
+                                    style={[
+                                        styles.headerActionText,
+                                        {color: theme.unread},
+                                    ]}>
+                                    {t('捨棄')}
+                                </Text>
+                            </Pressable>
+                        ) : null}
+                        <Pressable
+                            accessibilityLabel={t('發佈')}
+                            accessibilityRole="button"
+                            accessibilityState={{
+                                disabled: isPublishDisabled,
+                            }}
+                            disabled={isPublishDisabled}
+                            hitSlop={scale(8)}
+                            onPress={handleSubmit}
+                            style={({pressed}) => [
+                                styles.headerActionButton,
+                                pressed &&
+                                    !isPublishDisabled && {
+                                        opacity: 0.6,
+                                    },
+                            ]}>
+                            {isSubmitting ? (
+                                <ActivityIndicator
+                                    size="small"
+                                    color={theme.themeColor}
+                                />
+                            ) : (
+                                <Text
+                                    style={[
+                                        styles.headerActionText,
+                                        {
+                                            color: isPublishDisabled
+                                                ? theme.black.third
+                                                : theme.themeColor,
+                                        },
+                                    ]}>
+                                    {t('發佈')}
+                                </Text>
+                            )}
+                        </Pressable>
+                    </View>
+                )
+                : undefined,
+        });
+    }, [
+        handleDiscard,
+        handleSubmit,
+        hasDraftContent,
+        isDeleting,
+        isDraftLoading,
+        isEdit,
+        isLoading,
+        isNewTopic,
+        isReply,
+        isSubmitDisabled,
+        isSubmitting,
+        loadError,
+        navigation,
+        requiresWebImageEditing,
+        sessionStatus,
+        t,
+        theme.black.third,
+        theme.themeColor,
+        theme.unread,
+    ]);
 
     const handleSelectCategory = useCallback(item => {
         setCategoryId(Number(item.id));
@@ -709,6 +839,55 @@ const HarborComposerPage = ({route, navigation}) => {
         );
     }
 
+    if (isEdit && requiresWebImageEditing) {
+        return (
+            <View
+                style={[
+                    styles.centeredState,
+                    {backgroundColor: theme.bg_color},
+                ]}>
+                <MaterialCommunityIcons
+                    name="open-in-new"
+                    size={scale(42)}
+                    color={theme.themeColor}
+                />
+                <Text
+                    style={[
+                        styles.stateTitle,
+                        {color: theme.black.main},
+                    ]}>
+                    {t('請前往網頁版編輯')}
+                </Text>
+                <Text
+                    style={[
+                        styles.stateDescription,
+                        {color: theme.black.third},
+                    ]}>
+                    {t('此帖子的圖片並非全部連續放在正文末尾，為避免改變圖片位置，App 不允許編輯。')}
+                </Text>
+                <Pressable
+                    accessibilityRole="link"
+                    onPress={handleOpenWebComposer}
+                    style={({pressed}) => [
+                        styles.secondaryButton,
+                        {
+                            backgroundColor: pressed
+                                ? theme.tonal.primary30
+                                : theme.tonal.primary15,
+                        },
+                    ]}>
+                    <Text
+                        style={[
+                            styles.secondaryButtonText,
+                            {color: theme.themeColor},
+                        ]}>
+                        {t('前往網頁版')}
+                    </Text>
+                </Pressable>
+            </View>
+        );
+    }
+
     if (isReply) {
         return (
             <HarborReplyComposerForm
@@ -721,6 +900,7 @@ const HarborComposerPage = ({route, navigation}) => {
                 }}
                 imagesState={{
                     handleAddImages,
+                    handleMoveImage,
                     handleRemoveImage,
                     handleRetryImage,
                     hasReachedImageLimit,
@@ -774,6 +954,7 @@ const HarborComposerPage = ({route, navigation}) => {
             }}
             imagesState={{
                 handleAddImages,
+                handleMoveImage,
                 handleRemoveImage,
                 handleRetryImage,
                 hasReachedImageLimit,
@@ -790,10 +971,7 @@ const HarborComposerPage = ({route, navigation}) => {
             onSelectCategory={handleSelectCategory}
             route={route}
             submit={{
-                handleSubmit,
-                isPostLengthValid,
                 isDeleting,
-                isSubmitDisabled: isSubmitDisabled || isDeleting,
                 isSubmitting,
                 rawLength,
                 submitError,
@@ -810,13 +988,18 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         paddingHorizontal: scale(28),
     },
-    discardButton: {
+    headerActionButton: {
         paddingHorizontal: scale(6),
         paddingVertical: verticalScale(6),
     },
-    discardButtonText: {
+    headerActionText: {
         fontSize: scale(14),
         fontWeight: '600',
+    },
+    headerRightRow: {
+        alignItems: 'center',
+        flexDirection: 'row',
+        gap: scale(2),
     },
     inlineErrorText: {
         flex: 1,

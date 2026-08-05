@@ -11,6 +11,10 @@ export const activityMeta = {
         icon: 'heart-outline',
         label: '讚好了',
     },
+    likeReceived: {
+        icon: 'heart-outline',
+        label: '收到讚',
+    },
     reply: {
         icon: 'arrow-undo-outline',
         label: '回覆了',
@@ -118,6 +122,15 @@ const messageNotificationTypes = new Set([
     'group_message_summary',
     'membership_request_consolidated',
 ]);
+// 消息中心以頭像展示操作者：點讚／反應／私信
+const actorAvatarNotificationTypes = new Set([
+    'liked',
+    'liked_consolidated',
+    'reaction',
+    'boost',
+    'private_message',
+    'invited_to_private_message',
+]);
 
 function decodeHarborPathPart(value) {
     try {
@@ -211,6 +224,27 @@ export function getHarborNotificationPresentation(item, translate = value => val
         title,
         excerpt,
     };
+}
+
+// 點讚人或私信對方；頁面再以 username／avatarUrl 組頭像
+export function getHarborInboxActor(item) {
+    if (item?.inboxType === 'message') {
+        return {
+            username: item.actingUsername || '',
+            avatarUrl: item.avatarUrl || '',
+        };
+    }
+    if (
+        item?.inboxType === 'notification' &&
+        actorAvatarNotificationTypes.has(item?.typeName) &&
+        item?.actingUsername
+    ) {
+        return {
+            username: item.actingUsername,
+            avatarUrl: item.avatarUrl || '',
+        };
+    }
+    return {username: '', avatarUrl: ''};
 }
 
 export function getHarborNotificationTarget(item, username) {

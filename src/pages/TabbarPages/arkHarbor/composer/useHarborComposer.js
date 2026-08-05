@@ -22,6 +22,10 @@ import {
     COMPOSER_MODES,
     getEditPost,
 } from './harborComposerModels';
+import {
+    canUseHarborComposerImageGrid,
+    splitHarborComposerRaw,
+} from '../harborComposerText';
 
 export function useHarborComposer({route, t}) {
     const {
@@ -36,7 +40,7 @@ export function useHarborComposer({route, t}) {
     const isNewTopic = mode === 'newTopic';
     const isReply = mode === 'reply';
     const isEdit = mode === 'edit';
-    const supportsImages = isNewTopic || isReply;
+    const supportsImages = isNewTopic || isReply || isEdit;
     const routePostNumber = Number(route.params?.postNumber);
     const routeQuoteRaw = route.params?.quoteRaw;
     const initialRaw = routeQuoteRaw
@@ -61,6 +65,9 @@ export function useHarborComposer({route, t}) {
     const [isRetryBlocked, setIsRetryBlocked] = useState(false);
     const [publishRestriction, setPublishRestriction] = useState('');
     const [editMetadata, setEditMetadata] = useState({});
+    const [initialEditImages, setInitialEditImages] = useState([]);
+    const [requiresWebImageEditing, setRequiresWebImageEditing] =
+        useState(false);
     const isEditingFirstPost =
         isEdit &&
         Number(
@@ -174,11 +181,93 @@ export function useHarborComposer({route, t}) {
                     return;
                 }
                 const postRaw = String(post.raw || '');
-                setRaw(postRaw);
+                const isFirstPost = Number(
+                    post.postNumber ??
+                    post.post_number ??
+                    routePostNumber,
+                ) === 1;
+                const metadata = isFirstPost
+                    ? await fetchHarborComposerMetadata({forceRefresh})
+                    : {
+                        settings: await fetchCachedHarborComposerSettings({
+                            forceRefresh,
+                        }),
+                    };
+                if (controller.signal.aborted) {
+                    return;
+                }
+                const routeImageUrls = Array.isArray(
+                    route.params?.editImageUrls,
+                )
+                    ? route.params.editImageUrls
+                    : [];
+                const splitPost = splitHarborComposerRaw(postRaw, {
+                    previewUrls:
+                        routeImageUrls.length > 0
+                            ? routeImageUrls
+                            : post.imageUrls || [],
+                });
+                const canUseImageGrid =
+                    canUseHarborComposerImageGrid(postRaw);
+                setRequiresWebImageEditing(!canUseImageGrid);
+                setRaw(canUseImageGrid ? splitPost.text : postRaw);
+                setInitialEditImages(splitPost.images);
                 setOriginalText(
                     String(post.originalText ?? post.original_text ?? postRaw),
                 );
                 setTitle(post.title || route.params?.topicTitle || '');
+                setComposerSettings(metadata.settings);
+                if (isFirstPost) {
+                    const categoryItems = metadata.categories?.items || [];
+                    const availableTagItems = (metadata.tags?.items || []).filter(
+                        tag => !tag.pmOnly,
+                    );
+                    const postCategoryId = Number(
+                        post.categoryId ??
+                        post.category_id ??
+                        route.params?.categoryId,
+                    );
+                    const postTags = Array.isArray(post.tags)
+                        ? post.tags
+                        : Array.isArray(route.params?.tags)
+                            ? route.params.tags
+                            : [];
+                    const normalizedPostTags = postTags
+                        .map(postTag => {
+                            const name = String(
+                                postTag?.name || postTag || '',
+                            ).trim();
+                            if (!name) {
+                                return null;
+                            }
+                            return availableTagItems.find(tag =>
+                                tag.name === name,
+                            ) || {
+                                ...(postTag?.id == null
+                                    ? {}
+                                    : {id: postTag.id}),
+                                name,
+                            };
+                        })
+                        .filter(Boolean);
+                    const existingTagNames = new Set(
+                        availableTagItems.map(tag => tag.name),
+                    );
+                    const tagItems = [
+                        ...availableTagItems,
+                        ...normalizedPostTags.filter(tag =>
+                            !existingTagNames.has(tag.name),
+                        ),
+                    ];
+                    setCategories(categoryItems);
+                    setTags(tagItems);
+                    setCategoryId(
+                        Number.isInteger(postCategoryId) && postCategoryId > 0
+                            ? postCategoryId
+                            : null,
+                    );
+                    setSelectedTags(normalizedPostTags);
+                }
                 setEditMetadata(post);
             }
         } catch (error) {
@@ -205,8 +294,12 @@ export function useHarborComposer({route, t}) {
         isReply,
         route.params?.postId,
         route.params?.fromDraftBox,
+        route.params?.categoryId,
+        route.params?.editImageUrls,
         route.params?.topicId,
+        route.params?.tags,
         route.params?.topicTitle,
+        routePostNumber,
         sessionStatus,
         t,
     ]);
@@ -272,6 +365,7 @@ export function useHarborComposer({route, t}) {
         categoryId,
         composerSettings,
         editMetadata,
+        initialEditImages,
         isEdit,
         isEditingFirstPost,
         isLoading,
@@ -293,6 +387,7 @@ export function useHarborComposer({route, t}) {
         originalText,
         publishRestriction,
         raw,
+        requiresWebImageEditing,
         requiresCategory,
         routePostNumber,
         selectedCategory,
@@ -301,6 +396,7 @@ export function useHarborComposer({route, t}) {
         sessionStatus,
         setCategoryId,
         setLoadError,
+        setRequiresWebImageEditing,
         setRaw,
         setSelectedTags,
         setTitle,

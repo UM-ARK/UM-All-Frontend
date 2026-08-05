@@ -1,0 +1,730 @@
+/**
+ * 新建組隊：基本資料表單＋每週可用時間編輯
+ */
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {
+    ActivityIndicator,
+    Alert,
+    Pressable,
+    StyleSheet,
+    Switch,
+    Text,
+    TextInput,
+    View,
+} from 'react-native';
+
+import {isLiquidGlassSupported} from '@callstack/liquid-glass';
+import {useHeaderHeight} from '@react-navigation/elements';
+import {usePreventRemove} from '@react-navigation/native';
+import moment from 'moment-timezone';
+import {useTranslation} from 'react-i18next';
+import {
+    KeyboardAwareScrollView,
+    KeyboardToolbar,
+} from 'react-native-keyboard-controller';
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
+import {scale, verticalScale} from 'react-native-size-matters';
+
+import {uiStyle, useTheme} from '../../components/ThemeContext';
+import {logToFirebase} from '../../utils/firebaseAnalytics';
+import {createTeamEvent} from '../../utils/scheduling/schedulingApi';
+import {normalizeSchedulingError} from '../../utils/scheduling/schedulingErrors';
+import {
+    DEFAULT_TIMEZONE,
+    DEFAULT_WEEKLY_SCROLL_MINUTE,
+    FULL_WEEK_CANDIDATE_WINDOWS,
+} from '../../utils/scheduling/schedulingModels';
+import {trigger} from '../../utils/trigger';
+import CourseSchedulePreviewLegend from './components/CourseSchedulePreviewLegend';
+import ScheduleWeekGrid from './components/ScheduleWeekGrid';
+import ScheduleTimeRangeInsert from './components/ScheduleTimeRangeInsert';
+import {
+    buildWeeklySlots,
+    wallClockDateToOffsetIso,
+} from './components/scheduleWeekHelpers';
+import {clearTeamEventsCache} from './hooks/useTeamEvents';
+import {createCourseSchedulePrefill} from './utils/courseSchedulePrefill';
+import {loadSavedCourseSlots} from './utils/loadSavedCourseSlots';
+import {
+    commitCandidateDraft,
+    createEmptyDraft,
+    insertDraftRange,
+} from './utils/scheduleDraft';
+
+const TITLE_MAX = 200;
+const DESCRIPTION_MAX = 4000;
+const EVENT_EXPIRY_DAYS = 180;
+const EDIT_SLOT_MINUTES = 15;
+
+/**
+ * 後端錯誤碼 → 可讀文案 key
+ * @param {string} code
+ * @returns {string}
+ */
+function errorMessageForCode(code) {
+    switch (code) {
+        case 'deadline_after_expiry':
+            return '回覆截止時間不能晚於活動有效期。';
+        case 'invalid_title':
+            return '請輸入 1 至 200 字的活動名稱。';
+        case 'invalid_description':
+            return '說明最多 4000 字。';
+        case 'invalid_owner_availability':
+            return '請至少選擇一個有效的每週可用時段。';
+        case 'slot_alignment_required':
+            return '候選時段須對齊所選時間粒度。';
+        case 'overlapping_candidate_windows':
+            return '候選時段不可重疊。';
+        case 'owned_event_limit_reached':
+            return '你最多可建立 100 個尚未過期的活動，請先刪除或等待現有活動過期。';
+        case 'harbor_unavailable':
+            return '身分服務暫時不可用，請稍後再試。';
+        case 'harbor_auth_failed':
+            return 'Harbor 登入已失效，請重新登入後再試。';
+        default:
+            return '暫時無法完成，請稍後再試。';
+    }
+}
+
+const TeamScheduleCreatePage = ({navigation}) => {
+    const {theme} = useTheme();
+    const {t} = useTranslation('my');
+    const headerHeight = useHeaderHeight();
+    const tz = DEFAULT_TIMEZONE;
+
+    const [title, setTitle] = useState('');
+    const [description, setDescription] = useState('');
+    const [responseDeadlineAt, setResponseDeadlineAt] = useState(null);
+    const [deadlinePickerVisible, setDeadlinePickerVisible] = useState(false);
+    const [draft, setDraft] = useState(() =>
+        createEmptyDraft({
+            mode: 'candidate',
+            slotMinutes: EDIT_SLOT_MINUTES,
+            timezone: tz,
+        }),
+    );
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isPainting, setIsPainting] = useState(false);
+    const [coursePrefillEnabled, setCoursePrefillEnabled] = useState(true);
+    const [coursePrefillLoading, setCoursePrefillLoading] = useState(false);
+    const [coursePrefillError, setCoursePrefillError] = useState(null);
+    const [courseConflictKeys, setCourseConflictKeys] = useState([]);
+    const [scrollToStartMinute, setScrollToStartMinute] = useState(
+        DEFAULT_WEEKLY_SCROLL_MINUTE,
+    );
+    const submittingRef = useRef(false);
+    const allowLeaveRef = useRef(false);
+    const coursePrefillRequestRef = useRef(0);
+
+    const hasUnsavedDraft = useMemo(() => {
+        const trimmedTitle = title.trim();
+        const trimmedDesc = description.trim();
+        const hasSlots =
+            Array.isArray(draft.selectedKeys) && draft.selectedKeys.length > 0;
+        return (
+            trimmedTitle.length > 0 ||
+            trimmedDesc.length > 0 ||
+            hasSlots ||
+            responseDeadlineAt != null
+        );
+    }, [title, description, draft.selectedKeys, responseDeadlineAt]);
+
+    useEffect(() => {
+        navigation.setOptions({headerTitle: t('新建組隊')});
+    }, [navigation, t]);
+
+    useEffect(() => {
+        logToFirebase('screen_view', {screen_name: 'TeamScheduleCreate'});
+    }, []);
+
+    const loadCoursePrefill = useCallback(async () => {
+        const requestId = coursePrefillRequestRef.current + 1;
+        coursePrefillRequestRef.current = requestId;
+        setCoursePrefillLoading(true);
+        setCoursePrefillError(null);
+        try {
+            const {hasPlan, planSlots} = await loadSavedCourseSlots();
+            if (coursePrefillRequestRef.current !== requestId) {
+                return;
+            }
+            if (!hasPlan) {
+                setCoursePrefillEnabled(false);
+                setCourseConflictKeys([]);
+                setCoursePrefillError(t('尚未建立模擬課表'));
+                return;
+            }
+            if (planSlots.length === 0) {
+                setCoursePrefillEnabled(false);
+                setCourseConflictKeys([]);
+                setCoursePrefillError(t('無法讀取模擬課表'));
+                return;
+            }
+            const result = createCourseSchedulePrefill({
+                candidateWindows: FULL_WEEK_CANDIDATE_WINDOWS,
+                courseSlots: planSlots,
+                slotMinutes: EDIT_SLOT_MINUTES,
+            });
+            setCourseConflictKeys(result.courseConflictKeys);
+            setCoursePrefillEnabled(true);
+        } catch (_error) {
+            setCoursePrefillEnabled(false);
+            setCourseConflictKeys([]);
+            setCoursePrefillError(t('無法讀取模擬課表'));
+        } finally {
+            if (coursePrefillRequestRef.current === requestId) {
+                setCoursePrefillLoading(false);
+            }
+        }
+    }, [t]);
+
+    useEffect(() => {
+        loadCoursePrefill();
+        return () => {
+            coursePrefillRequestRef.current += 1;
+        };
+    }, [loadCoursePrefill]);
+
+    const handleCoursePrefillChange = useCallback(
+        enabled => {
+            trigger();
+            if (enabled) {
+                setCoursePrefillEnabled(true);
+                loadCoursePrefill();
+                return;
+            }
+            coursePrefillRequestRef.current += 1;
+            setCoursePrefillEnabled(false);
+            setCoursePrefillLoading(false);
+            setCoursePrefillError(null);
+            setCourseConflictKeys([]);
+        },
+        [loadCoursePrefill],
+    );
+
+    // Native Stack 需用 usePreventRemove，才會在原生返回／手勢前攔截
+    usePreventRemove(hasUnsavedDraft, ({data}) => {
+        if (allowLeaveRef.current) {
+            navigation.dispatch(data.action);
+            return;
+        }
+        Alert.alert(t('放棄建立？'), t('目前的內容尚未送出，確定要離開嗎？'), [
+            {
+                text: t('繼續編輯'),
+                style: 'cancel',
+                onPress: () => trigger(),
+            },
+            {
+                text: t('放棄建立'),
+                style: 'destructive',
+                onPress: () => {
+                    trigger();
+                    allowLeaveRef.current = true;
+                    navigation.dispatch(data.action);
+                },
+            },
+        ]);
+    });
+
+    const validateLocal = useCallback(() => {
+        const trimmedTitle = title.trim();
+        if (!trimmedTitle || trimmedTitle.length > TITLE_MAX) {
+            return t('請輸入 1 至 200 字的活動名稱。');
+        }
+        if (description.length > DESCRIPTION_MAX) {
+            return t('說明最多 4000 字。');
+        }
+        const selectedKeys = draft.selectedKeys || [];
+        if (selectedKeys.length === 0) {
+            return t('請至少選擇一個候選時段。');
+        }
+        if (responseDeadlineAt) {
+            const deadline = moment.tz(responseDeadlineAt, tz);
+            const expiry = moment.tz(tz).add(EVENT_EXPIRY_DAYS, 'days');
+            if (!deadline.isValid()) {
+                return t('回覆截止時間無效。');
+            }
+            if (deadline.isAfter(expiry)) {
+                return t('回覆截止時間不能晚於活動有效期。');
+            }
+            if (!deadline.isAfter(moment.tz(tz))) {
+                return t('回覆截止時間須晚於現在。');
+            }
+        }
+        return null;
+    }, [
+        description.length,
+        draft.selectedKeys,
+        responseDeadlineAt,
+        t,
+        title,
+        tz,
+    ]);
+
+    const buildPayload = useCallback(() => {
+        const referenceSlots = buildWeeklySlots(
+            FULL_WEEK_CANDIDATE_WINDOWS,
+            EDIT_SLOT_MINUTES,
+        );
+        const ownerRanges = commitCandidateDraft(draft, referenceSlots);
+        const payload = {
+            title: title.trim(),
+            description: description.trim(),
+            timezone: tz,
+            slotMinutes: EDIT_SLOT_MINUTES,
+            ownerAvailability: {
+                ranges: ownerRanges,
+            },
+        };
+        if (responseDeadlineAt) {
+            payload.responseDeadlineAt = responseDeadlineAt;
+        } else {
+            payload.responseDeadlineAt = null;
+        }
+        return payload;
+    }, [
+        description,
+        draft,
+        responseDeadlineAt,
+        title,
+        tz,
+    ]);
+
+    const handleSubmit = useCallback(async () => {
+        if (submittingRef.current) {
+            return;
+        }
+        trigger();
+        const localError = validateLocal();
+        if (localError) {
+            Alert.alert(t('無法建立'), localError);
+            return;
+        }
+        submittingRef.current = true;
+        setIsSubmitting(true);
+        try {
+            const payload = buildPayload();
+            const result = await createTeamEvent(payload);
+            const eventId = result?.event?.eventId;
+            logToFirebase('team_schedule_create', {
+                has_deadline: responseDeadlineAt != null ? 1 : 0,
+                used_course_prefill: coursePrefillEnabled ? 1 : 0,
+            });
+            clearTeamEventsCache();
+            allowLeaveRef.current = true;
+            if (eventId) {
+                navigation.replace('TeamScheduleDetail', {eventId});
+            } else {
+                navigation.goBack();
+            }
+        } catch (error) {
+            const normalized = normalizeSchedulingError(error);
+            Alert.alert(
+                t('無法建立'),
+                t(errorMessageForCode(normalized.code)),
+            );
+        } finally {
+            submittingRef.current = false;
+            setIsSubmitting(false);
+        }
+    }, [
+        buildPayload,
+        coursePrefillEnabled,
+        navigation,
+        responseDeadlineAt,
+        t,
+        validateLocal,
+    ]);
+
+    const deadlineDisplay = useMemo(() => {
+        if (!responseDeadlineAt) {
+            return t('未設定');
+        }
+        return moment
+            .tz(responseDeadlineAt, tz)
+            .format('YYYY年M月D日 HH:mm');
+    }, [responseDeadlineAt, t, tz]);
+
+    const pickerDate = useMemo(() => {
+        if (responseDeadlineAt) {
+            const m = moment.tz(responseDeadlineAt, tz);
+            // 以牆鐘數字餵給 picker（裝置本地 Date）
+            return new Date(
+                m.year(),
+                m.month(),
+                m.date(),
+                m.hour(),
+                m.minute(),
+                0,
+                0,
+            );
+        }
+        const soon = moment.tz(tz).add(1, 'day').minutes(0).seconds(0);
+        return new Date(
+            soon.year(),
+            soon.month(),
+            soon.date(),
+            soon.hour(),
+            soon.minute(),
+            0,
+            0,
+        );
+    }, [responseDeadlineAt, tz]);
+
+    const selectedCount = (draft.selectedKeys || []).length;
+    const candidateSlots = useMemo(
+        () =>
+            buildWeeklySlots(
+                FULL_WEEK_CANDIDATE_WINDOWS,
+                EDIT_SLOT_MINUTES,
+            ),
+        [],
+    );
+    const handleInsertRange = useCallback(
+        range => {
+            const next = insertDraftRange(draft, range, candidateSlots);
+            if (next === draft) {
+                return false;
+            }
+            setDraft(next);
+            setScrollToStartMinute(range.startMinute);
+            return true;
+        },
+        [candidateSlots, draft],
+    );
+
+    return (
+        <View style={[styles.container, {backgroundColor: theme.bg_color}]}>
+            <KeyboardAwareScrollView
+                bottomOffset={scale(50)}
+                keyboardDismissMode="on-drag"
+                scrollEnabled={!isPainting}
+                contentContainerStyle={[
+                    styles.content,
+                    isLiquidGlassSupported && {
+                        paddingTop: headerHeight + verticalScale(8),
+                    },
+                ]}
+                contentInsetAdjustmentBehavior={
+                    isLiquidGlassSupported ? undefined : 'automatic'
+                }>
+                <Text style={[styles.sectionTitle, {color: theme.black.main}]}>
+                    {t('基本資料')}
+                </Text>
+
+                <Text style={[styles.label, {color: theme.black.second}]}>
+                    {t('活動名稱')}
+                </Text>
+                <TextInput
+                    value={title}
+                    onChangeText={setTitle}
+                    placeholder={t('例如：COMP1000 小組會議')}
+                    placeholderTextColor={theme.black.third}
+                    maxLength={TITLE_MAX}
+                    style={[
+                        styles.input,
+                        {
+                            backgroundColor: theme.tonal.primary08,
+                            borderColor: theme.themeColorUltraLight,
+                            color: theme.black.main,
+                        },
+                    ]}
+                />
+                <Text style={[styles.counter, {color: theme.black.third}]}>
+                    {title.trim().length}/{TITLE_MAX}
+                </Text>
+
+                <Text style={[styles.label, {color: theme.black.second}]}>
+                    {t('說明（選填）')}
+                </Text>
+                <TextInput
+                    value={description}
+                    onChangeText={setDescription}
+                    placeholder={t('補充地點、議程或其他說明')}
+                    placeholderTextColor={theme.black.third}
+                    maxLength={DESCRIPTION_MAX}
+                    multiline
+                    textAlignVertical="top"
+                    style={[
+                        styles.input,
+                        styles.multiline,
+                        {
+                            backgroundColor: theme.tonal.primary08,
+                            borderColor: theme.themeColorUltraLight,
+                            color: theme.black.main,
+                        },
+                    ]}
+                />
+                <Text style={[styles.counter, {color: theme.black.third}]}>
+                    {description.length}/{DESCRIPTION_MAX}
+                </Text>
+
+                <View style={styles.metaRow}>
+                    <Text style={[styles.label, {color: theme.black.second}]}>
+                        {t('時區')}
+                    </Text>
+                    <Text style={[styles.metaValue, {color: theme.black.main}]}>
+                        {t('澳門時間')}
+                    </Text>
+                </View>
+
+                <Text style={[styles.label, {color: theme.black.second}]}>
+                    {t('回覆截止（選填）')}
+                </Text>
+                <View style={styles.deadlineRow}>
+                    <Pressable
+                        onPress={() => {
+                            trigger();
+                            setDeadlinePickerVisible(true);
+                        }}
+                        style={({pressed}) => [
+                            styles.deadlineButton,
+                            {
+                                backgroundColor: pressed
+                                    ? theme.tonal.primary30
+                                    : theme.tonal.primary15,
+                            },
+                        ]}>
+                        <Text
+                            style={[
+                                styles.deadlineButtonText,
+                                {color: theme.themeColor},
+                            ]}>
+                            {deadlineDisplay}
+                        </Text>
+                    </Pressable>
+                    {responseDeadlineAt ? (
+                        <Pressable
+                            onPress={() => {
+                                trigger();
+                                setResponseDeadlineAt(null);
+                            }}
+                            style={({pressed}) => [
+                                styles.clearButton,
+                                {
+                                    backgroundColor: pressed
+                                        ? theme.tonal.primary30
+                                        : theme.tonal.primary08,
+                                },
+                            ]}>
+                            <Text
+                                style={[
+                                    styles.clearButtonText,
+                                    {color: theme.black.second},
+                                ]}>
+                                {t('清除')}
+                            </Text>
+                        </Pressable>
+                    ) : null}
+                </View>
+
+                <Text
+                    style={[
+                        styles.sectionTitle,
+                        styles.sectionSpacing,
+                        {color: theme.black.main},
+                    ]}>
+                    {t('我的每週可用時間')}
+                </Text>
+                <Text style={[styles.hint, {color: theme.black.third}]}>
+                    {t(
+                        '選出你每週可以開會的時間；隊員加入後，會在這些時間中填寫自己的時間。',
+                    )}
+                </Text>
+                <Text style={[styles.hint, {color: theme.black.third}]}>
+                    {t('已選 {{count}} 格', {count: selectedCount})}
+                </Text>
+
+                <View style={styles.coursePrefillRow}>
+                    <CourseSchedulePreviewLegend
+                        error={coursePrefillError}
+                    />
+                    {coursePrefillLoading ? (
+                        <ActivityIndicator color={theme.themeColor} />
+                    ) : (
+                        <Switch
+                            accessibilityLabel={t('課表預覽')}
+                            accessibilityRole="switch"
+                            accessibilityState={{
+                                checked: coursePrefillEnabled,
+                            }}
+                            value={coursePrefillEnabled}
+                            onValueChange={handleCoursePrefillChange}
+                            trackColor={{
+                                false: theme.tonal.primary15,
+                                true: theme.tonal.primary50,
+                            }}
+                            thumbColor={theme.trueWhite}
+                            ios_backgroundColor={theme.tonal.primary15}
+                        />
+                    )}
+                </View>
+
+                <ScheduleTimeRangeInsert onInsert={handleInsertRange} />
+                <ScheduleWeekGrid
+                    mode="candidate"
+                    slotMinutes={EDIT_SLOT_MINUTES}
+                    draft={draft}
+                    courseConflictKeys={courseConflictKeys}
+                    onDraftChange={setDraft}
+                    onPaintingChange={setIsPainting}
+                    scrollToStartMinute={scrollToStartMinute}
+                />
+
+                <Pressable
+                    disabled={isSubmitting}
+                    onPress={handleSubmit}
+                    style={({pressed}) => [
+                        styles.submitButton,
+                        {
+                            backgroundColor: pressed
+                                ? theme.themeColorLight
+                                : theme.themeColor,
+                            opacity: isSubmitting ? 0.7 : 1,
+                        },
+                    ]}>
+                    {isSubmitting ? (
+                        <ActivityIndicator color={theme.trueWhite} />
+                    ) : (
+                        <Text
+                            style={[
+                                styles.submitButtonText,
+                                {color: theme.trueWhite},
+                            ]}>
+                            {t('建立組隊')}
+                        </Text>
+                    )}
+                </Pressable>
+            </KeyboardAwareScrollView>
+            <KeyboardToolbar />
+
+            <DateTimePickerModal
+                isVisible={deadlinePickerVisible}
+                mode="datetime"
+                date={pickerDate}
+                minimumDate={new Date()}
+                maximumDate={moment().add(EVENT_EXPIRY_DAYS, 'days').toDate()}
+                onConfirm={date => {
+                    trigger();
+                    setDeadlinePickerVisible(false);
+                    setResponseDeadlineAt(wallClockDateToOffsetIso(date, tz));
+                }}
+                onCancel={() => {
+                    trigger();
+                    setDeadlinePickerVisible(false);
+                }}
+                confirmTextIOS={t('確定')}
+                cancelTextIOS={t('取消')}
+            />
+        </View>
+    );
+};
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+    },
+    content: {
+        paddingBottom: verticalScale(40),
+        paddingHorizontal: scale(16),
+        paddingTop: verticalScale(12),
+    },
+    sectionTitle: {
+        ...uiStyle.defaultText,
+        fontSize: scale(16),
+        fontWeight: '700',
+        marginBottom: verticalScale(10),
+    },
+    sectionSpacing: {
+        marginTop: verticalScale(20),
+    },
+    label: {
+        ...uiStyle.defaultText,
+        fontSize: scale(12),
+        fontWeight: '600',
+        marginBottom: verticalScale(6),
+        marginTop: verticalScale(10),
+    },
+    input: {
+        ...uiStyle.defaultText,
+        borderRadius: scale(10),
+        borderWidth: StyleSheet.hairlineWidth,
+        fontSize: scale(14),
+        paddingHorizontal: scale(12),
+        paddingVertical: verticalScale(10),
+    },
+    multiline: {
+        minHeight: verticalScale(88),
+    },
+    counter: {
+        ...uiStyle.defaultText,
+        fontSize: scale(11),
+        marginTop: verticalScale(4),
+        textAlign: 'right',
+    },
+    metaRow: {
+        alignItems: 'center',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginTop: verticalScale(12),
+    },
+    metaValue: {
+        ...uiStyle.defaultText,
+        fontSize: scale(13),
+        fontWeight: '600',
+    },
+    deadlineRow: {
+        alignItems: 'center',
+        flexDirection: 'row',
+        gap: scale(8),
+    },
+    deadlineButton: {
+        borderRadius: scale(10),
+        flex: 1,
+        paddingHorizontal: scale(12),
+        paddingVertical: verticalScale(10),
+    },
+    deadlineButtonText: {
+        ...uiStyle.defaultText,
+        fontSize: scale(13),
+        fontWeight: '600',
+    },
+    clearButton: {
+        borderRadius: scale(10),
+        paddingHorizontal: scale(12),
+        paddingVertical: verticalScale(10),
+    },
+    clearButtonText: {
+        ...uiStyle.defaultText,
+        fontSize: scale(13),
+        fontWeight: '600',
+    },
+    hint: {
+        ...uiStyle.defaultText,
+        fontSize: scale(12),
+        lineHeight: verticalScale(18),
+        marginBottom: verticalScale(4),
+    },
+    coursePrefillRow: {
+        alignItems: 'center',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: verticalScale(8),
+        marginTop: verticalScale(8),
+        minHeight: scale(34),
+    },
+    submitButton: {
+        alignItems: 'center',
+        borderRadius: scale(12),
+        justifyContent: 'center',
+        marginTop: verticalScale(24),
+        minHeight: verticalScale(48),
+        paddingVertical: verticalScale(12),
+    },
+    submitButtonText: {
+        ...uiStyle.defaultText,
+        fontSize: scale(15),
+        fontWeight: '700',
+    },
+});
+
+export default TeamScheduleCreatePage;

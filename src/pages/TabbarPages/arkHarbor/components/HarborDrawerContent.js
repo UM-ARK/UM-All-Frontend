@@ -17,7 +17,7 @@ import {
 
 import { FlashList } from '@shopify/flash-list';
 import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import { scale, verticalScale } from 'react-native-size-matters';
 import {
     SafeAreaView,

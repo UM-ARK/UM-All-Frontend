@@ -1,6 +1,7 @@
 import React from 'react';
 import {
     ActivityIndicator,
+    Image,
     Pressable,
     StyleSheet,
     Text,
@@ -8,19 +9,27 @@ import {
 } from 'react-native';
 
 import {useTranslation} from 'react-i18next';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import Ionicons from "@react-native-vector-icons/ionicons";
+import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import {scale, verticalScale} from 'react-native-size-matters';
 
 import {uiStyle, useTheme} from '../../../../components/ThemeContext';
 import TouchableScale from '../../../../components/TouchableScale';
 import {trigger} from '../../../../utils/trigger';
+import HarborLoginConsentModal from './HarborLoginConsentModal';
 import HarborSectionHeader from './HarborSectionHeader';
 
 const HarborGuestState = ({isAuthorizing, onLogin, onBrowse}) => {
     const {theme} = useTheme();
     const {t} = useTranslation('my');
+    const [consentVisible, setConsentVisible] = React.useState(false);
     const features = [
+        {
+            key: 'teamSchedule',
+            icon: 'calendar-outline',
+            title: t('組隊約時間'),
+            description: t('邀請同學標記空檔，找出共同空閒時段'),
+        },
         {
             key: 'identity',
             icon: 'person-circle-outline',
@@ -48,17 +57,10 @@ const HarborGuestState = ({isAuthorizing, onLogin, onBrowse}) => {
                     styles.hero,
                     {backgroundColor: theme.white},
                 ]}>
-                <View
-                    style={[
-                        styles.heroIcon,
-                        {backgroundColor: theme.tonal.primary15},
-                    ]}>
-                    <MaterialCommunityIcons
-                        name="account-lock-outline"
-                        size={scale(44)}
-                        color={theme.themeColor}
-                    />
-                </View>
+                <Image
+                    source={require('../../../../static/img/logo.png')}
+                    style={styles.heroIcon}
+                />
                 <View
                     style={[
                         styles.harborPill,
@@ -74,7 +76,7 @@ const HarborGuestState = ({isAuthorizing, onLogin, onBrowse}) => {
                             styles.harborPillText,
                             {color: theme.secondThemeColor},
                         ]}>
-                        ARK Harbor
+                        ARK Harbor 職涯港
                     </Text>
                 </View>
                 <Text style={[styles.title, {color: theme.black.main}]}>
@@ -98,7 +100,9 @@ const HarborGuestState = ({isAuthorizing, onLogin, onBrowse}) => {
                     ]}
                     onPress={() => {
                         trigger();
-                        onLogin();
+                        if (!isAuthorizing) {
+                            setConsentVisible(true);
+                        }
                     }}>
                     {isAuthorizing ? (
                         <ActivityIndicator color={theme.trueWhite} />
@@ -213,6 +217,15 @@ const HarborGuestState = ({isAuthorizing, onLogin, onBrowse}) => {
                     </View>
                 ))}
             </View>
+
+            <HarborLoginConsentModal
+                visible={consentVisible}
+                onCancel={() => setConsentVisible(false)}
+                onConfirm={() => {
+                    setConsentVisible(false);
+                    onLogin();
+                }}
+            />
         </View>
     );
 };
@@ -232,8 +245,6 @@ const styles = StyleSheet.create({
         width: scale(82),
         height: scale(82),
         borderRadius: scale(16),
-        alignItems: 'center',
-        justifyContent: 'center',
         marginBottom: verticalScale(14),
     },
     harborPill: {

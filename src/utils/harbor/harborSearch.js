@@ -1,8 +1,15 @@
+import * as OpenCC from 'opencc-js';
+
 import {getLocalStorage, setLocalStorage} from '../storageKits';
 
 export const HARBOR_SEARCH_HISTORY_STORAGE_KEY =
     'ARK_Harbor_Search_History';
 export const HARBOR_SEARCH_HISTORY_LIMIT = 10;
+export const HARBOR_SEARCH_FALLBACK_THRESHOLD = 10;
+
+const traditionalToSimplified = OpenCC.Converter({from: 'tw', to: 'cn'});
+const simplifiedToTraditional = OpenCC.Converter({from: 'cn', to: 'tw'});
+const HAN_CHARACTER_PATTERN = /[\u3400-\u9FFF\uF900-\uFAFF]/;
 
 const SEARCH_RANGE_DAYS = {
     week: 7,
@@ -11,6 +18,60 @@ const SEARCH_RANGE_DAYS = {
 };
 
 const normalizeQueryKey = query => query.trim().toLowerCase();
+
+export const canRunHarborKeywordSearch = query =>
+    Array.from(typeof query === 'string' ? query.trim() : '').length >= 2;
+
+export const getAlternateHarborSearchQueries = query => {
+    const normalizedQuery = typeof query === 'string' ? query.trim() : '';
+    if (!normalizedQuery || !HAN_CHARACTER_PATTERN.test(normalizedQuery)) {
+        return [];
+    }
+
+    return [
+        traditionalToSimplified(normalizedQuery),
+        simplifiedToTraditional(normalizedQuery),
+    ].filter(
+        (convertedQuery, index, queries) =>
+            convertedQuery !== normalizedQuery &&
+            queries.indexOf(convertedQuery) === index,
+    );
+};
+
+const getHarborSearchItemKey = item => {
+    if (item?.postId != null) {
+        return `post:${item.postId}`;
+    }
+    if (item?.topicId != null) {
+        return `topic:${item.topicId}`;
+    }
+    if (item?.kind === 'user') {
+        return item.user?.id != null
+            ? `user:${item.user.id}`
+            : `username:${String(item.user?.username || '').toLowerCase()}`;
+    }
+    return `item:${item?.id}`;
+};
+
+export const mergeHarborSearchItems = (originalItems, convertedItems) => {
+    const mergedItems = [];
+    const seenKeys = new Set();
+
+    [...(originalItems || []), ...(convertedItems || [])].forEach(item => {
+        const itemKey = getHarborSearchItemKey(item);
+        if (seenKeys.has(itemKey)) {
+            return;
+        }
+        seenKeys.add(itemKey);
+        mergedItems.push(item);
+    });
+
+    return mergedItems;
+};
+
+export const countHarborSearchContentItems = items =>
+    (Array.isArray(items) ? items : []).filter(item => item?.kind !== 'user')
+        .length;
 
 const normalizeTimestamp = searchedAt =>
     Number.isFinite(searchedAt) && searchedAt >= 0 ? searchedAt : 0;
@@ -173,4 +234,44 @@ export const buildHarborSearchQuery = ({
     }
 
     return terms.filter(Boolean).join(' ');
+};
+
+/** 對已載入的搜尋結果做即時關鍵字篩選（輸入防抖完成前的本地預覽） */
+export const filterHarborSearchItems = (items, query) => {
+    if (!Array.isArray(items)) {
+        return [];
+    }
+    const normalizedQuery =
+        typeof query === 'string' ? query.trim().toLowerCase() : '';
+    if (!normalizedQuery) {
+        return items;
+    }
+
+    return items.filter(item => {
+        if (!item || typeof item !== 'object') {
+            return false;
+        }
+        if (item.kind === 'user') {
+            const user = item.user || {};
+            return [user.username, user.name].some(value =>
+                String(value || '')
+                    .toLowerCase()
+                    .includes(normalizedQuery),
+            );
+        }
+
+        const topic = item.topic || {};
+        const author = item.author || topic.author || {};
+        const haystack = [
+            item.title,
+            item.excerpt,
+            topic.title,
+            topic.excerpt,
+            typeof author === 'string' ? author : author.username,
+            typeof author === 'string' ? '' : author.name,
+        ]
+            .map(value => String(value || '').toLowerCase())
+            .join(' ');
+        return haystack.includes(normalizedQuery);
+    });
 };

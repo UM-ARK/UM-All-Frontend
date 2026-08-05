@@ -20,6 +20,16 @@ jest.mock('expo-crypto', () => ({
 
 jest.mock('expo-web-browser', () => ({
     openAuthSessionAsync: jest.fn(),
+    dismissAuthSession: jest.fn(),
+    dismissBrowser: jest.fn().mockResolvedValue({type: 'dismiss'}),
+    getCustomTabsSupportingBrowsersAsync: jest.fn().mockResolvedValue({
+        browserPackages: ['com.android.chrome'],
+        preferredBrowserPackage: 'com.android.chrome',
+    }),
+}));
+
+jest.mock('../../browserPackage', () => ({
+    getBestBrowserPackage: jest.fn().mockResolvedValue('com.android.chrome'),
 }));
 
 jest.mock('react-native-quick-crypto', () => {
@@ -60,10 +70,12 @@ const mockAuthStorage = jest.requireMock('../harborAuthStorage');
 const mockExpoCrypto = jest.requireMock('expo-crypto');
 
 import {
+    AUTH_TTL_MS,
     buildHarborAuthUrl,
     completeHarborAuthorization,
     completeInitialHarborCallback,
     decryptHarborPayload,
+    deliverHarborAuthDeepLink,
     ensureHarborRsaKeyPair,
     generateHarborNonce,
     generateHarborRsaKeyPair,
@@ -72,9 +84,14 @@ import {
     isHarborAuthCallback,
 } from '../harborAuth';
 
+const mockBrowserPackage = jest.requireMock('../../browserPackage');
+
 describe('Harbor User API Key 授權工具', () => {
     beforeEach(() => {
         jest.clearAllMocks();
+        mockBrowserPackage.getBestBrowserPackage.mockResolvedValue(
+            'com.android.chrome',
+        );
     });
 
     it('產生固定長度的 CSPRNG hex nonce', () => {
@@ -166,7 +183,7 @@ describe('Harbor User API Key 授權工具', () => {
 
     it('冷啟動沒有 callback 時清除逾時的 pending authorization', async () => {
         mockAuthStorage.loadPendingHarborAuthorization.mockResolvedValue({
-            createdAt: Date.now() - 11 * 60 * 1000,
+            createdAt: Date.now() - (AUTH_TTL_MS + 60 * 1000),
             privateKey: 'expired-private-key',
         });
 
@@ -174,6 +191,83 @@ describe('Harbor User API Key 授權工具', () => {
         expect(
             mockAuthStorage.clearPendingHarborAuthorization,
         ).toHaveBeenCalled();
+    });
+
+    it('未點擊登入時拒絕 deep link callback', async () => {
+        mockAuthStorage.loadPendingHarborAuthorization.mockResolvedValue(null);
+
+        await expect(
+            completeHarborAuthorization(
+                'one.umall://auth/discourse?payload=abc',
+            ),
+        ).rejects.toMatchObject({code: HARBOR_AUTH_ERROR.NO_PENDING_AUTH});
+        expect(mockAuthStorage.saveHarborCredentials).not.toHaveBeenCalled();
+    });
+
+    it('deliverHarborAuthDeepLink 只接受合法 auth callback', () => {
+        expect(
+            deliverHarborAuthDeepLink(
+                'one.umall://auth/discourse?payload=encrypted',
+            ),
+        ).toBe(true);
+        expect(
+            deliverHarborAuthDeepLink('one.umall://app/somewhere'),
+        ).toBe(false);
+    });
+
+    it('Auth Session 取消時保留 pending，供 OEM deep link 補完', async () => {
+        jest.useFakeTimers();
+        try {
+            await jest.isolateModulesAsync(async () => {
+                const isolatedAuthStorage = require('../harborAuthStorage');
+                const isolatedWebBrowser = require('expo-web-browser');
+                const isolatedHarborAuth = require('../harborAuth');
+                const keyPair = generateKeyPairSync('rsa', {
+                    modulusLength: 2048,
+                    publicKeyEncoding: {type: 'spki', format: 'pem'},
+                    privateKeyEncoding: {type: 'pkcs8', format: 'pem'},
+                });
+
+                isolatedAuthStorage.loadHarborRsaKeyPair.mockResolvedValue(
+                    keyPair,
+                );
+                isolatedAuthStorage.loadHarborClientId.mockResolvedValue(
+                    'installation-id',
+                );
+                isolatedAuthStorage.loadPendingHarborAuthorization.mockResolvedValue(
+                    null,
+                );
+                isolatedWebBrowser.openAuthSessionAsync.mockResolvedValue({
+                    type: 'dismiss',
+                });
+
+                const authPromise =
+                    isolatedHarborAuth.startHarborAuthorization();
+                // 必須先掛上 rejection 斷言，再推進 grace timer。
+                const rejection = expect(authPromise).rejects.toMatchObject({
+                    code: isolatedHarborAuth.HARBOR_AUTH_ERROR.CANCELLED,
+                });
+                await Promise.resolve();
+                await jest.advanceTimersByTimeAsync(3000);
+                await rejection;
+
+                expect(
+                    isolatedAuthStorage.savePendingHarborAuthorization,
+                ).toHaveBeenCalled();
+                // 取消路徑不得清掉剛寫入的 pending（最後一次 clear 應早於 save）
+                const clearOrder =
+                    isolatedAuthStorage.clearPendingHarborAuthorization.mock
+                        .invocationCallOrder;
+                const saveOrder =
+                    isolatedAuthStorage.savePendingHarborAuthorization.mock
+                        .invocationCallOrder;
+                const lastClear = clearOrder[clearOrder.length - 1] ?? -1;
+                const lastSave = saveOrder[saveOrder.length - 1];
+                expect(lastClear).toBeLessThan(lastSave);
+            });
+        } finally {
+            jest.useRealTimers();
+        }
     });
 
     it('解密 Discourse RSA-OAEP SHA-1 payload', () => {
@@ -329,5 +423,21 @@ describe('Harbor User API Key 授權工具', () => {
         expect(
             mockAuthStorage.clearPendingHarborAuthorization,
         ).toHaveBeenCalled();
+    });
+
+    it('逾時 pending 拒絕 callback', async () => {
+        mockAuthStorage.loadPendingHarborAuthorization.mockResolvedValue({
+            clientId: 'installation-id',
+            nonce: 'pending-nonce',
+            privateKey: 'unused',
+            createdAt: Date.now() - (AUTH_TTL_MS + 1000),
+        });
+
+        await expect(
+            completeHarborAuthorization(
+                'one.umall://auth/discourse?payload=abc',
+            ),
+        ).rejects.toMatchObject({code: HARBOR_AUTH_ERROR.EXPIRED});
+        expect(mockAuthStorage.saveHarborCredentials).not.toHaveBeenCalled();
     });
 });

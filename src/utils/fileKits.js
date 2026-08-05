@@ -10,11 +10,11 @@ import Toast from 'react-native-simple-toast';
  * @returns {Promise<boolean>} 是否有權限
  */
 async function checkAndRequestMediaLibraryPermission() {
-    const { status: existingStatus } = await MediaLibrary.getPermissionsAsync();
+    const { status: existingStatus } = await MediaLibrary.getPermissionsAsync(true);
     let finalStatus = existingStatus;
 
     if (existingStatus !== 'granted') {
-        const { status } = await MediaLibrary.requestPermissionsAsync();
+        const { status } = await MediaLibrary.requestPermissionsAsync(true);
         finalStatus = status;
     }
 
@@ -74,7 +74,7 @@ export async function handleImageDownload(IMAGE_URL) {
         await downloadedFile.move(targetFile);
 
         // 保存到相冊
-        await MediaLibrary.saveToLibraryAsync(targetFile.uri);
+        await MediaLibrary.Asset.create(targetFile.uri);
         Toast.show('保存成功 😊 ~');
 
         // 清理緩存文件

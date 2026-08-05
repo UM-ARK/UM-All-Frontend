@@ -3,7 +3,7 @@
     "name": "ARK ALL",
     "slug": "arkall",
     "scheme": "one.umall",
-    "version": "26.8.0",
+    "version": "26.8.1",
     "icon": "./src/static/img/logo.png",
     "userInterfaceStyle": "automatic",
     "ios": {
@@ -12,7 +12,8 @@
       "icon": "./src/static/img/logo.png",
       "googleServicesFile": "./GoogleService-Info.plist",
       "bundleIdentifier": "one.umall",
-      "buildNumber": "26.8.0",
+      "appleTeamId": "UVSHNJYJWU",
+      "buildNumber": "26.8.1",
       "associatedDomains": [
         "applinks:umall.one",
         "webcredentials:umall.one"
@@ -27,7 +28,7 @@
       "userInterfaceStyle": "automatic",
       "googleServicesFile": "./google-services.json",
       "package": "one.umall",
-      "versionCode": 80,
+      "versionCode": 83,
       "adaptiveIcon": {
         "foregroundImage": "./src/static/img/ic_launcher_foreground.png",
         "backgroundColor": "#E6AB52"
@@ -42,6 +43,11 @@
               "scheme": "https",
               "host": "umall.one",
               "pathPrefix": "/auth/discourse"
+            },
+            {
+              "scheme": "https",
+              "host": "umall.one",
+              "pathPrefix": "/app/"
             }
           ],
           "category": [
@@ -53,16 +59,16 @@
       "permissions": [
         "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.WRITE_EXTERNAL_STORAGE",
-        "android.permission.READ_MEDIA_VISUAL_USER_SELECTED",
-        "android.permission.ACCESS_MEDIA_LOCATION",
-        "android.permission.READ_MEDIA_IMAGES",
-        "android.permission.READ_MEDIA_VIDEO",
-        "android.permission.READ_MEDIA_AUDIO",
         "android.permission.RECORD_AUDIO"
+      ],
+      "blockedPermissions": [
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.READ_MEDIA_VIDEO"
       ]
     },
     "plugins": [
       "./plugins/withAndroidSigning",
+      "./plugins/withRNFirebaseDisableSPM",
       [
         "expo-dev-client",
         {
@@ -76,7 +82,8 @@
         {
           "photosPermission": "允許 ARK ALL 訪問您的照片以保存圖片。",
           "savePhotosPermission": "允許 ARK ALL 保存照片到相冊。",
-          "isAccessMediaLocationEnabled": true
+          "isAccessMediaLocationEnabled": false,
+          "granularPermissions": []
         }
       ],
       [
@@ -86,13 +93,23 @@
         }
       ],
       [
+        "expo-notifications",
+        {
+          "color": "#4796d6",
+          "defaultChannel": "default",
+          "enableBackgroundRemoteNotifications": false
+        }
+      ],
+      [
         "expo-build-properties",
         {
           "android": {
             "buildArchs": [
               "armeabi-v7a",
               "arm64-v8a"
-            ]
+            ],
+            "enableMinifyInReleaseBuilds": true,
+            "enableShrinkResourcesInReleaseBuilds": true
           },
           "ios": {
             "useFrameworks": "static",
@@ -120,7 +137,8 @@
       "expo-secure-store",
       "react-native-quick-crypto",
       "expo-quick-actions",
-      "expo-sharing"
+      "expo-sharing",
+      "@react-native-firebase/analytics"
     ],
     "extra": {
       "eas": {

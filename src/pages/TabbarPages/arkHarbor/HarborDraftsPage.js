@@ -19,21 +19,17 @@ import {isLiquidGlassSupported} from '@callstack/liquid-glass';
 import {HeaderHeightContext} from '@react-navigation/elements';
 import {FlashList} from '@shopify/flash-list';
 import {useFocusEffect} from '@react-navigation/native';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import {scale, verticalScale} from 'react-native-size-matters';
 import Toast from 'react-native-simple-toast';
 import {useTranslation} from 'react-i18next';
 
 import {uiStyle, useTheme} from '../../../components/ThemeContext';
 import {useHarborSession} from '../../../contexts/HarborSessionContext';
-import {fetchHarborDrafts} from '../../../utils/harbor/harborApi';
 import {
     deleteHarborComposerDraft,
-    flushPendingHarborDraftDeletes,
     getHarborDraftAccountId,
     getLocalHarborDrafts,
-    getPendingHarborDraftDeletes,
-    mergeHarborDrafts,
 } from '../../../utils/harbor/harborDrafts';
 import {trigger} from '../../../utils/trigger';
 
@@ -140,35 +136,14 @@ const HarborDraftsPage = ({
         }
 
         try {
-            const [
-                localDrafts,
-                pendingDeletes,
-            ] = await Promise.all([
-                getLocalHarborDrafts(accountId),
-                getPendingHarborDraftDeletes(accountId),
-            ]);
-            let remoteDrafts = [];
-            try {
-                const result = await fetchHarborDrafts({
-                    signal: controller.signal,
-                });
-                remoteDrafts = result.items;
-            } catch {
-                if (!controller.signal.aborted) {
-                    setLoadError(
-                        t('Harbor 草稿暫時無法同步，已顯示本機草稿。'),
-                    );
-                }
-            }
+            const localDrafts = await getLocalHarborDrafts(accountId);
             if (!controller.signal.aborted) {
                 setDrafts(
-                    mergeHarborDrafts(
-                        localDrafts,
-                        remoteDrafts,
-                        pendingDeletes,
+                    [...localDrafts].sort(
+                        (first, second) =>
+                            second.updatedAt - first.updatedAt,
                     ),
                 );
-                flushPendingHarborDraftDeletes(accountId).catch(() => null);
             }
         } catch {
             if (!controller.signal.aborted) {
@@ -250,9 +225,8 @@ const HarborDraftsPage = ({
                                     await deleteHarborComposerDraft(
                                         accountId,
                                         draft.draftKey,
-                                        draft.sequence,
                                     );
-                                if (!deleted && !accountId) {
+                                if (!deleted) {
                                     throw new Error(
                                         'Harbor draft deletion failed',
                                     );
@@ -514,7 +488,7 @@ const HarborDraftsPage = ({
                         {color: theme.black.second},
                     ]}>
                     {t(
-                        '本機草稿只保存在此裝置；清除 App 快取或重新安裝會失去草稿。',
+                        '草稿只保存在此裝置，不會同步到 Harbor；清除 App 資料或重新安裝會失去草稿。',
                     )}
                 </Text>
             </View>

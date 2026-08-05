@@ -58,6 +58,31 @@ const extractPostImages = html => {
     return [...new Set(images)];
 };
 
+const getHarborImagePressAction = ({ parentUrl, sourceUrl, imageUrls }) => {
+    const normalizedParentUrl = normalizeHtmlUrl(parentUrl);
+    const normalizedSourceUrl = normalizeHtmlUrl(sourceUrl);
+
+    if (normalizedParentUrl) {
+        const parentImageIndex = imageUrls.indexOf(normalizedParentUrl);
+        if (parentImageIndex >= 0) {
+            return { type: 'image', imageIndex: parentImageIndex };
+        }
+        if (normalizedParentUrl.startsWith('#')) {
+            return null;
+        }
+        return { type: 'link', url: normalizedParentUrl };
+    }
+
+    const sourceImageIndex = imageUrls.indexOf(normalizedSourceUrl);
+    if (sourceImageIndex >= 0) {
+        return { type: 'image', imageIndex: sourceImageIndex };
+    }
+    if (!normalizedSourceUrl || normalizedSourceUrl.startsWith('#')) {
+        return null;
+    }
+    return { type: 'link', url: normalizedSourceUrl };
+};
+
 const getReactionCount = post => {
     if (Number.isFinite(post?.reaction_users_count)) {
         return post.reaction_users_count;
@@ -507,6 +532,7 @@ export {
     flattenNestedPosts,
     formatHarborFlagTypesForPost,
     getFlagActions,
+    getHarborImagePressAction,
     getHarborMutationError,
     getLikeAction,
     getNestedReplyCount,

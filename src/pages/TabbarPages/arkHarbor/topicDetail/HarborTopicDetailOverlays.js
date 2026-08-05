@@ -12,7 +12,7 @@ import {
 // TODO: 暫時關閉收藏提醒日期選擇，待收藏提醒通知完整後再開啟
 // import moment from 'moment-timezone';
 // import DateTimePickerModal from 'react-native-modal-datetime-picker';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import { scale } from 'react-native-size-matters';
 import { useTranslation } from 'react-i18next';
 

@@ -12,29 +12,58 @@ import {
 
 import {isLiquidGlassSupported} from '@callstack/liquid-glass';
 import {FlashList} from '@shopify/flash-list';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import {scale, verticalScale} from 'react-native-size-matters';
 import {useTranslation} from 'react-i18next';
 
 import {uiStyle, useTheme} from '../../../../components/ThemeContext';
+import TouchableScale from '../../../../components/TouchableScale';
+import {filterHarborSearchItems} from '../../../../utils/harbor/harborSearch';
 import {trigger} from '../../../../utils/trigger';
 import {
     HarborFullState,
     HarborInlineRetry,
 } from '../components/HarborListStates';
+import HarborTopicCard from '../components/HarborTopicCard';
 import HarborSearchResultCard from './HarborSearchResultCard';
+
+/** 無輸入時疊加顯示的最近搜尋筆數 */
+const HISTORY_PREVIEW_LIMIT = 3;
+
+/** 將搜尋命中合併進 topic，供 HarborTopicCard 直接複用 */
+const toTopicCardTopic = item => {
+    if (!item?.topic) {
+        return null;
+    }
+    return {
+        ...item.topic,
+        // 搜尋命中作者（貼文 username）優先；topic 摘要常缺 posters 會變成「Harbor 會員」
+        author: item.author || item.topic.author,
+        excerpt: item.excerpt || item.topic.excerpt,
+        activityAt:
+            item.createdAt ||
+            item.topic.activityAt ||
+            item.topic.lastPostedAt ||
+            item.topic.createdAt,
+    };
+};
 
 const HarborSearchResults = ({
     results,
     history,
     actions,
+    resultTab,
+    query = '',
+    isSearchFocused = false,
+    filtersExpanded = false,
     headerHeight,
     onCollapseSearch,
     onResultPress,
     onAuthorPress,
+    onProfilePress,
     onCategoryPress,
-    onTagPress,
     onClearHistory,
+    onComposePress,
 }) => {
     const {theme} = useTheme();
     const {t} = useTranslation('harbor');
@@ -45,6 +74,7 @@ const HarborSearchResults = ({
         isLoadingMore,
         error,
         loadMoreError,
+        isQueryDirty = false,
     } = results;
     const {items: historyRecords} = history;
     const {
@@ -53,16 +83,66 @@ const HarborSearchResults = ({
         handleLoadMore,
         removeHistory,
     } = actions;
+    const isUsersTab = resultTab === 'users';
+    // 僅在無輸入、未展開篩選時顯示最近搜尋（聚焦或尚未搜尋）
+    const showHistoryPreview =
+        historyRecords.length > 0 &&
+        !query.trim() &&
+        !filtersExpanded &&
+        (isSearchFocused || !hasSearched);
     const historyItems = useMemo(
         () =>
-            historyRecords.map(record => ({
+            historyRecords.slice(0, HISTORY_PREVIEW_LIMIT).map(record => ({
                 id: `history-${record.query.toLowerCase()}`,
                 kind: 'history',
                 ...record,
             })),
         [historyRecords],
     );
-    const listData = hasSearched ? items : historyItems;
+    const filteredItems = useMemo(() => {
+        const tabItems = isUsersTab
+            ? items.filter(item => item.kind === 'user')
+            : items.filter(item => item.kind !== 'user');
+        // 輸入中：先對既有結果做本地篩選；防抖 API 回來後 isQueryDirty=false
+        if (isQueryDirty) {
+            return filterHarborSearchItems(tabItems, query);
+        }
+        return tabItems;
+    }, [isQueryDirty, isUsersTab, items, query]);
+    const showResultsCount =
+        hasSearched && !error && filteredItems.length > 0;
+    // 話題分頁搜尋完成後顯示發佈入口（有結果在底部、無結果在空狀態）
+    const showComposePrompt =
+        typeof onComposePress === 'function' &&
+        hasSearched &&
+        !isUsersTab &&
+        !isLoading &&
+        !isQueryDirty &&
+        !error;
+    const listData = useMemo(() => {
+        if (!hasSearched) {
+            return historyItems;
+        }
+        if (!showHistoryPreview) {
+            return filteredItems;
+        }
+        // 聚焦時：最近搜尋 → 結果標題 → 既有結果
+        const nextItems = [...historyItems];
+        if (showResultsCount) {
+            nextItems.push({
+                id: 'results-header',
+                kind: 'resultsHeader',
+                count: filteredItems.length,
+            });
+        }
+        return nextItems.concat(filteredItems);
+    }, [
+        filteredItems,
+        hasSearched,
+        historyItems,
+        showHistoryPreview,
+        showResultsCount,
+    ]);
 
     const renderItem = useCallback(
         ({item}) => {
@@ -129,22 +209,49 @@ const HarborSearchResults = ({
                 );
             }
 
+            if (item.kind === 'resultsHeader') {
+                return (
+                    <Text
+                        style={[
+                            styles.sectionTitle,
+                            styles.resultsTitleAfterHistory,
+                            {color: theme.black.second},
+                        ]}>
+                        {t('{{count}} 個搜尋結果', {count: item.count})}
+                    </Text>
+                );
+            }
+
+            if (item.kind === 'user') {
+                return (
+                    <HarborSearchResultCard
+                        user={item.user}
+                        onPress={onAuthorPress}
+                        onAvatarPress={onProfilePress}
+                    />
+                );
+            }
+
+            const topic = toTopicCardTopic(item);
+            if (!topic) {
+                return null;
+            }
+
             return (
-                <HarborSearchResultCard
-                    item={item}
-                    onPress={onResultPress}
-                    onAuthorPress={onAuthorPress}
+                <HarborTopicCard
+                    topic={topic}
+                    onPress={() => onResultPress(item)}
+                    onAuthorPress={onProfilePress}
                     onCategoryPress={onCategoryPress}
-                    onTagPress={onTagPress}
                 />
             );
         },
         [
             onAuthorPress,
+            onProfilePress,
             onCategoryPress,
             onCollapseSearch,
             onResultPress,
-            onTagPress,
             removeHistory,
             runSearch,
             setQuery,
@@ -153,69 +260,107 @@ const HarborSearchResults = ({
         ],
     );
 
-    const renderListHeader = useCallback(() => {
-        if (hasSearched) {
-            if (isLoading || error || items.length === 0) {
-                return null;
-            }
-            return (
+    const renderComposePrompt = useCallback(
+        () => (
+            <View style={styles.composePrompt}>
                 <Text
                     style={[
-                        styles.sectionTitle,
-                        {color: theme.black.second},
+                        styles.composePromptText,
+                        {color: theme.black.third},
                     ]}>
-                    {t('{{count}} 個搜尋結果', {count: items.length})}
+                    {t('沒有找到想要的？')}
                 </Text>
-            );
-        }
-        if (historyRecords.length === 0) {
-            return null;
-        }
-        return (
-            <View style={styles.historyHeader}>
-                <Text
-                    style={[
-                        styles.sectionTitle,
-                        {color: theme.black.second},
-                    ]}>
-                    {t('最近搜尋')}
-                </Text>
-                <Pressable
+                <TouchableScale
                     accessibilityRole="button"
+                    accessibilityLabel={t('發佈話題')}
                     onPress={() => {
                         trigger();
                         onCollapseSearch();
-                        onClearHistory();
+                        onComposePress();
                     }}
-                    style={({pressed}) => [
-                        styles.clearHistoryButton,
-                        pressed && {
-                            backgroundColor: theme.tonal.primary15,
-                        },
+                    style={[
+                        styles.composeButton,
+                        {backgroundColor: theme.tonal.primary15},
                     ]}>
+                    <MaterialCommunityIcons
+                        name="plus"
+                        size={scale(16)}
+                        color={theme.themeColor}
+                    />
                     <Text
                         style={[
-                            styles.clearHistoryText,
+                            styles.composeButtonText,
                             {color: theme.themeColor},
                         ]}>
-                        {t('清除全部')}
+                        {t('發佈話題')}
                     </Text>
-                </Pressable>
+                </TouchableScale>
             </View>
+        ),
+        [onCollapseSearch, onComposePress, t, theme],
+    );
+
+    const renderListHeader = useCallback(() => {
+        if (showHistoryPreview) {
+            return (
+                <View style={styles.historyHeader}>
+                    <Text
+                        style={[
+                            styles.sectionTitle,
+                            {color: theme.black.second},
+                        ]}>
+                        {t('最近搜尋')}
+                    </Text>
+                    <Pressable
+                        accessibilityRole="button"
+                        onPress={() => {
+                            trigger();
+                            onCollapseSearch();
+                            onClearHistory();
+                        }}
+                        style={({pressed}) => [
+                            styles.clearHistoryButton,
+                            pressed && {
+                                backgroundColor: theme.tonal.primary15,
+                            },
+                        ]}>
+                        <Text
+                            style={[
+                                styles.clearHistoryText,
+                                {color: theme.themeColor},
+                            ]}>
+                            {t('清除全部')}
+                        </Text>
+                    </Pressable>
+                </View>
+            );
+        }
+        if (!showResultsCount) {
+            return null;
+        }
+        return (
+            <Text
+                style={[
+                    styles.sectionTitle,
+                    {color: theme.black.second},
+                ]}>
+                {t('{{count}} 個搜尋結果', {count: filteredItems.length})}
+            </Text>
         );
     }, [
-        error,
-        hasSearched,
-        historyRecords.length,
-        isLoading,
-        items.length,
+        filteredItems.length,
         onClearHistory,
         onCollapseSearch,
+        showHistoryPreview,
+        showResultsCount,
         t,
         theme,
     ]);
 
     const renderEmptyState = useCallback(() => {
+        if (filteredItems.length > 0) {
+            return null;
+        }
         if (isLoading) {
             return (
                 <View style={styles.loadingState}>
@@ -232,6 +377,10 @@ const HarborSearchResults = ({
                     </Text>
                 </View>
             );
+        }
+        // 輸入中等待防抖：只留最近搜尋，不搶先顯示「無結果」
+        if (isQueryDirty) {
+            return null;
         }
         if (error) {
             const noPermission = [401, 403].includes(error?.response?.status);
@@ -255,11 +404,22 @@ const HarborSearchResults = ({
         }
         if (hasSearched) {
             return (
-                <HarborFullState
-                    icon="magnify-close"
-                    title={t('沒有找到搜尋結果')}
-                    description={t('試試其他關鍵字或調整搜尋篩選。')}
-                />
+                <View style={styles.emptyState}>
+                    <HarborFullState
+                        icon="magnify-close"
+                        title={
+                            isUsersTab
+                                ? t('沒有找到使用者')
+                                : t('沒有找到搜尋結果')
+                        }
+                        description={
+                            isUsersTab
+                                ? t('試試其他關鍵字。')
+                                : t('試試其他關鍵字或調整搜尋篩選。')
+                        }
+                    />
+                    {showComposePrompt ? renderComposePrompt() : null}
+                </View>
             );
         }
         return (
@@ -271,9 +431,25 @@ const HarborSearchResults = ({
                 )}
             />
         );
-    }, [error, hasSearched, isLoading, runSearch, t, theme]);
+    }, [
+        error,
+        filteredItems.length,
+        hasSearched,
+        isLoading,
+        isQueryDirty,
+        isUsersTab,
+        renderComposePrompt,
+        runSearch,
+        showComposePrompt,
+        t,
+        theme,
+    ]);
 
     const renderFooter = useCallback(() => {
+        // 用戶分頁僅首頁結果，不顯示載入更多
+        if (isUsersTab) {
+            return <View style={styles.footerSpacing} />;
+        }
         if (isLoadingMore) {
             return (
                 <View style={styles.footerLoading}>
@@ -286,20 +462,33 @@ const HarborSearchResults = ({
         }
         if (loadMoreError) {
             return (
-                <View style={styles.footerRetry}>
-                    <HarborInlineRetry
-                        message={t('暫時無法載入更多搜尋結果')}
-                        actionLabel={t('重試')}
-                        onRetry={handleLoadMore}
-                    />
+                <View>
+                    <View style={styles.footerRetry}>
+                        <HarborInlineRetry
+                            message={t('暫時無法載入更多搜尋結果')}
+                            actionLabel={t('重試')}
+                            onRetry={handleLoadMore}
+                        />
+                    </View>
+                    {showComposePrompt && filteredItems.length > 0
+                        ? renderComposePrompt()
+                        : null}
                 </View>
             );
         }
+        // 有結果時在列表底部顯示發佈入口；無結果已在空狀態顯示，避免重複
+        if (showComposePrompt && filteredItems.length > 0) {
+            return renderComposePrompt();
+        }
         return <View style={styles.footerSpacing} />;
     }, [
+        filteredItems.length,
         handleLoadMore,
         isLoadingMore,
+        isUsersTab,
         loadMoreError,
+        renderComposePrompt,
+        showComposePrompt,
         t,
         theme.themeColor,
     ]);
@@ -312,7 +501,7 @@ const HarborSearchResults = ({
             ListHeaderComponent={renderListHeader}
             ListEmptyComponent={renderEmptyState}
             ListFooterComponent={renderFooter}
-            onEndReached={handleLoadMore}
+            onEndReached={isUsersTab ? undefined : handleLoadMore}
             onEndReachedThreshold={0.35}
             onScrollBeginDrag={onCollapseSearch}
             keyboardDismissMode="on-drag"
@@ -337,6 +526,9 @@ const styles = StyleSheet.create({
         fontWeight: '700',
         marginHorizontal: scale(14),
         marginBottom: verticalScale(8),
+    },
+    resultsTitleAfterHistory: {
+        marginTop: verticalScale(12),
     },
     historyHeader: {
         flexDirection: 'row',
@@ -404,6 +596,34 @@ const styles = StyleSheet.create({
         ...uiStyle.defaultText,
         fontSize: scale(11),
         marginTop: verticalScale(10),
+    },
+    emptyState: {
+        paddingBottom: verticalScale(8),
+    },
+    composePrompt: {
+        alignItems: 'center',
+        marginHorizontal: scale(14),
+        marginTop: verticalScale(4),
+        marginBottom: verticalScale(20),
+        paddingTop: verticalScale(12),
+    },
+    composePromptText: {
+        ...uiStyle.defaultText,
+        fontSize: scale(12),
+        marginBottom: verticalScale(10),
+    },
+    composeButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        borderRadius: scale(11),
+        paddingHorizontal: scale(16),
+        paddingVertical: verticalScale(9),
+    },
+    composeButtonText: {
+        ...uiStyle.defaultText,
+        fontSize: scale(13),
+        fontWeight: '700',
+        marginLeft: scale(4),
     },
     footerLoading: {
         minHeight: verticalScale(54),

@@ -22,6 +22,8 @@ ENV['EXPO_USE_PRECOMPILED_MODULES'] = '0' if podfile_properties['EXPO_USE_PRECOM
 ENV['EXPO_USE_PRECOMPILED_MODULES'] ||= '1'
 platform :ios, podfile_properties['ios.deploymentTarget'] || '16.4'
 
+$RNFirebaseDisableSPM = true
+
 prepare_react_native_project!
 
 target 'ARKALL' do

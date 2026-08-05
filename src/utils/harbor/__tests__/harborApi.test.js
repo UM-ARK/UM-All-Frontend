@@ -14,6 +14,8 @@ import {
     fetchHarborNotificationPage,
     fetchHarborNestedPostChildren,
     fetchHarborNotifications,
+    fetchHarborProfileMetadata,
+    fetchHarborUserProfile,
     fetchHarborSearch,
     fetchHarborSiteCapabilities,
     fetchHarborTags,
@@ -23,6 +25,7 @@ import {
     fetchHarborUnreadNotificationCount,
     fetchHarborForumBadgeSnapshot,
     fetchHarborUserActions,
+    fetchHarborUserCreatedTopics,
     fetchCachedHarborFlagTypes,
     flagHarborPost,
     getHarborTopicViews,
@@ -33,18 +36,32 @@ import {
     markHarborNotificationRead,
     normalizeHarborFlagTypes,
     saveHarborTopicTimings,
+    selectHarborAvatar,
     setActiveHarborCredentials,
     setHarborCredentialRejectedHandler,
     setHarborTopicNotificationLevel,
+    resolveCanUploadCustomAvatar,
     toggleHarborPostReaction,
     unlikeHarborPost,
+    updateHarborAvatar,
+    updateHarborProfile,
     updateHarborBookmark,
     validateActiveHarborSession,
 } from '../harborApi';
 
 jest.mock('../../pathMap', () => ({
     ARK_HARBOR: 'https://harbor.example.com',
+    ARK_HARBOR_ABSOLUTE_URL: url =>
+        url.startsWith('//')
+            ? `https:${url}`
+            : `https://harbor.example.com${url}`,
     ARK_HARBOR_AVATAR_TEMPLATE: template => template,
+    ARK_HARBOR_UPLOAD_URL: url =>
+        url.includes('.r2.cloudflarestorage.com')
+            ? `https://assert.example.com${url.replace(/^\/\/[^/]+/, '')}`
+            : url.startsWith('//')
+            ? `https:${url}`
+            : `https://harbor.example.com${url}`,
 }));
 
 describe('Harbor API 資料正規化', () => {
@@ -172,6 +189,360 @@ describe('Harbor API 資料正規化', () => {
         ).toEqual(['latest', 'top']);
     });
 
+    it('保留可編輯個人資料欄位並識別 UMer 群組', async () => {
+        getSpy
+            .mockResolvedValueOnce({
+                data: {
+                    current_user: {
+                        id: 7,
+                        username: 'ark-user',
+                        admin: false,
+                        moderator: false,
+                        trust_level: 2,
+                        can_upload_avatar: true,
+                    },
+                },
+            })
+            .mockResolvedValueOnce({
+                data: {
+                    user: {
+                        username: 'ark-user',
+                        name: 'ARK User',
+                        bio_raw: 'Harbor 簡介',
+                        location: '澳門',
+                        website: 'https://umall.one',
+                        user_fields: {'1': '在讀'},
+                        groups: [{id: 41, name: 'UMer'}],
+                        can_edit: true,
+                        can_edit_name: true,
+                        can_change_bio: true,
+                        can_change_location: true,
+                        can_change_website: true,
+                    },
+                },
+            })
+            .mockResolvedValueOnce({data: {user_summary: {}}})
+            .mockResolvedValueOnce({data: {badges: [], user_badges: []}});
+
+        const result = await fetchCurrentHarborUser({
+            userApiKey: 'key',
+            clientId: 'client',
+        });
+
+        expect(result.isUMer).toBe(true);
+        expect(result.id).toBe(7);
+        expect(result.canUploadAvatar).toBe(true);
+        expect(result.isAdmin).toBe(false);
+        expect(result.isModerator).toBe(false);
+        expect(result.trustLevel).toBe(2);
+        expect(result.profile).toEqual({
+            bio: 'Harbor 簡介',
+            location: '澳門',
+            website: 'https://umall.one',
+            workStatus: '在讀',
+            canEdit: true,
+            canChangeBio: true,
+            canChangeLocation: true,
+            canChangeWebsite: true,
+        });
+    });
+
+    it('取得工作狀態欄位設定並更新個人資料', async () => {
+        getSpy.mockResolvedValueOnce({
+            data: {
+                user_fields: [
+                    {
+                        id: 1,
+                        name: '工作狀態',
+                        editable: true,
+                        required: true,
+                        options: ['在讀', '在職'],
+                    },
+                ],
+            },
+        });
+        getSpy.mockResolvedValueOnce({
+            data: {
+                allow_uploaded_avatars: true,
+                selectable_avatars:
+                    '//harbor.example.r2.cloudflarestorage.com/original/avatar-1.png|/uploads/avatar-2.png',
+                selectable_avatars_mode: 'everyone',
+            },
+        });
+        putSpy.mockResolvedValueOnce({data: {success: 'OK'}});
+
+        await expect(
+            fetchHarborProfileMetadata({
+                user: {
+                    canUploadAvatar: true,
+                    trustLevel: 1,
+                    isAdmin: false,
+                    isModerator: false,
+                },
+            }),
+        ).resolves.toEqual({
+            workStatusField: {
+                id: 1,
+                editable: true,
+                required: true,
+                options: ['在讀', '在職'],
+            },
+            selectableAvatars: [
+                {
+                    value: '//harbor.example.r2.cloudflarestorage.com/original/avatar-1.png',
+                    url: 'https://assert.example.com/original/avatar-1.png',
+                },
+                {
+                    value: '/uploads/avatar-2.png',
+                    url: 'https://harbor.example.com/uploads/avatar-2.png',
+                },
+            ],
+            selectableAvatarsMode: 'everyone',
+            canUploadCustomAvatar: true,
+        });
+        await expect(
+            updateHarborProfile('ark user', {
+                bio: 'Harbor 簡介',
+                location: '澳門',
+                website: 'https://umall.one',
+                workStatus: '在讀',
+                workStatusFieldId: 1,
+            }),
+        ).resolves.toEqual({success: 'OK'});
+        expect(putSpy).toHaveBeenCalledWith(
+            '/u/ark%20user.json',
+            {
+                bio_raw: 'Harbor 簡介',
+                location: '澳門',
+                website: 'https://umall.one',
+                user_fields: {'1': '在讀'},
+            },
+            {signal: undefined},
+        );
+    });
+
+    it('依 Discourse 權限判斷是否可上傳自訂頭像', () => {
+        const allowedUser = {
+            canUploadAvatar: true,
+            trustLevel: 2,
+            isAdmin: false,
+            isModerator: false,
+        };
+
+        expect(
+            resolveCanUploadCustomAvatar(
+                {selectable_avatars_mode: 'everyone'},
+                allowedUser,
+            ),
+        ).toBe(true);
+        expect(
+            resolveCanUploadCustomAvatar(
+                {selectable_avatars_mode: 'everyone'},
+                {...allowedUser, canUploadAvatar: false},
+            ),
+        ).toBe(false);
+        expect(
+            resolveCanUploadCustomAvatar(
+                {selectable_avatars_mode: 'no_one'},
+                allowedUser,
+            ),
+        ).toBe(false);
+        expect(
+            resolveCanUploadCustomAvatar(
+                {selectable_avatars_mode: 'tl3'},
+                allowedUser,
+            ),
+        ).toBe(false);
+        expect(
+            resolveCanUploadCustomAvatar(
+                {selectable_avatars_mode: 'tl2'},
+                allowedUser,
+            ),
+        ).toBe(true);
+        expect(
+            resolveCanUploadCustomAvatar(
+                {selectable_avatars_mode: 'staff'},
+                allowedUser,
+            ),
+        ).toBe(false);
+        expect(
+            resolveCanUploadCustomAvatar(
+                {selectable_avatars_mode: 'staff'},
+                {...allowedUser, isModerator: true},
+            ),
+        ).toBe(true);
+        expect(
+            resolveCanUploadCustomAvatar(
+                {selectable_avatars_mode: 'everyone'},
+                null,
+            ),
+        ).toBe(false);
+    });
+
+    it('上傳並套用 Harbor 頭像', async () => {
+        const signal = {aborted: false};
+        postSpy.mockResolvedValueOnce({data: {id: '91'}});
+        putSpy.mockResolvedValueOnce({data: {success: 'OK'}});
+
+        await expect(
+            updateHarborAvatar(
+                'ark user',
+                {
+                    uri: 'file:///avatar.jpeg',
+                    fileName: 'avatar.jpeg',
+                    mimeType: 'image/jpeg',
+                },
+                {signal, userId: 7},
+            ),
+        ).resolves.toEqual({success: 'OK'});
+        expect(postSpy).toHaveBeenCalledWith(
+            '/uploads.json',
+            expect.any(FormData),
+            {
+                headers: {'Content-Type': 'multipart/form-data'},
+                signal,
+            },
+        );
+        expect(Array.from(postSpy.mock.calls[0][1].entries())).toEqual(
+            expect.arrayContaining([
+                ['upload_type', 'avatar'],
+                ['user_id', '7'],
+                ['synchronous', 'true'],
+            ]),
+        );
+        expect(putSpy).toHaveBeenCalledWith(
+            '/u/ark%20user/preferences/avatar/pick.json',
+            {
+                upload_id: 91,
+                type: 'uploaded',
+            },
+            {signal},
+        );
+    });
+
+    it('套用站點提供的 Harbor 頭像', async () => {
+        const signal = {aborted: false};
+        putSpy.mockResolvedValueOnce({data: {success: 'OK'}});
+
+        await expect(
+            selectHarborAvatar(
+                'ark user',
+                '//cdn.example.com/avatar.png',
+                {signal},
+            ),
+        ).resolves.toEqual({success: 'OK'});
+        expect(putSpy).toHaveBeenCalledWith(
+            '/u/ark%20user/preferences/avatar/select.json',
+            {url: '//cdn.example.com/avatar.png'},
+            {signal},
+        );
+    });
+
+    it('取得指定使用者的公開個人資料', async () => {
+        getSpy.mockResolvedValueOnce({
+            data: {
+                user: {
+                    username: 'harbor-user',
+                    name: 'Harbor User',
+                    avatar_template: '/avatar/{size}.png',
+                    title: '社群成員',
+                    bio_cooked: '<p>公開簡介</p>',
+                    location: '澳門',
+                    website: 'https://umall.one',
+                    user_fields: {'1': '在讀'},
+                    groups: [{id: 41, name: 'UMer'}],
+                },
+            },
+        })
+            .mockResolvedValueOnce({
+                data: {
+                    user_summary: {
+                        topic_count: 12,
+                        post_count: 34,
+                        likes_received: 56,
+                        days_visited: 78,
+                        time_read: 5400,
+                        topics_entered: 90,
+                    },
+                },
+            })
+            .mockResolvedValueOnce({
+                data: {
+                    badges: [{id: 3, name: 'Nice Reply'}],
+                    user_badges: [{id: 8, badge_id: 3}],
+                },
+            });
+
+        const result = await fetchHarborUserProfile('harbor user');
+
+        expect(getSpy).toHaveBeenNthCalledWith(
+            1,
+            '/u/harbor%20user.json',
+            {signal: undefined},
+        );
+        expect(getSpy).toHaveBeenNthCalledWith(
+            2,
+            '/u/harbor%20user/summary.json',
+            {signal: undefined},
+        );
+        expect(getSpy).toHaveBeenNthCalledWith(
+            3,
+            '/user-badges/harbor%20user.json',
+            {signal: undefined},
+        );
+        expect(result).toEqual(
+            expect.objectContaining({
+                displayName: 'Harbor User',
+                username: 'harbor-user',
+                role: '社群成員',
+                isUMer: true,
+                groups: ['UMer'],
+                contributions: expect.arrayContaining([
+                    expect.objectContaining({
+                        key: 'topicsCreated',
+                        value: '12',
+                    }),
+                ]),
+                badges: [
+                    expect.objectContaining({
+                        id: '8',
+                        name: 'Nice Reply',
+                    }),
+                ],
+                profile: expect.objectContaining({
+                    bio: '公開簡介',
+                    location: '澳門',
+                    website: 'https://umall.one',
+                    workStatus: '在讀',
+                }),
+            }),
+        );
+    });
+
+    it('公開統計與徽章不可見時仍保留基本個人資料', async () => {
+        getSpy
+            .mockResolvedValueOnce({
+                data: {
+                    user: {
+                        username: 'private-stats',
+                        name: 'Private Stats',
+                    },
+                },
+            })
+            .mockRejectedValueOnce(new Error('Summary unavailable'))
+            .mockRejectedValueOnce(new Error('Badges unavailable'));
+
+        const result = await fetchHarborUserProfile('private-stats');
+
+        expect(result.displayName).toBe('Private Stats');
+        expect(result.contributions[0].value).toBe('—');
+        expect(result.badges).toEqual([]);
+        expect(result.unavailableProfileSections).toEqual([
+            'summary',
+            'badges',
+        ]);
+    });
+
     it('Secondary profile API 失敗時保留同帳號上次成功資料', async () => {
         const previousUser = {
             username: 'ark-user',
@@ -187,7 +558,6 @@ describe('Harbor API 資料正規化', () => {
             stats: [
                 {key: 'daysVisited', value: '90'},
                 {key: 'readTime', value: '120'},
-                {key: 'topicsRead', value: '45'},
             ],
             badges: [{id: 'badge-1'}],
         };
@@ -225,7 +595,6 @@ describe('Harbor API 資料正規化', () => {
         expect(result.stats.map(item => item.value)).toEqual([
             '90',
             '120',
-            '45',
         ]);
         expect(result.badges).toEqual(previousUser.badges);
         expect(result.partialProfile).toBe(true);
@@ -274,7 +643,6 @@ describe('Harbor API 資料正規化', () => {
         expect(result.stats.map(item => item.value)).toEqual([
             '—',
             '—',
-            '—',
         ]);
         expect(result.partialProfile).toBe(true);
         expect(result.usedPreviousProfileData).toBe(false);
@@ -320,6 +688,77 @@ describe('Harbor API 資料正規化', () => {
                 postNumber: 3,
             }),
         ]);
+    });
+
+    it('將使用者建立的話題列表轉為話題卡片資料', async () => {
+        getSpy.mockResolvedValue({
+            data: {
+                users: [
+                    {
+                        id: 7,
+                        username: 'ark-user',
+                        name: 'ARK',
+                        avatar_template: '/user_avatar/ark-user/{size}.png',
+                    },
+                ],
+                topic_list: {
+                    can_create_topic: true,
+                    more_topics_url: '/topics/created-by/ark-user?page=1',
+                    topics: [
+                        {
+                            id: 88,
+                            title: '我建立的話題',
+                            excerpt: '<p>發佈內容</p>',
+                            category_id: 4,
+                            category_name: '吹水台',
+                            category_slug: 'general',
+                            posters: [{user_id: 7}],
+                            posts_count: 3,
+                            reply_count: 2,
+                            views: 40,
+                            like_count: 5,
+                            created_at: '2026-07-20T08:00:00Z',
+                            last_posted_at: '2026-07-21T08:00:00Z',
+                        },
+                    ],
+                },
+            },
+        });
+
+        const result = await fetchHarborUserCreatedTopics('ark-user', {
+            page: 0,
+        });
+
+        expect(getSpy).toHaveBeenCalledWith(
+            '/topics/created-by/ark-user.json',
+            expect.objectContaining({
+                params: {page: 0},
+            }),
+        );
+        expect(result).toEqual(
+            expect.objectContaining({
+                hasMore: true,
+                nextPage: 1,
+            }),
+        );
+        expect(result.items[0]).toEqual(
+            expect.objectContaining({
+                id: 88,
+                title: '我建立的話題',
+                excerpt: '發佈內容',
+                replyCount: 2,
+                viewCount: 40,
+                likeCount: 5,
+                author: expect.objectContaining({
+                    username: 'ark-user',
+                }),
+                category: expect.objectContaining({
+                    id: 4,
+                    name: '吹水台',
+                    slug: 'general',
+                }),
+            }),
+        );
     });
 
     it('贊過列表優先使用 discourse-reactions，並合併 heart 影子讚', async () => {
@@ -393,6 +832,108 @@ describe('Harbor API 資料正規化', () => {
                 postNumber: 2,
             }),
         ]);
+    });
+
+    it('收到的讚列表使用 reactions-received，並帶按讚者頭像', async () => {
+        getSpy.mockResolvedValue({
+            data: [
+                {
+                    id: 33,
+                    user_id: 4,
+                    post_id: 42,
+                    created_at: '2026-08-01T08:19:35.833Z',
+                    user: {
+                        id: 4,
+                        username: 'yyyyyyounger',
+                        avatar_template:
+                            '/user_avatar/harbor.umall.one/yyyyyyounger/{size}/20_2.png',
+                    },
+                    post: {
+                        excerpt: '可以使用Event功能開啟時間表',
+                        id: 42,
+                        topic_id: 27,
+                        topic_title: '可以使用Event功能開啟時間表（倒計時）',
+                        post_number: 1,
+                        topic: {
+                            id: 27,
+                            title: '可以使用Event功能開啟時間表（倒計時）',
+                        },
+                    },
+                    reaction: {
+                        id: 55,
+                        reaction_type: 'emoji',
+                        reaction_value: 'clap',
+                        created_at: '2026-08-01T08:19:35.830Z',
+                    },
+                },
+            ],
+        });
+
+        const result = await fetchHarborUserActions('qq_yyy', {
+            kind: 'likesReceived',
+        });
+
+        expect(getSpy).toHaveBeenCalledWith(
+            '/discourse-reactions/posts/reactions-received.json',
+            expect.objectContaining({
+                params: expect.objectContaining({
+                    username: 'qq_yyy',
+                }),
+            }),
+        );
+        expect(result.items).toEqual([
+            expect.objectContaining({
+                id: '33',
+                kind: 'likeReceived',
+                title: '可以使用Event功能開啟時間表（倒計時）',
+                excerpt: '可以使用Event功能開啟時間表',
+                topicId: 27,
+                postNumber: 1,
+                actingUsername: 'yyyyyyounger',
+                reactionValue: 'clap',
+                avatarUrl: expect.stringContaining('yyyyyyounger'),
+            }),
+        ]);
+        expect(result.hasMore).toBe(false);
+        expect(result.nextOffset).toBeNull();
+    });
+
+    it('收到的讚列表支援 before_reaction_user_id 分頁', async () => {
+        getSpy.mockResolvedValue({
+            data: Array.from({length: 20}, (_, index) => ({
+                id: 100 - index,
+                created_at: '2026-08-01T08:00:00Z',
+                user: {
+                    username: `user-${index}`,
+                    avatar_template: `/user_avatar/harbor.umall.one/user-${index}/{size}/1.png`,
+                },
+                post: {
+                    topic_id: 10 + index,
+                    topic_title: `話題 ${index}`,
+                    post_number: 1,
+                    excerpt: '內容',
+                },
+                reaction: {reaction_value: 'heart'},
+            })),
+        });
+
+        const result = await fetchHarborUserActions('qq_yyy', {
+            kind: 'likesReceived',
+            offset: 50,
+        });
+
+        expect(getSpy).toHaveBeenCalledWith(
+            '/discourse-reactions/posts/reactions-received.json',
+            expect.objectContaining({
+                params: {
+                    username: 'qq_yyy',
+                    before_reaction_user_id: 50,
+                },
+            }),
+        );
+        expect(result.hasMore).toBe(true);
+        expect(result.nextOffset).toBe(81);
+        expect(result.items).toHaveLength(20);
     });
 
     it('收藏列表支援分頁、名稱及提醒狀態', async () => {
@@ -473,6 +1014,18 @@ describe('Harbor API 資料正規化', () => {
             })
             .mockResolvedValueOnce({
                 data: {
+                    users: [
+                        {
+                            id: 7,
+                            username: 'reader',
+                            avatar_template: '/user_avatar/reader/{size}.png',
+                        },
+                        {
+                            id: 1,
+                            username: 'ark-user',
+                            avatar_template: '/user_avatar/self/{size}.png',
+                        },
+                    ],
                     topic_list: {
                         topics: [
                             {
@@ -480,6 +1033,11 @@ describe('Harbor API 資料正規化', () => {
                                 slug: 'private-topic',
                                 title: '私人對話',
                                 unread_posts: 2,
+                                last_poster_username: 'reader',
+                                posters: [
+                                    {user_id: 1},
+                                    {user_id: 7, extras: 'latest'},
+                                ],
                             },
                             {
                                 id: 32,
@@ -533,6 +1091,8 @@ describe('Harbor API 資料正規化', () => {
                 id: '31',
                 slug: 'private-topic',
                 unreadCount: 2,
+                actingUsername: 'reader',
+                avatarUrl: '/user_avatar/reader/{size}.png',
             }),
         );
         expect(messages[1]).toEqual(
@@ -686,7 +1246,7 @@ describe('Harbor API 資料正規化', () => {
         });
     });
 
-    it('按話題去重計算上次進入論壇後的新貼文', async () => {
+    it('只按新建立話題去重，普通回覆不計入論壇角標', async () => {
         getSpy
             .mockResolvedValueOnce({
                 data: {
@@ -694,11 +1254,13 @@ describe('Harbor API 資料正規化', () => {
                         topics: [
                             {
                                 id: 1,
+                                created_at: '2026-07-31T07:00:00Z',
                                 last_posted_at: '2026-07-31T10:00:00Z',
                             },
                             {
                                 id: 2,
-                                last_posted_at: '2026-07-31T09:00:00Z',
+                                created_at: '2026-07-31T09:00:00Z',
+                                last_posted_at: '2026-07-31T09:30:00Z',
                             },
                         ],
                         more_topics_url: '/latest?page=1',
@@ -711,11 +1273,13 @@ describe('Harbor API 資料正規化', () => {
                         topics: [
                             {
                                 id: 2,
-                                last_posted_at: '2026-07-31T09:00:00Z',
+                                created_at: '2026-07-31T09:00:00Z',
+                                last_posted_at: '2026-07-31T09:30:00Z',
                             },
                             {
                                 id: 3,
-                                last_posted_at: '2026-07-31T07:00:00Z',
+                                created_at: '2026-07-31T08:30:00Z',
+                                last_posted_at: '2026-07-31T08:45:00Z',
                             },
                         ],
                         more_topics_url: '/latest?page=2',
@@ -728,6 +1292,7 @@ describe('Harbor API 資料正規化', () => {
                         topics: [
                             {
                                 id: 4,
+                                created_at: '2026-07-30T22:00:00Z',
                                 last_posted_at: '2026-07-30T23:00:00Z',
                             },
                         ],
@@ -758,12 +1323,13 @@ describe('Harbor API 資料正規化', () => {
         });
     });
 
-    it('論壇角標最多計算 100 個更新話題', async () => {
+    it('論壇角標最多計算 100 個新話題', async () => {
         getSpy.mockResolvedValueOnce({
             data: {
                 topic_list: {
                     topics: Array.from({length: 120}, (_, index) => ({
                         id: index + 1,
+                        created_at: '2026-07-31T10:00:00Z',
                         last_posted_at: '2026-07-31T10:00:00Z',
                     })),
                     more_topics_url: null,
@@ -779,6 +1345,35 @@ describe('Harbor API 資料正規化', () => {
             latestAt: '2026-07-31T10:00:00.000Z',
             topicCount: 100,
         });
+    });
+
+    it('達掃描頁數上限時不把普通回覆誤報為新話題', async () => {
+        getSpy.mockImplementation((_url, {params}) =>
+            Promise.resolve({
+                data: {
+                    topic_list: {
+                        topics: [
+                            {
+                                id: params.page + 1,
+                                created_at: '2026-07-30T08:00:00Z',
+                                last_posted_at: '2026-07-31T10:00:00Z',
+                            },
+                        ],
+                        more_topics_url: `/latest?page=${params.page + 1}`,
+                    },
+                },
+            }),
+        );
+
+        await expect(
+            fetchHarborForumBadgeSnapshot({
+                since: '2026-07-31T08:00:00Z',
+            }),
+        ).resolves.toEqual({
+            latestAt: '2026-07-31T10:00:00.000Z',
+            topicCount: 0,
+        });
+        expect(getSpy).toHaveBeenCalledTimes(10);
     });
 
     it('論壇角標回應格式錯誤時拒絕更新舊狀態', async () => {
@@ -1667,6 +2262,12 @@ describe('Harbor API 資料正規化', () => {
                 excerpt: '命中 & 摘要',
                 author: expect.objectContaining({
                     username: 'topic-author',
+                }),
+                topic: expect.objectContaining({
+                    author: expect.objectContaining({
+                        username: 'topic-author',
+                        avatarUrl: expect.stringContaining('/author/'),
+                    }),
                 }),
                 category: expect.objectContaining({
                     id: 4,

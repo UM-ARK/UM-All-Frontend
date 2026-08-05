@@ -17,6 +17,7 @@ import {useTranslation} from 'react-i18next';
 
 import {useTheme} from '../../../components/ThemeContext';
 import {logToFirebase} from '../../../utils/firebaseAnalytics';
+import {openHarborComposer} from '../../../utils/harbor/harborNavigation';
 import {trigger} from '../../../utils/trigger';
 import HarborSearchPanel from './search/HarborSearchPanel';
 import HarborSearchResults from './search/HarborSearchResults';
@@ -30,6 +31,8 @@ const HarborSearchPage = ({route, navigation}) => {
     const searchPanelRef = useRef(null);
     const initialSearchStartedRef = useRef(false);
     const [optionModal, setOptionModal] = useState(null);
+    const [isSearchFocused, setIsSearchFocused] = useState(false);
+    const [filtersExpanded, setFiltersExpanded] = useState(false);
 
     useEffect(() => {
         navigation.setOptions({headerTitle: t('Harbor 搜尋')});
@@ -45,11 +48,12 @@ const HarborSearchPage = ({route, navigation}) => {
         onSearchStart: collapseSearchFocus,
     });
     const {criteria, options, results, history, actions} = search;
-    const {query, category, tag} = criteria;
+    const {category, tag, resultTab} = criteria;
     const {categories, tags} = options;
     const {
         setCategory,
         setTag,
+        selectResultTab,
         runSearch,
         invalidateSearchResults,
         clearHistory,
@@ -101,13 +105,28 @@ const HarborSearchPage = ({route, navigation}) => {
             if (!username) {
                 return;
             }
+            // 切回話題分頁，清空關鍵字並以作者篩選列出貼文
+            selectResultTab('topics');
             searchPanelRef.current?.expandFilters();
             runSearch({
-                queryOverride: query.trim() || username,
+                queryOverride: '',
                 authorOverride: username,
             });
         },
-        [query, runSearch],
+        [runSearch, selectResultTab],
+    );
+
+    const handleProfilePress = useCallback(
+        username => {
+            if (!username) {
+                return;
+            }
+            navigation.navigate('HarborProfile', {
+                username,
+                mode: 'preview',
+            });
+        },
+        [navigation],
     );
 
     const handleCategoryPress = useCallback(
@@ -117,16 +136,6 @@ const HarborSearchPage = ({route, navigation}) => {
                 categoryId: selectedCategory.id,
                 categorySlug: selectedCategory.slug,
                 categoryName: selectedCategory.name,
-            });
-        },
-        [collapseSearchFocus, navigation],
-    );
-
-    const handleTagPress = useCallback(
-        selectedTag => {
-            collapseSearchFocus();
-            navigation.navigate('HarborTagTopics', {
-                tag: selectedTag.name || selectedTag,
             });
         },
         [collapseSearchFocus, navigation],
@@ -149,6 +158,16 @@ const HarborSearchPage = ({route, navigation}) => {
             },
         ]);
     }, [clearHistory, t]);
+
+    const handleComposePress = useCallback(() => {
+        collapseSearchFocus();
+        openHarborComposer(navigation, {
+            mode: 'newTopic',
+            ...(Number.isFinite(category?.id) && category.id > 0
+                ? {categoryId: category.id}
+                : {}),
+        });
+    }, [category, collapseSearchFocus, navigation]);
 
     const pageStyle = useMemo(
         () => [
@@ -190,18 +209,25 @@ const HarborSearchPage = ({route, navigation}) => {
                 results={results}
                 actions={actions}
                 onOpenOption={setOptionModal}
+                onSearchFocusChange={setIsSearchFocused}
+                onFiltersExpandedChange={setFiltersExpanded}
             />
             <HarborSearchResults
                 results={results}
                 history={history}
                 actions={actions}
+                resultTab={resultTab}
+                query={criteria.query}
+                isSearchFocused={isSearchFocused}
+                filtersExpanded={filtersExpanded}
                 headerHeight={headerHeight}
                 onCollapseSearch={collapseSearchFocus}
                 onResultPress={handleResultPress}
                 onAuthorPress={handleAuthorPress}
+                onProfilePress={handleProfilePress}
                 onCategoryPress={handleCategoryPress}
-                onTagPress={handleTagPress}
                 onClearHistory={handleClearHistory}
+                onComposePress={handleComposePress}
             />
             <SearchOptionModal
                 visible={optionModal === 'category'}

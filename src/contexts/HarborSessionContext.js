@@ -7,14 +7,17 @@ import React, {
     useRef,
     useState,
 } from 'react';
-import { AppState } from 'react-native';
+import { AppState, Linking } from 'react-native';
 
 import * as Crypto from 'expo-crypto';
 
 import {
+    completeHarborAuthorization,
     completeInitialHarborCallback,
+    deliverHarborAuthDeepLink,
     ensureHarborRsaKeyPair,
     HARBOR_AUTH_ERROR,
+    isHarborAuthSessionActive,
     startHarborAuthorization,
 } from '../utils/harbor/harborAuth';
 import {
@@ -41,6 +44,8 @@ import {
     loadHarborLoginIntent,
     saveHarborLoginIntent,
 } from '../utils/harbor/harborLoginIntent';
+import { logoutSchedulingSession } from '../utils/scheduling/schedulingAuth';
+import { syncAppIconBadgeCount } from '../utils/appIconBadge';
 import { getLocalStorage, setLocalStorage } from '../utils/storageKits';
 
 const PROFILE_CACHE_KEY = 'harbor_profile_cache';
@@ -50,6 +55,7 @@ const HarborSessionContext = createContext(null);
 
 function createFallbackUser() {
     return {
+        id: null,
         displayName: 'Harbor',
         username: '',
         role: 'Harbor 會員',
@@ -85,6 +91,7 @@ export const HarborSessionProvider = ({ children }) => {
     const lastValidationRef = useRef(0);
     const lastValidationAttemptRef = useRef(0);
     const validationInFlightRef = useRef(null);
+    const revocationInFlightRef = useRef(null);
     const sessionGenerationRef = useRef(0);
 
     useEffect(() => {
@@ -165,6 +172,7 @@ export const HarborSessionProvider = ({ children }) => {
                 return false;
             }
 
+            await logoutSchedulingSession().catch(() => {});
             applySignedOutState('expired');
             await clearHarborCredentials();
             await setLocalStorage(PROFILE_CACHE_KEY, null);
@@ -242,26 +250,37 @@ export const HarborSessionProvider = ({ children }) => {
         [expireSession, isCurrentSession],
     );
 
-    const retryPendingRevocation = useCallback(async () => {
-        const pendingQueue = await loadPendingHarborRevocation();
-        const attemptedCredentialKeys = new Set();
-        let remainingCount = 0;
-
-        for (const pendingCredentials of pendingQueue) {
-            attemptedCredentialKeys.add(pendingCredentials.userApiKey);
-            try {
-                await revokeHarborCredentials(pendingCredentials);
-                await clearPendingHarborRevocation(pendingCredentials);
-            } catch (requestError) {
-                if (isHarborCredentialRejected(requestError, true)) {
-                    await clearPendingHarborRevocation(pendingCredentials);
-                } else {
-                    remainingCount += 1;
-                }
-            }
+    const retryPendingRevocation = useCallback(pendingQueue => {
+        if (revocationInFlightRef.current) {
+            return revocationInFlightRef.current;
         }
 
-        return { attemptedCredentialKeys, remainingCount };
+        const request = (async () => {
+            const queue =
+                pendingQueue || (await loadPendingHarborRevocation());
+            let remainingCount = 0;
+
+            for (const pendingCredentials of queue) {
+                try {
+                    await revokeHarborCredentials(pendingCredentials);
+                    await clearPendingHarborRevocation(pendingCredentials);
+                } catch (requestError) {
+                    if (isHarborCredentialRejected(requestError, true)) {
+                        await clearPendingHarborRevocation(pendingCredentials);
+                    } else {
+                        remainingCount += 1;
+                    }
+                }
+            }
+
+            return { remainingCount };
+        })().finally(() => {
+            if (revocationInFlightRef.current === request) {
+                revocationInFlightRef.current = null;
+            }
+        });
+        revocationInFlightRef.current = request;
+        return request;
     }, []);
 
     useEffect(() => {
@@ -288,8 +307,19 @@ export const HarborSessionProvider = ({ children }) => {
 
         const restore = async () => {
             try {
-                const { attemptedCredentialKeys } =
-                    await retryPendingRevocation();
+                // pending key 是本地拒絕清單，實際撤銷不可阻塞首屏。
+                const pendingQueue = await loadPendingHarborRevocation();
+                const pendingCredentialKeys = new Set(
+                    pendingQueue.map(item => item.userApiKey),
+                );
+                const retryRevocationInBackground = () => {
+                    retryPendingRevocation(pendingQueue).catch(revokeError => {
+                        logHarborAuthError(
+                            'revocation.background.failed',
+                            revokeError,
+                        );
+                    });
+                };
 
                 let credentials = null;
                 try {
@@ -307,22 +337,57 @@ export const HarborSessionProvider = ({ children }) => {
 
                 if (!credentials) {
                     applySignedOutState();
+                    retryRevocationInBackground();
                     return;
                 }
 
-                if (attemptedCredentialKeys.has(credentials.userApiKey)) {
+                if (pendingCredentialKeys.has(credentials.userApiKey)) {
+                    applySignedOutState();
                     await clearHarborCredentials();
                     await setLocalStorage(PROFILE_CACHE_KEY, null);
-                    applySignedOutState();
+                    retryRevocationInBackground();
                     return;
                 }
 
+                const credentialCacheId = await getCredentialCacheId(
+                    credentials,
+                );
+                const cachedProfile = await getLocalStorage(PROFILE_CACHE_KEY);
+                const cachedUser =
+                    cachedProfile?.credentialCacheId === credentialCacheId
+                        ? cachedProfile.user
+                        : null;
                 const generation = activateSession(credentials);
-                await refreshProfile(credentials, generation);
-                const loginIntent = await loadHarborLoginIntent();
-                if (mountedRef.current && loginIntent) {
-                    setPendingLoginIntent(loginIntent);
+                if (isCurrentSession(credentials, generation)) {
+                    // 先用同一組憑證的快取進頁，再於背景向 Harbor 驗證。
+                    setUser(cachedUser || createFallbackUser());
+                    setStatus('signedIn');
                 }
+                retryRevocationInBackground();
+
+                const validationRequest = refreshProfile(
+                    credentials,
+                    generation,
+                ).catch(() => {});
+                validationInFlightRef.current = validationRequest;
+                validationRequest.finally(() => {
+                    if (validationInFlightRef.current === validationRequest) {
+                        validationInFlightRef.current = null;
+                    }
+                });
+
+                loadHarborLoginIntent()
+                    .then(loginIntent => {
+                        if (mountedRef.current && loginIntent) {
+                            setPendingLoginIntent(loginIntent);
+                        }
+                    })
+                    .catch(intentError => {
+                        logHarborAuthError(
+                            'login.intent.restore.failed',
+                            intentError,
+                        );
+                    });
             } catch (restoreError) {
                 logHarborAuthError('session.restore.failed', restoreError);
                 if (
@@ -347,6 +412,7 @@ export const HarborSessionProvider = ({ children }) => {
         activateSession,
         applySignedOutState,
         expireSession,
+        isCurrentSession,
         refreshProfile,
         retryPendingRevocation,
     ]);
@@ -356,6 +422,13 @@ export const HarborSessionProvider = ({ children }) => {
             refreshInboxUnreadCount().catch(() => {});
         }
     }, [refreshInboxUnreadCount, status, user?.username]);
+
+    // 將 Harbor 收件匣未讀同步到主畫面 App 角標；登出時清零
+    useEffect(() => {
+        const badgeCount =
+            status === 'signedIn' ? inboxUnreadCount : 0;
+        syncAppIconBadgeCount(badgeCount).catch(() => {});
+    }, [inboxUnreadCount, status]);
 
     useEffect(() => {
         const subscription = AppState.addEventListener('change', nextState => {
@@ -390,6 +463,72 @@ export const HarborSessionProvider = ({ children }) => {
         return () => subscription.remove();
     }, [refreshInboxUnreadCount, refreshProfile]);
 
+    const activateCredentialsFromCallback = useCallback(
+        async credentials => {
+            if (!credentials?.userApiKey) {
+                return false;
+            }
+            logHarborAuthEvent('login.credentials.ready', {
+                source: 'deeplink',
+            });
+            const loginIntent = await loadHarborLoginIntent();
+            const generation = activateSession(credentials);
+            await refreshProfile(credentials, generation);
+            await clearHarborLoginIntent();
+            if (mountedRef.current) {
+                setPendingLoginIntent(loginIntent);
+            }
+            return true;
+        },
+        [activateSession, refreshProfile],
+    );
+
+    // OEM／系統瀏覽器回傳的 auth deep link（暖啟動）；須已點擊登入且 pending 未逾時。
+    useEffect(() => {
+        const handleAuthUrl = async ({ url }) => {
+            if (!deliverHarborAuthDeepLink(url)) {
+                return;
+            }
+
+            // 進行中的 Auth Session 會自行競速完成，避免重複處理。
+            if (isHarborAuthSessionActive()) {
+                return;
+            }
+
+            // 已登入時忽略 stray callback，避免覆蓋現有工作階段。
+            if (credentialsRef.current) {
+                return;
+            }
+
+            try {
+                const credentials = await completeHarborAuthorization(url);
+                if (!mountedRef.current || credentialsRef.current) {
+                    return;
+                }
+                await activateCredentialsFromCallback(credentials);
+                logHarborAuthEvent('login.success', { source: 'deeplink' });
+            } catch (authError) {
+                if (
+                    authError.code === HARBOR_AUTH_ERROR.NO_PENDING_AUTH ||
+                    authError.code === HARBOR_AUTH_ERROR.EXPIRED ||
+                    authError.code === HARBOR_AUTH_ERROR.CANCELLED
+                ) {
+                    return;
+                }
+                logHarborAuthError('callback.deeplink.failed', authError);
+                if (mountedRef.current) {
+                    setError(authError);
+                    setStatus(
+                        credentialsRef.current ? 'signedIn' : 'signedOut',
+                    );
+                }
+            }
+        };
+
+        const subscription = Linking.addEventListener('url', handleAuthUrl);
+        return () => subscription.remove();
+    }, [activateCredentialsFromCallback]);
+
     const login = useCallback(async intent => {
         const startedAt = Date.now();
         logHarborAuthEvent('login.start');
@@ -421,7 +560,7 @@ export const HarborSessionProvider = ({ children }) => {
             await clearHarborLoginIntent();
             return true;
         } catch (authError) {
-            await clearHarborLoginIntent();
+            // 取消時保留 login intent，方便 OEM deep link 晚到後仍可導回目標頁。
             if (authError.code === HARBOR_AUTH_ERROR.CANCELLED) {
                 logHarborAuthEvent('login.cancelled', {
                     durationMs: Date.now() - startedAt,
@@ -433,6 +572,7 @@ export const HarborSessionProvider = ({ children }) => {
                 }
                 return false;
             }
+            await clearHarborLoginIntent();
             logHarborAuthError('login.failed', authError, {
                 durationMs: Date.now() - startedAt,
             });
@@ -447,6 +587,8 @@ export const HarborSessionProvider = ({ children }) => {
     const logout = useCallback(async () => {
         const credentials = credentialsRef.current;
         setError(null);
+
+        await logoutSchedulingSession().catch(() => {});
 
         if (credentials) {
             // 先持久化撤銷工作，確保任何時間 crash 都不會遺失需要撤銷的 key。

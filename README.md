@@ -38,6 +38,7 @@
       - [`GoogleService-Info.plist` 模板結構](#googleservice-infoplist-模板結構)
     - [🤖 Android 運行](#-android-運行)
     - [🍎 iOS 運行](#-ios-運行)
+      - [模擬器截圖（狀態列）](#模擬器截圖狀態列)
     - [配置Firebase](#配置firebase)
   - [🐛 如何 Debug?](#-如何-debug)
     - [重新打開 Dev Menu / 開啟 Tools button](#重新打開-dev-menu--開啟-tools-button)
@@ -310,6 +311,27 @@ yarn iosBig       # 運行 iPad Pro 13-inch 模擬器
 - **無需手動運行 `pod install`**
 - **無需手動打開 Xcode** 進行編譯
 - 如需在 Xcode 中調試，可打開 `./ios` 目錄下的項目文件（首次運行 `yarn ios` 後會生成）
+
+##### 模擬器截圖（狀態列）
+
+製作 App Store 截圖或更新 README 展示圖時，可先覆寫模擬器狀態列，避免時間、電量、訊號等干擾畫面：
+
+```console
+xcrun simctl status_bar booted override \
+  --time "9:41" \
+  --cellularMode active \
+  --cellularBars 4 \
+  --wifiMode active \
+  --wifiBars 3 \
+  --batteryState charged \
+  --batteryLevel 100
+```
+
+截圖完成後復原：
+
+```console
+xcrun simctl status_bar booted clear
+```
 
 #### 配置Firebase
 

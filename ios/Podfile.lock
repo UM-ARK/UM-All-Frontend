@@ -6,7 +6,7 @@ PODS:
   - EXJSONUtils (57.0.1)
   - EXManifests (57.0.1):
     - ExpoModulesCore
-  - Expo (57.0.9):
+  - Expo (57.0.10):
     - ExpoModulesCore
     - ExpoModulesJSI
     - hermes-engine
@@ -195,7 +195,7 @@ PODS:
     - ExpoModulesCore
   - ExpoFont (57.0.1):
     - ExpoModulesCore
-  - ExpoImage (57.0.1):
+  - ExpoImage (57.0.2):
     - ExpoModulesCore
   - ExpoImageManipulator (57.0.7):
     - ExpoModulesCore
@@ -210,7 +210,7 @@ PODS:
   - ExpoMediaLibrary (57.0.3):
     - ExpoModulesCore
     - React-Core
-  - ExpoModulesCore (57.0.8):
+  - ExpoModulesCore (57.0.9):
     - ExpoModulesJSI
     - hermes-engine
     - RCTRequired
@@ -237,14 +237,16 @@ PODS:
   - ExpoModulesJSI (57.0.4):
     - React-Core
     - ReactCommon
-  - ExpoModulesWorklets (57.0.8):
+  - ExpoModulesWorklets (57.0.9):
     - ExpoModulesCore
     - ExpoModulesJSI
-  - ExpoModulesWorkletsAdapter (57.0.8):
+  - ExpoModulesWorkletsAdapter (57.0.9):
     - ExpoModulesCore
     - ExpoModulesJSI
     - ExpoModulesWorklets
     - RNWorklets
+  - ExpoNotifications (57.0.8):
+    - ExpoModulesCore
   - ExpoQuickActions (6.0.2):
     - ExpoModulesCore
   - ExpoSecureStore (57.0.1):
@@ -255,7 +257,7 @@ PODS:
     - ExpoModulesCore
   - ExpoSystemUI (57.0.2):
     - ExpoModulesCore
-  - ExpoUI (57.0.8):
+  - ExpoUI (57.0.9):
     - ExpoModulesCore
     - ExpoModulesWorklets
     - React-RCTFabric
@@ -264,45 +266,45 @@ PODS:
   - EXUpdatesInterface (57.0.1):
     - ExpoModulesCore
   - FBLazyVector (0.86.2)
-  - Firebase/CoreOnly (12.15.0):
-    - FirebaseCore (~> 12.15.0)
-  - FirebaseAnalytics/Core (12.15.0):
-    - FirebaseCore (~> 12.15.0)
-    - FirebaseInstallations (~> 12.15.0)
-    - GoogleAppMeasurement/Core (= 12.15.0)
+  - Firebase/CoreOnly (12.17.0):
+    - FirebaseCore (~> 12.17.0)
+  - FirebaseAnalytics/Core (12.17.0):
+    - FirebaseCore (~> 12.17.0)
+    - FirebaseInstallations (~> 12.17.0)
+    - GoogleAppMeasurement/Core (= 12.17.0)
     - GoogleUtilities/AppDelegateSwizzler (~> 8.1)
     - GoogleUtilities/MethodSwizzler (~> 8.1)
     - GoogleUtilities/Network (~> 8.1)
     - "GoogleUtilities/NSData+zlib (~> 8.1)"
     - nanopb (~> 3.30910.0)
-  - FirebaseAnalytics/IdentitySupport (12.15.0):
-    - FirebaseCore (~> 12.15.0)
-    - FirebaseInstallations (~> 12.15.0)
-    - GoogleAppMeasurement/IdentitySupport (= 12.15.0)
+  - FirebaseAnalytics/IdentitySupport (12.17.0):
+    - FirebaseCore (~> 12.17.0)
+    - FirebaseInstallations (~> 12.17.0)
+    - GoogleAppMeasurement/IdentitySupport (= 12.17.0)
     - GoogleUtilities/AppDelegateSwizzler (~> 8.1)
     - GoogleUtilities/MethodSwizzler (~> 8.1)
     - GoogleUtilities/Network (~> 8.1)
     - "GoogleUtilities/NSData+zlib (~> 8.1)"
     - nanopb (~> 3.30910.0)
-  - FirebaseCore (12.15.0):
-    - FirebaseCoreInternal (~> 12.15.0)
+  - FirebaseCore (12.17.0):
+    - FirebaseCoreInternal (~> 12.17.0)
     - GoogleUtilities/Environment (~> 8.1)
     - GoogleUtilities/Logger (~> 8.1)
-  - FirebaseCoreInternal (12.15.0):
+  - FirebaseCoreInternal (12.17.0):
     - "GoogleUtilities/NSData+zlib (~> 8.1)"
-  - FirebaseInstallations (12.15.0):
-    - FirebaseCore (~> 12.15.0)
+  - FirebaseInstallations (12.17.0):
+    - FirebaseCore (~> 12.17.0)
     - GoogleUtilities/Environment (~> 8.1)
     - GoogleUtilities/UserDefaults (~> 8.1)
     - PromisesObjC (~> 2.4)
-  - GoogleAppMeasurement/Core (12.15.0):
+  - GoogleAppMeasurement/Core (12.17.0):
     - GoogleUtilities/AppDelegateSwizzler (~> 8.1)
     - GoogleUtilities/MethodSwizzler (~> 8.1)
     - GoogleUtilities/Network (~> 8.1)
     - "GoogleUtilities/NSData+zlib (~> 8.1)"
     - nanopb (~> 3.30910.0)
-  - GoogleAppMeasurement/IdentitySupport (12.15.0):
-    - GoogleAppMeasurement/Core (= 12.15.0)
+  - GoogleAppMeasurement/IdentitySupport (12.17.0):
+    - GoogleAppMeasurement/Core (= 12.17.0)
     - GoogleUtilities/AppDelegateSwizzler (~> 8.1)
     - GoogleUtilities/MethodSwizzler (~> 8.1)
     - GoogleUtilities/Network (~> 8.1)
@@ -1952,8 +1954,6 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
-  - react-native-render-html (6.3.4):
-    - React-Core
   - react-native-safe-area-context (5.7.0):
     - hermes-engine
     - RCTRequired
@@ -2091,6 +2091,11 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
+  - react-native-vector-icons-ant-design (13.1.2)
+  - react-native-vector-icons-evil-icons (13.1.2)
+  - react-native-vector-icons-feather (13.1.2)
+  - react-native-vector-icons-fontawesome6 (13.1.2)
+  - react-native-vector-icons-ionicons (13.1.2)
   - react-native-vector-icons-material-design-icons (13.1.2)
   - react-native-view-shot (5.1.0):
     - hermes-engine
@@ -2599,9 +2604,9 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
-  - RNFBAnalytics (25.1.0):
-    - FirebaseAnalytics/Core (= 12.15.0)
-    - FirebaseAnalytics/IdentitySupport (= 12.15.0)
+  - RNFBAnalytics (26.1.0):
+    - FirebaseAnalytics/Core (= 12.17.0)
+    - FirebaseAnalytics/IdentitySupport (= 12.17.0)
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -2624,8 +2629,8 @@ PODS:
     - ReactNativeDependencies
     - RNFBApp
     - Yoga
-  - RNFBApp (25.1.0):
-    - Firebase/CoreOnly (= 12.15.0)
+  - RNFBApp (26.1.0):
+    - Firebase/CoreOnly (= 12.17.0)
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -2927,28 +2932,6 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
-  - RNVectorIcons (10.3.0):
-    - hermes-engine
-    - RCTRequired
-    - RCTTypeSafety
-    - React-Core
-    - React-Core-prebuilt
-    - React-debug
-    - React-Fabric
-    - React-featureflags
-    - React-graphics
-    - React-ImageManager
-    - React-jsi
-    - React-NativeModulesApple
-    - React-RCTFabric
-    - React-renderercss
-    - React-rendererdebug
-    - React-utils
-    - ReactCodegen
-    - ReactCommon/turbomodule/bridging
-    - ReactCommon/turbomodule/core
-    - ReactNativeDependencies
-    - Yoga
   - RNWorklets (0.10.1):
     - hermes-engine
     - RCTRequired
@@ -3052,6 +3035,7 @@ DEPENDENCIES:
   - ExpoModulesJSI (from `../node_modules/expo-modules-jsi/apple`)
   - ExpoModulesWorklets (from `../node_modules/expo-modules-core/ExpoModulesWorklets.podspec`)
   - ExpoModulesWorkletsAdapter (from `../node_modules/expo-modules-core`)
+  - ExpoNotifications (from `../node_modules/expo-notifications/ios`)
   - ExpoQuickActions (from `../node_modules/expo-quick-actions/ios`)
   - ExpoSecureStore (from `../node_modules/expo-secure-store/ios`)
   - ExpoSharing (from `../node_modules/expo-sharing/ios`)
@@ -3108,10 +3092,14 @@ DEPENDENCIES:
   - "react-native-menu (from `../node_modules/@react-native-menu/menu`)"
   - react-native-pager-view (from `../node_modules/react-native-pager-view`)
   - react-native-quick-base64 (from `../node_modules/react-native-quick-base64`)
-  - react-native-render-html (from `../node_modules/react-native-render-html`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
   - react-native-simple-toast (from `../node_modules/react-native-simple-toast`)
   - "react-native-slider (from `../node_modules/@react-native-community/slider`)"
+  - "react-native-vector-icons-ant-design (from `../node_modules/@react-native-vector-icons/ant-design`)"
+  - "react-native-vector-icons-evil-icons (from `../node_modules/@react-native-vector-icons/evil-icons`)"
+  - "react-native-vector-icons-feather (from `../node_modules/@react-native-vector-icons/feather`)"
+  - "react-native-vector-icons-fontawesome6 (from `../node_modules/@react-native-vector-icons/fontawesome6`)"
+  - "react-native-vector-icons-ionicons (from `../node_modules/@react-native-vector-icons/ionicons`)"
   - "react-native-vector-icons-material-design-icons (from `../node_modules/@react-native-vector-icons/material-design-icons`)"
   - react-native-view-shot (from `../node_modules/react-native-view-shot`)
   - react-native-webview (from `../node_modules/react-native-webview`)
@@ -3162,7 +3150,6 @@ DEPENDENCIES:
   - RNScreens (from `../node_modules/react-native-screens`)
   - RNShare (from `../node_modules/react-native-share`)
   - RNSVG (from `../node_modules/react-native-svg`)
-  - RNVectorIcons (from `../node_modules/react-native-vector-icons`)
   - RNWorklets (from `../node_modules/react-native-worklets`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
@@ -3236,6 +3223,8 @@ EXTERNAL SOURCES:
     :podspec: "../node_modules/expo-modules-core/ExpoModulesWorklets.podspec"
   ExpoModulesWorkletsAdapter:
     :path: "../node_modules/expo-modules-core"
+  ExpoNotifications:
+    :path: "../node_modules/expo-notifications/ios"
   ExpoQuickActions:
     :path: "../node_modules/expo-quick-actions/ios"
   ExpoSecureStore:
@@ -3347,14 +3336,22 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-pager-view"
   react-native-quick-base64:
     :path: "../node_modules/react-native-quick-base64"
-  react-native-render-html:
-    :path: "../node_modules/react-native-render-html"
   react-native-safe-area-context:
     :path: "../node_modules/react-native-safe-area-context"
   react-native-simple-toast:
     :path: "../node_modules/react-native-simple-toast"
   react-native-slider:
     :path: "../node_modules/@react-native-community/slider"
+  react-native-vector-icons-ant-design:
+    :path: "../node_modules/@react-native-vector-icons/ant-design"
+  react-native-vector-icons-evil-icons:
+    :path: "../node_modules/@react-native-vector-icons/evil-icons"
+  react-native-vector-icons-feather:
+    :path: "../node_modules/@react-native-vector-icons/feather"
+  react-native-vector-icons-fontawesome6:
+    :path: "../node_modules/@react-native-vector-icons/fontawesome6"
+  react-native-vector-icons-ionicons:
+    :path: "../node_modules/@react-native-vector-icons/ionicons"
   react-native-vector-icons-material-design-icons:
     :path: "../node_modules/@react-native-vector-icons/material-design-icons"
   react-native-view-shot:
@@ -3455,8 +3452,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-share"
   RNSVG:
     :path: "../node_modules/react-native-svg"
-  RNVectorIcons:
-    :path: "../node_modules/react-native-vector-icons"
   RNWorklets:
     :path: "../node_modules/react-native-worklets"
   Yoga:
@@ -3467,7 +3462,7 @@ SPEC CHECKSUMS:
   EXConstants: 5efe6122eecac2d970aa50a2a502ecc6ce4b7564
   EXJSONUtils: 7a1683cfa2cbe6d11fca97097d51a496755b0287
   EXManifests: f9888c0bf5aaa6ddb7e3d4b224d6d54ac4ca84a4
-  Expo: 2455fd2278a1de64070453c9f426dd413e3ccca8
+  Expo: cf93d7e46db229e11a7b2b9b5bdc9b4ac7e87555
   expo-dev-client: 678dd58df0bd6d3486b8b358e37c79ca67d32af5
   expo-dev-launcher: 0adb6325315fe549599a9589c04d8e2091b1a9cd
   expo-dev-menu: 857fab48431f1b82b6ea2399c6d97e7f1e89d52e
@@ -3479,32 +3474,33 @@ SPEC CHECKSUMS:
   ExpoDomWebView: beaec034e51bd028428b98bb1f2633ab79c6d095
   ExpoFileSystem: e441dae0ae671fc451640517550973d9e024fdf0
   ExpoFont: 59e1faf66ba9bcd232ae1e2ce58d202a48b6f65e
-  ExpoImage: 4c1e7634db6033185a98959fb028d8d4b1c89695
+  ExpoImage: d66c5e5be02228cdfed42ebcb31acf2dd594b8e7
   ExpoImageManipulator: 3bdad664e6eb2e632b10edb4ba92d7983d54d81a
   ExpoImagePicker: 53793977b6f686c3f1230739a1dbe7178a9cef80
   ExpoKeepAwake: c26f14275017370cc8a4b7b43a0e23361f2053a5
   ExpoLinearGradient: 903b3f5fe566c666ff78b2599add51d094483613
   ExpoLogBox: 6bb73c341aca22e699bd4da6cc61afc844e1a648
   ExpoMediaLibrary: e0829ae4fe90dc8bcd5ec13250ba6503aebbbc94
-  ExpoModulesCore: 720f0a2dff8e047042465ddbf9e850593310959c
+  ExpoModulesCore: 1fb500b538cbdcd39ffffae5b15ba30e8510678e
   ExpoModulesJSI: 3accd404d715d63e7b04015d20c857e903e3bc73
-  ExpoModulesWorklets: 6b240031daa3de4df791588fc78236637ff602f6
-  ExpoModulesWorkletsAdapter: 7a7b58fb35a09f073cb310d7c63af696700a4858
+  ExpoModulesWorklets: a8986b0872d09df168f5d4e092625e9fbb6b38bb
+  ExpoModulesWorkletsAdapter: 45af1d3b1605384f7350ffbaf99575e4ae2dd2e4
+  ExpoNotifications: 0f253ad90f108c1c4045b541294164865c6aadc8
   ExpoQuickActions: edf2c5bc044f83dc9e9ed4dc4de7fe4a5b1b0422
   ExpoSecureStore: 94793113049a2d7478dfe1a13aa15081e9f61755
   ExpoSharing: dcf5cb459c99f344aabf126b171eb61d2e49276f
   ExpoSplashScreen: 247464c0fe484f766892db0d66c3fe54f92a624e
   ExpoSystemUI: ff3142b323ae7b4d11dc0b1dc4acfa30d92be7dc
-  ExpoUI: 62ef3713d3cce9736b063fe4edf8cb9c611a36d5
+  ExpoUI: 9d39a0371d8abff2b79394c8d81239dce4ad3298
   ExpoWebBrowser: 9b98d939d5f1c5dd8f523f0a0683056fb1204434
   EXUpdatesInterface: 92d2aa5194b6fb93ca8ab749db75665cb28b2e60
   FBLazyVector: 3c3be9a019176b5699455f7f66c5444b78a411c6
-  Firebase: a8539b633d474fbeb654c7043f9c1649e274045b
-  FirebaseAnalytics: 9c9fa7915fc52ea03077000d5a7b6a8947b2d76e
-  FirebaseCore: 2e86a4ea1684d4381707069e4a6d89ac808e901e
-  FirebaseCoreInternal: 6ab6a02c94446c026d2cf35cf5383842ebaa4992
-  FirebaseInstallations: eb29ccbf64eaedf86fd5b2ccc7fabde567660b52
-  GoogleAppMeasurement: a6d37949071d456e9147dac6789c4342e0e7a8c5
+  Firebase: e8400c058702940d53f31fc0653e4e7a06332326
+  FirebaseAnalytics: 652858a1424ca8c549b62261876814ff56dff650
+  FirebaseCore: 52d4512296984a44a8c8870c6494870fc7aeee2f
+  FirebaseCoreInternal: 3b310521b34a51ce3a6c605e4618b9aef8f6c112
+  FirebaseInstallations: bd8e80f51d4c8bdc6c872011dede0b800c5b49ea
+  GoogleAppMeasurement: 2234668e2451f9da37b93dad7830e457600c008f
   GoogleUtilities: 766ace00c6b10d8148408f329d10c4f051931850
   hermes-engine: 2a722444dd741b8b35350c462ca6598503ff139f
   LiquidGlass: e8764f36577a10ce8a658e47ef8c0f36422e7d1e
@@ -3555,10 +3551,14 @@ SPEC CHECKSUMS:
   react-native-menu: 46df909c7c60c4a6cb6757bf2281ea65d612065c
   react-native-pager-view: 583ed48cc9e4a5d11b3d7bfb6f2f319c929f50e7
   react-native-quick-base64: e254a406ac7d7f20857c9fbcbfb57fbf91ae21be
-  react-native-render-html: 5afc4751f1a98621b3009432ef84c47019dcb2bd
   react-native-safe-area-context: ba7283e541a5f57c6b27a7e33f2c40b8977888c0
   react-native-simple-toast: e72b90b79229ed6a2744d1c9b4f23f7c51308e7f
   react-native-slider: b15258ac3d287a5951f76b11497d659ed20c0def
+  react-native-vector-icons-ant-design: 1af4ee95ea3e57e30ee09367fc9f563855e73802
+  react-native-vector-icons-evil-icons: feaa087cda680c55db051990a90703361d495f71
+  react-native-vector-icons-feather: 57093d5a5c8ff48c34032e03313103ef306e2d49
+  react-native-vector-icons-fontawesome6: 9014730aa0e219382da1f109d47d1a378215cbf8
+  react-native-vector-icons-ionicons: 6831196cf1486bfd26b715d749c5c9a7d67bc0eb
   react-native-vector-icons-material-design-icons: a4b6ec02814573c09203a725ee3767a7e8d5eb77
   react-native-view-shot: 6da2aaa0404b8d617ab1689550acdb251d759af9
   react-native-webview: 2a4da2e03d3ec2c731c4d1a389cb86aaa4902167
@@ -3600,8 +3600,8 @@ SPEC CHECKSUMS:
   RNCAsyncStorage: d90e523830fa7705f8c61632479abde871bc792f
   RNCClipboard: 7a7d4557bfd3370b35c99dfecd92ae7b9fc4948a
   RNDateTimePicker: afe0288e6c7855994f7f2617b7b2c05799fea7f3
-  RNFBAnalytics: 95fe2bee29a080194cad87ede1c2109b93efed37
-  RNFBApp: 022a22b12d1dd0caec315a5970d45361a470e4f3
+  RNFBAnalytics: 5bd1a90e75d18c898a9458a5993570728a32666c
+  RNFBApp: f25ecdef5585e18470e584c2c34f25fba54243f7
   RNGestureHandler: 7b07d9192bc65c6883fb37fdecc05dc6b61c814f
   RNLocalize: 17bce0556e2d33fe1201c8cef53b3b7786e07612
   RNReactNativeHapticFeedback: 9dc72312c12cb53ee240b5b7aae1e167f3d940a6
@@ -3609,12 +3609,11 @@ SPEC CHECKSUMS:
   RNScreens: 5b4b260e28d8263d97fddcb53e59649515797bcc
   RNShare: 26c9524aee8cc3eedbab6d6b98cacce2f5247893
   RNSVG: 68c366b996064ea99cee1e55da62b8feafb33a78
-  RNVectorIcons: bd88db8836a8611aff4b44f061364c07002a6c2a
   RNWorklets: 43af89f696342f91118a2f1f3a879056e2f47331
   SwiftUIIntrospect: fee9aa07293ee280373a591e1824e8ddc869ba5d
   Toast: 1f5ea13423a1e6674c4abdac5be53587ae481c4e
   Yoga: 542a30dafe5b0f5f1d9f185ea7b2a3811ac54801
 
-PODFILE CHECKSUM: fb8dcd10264ea1ef038b47714438f4e3f7dea184
+PODFILE CHECKSUM: 8071de0361eb13703f238055fa8a4fe818678d5d
 
 COCOAPODS: 1.17.0

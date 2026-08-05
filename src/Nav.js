@@ -1,7 +1,7 @@
 // 專門存放路由，其他頁面可使用this.props.navigation.navigate("對應下方創建棧的路由名")進行跳轉
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { Platform, TouchableOpacity } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from "@react-native-vector-icons/ionicons";
 import {
     NavigationContainer,
     useNavigationContainerRef,
@@ -34,9 +34,17 @@ import HarborTopicListPage from './pages/TabbarPages/arkHarbor/HarborTopicListPa
 import HarborComposerPage from './pages/TabbarPages/arkHarbor/HarborComposerPage';
 import HarborDraftsPage from './pages/TabbarPages/arkHarbor/HarborDraftsPage';
 import HarborAccountSettingsPage from './pages/TabbarPages/my/pages/HarborAccountSettingsPage';
+import HarborProfilePage from './pages/TabbarPages/my/pages/HarborProfilePage';
 import HarborActivityPage from './pages/TabbarPages/my/pages/HarborActivityPage';
 import HarborBadgesPage from './pages/TabbarPages/my/pages/HarborBadgesPage';
 import HarborInboxPage from './pages/TabbarPages/my/pages/HarborInboxPage';
+import TeamScheduleListPage from './pages/TeamSchedule/TeamScheduleListPage';
+import TeamScheduleCreatePage from './pages/TeamSchedule/TeamScheduleCreatePage';
+import TeamScheduleDetailPage from './pages/TeamSchedule/TeamScheduleDetailPage';
+import TeamScheduleEditPage from './pages/TeamSchedule/TeamScheduleEditPage';
+import WikiHome from './pages/TabbarPages/arkwiki';
+import WikiSearchPage from './pages/TabbarPages/arkwiki/WikiSearchPage';
+import WikiArticlePage from './pages/TabbarPages/arkwiki/WikiArticlePage';
 
 import LocalCourse from './pages/TabbarPages/course/pages/what2Reg/pages/LocalCourse';
 
@@ -49,13 +57,14 @@ import UMOrg from './pages/Features/UMOrg';
 import SettingPage from './pages/Features/SettingPage';
 import { useTheme } from './components/ThemeContext';
 import { useHarborSession } from './contexts/HarborSessionContext';
+import { APP_LINKING } from './utils/appLinks';
 
 const Stack = createNativeStackNavigator();
 
 const Nav = () => {
     const { theme } = useTheme();
     const { black } = theme;
-    const { t } = useTranslation(['common', 'features', 'event', 'home']);
+    const { t } = useTranslation(['common', 'features', 'event', 'home', 'my']);
     const {
         consumeLoginIntent,
         pendingLoginIntent,
@@ -190,6 +199,7 @@ const Nav = () => {
         <NavigationContainer
             ref={navigationRef}
             theme={navigationTheme}
+            linking={APP_LINKING}
             onReady={handleNavigationReady}>
             <Stack.Navigator
                 initialRouteName="Tabbar"
@@ -369,8 +379,29 @@ const Nav = () => {
                     />
                     <Stack.Screen name="AllEvents" component={AllEvents} />
 
-                    {/* ARK選課 */}
-                    <Stack.Screen name="LocalCourse" component={LocalCourse} />
+                    {/* ARK選課：改為 card，避免再進 Wiki 時被 Modal 蓋住（Wiki 出現在背後） */}
+                    <Stack.Screen
+                        name="LocalCourse"
+                        component={LocalCourse}
+                        options={{
+                            presentation: 'card',
+                        }}
+                    />
+                    {/* Wiki 搜尋／條目：同組 card + headerLeft，與 LocalCourse 堆疊順序一致 */}
+                    <Stack.Screen
+                        name="WikiSearch"
+                        component={WikiSearchPage}
+                        options={{
+                            presentation: 'card',
+                        }}
+                    />
+                    <Stack.Screen
+                        name="WikiArticle"
+                        component={WikiArticlePage}
+                        options={{
+                            presentation: 'card',
+                        }}
+                    />
                 </Stack.Group>
 
                 {/* 普通左右壓動畫組 */}
@@ -391,6 +422,7 @@ const Nav = () => {
                         component={SearchScreen}
                         options={{ headerTitle: t('搜索') }}
                     />
+                    <Stack.Screen name="WikiHome" component={WikiHome} />
                     <Stack.Screen name="Webviewer" component={Webviewer} />
                     <Stack.Screen
                         name="SettingPage"
@@ -412,6 +444,30 @@ const Nav = () => {
                     <Stack.Screen
                         name="HarborAccountSettings"
                         component={HarborAccountSettingsPage}
+                    />
+                    <Stack.Screen
+                        name="HarborProfile"
+                        component={HarborProfilePage}
+                    />
+                    <Stack.Screen
+                        name="TeamScheduleList"
+                        component={TeamScheduleListPage}
+                        options={{headerTitle: t('全部組隊約時間')}}
+                    />
+                    <Stack.Screen
+                        name="TeamScheduleCreate"
+                        component={TeamScheduleCreatePage}
+                        options={{headerTitle: t('建立組隊')}}
+                    />
+                    <Stack.Screen
+                        name="TeamScheduleDetail"
+                        component={TeamScheduleDetailPage}
+                        options={{headerTitle: t('活動詳情')}}
+                    />
+                    <Stack.Screen
+                        name="TeamScheduleEdit"
+                        component={TeamScheduleEditPage}
+                        options={{headerTitle: t('編輯基本資料')}}
                     />
                 </Stack.Group>
             </Stack.Navigator>

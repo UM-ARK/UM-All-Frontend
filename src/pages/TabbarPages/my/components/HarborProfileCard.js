@@ -1,10 +1,10 @@
 import React from 'react';
-import {StyleSheet, Text, View} from 'react-native';
+import {Pressable, StyleSheet, Text, View} from 'react-native';
 
 import {Image} from 'expo-image';
 import {useTranslation} from 'react-i18next';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import Ionicons from "@react-native-vector-icons/ionicons";
+import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import {scale, verticalScale} from 'react-native-size-matters';
 
 import {uiStyle, useTheme} from '../../../../components/ThemeContext';
@@ -14,7 +14,7 @@ import {formatJoinedAt} from '../utils/harborUi';
 
 const AVATAR_SOURCE = require('../../../../static/img/logo_round.png');
 
-const HarborProfileCard = ({user, onSettingsPress}) => {
+const HarborProfileCard = ({user, onProfilePress, onSettingsPress}) => {
     const {theme} = useTheme();
     const {t, i18n} = useTranslation('my');
     const joinedAt = formatJoinedAt(user.joinedAt, i18n.language);
@@ -25,132 +25,147 @@ const HarborProfileCard = ({user, onSettingsPress}) => {
                 styles.container,
                 {backgroundColor: theme.bg_color},
             ]}>
-            <View
-                style={[
-                    styles.avatarRing,
-                    {backgroundColor: theme.tonal.primary30},
-                ]}>
-                <Image
-                    source={
-                        user.avatarUrl ? {uri: user.avatarUrl} : AVATAR_SOURCE
+            <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('Harbor 個人資料')}
+                disabled={!onProfilePress}
+                style={({pressed}) => [
+                    styles.profilePressable,
+                    pressed && onProfilePress && styles.profilePressed,
+                ]}
+                onPress={() => {
+                    if (!onProfilePress) {
+                        return;
                     }
-                    style={styles.avatar}
-                    contentFit="cover"
-                />
-                <View
-                    style={[
-                        styles.connectedDot,
-                        {
-                            backgroundColor: theme.success,
-                            borderColor: theme.bg_color,
-                        },
-                    ]}>
-                    <Ionicons
-                        name="checkmark"
-                        size={scale(8)}
-                        color={theme.trueWhite}
+                    trigger();
+                    onProfilePress();
+                }}>
+                <View style={styles.avatarWrap}>
+                    <Image
+                        source={
+                            user.avatarUrl ? {uri: user.avatarUrl} : AVATAR_SOURCE
+                        }
+                        style={styles.avatar}
+                        contentFit="cover"
                     />
-                </View>
-            </View>
-
-            <View style={styles.identity}>
-                <View style={styles.nameRow}>
-                    <Text
-                        numberOfLines={1}
-                        style={[styles.name, {color: theme.black.main}]}>
-                        {user.displayName || user.username}
-                    </Text>
                     <View
                         style={[
-                            styles.connectedPill,
-                            {backgroundColor: theme.tonal.success15},
+                            styles.connectedDot,
+                            {
+                                backgroundColor: theme.success,
+                                borderColor: theme.bg_color,
+                            },
                         ]}>
                         <Ionicons
-                            name="checkmark-circle"
-                            size={scale(12)}
-                            color={theme.success}
+                            name="checkmark"
+                            size={scale(8)}
+                            color={theme.trueWhite}
                         />
+                    </View>
+                </View>
+
+                <View style={styles.identity}>
+                    <View style={styles.nameRow}>
                         <Text
+                            numberOfLines={1}
+                            style={[styles.name, {color: theme.black.main}]}>
+                            {user.displayName || user.username}
+                        </Text>
+                        <View
                             style={[
-                                styles.connectedText,
-                                {color: theme.success},
+                                styles.connectedPill,
+                                {backgroundColor: theme.tonal.success15},
                             ]}>
-                            {t('已連接')}
+                            <Ionicons
+                                name="checkmark-circle"
+                                size={scale(12)}
+                                color={theme.success}
+                            />
+                            <Text
+                                style={[
+                                    styles.connectedText,
+                                    {color: theme.success},
+                                ]}>
+                                {t('已連接')}
+                            </Text>
+                        </View>
+                    </View>
+                    <Text style={[styles.handle, {color: theme.black.third}]}>
+                        @{user.username}
+                    </Text>
+                    <View style={styles.metaRow}>
+                        <MaterialCommunityIcons
+                            name="forum-outline"
+                            size={scale(13)}
+                            color={theme.themeColor}
+                        />
+                        <Text style={[styles.role, {color: theme.black.second}]}>
+                            {t(user.role || 'Harbor 會員')}
+                        </Text>
+                        <View
+                            style={[
+                                styles.metaDivider,
+                                {backgroundColor: theme.themeColorUltraLight},
+                            ]}
+                        />
+                        <Text style={[styles.trust, {color: theme.black.third}]}>
+                            TL{user.trustLevel ?? 0}
                         </Text>
                     </View>
-                    {onSettingsPress ? (
-                        <TouchableScale
-                            accessibilityRole="button"
-                            accessibilityLabel={t('設置')}
-                            hitSlop={scale(8)}
-                            style={styles.settingsButton}
-                            onPress={() => {
-                                trigger();
-                                onSettingsPress();
-                            }}>
-                            <Ionicons
-                                name="settings-outline"
-                                size={verticalScale(18)}
-                                color={theme.black.third}
-                            />
-                        </TouchableScale>
+                    {joinedAt ? (
+                        <Text style={[styles.joinedAt, {color: theme.black.third}]}>
+                            {t('於 {{date}} 加入', {date: joinedAt})}
+                        </Text>
                     ) : null}
                 </View>
-                <Text style={[styles.handle, {color: theme.black.third}]}>
-                    @{user.username}
-                </Text>
-                <View style={styles.metaRow}>
-                    <MaterialCommunityIcons
-                        name="forum-outline"
-                        size={scale(13)}
-                        color={theme.themeColor}
-                    />
-                    <Text style={[styles.role, {color: theme.black.second}]}>
-                        {t(user.role || 'Harbor 會員')}
-                    </Text>
-                    <View
-                        style={[
-                            styles.metaDivider,
-                            {backgroundColor: theme.themeColorUltraLight},
-                        ]}
-                    />
-                    <Text style={[styles.trust, {color: theme.black.third}]}>
-                        TL{user.trustLevel ?? 0}
-                    </Text>
-                </View>
-                {joinedAt ? (
-                    <Text style={[styles.joinedAt, {color: theme.black.third}]}>
-                        {t('於 {{date}} 加入', {date: joinedAt})}
-                    </Text>
-                ) : null}
-            </View>
+            </Pressable>
 
+            {onSettingsPress ? (
+                <TouchableScale
+                    accessibilityRole="button"
+                    accessibilityLabel={t('設置')}
+                    hitSlop={scale(8)}
+                    style={styles.settingsButton}
+                    onPress={() => {
+                        trigger();
+                        onSettingsPress();
+                    }}>
+                    <Ionicons
+                        name="settings-outline"
+                        size={verticalScale(18)}
+                        color={theme.black.third}
+                    />
+                </TouchableScale>
+            ) : null}
         </View>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
-        minHeight: verticalScale(112),
         flexDirection: 'row',
-        alignItems: 'center',
+        alignItems: 'flex-start',
         paddingHorizontal: scale(7),
         paddingTop: verticalScale(4),
-        paddingBottom: verticalScale(12),
+        paddingBottom: verticalScale(4),
+    },
+    profilePressable: {
+        flex: 1,
+        minWidth: 0,
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+    },
+    profilePressed: {
+        opacity: 0.7,
     },
     settingsButton: {
-        marginLeft: 'auto',
+        marginLeft: scale(4),
         width: scale(28),
         height: scale(28),
         alignItems: 'center',
         justifyContent: 'center',
     },
-    avatarRing: {
-        width: scale(66),
-        height: scale(66),
-        borderRadius: scale(33),
-        alignItems: 'center',
-        justifyContent: 'center',
+    avatarWrap: {
         marginRight: scale(13),
     },
     avatar: {
@@ -160,8 +175,8 @@ const styles = StyleSheet.create({
     },
     connectedDot: {
         position: 'absolute',
-        right: scale(1),
-        bottom: scale(1),
+        right: scale(-1),
+        bottom: scale(-1),
         width: scale(16),
         height: scale(16),
         borderRadius: scale(8),

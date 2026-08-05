@@ -6,9 +6,14 @@ jest.mock('../../storageKits', () => ({
 import {
     addHarborSearchHistory,
     buildHarborSearchQuery,
+    canRunHarborKeywordSearch,
     clearHarborSearchHistory,
+    countHarborSearchContentItems,
+    filterHarborSearchItems,
+    getAlternateHarborSearchQueries,
     getHarborSearchAfterDate,
     getHarborSearchHistory,
+    mergeHarborSearchItems,
     removeHarborSearchHistory,
     sanitizeHarborSearchHistory,
 } from '../harborSearch';
@@ -39,10 +44,70 @@ describe('Harbor 搜尋工具', () => {
         );
     });
 
+    it('空關鍵字僅帶作者時組成 @username 查詢', () => {
+        expect(
+            buildHarborSearchQuery({
+                query: '',
+                author: 'qq_yyy',
+            }),
+        ).toBe('@qq_yyy');
+    });
+
     it('按所選時間範圍建立搜尋日期', () => {
         const now = Date.parse('2026-07-26T12:00:00Z');
         expect(getHarborSearchAfterDate('week', now)).toBe('2026-07-19');
         expect(getHarborSearchAfterDate('all', now)).toBe('');
+    });
+
+    it('至少輸入兩個字才允許關鍵字搜尋', () => {
+        expect(canRunHarborKeywordSearch('課')).toBe(false);
+        expect(canRunHarborKeywordSearch('課程')).toBe(true);
+        expect(canRunHarborKeywordSearch('ab')).toBe(true);
+    });
+
+    it('為繁體或簡體搜尋字產生另一種中文版本', () => {
+        expect(getAlternateHarborSearchQueries('課程評價')).toEqual([
+            '课程评价',
+        ]);
+        expect(getAlternateHarborSearchQueries('新帖子测试')).toEqual([
+            '新帖子測試',
+        ]);
+        expect(getAlternateHarborSearchQueries('课程評價')).toEqual([
+            '课程评价',
+            '課程評價',
+        ]);
+    });
+
+    it('純英文或數字不執行中文版本補查', () => {
+        expect(getAlternateHarborSearchQueries('Harbor')).toEqual([]);
+        expect(getAlternateHarborSearchQueries('12345')).toEqual([]);
+        expect(getAlternateHarborSearchQueries('Harbor 123')).toEqual([]);
+    });
+
+    it('原文結果優先並按貼文或話題 ID 合併去重', () => {
+        const originalItems = [
+            {id: 'original-post', kind: 'post', postId: 10, topicId: 1},
+            {id: 'original-topic', kind: 'topic', topicId: 2},
+            {id: 'original-user', kind: 'user', user: {id: 3}},
+        ];
+        const convertedItems = [
+            {id: 'converted-post', kind: 'post', postId: 10, topicId: 1},
+            {id: 'converted-topic', kind: 'topic', topicId: 2},
+            {id: 'new-topic', kind: 'topic', topicId: 4},
+            {id: 'converted-user', kind: 'user', user: {id: 3}},
+        ];
+
+        expect(
+            mergeHarborSearchItems(originalItems, convertedItems).map(
+                item => item.id,
+            ),
+        ).toEqual([
+            'original-post',
+            'original-topic',
+            'original-user',
+            'new-topic',
+        ]);
+        expect(countHarborSearchContentItems(originalItems)).toBe(2);
     });
 
     it('清理、排序及忽略大小寫去重最近搜尋', () => {
@@ -99,5 +164,34 @@ describe('Harbor 搜尋工具', () => {
     it('破損儲存內容會安全返回空陣列', async () => {
         getLocalStorage.mockResolvedValue(new Error('broken'));
         await expect(getHarborSearchHistory()).resolves.toEqual([]);
+    });
+
+    it('即時篩選已載入的話題與用戶結果', () => {
+        const items = [
+            {
+                id: '1',
+                kind: 'topic',
+                title: '可以使用 Event 功能',
+                excerpt: '時間表',
+                author: {username: 'qq_yyy'},
+            },
+            {
+                id: '2',
+                kind: 'topic',
+                title: 'APP 開發測試',
+                excerpt: '測試回复',
+                author: {username: 'other'},
+            },
+            {
+                id: '3',
+                kind: 'user',
+                user: {username: 'event_bot', name: 'Event Bot'},
+            },
+        ];
+
+        expect(
+            filterHarborSearchItems(items, 'eve').map(item => item.id),
+        ).toEqual(['1', '3']);
+        expect(filterHarborSearchItems(items, '')).toEqual(items);
     });
 });

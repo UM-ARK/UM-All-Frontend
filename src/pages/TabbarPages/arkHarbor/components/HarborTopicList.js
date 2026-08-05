@@ -311,10 +311,8 @@ const HarborTopicList = ({
                     items: updateItems(cachedResult.items),
                 });
             });
-            if (
-                reloadLists &&
-                ['new', 'unread'].includes(sourceRef.current?.view)
-            ) {
+            // 發帖／刪帖等需重排時刷新當前列表；主頁僅有 latest／top，不可再限死 new／unread
+            if (reloadLists) {
                 loadFirstPage({ refresh: true, showIndicator: false });
             }
         });
@@ -488,17 +486,29 @@ const HarborTopicList = ({
         [navigation],
     );
 
+    const handleAuthorPress = useCallback(
+        username => {
+            navigation.navigate('HarborProfile', {
+                username,
+                mode: 'preview',
+            });
+        },
+        [navigation],
+    );
+
     const renderTopic = useCallback(
         ({ item }) => (
             <HarborTopicCard
                 topic={item}
                 onPress={handleTopicPress}
+                onAuthorPress={handleAuthorPress}
                 onCategoryPress={handleCategoryPress}
                 isPressAllowed={isTopicPressAllowed}
             />
         ),
         [
             handleCategoryPress,
+            handleAuthorPress,
             handleTopicPress,
             isTopicPressAllowed,
         ],

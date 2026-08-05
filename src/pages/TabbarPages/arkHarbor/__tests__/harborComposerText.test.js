@@ -1,6 +1,8 @@
 import {
     buildHarborComposerRaw,
+    canUseHarborComposerImageGrid,
     getHarborComposerResult,
+    splitHarborComposerRaw,
 } from '../harborComposerText';
 
 describe('buildHarborComposerRaw', () => {
@@ -35,6 +37,127 @@ describe('buildHarborComposerRaw', () => {
             '> 引用內容\n\n回覆文字\n\n' +
             '![圖片](upload://reply.jpeg)',
         );
+    });
+
+    it('保留既有圖片 Markdown 並依隊列順序放到文末', () => {
+        expect(
+            buildHarborComposerRaw('正文', [
+                {
+                    shortUrl: 'upload://second.jpeg',
+                    markdown: '![第二張|690x388](upload://second.jpeg)',
+                },
+                {
+                    shortUrl: 'upload://first.jpeg',
+                    markdown: '![第一張](upload://first.jpeg)',
+                },
+            ]),
+        ).toBe(
+            '正文\n\n' +
+            '![第二張|690x388](upload://second.jpeg)\n\n' +
+            '![第一張](upload://first.jpeg)',
+        );
+    });
+});
+
+describe('canUseHarborComposerImageGrid', () => {
+    it('只允許正文末尾的連續 Harbor 圖片區塊', () => {
+        expect(
+            canUseHarborComposerImageGrid(
+                '正文\n\n' +
+                '![第一張](upload://first.jpeg)\n\n' +
+                '![第二張](upload://second.jpeg)',
+            ),
+        ).toBe(true);
+        expect(
+            canUseHarborComposerImageGrid(
+                '![第一張](upload://first.jpeg)\n\n正文',
+            ),
+        ).toBe(false);
+    });
+
+    it('行內圖片、外部圖片或 HTML 圖片交由網頁版處理', () => {
+        expect(
+            canUseHarborComposerImageGrid(
+                '正文 ![行內](upload://inline.jpeg)',
+            ),
+        ).toBe(false);
+        expect(
+            canUseHarborComposerImageGrid(
+                '![外部](https://example.com/image.jpeg)',
+            ),
+        ).toBe(false);
+        expect(
+            canUseHarborComposerImageGrid('<img src="image.jpeg">'),
+        ).toBe(false);
+    });
+
+    it('沒有圖片的正文可直接使用九宮格', () => {
+        expect(canUseHarborComposerImageGrid('只有正文')).toBe(true);
+    });
+});
+
+describe('splitHarborComposerRaw', () => {
+    it('把獨立成行的 Harbor 圖片拆成可排序隊列', () => {
+        expect(
+            splitHarborComposerRaw(
+                '第一段\n\n' +
+                '![圖片](upload://first.jpeg)\n\n' +
+                '第二段\n' +
+                '![花朵|690x388](upload://second.jpeg)',
+                {
+                    previewUrls: [
+                        'https://harbor.example.com/first.jpeg',
+                        'https://harbor.example.com/second.jpeg',
+                    ],
+                },
+            ),
+        ).toMatchObject({
+            text: '第一段\n\n第二段',
+            images: [
+                {
+                    shortUrl: 'upload://first.jpeg',
+                    remoteUrl: 'https://harbor.example.com/first.jpeg',
+                    status: 'uploaded',
+                },
+                {
+                    shortUrl: 'upload://second.jpeg',
+                    remoteUrl: 'https://harbor.example.com/second.jpeg',
+                    status: 'uploaded',
+                },
+            ],
+        });
+    });
+
+    it('不移動行內圖片、外部圖片或普通 Markdown', () => {
+        const raw =
+            '文字 ![行內](upload://inline.jpeg)\n' +
+            '![外部](https://example.com/image.jpeg)';
+
+        expect(splitHarborComposerRaw(raw)).toEqual({
+            text: raw,
+            images: [],
+        });
+    });
+
+    it('從既有圖片保留預覽和本機狀態', () => {
+        const existingImage = {
+            id: 'existing',
+            localUri: 'file:///image.jpeg',
+            remoteUrl: 'https://harbor.example.com/image.jpeg',
+            shortUrl: 'upload://image.jpeg',
+        };
+
+        expect(
+            splitHarborComposerRaw(
+                '![圖片](upload://image.jpeg)',
+                {existingImages: [existingImage]},
+            ).images[0],
+        ).toMatchObject({
+            id: 'existing',
+            localUri: 'file:///image.jpeg',
+            shortUrl: 'upload://image.jpeg',
+            status: 'uploaded',
+        });
     });
 });
 

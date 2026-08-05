@@ -3,7 +3,6 @@ import { View, Text, StyleSheet, Platform } from 'react-native';
 
 import { useTheme, uiStyle } from '../../../../../../components/ThemeContext';
 import {
-    ARK_WIKI_SEARCH,
     OFFICIAL_COURSE_SEARCH,
 } from '../../../../../../utils/pathMap';
 import { useUmehHost } from '../../../../../../utils/umehHost';
@@ -11,6 +10,7 @@ import { logToFirebase } from '../../../../../../utils/firebaseAnalytics';
 import { openLink } from '../../../../../../utils/browser';
 import { trigger } from '../../../../../../utils/trigger';
 import { navigateToCourseTab } from '../../../../../../utils/courseNavigation';
+import { navigateToWikiSearch } from '../../../../../../utils/wikiNavigation';
 import { getCourseDisplayTitle } from '../utils/courseTitle';
 
 import { scale } from 'react-native-size-matters';
@@ -125,7 +125,7 @@ const CourseCard = memo(
         const courseActions = [
             {
                 id: 'ark-wiki',
-                title: `${t('寫', { ns: 'catalog' })} Wiki`,
+                title: 'Wiki',
                 image: Platform.select({
                     ios: 'book',
                     android: 'ic_menu_agenda',
@@ -134,8 +134,18 @@ const CourseCard = memo(
                 titleColor: themeColor,
             },
             {
+                id: 'harbor-discuss',
+                title: t('討論', { ns: 'catalog' }),
+                image: Platform.select({
+                    ios: 'bubble.left.and.bubble.right',
+                    android: 'ic_btn_speak_now',
+                }),
+                imageColor: black.third,
+                titleColor: black.third,
+            },
+            {
                 id: 'what2reg',
-                title: `${t('查', { ns: 'catalog' })} ${t('選咩課', { ns: 'catalog' })}`,
+                title: t('選咩課', { ns: 'catalog' }),
                 image: Platform.select({
                     ios: 'star',
                     android: 'btn_star_big_on',
@@ -145,7 +155,7 @@ const CourseCard = memo(
             },
             {
                 id: 'official',
-                title: `${t('查', { ns: 'catalog' })} ${t('官方', { ns: 'catalog' })}`,
+                title: t('官方', { ns: 'catalog' }),
                 image: Platform.select({
                     ios: 'graduationcap',
                     android: 'ic_menu_info_details',
@@ -157,7 +167,7 @@ const CourseCard = memo(
                 ? [
                     {
                         id: 'coursesim',
-                        title: `${t('查', { ns: 'catalog' })} ${t('模擬課表', { ns: 'catalog' })}`,
+                        title: t('模擬課表', { ns: 'catalog' }),
                         image: Platform.select({
                             ios: 'calendar',
                             android: 'ic_menu_my_calendar',
@@ -167,7 +177,7 @@ const CourseCard = memo(
                     },
                     {
                         id: 'section',
-                        title: `${t('查', { ns: 'catalog' })} Section`,
+                        title: 'Section',
                         image: Platform.select({
                             ios: 'list.bullet',
                             android: 'ic_menu_sort_by_size',
@@ -183,11 +193,9 @@ const CourseCard = memo(
             trigger();
             switch (event.nativeEvent.event) {
                 case 'ark-wiki': {
-                    let URL = ARK_WIKI_SEARCH + encodeURIComponent(courseCode);
+                    let wikiQuery = courseCode;
                     if (prof_info) {
-                        URL =
-                            ARK_WIKI_SEARCH +
-                            encodeURIComponent(prof_info.name);
+                        wikiQuery = prof_info.name;
                         logToFirebase('checkCourse', {
                             courseCode: courseCode,
                             profName: prof_info.name,
@@ -199,7 +207,15 @@ const CourseCard = memo(
                             action: 'ark-wiki',
                         });
                     }
-                    openLink(URL);
+                    navigateToWikiSearch(navigation, wikiQuery, {autoOpenUnique: true});
+                    break;
+                }
+                case 'harbor-discuss': {
+                    logToFirebase('checkCourse', {
+                        courseCode: courseCode,
+                        action: 'harbor-discuss',
+                    });
+                    navigation.navigate('HarborSearch', {query: courseCode});
                     break;
                 }
                 case 'what2reg': {

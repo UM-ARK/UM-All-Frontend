@@ -17,7 +17,7 @@ import ForumPage from './pages/TabbarPages/arkHarbor';
 import CourseTab from './pages/TabbarPages/course';
 import MyScreen from './pages/TabbarPages/my';
 
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import { trigger } from './utils/trigger';
 import { uiStyle } from './components/ThemeContext';
 import { isLiquidGlassSupported } from '@callstack/liquid-glass';
@@ -70,8 +70,8 @@ const androidTabIconConfig = {
     MyTabbar: 'account-circle',
 };
 
-// 論壇更新角標輪詢間隔
-const FORUM_BADGE_POLL_MS = 60 * 1000;
+// 論壇更新角標一般刷新間隔
+const FORUM_BADGE_STALE_MS = 5 * 60 * 1000;
 
 // 保持 Navigator 元件穩定，避免視窗縮放時重設目前分頁
 const IOSNativeTabs = createNativeBottomTabNavigator();
@@ -311,6 +311,7 @@ const Tabbar = () => {
         createHarborForumBadgeState(),
     );
     const forumBadgeRequestRef = useRef(0);
+    const forumBadgeLastRefreshAtRef = useRef(0);
     const forumBadgeStateRef = useRef(forumBadgeState);
     const forumBadgeStorageReadyRef = useRef(false);
     const forumBadgeAcknowledgePendingRef = useRef(false);
@@ -351,6 +352,13 @@ const Tabbar = () => {
                 (forumBadgeAcknowledgePendingRef.current &&
                     forumBadgeAcknowledgeUsernameRef.current ===
                         signedInUsername);
+            if (
+                !shouldAcknowledge &&
+                Date.now() - forumBadgeLastRefreshAtRef.current <
+                    FORUM_BADGE_STALE_MS
+            ) {
+                return;
+            }
             const currentState = forumBadgeStateRef.current;
             const requestId = forumBadgeRequestRef.current + 1;
             forumBadgeRequestRef.current = requestId;
@@ -361,6 +369,7 @@ const Tabbar = () => {
                         : currentState.acknowledgedAt,
                 });
                 if (forumBadgeRequestRef.current === requestId) {
+                    forumBadgeLastRefreshAtRef.current = Date.now();
                     setForumBadgeState(previousState => {
                         const nextState = updateHarborForumBadgeState(
                             previousState,
@@ -384,6 +393,7 @@ const Tabbar = () => {
     useEffect(() => {
         let active = true;
         forumBadgeRequestRef.current += 1;
+        forumBadgeLastRefreshAtRef.current = 0;
         forumBadgeStorageReadyRef.current = false;
         if (
             forumBadgeAcknowledgeUsernameRef.current !==
@@ -433,7 +443,6 @@ const Tabbar = () => {
         }
 
         refreshForumBadge();
-        const intervalId = setInterval(refreshForumBadge, FORUM_BADGE_POLL_MS);
         const subscription = AppState.addEventListener('change', nextState => {
             if (nextState === 'active') {
                 refreshForumBadge();
@@ -442,7 +451,6 @@ const Tabbar = () => {
 
         return () => {
             forumBadgeRequestRef.current += 1;
-            clearInterval(intervalId);
             subscription.remove();
         };
     }, [
@@ -482,7 +490,7 @@ const Tabbar = () => {
         });
     }, [signedInUsername]);
 
-    const forumUpdatesSinceEntry = getHarborForumBadgeCount(
+    const forumNewTopicsSinceEntry = getHarborForumBadgeCount(
         forumBadgeState,
         signedInUsername,
     );
@@ -490,11 +498,11 @@ const Tabbar = () => {
     const badges = useMemo(
         () => ({
             ForumTabbar: formatHarborTabBadge(
-                isSignedIn ? forumUpdatesSinceEntry : 0,
+                isSignedIn ? forumNewTopicsSinceEntry : 0,
             ),
             MyTabbar: formatHarborTabBadge(myUnreadTotal),
         }),
-        [forumUpdatesSinceEntry, isSignedIn, myUnreadTotal],
+        [forumNewTopicsSinceEntry, isSignedIn, myUnreadTotal],
     );
 
     const badgeListeners = useMemo(

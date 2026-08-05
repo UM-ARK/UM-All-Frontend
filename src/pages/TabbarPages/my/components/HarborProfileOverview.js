@@ -2,7 +2,7 @@ import React from 'react';
 import {Pressable, StyleSheet, Text, View} from 'react-native';
 
 import {useTranslation} from 'react-i18next';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import {scale, verticalScale} from 'react-native-size-matters';
 
 import {uiStyle, useTheme} from '../../../../components/ThemeContext';
@@ -59,11 +59,20 @@ const HarborProfileOverview = ({
                 if (item.key === 'postsCreated') {
                     return {
                         ...item,
-                        label: '評論',
                         onPress: () =>
                             navigation.navigate('HarborActivity', {
                                 kind: 'replies',
                                 title: t('評論'),
+                            }),
+                    };
+                }
+                if (item.key === 'likesReceived') {
+                    return {
+                        ...item,
+                        onPress: () =>
+                            navigation.navigate('HarborActivity', {
+                                kind: 'likesReceived',
+                                title: t('收到的讚'),
                             }),
                     };
                 }
@@ -82,6 +91,12 @@ const HarborProfileOverview = ({
         <View style={styles.container}>
             <HarborProfileCard
                 user={user}
+                onProfilePress={() =>
+                    navigation.navigate('HarborProfile', {
+                        username: user.username,
+                        mode: 'preview',
+                    })
+                }
                 onSettingsPress={onSettingsPress}
             />
             {user.partialProfile ? (
