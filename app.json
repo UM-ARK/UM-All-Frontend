@@ -28,7 +28,7 @@
       "userInterfaceStyle": "automatic",
       "googleServicesFile": "./google-services.json",
       "package": "one.umall",
-      "versionCode": 82,
+      "versionCode": 83,
       "adaptiveIcon": {
         "foregroundImage": "./src/static/img/ic_launcher_foreground.png",
         "backgroundColor": "#E6AB52"
