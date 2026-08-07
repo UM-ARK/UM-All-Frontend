@@ -1,6 +1,8 @@
 import {
     assignOverviewLanes,
+    computeOverviewBottomExpandPad,
     computeOverviewCourseFrames,
+    resolveOverviewCanvasSize,
 } from '../utils/overviewLayout';
 import { getSlotKey } from '../../../hooks/useConflict';
 
@@ -265,5 +267,118 @@ describe('computeOverviewCourseFrames', () => {
         });
 
         expect(frames.get(getSlotKey(courses[0])).height).toBe(100);
+    });
+});
+
+describe('computeOverviewBottomExpandPad', () => {
+    it('貼底矮卡需要預留擴展墊；中段矮卡不計', () => {
+        const courses = [
+            makeSlot('EARLY1000', '001', 'MON', '10:00', '10:20'),
+            makeSlot('LATE1000', '001', 'FRI', '17:00', '17:20'),
+        ];
+        const overviewStart = 10 * 60;
+        const overviewEnd = 17 * 60 + 20;
+        const hourHeight = 40;
+        const minHeight = 56;
+        const vGap = 3;
+
+        const pad = computeOverviewBottomExpandPad({
+            courses,
+            overviewStart,
+            overviewEnd,
+            hourHeight,
+            vGap,
+            minHeight,
+        });
+
+        // 20 分鐘 → 約 13.3，扣 vGap 後遠低於 56；時間軸內僅剩 vGap 空檔
+        const lateRaw = (20 / 60) * hourHeight;
+        const lateHeight = lateRaw - vGap;
+        const expectedPad = minHeight - lateHeight - vGap;
+        expect(pad).toBeCloseTo(expectedPad, 5);
+        // 中段 EARLY 下方尚有大段時間軸空檔，不應抬高底墊
+        expect(pad).toBeLessThan(minHeight - lateHeight);
+    });
+
+    it('已達可讀高度時不需底墊', () => {
+        const courses = [makeSlot('LONG1000', '001', 'MON', '10:00', '12:00')];
+        const pad = computeOverviewBottomExpandPad({
+            courses,
+            overviewStart: 10 * 60,
+            overviewEnd: 12 * 60,
+            hourHeight: 40,
+            vGap: 3,
+            minHeight: 56,
+        });
+        expect(pad).toBe(0);
+    });
+});
+
+describe('resolveOverviewCanvasSize', () => {
+    it('預扣底墊後總高不超出可視區，且貼底矮卡可擴到可讀高度', () => {
+        const courses = [
+            makeSlot('LAWS3010', '101', 'MON', '10:00', '12:45'),
+            makeSlot('LAWS3015', '001', 'FRI', '17:00', '17:20'),
+        ];
+        const overviewStart = 10 * 60;
+        const overviewEnd = 17 * 60 + 20;
+        const overviewDuration = overviewEnd - overviewStart;
+        const overviewMaxHeight = 400;
+
+        const { overviewHourHeight, overviewHeight, bottomExpandPad } =
+            resolveOverviewCanvasSize({
+                courses,
+                overviewStart,
+                overviewEnd,
+                overviewDuration,
+                overviewMaxHeight,
+                hourHeightCap: 62,
+                vGap: 3,
+                maxCourseHeight: 120,
+                minCourseHeight: 56,
+            });
+
+        expect(bottomExpandPad).toBeGreaterThan(0);
+        expect(overviewHeight).toBeLessThanOrEqual(overviewMaxHeight);
+
+        const frames = computeOverviewCourseFrames({
+            courses: courses.filter(c => c.Day === 'FRI'),
+            overviewStart,
+            hourHeight: overviewHourHeight,
+            dayWidth: 100,
+            vGap: 3,
+            maxHeight: 120,
+            minHeight: 56,
+            canvasBottom: overviewHeight,
+        });
+        const laws = frames.get(getSlotKey(courses[1]));
+
+        expect(laws.height).toBeGreaterThanOrEqual(55);
+        expect(laws.height).toBeLessThanOrEqual(56);
+        expect(laws.top + laws.height).toBeLessThanOrEqual(overviewHeight);
+    });
+
+    it('無需底墊時行為等同純時間軸高度', () => {
+        const courses = [makeSlot('LONG1000', '001', 'MON', '10:00', '12:00')];
+        const overviewStart = 10 * 60;
+        const overviewEnd = 12 * 60;
+        const overviewDuration = 120;
+        const overviewMaxHeight = 400;
+
+        const { overviewHourHeight, overviewHeight, bottomExpandPad } =
+            resolveOverviewCanvasSize({
+                courses,
+                overviewStart,
+                overviewEnd,
+                overviewDuration,
+                overviewMaxHeight,
+                hourHeightCap: 62,
+                vGap: 3,
+                minCourseHeight: 56,
+            });
+
+        expect(bottomExpandPad).toBe(0);
+        expect(overviewHourHeight).toBe(62);
+        expect(overviewHeight).toBe((overviewDuration / 60) * 62);
     });
 });

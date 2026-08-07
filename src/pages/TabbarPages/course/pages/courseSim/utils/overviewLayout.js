@@ -254,3 +254,140 @@ export function computeOverviewCourseFrames({
         canvasBottom: resolvedBottom,
     });
 }
+
+/**
+ * 計算時間軸終點之後需預留的像素，讓貼底矮卡可向下擴到 minHeight。
+ * 中段矮卡仍靠欄內空檔擴展，不計入此墊。
+ *
+ * @param {Object} options
+ * @param {Array<Object>} options.courses 全部課節（跨天）
+ * @param {number} options.overviewStart 時間軸起點（分鐘）
+ * @param {number} options.overviewEnd 時間軸終點（分鐘）
+ * @param {number} options.hourHeight 每小時像素
+ * @param {number} [options.vGap=0]
+ * @param {number} [options.maxHeight=Infinity]
+ * @param {number} [options.minHeight=0]
+ * @returns {number}
+ */
+export function computeOverviewBottomExpandPad({
+    courses,
+    overviewStart,
+    overviewEnd,
+    hourHeight,
+    vGap = 0,
+    maxHeight = Infinity,
+    minHeight = 0,
+}) {
+    if (
+        !Array.isArray(courses) ||
+        !(minHeight > 0) ||
+        !(hourHeight > 0) ||
+        !(overviewEnd > overviewStart)
+    ) {
+        return 0;
+    }
+
+    const timelineEnd = ((overviewEnd - overviewStart) / 60) * hourHeight;
+    let pad = 0;
+
+    courses.forEach(course => {
+        const start = parseTimeToMinutes(course?.['Time From']);
+        const end = parseTimeToMinutes(course?.['Time To']);
+        if (start === null || end === null || end <= start) {
+            return;
+        }
+
+        const rawHeight = ((end - start) / 60) * hourHeight;
+        const height = Math.max(0, Math.min(maxHeight, rawHeight - vGap));
+        if (height >= minHeight - 0.5) {
+            return;
+        }
+
+        const top = ((start - overviewStart) / 60) * hourHeight;
+        const frameBottom = top + height;
+        const roomInTimeline = timelineEnd - frameBottom;
+        const deficit = minHeight - height;
+        pad = Math.max(pad, Math.max(0, deficit - Math.max(0, roomInTimeline)));
+    });
+
+    return pad;
+}
+
+/**
+ * 從可用高度預扣貼底擴展墊，回傳 hourHeight 與總畫布高（≤ overviewMaxHeight），
+ * 讓最後一節矮卡可向下伸展且整表落在可視區內、無需翻頁。
+ *
+ * @param {Object} options
+ * @param {Array<Object>} [options.courses=[]]
+ * @param {number} options.overviewStart
+ * @param {number} options.overviewEnd
+ * @param {number} options.overviewDuration
+ * @param {number} options.overviewMaxHeight 課表網格可用最大高度
+ * @param {number} options.hourHeightCap 每小時高度上限
+ * @param {number} [options.vGap=0]
+ * @param {number} [options.maxCourseHeight=Infinity]
+ * @param {number} [options.minCourseHeight=0]
+ * @returns {{overviewHourHeight: number, overviewHeight: number, bottomExpandPad: number}}
+ */
+export function resolveOverviewCanvasSize({
+    courses = [],
+    overviewStart,
+    overviewEnd,
+    overviewDuration,
+    overviewMaxHeight,
+    hourHeightCap,
+    vGap = 0,
+    maxCourseHeight = Infinity,
+    minCourseHeight = 0,
+}) {
+    const duration = Math.max(overviewDuration, 1);
+    const maxHeight = Math.max(overviewMaxHeight, 1);
+    const provisionalHourHeight = Math.min(
+        hourHeightCap,
+        (maxHeight / duration) * 60,
+    );
+    let bottomExpandPad = Math.min(
+        computeOverviewBottomExpandPad({
+            courses,
+            overviewStart,
+            overviewEnd,
+            hourHeight: provisionalHourHeight,
+            vGap,
+            maxHeight: maxCourseHeight,
+            minHeight: minCourseHeight,
+        }),
+        Math.max(0, maxHeight - 1),
+    );
+
+    const timelineBudget = Math.max(1, maxHeight - bottomExpandPad);
+    const overviewHourHeight = Math.min(
+        hourHeightCap,
+        (timelineBudget / duration) * 60,
+    );
+    // 壓縮後矮卡 deficit 可能略增，再算一次並保證總高不超出可視區
+    bottomExpandPad = Math.min(
+        computeOverviewBottomExpandPad({
+            courses,
+            overviewStart,
+            overviewEnd,
+            hourHeight: overviewHourHeight,
+            vGap,
+            maxHeight: maxCourseHeight,
+            minHeight: minCourseHeight,
+        }),
+        Math.max(0, maxHeight - 1),
+    );
+    const finalTimelineBudget = Math.max(1, maxHeight - bottomExpandPad);
+    const finalHourHeight = Math.min(
+        hourHeightCap,
+        (finalTimelineBudget / duration) * 60,
+    );
+    const timelineHeight = (duration / 60) * finalHourHeight;
+    const overviewHeight = Math.min(maxHeight, timelineHeight + bottomExpandPad);
+
+    return {
+        overviewHourHeight: finalHourHeight,
+        overviewHeight,
+        bottomExpandPad,
+    };
+}

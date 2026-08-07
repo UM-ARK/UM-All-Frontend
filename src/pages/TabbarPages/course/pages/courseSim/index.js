@@ -68,7 +68,10 @@ import {
 import SegmentControl from '../../../../../components/SegmentControl';
 import { COURSE_SEARCH_SEGMENT } from '../../../../../utils/courseNavigation';
 import { getReplacementCourses } from './utils/replacementCourses';
-import { computeOverviewCourseFrames } from './utils/overviewLayout';
+import {
+    computeOverviewCourseFrames,
+    resolveOverviewCanvasSize,
+} from './utils/overviewLayout';
 import {
     OVERVIEW_ALIGNMENT_MINUTES,
     OVERVIEW_COURSE_H_GAP,
@@ -484,11 +487,18 @@ function CourseSim({ route, navigation }) {
         tabBarHeight -
         OVERVIEW_RESERVED_HEIGHT,
     );
-    const overviewHourHeight = Math.min(
-        OVERVIEW_HOUR_HEIGHT,
-        (overviewMaxHeight / overviewDuration) * 60,
-    );
-    const overviewHeight = (overviewDuration / 60) * overviewHourHeight;
+    // 預扣貼底擴展墊：最後一節矮卡可向下伸展，且總高仍落入可視區（無需翻頁）
+    const { overviewHourHeight, overviewHeight } = resolveOverviewCanvasSize({
+        courses: planSlots,
+        overviewStart,
+        overviewEnd,
+        overviewDuration,
+        overviewMaxHeight,
+        hourHeightCap: OVERVIEW_HOUR_HEIGHT,
+        vGap: OVERVIEW_COURSE_V_GAP,
+        maxCourseHeight: OVERVIEW_MAX_COURSE_HEIGHT,
+        minCourseHeight: OVERVIEW_MIN_COURSE_HEIGHT,
+    });
     const overviewFramesByDay = useMemo(() => {
         const byDay = lodash.groupBy(planSlots, 'Day');
         const framesByDay = {};

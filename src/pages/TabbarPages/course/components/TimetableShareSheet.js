@@ -41,7 +41,10 @@ import { trigger } from '../../../../utils/trigger';
 import { useCoursePlan } from '../context/CoursePlanContext';
 import { getSlotKey } from '../hooks/useConflict';
 import { buildImportText } from '../utils/parseImportData';
-import { computeOverviewCourseFrames } from '../pages/courseSim/utils/overviewLayout';
+import {
+    computeOverviewCourseFrames,
+    resolveOverviewCanvasSize,
+} from '../pages/courseSim/utils/overviewLayout';
 import {
     OVERVIEW_ALIGNMENT_MINUTES,
     OVERVIEW_COURSE_H_GAP,
@@ -152,12 +155,17 @@ const TimetableSharePreview = ({
         lodash.max(planSlots.map(course => toMinutes(course['Time To']))) ??
         overviewStart;
     const overviewDuration = Math.max(overviewEnd - overviewStart, 60);
-    const overviewHourHeight = Math.min(
-        OVERVIEW_HOUR_HEIGHT,
-        (overviewMaxHeight / overviewDuration) * 60,
-    );
-    const overviewHeight =
-        (overviewDuration / 60) * overviewHourHeight;
+    const { overviewHourHeight, overviewHeight } = resolveOverviewCanvasSize({
+        courses: planSlots,
+        overviewStart,
+        overviewEnd,
+        overviewDuration,
+        overviewMaxHeight,
+        hourHeightCap: OVERVIEW_HOUR_HEIGHT,
+        vGap: OVERVIEW_COURSE_V_GAP,
+        maxCourseHeight: OVERVIEW_MAX_COURSE_HEIGHT,
+        minCourseHeight: OVERVIEW_MIN_COURSE_HEIGHT,
+    });
     const dayColumnWidth = width / overviewDays.length;
     const slotsByDay = useMemo(
         () => lodash.groupBy(planSlots, 'Day'),
