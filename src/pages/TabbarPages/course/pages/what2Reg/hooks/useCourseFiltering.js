@@ -190,22 +190,23 @@ const useCourseFiltering = ({
         [planCourseCodes],
     );
 
+    // 瀏覽列表統一按 Course Code 排序，與搜尋結果一致，避免 JSON 原序亂序
     const filterCourseList = useMemo(() => {
-        if (!isRecommendationFilterActive) {
-            return timeFilteredCourseList;
-        }
+        const list = !isRecommendationFilterActive
+            ? timeFilteredCourseList
+            : timeFilteredCourseList.filter(course => {
+                const courseCode = course['Course Code'];
 
-        return timeFilteredCourseList.filter(course => {
-            const courseCode = course['Course Code'];
-
-            return isCourseRecommended({
-                courseCode,
-                courseSlots: slotsByCourseCode[courseCode] || [],
-                planCourseCodeSet,
-                planSlots,
-                timeFilter: isTimeFilterActive ? timeFilter : defaultTimeFilter,
+                return isCourseRecommended({
+                    courseCode,
+                    courseSlots: slotsByCourseCode[courseCode] || [],
+                    planCourseCodeSet,
+                    planSlots,
+                    timeFilter: isTimeFilterActive ? timeFilter : defaultTimeFilter,
+                });
             });
-        });
+
+        return lodash.sortBy(list, ['Course Code']);
     }, [
         isRecommendationFilterActive,
         isTimeFilterActive,

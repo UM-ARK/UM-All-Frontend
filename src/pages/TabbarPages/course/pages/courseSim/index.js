@@ -1723,11 +1723,15 @@ E11-0000
 
     /** 渲染由課程卡片開啟的平替課程列表。 */
     const renderReplacementSearch = () => {
-        const filteredCourses = replacementSearchText.trim()
-            ? replacementResult.courses.filter(course =>
-                courseMatchesSearch(course, replacementSearchText),
-            )
-            : replacementResult.courses;
+        // 平替候選已按 Course Code 排序；二次搜尋後再排一次，避免篩選後順序漂移
+        const filteredCourses = lodash.sortBy(
+            replacementSearchText.trim()
+                ? replacementResult.courses.filter(course =>
+                    courseMatchesSearch(course, replacementSearchText),
+                )
+                : replacementResult.courses,
+            ['Course Code'],
+        );
         const selectedCourse = replacementResult.courses.find(
             item => item['Course Code'] === replacementCourseCode,
         );
@@ -2348,8 +2352,9 @@ E11-0000
                                                 }
                                                 : null),
                                         }}>
-                                        {Object.keys(sectionObj).map(
-                                            sectionKey => {
+                                        {Object.keys(sectionObj)
+                                            .sort()
+                                            .map(sectionKey => {
                                                 const courseInfo =
                                                     sectionObj[sectionKey][0];
                                                 const sectionStatus =
@@ -2457,8 +2462,7 @@ E11-0000
                                                         )}
                                                     </TouchableOpacity>
                                                 );
-                                            },
-                                        )}
+                                            })}
                                     </View>
                                 </View>
                             );
@@ -2514,8 +2518,11 @@ E11-0000
      * @returns {Array} - 符合搜索條件的課程列表
      */
     function handleSearchFilterCourse(inputText) {
-        return lodash.filter(coursePlanList, course =>
-            courseMatchesSearch(course, inputText),
+        return lodash.sortBy(
+            lodash.filter(coursePlanList, course =>
+                courseMatchesSearch(course, inputText),
+            ),
+            ['Course Code'],
         );
     }
 
