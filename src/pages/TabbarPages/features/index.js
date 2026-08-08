@@ -139,11 +139,16 @@ function FeatureListPage({ navigation }) {
         [navigation],
     );
 
+    // 預留兩行標題高度，避免同列單行／雙行標籤把圖標頂歪
+    const featureLabelLineHeight = fontSize * 1.25;
+    const featureLabelHeight = featureLabelLineHeight * 2;
+
     const renderFeatureItem = useCallback(
         item => (
             <TouchableScale
                 style={{
-                    justifyContent: 'center',
+                    width: '100%',
+                    justifyContent: 'flex-start',
                     alignItems: 'center',
                 }}
                 activeOpacity={0.7}
@@ -159,9 +164,12 @@ function FeatureListPage({ navigation }) {
                 key={item.key_name || item.fn_name}>
                 <FeatureIcon item={item} size={scale(22)} />
                 <Text
+                    numberOfLines={2}
                     style={{
                         ...uiStyle.defaultText,
                         fontSize: fontSize,
+                        lineHeight: featureLabelLineHeight,
+                        height: featureLabelHeight,
                         color: black.second,
                         textAlign: 'center',
                         marginTop: verticalScale(4),
@@ -170,7 +178,13 @@ function FeatureListPage({ navigation }) {
                 </Text>
             </TouchableScale>
         ),
-        [black.second, fontSize, handleFeaturePress],
+        [
+            black.second,
+            featureLabelHeight,
+            featureLabelLineHeight,
+            fontSize,
+            handleFeaturePress,
+        ],
     );
 
     // 功能卡片渲染，useCallback避免不必要的重渲染
@@ -213,7 +227,7 @@ function FeatureListPage({ navigation }) {
                     spacing={scale(10)}
                     itemContainerStyle={{
                         alignItems: 'center',
-                        justifyContent: 'center',
+                        justifyContent: 'flex-start',
                     }}
                     data={fn_list}
                     renderItem={({ item }) => renderFeatureItem(item)}
@@ -354,7 +368,7 @@ function FeatureListPage({ navigation }) {
                             style={{ marginBottom: verticalScale(-6) }}
                             itemContainerStyle={{
                                 alignItems: 'center',
-                                justifyContent: 'center',
+                                justifyContent: 'flex-start',
                             }}
                             data={frequentFeatures}
                             renderItem={({ item }) => renderFeatureItem(item)}
