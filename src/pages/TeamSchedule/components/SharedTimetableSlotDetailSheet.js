@@ -14,8 +14,8 @@ import {uiStyle, useTheme} from '../../../components/ThemeContext';
 import {ARK_HARBOR_AVATAR_TEMPLATE} from '../../../utils/pathMap';
 import {trigger} from '../../../utils/trigger';
 import {
-    WEEKDAY_SHORT_LABELS,
     formatMinuteOfDay,
+    getWeekdayShortLabel,
 } from './scheduleWeekHelpers';
 
 function meetingLabel(meeting) {
@@ -62,7 +62,7 @@ const SharedTimetableSlotDetailSheet = ({
             ),
         [slot],
     );
-    const weekday = WEEKDAY_SHORT_LABELS[Number(slot?.weekday) - 1] || '';
+    const weekdayLabel = getWeekdayShortLabel(slot?.weekday, t);
 
     return (
         <ActionSheet
@@ -93,7 +93,9 @@ const SharedTimetableSlotDetailSheet = ({
                                 styles.timeLine,
                                 {color: theme.black.second},
                             ]}>
-                            {t('週{{weekday}}', {weekday})} ·{' '}
+                            {weekdayLabel
+                                ? `${weekdayLabel} · `
+                                : ''}
                             {formatMinuteOfDay(slot.startMinute)} –{' '}
                             {formatMinuteOfDay(slot.endMinute)}
                         </Text>

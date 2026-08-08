@@ -30,7 +30,7 @@ function formatDeadlineLine(responseDeadlineAt, timezone, t) {
         return t('已截止填寫');
     }
     return t('回覆截止：{{time}}', {
-        time: deadline.format('M月D日 HH:mm'),
+        time: deadline.format(t('M月D日 HH:mm')),
     });
 }
 

@@ -1,4 +1,6 @@
 {
+    "schemaVersion": 2,
+    "mode": "preenroll",
     "Courses": [
         {
             "Offering Unit": "FBA",
@@ -7713,6 +7715,5 @@
     "updateTime": "2026-04-22",
     "academicYear": "26/27",
     "sem": "1",
-    "remark": "用於Pre Enrollment期間的數據",
-    "preEn": true
+    "revision": "preenroll-2026-04-22-bundled"
 }

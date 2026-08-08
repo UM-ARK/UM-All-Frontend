@@ -13,8 +13,30 @@ import {
 export const CANDIDATE_AXIS_START_HOUR = 0;
 export const CANDIDATE_AXIS_END_HOUR = 24;
 
-/** 週一至週日短標 */
-export const WEEKDAY_SHORT_LABELS = ['一', '二', '三', '四', '五', '六', '日'];
+/** 週一至週日短標（i18n key；英文為 MON…SUN） */
+export const WEEKDAY_SHORT_LABELS = [
+    '週一',
+    '週二',
+    '週三',
+    '週四',
+    '週五',
+    '週六',
+    '週日',
+];
+
+/**
+ * 取得星期短標（繁中：週一；英文：MON）
+ * @param {number} weekday 1–7（週一至週日）
+ * @param {(key: string) => string} [t]
+ * @returns {string}
+ */
+export function getWeekdayShortLabel(weekday, t) {
+    const key = WEEKDAY_SHORT_LABELS[Number(weekday) - 1];
+    if (!key) {
+        return '';
+    }
+    return typeof t === 'function' ? t(key) : key;
+}
 
 /**
  * 將分鐘數轉為 HH:mm
@@ -106,15 +128,16 @@ export function heatToBackgroundColor(heat, theme, dimmed = false) {
 /**
  * 建議時段顯示文字
  * @param {{weekday: number, startMinute: number, endMinute: number}} suggestion
+ * @param {(key: string) => string} [t]
  * @returns {string}
  */
-export function formatSuggestionLabel(suggestion) {
+export function formatSuggestionLabel(suggestion, t) {
     if (!suggestion) {
         return '';
     }
-    const weekday = WEEKDAY_SHORT_LABELS[Number(suggestion.weekday) - 1];
+    const weekday = getWeekdayShortLabel(suggestion.weekday, t);
     if (!weekday) {
         return '';
     }
-    return `週${weekday} ${formatMinuteOfDay(suggestion.startMinute)} – ${formatMinuteOfDay(suggestion.endMinute)}`;
+    return `${weekday} ${formatMinuteOfDay(suggestion.startMinute)} – ${formatMinuteOfDay(suggestion.endMinute)}`;
 }

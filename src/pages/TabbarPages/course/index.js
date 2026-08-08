@@ -10,7 +10,6 @@ import { useTranslation } from 'react-i18next';
 import { useTheme, uiStyle } from '../../../components/ThemeContext';
 import { trigger } from '../../../utils/trigger';
 import { openLink } from '../../../utils/browser';
-import { checkCloudCourseVersion } from '../../../utils/checkCoursesKits';
 import { UM_PRE_ENROLMENT_EXCEL } from '../../../utils/pathMap';
 import {
     COURSE_SEARCH_SEGMENT,
@@ -129,7 +128,7 @@ const CourseTabContent = () => {
     const isFocused = useIsFocused();
 
     const {
-        courseVersion,
+        catalogMetadata,
         initCourseData,
         refreshCourseData,
         planList,
@@ -177,14 +176,13 @@ const CourseTabContent = () => {
     const handleManualUpdate = useCallback(async () => {
         setIsUpdating(true);
         try {
-            await checkCloudCourseVersion();
-            await initCourseData();
+            await refreshCourseData({ force: true });
         } catch (error) {
             Alert.alert('ARK Courses error, 請聯繫開發者！', String(error));
         } finally {
             setIsUpdating(false);
         }
-    }, [initCourseData]);
+    }, [refreshCourseData]);
 
     const handleOpenSharePoint = useCallback(() => {
         openLink(UM_PRE_ENROLMENT_EXCEL);
@@ -225,7 +223,7 @@ const CourseTabContent = () => {
         props => (
             <CourseTabBar
                 {...props}
-                courseVersion={courseVersion}
+                catalogMetadata={catalogMetadata}
                 onManualUpdate={handleManualUpdate}
                 onOpenSharePoint={handleOpenSharePoint}
                 canClear={canClear}
@@ -233,7 +231,7 @@ const CourseTabContent = () => {
             />
         ),
         [
-            courseVersion,
+            catalogMetadata,
             handleClearPlan,
             handleManualUpdate,
             handleOpenSharePoint,

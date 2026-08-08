@@ -4,6 +4,7 @@ import { AppState, Platform, useWindowDimensions, View } from 'react-native';
 import { useTheme } from './components/ThemeContext';
 
 import { scale, verticalScale } from 'react-native-size-matters';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTranslation } from 'react-i18next';
 
@@ -77,10 +78,14 @@ const FORUM_BADGE_STALE_MS = 5 * 60 * 1000;
 const IOSNativeTabs = createNativeBottomTabNavigator();
 const AndroidBottomTabs = createBottomTabNavigator();
 
+// Android 預設內容區約 49；部分機型文字易貼底，略加高並多留底部間距
+const ANDROID_TAB_BAR_CONTENT_HEIGHT = 56;
+const ANDROID_TAB_LABEL_BOTTOM_PADDING = 4;
+
 /**
  * 取得 Tab Bar 樣式（iOS 勿硬編碼純白，深色模式下會與主題脫節）
  */
-const getTabBarStyle = theme => {
+const getTabBarStyle = (theme, insets) => {
     if (Platform.OS === 'ios') {
         return {
             // 液態玻璃 + translucent 時由系統材質呈現；否則與頁面背景一致
@@ -90,6 +95,12 @@ const getTabBarStyle = theme => {
             borderTopWidth: 0,
         };
     }
+    // 部分機型 bottom inset 偏小甚至為 0，保底避免文字貼底
+    const bottomInset = Math.max(
+        insets?.bottom ?? 0,
+        verticalScale(ANDROID_TAB_LABEL_BOTTOM_PADDING),
+    );
+    const extraBottom = verticalScale(ANDROID_TAB_LABEL_BOTTOM_PADDING);
     return {
         backgroundColor: theme.bg_color,
         borderTopColor: theme.isLight
@@ -97,6 +108,10 @@ const getTabBarStyle = theme => {
             : 'rgba(255,255,255,0.1)',
         borderTopWidth: 0.5,
         elevation: 8,
+        // 覆寫預設 height / paddingBottom，讓文字與系統手勢條之間多一點空隙
+        height: ANDROID_TAB_BAR_CONTENT_HEIGHT + bottomInset + extraBottom,
+        paddingBottom: bottomInset + extraBottom,
+        paddingTop: verticalScale(2),
     };
 };
 
@@ -157,7 +172,7 @@ class IOSTabbar {
                         },
                         tabBarActiveTintColor: theme.themeColor,
                         tabBarInactiveTintColor: theme.black.main,
-                        tabBarStyle: getTabBarStyle(theme),
+                        tabBarStyle: getTabBarStyle(theme, insets),
                         translucent: isLiquidGlassSupported ? true : false,
                         tabBarIcon: ({ focused }) =>
                             this.getTabbarIcon(route.name, focused),
@@ -249,10 +264,14 @@ class AndroidTabbar {
                                 ...uiStyle.defaultText,
                                 fontSize: labelFontSize,
                                 fontWeight: '600',
+                                // 文字與底部系統列之間多留一點空隙
+                                paddingBottom: verticalScale(
+                                    ANDROID_TAB_LABEL_BOTTOM_PADDING,
+                                ),
                             },
                             tabBarActiveTintColor: theme.themeColor,
                             tabBarInactiveTintColor: theme.black.main,
-                            tabBarStyle: getTabBarStyle(theme),
+                            tabBarStyle: getTabBarStyle(theme, insets),
                         }}
                         initialRouteName={'NewsTabbar'}>
                         {Object.keys(tabScreen).map(name =>
@@ -300,6 +319,7 @@ const Tabbar = () => {
     const { theme } = useTheme();
     const { t } = useTranslation(['common', 'home']);
     const { width, height } = useWindowDimensions();
+    const insets = useSafeAreaInsets();
     const {
         status,
         user,
@@ -537,7 +557,7 @@ const Tabbar = () => {
     const TabbarComponent = tabbarFactory(
         Platform.OS,
         t,
-        null,
+        insets,
         theme,
         isLandscape,
         labelFontSize,

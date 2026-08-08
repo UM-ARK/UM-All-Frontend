@@ -1,4 +1,10 @@
 {
+    "schemaVersion": 2,
+    "mode": "adddrop",
+    "updateTime": "2026-04-02",
+    "academicYear": "25/26",
+    "sem": "2",
+    "revision": "adddrop-2026-04-02-bundled",
     "Courses": [
         {
             "Offering Unit": "FBA",

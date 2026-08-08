@@ -209,10 +209,10 @@ const What2Reg = () => {
     const {
         courseMode,
         setCourseMode,
-        offerCoursesData,
-        coursePlanData,
-        coursePlanTimeData,
-        courseVersion,
+        preenrollCatalog,
+        adddropCatalog,
+        adddropCourseList,
+        catalogMetadata,
         planCourseCodes,
         planSlots,
     } = useCoursePlan();
@@ -228,10 +228,10 @@ const What2Reg = () => {
         isRecommendationFilterActive,
     } = useCourseFiltering({
         courseMode,
-        coursePlanData,
-        offerCoursesData,
+        preenrollCatalog,
+        adddropCourseList,
         filterOptions,
-        coursePlanTimeData,
+        adddropCatalog,
         timeFilter,
         recommendationOnly,
         planCourseCodes,
@@ -244,7 +244,7 @@ const What2Reg = () => {
         }
 
         const slotsByCourseCode = lodash.groupBy(
-            coursePlanTimeData?.Courses || [],
+            adddropCatalog?.Courses || [],
             'Course Code',
         );
         return filterCourseList.reduce((result, course) => {
@@ -284,7 +284,7 @@ const What2Reg = () => {
             return result;
         }, {});
     }, [
-        coursePlanTimeData,
+        adddropCatalog,
         filterCourseList,
         isRecommendationFilterActive,
         isTimeFilterActive,
@@ -300,7 +300,8 @@ const What2Reg = () => {
         searchFilterCourse,
     } = useCourseSearch({
         offerCourseList,
-        coursePlanTimeCourses: coursePlanTimeData?.Courses || [],
+        adddropCourses: adddropCatalog?.Courses || [],
+        adddropCourseList,
     });
 
     const activeCourseList = searchFilterCourse?.length > 0 ? searchFilterCourse : filterCourseList;
@@ -552,7 +553,7 @@ const What2Reg = () => {
                         {`${courseMode === 'ad' ? '開設' : '預選'}課程:`}
                     </Text>
                     <Text style={{ ...uiStyle.defaultText, fontSize: scale(9), color: black.third }}>
-                        數據日期版本: {courseMode === 'ad' ? courseVersion.adddrop.updateTime : courseVersion.pre.updateTime}
+                        數據日期版本: {courseMode === 'ad' ? catalogMetadata.adddrop.updateTime : catalogMetadata.pre.updateTime}
                     </Text>
                     <Text style={{ ...uiStyle.defaultText, fontSize: scale(9), color: themeColor }}>
                         記得提醒開發者最新Excel課表版本

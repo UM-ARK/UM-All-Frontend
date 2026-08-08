@@ -799,6 +799,9 @@ const HarborTopicDetail = ({ route, navigation }) => {
                         nestedReplyCount={
                             item.__harborNestedReplyCount || 0
                         }
+                        nestedReplyPreviewCount={
+                            item.__harborNestedReplyPreviewCount || 0
+                        }
                         nestedVisibleReplyCount={
                             item.__harborNestedVisibleReplyCount || 0
                         }

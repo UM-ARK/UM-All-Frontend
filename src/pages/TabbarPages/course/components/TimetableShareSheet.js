@@ -111,7 +111,7 @@ function buildOverviewRows(planSlots) {
  * @param {Array<Object>} props.planSlots 完整課節列表
  * @param {Array<string>} props.planCourseCodes 已排課程代碼
  * @param {Set<string>} props.conflictSlotKeys 衝突課節 key
- * @param {Object} props.courseVersion 課程資料版本
+ * @param {Object} props.catalogMetadata 兩份課程 catalog 的 metadata
  * @param {number} props.width 輸出寬度
  * @param {number} props.height 輸出最小高度
  * @param {number} props.overviewMaxHeight 畫面概覽可用高度
@@ -122,7 +122,7 @@ const TimetableSharePreview = ({
     planSlots,
     planCourseCodes,
     conflictSlotKeys,
-    courseVersion,
+    catalogMetadata,
     width,
     height,
     overviewMaxHeight,
@@ -579,10 +579,10 @@ const TimetableSharePreview = ({
             </View>
             {mode === 'detail' ? renderDetail() : renderOverview()}
             <View style={styles.footer}>
-                {courseVersion?.adddrop?.updateTime ? (
+                {catalogMetadata?.adddrop?.updateTime ? (
                     <Text style={styles.footerText}>
                         Timetable Version:{' '}
-                        {courseVersion.adddrop.updateTime}
+                        {catalogMetadata.adddrop.updateTime}
                     </Text>
                 ) : null}
                 <Text style={styles.footerText}>{t('僅作模擬!')}</Text>
@@ -598,7 +598,7 @@ const TimetableSharePreview = ({
  * 分享／儲存／純文字按鈕位於截圖範圍之外。
  * 純文字格式對齊 parseImportData，對方可貼上導入。
  */
-const TimetableShareSheet = forwardRef(({ courseVersion }, ref) => {
+const TimetableShareSheet = forwardRef(({ catalogMetadata }, ref) => {
     const { t } = useTranslation(['common', 'timetable']);
     const { theme } = useTheme();
     const { width: windowWidth, height: windowHeight } = useWindowDimensions();
@@ -900,7 +900,7 @@ const TimetableShareSheet = forwardRef(({ courseVersion }, ref) => {
                         planSlots={planSlots}
                         planCourseCodes={planCourseCodes}
                         conflictSlotKeys={conflictSlotKeys}
-                        courseVersion={courseVersion}
+                        catalogMetadata={catalogMetadata}
                         width={windowWidth}
                         height={windowHeight}
                         overviewMaxHeight={overviewMaxHeight}

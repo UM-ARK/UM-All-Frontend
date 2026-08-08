@@ -1,9 +1,9 @@
-import {getCourseData} from '../../../utils/checkCoursesKits';
+import {getCourseCatalog} from '../../../utils/checkCoursesKits';
 import {getLocalStorage} from '../../../utils/storageKits';
 import {loadSavedCourseSlots} from '../utils/loadSavedCourseSlots';
 
 jest.mock('../../../utils/checkCoursesKits', () => ({
-    getCourseData: jest.fn(),
+    getCourseCatalog: jest.fn(),
 }));
 jest.mock('../../../utils/storageKits', () => ({
     getLocalStorage: jest.fn(),
@@ -21,32 +21,30 @@ describe('loadSavedCourseSlots', () => {
             hasPlan: false,
             planSlots: [],
         });
-        expect(getCourseData).not.toHaveBeenCalled();
+        expect(getCourseCatalog).not.toHaveBeenCalled();
     });
 
     test('只展開已選 Course Code 與 Section 的課堂', async () => {
         getLocalStorage.mockResolvedValue([
             {'Course Code': 'TEST1000', Section: '001'},
         ]);
-        getCourseData.mockResolvedValue({
-            timetable: {
-                Courses: [
-                    {
-                        'Course Code': 'TEST1000',
-                        Section: '001',
-                        Day: 'MON',
-                        'Time From': '10:00',
-                        'Time To': '11:15',
-                    },
-                    {
-                        'Course Code': 'TEST1000',
-                        Section: '002',
-                        Day: 'TUE',
-                        'Time From': '10:00',
-                        'Time To': '11:15',
-                    },
-                ],
-            },
+        getCourseCatalog.mockResolvedValue({
+            Courses: [
+                {
+                    'Course Code': 'TEST1000',
+                    Section: '001',
+                    Day: 'MON',
+                    'Time From': '10:00',
+                    'Time To': '11:15',
+                },
+                {
+                    'Course Code': 'TEST1000',
+                    Section: '002',
+                    Day: 'TUE',
+                    'Time From': '10:00',
+                    'Time To': '11:15',
+                },
+            ],
         });
 
         const result = await loadSavedCourseSlots();
@@ -54,6 +52,6 @@ describe('loadSavedCourseSlots', () => {
         expect(result.hasPlan).toBe(true);
         expect(result.planSlots).toHaveLength(1);
         expect(result.planSlots[0].Section).toBe('001');
-        expect(getCourseData).toHaveBeenCalledWith('adddrop');
+        expect(getCourseCatalog).toHaveBeenCalledWith('adddrop');
     });
 });

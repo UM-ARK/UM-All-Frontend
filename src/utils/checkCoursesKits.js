@@ -1,209 +1,262 @@
-import moment from 'moment';
 import axios from 'axios';
-import { Alert } from 'react-native';
 
-import { getLocalStorage, setLocalStorage, logAllStorage } from './storageKits';
+import { getLocalStorage, setLocalStorage } from './storageKits';
 import { COURSE_API_CF_WORKERS } from './pathMap';
-import offerCourses from '../static/UMCourses/offerCourses';
-import coursePlan from '../static/UMCourses/coursePlan';
-import coursePlanTime from '../static/UMCourses/coursePlanTime';
-import sourceCourseVersion from '../static/UMCourses/courseVersion';
-import Toast from 'react-native-simple-toast';
+import { getLocalAppVersion } from './appUpdateKits';
+import {
+    adddropCatalog as bundledAdddropCatalog,
+    preenrollCatalog as bundledPreenrollCatalog,
+} from '../static/UMCourses/courseCatalogs';
 
+export const COURSE_CATALOG_STORAGE_KEYS = {
+    preenroll: 'ARK_CourseCatalog_v2_preEnroll',
+    adddrop: 'ARK_CourseCatalog_v2_addDrop',
+    metadata: 'ARK_CourseCatalog_v2_metadata',
+};
+
+const COURSE_CATALOG_MODES = ['preenroll', 'adddrop'];
+export const COURSE_CATALOG_REFRESH_INTERVAL_MS = 6 * 60 * 60 * 1000;
+const bundledCatalogs = {
+    preenroll: bundledPreenrollCatalog,
+    adddrop: bundledAdddropCatalog,
+};
+let refreshCourseCatalogsPromise = null;
 
 /**
- * 檢查Cloudflare Workers的version API
+ * 驗證 v2 catalog 契約，避免把只有 Courses 的 v1 payload 寫入新緩存。
+ *
+ * @param {Object} catalog 待驗證的 catalog
+ * @param {'preenroll'|'adddrop'} mode 預期模式
+ * @returns {boolean} 是否符合 v2 catalog 契約
  */
-export async function checkCloudCourseVersion() {
+export function isValidCourseCatalog(catalog, mode) {
+    return (
+        catalog?.schemaVersion === 2 &&
+        catalog?.mode === mode &&
+        typeof catalog?.updateTime === 'string' &&
+        typeof catalog?.academicYear === 'string' &&
+        ['string', 'number'].includes(typeof catalog?.sem) &&
+        typeof catalog?.revision === 'string' &&
+        catalog.revision.length > 0 &&
+        Array.isArray(catalog?.Courses)
+    );
+}
+
+const getCatalogMetadata = catalog => ({
+    revision: catalog.revision,
+    updateTime: catalog.updateTime,
+    academicYear: catalog.academicYear,
+    sem: catalog.sem,
+});
+
+const getResponseETag = response =>
+    response?.headers?.etag || response?.headers?.get?.('etag') || null;
+
+const getRequestHeaders = etag => {
+    const headers = {
+        'X-UMall-Course-Schema': '2',
+    };
+    const appVersion = getLocalAppVersion();
+    if (appVersion) {
+        headers['X-UMall-App-Version'] = appVersion;
+    }
+    if (etag) {
+        headers['If-None-Match'] = etag;
+    }
+    return headers;
+};
+
+const buildLegacyFallbackCatalog = (mode, payload, currentCatalog) => ({
+    schemaVersion: 2,
+    mode,
+    updateTime: payload?.updateTime || currentCatalog.updateTime,
+    academicYear: payload?.academicYear || currentCatalog.academicYear,
+    sem: payload?.sem || currentCatalog.sem,
+    revision: `legacy-${mode}-${payload?.updateTime || currentCatalog.updateTime}`,
+    Courses: payload.Courses,
+});
+
+async function requestCourseCatalog(mode, currentCatalog, metadata) {
+    const cachedETag = metadata?.[mode]?.revision === currentCatalog.revision
+        ? metadata[mode].etag
+        : null;
     try {
-        const res = await axios.get(`${COURSE_API_CF_WORKERS}/version`);
-        if (res.status === 200) {
-            const { data } = res;
-            /* Example Data Return:
+        let response = await axios.get(
+            `${COURSE_API_CF_WORKERS}/v2/catalog/${mode}`,
+            {
+                headers: getRequestHeaders(cachedETag),
+                validateStatus: status => status === 200 || status === 304,
+            },
+        );
+        if (response.status === 304 && !cachedETag) {
+            response = await axios.get(
+                `${COURSE_API_CF_WORKERS}/v2/catalog/${mode}`,
                 {
-                    "pre": { "updateTime": "2025-10-21", "academicYear": "25/26", "sem": "1" },
-                    "adddrop": { "updateTime": "2025-10-21", "academicYear": "25/26", "sem": "1" }
-                }
-            */
-            await compareLocalCourseVersion(data);
+                    headers: getRequestHeaders(),
+                    validateStatus: status => status === 200,
+                },
+            );
         }
+        if (response.status === 304) {
+            return {
+                catalog: currentCatalog,
+                metadata: {
+                    ...getCatalogMetadata(currentCatalog),
+                    ...metadata?.[mode],
+                },
+            };
+        }
+        if (!isValidCourseCatalog(response.data, mode)) {
+            throw new Error('Invalid v2 course catalog');
+        }
+        return {
+            catalog: response.data,
+            metadata: {
+                ...getCatalogMetadata(response.data),
+                etag: getResponseETag(response),
+            },
+        };
     } catch (error) {
-        Alert.alert('', 'Check course version error!\nPlease check your network!\nOr it\'s caused by the developer...', null, { cancelable: true });
-    }
-}
-
-/**
- * 對比本地課程版本，若有更新則覆蓋本地緩存
- *
- * @param {Object} versionInfo -  Version API返回的雲端版本對象
- */
-export async function compareLocalCourseVersion(versionInfo) {
-    let localCourseVersion = await getLocalStorage('course_version');
-    // 如果本地沒有緩存則用source替代
-    if (!localCourseVersion) { localCourseVersion = sourceCourseVersion; }
-
-    let needSave = false;
-    let newVersion = { ...localCourseVersion };
-
-    // 判断本地source是否更新
-    if (needUpdate(localCourseVersion.pre, sourceCourseVersion.pre)) {
-        needSave = true;
-        newVersion.pre = sourceCourseVersion.pre;
-        await saveCourseDataToStorage('pre', 'source');
-    }
-    if (needUpdate(localCourseVersion.adddrop, sourceCourseVersion.adddrop)) {
-        needSave = true;
-        newVersion.adddrop = sourceCourseVersion.adddrop;
-        await saveCourseDataToStorage('adddrop', 'source');
-    }
-
-    if (needUpdate(localCourseVersion.pre, versionInfo.pre)) {
-        needSave = true;
-        newVersion.pre = versionInfo.pre;
-        const courseData = await requestCourseData('pre');
-        await saveCourseDataToStorage('pre', courseData);
-    }
-    if (needUpdate(localCourseVersion.adddrop, versionInfo.adddrop)) {
-        needSave = true;
-        newVersion.adddrop = versionInfo.adddrop;
-        const courseData = await requestCourseData('adddrop');
-        await saveCourseDataToStorage('adddrop', courseData);
-    }
-
-    if (needSave) {
-        const saveResult = await setLocalStorage('course_version', newVersion);
-        if (saveResult !== 'ok') { Alert.alert('Error', JSON.stringify(saveResult)); }
-        Toast.show('Course Data Updated.');
-    } else {
-        Toast.show('Your data is up to date.');
-    }
-}
-
-/**
- * 比較target Object的updateTime是否比origin更新
- *
- * @param {Object} origin - 現有課表版本對象，需有updateTime屬性
- * @param {Object} target - 待判斷的新課表版本對象，需有updateTime屬性
- * @returns
- */
-export function needUpdate(origin, target) {
-    try {
-        return moment(origin.updateTime).isBefore(moment(target.updateTime));
-    } catch (error) {
-        Alert.alert('', 'needUpdate Function Error', null, { cancelable: true });
-    }
-}
-
-/**
- * 根據類型從 Cloudflare Workers 請求課程數據並返回
- *
- * - 當 type 為 'pre' 時，僅請求一次 /pre 接口並保存課程數據。
- * - 當 type 為 'adddrop' 時，分別請求 /adddrop 和 /timetable 兩個接口，並將結果組合後保存。
- *
- * @param {('pre'|'adddrop')} type - 請求的課程數據類型。
- * @returns {Object} - 需要返回的課程數據
- */
-async function requestCourseData(type) {
-    try {
-        // console.log('請求', type, '的CF數據');
-        // type是pre只請求一次，是adddrop要請求兩次
-        if (type === 'pre') {
-            const res = await axios.get(COURSE_API_CF_WORKERS + '/pre');
-            if (res.status === 200 && res.data) { return res.data; }
-        } else if (type === 'adddrop') {
-            const adddropRes = await axios.get(COURSE_API_CF_WORKERS + '/adddrop');
-            const timetableRes = await axios.get(COURSE_API_CF_WORKERS + '/timetable');
-            if (adddropRes.status === 200 && timetableRes.status === 200 && adddropRes.data && timetableRes.data) {
-                return { adddrop: adddropRes.data, timetable: timetableRes.data };
+        try {
+            const legacyPath = mode === 'adddrop' ? '/timetable' : '/adddrop';
+            const response = await axios.get(COURSE_API_CF_WORKERS + legacyPath);
+            if (!Array.isArray(response?.data?.Courses)) {
+                throw error;
             }
+            const catalog = buildLegacyFallbackCatalog(
+                mode,
+                response.data,
+                currentCatalog,
+            );
+            return {
+                catalog,
+                metadata: getCatalogMetadata(catalog),
+            };
+        } catch {
+            return {
+                catalog: currentCatalog,
+                metadata: {
+                    ...getCatalogMetadata(currentCatalog),
+                    ...metadata?.[mode],
+                },
+            };
         }
-    } catch (error) {
-        Alert.alert('', 'Request course data error!\nPlease check your network!\nOr it\'s caused by the developer...', null, { cancelable: true });
-        return null;
     }
 }
 
 /**
- * 保存課程數據到本地儲存
- *
- * @param {('pre'|'adddrop')} type - 覆蓋 預選 或 adddrop數據 到緩存。
- * @param {('source'|Object)} courseData - 課程數據。'source' 表示用源文件覆蓋本地緩存；
- *   當 type 為 'pre' 時，courseData 應為課程對象；
- *   當 type 為 'adddrop' 時，courseData 應為 { adddrop: Object, timetable: Object } 結構。
- * @param {Object} [courseData.adddrop] - 僅當 type 為 'adddrop' 時，adddrop 課程對象。
- * @param {Object} [courseData.timetable] - 僅當 type 為 'adddrop' 時，課表對象。
+ * 讀取 v2 catalog 緩存；缺少或不合法時使用隨 APP 打包的 catalog。
  */
-export async function saveCourseDataToStorage(type, courseData) {
+export async function getCourseCatalogs() {
+    const [preenrollCache, adddropCache, metadata] = await Promise.all([
+        getLocalStorage(COURSE_CATALOG_STORAGE_KEYS.preenroll),
+        getLocalStorage(COURSE_CATALOG_STORAGE_KEYS.adddrop),
+        getLocalStorage(COURSE_CATALOG_STORAGE_KEYS.metadata),
+    ]);
+
+    return {
+        preenrollCatalog: isValidCourseCatalog(preenrollCache, 'preenroll')
+            ? preenrollCache
+            : bundledCatalogs.preenroll,
+        adddropCatalog: isValidCourseCatalog(adddropCache, 'adddrop')
+            ? adddropCache
+            : bundledCatalogs.adddrop,
+        metadata: metadata?.schemaVersion === 2
+            ? metadata
+            : { schemaVersion: 2 },
+    };
+}
+
+/**
+ * 對兩份 catalog 發 conditional request，先寫 catalog，最後才更新 metadata。
+ */
+export async function refreshCourseCatalogs({ force = false } = {}) {
+    if (refreshCourseCatalogsPromise) {
+        return refreshCourseCatalogsPromise;
+    }
+
+    refreshCourseCatalogsPromise = (async () => {
+        const current = await getCourseCatalogs();
+        const lastCheckedAt = Date.parse(current.metadata?.lastCheckedAt);
+        const hasConsistentCatalogs = COURSE_CATALOG_MODES.every(mode => {
+            const catalog = mode === 'preenroll'
+                ? current.preenrollCatalog
+                : current.adddropCatalog;
+            return current.metadata?.[mode]?.revision === catalog.revision;
+        });
+        if (
+            !force &&
+            hasConsistentCatalogs &&
+            Number.isFinite(lastCheckedAt) &&
+            Date.now() - lastCheckedAt < COURSE_CATALOG_REFRESH_INTERVAL_MS
+        ) {
+            return current;
+        }
+        const results = await Promise.all(
+            COURSE_CATALOG_MODES.map(mode =>
+                requestCourseCatalog(
+                    mode,
+                    mode === 'preenroll'
+                        ? current.preenrollCatalog
+                        : current.adddropCatalog,
+                    current.metadata,
+                ),
+            ),
+        );
+        const [preenrollResult, adddropResult] = results;
+
+        const preenrollSaveResult = await setLocalStorage(
+            COURSE_CATALOG_STORAGE_KEYS.preenroll,
+            preenrollResult.catalog,
+        );
+        if (preenrollSaveResult !== 'ok') {
+            throw preenrollSaveResult;
+        }
+        const adddropSaveResult = await setLocalStorage(
+            COURSE_CATALOG_STORAGE_KEYS.adddrop,
+            adddropResult.catalog,
+        );
+        if (adddropSaveResult !== 'ok') {
+            throw adddropSaveResult;
+        }
+
+        const nextMetadata = {
+            schemaVersion: 2,
+            lastCheckedAt: new Date().toISOString(),
+            preenroll: preenrollResult.metadata,
+            adddrop: adddropResult.metadata,
+        };
+        const metadataSaveResult = await setLocalStorage(
+            COURSE_CATALOG_STORAGE_KEYS.metadata,
+            nextMetadata,
+        );
+        if (metadataSaveResult !== 'ok') {
+            throw metadataSaveResult;
+        }
+
+        return {
+            preenrollCatalog: preenrollResult.catalog,
+            adddropCatalog: adddropResult.catalog,
+            metadata: nextMetadata,
+        };
+    })();
+
     try {
-        if (type === 'pre') {
-            const saveResult = await setLocalStorage('offer_courses', courseData === 'source' ? offerCourses : courseData);
-            if (saveResult != 'ok') { Alert.alert('Error', JSON.stringify(saveResult)); }
-        }
-        if (type === 'adddrop') {
-            // 新APP需覆蓋舊版APP的本地緩存
-            let saveResult = await setLocalStorage('course_plan', courseData === 'source' ? coursePlan : courseData.adddrop);
-            if (saveResult != 'ok') { Alert.alert('Error', JSON.stringify(saveResult)); }
-            saveResult = await setLocalStorage('course_plan_time', courseData === 'source' ? coursePlanTime : courseData.timetable);
-            if (saveResult != 'ok') { Alert.alert('Error', JSON.stringify(saveResult)); }
-        }
-    } catch (error) {
-        Alert.alert('', 'Saving course data error...\nPlease contact developer.', null, { cancelable: true });
+        return await refreshCourseCatalogsPromise;
+    } finally {
+        refreshCourseCatalogsPromise = null;
     }
 }
 
-
 /**
- * 根據 type 返回對應的課程數據（預選或加退選+課表）。
- *
- * - 若本地有緩存則優先返回緩存數據；
- * - 若無緩存則返回本地源文件數據。
- *
- * @param {'pre'|'adddrop'|'version'} type - 課程數據類型，'pre' 為預選，'adddrop' 為加退選+課表。
- * @returns {Promise<Object>}
- *   - 當 type 為 'pre' 時，返回預選課數據對象；
- *   - 當 type 為 'adddrop' 時，返回 { adddrop: Object, timetable: Object } 結構。
- *   - 當 type 為 'version' 時，返回 { pre: Object, adddrop: Object } 結構。
+ * 按模式讀取單一 v2 catalog，不觸發網絡請求。
  */
-export async function getCourseData(type) {
-    try {
-        if (type === 'pre') {
-            // 先查本地緩存
-            const localData = await getLocalStorage('offer_courses');
-            if (localData) {
-                return localData;
-            } else {
-                // 無緩存則用本地源文件
-                return offerCourses;
-            }
-        } else if (type === 'adddrop') {
-            // 查兩個緩存
-            const adddropData = await getLocalStorage('course_plan');
-            const timetableData = await getLocalStorage('course_plan_time');
-            if (adddropData && timetableData) {
-                return { adddrop: adddropData, timetable: timetableData };
-            } else {
-                // 有一個沒緩存則用本地源文件
-                return { adddrop: coursePlan, timetable: coursePlanTime };
-            }
-        } else if (type === 'version') {
-            const localCourseVersion = await getLocalStorage('course_version');
-            if (localCourseVersion) {
-                return localCourseVersion;
-            } else {
-                return sourceCourseVersion;
-            }
-        } else {
-            throw new Error('Unknown type for getCourseData');
-        }
-    } catch (error) {
-        Alert.alert('', 'Get course data error...\nPlease contact developer.', null, { cancelable: true });
-        // fallback
-        if (type === 'pre') {
-            return offerCourses;
-        } else if (type === 'adddrop') {
-            return { adddrop: coursePlan, timetable: coursePlanTime };
-        } else if (type === 'version') {
-            return sourceCourseVersion;
-        }
+export async function getCourseCatalog(mode) {
+    if (!COURSE_CATALOG_MODES.includes(mode)) {
+        throw new Error('Unknown course catalog mode');
     }
+    const catalogs = await getCourseCatalogs();
+    return mode === 'preenroll'
+        ? catalogs.preenrollCatalog
+        : catalogs.adddropCatalog;
 }

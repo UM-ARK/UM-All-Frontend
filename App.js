@@ -4,10 +4,9 @@ import { Dimensions, Alert, Appearance } from 'react-native';
 // 本地引用
 import Nav from './src/Nav';
 import { uiStyle } from './src/components/ThemeContext';
-import { checkCloudCourseVersion, needUpdate, saveCourseDataToStorage } from './src/utils/checkCoursesKits';
-import { getLocalStorage, setLocalStorage } from './src/utils/storageKits';
+import { refreshCourseCatalogs } from './src/utils/checkCoursesKits';
+import { getLocalStorage } from './src/utils/storageKits';
 import { ThemeProvider, themes } from './src/components/ThemeContext';
-import sourceCourseVersion from './src/static/UMCourses/courseVersion';
 import { getPreciseDeviceName } from './src/utils/iosModel';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -22,30 +21,6 @@ import { SchedulingSessionProvider } from './src/contexts/SchedulingSessionConte
 
 const { width: PAGE_WIDTH } = Dimensions.get('window');
 const LOGO_WIDTH = PAGE_WIDTH * 0.5;
-
-// Workers API 分時請求
-const LAST_CHECK_KEY = 'last_version_check_timestamp';
-const CHECK_INTERVAL = 6 * 60 * 60 * 1000; // 6 小時
-// 檢查時間間隔，是否需要檢查Version
-const performCheck = async () => {
-    try {
-        const lastCheckTimestamp = await AsyncStorage.getItem(LAST_CHECK_KEY);
-        const now = Date.now();
-
-        if (lastCheckTimestamp && (now - parseInt(lastCheckTimestamp, 10)) < CHECK_INTERVAL) {
-            // console.log('仍在 6 小時冷卻時間內，跳過版本檢查。');
-            return;
-        }
-
-        // 執行檢查並更新時間戳
-        // console.log('檢查雲端課程數據');
-        await checkCloudCourseVersion();
-        await AsyncStorage.setItem(LAST_CHECK_KEY, now.toString());
-
-    } catch (error) {
-        console.error('版本檢查失敗:', error);
-    }
-};
 
 const App = () => {
     const [appTheme, setAppTheme] = useState(themes.light);
@@ -105,33 +80,9 @@ const App = () => {
                 const strUserInfo = await AsyncStorage.getItem('userInfo');
                 const userInfo = strUserInfo ? JSON.parse(strUserInfo) : {};
 
-                let localCourseVersion = await getLocalStorage('course_version');
-                // 首次啟動，優先用本地打包的 sourceCourseVersion
-                if (!localCourseVersion) {
-                    const saveResult = await setLocalStorage('course_version', sourceCourseVersion);
-                    if (saveResult !== 'ok') { Alert.alert('Error', JSON.stringify(saveResult)); }
-                    localCourseVersion = sourceCourseVersion;
-                }
-                // 新APP將先覆蓋舊版APP的本地緩存
-                let needSave = false;
-                let newVersion = { ...localCourseVersion };
-                if (needUpdate(localCourseVersion.adddrop, sourceCourseVersion.adddrop)) {
-                    needSave = true;
-                    newVersion.adddrop = sourceCourseVersion.adddrop;
-                    saveCourseDataToStorage('adddrop', 'source');
-                }
-                if (needUpdate(localCourseVersion.pre, sourceCourseVersion.pre)) {
-                    needSave = true;
-                    newVersion.pre = sourceCourseVersion.pre;
-                    saveCourseDataToStorage('pre', 'source');
-                }
-                if (needSave) {
-                    const saveResult = await setLocalStorage('course_version', newVersion);
-                    if (saveResult !== 'ok') { Alert.alert('Error', JSON.stringify(saveResult)); }
-                }
-
-                // 在時間差內檢查雲端數據更新
-                performCheck();
+                refreshCourseCatalogs().catch(error => {
+                    console.error('課程資料檢查失敗:', error);
+                });
             } catch (e) {
                 Alert.alert('', 'App initialization error!\nPlease contact developer.', null, { cancelable: true });
             } finally {

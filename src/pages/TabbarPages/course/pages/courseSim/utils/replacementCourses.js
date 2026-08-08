@@ -82,7 +82,7 @@ export const getReplacementWindow = (targetSlot, planSlots = []) => {
  * @param {Array<Object>} params.planSlots 目前課表課節
  * @param {Array<Object>} params.planList 目前已選 Course Code + Section
  * @param {Array<Object>} params.courseTimeList 全部含時間課節
- * @param {Array<Object>} params.coursePlanList 課程摘要資料
+ * @param {Array<Object>} params.adddropCourseList Add Drop 課程摘要資料
  * @returns {{window: Object|null, courses: Array<Object>}} 平替空檔與候選課程
  */
 export const getReplacementCourses = ({
@@ -90,7 +90,7 @@ export const getReplacementCourses = ({
     planSlots = [],
     planList = [],
     courseTimeList = [],
-    coursePlanList = [],
+    adddropCourseList = [],
 }) => {
     const window = getReplacementWindow(targetSlot, planSlots);
     if (!window) {
@@ -106,7 +106,7 @@ export const getReplacementCourses = ({
     const remainingPlanSlots = planSlots.filter(
         slot => !isSameSection(slot, targetSlot),
     );
-    const summariesByCourseCode = lodash.keyBy(coursePlanList, 'Course Code');
+    const summariesByCourseCode = lodash.keyBy(adddropCourseList, 'Course Code');
 
     const courses = lodash
         .chain(courseTimeList)

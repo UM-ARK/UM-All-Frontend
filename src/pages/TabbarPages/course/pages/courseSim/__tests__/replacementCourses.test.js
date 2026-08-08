@@ -87,7 +87,7 @@ describe('getReplacementCourses', () => {
                 ...outsideWindow,
                 ...otherDayConflict,
             ],
-            coursePlanList: [
+            adddropCourseList: [
                 fittingSection[0],
                 outsideWindow[0],
                 otherDayConflict[0],
@@ -119,7 +119,7 @@ describe('getReplacementCourses', () => {
                     Day: '',
                 },
             ],
-            coursePlanList: [],
+            adddropCourseList: [],
         });
 
         expect(result.courses).toEqual([]);

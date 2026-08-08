@@ -585,7 +585,10 @@ const HarborPostContent = memo(
                     renderersProps={renderersProps}
                     customHTMLElementModels={customHTMLElementModels}
                     ignoredDomTags={['svg']}
-                    defaultTextProps={{ selectable: true }}
+                    defaultTextProps={{
+                        selectable: true,
+                        style: styles.renderedText,
+                    }}
                     enableExperimentalBRCollapsing
                     enableExperimentalGhostLinesPrevention
                     enableExperimentalMarginCollapsing

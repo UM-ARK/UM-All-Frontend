@@ -55,18 +55,18 @@ export const isCourseRecommended = ({
  */
 const useCourseFiltering = ({
     courseMode,
-    coursePlanData,
-    offerCoursesData,
+    preenrollCatalog,
+    adddropCourseList,
     filterOptions,
-    coursePlanTimeData,
+    adddropCatalog,
     timeFilter = defaultTimeFilter,
     recommendationOnly = false,
     planCourseCodes = [],
     planSlots = [],
 }) => {
     const offerCourseList = useMemo(() => {
-        return courseMode === 'ad' ? coursePlanData?.Courses || [] : offerCoursesData?.Courses || [];
-    }, [courseMode, coursePlanData, offerCoursesData]);
+        return courseMode === 'ad' ? adddropCourseList : preenrollCatalog?.Courses || [];
+    }, [courseMode, adddropCourseList, preenrollCatalog]);
 
     const offerFacultyList = useMemo(() => {
         return lodash.uniq(offerCourseList.map(itm => itm['Offering Unit']).filter(Boolean)).sort();
@@ -160,8 +160,8 @@ const useCourseFiltering = ({
 
     // 以 Course Code 建索引，避免對每個課程線性掃描數萬筆課節資料
     const slotsByCourseCode = useMemo(() => {
-        return lodash.groupBy(coursePlanTimeData?.Courses || [], 'Course Code');
-    }, [coursePlanTimeData]);
+        return lodash.groupBy(adddropCatalog?.Courses || [], 'Course Code');
+    }, [adddropCatalog]);
 
     // 預選課資料沒有上課時間，故時段篩選只在 Add Drop 模式生效
     const isTimeFilterActive = courseMode === 'ad' && Boolean(timeFilter?.day);
@@ -190,22 +190,23 @@ const useCourseFiltering = ({
         [planCourseCodes],
     );
 
+    // 瀏覽列表統一按 Course Code 排序，與搜尋結果一致，避免 JSON 原序亂序
     const filterCourseList = useMemo(() => {
-        if (!isRecommendationFilterActive) {
-            return timeFilteredCourseList;
-        }
+        const list = !isRecommendationFilterActive
+            ? timeFilteredCourseList
+            : timeFilteredCourseList.filter(course => {
+                const courseCode = course['Course Code'];
 
-        return timeFilteredCourseList.filter(course => {
-            const courseCode = course['Course Code'];
-
-            return isCourseRecommended({
-                courseCode,
-                courseSlots: slotsByCourseCode[courseCode] || [],
-                planCourseCodeSet,
-                planSlots,
-                timeFilter: isTimeFilterActive ? timeFilter : defaultTimeFilter,
+                return isCourseRecommended({
+                    courseCode,
+                    courseSlots: slotsByCourseCode[courseCode] || [],
+                    planCourseCodeSet,
+                    planSlots,
+                    timeFilter: isTimeFilterActive ? timeFilter : defaultTimeFilter,
+                });
             });
-        });
+
+        return lodash.sortBy(list, ['Course Code']);
     }, [
         isRecommendationFilterActive,
         isTimeFilterActive,

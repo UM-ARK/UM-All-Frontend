@@ -8,8 +8,8 @@ import { getDeepLinkShareHeaderOptions } from '../../../../../../components/Deep
 import SegmentControl from '../../../../../../components/SegmentControl';
 import { ARK_COURSE_SHARE_URL, ARK_WIKI_SEARCH } from '../../../../../../utils/pathMap';
 import { openLink } from '../../../../../../utils/browser';
-import { getCourseData } from '../../../../../../utils/checkCoursesKits';
-import coursePlanTime from '../../../../../../static/UMCourses/coursePlanTime';
+import { getCourseCatalog } from '../../../../../../utils/checkCoursesKits';
+import { adddropCatalog } from '../../../../../../static/UMCourses/courseCatalogs';
 
 import { scale, verticalScale } from 'react-native-size-matters';
 import groupBy from 'lodash/groupBy';
@@ -244,7 +244,7 @@ const LocalCourse = (props) => {
         [routeParams],
     );
     const [isLoading, setIsLoading] = useState(true);
-    const [s_coursePlanTime, setSCoursePlanTime] = useState(coursePlanTime);
+    const [localAdddropCatalog, setLocalAdddropCatalog] = useState(adddropCatalog);
     const [groupChoice, setGroupChoice] = useState('section');
     const [relateSectionObj, setRelateSectionObj] = useState(null);
     const [relateTeacherObj, setRelateTeacherObj] = useState(null);
@@ -275,8 +275,8 @@ const LocalCourse = (props) => {
     useEffect(() => {
         const init = async () => {
             try {
-                const storageCoursePlanList = await getCourseData('adddrop');
-                setSCoursePlanTime(storageCoursePlanList.timetable);
+                const storageCoursePlanList = await getCourseCatalog('adddrop');
+                setLocalAdddropCatalog(storageCoursePlanList);
             } catch (error) {
                 Alert.alert(JSON.stringify(error));
             } finally {
@@ -287,15 +287,15 @@ const LocalCourse = (props) => {
         init();
     }, []);
 
-    const coursePlanList = useMemo(() => {
-        return s_coursePlanTime.Courses || [];
-    }, [s_coursePlanTime]);
+    const adddropSlots = useMemo(() => {
+        return localAdddropCatalog.Courses || [];
+    }, [localAdddropCatalog]);
 
     const relateList = useMemo(() => {
-        return coursePlanList.filter(itm =>
+        return adddropSlots.filter(itm =>
             itm['Course Code'].toUpperCase().includes(courseCode)
         );
-    }, [coursePlanList, courseCode]);
+    }, [adddropSlots, courseCode]);
 
     useEffect(() => {
         if (isLoading) {return;}

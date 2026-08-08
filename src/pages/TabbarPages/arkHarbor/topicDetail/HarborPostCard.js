@@ -122,6 +122,7 @@ const HarborPostCard = memo(
         nestedRepliesExpanded,
         nestedRepliesLoading,
         nestedReplyCount,
+        nestedReplyPreviewCount = 0,
         nestedVisibleReplyCount,
         pendingBookmark,
         pendingDelete,
@@ -353,7 +354,9 @@ const HarborPostCard = memo(
             unread,
         ]);
         const nestedRepliesButton =
-            nestedReplyCount > 0 ? (
+            nestedReplyCount > 0 &&
+            (nestedReplyCount > nestedReplyPreviewCount ||
+                nestedVisibleReplyCount < nestedReplyCount) ? (
                 <Pressable
                     accessibilityRole="button"
                     accessibilityState={{

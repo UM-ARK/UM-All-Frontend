@@ -7,7 +7,11 @@ import { buildSearchResults } from '../utils/search';
  * - 中文：輸入長度 > 0 即開始搜尋
  * - 非中文：輸入長度 > 2 才開始搜尋
  */
-const useCourseSearch = ({ offerCourseList, coursePlanTimeCourses }) => {
+const useCourseSearch = ({
+    offerCourseList,
+    adddropCourses,
+    adddropCourseList,
+}) => {
     const [inputText, setInputText] = useState('');
 
     const inputOK = inputText.length > 0;
@@ -15,14 +19,24 @@ const useCourseSearch = ({ offerCourseList, coursePlanTimeCourses }) => {
     const searchFilterCourse = useMemo(() => {
         if (hasChinese(inputText)) {
             return inputText.length > 0
-                ? buildSearchResults(inputText, offerCourseList, coursePlanTimeCourses)
+                ? buildSearchResults(
+                    inputText,
+                    offerCourseList,
+                    adddropCourses,
+                    adddropCourseList,
+                )
                 : null;
         }
 
         return inputText.length > 2
-            ? buildSearchResults(inputText, offerCourseList, coursePlanTimeCourses)
+            ? buildSearchResults(
+                inputText,
+                offerCourseList,
+                adddropCourses,
+                adddropCourseList,
+            )
             : null;
-    }, [inputText, offerCourseList, coursePlanTimeCourses]);
+    }, [inputText, offerCourseList, adddropCourses, adddropCourseList]);
 
     const clearInput = () => {
         setInputText('');

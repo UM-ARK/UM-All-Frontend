@@ -1,7 +1,7 @@
 /**
  * 按需讀取模擬課表，避免把 CoursePlanProvider 搬到 App 根層。
  */
-import {getCourseData} from '../../../utils/checkCoursesKits';
+import {getCourseCatalog} from '../../../utils/checkCoursesKits';
 import {getLocalStorage} from '../../../utils/storageKits';
 
 const PLAN_STORAGE_KEY = 'ARK_Timetable_Storage';
@@ -17,9 +17,9 @@ export async function loadSavedCourseSlots({includePlanList = false} = {}) {
             : {hasPlan: false, planSlots: []};
     }
 
-    const courseData = await getCourseData('adddrop');
-    const courseTimeList = Array.isArray(courseData?.timetable?.Courses)
-        ? courseData.timetable.Courses
+    const courseData = await getCourseCatalog('adddrop');
+    const courseTimeList = Array.isArray(courseData?.Courses)
+        ? courseData.Courses
         : [];
     const selectedSections = new Set(
         planList.map(

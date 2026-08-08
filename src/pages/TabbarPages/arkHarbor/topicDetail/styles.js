@@ -416,6 +416,10 @@ const styles = StyleSheet.create({
     inlineEmoji: {
         width: scale(18),
         height: scale(18),
+        transform: [{ translateY: verticalScale(2) }],
+    },
+    renderedText: {
+        overflow: 'visible',
     },
     iframeContainer: {
         overflow: 'hidden',

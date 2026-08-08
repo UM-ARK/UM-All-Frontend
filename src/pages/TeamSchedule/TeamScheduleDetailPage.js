@@ -31,7 +31,7 @@ import {useHarborSession} from '../../contexts/HarborSessionContext';
 import {useSchedulingSession} from '../../contexts/SchedulingSessionContext';
 import {uiStyle, useTheme} from '../../components/ThemeContext';
 import SegmentControl from '../../components/SegmentControl';
-import {getCourseData} from '../../utils/checkCoursesKits';
+import {getCourseCatalog} from '../../utils/checkCoursesKits';
 import {logToFirebase} from '../../utils/firebaseAnalytics';
 import {ARK_HARBOR_AVATAR_TEMPLATE} from '../../utils/pathMap';
 import {
@@ -325,10 +325,10 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
     const loadSharedTimetables = useCallback(async ({force = false} = {}) => {
         const [sharedResult, courseResult] = await Promise.allSettled([
             sharedTimetables.load({force}),
-            getCourseData('adddrop'),
+            getCourseCatalog('adddrop'),
         ]);
         if (courseResult.status === 'fulfilled') {
-            const slots = courseResult.value?.timetable?.Courses;
+            const slots = courseResult.value?.Courses;
             setCourseCatalogSlots(Array.isArray(slots) ? slots : []);
         }
         if (sharedResult.status === 'rejected') {
@@ -1490,7 +1490,7 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                                         {color: theme.black.main},
                                     ]}
                                     numberOfLines={1}>
-                                    {formatSuggestionLabel(item)}
+                                    {formatSuggestionLabel(item, t)}
                                 </Text>
                                 <Text
                                     style={[

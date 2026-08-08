@@ -20,6 +20,8 @@ import {
     collectNestedPosts,
     extractPostImages,
     flattenNestedPosts,
+    getNestedReplyCount,
+    getNestedReplyPreviewLimit,
     isCanceledRequest,
     mergeTopicWindow,
     NESTED_REPLY_BATCH_SIZE,
@@ -27,6 +29,79 @@ import {
 } from './harborTopicModels';
 
 const TOPIC_POST_BATCH_SIZE = 20;
+
+const loadNestedReplyPreviews = async ({signal, topic, topicId}) => {
+    const previewLimit = getNestedReplyPreviewLimit(topic?.posts_count);
+    const topicPosts = topic?.post_stream?.posts;
+    if (
+        !topic?.is_nested_view ||
+        previewLimit <= 0 ||
+        !Array.isArray(topicPosts)
+    ) {
+        return topic;
+    }
+
+    const previewRoots = topicPosts.filter(post => {
+        const replyCount = getNestedReplyCount(post);
+        return (
+            Number(post?.post_number) > 1 &&
+            replyCount > 0 &&
+            (!Array.isArray(post.children) ||
+                post.children.length < Math.min(previewLimit, replyCount))
+        );
+    });
+    if (previewRoots.length === 0) {
+        return topic;
+    }
+
+    const responses = await Promise.all(
+        previewRoots.map(async post => {
+            try {
+                const response = await fetchHarborNestedPostChildren(
+                    topicId,
+                    Number(post.post_number),
+                    {
+                        depth: 1,
+                        signal,
+                        sort: topic.nested_sort || 'old',
+                    },
+                );
+                return {postId: post.id, response};
+            } catch (error) {
+                if (isCanceledRequest(error, signal)) {
+                    throw error;
+                }
+                return null;
+            }
+        }),
+    );
+
+    const posts = responses.reduce((currentPosts, result) => {
+        if (!result) {
+            return currentPosts;
+        }
+        return updateNestedPostTree(
+            currentPosts,
+            result.postId,
+            post => ({
+                ...post,
+                __harborNestedChildrenFetched: true,
+                __harborNestedHasMoreChildren: Boolean(
+                    result.response.has_more,
+                ),
+                children: result.response.children,
+            }),
+        );
+    }, topicPosts);
+
+    return {
+        ...topic,
+        post_stream: {
+            ...topic.post_stream,
+            posts,
+        },
+    };
+};
 
 const useHarborTopicData = ({
     onNewRepliesLoaded,
@@ -70,8 +145,9 @@ const useHarborTopicData = ({
         return flattenNestedPosts(
             topicPosts,
             nestedReplyLimits,
+            getNestedReplyPreviewLimit(topic?.posts_count),
         );
-    }, [nestedReplyLimits, topic?.is_nested_view, topicPosts]);
+    }, [nestedReplyLimits, topic?.is_nested_view, topic?.posts_count, topicPosts]);
 
     const validReactions = useMemo(() => {
         return Array.isArray(topic?.valid_reactions)
@@ -175,9 +251,14 @@ const useHarborTopicData = ({
                 const shouldTrackPageView =
                     !refresh &&
                     trackedPageViewTopicIdRef.current !== topicId;
-                const nextTopic = await fetchHarborTopic(topicId, {
+                let nextTopic = await fetchHarborTopic(topicId, {
                     signal: controller.signal,
                     trackPageView: shouldTrackPageView,
+                });
+                nextTopic = await loadNestedReplyPreviews({
+                    signal: controller.signal,
+                    topic: nextTopic,
+                    topicId,
                 });
                 if (shouldTrackPageView) {
                     trackedPageViewTopicIdRef.current = topicId;
@@ -304,6 +385,16 @@ const useHarborTopicData = ({
                             sort: currentTopic.nested_sort || 'old',
                         },
                     );
+                    const previewTopic = await loadNestedReplyPreviews({
+                        topic: {
+                            ...currentTopic,
+                            post_stream: {
+                                ...currentTopic.post_stream,
+                                posts: nextRoots.roots,
+                            },
+                        },
+                        topicId,
+                    });
                     setTopic(current => {
                         if (!current?.is_nested_view) {
                             return current;
@@ -313,9 +404,11 @@ const useHarborTopicData = ({
                         const currentIds = new Set(
                             currentPosts.map(post => Number(post.id)),
                         );
-                        const roots = nextRoots.roots.filter(post => {
-                            return !currentIds.has(Number(post.id));
-                        });
+                        const roots = previewTopic.post_stream.posts.filter(
+                            post => {
+                                return !currentIds.has(Number(post.id));
+                            },
+                        );
                         const nestedPosts = [...currentPosts, ...roots];
                         return {
                             ...current,
@@ -438,7 +531,7 @@ const useHarborTopicData = ({
                 post.__harborNestedVisibleReplyCount || 0,
             );
             const currentReplyLimit = Number(
-                nestedReplyLimits.get(postNumber) || 0,
+                nestedReplyLimits.get(postNumber) || visibleReplyCount,
             );
             if (
                 visibleReplyCount > 0 &&

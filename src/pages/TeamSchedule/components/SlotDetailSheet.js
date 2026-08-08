@@ -23,8 +23,8 @@ import {
     resolveSharedTimetableMeetings,
 } from '../utils/sharedTimetable';
 import {
-    WEEKDAY_SHORT_LABELS,
     formatMinuteOfDay,
+    getWeekdayShortLabel,
 } from './scheduleWeekHelpers';
 
 /**
@@ -70,8 +70,7 @@ const SlotDetailSheet = ({
             return null;
         }
         const detailSlot = slot.representativeSlot || slot;
-        const weekday =
-            WEEKDAY_SHORT_LABELS[Number(detailSlot.weekday) - 1] || '';
+        const weekdayLabel = getWeekdayShortLabel(detailSlot.weekday, t);
         const freeMembers = Array.isArray(detailSlot.freeMembers)
             ? detailSlot.freeMembers
             : [];
@@ -151,7 +150,7 @@ const SlotDetailSheet = ({
         }
 
         return {
-            weekdayLabel: weekday ? `週${weekday}` : '',
+            weekdayLabel,
             timeLabel: `${formatMinuteOfDay(detailSlot.startMinute)} – ${formatMinuteOfDay(detailSlot.endMinute)}`,
             availableCount:
                 detailSlot.availableCount ?? freeMembers.length,
@@ -168,6 +167,7 @@ const SlotDetailSheet = ({
         myHarborUserId,
         sharedTimetableMembers,
         slot,
+        t,
         timezone,
     ]);
 
@@ -175,14 +175,13 @@ const SlotDetailSheet = ({
         if (!slot || !Array.isArray(slots) || slots.length === 0) {
             return null;
         }
-        const weekday = WEEKDAY_SHORT_LABELS[Number(slot.weekday) - 1] || '';
         return {
-            weekdayLabel: weekday ? `週${weekday}` : '',
+            weekdayLabel: getWeekdayShortLabel(slot.weekday, t),
             submittedCount: slots[0].submittedCount ?? 0,
             memberCount: slots[0].memberCount ?? 0,
             slots,
         };
-    }, [slot, slots]);
+    }, [slot, slots, t]);
 
     return (
         <ActionSheet

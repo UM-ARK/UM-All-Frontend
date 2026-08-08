@@ -17,6 +17,7 @@ import {
     useConflict,
 } from '../hooks/useConflict';
 import parseImportData from '../utils/parseImportData';
+import { buildAdddropCourseList } from '../utils/courseCatalog';
 import { getLocalStorage, setLocalStorage } from '../../../../utils/storageKits';
 
 /** 使用者選課清單（僅 Course Code 與 Section） */
@@ -83,10 +84,9 @@ export const CoursePlanProvider = ({ children }) => {
     const {
         courseMode,
         setCourseMode,
-        offerCoursesData,
-        coursePlanData,
-        coursePlanTimeData,
-        courseVersion,
+        preenrollCatalog,
+        adddropCatalog,
+        catalogMetadata,
         initCourseData,
         refreshCourseData,
     } = useCourseData();
@@ -94,13 +94,13 @@ export const CoursePlanProvider = ({ children }) => {
     const [planList, setPlanList] = useState([]);
 
     const courseTimeList = useMemo(
-        () => coursePlanTimeData?.Courses || [],
-        [coursePlanTimeData],
+        () => adddropCatalog?.Courses || [],
+        [adddropCatalog],
     );
 
-    const coursePlanList = useMemo(
-        () => coursePlanData?.Courses || [],
-        [coursePlanData],
+    const adddropCourseList = useMemo(
+        () => buildAdddropCourseList(adddropCatalog?.Courses),
+        [adddropCatalog],
     );
 
     const sectionsByCourseCode = useMemo(
@@ -330,14 +330,13 @@ export const CoursePlanProvider = ({ children }) => {
         () => ({
             courseMode,
             setCourseMode,
-            offerCoursesData,
-            coursePlanData,
-            coursePlanTimeData,
-            courseVersion,
+            preenrollCatalog,
+            adddropCatalog,
+            catalogMetadata,
             initCourseData,
             refreshCourseData,
             courseTimeList,
-            coursePlanList,
+            adddropCourseList,
             sectionsByCourseCode,
             planList,
             planSlots,
@@ -359,14 +358,13 @@ export const CoursePlanProvider = ({ children }) => {
         [
             courseMode,
             setCourseMode,
-            offerCoursesData,
-            coursePlanData,
-            coursePlanTimeData,
-            courseVersion,
+            preenrollCatalog,
+            adddropCatalog,
+            catalogMetadata,
             initCourseData,
             refreshCourseData,
             courseTimeList,
-            coursePlanList,
+            adddropCourseList,
             sectionsByCourseCode,
             planList,
             planSlots,

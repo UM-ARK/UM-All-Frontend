@@ -8,8 +8,8 @@ import moment from 'moment';
 
 import { uiStyle, useTheme } from '../../components/ThemeContext';
 import SegmentControl from '../../components/SegmentControl';
-import { getCourseData } from '../../utils/checkCoursesKits';
-import coursePlanTime from '../../static/UMCourses/coursePlanTime';
+import { getCourseCatalog } from '../../utils/checkCoursesKits';
+import { adddropCatalog } from '../../static/UMCourses/courseCatalogs';
 
 const DAY_LIST = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
 
@@ -24,7 +24,7 @@ const EatingSchedule = () => {
     const styles = useMemo(() => getStyles(theme), [theme]);
     const { black, themeColor, unread, warning } = theme;
 
-    const [courses, setCourses] = useState(coursePlanTime?.Courses || []);
+    const [courses, setCourses] = useState(adddropCatalog?.Courses || []);
     const [statMode, setStatMode] = useState('end');
     const now = useMemo(() => moment(), []);
     const horizontalScrollRef = useRef(null);
@@ -49,11 +49,11 @@ const EatingSchedule = () => {
         let isMounted = true;
 
         const loadScheduleCourses = async () => {
-            const courseData = await getCourseData('adddrop');
+            const courseData = await getCourseCatalog('adddrop');
             if (isMounted) {
                 setCourses(
-                    courseData?.timetable?.Courses ||
-                    coursePlanTime?.Courses ||
+                    courseData?.Courses ||
+                    adddropCatalog?.Courses ||
                     [],
                 );
             }
