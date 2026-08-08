@@ -12,6 +12,7 @@ import React, {
 } from 'react';
 import {ScrollView, StyleSheet, Text, View} from 'react-native';
 
+import {useTranslation} from 'react-i18next';
 import {Gesture, GestureDetector} from 'react-native-gesture-handler';
 import {runOnJS} from 'react-native-reanimated';
 import {scale, verticalScale} from 'react-native-size-matters';
@@ -54,6 +55,7 @@ const ScheduleWeekGrid = ({
     scrollToStartMinute,
 }) => {
     const {theme} = useTheme();
+    const {t} = useTranslation('my');
     const slot = normalizeSlotMinutes(slotMinutes);
     const isCandidateMode = mode === 'candidate';
     const isEditMode = mode === 'availability';
@@ -400,7 +402,7 @@ const ScheduleWeekGrid = ({
                         key={label}
                         style={[styles.dayHeaderCell, {width: getColFrame(index).width}]}>
                         <Text style={[styles.weekdayText, {color: theme.black.main}]}>
-                            {`週${label}`}
+                            {t(label)}
                         </Text>
                     </View>
                 ))}

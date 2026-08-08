@@ -13,6 +13,7 @@ import {uiStyle, useTheme} from '../../../components/ThemeContext';
 import {logToFirebase} from '../../../utils/firebaseAnalytics';
 import {trigger} from '../../../utils/trigger';
 import {buildSharedTimetablePayload} from '../utils/sharedTimetable';
+import {getWeekdayShortLabel} from './scheduleWeekHelpers';
 
 const SharedTimetableSheet = ({
     visible,
@@ -92,7 +93,8 @@ const SharedTimetableSheet = ({
                 const minutes = minute % 60;
                 return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
             };
-            return `週${item.weekday} ${formatMinute(item.startMinute)}–${formatMinute(item.endMinute)}`;
+            const weekday = getWeekdayShortLabel(item.weekday, t);
+            return `${weekday} ${formatMinute(item.startMinute)}–${formatMinute(item.endMinute)}`;
         })
         .join('\n');
 

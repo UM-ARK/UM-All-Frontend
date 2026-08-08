@@ -64,7 +64,7 @@ function formatCreatedAt(createdAt, timezone, t) {
         return null;
     }
     return t('建立於 {{time}}', {
-        time: created.format('M月D日 HH:mm'),
+        time: created.format(t('M月D日 HH:mm')),
     });
 }
 

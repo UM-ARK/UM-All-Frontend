@@ -32,8 +32,8 @@ import {useSharedTimetableMemberSelection} from '../hooks/useSharedTimetableMemb
 import SharedTimetableMemberPickerSheet from './SharedTimetableMemberPickerSheet';
 import SharedTimetableMemberSelector from './SharedTimetableMemberSelector';
 import SharedTimetableSlotDetailSheet from './SharedTimetableSlotDetailSheet';
+import {WEEKDAY_SHORT_LABELS} from './scheduleWeekHelpers';
 
-const WEEKDAY_LABELS = ['一', '二', '三', '四', '五', '六', '日'];
 const WEEKDAY_CODES = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
 const OVERVIEW_TIME_LABEL_WIDTH = scale(34);
 
@@ -247,8 +247,8 @@ const WeeklyOverview = ({meetings, aggregate = false, aggregateMemberCount = 0, 
             style={[styles.overview, {backgroundColor: theme.white, borderColor: theme.themeColorUltraLight}]}>
             <View style={styles.overviewHeader}>
                 {aggregate ? <View style={{width: timeLabelWidth}} /> : null}
-                {WEEKDAY_LABELS.slice(0, dayCount).map(label => (
-                    <Text key={label} style={[styles.dayLabel, {color: theme.black.second, width: dayWidth}]}>週{label}</Text>
+                {WEEKDAY_SHORT_LABELS.slice(0, dayCount).map(label => (
+                    <Text key={label} style={[styles.dayLabel, {color: theme.black.second, width: dayWidth}]}>{t(label)}</Text>
                 ))}
             </View>
             {gridWidth > 0 ? (

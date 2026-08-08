@@ -15,6 +15,7 @@ import {trigger} from '../../../utils/trigger';
 import {
     WEEKDAY_SHORT_LABELS,
     formatMinuteOfDay,
+    getWeekdayShortLabel,
 } from './scheduleWeekHelpers';
 
 const DEFAULT_START_MINUTE = 9 * 60;
@@ -37,7 +38,7 @@ const ScheduleTimeRangeInsert = ({onClear, onInsert, emptyRangeMessage}) => {
         () =>
             WEEKDAY_SHORT_LABELS.map((label, index) => ({
                 id: String(index + 1),
-                title: t('星期{{day}}', {day: label}),
+                title: t(label),
                 state: weekday === index + 1 ? 'on' : 'off',
             })),
         [t, weekday],
@@ -128,9 +129,7 @@ const ScheduleTimeRangeInsert = ({onClear, onInsert, emptyRangeMessage}) => {
                         pressed && {opacity: 0.7},
                     ]}>
                     <Text style={[styles.valueText, {color: theme.black.main}]}>
-                        {t('星期{{day}}', {
-                            day: WEEKDAY_SHORT_LABELS[weekday - 1],
-                        })}
+                        {getWeekdayShortLabel(weekday, t)}
                     </Text>
                     <Ionicons
                         name="chevron-down"

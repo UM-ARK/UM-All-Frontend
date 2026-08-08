@@ -341,7 +341,7 @@ const TeamScheduleCreatePage = ({navigation}) => {
         }
         return moment
             .tz(responseDeadlineAt, tz)
-            .format('YYYY年M月D日 HH:mm');
+            .format(t('YYYY年M月D日 HH:mm'));
     }, [responseDeadlineAt, t, tz]);
 
     const pickerDate = useMemo(() => {

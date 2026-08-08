@@ -1490,7 +1490,7 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                                         {color: theme.black.main},
                                     ]}
                                     numberOfLines={1}>
-                                    {formatSuggestionLabel(item)}
+                                    {formatSuggestionLabel(item, t)}
                                 </Text>
                                 <Text
                                     style={[
