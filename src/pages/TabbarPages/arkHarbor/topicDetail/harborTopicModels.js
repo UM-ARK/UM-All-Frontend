@@ -8,6 +8,8 @@ import { ARK_HARBOR_ABSOLUTE_URL } from '../../../../utils/pathMap';
 
 const LIKE_ACTION_ID = 2;
 const NESTED_REPLY_BATCH_SIZE = 5;
+const NESTED_REPLY_PREVIEW_SIZE = 2;
+const NESTED_REPLY_PREVIEW_COMMENT_THRESHOLD = 10;
 
 const isCanceledRequest = (error, signal) => {
     return (
@@ -426,6 +428,13 @@ const getNestedReplyCount = post => {
     );
 };
 
+const getNestedReplyPreviewLimit = postsCount => {
+    const commentCount = Math.max(Number(postsCount || 1) - 1, 0);
+    return commentCount < NESTED_REPLY_PREVIEW_COMMENT_THRESHOLD
+        ? NESTED_REPLY_PREVIEW_SIZE
+        : 0;
+};
+
 const collectNestedPosts = posts => {
     const collected = [];
     const appendPosts = nestedPosts => {
@@ -441,7 +450,11 @@ const collectNestedPosts = posts => {
     return collected;
 };
 
-const flattenNestedPosts = (posts, nestedReplyLimits) => {
+const flattenNestedPosts = (
+    posts,
+    nestedReplyLimits,
+    defaultReplyLimit = 0,
+) => {
     const flattened = [];
     const collectDescendants = (nestedPosts, depth, descendants) => {
         (Array.isArray(nestedPosts) ? nestedPosts : []).forEach(post => {
@@ -460,17 +473,26 @@ const flattenNestedPosts = (posts, nestedReplyLimits) => {
             return;
         }
         const nestedReplyCount = getNestedReplyCount(post);
+        const defaultPostReplyLimit =
+            Number(post.post_number) === 1
+                ? 0
+                : Math.min(
+                    Math.max(Number(defaultReplyLimit || 0), 0),
+                    nestedReplyCount,
+                );
         const requestedReplyLimit =
             Number(post.post_number) === 1
                 ? 0
-                : Math.max(
-                    Number(
-                        nestedReplyLimits?.get(
-                            Number(post.post_number),
-                        ) || 0,
-                    ),
-                    0,
-                );
+                : nestedReplyLimits?.has(Number(post.post_number))
+                    ? Math.max(
+                        Number(
+                            nestedReplyLimits.get(
+                                Number(post.post_number),
+                            ) || 0,
+                        ),
+                        0,
+                    )
+                    : defaultPostReplyLimit;
         const descendants = [];
         collectDescendants(post.children, 1, descendants);
         const visibleDescendants = descendants.slice(
@@ -481,6 +503,7 @@ const flattenNestedPosts = (posts, nestedReplyLimits) => {
             ...post,
             __harborNestedDepth: 0,
             __harborNestedReplyCount: nestedReplyCount,
+            __harborNestedReplyPreviewCount: defaultPostReplyLimit,
             __harborNestedVisibleReplyCount: visibleDescendants.length,
         });
         visibleDescendants.forEach(descendant => {
@@ -488,6 +511,7 @@ const flattenNestedPosts = (posts, nestedReplyLimits) => {
                 ...descendant.post,
                 __harborNestedDepth: descendant.depth,
                 __harborNestedReplyCount: 0,
+                __harborNestedReplyPreviewCount: 0,
                 __harborNestedVisibleReplyCount: 0,
             });
         });
@@ -536,6 +560,7 @@ export {
     getHarborMutationError,
     getLikeAction,
     getNestedReplyCount,
+    getNestedReplyPreviewLimit,
     getNotificationLevelLabel,
     getReactionCount,
     getTagLabel,

@@ -15,6 +15,7 @@ import {
     formatHarborFlagTypesForPost,
     getFlagActions,
     getHarborImagePressAction,
+    getNestedReplyPreviewLimit,
     interpolateHarborI18nTemplate,
     isHarborPostDeleted,
     mergeAvailableFlagTypes,
@@ -410,6 +411,30 @@ describe('Nested Replies 資料模型', () => {
                 new Map([[2, 10]]),
             ).map(post => post.id),
         ).toEqual([1, 2, 3, 4, 5, 6, 7, 8]);
+    });
+
+    it('少於十則評論時預設顯示最多兩則樓中樓回覆', () => {
+        const flattened = flattenNestedPosts(
+            posts,
+            new Map(),
+            getNestedReplyPreviewLimit(10),
+        );
+
+        expect(flattened.map(post => post.id)).toEqual([1, 2, 3, 4]);
+        expect(flattened[1].__harborNestedReplyPreviewCount).toBe(2);
+        expect(flattened[1].__harborNestedVisibleReplyCount).toBe(2);
+    });
+
+    it('十則評論起維持樓中樓預設收合', () => {
+        expect(getNestedReplyPreviewLimit(10)).toBe(2);
+        expect(getNestedReplyPreviewLimit(11)).toBe(0);
+        expect(
+            flattenNestedPosts(
+                posts,
+                new Map(),
+                getNestedReplyPreviewLimit(11),
+            ).map(post => post.id),
+        ).toEqual([1, 2]);
     });
 
     it('可在巢狀子樹中更新指定貼文而不改動其他分支', () => {
