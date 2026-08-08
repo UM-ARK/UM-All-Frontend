@@ -12,7 +12,7 @@ describe('What2Reg 體育課搜尋與顯示', () => {
             'Course Title Chi': '體育一',
         },
     ];
-    const coursePlanTimeCourses = [
+    const adddropCourses = [
         {
             'Course Code': 'CPED1001',
             'Course Title': 'Physical Education I - Soccer',
@@ -24,11 +24,45 @@ describe('What2Reg 體育課搜尋與顯示', () => {
         const result = buildSearchResults(
             '足球',
             offerCourseList,
-            coursePlanTimeCourses,
+            adddropCourses,
+            adddropCourses,
         );
 
         expect(result).toHaveLength(1);
         expect(result[0]['Course Code']).toBe('CPED1001');
+    });
+
+    it('以教師搜尋時只回填課程摘要，不帶首個 Section 時間', () => {
+        const result = buildSearchResults(
+            'TEST TEACHER',
+            [],
+            [
+                {
+                    'Course Code': 'TEST1000',
+                    'Course Title': 'Test Course',
+                    'Teacher Information': 'Test Teacher',
+                    Section: '001',
+                    Day: 'MON',
+                    'Time From': '10:00',
+                },
+            ],
+            [
+                {
+                    'Course Code': 'TEST1000',
+                    'Course Title': 'Test Course',
+                },
+            ],
+        );
+
+        expect(result).toEqual([
+            {
+                'Course Code': 'TEST1000',
+                'Course Title': 'Test Course',
+            },
+        ]);
+        expect(result[0]).not.toHaveProperty('Section');
+        expect(result[0]).not.toHaveProperty('Day');
+        expect(result[0]).not.toHaveProperty('Time From');
     });
 
     it('課程卡不顯示體育課的具體 Section 項目', () => {

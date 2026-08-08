@@ -161,7 +161,7 @@ function CourseSim({ route, navigation }) {
     const {
         courseVersion,
         courseTimeList,
-        coursePlanList,
+        adddropCourseList,
         planList,
         planSlots,
         planCourseCodes,
@@ -414,14 +414,14 @@ function CourseSim({ route, navigation }) {
                 planSlots,
                 planList,
                 courseTimeList,
-                coursePlanList,
+                adddropCourseList,
             }),
         [
             replacementTarget,
             planSlots,
             planList,
             courseTimeList,
-            coursePlanList,
+            adddropCourseList,
         ],
     );
     const overviewRows = useMemo(() => {
@@ -2519,7 +2519,7 @@ E11-0000
      */
     function handleSearchFilterCourse(inputText) {
         return lodash.sortBy(
-            lodash.filter(coursePlanList, course =>
+            lodash.filter(adddropCourseList, course =>
                 courseMatchesSearch(course, inputText),
             ),
             ['Course Code'],

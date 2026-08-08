@@ -209,9 +209,9 @@ const What2Reg = () => {
     const {
         courseMode,
         setCourseMode,
-        offerCoursesData,
-        coursePlanData,
-        coursePlanTimeData,
+        preenrollCatalog,
+        adddropCatalog,
+        adddropCourseList,
         courseVersion,
         planCourseCodes,
         planSlots,
@@ -228,10 +228,10 @@ const What2Reg = () => {
         isRecommendationFilterActive,
     } = useCourseFiltering({
         courseMode,
-        coursePlanData,
-        offerCoursesData,
+        preenrollCatalog,
+        adddropCourseList,
         filterOptions,
-        coursePlanTimeData,
+        adddropCatalog,
         timeFilter,
         recommendationOnly,
         planCourseCodes,
@@ -244,7 +244,7 @@ const What2Reg = () => {
         }
 
         const slotsByCourseCode = lodash.groupBy(
-            coursePlanTimeData?.Courses || [],
+            adddropCatalog?.Courses || [],
             'Course Code',
         );
         return filterCourseList.reduce((result, course) => {
@@ -284,7 +284,7 @@ const What2Reg = () => {
             return result;
         }, {});
     }, [
-        coursePlanTimeData,
+        adddropCatalog,
         filterCourseList,
         isRecommendationFilterActive,
         isTimeFilterActive,
@@ -300,7 +300,8 @@ const What2Reg = () => {
         searchFilterCourse,
     } = useCourseSearch({
         offerCourseList,
-        coursePlanTimeCourses: coursePlanTimeData?.Courses || [],
+        adddropCourses: adddropCatalog?.Courses || [],
+        adddropCourseList,
     });
 
     const activeCourseList = searchFilterCourse?.length > 0 ? searchFilterCourse : filterCourseList;
