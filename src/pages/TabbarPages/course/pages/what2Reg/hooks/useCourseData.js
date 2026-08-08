@@ -10,7 +10,7 @@ import {
 import { getLocalStorage } from '../../../../../../utils/storageKits';
 import { defaultFilterOptions } from '../constants/options';
 
-const getCourseVersion = (preenrollCatalog, adddropCatalog) => ({
+const getCatalogMetadata = (preenrollCatalog, adddropCatalog) => ({
     pre: {
         updateTime: preenrollCatalog.updateTime,
         academicYear: preenrollCatalog.academicYear,
@@ -38,15 +38,15 @@ const useCourseData = () => {
     const [adddropCatalog, setAdddropCatalog] = useState(
         bundledAdddropCatalog,
     );
-    const [courseVersion, setCourseVersion] = useState(() =>
-        getCourseVersion(bundledPreenrollCatalog, bundledAdddropCatalog),
+    const [catalogMetadata, setCatalogMetadata] = useState(() =>
+        getCatalogMetadata(bundledPreenrollCatalog, bundledAdddropCatalog),
     );
 
     const applyCatalogs = useCallback(catalogs => {
         setPreenrollCatalog(catalogs.preenrollCatalog);
         setAdddropCatalog(catalogs.adddropCatalog);
-        setCourseVersion(
-            getCourseVersion(
+        setCatalogMetadata(
+            getCatalogMetadata(
                 catalogs.preenrollCatalog,
                 catalogs.adddropCatalog,
             ),
@@ -74,7 +74,7 @@ const useCourseData = () => {
         setCourseMode,
         preenrollCatalog,
         adddropCatalog,
-        courseVersion,
+        catalogMetadata,
         initCourseData,
         refreshCourseData,
     };

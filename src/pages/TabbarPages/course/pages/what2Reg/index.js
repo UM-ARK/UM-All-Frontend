@@ -212,7 +212,7 @@ const What2Reg = () => {
         preenrollCatalog,
         adddropCatalog,
         adddropCourseList,
-        courseVersion,
+        catalogMetadata,
         planCourseCodes,
         planSlots,
     } = useCoursePlan();
@@ -553,7 +553,7 @@ const What2Reg = () => {
                         {`${courseMode === 'ad' ? '開設' : '預選'}課程:`}
                     </Text>
                     <Text style={{ ...uiStyle.defaultText, fontSize: scale(9), color: black.third }}>
-                        數據日期版本: {courseMode === 'ad' ? courseVersion.adddrop.updateTime : courseVersion.pre.updateTime}
+                        數據日期版本: {courseMode === 'ad' ? catalogMetadata.adddrop.updateTime : catalogMetadata.pre.updateTime}
                     </Text>
                     <Text style={{ ...uiStyle.defaultText, fontSize: scale(9), color: themeColor }}>
                         記得提醒開發者最新Excel課表版本

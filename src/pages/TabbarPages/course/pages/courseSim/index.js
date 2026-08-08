@@ -159,7 +159,7 @@ function TimetableCourseMenuCard({
 function CourseSim({ route, navigation }) {
     // 課程資料與排課狀態一律來自 CoursePlanProvider，本段落不再自行持有
     const {
-        courseVersion,
+        catalogMetadata,
         courseTimeList,
         adddropCourseList,
         planList,
@@ -2716,7 +2716,7 @@ E11-0000
                         textAlign: 'center',
                     }}>
                     Timetable Version:{' '}
-                    {courseVersion.adddrop.updateTime}
+                    {catalogMetadata.adddrop.updateTime}
                 </Text>
                 <Text
                     style={{

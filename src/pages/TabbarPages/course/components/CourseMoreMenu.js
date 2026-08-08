@@ -17,14 +17,14 @@ import TimetableShareSheet from './TimetableShareSheet';
  * 「課表模擬」左上是垃圾桶右上是「＋」，切頁時按鈕會在兩種佈局間跳動。這裡把更新
  * 相關操作收進單一 ActionSheet；有模擬課表時亦在此提供清空操作。
  *
- * @param {object} courseVersion 課程資料版本，形狀同 static/UMCourses/courseVersion.json
+ * @param {object} catalogMetadata 兩份課程 catalog 的 metadata
  * @param {Function} onManualUpdate 手動檢查課表數據更新
  * @param {Function} onOpenSharePoint 開啟官方 SharePoint 課表 Excel
  * @param {boolean} canClear 是否已有模擬課表
  * @param {Function} onClearPress 清空模擬課表
  */
 const CourseMoreMenu = ({
-    courseVersion,
+    catalogMetadata,
     onManualUpdate,
     onOpenSharePoint,
     canClear,
@@ -105,9 +105,9 @@ const CourseMoreMenu = ({
         [bg_color, black.third],
     );
 
-    const versionSummary = useMemo(() => {
-        const adddrop = courseVersion?.adddrop;
-        const pre = courseVersion?.pre;
+    const metadataSummary = useMemo(() => {
+        const adddrop = catalogMetadata?.adddrop;
+        const pre = catalogMetadata?.pre;
         if (!adddrop || !pre) {
             return '';
         }
@@ -118,7 +118,7 @@ const CourseMoreMenu = ({
             `${t('PreEnroll Data Version', { ns: 'about' })}${pre.updateTime}`,
             `${pre.academicYear} - Sem ${pre.sem}`,
         ].join('\n');
-    }, [courseVersion]);
+    }, [catalogMetadata]);
 
     const handleOpenSheet = useCallback(() => {
         trigger();
@@ -160,8 +160,8 @@ const CourseMoreMenu = ({
                 containerStyle={styles.sheetContainer}
                 onClose={handleSheetClose}>
                 <View style={{ padding: scale(10) }}>
-                    {versionSummary ? (
-                        <Text style={styles.versionText}>{versionSummary}</Text>
+                    {metadataSummary ? (
+                        <Text style={styles.versionText}>{metadataSummary}</Text>
                     ) : null}
 
                     {canClear ? (
@@ -242,7 +242,7 @@ const CourseMoreMenu = ({
             </ActionSheet>
             <TimetableShareSheet
                 ref={shareSheetRef}
-                courseVersion={courseVersion}
+                catalogMetadata={catalogMetadata}
             />
         </>
     );
