@@ -12,6 +12,7 @@ import { trigger } from '../../../../../../utils/trigger';
 import { navigateToCourseTab } from '../../../../../../utils/courseNavigation';
 import { navigateToWikiSearch } from '../../../../../../utils/wikiNavigation';
 import { getCourseDisplayTitle } from '../utils/courseTitle';
+import { splitCourseCode } from '../utils/courseCode';
 
 import { scale } from 'react-native-size-matters';
 import { NavigationContext } from '@react-navigation/native';
@@ -71,42 +72,21 @@ const CourseCard = memo(
 
         // 渲染課程代號
         const renderCourseCode = code => {
-            let renderItm = null;
-            if (code.length === 8 && code.indexOf('-') === -1) {
-                renderItm = (
-                    <>
-                        {code.substring(0, 4) + ' '}
-                        <Text
-                            style={{
-                                ...uiStyle.defaultText,
-                                color: themeColor,
-                                fontWeight: '700',
-                                fontSize: scale(16),
-                            }}>
-                            {code.substring(4, 8)}
-                        </Text>
-                    </>
-                );
-            }
-            // FLL MLS的課程代號有TLL123-A的格式
-            else if (code.length === 8 && code.indexOf('-') !== -1) {
-                renderItm = (
-                    <>
-                        {code.substring(0, 3) + ' '}
-                        <Text
-                            style={{
-                                ...uiStyle.defaultText,
-                                color: themeColor,
-                                fontWeight: '700',
-                                fontSize: scale(16),
-                            }}>
-                            {code.substring(3, 8)}
-                        </Text>
-                    </>
-                );
-            } else {
-                renderItm = code;
-            }
+            const { prefix, suffix } = splitCourseCode(code);
+            const renderItm = prefix ? (
+                <>
+                    {prefix + ' '}
+                    <Text
+                        style={{
+                            ...uiStyle.defaultText,
+                            color: themeColor,
+                            fontWeight: '700',
+                            fontSize: scale(16),
+                        }}>
+                        {suffix}
+                    </Text>
+                </>
+            ) : code;
 
             return (
                 <Text
