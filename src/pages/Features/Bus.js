@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef, useLayoutEffect } from 'react';
-import { Text, View, TouchableOpacity, StyleSheet, Image, ImageBackground, ScrollView, RefreshControl, Dimensions } from 'react-native';
+import { Text, View, TouchableOpacity, StyleSheet, Image, ImageBackground, ScrollView, RefreshControl, Dimensions, Platform, Pressable } from 'react-native';
 
 // 引入本地工具
 import { useTheme, uiStyle } from '../../components/ThemeContext';
 import ARKImageView from '../../components/ARKImageView';
-import { UM_BUS_LOOP_ZH, UM_BUS_LOOP_EN, UM_MAP } from '../../utils/pathMap';
+import { UM_BUS_LOOP_ZH, UM_BUS_LOOP_EN, UM_BUS_LOOP_SERVICE, UM_MAP } from '../../utils/pathMap';
 import { openLink } from '../../utils/browser';
 import { logToFirebase } from '../../utils/firebaseAnalytics';
 import { trigger } from '../../utils/trigger';
@@ -16,6 +16,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { t } from 'i18next';
 import Toast from 'react-native-simple-toast';
 import { useKeepAwake } from 'expo-keep-awake';
+import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 import TouchableScale from '../../components/TouchableScale';
 
 const busIcon = require('../../static/img/Bus/bus.png');
@@ -96,7 +97,7 @@ function getBusData(busInfoHtml) {
 const BUS_URL_DEFAULT = UM_BUS_LOOP_ZH;
 
 // 巴士報站頁 - 畫面佈局與渲染
-const BusScreen = () => {
+const BusScreen = ({ navigation }) => {
     useKeepAwake();
     const { theme } = useTheme();
     const { bg_color, white, black, themeColor, secondThemeColor, viewShadow } = theme;
@@ -133,6 +134,60 @@ const BusScreen = () => {
     const [toastColor, setToastColor] = useState(themeColor);
     const [busUrl, setBusUrl] = useState(BUS_URL_DEFAULT);
     const imageViewerRef = useRef(null);
+
+    // 右上角官方服務說明（參考 LocalCourse / DeepLinkShareButton header 模式）
+    const openBusServiceInfo = useCallback(() => {
+        openLink(UM_BUS_LOOP_SERVICE);
+    }, []);
+
+    useLayoutEffect(() => {
+        navigation.setOptions({
+            headerRight:
+                Platform.OS === 'ios'
+                    ? undefined
+                    : () => (
+                        <Pressable
+                            accessibilityRole="button"
+                            accessibilityLabel={t('官方資訊', { ns: 'features' })}
+                            onPress={() => {
+                                trigger();
+                                openBusServiceInfo();
+                            }}
+                            style={{
+                                width: scale(36),
+                                height: scale(36),
+                                borderRadius: scale(18),
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                            }}>
+                            <MaterialCommunityIcons
+                                name="information-outline"
+                                size={scale(20)}
+                                color={themeColor}
+                            />
+                        </Pressable>
+                    ),
+            unstable_headerRightItems:
+                Platform.OS === 'ios'
+                    ? () => [
+                        {
+                            type: 'button',
+                            label: t('官方資訊', { ns: 'features' }),
+                            accessibilityLabel: t('官方資訊', { ns: 'features' }),
+                            icon: {
+                                type: 'sfSymbol',
+                                name: 'info.circle',
+                            },
+                            tintColor: themeColor,
+                            onPress: () => {
+                                trigger();
+                                openBusServiceInfo();
+                            },
+                        },
+                    ]
+                    : undefined,
+        });
+    }, [navigation, openBusServiceInfo, themeColor]);
 
     // 將 stopImgArr 轉換為 ARKImageView 可用的格式
     const processedStopImages = useMemo(() => {
