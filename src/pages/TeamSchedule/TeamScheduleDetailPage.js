@@ -1172,11 +1172,15 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
         paddingTop: topSafePad,
         paddingBottom: bottomSafePad,
     };
+    // 可用時間 CTA／編輯 footer 固定於底部時，ScrollView 內容只需少量底距
+    const showEditCta =
+        scheduleMode === 'availability' && !editor.isEditing && canEdit;
     const contentPad = {
         paddingTop: topSafePad,
-        paddingBottom: editor.isEditing
-            ? verticalScale(90) + insets.bottom
-            : verticalScale(40) + insets.bottom,
+        paddingBottom:
+            editor.isEditing || showEditCta
+                ? verticalScale(16)
+                : verticalScale(40) + insets.bottom,
         paddingHorizontal: scale(14),
     };
     // 液態玻璃透明導覽列：indicator 需下移，否則會藏在 header 後方
@@ -1704,35 +1708,6 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                     </View>
                 ) : null}
 
-                {scheduleMode === 'availability' &&
-                !editor.isEditing &&
-                canEdit ? (
-                    <Pressable
-                        accessibilityRole="button"
-                        onPress={() => {
-                            trigger();
-                            editor.enterEdit();
-                        }}
-                        style={({pressed}) => [
-                            styles.editCta,
-                            {
-                                backgroundColor: pressed
-                                    ? theme.tonal.primary50
-                                    : theme.themeColor,
-                            },
-                        ]}>
-                        <Text
-                            style={[
-                                styles.editCtaText,
-                                {color: theme.trueWhite},
-                            ]}>
-                            {hasSubmitted
-                                ? t('修改我的時間')
-                                : t('填寫我的時間')}
-                        </Text>
-                    </Pressable>
-                ) : null}
-
                 {members?.length > 0 ? (
                     <View style={styles.section}>
                         <Text
@@ -1832,6 +1807,46 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                     />
                 ) : null}
             </ScrollView>
+
+            {showEditCta ? (
+                <View
+                    style={[
+                        styles.editCtaBar,
+                        {
+                            backgroundColor: theme.bg_color,
+                            borderTopColor: theme.themeColorUltraLight,
+                            paddingBottom: Math.max(
+                                insets.bottom,
+                                verticalScale(8),
+                            ),
+                        },
+                    ]}>
+                    <Pressable
+                        accessibilityRole="button"
+                        onPress={() => {
+                            trigger();
+                            editor.enterEdit();
+                        }}
+                        style={({pressed}) => [
+                            styles.editCta,
+                            {
+                                backgroundColor: pressed
+                                    ? theme.tonal.primary50
+                                    : theme.themeColor,
+                            },
+                        ]}>
+                        <Text
+                            style={[
+                                styles.editCtaText,
+                                {color: theme.trueWhite},
+                            ]}>
+                            {hasSubmitted
+                                ? t('修改我的時間')
+                                : t('填寫我的時間')}
+                        </Text>
+                    </Pressable>
+                </View>
+            ) : null}
 
             {editor.isEditing ? (
                 <AvailabilityEditorFooter
@@ -1994,10 +2009,16 @@ const styles = StyleSheet.create({
         fontSize: scale(12),
         marginLeft: scale(8),
     },
+    editCtaBar: {
+        borderTopWidth: StyleSheet.hairlineWidth,
+        paddingHorizontal: scale(14),
+        paddingTop: verticalScale(10),
+    },
     editCta: {
         alignItems: 'center',
         borderRadius: scale(12),
-        marginTop: verticalScale(16),
+        justifyContent: 'center',
+        minHeight: verticalScale(44),
         paddingVertical: verticalScale(12),
     },
     editCtaText: {
