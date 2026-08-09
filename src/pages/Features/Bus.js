@@ -465,7 +465,6 @@ const BusScreen = ({navigation}) => {
                 }>
                 <BusRouteMap
                     maxHeight={routeMapMaxHeight}
-                    onOpenMap={() => openLink({URL: UM_MAP, mode: 'fullScreen'})}
                     onSelectStop={handleSelectStop}
                     onSelectVehicle={plate => {
                         setSelectedVehiclePlate(plate);
@@ -483,6 +482,7 @@ const BusScreen = ({navigation}) => {
                 <BusArrivalPanel
                     expanded={panelExpanded}
                     now={now}
+                    onOpenMap={() => openLink({URL: UM_MAP, mode: 'fullScreen'})}
                     onRefresh={handleRefresh}
                     onSelectStop={handleSelectStop}
                     onSelectVehicle={setSelectedVehiclePlate}

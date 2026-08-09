@@ -57,6 +57,7 @@ const etaText = (display, translate) => {
 const BusArrivalPanel = ({
     expanded,
     now,
+    onOpenMap,
     onRefresh,
     onSelectStop,
     onSelectVehicle,
@@ -393,6 +394,23 @@ const BusArrivalPanel = ({
                                     />
                                 </Pressable>
                             ) : null}
+                            <Pressable
+                                accessibilityRole="button"
+                                accessibilityLabel={translate('校園地圖')}
+                                onPress={() => {
+                                    trigger();
+                                    onOpenMap();
+                                }}
+                                style={({pressed}) => [
+                                    styles.headingAction,
+                                    pressed && {opacity: 0.7},
+                                ]}>
+                                <MaterialCommunityIcons
+                                    name="map-outline"
+                                    color={themeColor}
+                                    size={20}
+                                />
+                            </Pressable>
                             <Pressable
                                 accessibilityRole="button"
                                 accessibilityLabel={translate('更新巴士資料')}

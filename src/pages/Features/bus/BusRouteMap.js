@@ -18,7 +18,6 @@ const percentY = value => `${value / MAP_HEIGHT * 100}%`;
 
 const BusRouteMap = ({
     maxHeight,
-    onOpenMap,
     onSelectStop,
     onSelectVehicle,
     selectedStop,
@@ -49,28 +48,6 @@ const BusRouteMap = ({
             position: 'absolute',
             width: '100%',
             height: '100%',
-        },
-        mapButton: {
-            position: 'absolute',
-            top: '58%',
-            left: '50%',
-            transform: [{translateX: -46}],
-            minWidth: 92,
-            minHeight: 34,
-            paddingHorizontal: 12,
-            borderRadius: 17,
-            backgroundColor: white,
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexDirection: 'row',
-            gap: 5,
-            ...viewShadow,
-        },
-        mapButtonText: {
-            ...uiStyle.defaultText,
-            color: themeColor,
-            fontSize: 13,
-            fontWeight: '600',
         },
         stopLabel: {
             minHeight: 30,
@@ -286,18 +263,6 @@ const BusRouteMap = ({
                     </TouchableScale>
                 );
             })}
-
-            <Pressable
-                accessibilityRole="link"
-                accessibilityLabel={translate('校園地圖')}
-                onPress={() => {
-                    trigger();
-                    onOpenMap();
-                }}
-                style={({pressed}) => [styles.mapButton, pressed && {opacity: 0.7}]}>
-                <MaterialCommunityIcons name="map-outline" color={themeColor} size={17} />
-                <Text style={styles.mapButtonText}>{translate('校園地圖')}</Text>
-            </Pressable>
         </View>
     );
 };
