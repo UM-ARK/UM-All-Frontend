@@ -82,6 +82,10 @@ import {createCourseSchedulePrefill} from './utils/courseSchedulePrefill';
 import {loadSavedCourseSlots} from './utils/loadSavedCourseSlots';
 import {slotKey} from './utils/scheduleRanges';
 import {
+    areSharedTimetablePayloadsEqual,
+    buildSharedTimetablePayload,
+} from './utils/sharedTimetable';
+import {
     aggregateHeatmapSlots,
     buildHeatmapWithSuggestions,
     getActiveMembers,
@@ -270,6 +274,7 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
     });
     const [scheduleMode, setScheduleMode] = useState('availability');
     const [courseCatalogSlots, setCourseCatalogSlots] = useState([]);
+    const [localSharedTimetable, setLocalSharedTimetable] = useState(null);
     const loadedSharedTimetableEventRef = useRef(null);
     const [sharedTimetableSheetVisible, setSharedTimetableSheetVisible] =
         useState(false);
@@ -337,6 +342,12 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
         return true;
     }, [sharedTimetables]);
 
+    const loadLocalSharedTimetable = useCallback(async () => {
+        const local = await loadSavedCourseSlots({includePlanList: true});
+        setLocalSharedTimetable(local);
+        return local;
+    }, []);
+
     const handlePullRefresh = useCallback(async () => {
         if (editor.isEditing || isPullRefreshing) {
             return;
@@ -402,8 +413,16 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
         }
         loadedSharedTimetableEventRef.current = eventId;
         setCourseCatalogSlots([]);
-        loadSharedTimetables();
-    }, [eventId, loadSharedTimetables, scheduleMode]);
+        Promise.allSettled([
+            loadSharedTimetables(),
+            loadLocalSharedTimetable(),
+        ]);
+    }, [
+        eventId,
+        loadLocalSharedTimetable,
+        loadSharedTimetables,
+        scheduleMode,
+    ]);
     const [displaySlotMinutes, setDisplaySlotMinutes] = useState(
         DEFAULT_DISPLAY_SLOT_MINUTES,
     );
@@ -1363,6 +1382,18 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
         normalizeAvailability(myAvailability, event?.timezone),
     );
     const mySharingLevel = sharedTimetables.mySharedTimetable?.sharingLevel;
+    const isSharedTimetableOutdated = Boolean(
+        sharedTimetables.mySharedTimetable &&
+        localSharedTimetable?.hasPlan &&
+        !areSharedTimetablePayloadsEqual(
+            buildSharedTimetablePayload({
+                sharingLevel: mySharingLevel,
+                planList: localSharedTimetable.planList,
+                planSlots: localSharedTimetable.planSlots,
+            }),
+            sharedTimetables.mySharedTimetable,
+        ),
+    );
     const mySharingStatus = sharedTimetables.phase === 'loading' ||
         sharedTimetables.phase === 'idle'
         ? {
@@ -1376,6 +1407,12 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                 hint: null,
                 icon: 'alert-circle-outline',
             }
+          : isSharedTimetableOutdated
+            ? {
+                  title: t('我的課表共享'),
+                  hint: t('本機課表已有變更，點此更新'),
+                  icon: 'alert-circle-outline',
+              }
           : mySharingLevel === 'course_identity'
             ? {
                   title: t('我的課表共享'),
@@ -1430,7 +1467,11 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                     <SegmentControl
                         options={[
                             {key: 'availability', label: t('共同空檔')},
-                            {key: 'shared', label: t('小組課表')},
+                            {
+                                key: 'shared',
+                                label: t('小組課表'),
+                                showDot: isSharedTimetableOutdated,
+                            },
                         ]}
                         selectedIndex={
                             scheduleMode === 'shared' ? 1 : 0
@@ -1656,18 +1697,31 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                                 styles.sharedTimetableCta,
                                 {
                                     backgroundColor: pressed
-                                        ? theme.tonal.primary30
-                                        : theme.tonal.primary15,
+                                        ? isSharedTimetableOutdated
+                                            ? theme.tonal.unread30
+                                            : theme.tonal.primary30
+                                        : isSharedTimetableOutdated
+                                          ? theme.tonal.unread15
+                                          : theme.tonal.primary15,
                                 },
                             ]}>
                             <View
                                 style={[
                                     styles.sharedTimetableStatusIcon,
-                                    {backgroundColor: theme.tonal.primary30},
+                                    {
+                                        backgroundColor:
+                                            isSharedTimetableOutdated
+                                                ? theme.tonal.unread30
+                                                : theme.tonal.primary30,
+                                    },
                                 ]}>
                                 <Ionicons
                                     name={mySharingStatus.icon}
-                                    color={theme.themeColor}
+                                    color={
+                                        isSharedTimetableOutdated
+                                            ? theme.unread
+                                            : theme.themeColor
+                                    }
                                     size={scale(18)}
                                 />
                             </View>
@@ -1675,7 +1729,11 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                                 <Text
                                     style={[
                                         styles.sharedTimetableCtaText,
-                                        {color: theme.themeColor},
+                                        {
+                                            color: isSharedTimetableOutdated
+                                                ? theme.unread
+                                                : theme.themeColor,
+                                        },
                                     ]}>
                                     {mySharingStatus.title}
                                 </Text>
@@ -1691,7 +1749,11 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                             </View>
                             <Ionicons
                                 name="chevron-forward"
-                                color={theme.themeColor}
+                                color={
+                                    isSharedTimetableOutdated
+                                        ? theme.unread
+                                        : theme.themeColor
+                                }
                                 size={scale(17)}
                             />
                         </Pressable>
@@ -1891,9 +1953,7 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                 visible={sharedTimetableSheetVisible}
                 eventStatus={event?.status}
                 serverSnapshot={sharedTimetables.mySharedTimetable}
-                onLoadLocal={() =>
-                    loadSavedCourseSlots({includePlanList: true})
-                }
+                onLoadLocal={loadLocalSharedTimetable}
                 onSave={sharedTimetables.save}
                 onStop={sharedTimetables.stopSharing}
                 onClose={() => setSharedTimetableSheetVisible(false)}

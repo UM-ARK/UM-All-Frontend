@@ -12,7 +12,10 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {uiStyle, useTheme} from '../../../components/ThemeContext';
 import {logToFirebase} from '../../../utils/firebaseAnalytics';
 import {trigger} from '../../../utils/trigger';
-import {buildSharedTimetablePayload} from '../utils/sharedTimetable';
+import {
+    areSharedTimetablePayloadsEqual,
+    buildSharedTimetablePayload,
+} from '../utils/sharedTimetable';
 import {getWeekdayShortLabel} from './scheduleWeekHelpers';
 
 const SharedTimetableSheet = ({
@@ -86,6 +89,18 @@ const SharedTimetableSheet = ({
         local?.hasPlan &&
         !loading &&
         !saving;
+    const isLocalOutdated = Boolean(
+        serverSnapshot &&
+        local?.hasPlan &&
+        !areSharedTimetablePayloadsEqual(
+            buildSharedTimetablePayload({
+                sharingLevel: serverSnapshot.sharingLevel,
+                planList: local.planList,
+                planSlots: local.planSlots,
+            }),
+            serverSnapshot,
+        ),
+    );
     const timePreview = payload.busyRanges
         ?.map(item => {
             const formatMinute = minute => {
@@ -197,6 +212,24 @@ const SharedTimetableSheet = ({
                             '每個組隊的共享內容彼此獨立。本機課表變更後不會自動更新此組隊，需再次點擊「確定更新」。',
                         )}
                     </Text>
+                    {isLocalOutdated ? (
+                        <View
+                            style={[
+                                styles.outdatedNotice,
+                                {
+                                    backgroundColor: theme.tonal.unread15,
+                                    borderColor: theme.tonal.unread30,
+                                },
+                            ]}>
+                            <Text
+                                style={[
+                                    styles.outdatedNoticeText,
+                                    {color: theme.unread},
+                                ]}>
+                                {t('本機課表已有變更，請確認內容後點擊「確定更新」。')}
+                            </Text>
+                        </View>
+                    ) : null}
                     {loading ? (
                         <ActivityIndicator
                             color={theme.themeColor}
@@ -440,6 +473,18 @@ const styles = StyleSheet.create({
     },
     loading: {
         marginTop: verticalScale(12),
+    },
+    outdatedNotice: {
+        borderRadius: scale(8),
+        borderWidth: StyleSheet.hairlineWidth,
+        marginTop: verticalScale(10),
+        paddingHorizontal: scale(10),
+        paddingVertical: verticalScale(8),
+    },
+    outdatedNoticeText: {
+        ...uiStyle.defaultText,
+        fontSize: scale(12),
+        lineHeight: verticalScale(17),
     },
     option: {
         borderRadius: scale(10),

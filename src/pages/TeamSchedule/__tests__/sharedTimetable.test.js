@@ -131,6 +131,43 @@ describe('小組共享課表 payload', () => {
             ),
         ).toBe(true);
     });
+
+    test('共享內容比較會忽略 revision 並識別本機時間變更', () => {
+        expect(
+            areSharedTimetablePayloadsEqual(
+                {
+                    sharingLevel: 'time_only',
+                    busyRanges: [
+                        {weekday: 1, startMinute: 600, endMinute: 660},
+                    ],
+                    revision: 0,
+                },
+                {
+                    sharingLevel: 'time_only',
+                    busyRanges: [
+                        {weekday: 1, startMinute: 600, endMinute: 660},
+                    ],
+                    revision: 3,
+                },
+            ),
+        ).toBe(true);
+        expect(
+            areSharedTimetablePayloadsEqual(
+                {
+                    sharingLevel: 'time_only',
+                    busyRanges: [
+                        {weekday: 1, startMinute: 600, endMinute: 690},
+                    ],
+                },
+                {
+                    sharingLevel: 'time_only',
+                    busyRanges: [
+                        {weekday: 1, startMinute: 600, endMinute: 660},
+                    ],
+                },
+            ),
+        ).toBe(false);
+    });
 });
 
 describe('小組共享課表概覽', () => {
