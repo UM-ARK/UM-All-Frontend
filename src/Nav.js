@@ -275,7 +275,11 @@ const Nav = () => {
                     <Stack.Screen
                         name="Bus"
                         component={Bus}
-                        options={{ headerTitle: t('校園巴士') }}
+                        options={{
+                            headerTitle: t('校園巴士'),
+                            // 巴士頁改為全屏堆疊跳轉，不再使用 iOS Modal
+                            presentation: 'card',
+                        }}
                     />
                     <Stack.Screen
                         name="CarPark"

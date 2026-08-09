@@ -9,6 +9,8 @@ export const SCHEDULING_BASE_URI = 'https://umall.one/api/v2';
 // 用適配API返回的圖片相對路徑
 export const BASE_HOST = 'https://umall.one';
 
+export const UM_BUS_LIVE = BASE_HOST + '/api/v2/bus/live';
+
 export const ARK_APP_LINK = BASE_HOST + '/app';
 
 export function ARK_COURSE_SHARE_URL(courseCode) {
