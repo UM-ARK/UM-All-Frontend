@@ -16,7 +16,7 @@ import {
     BUS_STOPS,
     getBusStop,
     getEtaDisplay,
-    getOfficialNextDepartureTime,
+    getOfficialNextDeparturePresentation,
     getPositionLabel,
     getVehicleDestinationEta,
     sortVehiclesByDestinationEta,
@@ -263,9 +263,26 @@ const BusArrivalPanel = ({
         [selectedStop, snapshot?.vehicles],
     );
     const visibleVehicles = expanded ? vehicles : vehicles.slice(0, 1);
-    const officialNextDepartureTime = getOfficialNextDepartureTime(
+    const officialNextDeparture = getOfficialNextDeparturePresentation(
         snapshot?.officialNextDeparture,
     );
+    const officialNextDepartureText = (() => {
+        if (officialNextDeparture.kind === 'serviceWindow') {
+            return translate('官方班次 {{start}}–{{end}} 循環行駛', {
+                start: officialNextDeparture.startTime,
+                end: officialNextDeparture.endTime,
+            });
+        }
+        if (officialNextDeparture.kind === 'loopService') {
+            return translate('官方班次循環行駛');
+        }
+        if (officialNextDeparture.kind === 'departure') {
+            return translate('官方下一班預計 {{time}} 開出', {
+                time: officialNextDeparture.time,
+            });
+        }
+        return translate('官方下一班時間待公布');
+    })();
 
     useEffect(() => {
         panelHeight.value = withSpring(
@@ -476,9 +493,7 @@ const BusArrivalPanel = ({
                             size={14}
                         />
                         <Text style={styles.departureText} numberOfLines={1}>
-                            {officialNextDepartureTime
-                                ? translate('官方下一班預計 {{time}} 開出', {time: officialNextDepartureTime})
-                                : translate('官方下一班時間待公布')}
+                            {officialNextDepartureText}
                         </Text>
                     </View>
                 </Animated.View>

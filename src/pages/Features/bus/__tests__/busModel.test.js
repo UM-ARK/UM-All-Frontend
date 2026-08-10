@@ -4,7 +4,7 @@ import {
     getBusPosition,
     getBusStop,
     getEtaDisplay,
-    getOfficialNextDepartureTime,
+    getOfficialNextDeparturePresentation,
     getPositionLabel,
     isCachedBusLiveUsable,
     normalizeBusLive,
@@ -74,9 +74,19 @@ describe('busModel', () => {
         )).toEqual({kind: 'soon'});
     });
 
-    test('extracts the official next departure time', () => {
-        expect(getOfficialNextDepartureTime('下一班：08:45')).toBe('08:45');
-        expect(getOfficialNextDepartureTime(null)).toBeNull();
+    test('distinguishes an official departure from a loop-service window', () => {
+        expect(getOfficialNextDeparturePresentation('下一班：08:45')).toEqual({
+            kind: 'departure',
+            time: '08:45',
+        });
+        expect(getOfficialNextDeparturePresentation(
+            '下一班：循環行駛 (09:00 - 15:00)',
+        )).toEqual({
+            kind: 'serviceWindow',
+            startTime: '09:00',
+            endTime: '15:00',
+        });
+        expect(getOfficialNextDeparturePresentation(null)).toEqual({kind: 'pending'});
     });
 
     test('sorts known destination ETAs before unavailable vehicles', () => {

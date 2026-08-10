@@ -1128,6 +1128,8 @@
         "所選站暫無預計時間 · {{eta}}到達下一站 {{station}}": "No ETA for the selected stop · {{eta}} to the next stop, {{station}}",
         "官方下一班預計 {{time}} 開出": "Official next departure is expected at {{time}}",
         "官方下一班時間待公布": "Official next departure time is pending",
+        "官方班次 {{start}}–{{end}} 循環行駛": "Official loop service runs from {{start}} to {{end}}",
+        "官方班次循環行駛": "Official loop service is running",
         "等待開出": "Waiting to depart",
         "預計時間暫時無法使用": "ETA temporarily unavailable",
         "正在累積行車數據": "Collecting journey data",

@@ -69,8 +69,20 @@ export function getPositionLabel(positionCode, translate = value => value) {
     return `${from.code} → ${to.code}`;
 }
 
-export function getOfficialNextDepartureTime(value) {
-    return String(value || '').match(/\b\d{1,2}:\d{2}\b/)?.[0] || null;
+export function getOfficialNextDeparturePresentation(value) {
+    const text = String(value || '');
+    const times = text.match(/\b\d{1,2}:\d{2}\b/g) || [];
+    const isLoopService = /循環行駛|loop|continuous/i.test(text);
+    if (isLoopService && times.length >= 2) {
+        return {kind: 'serviceWindow', startTime: times[0], endTime: times[1]};
+    }
+    if (isLoopService) {
+        return {kind: 'loopService'};
+    }
+    if (times.length > 0) {
+        return {kind: 'departure', time: times[0]};
+    }
+    return {kind: 'pending'};
 }
 
 export function normalizeBusLive(payload, deliverySource = 'live') {
