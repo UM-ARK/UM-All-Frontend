@@ -2,6 +2,7 @@ import axios from 'axios';
 import {
     COURSE_CATALOG_STORAGE_KEYS,
     getCourseCatalogs,
+    isBundledCatalogNewer,
     isValidCourseCatalog,
     refreshCourseCatalogs,
 } from '../checkCoursesKits';
@@ -40,10 +41,10 @@ jest.mock('../../static/UMCourses/courseCatalogs', () => ({
     },
 }));
 
-const makeCatalog = (mode, revision, courseCode = revision) => ({
+const makeCatalog = (mode, revision, courseCode = revision, updateTime = '2026-08-07') => ({
     schemaVersion: 2,
     mode,
-    updateTime: '2026-08-07',
+    updateTime,
     academicYear: '26/27',
     sem: '1',
     revision,
@@ -72,6 +73,21 @@ describe('v2 course catalog adapter', () => {
         )).toBe(false);
     });
 
+    test('isBundledCatalogNewer 僅在 updateTime 嚴格較新時為 true', () => {
+        expect(isBundledCatalogNewer(
+            {updateTime: '2026-08-10'},
+            {updateTime: '2026-08-07'},
+        )).toBe(true);
+        expect(isBundledCatalogNewer(
+            {updateTime: '2026-08-07'},
+            {updateTime: '2026-08-10'},
+        )).toBe(false);
+        expect(isBundledCatalogNewer(
+            {updateTime: '2026-08-07'},
+            {updateTime: '2026-08-07'},
+        )).toBe(false);
+    });
+
     test('v2 緩存缺失或不合法時使用 bundled catalog', async () => {
         setStorageValues({
             [COURSE_CATALOG_STORAGE_KEYS.preenroll]: { Courses: [] },
@@ -87,6 +103,95 @@ describe('v2 course catalog adapter', () => {
         expect(catalogs.adddropCatalog.Courses[0]['Course Code']).toBe(
             'BUNDLED-AD',
         );
+        expect(setLocalStorage).not.toHaveBeenCalled();
+    });
+
+    test('打包種子比緩存新時抬升並寫回 storage、清除舊 ETag', async () => {
+        const staleAdddrop = makeCatalog(
+            'adddrop',
+            'adddrop-2026-03-01-old',
+            'STALE-AD',
+            '2026-03-01',
+        );
+        const newerPreenroll = makeCatalog(
+            'preenroll',
+            'preenroll-2026-05-01-cloud',
+            'CLOUD-PRE',
+            '2026-05-01',
+        );
+        setStorageValues({
+            [COURSE_CATALOG_STORAGE_KEYS.preenroll]: newerPreenroll,
+            [COURSE_CATALOG_STORAGE_KEYS.adddrop]: staleAdddrop,
+            [COURSE_CATALOG_STORAGE_KEYS.metadata]: {
+                schemaVersion: 2,
+                lastCheckedAt: new Date().toISOString(),
+                preenroll: {
+                    revision: 'preenroll-2026-05-01-cloud',
+                    etag: '"sha256-pre"',
+                },
+                adddrop: {
+                    revision: 'adddrop-2026-03-01-old',
+                    etag: '"sha256-stale-ad"',
+                },
+            },
+        });
+
+        const catalogs = await getCourseCatalogs();
+
+        expect(catalogs.adddropCatalog.Courses[0]['Course Code']).toBe(
+            'BUNDLED-AD',
+        );
+        expect(catalogs.preenrollCatalog.Courses[0]['Course Code']).toBe(
+            'CLOUD-PRE',
+        );
+        expect(catalogs.metadata.adddrop).toEqual({
+            revision: 'adddrop-2026-04-02-bundled',
+            updateTime: '2026-04-02',
+            academicYear: '25/26',
+            sem: '2',
+        });
+        expect(catalogs.metadata.adddrop.etag).toBeUndefined();
+        expect(catalogs.metadata.preenroll.etag).toBe('"sha256-pre"');
+        expect(setLocalStorage).toHaveBeenCalledWith(
+            COURSE_CATALOG_STORAGE_KEYS.adddrop,
+            expect.objectContaining({revision: 'adddrop-2026-04-02-bundled'}),
+        );
+        expect(setLocalStorage).toHaveBeenCalledWith(
+            COURSE_CATALOG_STORAGE_KEYS.metadata,
+            expect.objectContaining({
+                adddrop: expect.objectContaining({
+                    revision: 'adddrop-2026-04-02-bundled',
+                }),
+                preenroll: expect.objectContaining({
+                    etag: '"sha256-pre"',
+                }),
+            }),
+        );
+        expect(setLocalStorage).not.toHaveBeenCalledWith(
+            COURSE_CATALOG_STORAGE_KEYS.preenroll,
+            expect.anything(),
+        );
+    });
+
+    test('緩存不舊於打包種子時維持緩存且不寫入', async () => {
+        const preenrollCatalog = makeCatalog('preenroll', 'pre-cache');
+        const adddropCatalog = makeCatalog('adddrop', 'ad-cache');
+        setStorageValues({
+            [COURSE_CATALOG_STORAGE_KEYS.preenroll]: preenrollCatalog,
+            [COURSE_CATALOG_STORAGE_KEYS.adddrop]: adddropCatalog,
+            [COURSE_CATALOG_STORAGE_KEYS.metadata]: {
+                schemaVersion: 2,
+                lastCheckedAt: new Date().toISOString(),
+                preenroll: { revision: 'pre-cache' },
+                adddrop: { revision: 'ad-cache' },
+            },
+        });
+
+        const catalogs = await getCourseCatalogs();
+
+        expect(catalogs.preenrollCatalog).toBe(preenrollCatalog);
+        expect(catalogs.adddropCatalog).toBe(adddropCatalog);
+        expect(setLocalStorage).not.toHaveBeenCalled();
     });
 
     test('新鮮 metadata 在六小時內不重複請求', async () => {
