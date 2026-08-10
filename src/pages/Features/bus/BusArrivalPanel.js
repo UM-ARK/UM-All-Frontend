@@ -334,6 +334,20 @@ const BusArrivalPanel = ({
                     station: vehicle.nextStop || '—',
                 });
         }
+        if (selectedStop && vehicle.nextStopEta && vehicle.nextStop) {
+            const nextStopDisplay = getEtaDisplay(
+                vehicle.nextStopEta,
+                snapshot?.observedAt,
+                now,
+            );
+            const nextStopValue = etaText(nextStopDisplay, translate);
+            if (nextStopValue) {
+                return translate('所選站暫無預計時間 · {{eta}}到達下一站 {{station}}', {
+                    eta: nextStopValue,
+                    station: vehicle.nextStop,
+                });
+            }
+        }
         return snapshot?.deliverySource === 'fallback'
             ? translate('預計時間暫時無法使用')
             : translate('正在累積行車數據');
