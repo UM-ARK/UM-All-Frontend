@@ -29,6 +29,7 @@ import {
     BUS_STOPS,
     createFallbackBusLive,
     extractVehiclePlates,
+    isBusLiveSnapshotFresh,
     isCachedBusLiveUsable,
     normalizeBusLive,
 } from './bus/busModel';
@@ -280,9 +281,9 @@ const BusScreen = ({navigation}) => {
                 timeout: 8000,
             });
             const live = normalizeBusLive(response.data);
-            if (live.stale) {
+            if (!isBusLiveSnapshotFresh(live)) {
                 staleLive = live;
-                throw new Error('Bus live response is stale');
+                throw new Error('Bus live response is stale or expired');
             }
             setSnapshot(live);
             setLocalStorageSilently(BUS_LIVE_SNAPSHOT_KEY, live);

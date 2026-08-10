@@ -129,16 +129,31 @@ export function createFallbackBusLive(busData, observedAt = new Date()) {
     };
 }
 
-export function isCachedBusLiveUsable(snapshot, now = Date.now()) {
-    if (snapshot?.deliverySource === 'fallback' || snapshot?.deliverySource === 'stale') {
+export function isBusLiveSnapshotFresh(snapshot, now = Date.now()) {
+    if (snapshot?.stale) {
         return false;
     }
     const observedAt = Date.parse(snapshot?.observedAt || '');
     if (!Number.isFinite(observedAt)) {
         return false;
     }
-    const maxAge = snapshot?.observerMode === 'scheduled_idle' ? 10 * 60 * 1000 : 60 * 1000;
+    const isScheduledIdle = snapshot?.observerMode === 'scheduled_idle';
+    const maxAge = isScheduledIdle ? 10 * 60 * 1000 : 60 * 1000;
+    const nextPollAt = Date.parse(snapshot?.nextPollAt || '');
+    if (Number.isFinite(nextPollAt)) {
+        const overdueGrace = isScheduledIdle ? 5 * 60 * 1000 : 30 * 1000;
+        if (now > nextPollAt + overdueGrace) {
+            return false;
+        }
+    }
     return now - observedAt <= maxAge;
+}
+
+export function isCachedBusLiveUsable(snapshot, now = Date.now()) {
+    if (snapshot?.deliverySource === 'fallback' || snapshot?.deliverySource === 'stale') {
+        return false;
+    }
+    return isBusLiveSnapshotFresh(snapshot, now);
 }
 
 export function getEtaDisplay(eta, observedAt, now = Date.now()) {

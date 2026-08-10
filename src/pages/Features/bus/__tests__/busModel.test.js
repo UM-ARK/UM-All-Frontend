@@ -7,6 +7,7 @@ import {
     getOfficialNextDeparturePresentation,
     getPositionLabel,
     getVehicleDestinationEta,
+    isBusLiveSnapshotFresh,
     isCachedBusLiveUsable,
     normalizeBusLive,
     sortVehiclesByDestinationEta,
@@ -59,6 +60,27 @@ describe('busModel', () => {
         expect(isCachedBusLiveUsable({
             observedAt: '2026-08-10T00:08:50.000Z',
             deliverySource: 'fallback',
+        }, now)).toBe(false);
+    });
+
+    test('rejects expired successful live responses so the page can fall back', () => {
+        const now = Date.parse('2026-08-10T00:02:10.000Z');
+        expect(isBusLiveSnapshotFresh({
+            observedAt: '2026-08-10T00:01:30.000Z',
+            nextPollAt: '2026-08-10T00:01:35.000Z',
+            observerMode: 'active',
+            stale: false,
+        }, now)).toBe(false);
+        expect(isBusLiveSnapshotFresh({
+            observedAt: '2026-08-10T00:00:00.000Z',
+            nextPollAt: '2026-08-10T00:05:00.000Z',
+            observerMode: 'scheduled_idle',
+            stale: false,
+        }, now)).toBe(true);
+        expect(isBusLiveSnapshotFresh({
+            observedAt: '2026-08-10T00:01:50.000Z',
+            observerMode: 'active',
+            stale: true,
         }, now)).toBe(false);
     });
 
