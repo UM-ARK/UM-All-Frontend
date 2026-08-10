@@ -357,6 +357,13 @@ const BusArrivalPanel = ({
         const eta = getVehicleDestinationEta(vehicle, selectedStop);
         const display = getEtaDisplay(eta, snapshot?.observedAt, now);
         const value = etaText(display, translate);
+        const etaLowConfidence = eta?.confidence === 'low';
+        const pghDeparture = vehicle.positionCode === 'PGH'
+            ? departureText(
+                getEtaDisplay(vehicle.departureEta, snapshot?.observedAt, now),
+                translate,
+            )
+            : null;
         if (selectedStop && vehicle.positionCode === selectedStop) {
             const departure = departureText(
                 getEtaDisplay(vehicle.departureEta, snapshot?.observedAt, now),
@@ -382,10 +389,18 @@ const BusArrivalPanel = ({
                         eta: nextStop,
                         station: vehicle.nextStop,
                     }),
+                    lowConfidence: etaLowConfidence
+                        || vehicle.departureEta?.confidence === 'low'
+                        || vehicle.nextStopEta?.confidence === 'low',
                 };
             }
             if (departure) {
-                return {primary, secondary: departure};
+                return {
+                    primary,
+                    secondary: departure,
+                    lowConfidence: etaLowConfidence
+                        || vehicle.departureEta?.confidence === 'low',
+                };
             }
             if (nextStop && vehicle.nextStop) {
                 return {
@@ -394,9 +409,11 @@ const BusArrivalPanel = ({
                         eta: nextStop,
                         station: vehicle.nextStop,
                     }),
+                    lowConfidence: etaLowConfidence
+                        || vehicle.nextStopEta?.confidence === 'low',
                 };
             }
-            return {primary, secondary: null};
+            return {primary, secondary: null, lowConfidence: etaLowConfidence};
         }
         if (value) {
             const primary = selectedStop
@@ -408,7 +425,14 @@ const BusArrivalPanel = ({
                     eta: value,
                     station: vehicle.nextStop || '—',
                 });
-            return {primary, secondary: null};
+            return {
+                primary,
+                secondary: pghDeparture,
+                lowConfidence: etaLowConfidence
+                    || Boolean(
+                        pghDeparture && vehicle.departureEta?.confidence === 'low',
+                    ),
+            };
         }
         if (selectedStop && vehicle.nextStopEta && vehicle.nextStop) {
             const nextStopDisplay = getEtaDisplay(
@@ -424,6 +448,7 @@ const BusArrivalPanel = ({
                         eta: nextStopValue,
                         station: vehicle.nextStop,
                     }),
+                    lowConfidence: vehicle.nextStopEta?.confidence === 'low',
                 };
             }
         }
@@ -432,6 +457,7 @@ const BusArrivalPanel = ({
                 ? translate('預計時間暫時無法使用')
                 : translate('正在累積行車數據'),
             secondary: null,
+            lowConfidence: false,
         };
     };
 
@@ -637,7 +663,9 @@ const BusArrivalPanel = ({
                                             {etaPresentation.secondary}
                                         </Text>
                                     ) : null}
-                                    {vehicle.stateConfidence === 'low' || vehicle.positionOverdue ? (
+                                    {etaPresentation.lowConfidence
+                                    || vehicle.stateConfidence === 'low'
+                                    || vehicle.positionOverdue ? (
                                         <Text style={styles.warning}>{translate('預測信心較低')}</Text>
                                     ) : null}
                                 </View>

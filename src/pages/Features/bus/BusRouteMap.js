@@ -6,7 +6,7 @@ import Svg, {Circle, Path} from 'react-native-svg';
 import {uiStyle} from '../../../components/ThemeContext';
 import TouchableScale from '../../../components/TouchableScale';
 import {trigger} from '../../../utils/trigger';
-import {BUS_STOPS, getBusPosition} from './busModel';
+import {BUS_STOPS, getBusPosition, getBusStop} from './busModel';
 
 const MAP_WIDTH = 354;
 const MAP_HEIGHT = 678;
@@ -62,9 +62,10 @@ const BusRouteMap = ({
         },
         stopLabel: {
             maxWidth: '100%',
-            minHeight: 30 * mapScale,
-            paddingHorizontal: 8 * mapScale,
-            borderRadius: 15 * mapScale,
+            minHeight: 22 * mapScale,
+            paddingHorizontal: 5 * mapScale,
+            paddingVertical: 2 * mapScale,
+            borderRadius: 11 * mapScale,
             borderWidth: Math.max(1.5, 2 * mapScale),
             backgroundColor: white,
             alignItems: 'center',
@@ -113,6 +114,17 @@ const BusRouteMap = ({
             fontWeight: '700',
         },
     }), [mapScale, themeColor, trueWhite, viewShadow, white]);
+
+    // 巴士目前停在站點上的站碼集合（positionCode 等於站點碼）
+    const arrivedStopCodes = useMemo(() => {
+        const codes = new Set();
+        vehicles.forEach(vehicle => {
+            if (getBusStop(vehicle.positionCode)) {
+                codes.add(vehicle.positionCode);
+            }
+        });
+        return codes;
+    }, [vehicles]);
 
     const vehicleItems = useMemo(() => {
         const groups = vehicles.reduce((result, vehicle) => {
@@ -198,6 +210,15 @@ const BusRouteMap = ({
 
             {BUS_STOPS.map(stop => {
                 const selected = selectedStop === stop.code;
+                const arrived = arrivedStopCodes.has(stop.code);
+                // 到站用副主題色（與巴士圖示一致）；選中用主題色；一般為白底
+                const labelBackground = selected
+                    ? themeColor
+                    : arrived
+                        ? secondThemeColor
+                        : white;
+                const labelForeground = selected || arrived ? trueWhite : themeColor;
+                const labelBorder = selected ? themeColor : arrived ? secondThemeColor : themeColor;
                 const anchorStyle = stop.labelSide === 'right'
                     ? {left: percentX(stop.x + 13), right: 0, top: percentY(stop.y), alignItems: 'flex-start'}
                     : stop.labelSide === 'bottom'
@@ -218,10 +239,10 @@ const BusRouteMap = ({
                             style={({pressed}) => [
                                 styles.stopLabel,
                                 {
-                                    borderColor: themeColor,
-                                    backgroundColor: selected ? themeColor : white,
+                                    borderColor: labelBorder,
+                                    backgroundColor: labelBackground,
                                     opacity: pressed ? 0.7 : 1,
-                                    transform: stop.labelSide === 'bottom' ? [] : [{translateY: -15 * mapScale}],
+                                    transform: stop.labelSide === 'bottom' ? [] : [{translateY: -11 * mapScale}],
                                 },
                             ]}>
                             <Text
@@ -231,7 +252,7 @@ const BusRouteMap = ({
                                 numberOfLines={1}
                                 style={[
                                     styles.stopLabelText,
-                                    {color: selected ? trueWhite : themeColor},
+                                    {color: labelForeground},
                                 ]}>
                                 <Text style={styles.stopCode}>{stop.code}</Text>
                                 {' ' + translate(stop.shortName)}
