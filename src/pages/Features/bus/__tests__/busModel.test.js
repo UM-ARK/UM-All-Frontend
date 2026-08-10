@@ -6,6 +6,7 @@ import {
     getEtaDisplay,
     getOfficialNextDeparturePresentation,
     getPositionLabel,
+    getVehicleDestinationEta,
     isCachedBusLiveUsable,
     normalizeBusLive,
     sortVehiclesByDestinationEta,
@@ -96,6 +97,17 @@ describe('busModel', () => {
             {vehiclePlateNumber: 'A', destinationEtas: {E21: {p50Seconds: 120}}},
         ];
         expect(sortVehiclesByDestinationEta(vehicles, 'E21')[0].vehiclePlateNumber).toBe('A');
+    });
+
+    test('uses the next-loop ETA when the selected stop is the current position', () => {
+        const vehicle = {
+            positionCode: 'PGH',
+            destinationEtas: {PGH: {p50Seconds: 900, p75Seconds: 960}},
+        };
+        expect(getVehicleDestinationEta(vehicle, 'PGH')).toEqual({
+            p50Seconds: 900,
+            p75Seconds: 960,
+        });
     });
 
     test('formats stop and between-stop positions', () => {

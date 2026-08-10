@@ -35,11 +35,8 @@ const PANEL_SPRING = {
 };
 
 const etaText = (display, translate) => {
-    if (display.kind === 'arrived') {
-        return translate('已到站');
-    }
-    if (display.kind === 'soon') {
-        return translate('即將到站');
+    if (display.kind === 'arrived' || display.kind === 'soon') {
+        return translate('即將');
     }
     if (display.kind === 'minutes') {
         if (display.minimumMinutes === display.maximumMinutes) {
@@ -250,6 +247,13 @@ const BusArrivalPanel = ({
             fontWeight: '700',
             marginTop: 3,
         },
+        etaSecondary: {
+            ...uiStyle.defaultText,
+            color: black.third,
+            fontSize: 10,
+            fontWeight: '600',
+            marginTop: 2,
+        },
         warning: {
             ...uiStyle.defaultText,
             color: warning,
@@ -350,6 +354,9 @@ const BusArrivalPanel = ({
     }));
 
     const renderVehicleEta = vehicle => {
+        const eta = getVehicleDestinationEta(vehicle, selectedStop);
+        const display = getEtaDisplay(eta, snapshot?.observedAt, now);
+        const value = etaText(display, translate);
         if (selectedStop && vehicle.positionCode === selectedStop) {
             const departure = departureText(
                 getEtaDisplay(vehicle.departureEta, snapshot?.observedAt, now),
@@ -359,31 +366,40 @@ const BusArrivalPanel = ({
                 getEtaDisplay(vehicle.nextStopEta, snapshot?.observedAt, now),
                 translate,
             );
+            const primary = value
+                ? translate('下一圈 {{eta}}到達 {{station}}', {
+                    eta: value,
+                    station: selectedStop,
+                })
+                : snapshot?.deliverySource === 'fallback'
+                    ? translate('下一圈預計時間暫時無法使用')
+                    : translate('下一圈預計時間仍在累積');
             if (departure && nextStop && vehicle.nextStop) {
-                return translate('已到站 · {{departure}} · {{eta}}到達下一站 {{station}}', {
-                    departure,
-                    eta: nextStop,
-                    station: vehicle.nextStop,
-                });
+                return {
+                    primary,
+                    secondary: translate('{{departure}} · {{eta}}到達下一站 {{station}}', {
+                        departure,
+                        eta: nextStop,
+                        station: vehicle.nextStop,
+                    }),
+                };
             }
             if (departure) {
-                return translate('已到站 · {{departure}}', {departure});
+                return {primary, secondary: departure};
             }
             if (nextStop && vehicle.nextStop) {
-                return translate('已到站 · {{eta}}到達下一站 {{station}}', {
-                    eta: nextStop,
-                    station: vehicle.nextStop,
-                });
+                return {
+                    primary,
+                    secondary: translate('{{eta}}到達下一站 {{station}}', {
+                        eta: nextStop,
+                        station: vehicle.nextStop,
+                    }),
+                };
             }
-            return snapshot?.deliverySource === 'fallback'
-                ? translate('已到站 · 預計時間暫時無法使用')
-                : translate('已到站 · 正在累積停站數據');
+            return {primary, secondary: null};
         }
-        const eta = getVehicleDestinationEta(vehicle, selectedStop);
-        const display = getEtaDisplay(eta, snapshot?.observedAt, now);
-        const value = etaText(display, translate);
         if (value) {
-            return selectedStop
+            const primary = selectedStop
                 ? translate('{{eta}}到達 {{station}}', {
                     eta: value,
                     station: selectedStop,
@@ -392,6 +408,7 @@ const BusArrivalPanel = ({
                     eta: value,
                     station: vehicle.nextStop || '—',
                 });
+            return {primary, secondary: null};
         }
         if (selectedStop && vehicle.nextStopEta && vehicle.nextStop) {
             const nextStopDisplay = getEtaDisplay(
@@ -401,15 +418,21 @@ const BusArrivalPanel = ({
             );
             const nextStopValue = etaText(nextStopDisplay, translate);
             if (nextStopValue) {
-                return translate('所選站暫無預計時間 · {{eta}}到達下一站 {{station}}', {
-                    eta: nextStopValue,
-                    station: vehicle.nextStop,
-                });
+                return {
+                    primary: translate('所選站暫無預計時間'),
+                    secondary: translate('{{eta}}到達下一站 {{station}}', {
+                        eta: nextStopValue,
+                        station: vehicle.nextStop,
+                    }),
+                };
             }
         }
-        return snapshot?.deliverySource === 'fallback'
-            ? translate('預計時間暫時無法使用')
-            : translate('正在累積行車數據');
+        return {
+            primary: snapshot?.deliverySource === 'fallback'
+                ? translate('預計時間暫時無法使用')
+                : translate('正在累積行車數據'),
+            secondary: null,
+        };
     };
 
     return (
@@ -583,6 +606,7 @@ const BusArrivalPanel = ({
                     contentContainerStyle={styles.listContent}>
                     {visibleVehicles.length > 0 ? visibleVehicles.map(vehicle => {
                         const selected = selectedVehiclePlate === vehicle.vehiclePlateNumber;
+                        const etaPresentation = renderVehicleEta(vehicle);
                         return (
                             <Pressable
                                 key={vehicle.vehiclePlateNumber}
@@ -607,7 +631,12 @@ const BusArrivalPanel = ({
                                     <Text style={styles.vehiclePosition}>
                                         {getPositionLabel(vehicle.positionCode, translate)}
                                     </Text>
-                                    <Text style={styles.eta}>{renderVehicleEta(vehicle)}</Text>
+                                    <Text style={styles.eta}>{etaPresentation.primary}</Text>
+                                    {etaPresentation.secondary ? (
+                                        <Text style={styles.etaSecondary}>
+                                            {etaPresentation.secondary}
+                                        </Text>
+                                    ) : null}
                                     {vehicle.stateConfidence === 'low' || vehicle.positionOverdue ? (
                                         <Text style={styles.warning}>{translate('預測信心較低')}</Text>
                                     ) : null}
