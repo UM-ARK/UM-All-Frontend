@@ -134,27 +134,31 @@ describe('busModel', () => {
         });
     });
 
-    test('anchors countdown progress to the destination position within the loop', () => {
+    test('makes the final ETA minutes visibly distinct without completing before arrival', () => {
         const observedAt = '2026-08-10T00:00:00.000Z';
         const vehicle = {
             destinationEtas: {
-                N6: {p50Seconds: 40},
-                E11: {p50Seconds: 140},
-                N2: {p50Seconds: 900},
+                E11: {p50Seconds: 180},
             },
         };
         expect(getVehicleDestinationProgress(
             vehicle,
-            'N6',
+            'E11',
             observedAt,
             Date.parse(observedAt),
-        )).toBeCloseTo(1 - 40 / 900);
+        )).toBeCloseTo(Math.exp(-180 / 240));
         expect(getVehicleDestinationProgress(
             vehicle,
-            'N6',
+            'E11',
             observedAt,
-            Date.parse(observedAt) + 30000,
-        )).toBeCloseTo(0.98);
+            Date.parse(observedAt) + 60000,
+        )).toBeCloseTo(Math.exp(-120 / 240));
+        expect(getVehicleDestinationProgress(
+            vehicle,
+            'E11',
+            observedAt,
+            Date.parse(observedAt) + 180000,
+        )).toBe(0.98);
     });
 
     test('formats stop and between-stop positions', () => {

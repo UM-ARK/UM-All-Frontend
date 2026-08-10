@@ -29,6 +29,7 @@ export const BUS_POSITIONS = [
 ];
 
 export const BUS_POSITION_CODES = BUS_POSITIONS.map(item => item.code);
+const BUS_ETA_PROGRESS_TIME_CONSTANT_SECONDS = 240;
 export const BUS_STATS_LOOKBACK_DAYS = [1, 7, 30];
 const BUS_STATS_MINIMUM_SAMPLES = 5;
 
@@ -197,12 +198,7 @@ export function getVehicleDestinationProgress(
     now = Date.now(),
 ) {
     const eta = getVehicleDestinationEta(vehicle, destinationCode);
-    const loopEtaSeconds = Math.max(
-        ...Object.values(vehicle?.destinationEtas || {})
-            .map(item => item?.p50Seconds)
-            .filter(Number.isFinite),
-    );
-    if (!Number.isFinite(eta?.p50Seconds) || !Number.isFinite(loopEtaSeconds) || loopEtaSeconds <= 0) {
+    if (!Number.isFinite(eta?.p50Seconds)) {
         return 0;
     }
     const observedTime = Date.parse(observedAt || '');
@@ -210,7 +206,10 @@ export function getVehicleDestinationProgress(
         ? Math.max(0, (now - observedTime) / 1000)
         : 0;
     const remainingSeconds = Math.max(0, eta.p50Seconds - elapsedSeconds);
-    return Math.max(0, Math.min(0.98, 1 - remainingSeconds / loopEtaSeconds));
+    return Math.min(
+        0.98,
+        Math.exp(-remainingSeconds / BUS_ETA_PROGRESS_TIME_CONSTANT_SECONDS),
+    );
 }
 
 function getStatsTimeContext(value) {

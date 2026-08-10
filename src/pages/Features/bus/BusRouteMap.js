@@ -85,9 +85,9 @@ const CountdownBorder = ({arrived, color, countdownKey, deadlineAt, initialProgr
         progress.value = correctionDuration > 0
             ? withSequence(
                 withTiming(initialProgress, {duration: correctionDuration}),
-                withTiming(1, {duration: Math.max(0, remainingMs - correctionDuration)}),
+                withTiming(0.98, {duration: Math.max(0, remainingMs - correctionDuration)}),
             )
-            : withTiming(1, {duration: remainingMs});
+            : withTiming(0.98, {duration: remainingMs});
     }, [arrived, countdownKey, deadlineAt, initialProgress, progress, visible]);
 
     return (
