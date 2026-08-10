@@ -4,6 +4,7 @@ import {
     getBusPosition,
     getBusStop,
     getEtaDisplay,
+    getOfficialNextDepartureTime,
     getPositionLabel,
     isCachedBusLiveUsable,
     normalizeBusLive,
@@ -71,6 +72,11 @@ describe('busModel', () => {
             observedAt,
             Date.parse(observedAt),
         )).toEqual({kind: 'soon'});
+    });
+
+    test('extracts the official next departure time', () => {
+        expect(getOfficialNextDepartureTime('下一班：08:45')).toBe('08:45');
+        expect(getOfficialNextDepartureTime(null)).toBeNull();
     });
 
     test('sorts known destination ETAs before unavailable vehicles', () => {

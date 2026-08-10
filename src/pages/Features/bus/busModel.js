@@ -69,6 +69,10 @@ export function getPositionLabel(positionCode, translate = value => value) {
     return `${from.code} → ${to.code}`;
 }
 
+export function getOfficialNextDepartureTime(value) {
+    return String(value || '').match(/\b\d{1,2}:\d{2}\b/)?.[0] || null;
+}
+
 export function normalizeBusLive(payload, deliverySource = 'live') {
     if (!payload || payload.schemaVersion !== 1 || !Array.isArray(payload.vehicles)) {
         throw new Error('Unsupported bus live response');

@@ -1126,6 +1126,7 @@
         "{{eta}}到達 {{station}}": "{{eta}} to {{station}}",
         "{{eta}}到達下一站 {{station}}": "{{eta}} to the next stop, {{station}}",
         "官方下一班預計 {{time}} 開出": "Official next departure is expected at {{time}}",
+        "官方下一班時間待公布": "Official next departure time is pending",
         "等待開出": "Waiting to depart",
         "預計時間暫時無法使用": "ETA temporarily unavailable",
         "正在累積行車數據": "Collecting journey data",

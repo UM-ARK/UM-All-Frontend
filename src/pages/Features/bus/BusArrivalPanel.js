@@ -16,6 +16,7 @@ import {
     BUS_STOPS,
     getBusStop,
     getEtaDisplay,
+    getOfficialNextDepartureTime,
     getPositionLabel,
     getVehicleDestinationEta,
     sortVehiclesByDestinationEta,
@@ -23,8 +24,8 @@ import {
 
 // 面板高度（不含底部安全區）
 export const BUS_PANEL_COLLAPSED_EMPTY = 112;
-export const BUS_PANEL_COLLAPSED = 158;
-export const BUS_PANEL_EXPANDED = 330;
+export const BUS_PANEL_COLLAPSED = 178;
+export const BUS_PANEL_EXPANDED = 350;
 
 const PANEL_SPRING = {
     damping: 28,
@@ -32,8 +33,6 @@ const PANEL_SPRING = {
     mass: 0.8,
     overshootClamping: true,
 };
-
-const departureTime = value => String(value || '').match(/\b\d{1,2}:\d{2}\b/)?.[0] || null;
 
 const etaText = (display, translate) => {
     if (display.kind === 'arrived') {
@@ -151,6 +150,19 @@ const BusArrivalPanel = ({
             fontSize: 18,
             fontWeight: '700',
         },
+        departureRow: {
+            minHeight: 20,
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 4,
+            marginBottom: 2,
+        },
+        departureText: {
+            ...uiStyle.defaultText,
+            color: themeColor,
+            fontSize: 12,
+            fontWeight: '700',
+        },
         hint: {
             ...uiStyle.defaultText,
             color: black.third,
@@ -251,6 +263,9 @@ const BusArrivalPanel = ({
         [selectedStop, snapshot?.vehicles],
     );
     const visibleVehicles = expanded ? vehicles : vehicles.slice(0, 1);
+    const officialNextDepartureTime = getOfficialNextDepartureTime(
+        snapshot?.officialNextDeparture,
+    );
 
     useEffect(() => {
         panelHeight.value = withSpring(
@@ -302,12 +317,6 @@ const BusArrivalPanel = ({
     }));
 
     const renderVehicleEta = vehicle => {
-        if (selectedStop === 'S4' && vehicle.positionCode === 'S4') {
-            const time = departureTime(snapshot?.officialNextDeparture);
-            return time
-                ? translate('官方下一班預計 {{time}} 開出', {time})
-                : translate('等待開出');
-        }
         if (selectedStop && vehicle.positionCode === selectedStop) {
             return translate('已到站');
         }
@@ -445,6 +454,18 @@ const BusArrivalPanel = ({
                                 />
                             </Pressable>
                         </View>
+                    </View>
+                    <View style={styles.departureRow}>
+                        <MaterialCommunityIcons
+                            name="clock-outline"
+                            color={themeColor}
+                            size={14}
+                        />
+                        <Text style={styles.departureText} numberOfLines={1}>
+                            {officialNextDepartureTime
+                                ? translate('官方下一班預計 {{time}} 開出', {time: officialNextDepartureTime})
+                                : translate('官方下一班時間待公布')}
+                        </Text>
                     </View>
                 </Animated.View>
             </GestureDetector>
