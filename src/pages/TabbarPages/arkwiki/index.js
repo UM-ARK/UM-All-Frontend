@@ -69,6 +69,8 @@ const CURATED_CATEGORIES = [
     },
 ];
 
+const RECENT_PREVIEW_LIMIT = 3;
+
 const WikiHome = ({navigation}) => {
     const {theme} = useTheme();
     const {t} = useTranslation('wiki');
@@ -83,6 +85,7 @@ const WikiHome = ({navigation}) => {
             : verticalScale(28);
     const [recentChanges, setRecentChanges] = useState([]);
     const [isLoadingRecent, setIsLoadingRecent] = useState(true);
+    const [showAllRecent, setShowAllRecent] = useState(false);
     const [collapsedCategoryKeys, setCollapsedCategoryKeys] = useState(new Set());
 
     useEffect(() => {
@@ -101,10 +104,24 @@ const WikiHome = ({navigation}) => {
     }, [navigation]);
 
     const items = useMemo(() => [
+        {
+            type: 'heading',
+            section: 'recent',
+            title: t('最近更新'),
+            action: recentChanges.length > RECENT_PREVIEW_LIMIT
+                ? showAllRecent ? t('收起') : t('查看全部')
+                : null,
+        },
+        {
+            type: 'recentList',
+            articles: recentChanges.slice(
+                0,
+                showAllRecent ? recentChanges.length : RECENT_PREVIEW_LIMIT,
+            ),
+        },
+        {type: 'heading', title: t('精選文章')},
         ...CURATED_CATEGORIES.map(category => ({...category, type: 'category'})),
-        {type: 'heading', title: t('最近更新')},
-        ...recentChanges.map(item => ({...item, type: 'article', section: 'recent'})),
-    ], [recentChanges, t]);
+    ], [recentChanges, showAllRecent, t]);
     const pageStyle = useMemo(() => [
         styles.page,
         {
@@ -116,6 +133,18 @@ const WikiHome = ({navigation}) => {
     const openArticle = title => {
         trigger();
         navigation.navigate('WikiArticle', {title});
+    };
+
+    const formatRecentTimestamp = timestamp => {
+        const updatedAt = moment(timestamp);
+        const days = moment().diff(updatedAt, 'days');
+        if (days < 1) {
+            return t('今日更新');
+        }
+        if (days < 7) {
+            return t('{{days}} 日前更新', {days});
+        }
+        return t('更新於 {{date}}', {date: updatedAt.format('YYYY-MM-DD')});
     };
 
     const toggleCategory = key => {
@@ -208,38 +237,68 @@ const WikiHome = ({navigation}) => {
             return (
                 <View style={styles.headingRow}>
                     <Text style={[styles.heading, {color: theme.black.main}]}>{item.title}</Text>
-                    {isLoadingRecent ? <ActivityIndicator size="small" color={theme.themeColor} /> : null}
+                    {item.section === 'recent' && isLoadingRecent ? (
+                        <ActivityIndicator size="small" color={theme.themeColor} />
+                    ) : item.action ? (
+                        <Pressable
+                            accessibilityRole="button"
+                            hitSlop={scale(8)}
+                            onPress={() => {
+                                trigger();
+                                setShowAllRecent(currentValue => !currentValue);
+                            }}>
+                            <Text style={[styles.headingAction, {color: theme.themeColor}]}>
+                                {item.action}
+                            </Text>
+                        </Pressable>
+                    ) : null}
                 </View>
             );
         }
-        return (
-            <Pressable
-                onPress={() => openArticle(item.title)}
-                style={({pressed}) => [
-                    styles.articleRow,
-                    {
-                        backgroundColor: pressed ? theme.tonal.primary15 : theme.white,
-                        borderColor: theme.disabled,
-                    },
-                ]}>
-                <MaterialCommunityIcons
-                    name={item.section === 'recent' ? 'history' : 'book-open-page-variant-outline'}
-                    size={scale(20)}
-                    color={theme.themeColor}
-                />
-                <View style={styles.articleText}>
-                    <Text style={[styles.articleTitle, {color: theme.black.main}]}>
-                        {item.label || item.title}
-                    </Text>
-                    {item.timestamp ? (
-                        <Text style={[styles.articleMeta, {color: theme.black.third}]}>
-                            {moment(item.timestamp).format('YYYY-MM-DD HH:mm')}
-                        </Text>
-                    ) : null}
+        if (item.type === 'recentList') {
+            if (!item.articles.length) {
+                return null;
+            }
+            return (
+                <View style={styles.recentList}>
+                    {item.articles.map((article, index) => (
+                        <Pressable
+                            key={`${article.title}-${article.timestamp || index}`}
+                            onPress={() => openArticle(article.title)}
+                            style={({pressed}) => [
+                                styles.recentRow,
+                                index < item.articles.length - 1 && {
+                                    borderBottomWidth: StyleSheet.hairlineWidth,
+                                    borderBottomColor: theme.disabled,
+                                },
+                                pressed && {backgroundColor: theme.tonal.primary15},
+                            ]}>
+                            <MaterialCommunityIcons
+                                name="history"
+                                size={scale(18)}
+                                color={theme.themeColor}
+                            />
+                            <View style={styles.articleText}>
+                                <Text style={[styles.articleTitle, {color: theme.black.main}]}>
+                                    {article.label || article.title}
+                                </Text>
+                                {article.timestamp ? (
+                                    <Text style={[styles.articleMeta, {color: theme.black.third}]}>
+                                        {formatRecentTimestamp(article.timestamp)}
+                                    </Text>
+                                ) : null}
+                            </View>
+                            <MaterialCommunityIcons
+                                name="chevron-right"
+                                size={scale(20)}
+                                color={theme.black.third}
+                            />
+                        </Pressable>
+                    ))}
                 </View>
-                <MaterialCommunityIcons name="chevron-right" size={scale(21)} color={theme.black.third} />
-            </Pressable>
-        );
+            );
+        }
+        return null;
     };
 
     const listHeader = (
@@ -276,7 +335,6 @@ const WikiHome = ({navigation}) => {
                     <Text style={[styles.quickText, {color: theme.secondThemeColor}]}>{t('前往 Wiki 貢獻')}</Text>
                 </Pressable>
             </View>
-            <Text style={[styles.heading, {color: theme.black.main}]}>{t('精選文章')}</Text>
         </View>
     );
 
@@ -286,7 +344,11 @@ const WikiHome = ({navigation}) => {
                 data={items}
                 extraData={collapsedCategoryKeys}
                 renderItem={renderItem}
-                keyExtractor={(item, index) => `${item.type}-${item.key || item.title}-${index}`}
+                keyExtractor={(item, index) =>
+                    item.type === 'recentList'
+                        ? `recentList-${item.articles.length}-${showAllRecent}`
+                        : `${item.type}-${item.key || item.title}-${index}`
+                }
                 ListHeaderComponent={listHeader}
                 contentContainerStyle={[styles.content, {paddingBottom: listBottomPad}]}
             />
@@ -353,8 +415,11 @@ const styles = StyleSheet.create({
         ...uiStyle.defaultText,
         fontSize: scale(17),
         fontWeight: '700',
-        marginTop: verticalScale(18),
-        marginBottom: verticalScale(8),
+    },
+    headingAction: {
+        ...uiStyle.defaultText,
+        fontSize: scale(13),
+        fontWeight: '600',
     },
     category: {
         borderWidth: StyleSheet.hairlineWidth,
@@ -407,13 +472,12 @@ const styles = StyleSheet.create({
         fontSize: scale(12),
         fontWeight: '600',
     },
-    articleRow: {
-        minHeight: verticalScale(52),
-        borderWidth: StyleSheet.hairlineWidth,
-        borderRadius: scale(13),
-        paddingHorizontal: scale(12),
-        paddingVertical: verticalScale(9),
-        marginBottom: verticalScale(7),
+    recentList: {
+        marginBottom: verticalScale(2),
+    },
+    recentRow: {
+        minHeight: verticalScale(44),
+        paddingVertical: verticalScale(8),
         flexDirection: 'row',
         alignItems: 'center',
         gap: scale(10),
@@ -429,7 +493,7 @@ const styles = StyleSheet.create({
     articleMeta: {
         ...uiStyle.defaultText,
         fontSize: scale(11),
-        marginTop: verticalScale(2),
+        marginTop: verticalScale(1),
     },
 });
 
