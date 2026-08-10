@@ -22,9 +22,9 @@ import {
     sortVehiclesByDestinationEta,
 } from './busModel';
 
-// 面板高度（不含底部安全區）
+// 面板高度（不含底部安全區；收合態預留摘要次行，例如 PGH 出發 ETA）
 export const BUS_PANEL_COLLAPSED_EMPTY = 112;
-export const BUS_PANEL_COLLAPSED = 118;
+export const BUS_PANEL_COLLAPSED = 138;
 export const BUS_PANEL_EXPANDED = 350;
 
 const PANEL_SPRING = {
@@ -594,6 +594,18 @@ const BusArrivalPanel = ({
                             />
                             <Text style={styles.departureText} numberOfLines={1}>
                                 {summaryEtaPresentation.primary}
+                            </Text>
+                        </View>
+                    ) : null}
+                    {summaryEtaPresentation?.secondary ? (
+                        <View style={styles.departureRow}>
+                            <MaterialCommunityIcons
+                                name="bus-clock"
+                                color={themeColor}
+                                size={14}
+                            />
+                            <Text style={styles.departureText} numberOfLines={1}>
+                                {summaryEtaPresentation.secondary}
                             </Text>
                         </View>
                     ) : null}
