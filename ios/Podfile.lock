@@ -185,6 +185,10 @@ PODS:
     - ExpoModulesCore
   - ExpoBlur (57.0.2):
     - ExpoModulesCore
+  - ExpoCamera (57.0.3):
+    - ExpoModulesCore
+  - ExpoCameraBarcodeScanning (57.0.3):
+    - ExpoCamera
   - ExpoCrypto (57.0.1):
     - ExpoModulesCore
   - ExpoDevice (57.0.1):
@@ -3019,6 +3023,8 @@ DEPENDENCIES:
   - expo-dev-menu-interface (from `../node_modules/expo-dev-menu-interface/ios`)
   - ExpoAsset (from `../node_modules/expo-asset/ios`)
   - ExpoBlur (from `../node_modules/expo-blur/ios`)
+  - ExpoCamera (from `../node_modules/expo-camera/ios/ExpoCamera.podspec`)
+  - ExpoCameraBarcodeScanning (from `../node_modules/expo-camera/ios/ExpoCameraBarcodeScanning.podspec`)
   - ExpoCrypto (from `../node_modules/expo-crypto/ios`)
   - ExpoDevice (from `../node_modules/expo-device/ios`)
   - "ExpoDomWebView (from `../node_modules/@expo/dom-webview/ios`)"
@@ -3191,6 +3197,10 @@ EXTERNAL SOURCES:
     :path: "../node_modules/expo-asset/ios"
   ExpoBlur:
     :path: "../node_modules/expo-blur/ios"
+  ExpoCamera:
+    :podspec: "../node_modules/expo-camera/ios/ExpoCamera.podspec"
+  ExpoCameraBarcodeScanning:
+    :podspec: "../node_modules/expo-camera/ios/ExpoCameraBarcodeScanning.podspec"
   ExpoCrypto:
     :path: "../node_modules/expo-crypto/ios"
   ExpoDevice:
@@ -3469,6 +3479,8 @@ SPEC CHECKSUMS:
   expo-dev-menu-interface: 7a59e803916fbfd1b96c75ff91ea8dddac7e722f
   ExpoAsset: cfe3aa47b38c5bc793613f2d7224f2314ad132d0
   ExpoBlur: 69e67b4fbfed6f7325377af2aefa8aa4f00cd2af
+  ExpoCamera: a5e9d9ce2fc06689eb2dd676f1f8d5f22f8aa292
+  ExpoCameraBarcodeScanning: b869ac87ebe30bb99b26c55b0e0471301383c90b
   ExpoCrypto: 366380ffafeb22cc9795438cddcbfa299e1aaf42
   ExpoDevice: 93a72d7c2bd656a4f0c0d580523e390e9ee7fba5
   ExpoDomWebView: beaec034e51bd028428b98bb1f2633ab79c6d095
