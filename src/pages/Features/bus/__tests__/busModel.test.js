@@ -133,7 +133,7 @@ describe('busModel', () => {
     });
 
     test('formats stop and between-stop positions', () => {
-        expect(getPositionLabel('E11')).toBe('E11 科技學院');
+        expect(getPositionLabel('E11')).toBe('E11 工學院、信息學院、理學院');
         expect(getPositionLabel('E11_TO_E21')).toBe('E11 → E21');
     });
 

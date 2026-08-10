@@ -241,6 +241,9 @@ const BusRouteMap = ({
                                 {
                                     borderColor: labelBorder,
                                     backgroundColor: labelBackground,
+                                    maxWidth: stop.labelMaxWidth
+                                        ? stop.labelMaxWidth * mapDisplayWidth / MAP_WIDTH
+                                        : undefined,
                                     opacity: pressed ? 0.7 : 1,
                                     transform: stop.labelSide === 'bottom' ? [] : [{translateY: -11 * mapScale}],
                                 },
@@ -249,7 +252,7 @@ const BusRouteMap = ({
                                 adjustsFontSizeToFit
                                 ellipsizeMode="tail"
                                 minimumFontScale={0.72}
-                                numberOfLines={1}
+                                numberOfLines={stop.labelLines || 1}
                                 style={[
                                     styles.stopLabelText,
                                     {color: labelForeground},

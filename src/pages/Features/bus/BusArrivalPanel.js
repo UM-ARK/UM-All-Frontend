@@ -24,7 +24,7 @@ import {
 
 // 面板高度（不含底部安全區）
 export const BUS_PANEL_COLLAPSED_EMPTY = 112;
-export const BUS_PANEL_COLLAPSED = 178;
+export const BUS_PANEL_COLLAPSED = 118;
 export const BUS_PANEL_EXPANDED = 350;
 
 const PANEL_SPRING = {
@@ -282,7 +282,9 @@ const BusArrivalPanel = ({
         () => sortVehiclesByDestinationEta(snapshot?.vehicles || [], selectedStop),
         [selectedStop, snapshot?.vehicles],
     );
-    const visibleVehicles = expanded ? vehicles : vehicles.slice(0, 1);
+    const headingVehicle = vehicles.find(
+        vehicle => vehicle.vehiclePlateNumber === selectedVehiclePlate,
+    ) || vehicles[0];
     const officialNextDeparture = getOfficialNextDeparturePresentation(
         snapshot?.officialNextDeparture,
     );
@@ -461,6 +463,10 @@ const BusArrivalPanel = ({
         };
     };
 
+    const summaryEtaPresentation = selectedStop && headingVehicle
+        ? renderVehicleEta(headingVehicle)
+        : null;
+
     return (
         <Animated.View style={[styles.container, animatedContainerStyle]}>
             <GestureDetector gesture={panGesture}>
@@ -500,9 +506,11 @@ const BusArrivalPanel = ({
                                 </Text>
                             </View>
                             <Text style={styles.heading} numberOfLines={1}>
-                                {selectedStopInfo
-                                    ? `${selectedStopInfo.code} ${translate(selectedStopInfo.name)}`
-                                    : translate('選擇目的站')}
+                                {headingVehicle
+                                    ? getPositionLabel(headingVehicle.positionCode, translate)
+                                    : snapshot
+                                        ? translate('暫時沒有巴士位置')
+                                        : translate('正在載入巴士資料')}
                             </Text>
                         </Pressable>
                         <View style={styles.headingActions}>
@@ -577,6 +585,18 @@ const BusArrivalPanel = ({
                             </Pressable>
                         </View>
                     </View>
+                    {summaryEtaPresentation ? (
+                        <View style={styles.departureRow}>
+                            <MaterialCommunityIcons
+                                name="map-marker-distance"
+                                color={themeColor}
+                                size={14}
+                            />
+                            <Text style={styles.departureText} numberOfLines={1}>
+                                {summaryEtaPresentation.primary}
+                            </Text>
+                        </View>
+                    ) : null}
                     <View style={styles.departureRow}>
                         <MaterialCommunityIcons
                             name="clock-outline"
@@ -625,12 +645,12 @@ const BusArrivalPanel = ({
                 <Text style={styles.hint}>{translate('點選路線上的車站查看預計到站時間')}</Text>
             ) : null}
 
-            {hasVehicles || expanded ? (
+            {expanded ? (
                 <ScrollView
                     style={styles.list}
                     showsVerticalScrollIndicator={false}
                     contentContainerStyle={styles.listContent}>
-                    {visibleVehicles.length > 0 ? visibleVehicles.map(vehicle => {
+                    {vehicles.length > 0 ? vehicles.map(vehicle => {
                         const selected = selectedVehiclePlate === vehicle.vehiclePlateNumber;
                         const etaPresentation = renderVehicleEta(vehicle);
                         return (
