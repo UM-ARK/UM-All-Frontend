@@ -73,6 +73,8 @@ const BusRouteMap = ({
             position: 'absolute',
             width: 34,
             height: 34,
+            marginLeft: -17,
+            marginTop: -17,
             borderRadius: 17,
             borderWidth: 3,
             alignItems: 'center',
@@ -143,8 +145,8 @@ const BusRouteMap = ({
                 />
                 {BUS_STOPS.map(stop => (
                     <React.Fragment key={stop.code}>
-                        <Circle cx={stop.x} cy={stop.y} fill={ROUTE_COLOR} r="12" />
-                        <Circle cx={stop.x} cy={stop.y} fill={white} r="7" />
+                        <Circle cx={stop.x} cy={stop.y} fill={ROUTE_COLOR} r="9" />
+                        <Circle cx={stop.x} cy={stop.y} fill={white} r="5" />
                     </React.Fragment>
                 ))}
                 <Path
@@ -249,7 +251,6 @@ const BusRouteMap = ({
                                 top: percentY(position.y),
                                 backgroundColor: secondThemeColor,
                                 borderColor: selected ? black.main : trueWhite,
-                                transform: [{translateX: -17}, {translateY: -17}],
                             },
                         ]}>
                         <MaterialCommunityIcons name="bus" color={trueWhite} size={19} />
