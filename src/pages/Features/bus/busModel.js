@@ -29,6 +29,8 @@ export const BUS_POSITIONS = [
 ];
 
 export const BUS_POSITION_CODES = BUS_POSITIONS.map(item => item.code);
+export const BUS_STATS_LOOKBACK_DAYS = [1, 7, 30];
+const BUS_STATS_MINIMUM_SAMPLES = 5;
 
 const STOP_BY_CODE = BUS_STOPS.reduce((result, stop) => {
     result[stop.code] = stop;
@@ -209,6 +211,84 @@ export function getVehicleDestinationProgress(
         : 0;
     const remainingSeconds = Math.max(0, eta.p50Seconds - elapsedSeconds);
     return Math.max(0, Math.min(0.98, 1 - remainingSeconds / loopEtaSeconds));
+}
+
+function getStatsTimeContext(value) {
+    const parsed = Date.parse(value || '');
+    const timestamp = Number.isFinite(parsed) ? parsed : Date.now();
+    const date = new Date(timestamp + 8 * 60 * 60 * 1000);
+    const weekday = date.getUTCDay();
+    const hour = date.getUTCHours();
+    return {
+        dayType: weekday === 0 ? 'closed' : weekday === 6 ? 'saturday' : 'weekday',
+        timeBucket: hour >= 7 && hour < 12
+            ? 'morning'
+            : hour >= 12 && hour < 19
+                ? 'afternoon'
+                : 'evening',
+    };
+}
+
+export function getBusStatsRoutePresentation(document, fromPositionCode, destinationCode, at) {
+    const startIndex = BUS_POSITION_CODES.indexOf(fromPositionCode);
+    if (startIndex < 0 || !getBusStop(destinationCode)) {
+        return {kind: 'unavailable'};
+    }
+    const routeCodes = [];
+    for (let offset = 0; offset < BUS_POSITION_CODES.length; offset++) {
+        const code = BUS_POSITION_CODES[(startIndex + offset) % BUS_POSITION_CODES.length];
+        if (offset > 0 && code === destinationCode) {
+            break;
+        }
+        routeCodes.push(code);
+    }
+    const positions = Array.isArray(document?.positionDurations)
+        ? document.positionDurations
+        : [];
+    const {dayType, timeBucket} = getStatsTimeContext(at || document?.generatedAt);
+    let usedFallback = false;
+    const routeStats = routeCodes.map(code => {
+        const position = positions.find(item => item.positionCode === code);
+        const exact = position?.breakdowns?.find(item =>
+            item.dayType === dayType && item.timeBucket === timeBucket,
+        );
+        if (
+            exact?.sampleCount >= BUS_STATS_MINIMUM_SAMPLES
+            && Number.isFinite(exact.p50Seconds)
+            && Number.isFinite(exact.p75Seconds)
+            && Number.isFinite(exact.p90Seconds)
+        ) {
+            return exact;
+        }
+        if (
+            position?.sampleCount >= BUS_STATS_MINIMUM_SAMPLES
+            && Number.isFinite(position.p50Seconds)
+            && Number.isFinite(position.p75Seconds)
+            && Number.isFinite(position.p90Seconds)
+        ) {
+            usedFallback = true;
+            return position;
+        }
+        return null;
+    });
+    if (routeStats.some(item => item === null)) {
+        return {
+            kind: 'insufficient',
+            missingPositionCodes: routeCodes.filter((_code, index) => routeStats[index] === null),
+        };
+    }
+    const total = key => routeStats.reduce((sum, item) => sum + item[key], 0);
+    const minimumMinutes = Math.max(1, Math.ceil(total('p50Seconds') / 60));
+    const maximumMinutes = Math.max(minimumMinutes, Math.ceil(total('p75Seconds') / 60));
+    return {
+        kind: 'ready',
+        minimumMinutes,
+        maximumMinutes,
+        p90Minutes: Math.max(maximumMinutes, Math.ceil(total('p90Seconds') / 60)),
+        sampleCount: Math.min(...routeStats.map(item => item.sampleCount)),
+        confidence: usedFallback ? 'low' : 'high',
+        routeCodes,
+    };
 }
 
 export function sortVehiclesByDestinationEta(vehicles, destinationCode) {

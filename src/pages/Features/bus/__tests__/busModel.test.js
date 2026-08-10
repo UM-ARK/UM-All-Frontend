@@ -2,6 +2,7 @@ import {
     createFallbackBusLive,
     extractVehiclePlates,
     getBusPosition,
+    getBusStatsRoutePresentation,
     getBusStop,
     getEtaDisplay,
     getOfficialNextDeparturePresentation,
@@ -167,6 +168,53 @@ describe('busModel', () => {
                 x: getBusStop(code).x,
                 y: getBusStop(code).y,
             });
+        });
+    });
+
+    test('builds a selected-stop reference from matching time-bucket statistics', () => {
+        const positionDurations = ['PGH', 'PGH_TO_E4'].map(positionCode => ({
+            positionCode,
+            sampleCount: 20,
+            p50Seconds: 120,
+            p75Seconds: 180,
+            p90Seconds: 240,
+            breakdowns: [{
+                dayType: 'weekday',
+                timeBucket: 'morning',
+                sampleCount: 8,
+                p50Seconds: 60,
+                p75Seconds: 90,
+                p90Seconds: 120,
+            }],
+        }));
+        expect(getBusStatsRoutePresentation(
+            {positionDurations},
+            'PGH',
+            'E4',
+            '2026-08-10T23:30:00.000Z',
+        )).toMatchObject({
+            kind: 'ready',
+            minimumMinutes: 2,
+            maximumMinutes: 3,
+            p90Minutes: 4,
+            sampleCount: 8,
+            confidence: 'high',
+        });
+    });
+
+    test('reports insufficient statistics when any route position has too few samples', () => {
+        expect(getBusStatsRoutePresentation({
+            positionDurations: [{
+                positionCode: 'PGH',
+                sampleCount: 4,
+                p50Seconds: 60,
+                p75Seconds: 90,
+                p90Seconds: 120,
+                breakdowns: [],
+            }],
+        }, 'PGH', 'E4')).toMatchObject({
+            kind: 'insufficient',
+            missingPositionCodes: ['PGH', 'PGH_TO_E4'],
         });
     });
 });

@@ -25,7 +25,7 @@ import {
 // 面板高度（不含底部安全區；收合態預留摘要次行，例如 PGH 出發 ETA）
 export const BUS_PANEL_COLLAPSED_EMPTY = 112;
 export const BUS_PANEL_COLLAPSED = 138;
-export const BUS_PANEL_EXPANDED = 350;
+export const BUS_PANEL_EXPANDED = 440;
 
 const PANEL_SPRING = {
     damping: 28,
@@ -70,6 +70,7 @@ const BusArrivalPanel = ({
     expanded,
     now,
     onOpenMap,
+    onOpenStats,
     onRefresh,
     onSelectStop,
     onSelectVehicle,
@@ -200,6 +201,31 @@ const BusArrivalPanel = ({
         stopChipText: {
             ...uiStyle.defaultText,
             fontSize: 12,
+        },
+        statsButton: {
+            minHeight: 46,
+            borderRadius: 14,
+            backgroundColor: tonal.primary08,
+            paddingHorizontal: 12,
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 9,
+            marginTop: 3,
+        },
+        statsButtonContent: {
+            flex: 1,
+        },
+        statsButtonTitle: {
+            ...uiStyle.defaultText,
+            color: black.main,
+            fontSize: 12,
+            fontWeight: '700',
+        },
+        statsButtonText: {
+            ...uiStyle.defaultText,
+            color: black.third,
+            fontSize: 10,
+            marginTop: 1,
         },
         list: {
             marginTop: 3,
@@ -657,9 +683,28 @@ const BusArrivalPanel = ({
                 <Text style={styles.hint}>{translate('點選路線上的車站查看預計到站時間')}</Text>
             ) : null}
 
+            {expanded && selectedStopInfo ? (
+                <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={translate('查看到站時間統計')}
+                    onPress={() => {
+                        trigger();
+                        onOpenStats();
+                    }}
+                    style={({pressed}) => [styles.statsButton, pressed && {opacity: 0.7}]}>
+                    <MaterialCommunityIcons name="chart-line" color={themeColor} size={20} />
+                    <View style={styles.statsButtonContent}>
+                        <Text style={styles.statsButtonTitle}>{translate('到站時間統計')}</Text>
+                        <Text style={styles.statsButtonText}>{translate('查看近1天、7天及30天行車參考')}</Text>
+                    </View>
+                    <MaterialCommunityIcons name="chevron-right" color={themeColor} size={22} />
+                </Pressable>
+            ) : null}
+
             {expanded ? (
                 <ScrollView
                     style={styles.list}
+                    nestedScrollEnabled
                     showsVerticalScrollIndicator={false}
                     contentContainerStyle={styles.listContent}>
                     {vehicles.length > 0 ? vehicles.map(vehicle => {

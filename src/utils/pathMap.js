@@ -10,6 +10,7 @@ export const SCHEDULING_BASE_URI = 'https://umall.one/api/v2';
 export const BASE_HOST = 'https://umall.one';
 
 export const UM_BUS_LIVE = BASE_HOST + '/api/v2/bus/live';
+export const UM_BUS_STATS = BASE_HOST + '/api/v2/bus/stats';
 
 export const ARK_APP_LINK = BASE_HOST + '/app';
 

@@ -24,6 +24,7 @@ import BusArrivalPanel, {
     BUS_PANEL_COLLAPSED_EMPTY,
     BUS_PANEL_EXPANDED,
 } from './bus/BusArrivalPanel';
+import BusEtaStatsSheet from './bus/BusEtaStatsSheet';
 import BusRouteMap from './bus/BusRouteMap';
 import {
     BUS_STOPS,
@@ -160,6 +161,7 @@ const BusScreen = ({navigation}) => {
     const [selectedStop, setSelectedStop] = useState(null);
     const [selectedVehiclePlate, setSelectedVehiclePlate] = useState(null);
     const [panelExpanded, setPanelExpanded] = useState(false);
+    const [statsVisible, setStatsVisible] = useState(false);
     const [routeViewportHeight, setRouteViewportHeight] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
@@ -531,6 +533,7 @@ const BusScreen = ({navigation}) => {
                     expanded={panelExpanded}
                     now={now}
                     onOpenMap={() => openLink({URL: UM_MAP, mode: 'fullScreen'})}
+                    onOpenStats={() => setStatsVisible(true)}
                     onRefresh={handleRefresh}
                     onSelectStop={handleSelectStop}
                     onSelectVehicle={setSelectedVehiclePlate}
@@ -545,6 +548,14 @@ const BusScreen = ({navigation}) => {
                     translate={t}
                 />
             </View>
+
+            <BusEtaStatsSheet
+                visible={statsVisible}
+                onClose={() => setStatsVisible(false)}
+                selectedStop={selectedStop}
+                selectedVehiclePlate={selectedVehiclePlate}
+                snapshot={snapshot}
+            />
 
             {/* ARKImageView 圖片查看器 */}
             <ARKImageView
