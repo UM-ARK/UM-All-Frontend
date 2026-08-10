@@ -108,6 +108,7 @@ export function createFallbackBusLive(busData, observedAt = new Date()) {
         positionIndex: item.index,
         positionCode: BUS_POSITION_CODES[item.index],
         nextStop: null,
+        departureEta: null,
         nextStopEta: null,
         destinationEtas: {},
     })).filter(vehicle => getBusPosition(vehicle.positionCode));

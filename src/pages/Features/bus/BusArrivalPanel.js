@@ -53,6 +53,22 @@ const etaText = (display, translate) => {
     return null;
 };
 
+const departureText = (display, translate) => {
+    if (display.kind === 'arrived' || display.kind === 'soon') {
+        return translate('即將開出');
+    }
+    if (display.kind === 'minutes') {
+        if (display.minimumMinutes === display.maximumMinutes) {
+            return translate('約 {{minutes}} 分鐘後開出', {minutes: display.minimumMinutes});
+        }
+        return translate('約 {{minimum}}–{{maximum}} 分鐘後開出', {
+            minimum: display.minimumMinutes,
+            maximum: display.maximumMinutes,
+        });
+    }
+    return null;
+};
+
 const BusArrivalPanel = ({
     expanded,
     now,
@@ -335,7 +351,33 @@ const BusArrivalPanel = ({
 
     const renderVehicleEta = vehicle => {
         if (selectedStop && vehicle.positionCode === selectedStop) {
-            return translate('已到站');
+            const departure = departureText(
+                getEtaDisplay(vehicle.departureEta, snapshot?.observedAt, now),
+                translate,
+            );
+            const nextStop = etaText(
+                getEtaDisplay(vehicle.nextStopEta, snapshot?.observedAt, now),
+                translate,
+            );
+            if (departure && nextStop && vehicle.nextStop) {
+                return translate('已到站 · {{departure}} · {{eta}}到達下一站 {{station}}', {
+                    departure,
+                    eta: nextStop,
+                    station: vehicle.nextStop,
+                });
+            }
+            if (departure) {
+                return translate('已到站 · {{departure}}', {departure});
+            }
+            if (nextStop && vehicle.nextStop) {
+                return translate('已到站 · {{eta}}到達下一站 {{station}}', {
+                    eta: nextStop,
+                    station: vehicle.nextStop,
+                });
+            }
+            return snapshot?.deliverySource === 'fallback'
+                ? translate('已到站 · 預計時間暫時無法使用')
+                : translate('已到站 · 正在累積停站數據');
         }
         const eta = getVehicleDestinationEta(vehicle, selectedStop);
         const display = getEtaDisplay(eta, snapshot?.observedAt, now);

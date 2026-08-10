@@ -11,6 +11,7 @@ import {BUS_STOPS, getBusPosition} from './busModel';
 const MAP_WIDTH = 354;
 const MAP_HEIGHT = 678;
 const MAP_DISPLAY_WIDTH = 310;
+const MAP_MAX_DISPLAY_WIDTH = 420;
 const ROUTE_COLOR = '#005F95';
 
 const percentX = value => `${value / MAP_WIDTH * 100}%`;
@@ -26,11 +27,21 @@ const BusRouteMap = ({
     translate,
     vehicles,
 }) => {
-    const {width: windowWidth} = useWindowDimensions();
+    const {height: windowHeight, width: windowWidth} = useWindowDimensions();
+    const availableWidth = windowWidth - 24;
+    const minimumReadableWidth = Math.min(
+        Math.min(windowHeight, windowWidth) >= 600 ? MAP_MAX_DISPLAY_WIDTH : MAP_DISPLAY_WIDTH,
+        availableWidth,
+    );
     const heightConstrainedWidth = maxHeight === null
-        ? MAP_DISPLAY_WIDTH
+        ? MAP_MAX_DISPLAY_WIDTH
         : maxHeight * MAP_WIDTH / MAP_HEIGHT;
-    const mapDisplayWidth = Math.min(MAP_DISPLAY_WIDTH, windowWidth - 24, heightConstrainedWidth);
+    const mapDisplayWidth = Math.min(
+        MAP_MAX_DISPLAY_WIDTH,
+        availableWidth,
+        Math.max(minimumReadableWidth, heightConstrainedWidth),
+    );
+    const mapScale = mapDisplayWidth / MAP_DISPLAY_WIDTH;
     const {
         black,
         secondThemeColor,
@@ -50,10 +61,11 @@ const BusRouteMap = ({
             height: '100%',
         },
         stopLabel: {
-            minHeight: 30,
-            paddingHorizontal: 8,
-            borderRadius: 15,
-            borderWidth: 2,
+            maxWidth: '100%',
+            minHeight: 30 * mapScale,
+            paddingHorizontal: 8 * mapScale,
+            borderRadius: 15 * mapScale,
+            borderWidth: Math.max(1.5, 2 * mapScale),
             backgroundColor: white,
             alignItems: 'center',
             justifyContent: 'center',
@@ -64,7 +76,8 @@ const BusRouteMap = ({
         },
         stopLabelText: {
             ...uiStyle.defaultText,
-            fontSize: 12,
+            flexShrink: 1,
+            fontSize: 12 * mapScale,
         },
         stopCode: {
             fontWeight: '700',
@@ -99,7 +112,7 @@ const BusRouteMap = ({
             fontSize: 9,
             fontWeight: '700',
         },
-    }), [themeColor, trueWhite, viewShadow, white]);
+    }), [mapScale, themeColor, trueWhite, viewShadow, white]);
 
     const vehicleItems = useMemo(() => {
         const groups = vehicles.reduce((result, vehicle) => {
@@ -208,10 +221,13 @@ const BusRouteMap = ({
                                     borderColor: themeColor,
                                     backgroundColor: selected ? themeColor : white,
                                     opacity: pressed ? 0.7 : 1,
-                                    transform: stop.labelSide === 'bottom' ? [] : [{translateY: -15}],
+                                    transform: stop.labelSide === 'bottom' ? [] : [{translateY: -15 * mapScale}],
                                 },
                             ]}>
                             <Text
+                                adjustsFontSizeToFit
+                                ellipsizeMode="tail"
+                                minimumFontScale={0.72}
                                 numberOfLines={1}
                                 style={[
                                     styles.stopLabelText,

@@ -34,6 +34,7 @@ describe('busModel', () => {
             busPositionArr: [{number: 'MW-81-74', index: 1}],
         }, new Date('2026-08-10T00:00:00.000Z'));
         expect(result.vehicles[0].positionCode).toBe('PGH_TO_E4');
+        expect(result.vehicles[0].departureEta).toBeNull();
         expect(result.deliverySource).toBe('fallback');
     });
 
