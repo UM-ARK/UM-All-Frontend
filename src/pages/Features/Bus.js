@@ -108,6 +108,10 @@ const BUS_LIVE_SNAPSHOT_KEY = 'busLiveSnapshot';
 const BUS_SELECTED_STOP_KEY = 'busSelectedStop';
 const BUS_REFRESH_INTERVAL_MS = 10000;
 const staticStyles = StyleSheet.create({
+    headerRightRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
     headerButton: {
         width: scale(36),
         height: scale(36),
@@ -186,7 +190,13 @@ const BusScreen = ({navigation}) => {
         ? null
         : Math.max(0, routeViewportHeight - collapsedPanelReservedHeight - 12);
 
-    // 右上角官方服務說明（參考 LocalCourse / DeepLinkShareButton header 模式）
+    const busUrl = i18n.resolvedLanguage === 'en' ? UM_BUS_LOOP_EN : UM_BUS_LOOP_ZH;
+
+    // 右上角：官方網站 / 服務說明（參考 LocalCourse / DeepLinkShareButton header 模式）
+    const openBusOfficialPage = useCallback(() => {
+        openLink(busUrl);
+    }, [busUrl]);
+
     const openBusServiceInfo = useCallback(() => {
         openLink(UM_BUS_LOOP_SERVICE);
     }, []);
@@ -197,20 +207,36 @@ const BusScreen = ({navigation}) => {
                 Platform.OS === 'ios'
                     ? undefined
                     : () => (
-                        <Pressable
-                            accessibilityRole="button"
-                            accessibilityLabel={t('官方資訊')}
-                            onPress={() => {
-                                trigger();
-                                openBusServiceInfo();
-                            }}
-                            style={staticStyles.headerButton}>
-                            <MaterialCommunityIcons
-                                name="information-outline"
-                                size={scale(20)}
-                                color={themeColor}
-                            />
-                        </Pressable>
+                        <View style={staticStyles.headerRightRow}>
+                            <Pressable
+                                accessibilityRole="button"
+                                accessibilityLabel={t('官方網站')}
+                                onPress={() => {
+                                    trigger();
+                                    openBusOfficialPage();
+                                }}
+                                style={staticStyles.headerButton}>
+                                <MaterialCommunityIcons
+                                    name="earth"
+                                    size={scale(20)}
+                                    color={themeColor}
+                                />
+                            </Pressable>
+                            <Pressable
+                                accessibilityRole="button"
+                                accessibilityLabel={t('官方資訊')}
+                                onPress={() => {
+                                    trigger();
+                                    openBusServiceInfo();
+                                }}
+                                style={staticStyles.headerButton}>
+                                <MaterialCommunityIcons
+                                    name="information-outline"
+                                    size={scale(20)}
+                                    color={themeColor}
+                                />
+                            </Pressable>
+                        </View>
                     ),
             unstable_headerRightItems:
                 Platform.OS === 'ios'
@@ -229,10 +255,24 @@ const BusScreen = ({navigation}) => {
                                 openBusServiceInfo();
                             },
                         },
+                        {
+                            type: 'button',
+                            label: t('官方網站'),
+                            accessibilityLabel: t('官方網站'),
+                            icon: {
+                                type: 'sfSymbol',
+                                name: 'globe',
+                            },
+                            tintColor: themeColor,
+                            onPress: () => {
+                                trigger();
+                                openBusOfficialPage();
+                            },
+                        },
                     ]
                     : undefined,
         });
-    }, [navigation, openBusServiceInfo, t, themeColor]);
+    }, [navigation, openBusOfficialPage, openBusServiceInfo, t, themeColor]);
 
     // 將 stopImgArr 轉換為 ARKImageView 可用的格式
     const processedStopImages = useMemo(() => {
@@ -244,8 +284,6 @@ const BusScreen = ({navigation}) => {
             return { uri: img };
         });
     }, []);
-
-    const busUrl = i18n.resolvedLanguage === 'en' ? UM_BUS_LOOP_EN : UM_BUS_LOOP_ZH;
 
     useEffect(() => {
         snapshotRef.current = snapshot;
