@@ -1,24 +1,122 @@
-import React, {useMemo} from 'react';
+import React, {useEffect, useMemo, useRef, useState} from 'react';
 import {Pressable, StyleSheet, Text, useWindowDimensions, View} from 'react-native';
+import Animated, {
+    cancelAnimation,
+    useAnimatedProps,
+    useSharedValue,
+    withSequence,
+    withTiming,
+} from 'react-native-reanimated';
 import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 import Svg, {Circle, Path} from 'react-native-svg';
 
 import {uiStyle} from '../../../components/ThemeContext';
 import TouchableScale from '../../../components/TouchableScale';
 import {trigger} from '../../../utils/trigger';
-import {BUS_STOPS, getBusPosition, getBusStop} from './busModel';
+import {
+    BUS_STOPS,
+    getBusPosition,
+    getBusStop,
+    getVehicleDestinationEta,
+    getVehicleDestinationProgress,
+    sortVehiclesByDestinationEta,
+} from './busModel';
 
 const MAP_WIDTH = 354;
 const MAP_HEIGHT = 678;
 const MAP_DISPLAY_WIDTH = 310;
 const MAP_MAX_DISPLAY_WIDTH = 420;
 const ROUTE_COLOR = '#005F95';
+const AnimatedPath = Animated.createAnimatedComponent(Path);
 
 const percentX = value => `${value / MAP_WIDTH * 100}%`;
 const percentY = value => `${value / MAP_HEIGHT * 100}%`;
 
+const CountdownBorder = ({arrived, color, countdownKey, deadlineAt, initialProgress, radius, visible}) => {
+    const [layout, setLayout] = useState({width: 0, height: 0});
+    const countdownKeyRef = useRef(null);
+    const progress = useSharedValue(initialProgress);
+    const inset = 1.5;
+    const width = Math.max(0, layout.width - inset * 2);
+    const height = Math.max(0, layout.height - inset * 2);
+    const cornerRadius = Math.max(0, Math.min(radius - inset, width / 2, height / 2));
+    const perimeter = Math.max(
+        1,
+        2 * (width + height - 4 * cornerRadius) + 2 * Math.PI * cornerRadius,
+    );
+    const path = [
+        `M ${inset + width} ${inset + height / 2}`,
+        `L ${inset + width} ${inset + height - cornerRadius}`,
+        `Q ${inset + width} ${inset + height} ${inset + width - cornerRadius} ${inset + height}`,
+        `L ${inset + cornerRadius} ${inset + height}`,
+        `Q ${inset} ${inset + height} ${inset} ${inset + height - cornerRadius}`,
+        `L ${inset} ${inset + cornerRadius}`,
+        `Q ${inset} ${inset} ${inset + cornerRadius} ${inset}`,
+        `L ${inset + width - cornerRadius} ${inset}`,
+        `Q ${inset + width} ${inset} ${inset + width} ${inset + cornerRadius}`,
+        'Z',
+    ].join(' ');
+    const animatedProps = useAnimatedProps(() => ({
+        strokeDashoffset: perimeter * (1 - progress.value),
+    }));
+
+    useEffect(() => {
+        cancelAnimation(progress);
+        if (!visible) {
+            countdownKeyRef.current = null;
+            progress.value = 0;
+            return;
+        }
+        const isNewCountdown = countdownKeyRef.current !== countdownKey;
+        countdownKeyRef.current = countdownKey;
+        if (isNewCountdown) {
+            progress.value = initialProgress;
+        }
+        if (arrived) {
+            progress.value = withTiming(1, {duration: 300});
+            return;
+        }
+        const currentTime = Date.now();
+        const remainingMs = Math.max(0, deadlineAt - currentTime);
+        const currentProgress = progress.value;
+        const correctionDuration = !isNewCountdown && currentProgress < initialProgress
+            ? Math.min(2000, remainingMs)
+            : 0;
+        progress.value = correctionDuration > 0
+            ? withSequence(
+                withTiming(initialProgress, {duration: correctionDuration}),
+                withTiming(1, {duration: Math.max(0, remainingMs - correctionDuration)}),
+            )
+            : withTiming(1, {duration: remainingMs});
+    }, [arrived, countdownKey, deadlineAt, initialProgress, progress, visible]);
+
+    return (
+        <View
+            pointerEvents="none"
+            onLayout={event => setLayout(event.nativeEvent.layout)}
+            style={StyleSheet.absoluteFill}>
+            {visible && width > 0 && height > 0 ? (
+                <Svg width="100%" height="100%">
+                    <AnimatedPath
+                        animatedProps={animatedProps}
+                        d={path}
+                        fill="none"
+                        stroke={color}
+                        strokeDasharray={`${perimeter} ${perimeter}`}
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2.5"
+                    />
+                </Svg>
+            ) : null}
+        </View>
+    );
+};
+
 const BusRouteMap = ({
+    countdownEnabled,
     maxHeight,
+    observedAt,
     onSelectStop,
     onSelectVehicle,
     selectedStop,
@@ -146,6 +244,38 @@ const BusRouteMap = ({
         });
     }, [vehicles]);
 
+    const selectedStopCountdown = useMemo(() => {
+        if (!countdownEnabled || !selectedStop) {
+            return null;
+        }
+        if (vehicles.some(vehicle => vehicle.positionCode === selectedStop)) {
+            return {arrived: true, deadlineAt: 0, initialProgress: 1};
+        }
+        const observedTime = Date.parse(observedAt || '');
+        if (!Number.isFinite(observedTime)) {
+            return null;
+        }
+        const headingVehicle = sortVehiclesByDestinationEta(vehicles, selectedStop).find(vehicle => {
+            const eta = getVehicleDestinationEta(vehicle, selectedStop);
+            return Number.isFinite(eta?.p50Seconds);
+        });
+        const eta = headingVehicle
+            ? getVehicleDestinationEta(headingVehicle, selectedStop)
+            : null;
+        return eta
+            ? {
+                arrived: false,
+                countdownKey: `${selectedStop}:${headingVehicle.vehiclePlateNumber}`,
+                deadlineAt: observedTime + eta.p50Seconds * 1000,
+                initialProgress: getVehicleDestinationProgress(
+                    headingVehicle,
+                    selectedStop,
+                    observedAt,
+                ),
+            }
+            : null;
+    }, [countdownEnabled, observedAt, selectedStop, vehicles]);
+
     return (
         <View
             style={[
@@ -248,6 +378,17 @@ const BusRouteMap = ({
                                     transform: stop.labelSide === 'bottom' ? [] : [{translateY: -11 * mapScale}],
                                 },
                             ]}>
+                            {selected ? (
+                                <CountdownBorder
+                                    arrived={Boolean(selectedStopCountdown?.arrived)}
+                                    color={trueWhite}
+                                    countdownKey={selectedStopCountdown?.countdownKey}
+                                    deadlineAt={selectedStopCountdown?.deadlineAt || 0}
+                                    initialProgress={selectedStopCountdown?.initialProgress || 0}
+                                    radius={11 * mapScale}
+                                    visible={Boolean(selectedStopCountdown)}
+                                />
+                            ) : null}
                             <Text
                                 adjustsFontSizeToFit
                                 ellipsizeMode="tail"

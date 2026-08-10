@@ -503,7 +503,16 @@ const BusScreen = ({navigation}) => {
                     />
                 }>
                 <BusRouteMap
+                    countdownEnabled={Boolean(
+                        isFocused
+                        && isAppActive
+                        && snapshot
+                        && !snapshot.stale
+                        && snapshot.deliverySource !== 'fallback'
+                        && snapshot.deliverySource !== 'stale'
+                    )}
                     maxHeight={routeMapMaxHeight}
+                    observedAt={snapshot?.observedAt}
                     onSelectStop={handleSelectStop}
                     onSelectVehicle={plate => {
                         setSelectedVehiclePlate(plate);

@@ -7,6 +7,7 @@ import {
     getOfficialNextDeparturePresentation,
     getPositionLabel,
     getVehicleDestinationEta,
+    getVehicleDestinationProgress,
     isBusLiveSnapshotFresh,
     isCachedBusLiveUsable,
     normalizeBusLive,
@@ -130,6 +131,29 @@ describe('busModel', () => {
             p50Seconds: 900,
             p75Seconds: 960,
         });
+    });
+
+    test('anchors countdown progress to the destination position within the loop', () => {
+        const observedAt = '2026-08-10T00:00:00.000Z';
+        const vehicle = {
+            destinationEtas: {
+                N6: {p50Seconds: 40},
+                E11: {p50Seconds: 140},
+                N2: {p50Seconds: 900},
+            },
+        };
+        expect(getVehicleDestinationProgress(
+            vehicle,
+            'N6',
+            observedAt,
+            Date.parse(observedAt),
+        )).toBeCloseTo(1 - 40 / 900);
+        expect(getVehicleDestinationProgress(
+            vehicle,
+            'N6',
+            observedAt,
+            Date.parse(observedAt) + 30000,
+        )).toBeCloseTo(0.98);
     });
 
     test('formats stop and between-stop positions', () => {
