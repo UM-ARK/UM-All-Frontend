@@ -150,7 +150,8 @@ const ClubDetail = (props) => {
     }, [clubData?.name, clubNum]);
 
     useLayoutEffect(() => {
-        if (!clubNum) {return;}
+        // club_num=0 為 ARK ALL 管理員帳號，不可用 truthy 判斷
+        if (clubNum == null || clubNum === '') {return;}
         props.navigation.setOptions(
             getDeepLinkShareHeaderOptions({
                 accessibilityLabel: '分享',
@@ -183,9 +184,9 @@ const ClubDetail = (props) => {
         }
     }, []);
 
-    // 由ClubPage或深度連結跳轉初始化
+    // 由ClubPage或深度連結跳轉初始化；club_num=0 為 ARK ALL 管理員帳號
     useEffect(() => {
-        if (clubNum) {
+        if (clubNum != null && clubNum !== '') {
             getData(clubNum);
         }
     }, [clubNum, getData]);
