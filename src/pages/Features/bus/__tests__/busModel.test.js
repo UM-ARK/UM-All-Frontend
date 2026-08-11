@@ -33,6 +33,24 @@ describe('busModel', () => {
         expect(() => normalizeBusLive({schemaVersion: 2, vehicles: []})).toThrow();
     });
 
+    test('accepts an empty vehicle list while service is running', () => {
+        const result = normalizeBusLive({
+            schemaVersion: 1,
+            serviceStatus: 'running',
+            vehicles: [],
+        });
+        expect(result.vehicles).toEqual([]);
+        expect(result.serviceStatus).toBe('running');
+    });
+
+    test('rejects live vehicles when every position is unsupported', () => {
+        expect(() => normalizeBusLive({
+            schemaVersion: 1,
+            serviceStatus: 'running',
+            vehicles: [{vehiclePlateNumber: 'MW-81-74', positionCode: 'NEW_POSITION'}],
+        })).toThrow('no supported vehicle positions');
+    });
+
     test('builds position-only fallback vehicles', () => {
         const result = createFallbackBusLive({
             busPositionArr: [{number: 'MW-81-74', index: 1}],
@@ -40,6 +58,12 @@ describe('busModel', () => {
         expect(result.vehicles[0].positionCode).toBe('PGH_TO_E4');
         expect(result.vehicles[0].departureEta).toBeNull();
         expect(result.deliverySource).toBe('fallback');
+    });
+
+    test('does not treat an empty fallback map as confirmed stopped service', () => {
+        const result = createFallbackBusLive({busPositionArr: []});
+        expect(result.vehicles).toEqual([]);
+        expect(result.serviceStatus).toBe('unknown');
     });
 
     test('extracts multiple vehicle plates from one fallback position', () => {

@@ -455,7 +455,9 @@ const BusScreen = ({navigation}) => {
             return {
                 color: warning,
                 icon: 'cloud-alert-outline',
-                text: t('即時位置可用，預計時間暫不可用'),
+                text: snapshot.vehicles?.length > 0
+                    ? t('即時位置可用，預計時間暫不可用')
+                    : t('暫未偵測到行駛中的巴士'),
             };
         }
         if (snapshot.deliverySource === 'cache') {
@@ -472,6 +474,13 @@ const BusScreen = ({navigation}) => {
                 text: snapshot.observerMode === 'scheduled_idle'
                     ? t('目前停駛')
                     : t('巴士服務暫停'),
+            };
+        }
+        if (snapshot.serviceStatus === 'running' && snapshot.vehicles?.length === 0) {
+            return {
+                color: black.third,
+                icon: 'bus-clock',
+                text: t('服務時段內，暫未有巴士出現'),
             };
         }
         const observedAt = Date.parse(snapshot.observedAt || '');

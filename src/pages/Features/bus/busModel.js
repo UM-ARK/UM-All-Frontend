@@ -92,11 +92,15 @@ export function normalizeBusLive(payload, deliverySource = 'live') {
     if (!payload || payload.schemaVersion !== 1 || !Array.isArray(payload.vehicles)) {
         throw new Error('Unsupported bus live response');
     }
-    const vehicles = payload.vehicles.filter(vehicle =>
+    const rawVehicles = payload.vehicles;
+    const vehicles = rawVehicles.filter(vehicle =>
         vehicle &&
         typeof vehicle.vehiclePlateNumber === 'string' &&
         getBusPosition(vehicle.positionCode),
     );
+    if (rawVehicles.length > 0 && vehicles.length === 0) {
+        throw new Error('Bus live response contains no supported vehicle positions');
+    }
     return {
         ...payload,
         vehicles,
@@ -120,7 +124,7 @@ export function createFallbackBusLive(busData, observedAt = new Date()) {
         modelVersion: null,
         observedAt: observedAt.toISOString(),
         sourceUpdatedAt: observedAt.toISOString(),
-        serviceStatus: vehicles.length > 0 ? 'running' : 'stopped',
+        serviceStatus: vehicles.length > 0 ? 'running' : 'unknown',
         officialNextDeparture: null,
         observerMode: 'fallback',
         stale: false,

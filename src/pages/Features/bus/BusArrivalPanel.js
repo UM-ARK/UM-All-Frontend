@@ -536,7 +536,9 @@ const BusArrivalPanel = ({
                                 {headingVehicle
                                     ? getPositionLabel(headingVehicle.positionCode, translate)
                                     : snapshot
-                                        ? translate('暫時沒有巴士位置')
+                                        ? snapshot.serviceStatus === 'running'
+                                            ? translate('服務時段內，暫未有巴士出現')
+                                            : translate('暫時沒有巴士位置')
                                         : translate('正在載入巴士資料')}
                             </Text>
                         </Pressable>
@@ -754,7 +756,9 @@ const BusArrivalPanel = ({
                             <Text style={styles.emptyText}>
                                 {snapshot?.serviceStatus === 'stopped'
                                     ? translate('目前沒有巴士服務')
-                                    : translate('暫時沒有巴士位置')}
+                                    : snapshot?.serviceStatus === 'running'
+                                        ? translate('服務時段內，暫未有巴士出現')
+                                        : translate('暫未偵測到行駛中的巴士')}
                             </Text>
                         </View>
                     )}
