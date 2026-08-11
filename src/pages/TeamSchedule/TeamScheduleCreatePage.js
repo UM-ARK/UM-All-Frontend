@@ -339,9 +339,10 @@ const TeamScheduleCreatePage = ({navigation}) => {
         if (!responseDeadlineAt) {
             return t('未設定');
         }
+        // nsSeparator 為 ':'，格式字串含冒號時必須關閉，否則會被拆成 key「mm」只顯示分鐘
         return moment
             .tz(responseDeadlineAt, tz)
-            .format(t('YYYY年M月D日 HH:mm'));
+            .format(t('YYYY年M月D日 HH:mm', {nsSeparator: false}));
     }, [responseDeadlineAt, t, tz]);
 
     const pickerDate = useMemo(() => {

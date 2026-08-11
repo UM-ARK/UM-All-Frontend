@@ -64,8 +64,9 @@ function formatCreatedAt(createdAt, timezone, t) {
     if (!created.isValid()) {
         return null;
     }
+    // nsSeparator 為 ':'，格式字串含冒號時必須關閉，否則會被拆成 key「mm」只顯示分鐘
     return t('建立於 {{time}}', {
-        time: created.format(t('M月D日 HH:mm')),
+        time: created.format(t('M月D日 HH:mm', {nsSeparator: false})),
     });
 }
 

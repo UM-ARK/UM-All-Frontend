@@ -31,7 +31,8 @@ function formatDeadlineLine(responseDeadlineAt, timezone, t) {
         return t('已截止填寫');
     }
     return t('回覆截止：{{time}}', {
-        time: deadline.format(t('M月D日 HH:mm')),
+        // nsSeparator 為 ':'，格式字串含冒號時必須關閉，否則會被拆成 key「mm」只顯示分鐘
+        time: deadline.format(t('M月D日 HH:mm', {nsSeparator: false})),
     });
 }
 
