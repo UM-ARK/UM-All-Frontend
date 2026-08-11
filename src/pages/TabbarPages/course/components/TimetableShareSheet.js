@@ -13,7 +13,6 @@ import {
     Image,
     Pressable,
     StyleSheet,
-    Text,
     View,
     useWindowDimensions,
 } from 'react-native';
@@ -34,6 +33,7 @@ import Toast from 'react-native-simple-toast';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
 
+import Text from '../../../../components/AppText';
 import { useTheme, uiStyle } from '../../../../components/ThemeContext';
 import SegmentControl from '../../../../components/SegmentControl';
 import { logToFirebase } from '../../../../utils/firebaseAnalytics';

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Keyboard, Platform, Pressable, Text, TextInput, View } from 'react-native';
+import { Keyboard, Platform, Pressable, View } from 'react-native';
 import Ionicons from "@react-native-vector-icons/ionicons";
 // 不可用 @expo/ui MenuView（SwiftUI Host matchContents 會在 Tab 切換／版面提交時
 // 反寫 Fabric ShadowTree 並 abort）。改用 @react-native-menu/menu（原生 UIButton）。
@@ -9,6 +9,8 @@ import Animated, {
     useSharedValue,
     withSpring,
 } from 'react-native-reanimated';
+import Text from '../../../../../../components/AppText';
+import TextInput from '../../../../../../components/AppTextInput';
 import TouchableScale from '../../../../../../components/TouchableScale';
 import { scale, verticalScale } from 'react-native-size-matters';
 import { t } from 'i18next';

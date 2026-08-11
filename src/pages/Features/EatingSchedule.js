@@ -1,11 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Platform, ScrollView, Text, View } from 'react-native';
+import { Platform, ScrollView, View } from 'react-native';
 import { useIsFocused } from '@react-navigation/native';
 import { scale, verticalScale } from 'react-native-size-matters';
 import { useTranslation } from 'react-i18next';
 import lodash from 'lodash';
 import moment from 'moment';
 
+import Text from '../../components/AppText';
 import { uiStyle, useTheme } from '../../components/ThemeContext';
 import SegmentControl from '../../components/SegmentControl';
 import { getCourseCatalog } from '../../utils/checkCoursesKits';

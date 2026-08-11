@@ -10,13 +10,13 @@ import React, {
 } from 'react';
 import {
     View,
-    Text,
     VirtualizedList,
     RefreshControl,
     StyleSheet,
     TouchableOpacity,
 } from 'react-native';
 
+import Text from '../../../components/AppText';
 import NewsCard from './components/NewsCard';
 import NewsListSkeleton from './components/NewsListSkeleton';
 

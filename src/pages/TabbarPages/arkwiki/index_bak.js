@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
-import { View, Text, Platform, StyleSheet, TouchableOpacity, BackHandler } from 'react-native';
+import { View, Platform, StyleSheet, TouchableOpacity, BackHandler } from 'react-native';
 
 import { WebView } from 'react-native-webview';
 import { Header } from '@rneui/themed';
@@ -9,6 +9,7 @@ import MaterialCommunityIcons from "@react-native-vector-icons/material-design-i
 import Ionicons from "@react-native-vector-icons/ionicons";
 import Clipboard from '@react-native-clipboard/clipboard';
 import Toast from 'react-native-toast-message';
+import Text from '../../../components/AppText';
 import SimpleProgressBar from '../../../components/SimpleProgressBar';
 import TouchableScale from '../../../components/TouchableScale';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';

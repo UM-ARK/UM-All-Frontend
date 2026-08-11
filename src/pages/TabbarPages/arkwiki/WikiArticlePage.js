@@ -5,7 +5,6 @@ import {
     Pressable,
     Share,
     StyleSheet,
-    Text,
     View,
 } from 'react-native';
 
@@ -17,6 +16,7 @@ import moment from 'moment';
 import { useTranslation } from 'react-i18next';
 import { scale, verticalScale } from 'react-native-size-matters';
 
+import Text from '../../../components/AppText';
 import ARKImageView from '../../../components/ARKImageView';
 import { uiStyle, useTheme } from '../../../components/ThemeContext';
 import { openLink } from '../../../utils/browser';

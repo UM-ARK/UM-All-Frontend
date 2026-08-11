@@ -10,8 +10,6 @@ import {
     ActivityIndicator,
     Pressable,
     StyleSheet,
-    Text,
-    TextInput,
     View,
 } from 'react-native';
 
@@ -24,6 +22,8 @@ import Animated, {
 import { scale, verticalScale } from 'react-native-size-matters';
 import { useTranslation } from 'react-i18next';
 
+import Text from '../../../../components/AppText';
+import TextInput from '../../../../components/AppTextInput';
 import TouchableScale from '../../../../components/TouchableScale';
 import { uiStyle, useTheme } from '../../../../components/ThemeContext';
 import { trigger } from '../../../../utils/trigger';

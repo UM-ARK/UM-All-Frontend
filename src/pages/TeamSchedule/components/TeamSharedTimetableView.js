@@ -2,13 +2,14 @@
  * 小組課表模式：成員選擇、個人課表與全體上課概覽。
  */
 import React, {memo, useMemo, useState} from 'react';
-import {Pressable, StyleSheet, Text, View} from 'react-native';
+import {Pressable, StyleSheet, View} from 'react-native';
 
 import {useIsFocused} from '@react-navigation/native';
 import {useTranslation} from 'react-i18next';
 import {scale, verticalScale} from 'react-native-size-matters';
 import Ionicons from '@react-native-vector-icons/ionicons';
 
+import Text from '../../../components/AppText';
 import {uiStyle, useTheme} from '../../../components/ThemeContext';
 import {trigger} from '../../../utils/trigger';
 import CourseActionMenuCard from '../../TabbarPages/course/components/CourseActionMenuCard';

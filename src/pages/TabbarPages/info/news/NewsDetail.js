@@ -1,7 +1,9 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { View, Text, Dimensions, ScrollView, StyleSheet, Linking, Platform } from 'react-native';
+import { View, Dimensions, ScrollView, StyleSheet, Linking, Platform } from 'react-native';
 
+import Text from '../../../../components/AppText';
 import { useTheme, themes, uiStyle, ThemeContext } from '../../../../components/ThemeContext';
+import { ANDROID_UI_FONT_FAMILY } from '../../../../components/typography';
 import ARKImageView from '../../../../components/ARKImageView';
 import { logToFirebase } from '../../../../utils/firebaseAnalytics';
 import { openLink } from '../../../../utils/browser';
@@ -15,8 +17,8 @@ import RenderHTML from '@native-html/render';
 import { scale } from 'react-native-size-matters';
 import TouchableScale from '../../../../components/TouchableScale';
 
-// 正文字體：iOS 用 PingFang SC，Android 用 Noto Sans
-const BODY_FONT = Platform.select({ ios: 'PingFang SC', android: 'NotoSansCJK-Regular', default: undefined });
+// 正文字體：Android 用內置 Noto Sans TC，iOS 保留系統字體
+const BODY_FONT = Platform.select({ android: ANDROID_UI_FONT_FAMILY, default: undefined });
 
 // 澳大新聞 HTML 常帶表格固定 height／width，RenderHTML 會裁切文字；先清掉再渲染
 const NEWS_IGNORED_STYLES = ['height', 'width', 'minWidth', 'maxWidth'];

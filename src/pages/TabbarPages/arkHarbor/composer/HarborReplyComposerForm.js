@@ -4,8 +4,6 @@ import {
     Pressable,
     ScrollView,
     StyleSheet,
-    Text,
-    TextInput,
     View,
 } from 'react-native';
 
@@ -15,6 +13,8 @@ import {scale, verticalScale} from 'react-native-size-matters';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useTranslation} from 'react-i18next';
 
+import Text from '../../../../components/AppText';
+import TextInput from '../../../../components/AppTextInput';
 import {useTheme} from '../../../../components/ThemeContext';
 import HarborComposerImageGrid from './HarborComposerImageGrid';
 import {MAX_IMAGES_PER_POST} from './harborComposerImages';

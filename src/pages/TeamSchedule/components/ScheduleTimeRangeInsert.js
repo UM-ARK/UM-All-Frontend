@@ -2,7 +2,7 @@
  * 每週時間板上方的快速時段插入列
  */
 import React, {useCallback, useMemo, useState} from 'react';
-import {Alert, Pressable, StyleSheet, Text, View} from 'react-native';
+import {Alert, Pressable, StyleSheet, View} from 'react-native';
 
 import Ionicons from '@react-native-vector-icons/ionicons';
 import {MenuView} from '@react-native-menu/menu';
@@ -10,6 +10,7 @@ import {useTranslation} from 'react-i18next';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import {scale, verticalScale} from 'react-native-size-matters';
 
+import Text from '../../../components/AppText';
 import {uiStyle, useTheme} from '../../../components/ThemeContext';
 import {trigger} from '../../../utils/trigger';
 import {

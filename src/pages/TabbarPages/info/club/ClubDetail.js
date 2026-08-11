@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react';
 import {
     View,
-    Text,
     TouchableOpacity,
     TouchableWithoutFeedback,
     Dimensions,
@@ -14,6 +13,7 @@ import {
     Share,
 } from 'react-native';
 
+import Text from '../../../../components/AppText';
 import { useTheme, themes, uiStyle, ThemeContext } from '../../../../components/ThemeContext';
 import { getDeepLinkShareHeaderOptions } from '../../../../components/DeepLinkShareButton';
 import { clubTagMap } from '../../../../utils/clubMap';

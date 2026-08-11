@@ -2,7 +2,6 @@ import React, { useState, useEffect, useLayoutEffect, useRef, useCallback } from
 import {
     Alert,
     View,
-    Text,
     TouchableOpacity,
     TouchableWithoutFeedback,
     Dimensions,
@@ -13,6 +12,7 @@ import {
     Share,
 } from 'react-native';
 
+import Text from '../../../../components/AppText';
 import { useTheme, uiStyle } from '../../../../components/ThemeContext';
 import { getDeepLinkShareHeaderOptions } from '../../../../components/DeepLinkShareButton';
 import { BASE_URI, BASE_HOST, GET, ARK_EVENT_SHARE_URL, POST, MAIL } from '../../../../utils/pathMap';

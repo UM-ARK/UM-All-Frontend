@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Alert, Text, View } from 'react-native';
+import { Alert, View } from 'react-native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { SafeAreaView } from 'react-native-screens/experimental';
 import { useIsFocused } from '@react-navigation/native';
@@ -7,6 +7,7 @@ import { Dialog } from '@rneui/themed';
 import { scale } from 'react-native-size-matters';
 import { useTranslation } from 'react-i18next';
 
+import Text from '../../../components/AppText';
 import { useTheme, uiStyle } from '../../../components/ThemeContext';
 import { trigger } from '../../../utils/trigger';
 import { openLink } from '../../../utils/browser';

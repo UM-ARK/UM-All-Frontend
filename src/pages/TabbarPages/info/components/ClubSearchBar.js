@@ -1,8 +1,6 @@
 import React, { memo, useCallback, useRef } from 'react';
 import {
     View,
-    TextInput,
-    Text,
     Pressable,
     ActivityIndicator,
     StyleSheet,
@@ -14,6 +12,8 @@ import Animated, {
     withTiming,
 } from 'react-native-reanimated';
 import { useTranslation } from 'react-i18next';
+import Text from '../../../../components/AppText';
+import TextInput from '../../../../components/AppTextInput';
 import { useTheme, uiStyle } from '../../../../components/ThemeContext';
 import { trigger } from '../../../../utils/trigger';
 import { scale, verticalScale } from 'react-native-size-matters';

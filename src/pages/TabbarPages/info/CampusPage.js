@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { View, Text, StyleSheet, Pressable, Alert } from 'react-native';
+import { View, StyleSheet, Pressable, Alert } from 'react-native';
 import PagerView from 'react-native-pager-view';
 import Animated, {
     Easing,
@@ -15,6 +15,7 @@ import {
     LiquidGlassView,
 } from '@callstack/liquid-glass';
 
+import Text from '../../../components/AppText';
 import { useTheme, uiStyle } from '../../../components/ThemeContext';
 import SegmentControl from '../../../components/SegmentControl';
 import { trigger } from '../../../utils/trigger';

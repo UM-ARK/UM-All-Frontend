@@ -3,7 +3,6 @@ import {
     ActivityIndicator,
     RefreshControl,
     StyleSheet,
-    Text,
     View,
 } from 'react-native';
 
@@ -14,6 +13,7 @@ import {useTranslation} from 'react-i18next';
 import Ionicons from "@react-native-vector-icons/ionicons";
 import {scale, verticalScale} from 'react-native-size-matters';
 
+import Text from '../../../../components/AppText';
 import {uiStyle, useTheme} from '../../../../components/ThemeContext';
 import {useHarborSession} from '../../../../contexts/HarborSessionContext';
 import {fetchHarborBadges} from '../../../../utils/harbor/harborApi';

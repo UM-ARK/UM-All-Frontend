@@ -2,7 +2,6 @@ import React, { memo, useEffect, useState } from 'react';
 import {
     Pressable,
     StyleSheet,
-    Text,
     useWindowDimensions,
     View,
 } from 'react-native';
@@ -13,6 +12,7 @@ import MaterialCommunityIcons from "@react-native-vector-icons/material-design-i
 import { scale, verticalScale } from 'react-native-size-matters';
 import { useTranslation } from 'react-i18next';
 
+import Text from '../../../../components/AppText';
 import { uiStyle, useTheme } from '../../../../components/ThemeContext';
 import {
     ARK_HARBOR_ABSOLUTE_URL,

@@ -2,13 +2,14 @@
  * 組隊詳情頁首：標題、狀態、說明、截止、提交進度
  */
 import React, {memo} from 'react';
-import {Pressable, ScrollView, StyleSheet, Text, View} from 'react-native';
+import {Pressable, ScrollView, StyleSheet, View} from 'react-native';
 
 import moment from 'moment-timezone';
 import {useTranslation} from 'react-i18next';
 import {scale, verticalScale} from 'react-native-size-matters';
 import Ionicons from '@react-native-vector-icons/ionicons';
 
+import Text from '../../../components/AppText';
 import {uiStyle, useTheme} from '../../../components/ThemeContext';
 import {trigger} from '../../../utils/trigger';
 

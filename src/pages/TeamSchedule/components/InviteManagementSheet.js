@@ -7,7 +7,6 @@ import {
     Pressable,
     Share,
     StyleSheet,
-    Text,
     View,
 } from 'react-native';
 
@@ -16,6 +15,7 @@ import ActionSheet from 'react-native-actions-sheet';
 import {scale, verticalScale} from 'react-native-size-matters';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
+import Text from '../../../components/AppText';
 import {uiStyle, useTheme} from '../../../components/ThemeContext';
 import {logToFirebase} from '../../../utils/firebaseAnalytics';
 import {

@@ -4,7 +4,6 @@ import {
     Pressable,
     RefreshControl,
     StyleSheet,
-    Text,
     View,
 } from 'react-native';
 
@@ -17,6 +16,7 @@ import Toast from 'react-native-simple-toast';
 import Ionicons from "@react-native-vector-icons/ionicons";
 import {scale, verticalScale} from 'react-native-size-matters';
 
+import Text from '../../../../components/AppText';
 import SegmentControl from '../../../../components/SegmentControl';
 import {uiStyle, useTheme} from '../../../../components/ThemeContext';
 import {useHarborSession} from '../../../../contexts/HarborSessionContext';

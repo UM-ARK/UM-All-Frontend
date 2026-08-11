@@ -4,7 +4,6 @@ import React, {
 import {
     ActivityIndicator,
     Pressable,
-    Text,
     View,
 } from 'react-native';
 
@@ -13,6 +12,7 @@ import { scale, verticalScale } from 'react-native-size-matters';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
+import Text from '../../../../components/AppText';
 import { useTheme } from '../../../../components/ThemeContext';
 import { trigger } from '../../../../utils/trigger';
 import HarborReactionControl, {

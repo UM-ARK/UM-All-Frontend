@@ -1,6 +1,7 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { scale, verticalScale } from 'react-native-size-matters';
+import Text from './AppText';
 import { useTheme, uiStyle } from './ThemeContext';
 import { trigger } from '../utils/trigger';
 import TouchableScale from './TouchableScale';

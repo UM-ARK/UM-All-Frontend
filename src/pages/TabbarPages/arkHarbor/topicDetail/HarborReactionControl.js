@@ -8,7 +8,6 @@ import {
     Pressable,
     ScrollView,
     StyleSheet,
-    Text,
     useWindowDimensions,
     View,
 } from 'react-native';
@@ -17,6 +16,7 @@ import { Image } from 'expo-image';
 import { scale } from 'react-native-size-matters';
 import { useTranslation } from 'react-i18next';
 
+import Text from '../../../../components/AppText';
 import { useTheme } from '../../../../components/ThemeContext';
 import { ARK_HARBOR_EMOJI_URL } from '../../../../utils/pathMap';
 import { trigger } from '../../../../utils/trigger';

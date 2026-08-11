@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import {
     ScrollView,
     View,
-    Text,
     Pressable,
     TouchableOpacity,
     RefreshControl,
@@ -16,6 +15,7 @@ import {
 } from 'react-native';
 
 // 本地工具
+import Text from '../../../../components/AppText';
 import { useTheme, uiStyle } from '../../../../components/ThemeContext';
 import {
     GITHUB_DONATE,

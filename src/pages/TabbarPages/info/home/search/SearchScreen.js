@@ -4,8 +4,6 @@ import {
     Keyboard,
     Pressable,
     StyleSheet,
-    Text,
-    TextInput,
     View,
 } from 'react-native';
 
@@ -19,6 +17,8 @@ import * as OpenCC from 'opencc-js';
 import { useTranslation } from 'react-i18next';
 
 import { getFunctionArr } from '../../../features/FeatureList';
+import Text from '../../../../../components/AppText';
+import TextInput from '../../../../../components/AppTextInput';
 import FeatureIcon from './components/FeatureIcon';
 import { useTheme, uiStyle } from '../../../../../components/ThemeContext';
 import { openLink } from '../../../../../utils/browser';

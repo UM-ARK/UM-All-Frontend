@@ -2,11 +2,12 @@
  * 組隊約時間共用狀態：skeleton／空狀態／區塊內錯誤重試
  */
 import React from 'react';
-import {Pressable, StyleSheet, Text, View} from 'react-native';
+import {Pressable, StyleSheet, View} from 'react-native';
 
 import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 import {scale, verticalScale} from 'react-native-size-matters';
 
+import Text from '../../../components/AppText';
 import {uiStyle, useTheme} from '../../../components/ThemeContext';
 import {trigger} from '../../../utils/trigger';
 

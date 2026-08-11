@@ -1,6 +1,7 @@
 import React, { memo, useCallback, useContext, useEffect, useMemo, useRef, useState, } from 'react';
-import { Text, View, RefreshControl, TouchableOpacity, Alert, SectionList, Dimensions, FlatList, Platform, } from 'react-native';
+import { View, RefreshControl, TouchableOpacity, Alert, SectionList, Dimensions, FlatList, Platform, } from 'react-native';
 
+import Text from '../../../components/AppText';
 import { uiStyle, ThemeContext, } from '../../../components/ThemeContext';
 import { BASE_URI, BASE_HOST, GET, USUAL_Q } from '../../../utils/pathMap';
 import { clubTagList, clubTagMap } from '../../../utils/clubMap';

@@ -7,9 +7,10 @@ import React, {
     useCallback,
     useImperativeHandle,
 } from 'react';
-import { Text, View, RefreshControl } from 'react-native';
+import { View, RefreshControl } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 
+import Text from '../../../components/AppText';
 import { uiStyle, ThemeContext } from '../../../components/ThemeContext';
 import { UM_API_EVENT, UM_API_TOKEN } from '../../../utils/pathMap';
 

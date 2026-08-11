@@ -9,7 +9,6 @@ import React, {
     memo,
 } from 'react';
 import {
-    Text,
     View,
     StyleSheet,
     FlatList,
@@ -21,6 +20,7 @@ import {
 // import { useNavigation } from '@react-navigation/native';
 // import { Image } from 'expo-image';
 
+import Text from '../../../../components/AppText';
 import { useTheme, uiStyle } from '../../../../components/ThemeContext';
 import {
     BASE_URI,

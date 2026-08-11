@@ -1,8 +1,9 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import Animated, { FadeInUp, LinearTransition } from 'react-native-reanimated';
 import GlassmorphismCard from './GlassmorphismCard';
 import { scale, verticalScale, moderateScale } from 'react-native-size-matters';
+import Text from './AppText';
 
 /**
  * 信息卡片組件

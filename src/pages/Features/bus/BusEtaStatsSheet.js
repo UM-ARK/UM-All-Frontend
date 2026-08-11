@@ -1,11 +1,12 @@
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
-import {ActivityIndicator, Pressable, StyleSheet, Text, View} from 'react-native';
+import {ActivityIndicator, Pressable, StyleSheet, View} from 'react-native';
 import ActionSheet from 'react-native-actions-sheet';
 import {useTranslation} from 'react-i18next';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 import axios from 'axios';
 
+import Text from '../../../components/AppText';
 import SegmentControl from '../../../components/SegmentControl';
 import {uiStyle, useTheme} from '../../../components/ThemeContext';
 import {UM_BUS_STATS} from '../../../utils/pathMap';

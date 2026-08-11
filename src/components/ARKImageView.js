@@ -1,5 +1,5 @@
 import React, { useState, forwardRef, useImperativeHandle, useCallback, useMemo, useRef } from 'react';
-import { View, Text, StyleSheet, Pressable, Image as RNImage, ActivityIndicator, Alert, Platform } from 'react-native';
+import { View, StyleSheet, Pressable, Image as RNImage, ActivityIndicator, Alert, Platform } from 'react-native';
 import Clipboard from '@react-native-clipboard/clipboard';
 import { Camera } from 'expo-camera';
 import GalleryPreview from 'react-native-gallery-preview';
@@ -7,6 +7,7 @@ import ActionSheet, { ScrollView } from 'react-native-actions-sheet';
 import { useTranslation } from 'react-i18next';
 import Toast from 'react-native-simple-toast';
 import { Image } from 'expo-image';
+import Text from './AppText';
 import { useTheme } from './ThemeContext';
 import { scale } from 'react-native-size-matters';
 import Ionicons from "@react-native-vector-icons/ionicons";

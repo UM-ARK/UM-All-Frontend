@@ -1,5 +1,5 @@
 import React, {useEffect, useMemo, useRef, useState} from 'react';
-import {Pressable, StyleSheet, Text, useWindowDimensions, View} from 'react-native';
+import {Pressable, StyleSheet, useWindowDimensions, View} from 'react-native';
 import Animated, {
     cancelAnimation,
     useAnimatedProps,
@@ -10,6 +10,7 @@ import Animated, {
 import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 import Svg, {Circle, Path} from 'react-native-svg';
 
+import Text from '../../../components/AppText';
 import {uiStyle} from '../../../components/ThemeContext';
 import TouchableScale from '../../../components/TouchableScale';
 import {trigger} from '../../../utils/trigger';

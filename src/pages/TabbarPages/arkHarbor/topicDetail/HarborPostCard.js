@@ -6,7 +6,6 @@ import {
     ActivityIndicator,
     Platform,
     Pressable,
-    Text,
     View,
 } from 'react-native';
 
@@ -17,6 +16,7 @@ import MaterialCommunityIcons from "@react-native-vector-icons/material-design-i
 import { scale } from 'react-native-size-matters';
 import { useTranslation } from 'react-i18next';
 
+import Text from '../../../../components/AppText';
 import { useTheme } from '../../../../components/ThemeContext';
 import { parseHarborPostEvent } from '../../../../utils/harbor/harborPostEvent';
 import {

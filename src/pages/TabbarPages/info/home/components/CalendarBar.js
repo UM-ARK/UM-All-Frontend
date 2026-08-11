@@ -1,8 +1,9 @@
 import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
-import { View, Text, VirtualizedList } from 'react-native';
+import { View, VirtualizedList } from 'react-native';
 import moment from 'moment';
 import { moderateScale, scale, verticalScale } from 'react-native-size-matters';
 
+import Text from '../../../../../components/AppText';
 import { useTheme } from '../../../../../components/ThemeContext';
 import { uiStyle, VERSION_EMOJI } from '../../../../../components/ThemeContext';
 import { screenWidth } from '../../../../../utils/stylesKits';

@@ -12,7 +12,6 @@ import {
     Share,
     StyleSheet,
     Switch,
-    Text,
     View,
 } from 'react-native';
 
@@ -29,6 +28,7 @@ import Ionicons from '@react-native-vector-icons/ionicons';
 
 import {useHarborSession} from '../../contexts/HarborSessionContext';
 import {useSchedulingSession} from '../../contexts/SchedulingSessionContext';
+import Text from '../../components/AppText';
 import {uiStyle, useTheme} from '../../components/ThemeContext';
 import SegmentControl from '../../components/SegmentControl';
 import {getCourseCatalog} from '../../utils/checkCoursesKits';

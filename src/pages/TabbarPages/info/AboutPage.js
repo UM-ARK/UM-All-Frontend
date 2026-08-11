@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Linking, Alert, StyleSheet } from 'react-native';
+import { View, ScrollView, TouchableOpacity, Linking, Alert, StyleSheet } from 'react-native';
 
+import Text from '../../../components/AppText';
 import { useTheme, themes, uiStyle, ThemeContext } from '../../../components/ThemeContext';
 import { openLink } from '../../../utils/browser';
 import HomeCard from './home/components/HomeCard';

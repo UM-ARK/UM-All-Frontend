@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text, View, Platform, useWindowDimensions } from 'react-native';
+import { View, Platform, useWindowDimensions } from 'react-native';
 // 不可用 @expo/ui MenuView（SwiftUI Host matchContents 會在 Tab 切換／版面提交時
 // 反寫 Fabric ShadowTree 並 abort）。改用 @react-native-menu/menu（原生 UIButton）。
 // Teacher 分類橫滑靠固定 cardWidth；時段每行最多兩天，避免多天撐破寬度。
@@ -13,6 +13,7 @@ import { scale } from 'react-native-size-matters';
 import lodash from 'lodash';
 import { t } from 'i18next';
 
+import Text from '../../../../../../components/AppText';
 import { useTheme, uiStyle } from '../../../../../../components/ThemeContext';
 import { trigger } from '../../../../../../utils/trigger';
 import { useUmehHost } from '../../../../../../utils/umehHost';

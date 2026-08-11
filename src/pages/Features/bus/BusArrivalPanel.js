@@ -1,5 +1,5 @@
 import React, {useCallback, useEffect, useMemo} from 'react';
-import {Pressable, ScrollView, StyleSheet, Text, View} from 'react-native';
+import {Pressable, ScrollView, StyleSheet, View} from 'react-native';
 import {Gesture, GestureDetector} from 'react-native-gesture-handler';
 import Animated, {
     runOnJS,
@@ -10,6 +10,7 @@ import Animated, {
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 
+import Text from '../../../components/AppText';
 import {uiStyle} from '../../../components/ThemeContext';
 import {trigger} from '../../../utils/trigger';
 import {

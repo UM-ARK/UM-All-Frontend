@@ -2,13 +2,14 @@
  * 本人共享與管理課表的明確確認 Sheet。
  */
 import React, {memo, useEffect, useMemo, useRef, useState} from 'react';
-import {ActivityIndicator, Alert, Pressable, StyleSheet, Text, View} from 'react-native';
+import {ActivityIndicator, Alert, Pressable, StyleSheet, View} from 'react-native';
 
 import {useTranslation} from 'react-i18next';
 import ActionSheet, {ScrollView} from 'react-native-actions-sheet';
 import {scale, verticalScale} from 'react-native-size-matters';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
+import Text from '../../../components/AppText';
 import {uiStyle, useTheme} from '../../../components/ThemeContext';
 import {logToFirebase} from '../../../utils/firebaseAnalytics';
 import {trigger} from '../../../utils/trigger';

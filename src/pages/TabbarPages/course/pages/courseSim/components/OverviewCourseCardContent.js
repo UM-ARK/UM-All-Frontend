@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { StyleSheet, Text } from 'react-native';
+import { StyleSheet } from 'react-native';
 
 import {
     moderateScale,
@@ -7,6 +7,7 @@ import {
     verticalScale,
 } from 'react-native-size-matters';
 
+import Text from '../../../../../../components/AppText';
 import { useTheme, uiStyle } from '../../../../../../components/ThemeContext';
 
 /**

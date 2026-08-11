@@ -7,8 +7,6 @@ import {
     Alert,
     Pressable,
     StyleSheet,
-    Text,
-    TextInput,
     View,
 } from 'react-native';
 
@@ -24,6 +22,8 @@ import {
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import {scale, verticalScale} from 'react-native-size-matters';
 
+import Text from '../../components/AppText';
+import TextInput from '../../components/AppTextInput';
 import {uiStyle, useTheme} from '../../components/ThemeContext';
 import {logToFirebase} from '../../utils/firebaseAnalytics';
 import {updateTeamEvent} from '../../utils/scheduling/schedulingApi';

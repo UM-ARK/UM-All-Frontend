@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 
 import { Image } from 'expo-image';
 import { scale, verticalScale } from 'react-native-size-matters';
 import { t } from 'i18next';
 
+import Text from '../../../../../components/AppText';
 import { useTheme, themes, uiStyle, ThemeContext } from '../../../../../components/ThemeContext';
 import { screenWidth } from '../../../../../utils/stylesKits';
 
