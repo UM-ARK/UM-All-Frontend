@@ -79,7 +79,7 @@
       [
         "expo-camera",
         {
-          "cameraPermission": false,
+          "cameraPermission": "允許 ARK ALL 使用相機以掃描二維碼。",
           "microphonePermission": false,
           "recordAudioAndroid": false,
           "barcodeScannerEnabled": true
