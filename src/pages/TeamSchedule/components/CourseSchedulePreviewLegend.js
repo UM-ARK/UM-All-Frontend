@@ -2,12 +2,13 @@
  * 課表預覽：課堂重疊與已選時段圖例
  */
 import React, {memo} from 'react';
-import {StyleSheet, Text, View} from 'react-native';
+import {StyleSheet, View} from 'react-native';
 
 import Ionicons from '@react-native-vector-icons/ionicons';
 import {useTranslation} from 'react-i18next';
 import {scale, verticalScale} from 'react-native-size-matters';
 
+import Text from '../../../components/AppText';
 import {uiStyle, useTheme} from '../../../components/ThemeContext';
 
 /**

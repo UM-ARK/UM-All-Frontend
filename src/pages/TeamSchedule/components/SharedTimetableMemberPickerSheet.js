@@ -2,8 +2,6 @@ import React, {memo, useEffect, useMemo, useRef, useState} from 'react';
 import {
     Pressable,
     StyleSheet,
-    Text,
-    TextInput,
     useWindowDimensions,
     View,
 } from 'react-native';
@@ -16,6 +14,8 @@ import Ionicons from '@react-native-vector-icons/ionicons';
 import {scale, verticalScale} from 'react-native-size-matters';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
+import Text from '../../../components/AppText';
+import TextInput from '../../../components/AppTextInput';
 import {uiStyle, useTheme} from '../../../components/ThemeContext';
 import {ARK_HARBOR_AVATAR_TEMPLATE} from '../../../utils/pathMap';
 import {trigger} from '../../../utils/trigger';

@@ -3,8 +3,6 @@ import {
     ActivityIndicator,
     Pressable,
     StyleSheet,
-    Text,
-    TextInput,
     View,
 } from 'react-native';
 
@@ -18,6 +16,8 @@ import MaterialCommunityIcons from "@react-native-vector-icons/material-design-i
 import { scale, verticalScale } from 'react-native-size-matters';
 import { useTranslation } from 'react-i18next';
 
+import Text from '../../../../components/AppText';
+import TextInput from '../../../../components/AppTextInput';
 import { useTheme } from '../../../../components/ThemeContext';
 import HarborCategoryIcon from '../components/HarborCategoryIcon';
 import HarborCategoryPickerSheet from './HarborCategoryPickerSheet';

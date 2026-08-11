@@ -11,7 +11,6 @@ import {
     Alert,
     Pressable,
     StyleSheet,
-    Text,
     View,
 } from 'react-native';
 
@@ -24,6 +23,7 @@ import {scale, verticalScale} from 'react-native-size-matters';
 import Toast from 'react-native-simple-toast';
 import {useTranslation} from 'react-i18next';
 
+import Text from '../../../components/AppText';
 import {uiStyle, useTheme} from '../../../components/ThemeContext';
 import {useHarborSession} from '../../../contexts/HarborSessionContext';
 import {

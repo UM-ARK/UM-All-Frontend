@@ -4,7 +4,6 @@ import {
     Pressable,
     RefreshControl,
     StyleSheet,
-    Text,
     View,
 } from 'react-native';
 
@@ -17,6 +16,7 @@ import Toast from 'react-native-simple-toast';
 import Ionicons from "@react-native-vector-icons/ionicons";
 import {scale, verticalScale} from 'react-native-size-matters';
 
+import Text from '../../../../components/AppText';
 import SegmentControl from '../../../../components/SegmentControl';
 import {uiStyle, useTheme} from '../../../../components/ThemeContext';
 import {useHarborSession} from '../../../../contexts/HarborSessionContext';
@@ -31,6 +31,7 @@ import {
 import {ARK_HARBOR_ABSOLUTE_URL, ARK_HARBOR_AVATAR} from '../../../../utils/pathMap';
 import {trigger} from '../../../../utils/trigger';
 import {HarborInlineRetry} from '../../arkHarbor/components/HarborListStates';
+import {HarborReactionIcon} from '../../arkHarbor/topicDetail/HarborReactionControl';
 import HarborEmptyState from '../components/HarborEmptyState';
 import {
     formatRelativeTime,
@@ -45,6 +46,7 @@ const HarborInboxLeading = ({
     avatarUrl,
     accentColor,
     fallbackIcon,
+    reactionValue,
     unread,
     theme,
 }) => {
@@ -52,8 +54,8 @@ const HarborInboxLeading = ({
     React.useEffect(() => {
         setFailed(false);
     }, [avatarUrl]);
-    if (avatarUrl && !failed) {
-        return (
+    const leading =
+        avatarUrl && !failed ? (
             <Image
                 source={{uri: avatarUrl}}
                 style={[
@@ -66,23 +68,35 @@ const HarborInboxLeading = ({
                 transition={200}
                 onError={() => setFailed(true)}
             />
+        ) : (
+            <View
+                style={[
+                    styles.iconWrap,
+                    {
+                        backgroundColor: unread
+                            ? theme.tonal.primary30
+                            : theme.tonal.primary15,
+                    },
+                ]}>
+                <Ionicons
+                    name={fallbackIcon}
+                    size={scale(20)}
+                    color={accentColor}
+                />
+            </View>
         );
-    }
+
     return (
-        <View
-            style={[
-                styles.iconWrap,
-                {
-                    backgroundColor: unread
-                        ? theme.tonal.primary30
-                        : theme.tonal.primary15,
-                },
-            ]}>
-            <Ionicons
-                name={fallbackIcon}
-                size={scale(20)}
-                color={accentColor}
-            />
+        <View style={styles.leadingWrap}>
+            {leading}
+            {reactionValue ? (
+                <View style={styles.reactionBadge}>
+                    <HarborReactionIcon
+                        name={reactionValue}
+                        size={verticalScale(20)}
+                    />
+                </View>
+            ) : null}
         </View>
     );
 };
@@ -465,6 +479,9 @@ const HarborInboxPage = ({
                                 ? presentation.icon
                                 : 'mail-outline'
                         }
+                        reactionValue={
+                            isNotification ? item.reactionValue : ''
+                        }
                         unread={unread}
                         theme={theme}
                     />
@@ -696,6 +713,10 @@ const styles = StyleSheet.create({
         paddingHorizontal: scale(12),
         paddingVertical: verticalScale(9),
     },
+    leadingWrap: {
+        width: scale(38),
+        height: scale(38),
+    },
     iconWrap: {
         width: scale(38),
         height: scale(38),
@@ -707,6 +728,16 @@ const styles = StyleSheet.create({
         width: scale(38),
         height: scale(38),
         borderRadius: scale(19),
+    },
+    reactionBadge: {
+        position: 'absolute',
+        right: scale(-6),
+        bottom: verticalScale(-6),
+        width: scale(22),
+        height: scale(22),
+        borderRadius: scale(11),
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     avatarPressed: {
         opacity: 0.65,

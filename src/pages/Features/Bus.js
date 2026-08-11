@@ -1,25 +1,40 @@
-import React, { useState, useEffect, useCallback, useMemo, useRef, useLayoutEffect } from 'react';
-import { Text, View, TouchableOpacity, StyleSheet, Image, ImageBackground, ScrollView, RefreshControl, Dimensions } from 'react-native';
+import React, {useState, useEffect, useCallback, useMemo, useRef, useLayoutEffect} from 'react';
+import {AppState, Image, Platform, Pressable, RefreshControl, ScrollView, StyleSheet, View} from 'react-native';
+import {isLiquidGlassSupported} from '@callstack/liquid-glass';
+import {useHeaderHeight} from '@react-navigation/elements';
+import {useIsFocused} from '@react-navigation/native';
+import {useTranslation} from 'react-i18next';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 // 引入本地工具
-import { useTheme, uiStyle } from '../../components/ThemeContext';
+import {useTheme} from '../../components/ThemeContext';
 import ARKImageView from '../../components/ARKImageView';
-import { UM_BUS_LOOP_ZH, UM_BUS_LOOP_EN, UM_MAP } from '../../utils/pathMap';
-import { openLink } from '../../utils/browser';
-import { logToFirebase } from '../../utils/firebaseAnalytics';
-import { trigger } from '../../utils/trigger';
-import { CountdownCircleTimer } from 'react-native-countdown-circle-timer';
-import { DOMParser } from 'react-native-html-parser';
-import { scale, verticalScale } from 'react-native-size-matters';
+import {UM_BUS_LIVE, UM_BUS_LOOP_ZH, UM_BUS_LOOP_EN, UM_BUS_LOOP_SERVICE, UM_MAP} from '../../utils/pathMap';
+import {openLink} from '../../utils/browser';
+import {logToFirebase} from '../../utils/firebaseAnalytics';
+import {getLocalStorage, setLocalStorageSilently} from '../../utils/storageKits';
+import {trigger} from '../../utils/trigger';
+import {DOMParser} from 'react-native-html-parser';
+import {scale} from 'react-native-size-matters';
 import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { t } from 'i18next';
 import Toast from 'react-native-simple-toast';
-import { useKeepAwake } from 'expo-keep-awake';
-import TouchableScale from '../../components/TouchableScale';
+import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
+import BusArrivalPanel, {
+    BUS_PANEL_COLLAPSED,
+    BUS_PANEL_COLLAPSED_EMPTY,
+    BUS_PANEL_EXPANDED,
+} from './bus/BusArrivalPanel';
+import BusEtaStatsSheet from './bus/BusEtaStatsSheet';
+import BusRouteMap from './bus/BusRouteMap';
+import {
+    BUS_STOPS,
+    createFallbackBusLive,
+    extractVehiclePlates,
+    isBusLiveSnapshotFresh,
+    isCachedBusLiveUsable,
+    normalizeBusLive,
+} from './bus/busModel';
 
-const busIcon = require('../../static/img/Bus/bus.png');
-const busRouteImg = require('../../static/img/Bus/bus_route.png');
 const stopImgArr = [
     require('../../static/img/Bus/stopImg/PGH.jpg'),
     require('../../static/img/Bus/stopImg/E4.jpg'),
@@ -39,7 +54,7 @@ function getBusData(busInfoHtml) {
 
     // 主要的巴士資訊都存放在span內
     let mainInfo = doc.getElementsByTagName('span');
-    let busInfoArr = new Array();
+    let busInfoArr = [];
 
     // 到站時車牌屬於span（13個span）。未到站時車牌屬於div（12個span）
     // 無車服務時只有0~2的下標為busInfo（11個span）。有車服務時，0~3的下標都是busInfo（至少12個span）
@@ -78,12 +93,9 @@ function getBusData(busInfoHtml) {
     let busPositionArr = [];
     for (let i = 0; i < arriveInfoArr.length; i++) {
         let item = arriveInfoArr[i];
-        if (item.length > 0) {
-            busPositionArr.push({
-                number: item,
-                index: i,
-            });
-        }
+        extractVehiclePlates(item).forEach(number => {
+            busPositionArr.push({number, index: i});
+        });
     }
     // console.log("Bus車牌、位置總數據：",busPositionArr);
 
@@ -93,46 +105,176 @@ function getBusData(busInfoHtml) {
     };
 }
 
-const BUS_URL_DEFAULT = UM_BUS_LOOP_ZH;
+const BUS_LIVE_SNAPSHOT_KEY = 'busLiveSnapshot';
+const BUS_SELECTED_STOP_KEY = 'busSelectedStop';
+const BUS_REFRESH_INTERVAL_MS = 10000;
+const staticStyles = StyleSheet.create({
+    headerRightRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    headerButton: {
+        width: scale(36),
+        height: scale(36),
+        borderRadius: scale(18),
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+});
 
 // 巴士報站頁 - 畫面佈局與渲染
-const BusScreen = () => {
-    useKeepAwake();
-    const { theme } = useTheme();
-    const { bg_color, white, black, themeColor, secondThemeColor, viewShadow } = theme;
-    const s = StyleSheet.create({
+const BusScreen = ({navigation}) => {
+    const {t, i18n} = useTranslation('features');
+    const isFocused = useIsFocused();
+    const headerHeight = useHeaderHeight();
+    const insets = useSafeAreaInsets();
+    const {theme} = useTheme();
+    const {
+        bg_color,
+        black,
+        success,
+        themeColor,
+        warning,
+    } = theme;
+    const s = useMemo(() => StyleSheet.create({
         container: {
             flex: 1,
-            flexDirection: 'column',
+            backgroundColor: bg_color,
         },
-        arrowSize: {
-            width: scale(35),
-            height: scale(35),
-            resizeMode: 'contain',
+        routeScroll: {
+            flex: 1,
         },
-        dotSize: {
-            width: scale(21),
-            height: scale(21),
-            resizeMode: 'contain',
+        routeContent: {
+            paddingHorizontal: 12,
+            paddingTop: 4,
+            paddingBottom: 8,
         },
-        infoContainer: {
+        panelOverlay: {
             position: 'absolute',
-            marginHorizontal: scale(10),
-            backgroundColor: white,
-            borderRadius: scale(10),
-            ...viewShadow,
-            paddingHorizontal: scale(10),
-            paddingVertical: scale(3),
+            left: 0,
+            right: 0,
+            bottom: 0,
         },
-    });
+    }), [bg_color]);
 
-    const [busPositionArr, setBusPositionArr] = useState([]);
-    const [busInfoArr, setBusInfoArr] = useState([]);
-    const [clickStopIndex, setClickStopIndex] = useState(0);
+    const [snapshot, setSnapshot] = useState(null);
+    const [selectedStop, setSelectedStop] = useState(null);
+    const [selectedVehiclePlate, setSelectedVehiclePlate] = useState(null);
+    const [panelExpanded, setPanelExpanded] = useState(false);
+    const [statsVisible, setStatsVisible] = useState(false);
+    const [routeViewportHeight, setRouteViewportHeight] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
-    const [toastColor, setToastColor] = useState(themeColor);
-    const [busUrl, setBusUrl] = useState(BUS_URL_DEFAULT);
+    const [isRefreshing, setIsRefreshing] = useState(false);
+    const [isAppActive, setIsAppActive] = useState(AppState.currentState === 'active');
+    const [now, setNow] = useState(Date.now());
     const imageViewerRef = useRef(null);
+    const routeScrollRef = useRef(null);
+    const controllerRef = useRef(null);
+    const requestInFlightRef = useRef(false);
+    const snapshotRef = useRef(null);
+    const panelBottomInset = insets.bottom;
+    const collapsedPanelReservedHeight = (snapshot?.vehicles?.length > 0
+        ? BUS_PANEL_COLLAPSED
+        : BUS_PANEL_COLLAPSED_EMPTY)
+        + panelBottomInset;
+    const panelReservedHeight = (panelExpanded
+        ? BUS_PANEL_EXPANDED
+        : collapsedPanelReservedHeight);
+    const contentTopStyle = useMemo(
+        () => isLiquidGlassSupported ? {paddingTop: headerHeight} : null,
+        [headerHeight],
+    );
+    const routePanelInsetStyle = useMemo(
+        () => ({paddingBottom: panelReservedHeight + 8}),
+        [panelReservedHeight],
+    );
+    const routeMapMaxHeight = routeViewportHeight === null
+        ? null
+        : Math.max(0, routeViewportHeight - collapsedPanelReservedHeight - 12);
+
+    const busUrl = i18n.resolvedLanguage === 'en' ? UM_BUS_LOOP_EN : UM_BUS_LOOP_ZH;
+
+    // 右上角：官方網站 / 服務說明（參考 LocalCourse / DeepLinkShareButton header 模式）
+    const openBusOfficialPage = useCallback(() => {
+        openLink(busUrl);
+    }, [busUrl]);
+
+    const openBusServiceInfo = useCallback(() => {
+        openLink(UM_BUS_LOOP_SERVICE);
+    }, []);
+
+    useLayoutEffect(() => {
+        navigation.setOptions({
+            headerRight:
+                Platform.OS === 'ios'
+                    ? undefined
+                    : () => (
+                        <View style={staticStyles.headerRightRow}>
+                            <Pressable
+                                accessibilityRole="button"
+                                accessibilityLabel={t('官方網站')}
+                                onPress={() => {
+                                    trigger();
+                                    openBusOfficialPage();
+                                }}
+                                style={staticStyles.headerButton}>
+                                <MaterialCommunityIcons
+                                    name="earth"
+                                    size={scale(20)}
+                                    color={themeColor}
+                                />
+                            </Pressable>
+                            <Pressable
+                                accessibilityRole="button"
+                                accessibilityLabel={t('官方資訊')}
+                                onPress={() => {
+                                    trigger();
+                                    openBusServiceInfo();
+                                }}
+                                style={staticStyles.headerButton}>
+                                <MaterialCommunityIcons
+                                    name="information-outline"
+                                    size={scale(20)}
+                                    color={themeColor}
+                                />
+                            </Pressable>
+                        </View>
+                    ),
+            unstable_headerRightItems:
+                Platform.OS === 'ios'
+                    ? () => [
+                        {
+                            type: 'button',
+                            label: t('官方資訊'),
+                            accessibilityLabel: t('官方資訊'),
+                            icon: {
+                                type: 'sfSymbol',
+                                name: 'info.circle',
+                            },
+                            tintColor: themeColor,
+                            onPress: () => {
+                                trigger();
+                                openBusServiceInfo();
+                            },
+                        },
+                        {
+                            type: 'button',
+                            label: t('官方網站'),
+                            accessibilityLabel: t('官方網站'),
+                            icon: {
+                                type: 'sfSymbol',
+                                name: 'globe',
+                            },
+                            tintColor: themeColor,
+                            onPress: () => {
+                                trigger();
+                                openBusOfficialPage();
+                            },
+                        },
+                    ]
+                    : undefined,
+        });
+    }, [navigation, openBusOfficialPage, openBusServiceInfo, t, themeColor]);
 
     // 將 stopImgArr 轉換為 ARKImageView 可用的格式
     const processedStopImages = useMemo(() => {
@@ -145,235 +287,284 @@ const BusScreen = () => {
         });
     }, []);
 
-    const controller = new AbortController();
-
-    // busStyleArr 使用 useMemo 儲存，避免每次重新建立
-    const busStyleArr = useMemo(() => [
-        { position: 'absolute', left: scale(255), top: scale(450) }, // PGH
-        { position: 'absolute', left: scale(255), top: scale(380) }, // PGH ~ E4
-        { position: 'absolute', left: scale(255), top: scale(300) }, // E4
-        { position: 'absolute', left: scale(255), top: scale(200) }, // E4 ~ N2
-        { position: 'absolute', left: scale(255), top: scale(80) },  // N2
-        { position: 'absolute', left: scale(160), top: scale(30) },  // N2 ~ N6
-        { position: 'absolute', left: scale(75), top: scale(58) },   // N6
-        { position: 'absolute', left: scale(30), top: scale(120) },  // N6 ~ E11
-        { position: 'absolute', left: scale(30), top: scale(155) },  // E11
-        { position: 'absolute', left: scale(30), top: scale(210) },  // E11 ~ E21
-        { position: 'absolute', left: scale(30), top: scale(265) },  // N21
-        { position: 'absolute', left: scale(30), top: scale(330) },  // N21 ~ E32
-        { position: 'absolute', left: scale(30), top: scale(390) },  // E32
-        { position: 'absolute', left: scale(30), top: scale(500) },  // E32 ~ S4
-        { position: 'absolute', left: scale(190), top: scale(493) }, // s4
-        { position: 'absolute', left: scale(255), top: scale(500) }, // s4 ~ PGH
-    ], []);
-
-    // 取得語言設定並設定 BUS_URL
     useEffect(() => {
-        AsyncStorage.getItem('language').then(res => {
-            const lng = JSON.parse(res);
-            if (lng !== 'tc') {
-                setBusUrl(UM_BUS_LOOP_EN);
-            } else {
-                setBusUrl(UM_BUS_LOOP_ZH);
+        snapshotRef.current = snapshot;
+    }, [snapshot]);
+
+    useEffect(() => {
+        logToFirebase('openPage', {page: 'bus'});
+        getLocalStorage(BUS_SELECTED_STOP_KEY).then(value => {
+            if (typeof value === 'string') {
+                setSelectedStop(value);
             }
         });
-
-        logToFirebase('openPage', { page: 'bus' });
     }, []);
 
-    // 自動刷新定時器
-    useEffect(() => {
-        // 首次載入即呼叫
-        fetchBusInfo();
-
-        const timer = setInterval(() => {
-            fetchBusInfo();
-        }, 7000);
-
-        return () => {
-            controller.abort(); // 清理請求
-            clearInterval(timer);
-        };
-    }, [busUrl]);
-
-    // 爬蟲campus Bus
-    const fetchBusInfo = async () => {
-        setIsLoading(true);
-        try {
-            const res = await axios.get(busUrl, { signal: controller.signal });
-            const result = getBusData(res.data);
-
-            // TODO: busInfoArr服務正常時，有時length為3，有時為4。為4時缺失“下一班車時間”資訊。
-            result.busInfoArr.shift(); // 移除數組第一位的 “澳大環校穿梭巴士報站資訊” 字符串
-
-            setBusInfoArr(result.busInfoArr);
-            setBusPositionArr(result.busPositionArr);
-            setIsLoading(false);
-
-            if (result.busPositionArr.length === 0) {
-                Toast.show('當前沒有巴士~ []~(￣▽￣)~*👋');
-            } else {
-                Toast.show('已自動刷新！點擊巴士圖標可手動刷新 []~(￣▽￣)~*👋');
-            }
-        } catch (error) {
-            setIsLoading(false);
-            Toast.show('網絡錯誤！🆘');
+    const fetchBusInfo = useCallback(async ({manual = false} = {}) => {
+        if (requestInFlightRef.current) {
+            return;
         }
-    };
+        requestInFlightRef.current = true;
+        controllerRef.current?.abort();
+        const controller = new AbortController();
+        controllerRef.current = controller;
+        if (manual) {
+            setIsRefreshing(true);
+        } else if (!snapshotRef.current) {
+            setIsLoading(true);
+        }
+
+        let staleLive = null;
+        try {
+            const response = await axios.get(UM_BUS_LIVE, {
+                signal: controller.signal,
+                timeout: 8000,
+            });
+            const live = normalizeBusLive(response.data);
+            if (!isBusLiveSnapshotFresh(live)) {
+                staleLive = live;
+                throw new Error('Bus live response is stale or expired');
+            }
+            setSnapshot(live);
+            setLocalStorageSilently(BUS_LIVE_SNAPSHOT_KEY, live);
+        } catch (error) {
+            if (controller.signal.aborted) {
+                return;
+            }
+            let cached = snapshotRef.current;
+            if (!isCachedBusLiveUsable(cached)) {
+                try {
+                    cached = await getLocalStorage(BUS_LIVE_SNAPSHOT_KEY);
+                } catch (_storageError) {
+                    cached = null;
+                }
+            }
+            if (isCachedBusLiveUsable(cached)) {
+                try {
+                    setSnapshot(normalizeBusLive(cached, 'cache'));
+                    return;
+                } catch (_cacheError) {
+                    cached = null;
+                }
+            }
+            try {
+                const response = await axios.get(busUrl, {
+                    signal: controller.signal,
+                    timeout: 8000,
+                });
+                setSnapshot(createFallbackBusLive(getBusData(response.data)));
+            } catch (_fallbackError) {
+                if (controller.signal.aborted) {
+                    return;
+                }
+                const lastSnapshot = staleLive || cached || snapshotRef.current;
+                if (lastSnapshot) {
+                    setSnapshot({
+                        ...lastSnapshot,
+                        stale: true,
+                        deliverySource: 'stale',
+                    });
+                }
+                if (manual) {
+                    Toast.show(t('暫時無法更新巴士資料'));
+                }
+            }
+        } finally {
+            if (controllerRef.current === controller) {
+                controllerRef.current = null;
+                requestInFlightRef.current = false;
+                setIsLoading(false);
+                setIsRefreshing(false);
+            }
+        }
+    }, [busUrl, t]);
+
+    useEffect(() => {
+        const subscription = AppState.addEventListener('change', nextState => {
+            setIsAppActive(nextState === 'active');
+        });
+        return () => subscription.remove();
+    }, []);
+
+    useEffect(() => {
+        if (!isFocused || !isAppActive) {
+            return undefined;
+        }
+        fetchBusInfo();
+        const timer = setInterval(fetchBusInfo, BUS_REFRESH_INTERVAL_MS);
+        return () => {
+            clearInterval(timer);
+            const controller = controllerRef.current;
+            controllerRef.current = null;
+            requestInFlightRef.current = false;
+            controller?.abort();
+        };
+    }, [fetchBusInfo, isAppActive, isFocused]);
+
+    useEffect(() => {
+        if (!isFocused || !isAppActive) {
+            return undefined;
+        }
+        const timer = setInterval(() => setNow(Date.now()), 1000);
+        return () => clearInterval(timer);
+    }, [isAppActive, isFocused]);
+
+    useEffect(() => {
+        routeScrollRef.current?.scrollTo({y: 0, animated: false});
+    }, [headerHeight, panelExpanded]);
 
     // 控制彈出層打開 or 關閉
-    const toggleModal = (index) => {
-        trigger();
-        setClickStopIndex(index);
+    const toggleModal = useCallback(index => {
         // 使用 ARKImageView 打開圖片
         imageViewerRef.current?.handleOpenImage(index);
-    };
+    }, []);
 
-    // 點擊刷新
-    const onBusIconPress = () => {
+    const openSelectedStopImage = useCallback(() => {
+        const index = BUS_STOPS.findIndex(stop => stop.code === selectedStop);
+        if (index >= 0) {
+            toggleModal(index);
+        }
+    }, [selectedStop, toggleModal]);
+
+    const handleRefresh = () => {
         trigger();
-        fetchBusInfo();
+        fetchBusInfo({manual: true});
     };
 
-    // 巴士站點文字渲染
-    const renderBusStopText = useCallback((left, top, buildingCode, text, index) => {
-        let borderColor = themeColor;
-        busPositionArr.forEach(item => {
-            if (item.index / 2 === index) {
-                borderColor = secondThemeColor;
-            }
-        });
+    const handleSelectStop = useCallback(code => {
+        setSelectedStop(code);
+        setLocalStorageSilently(BUS_SELECTED_STOP_KEY, code);
+    }, []);
 
-        return (
-            <TouchableScale
-                key={`stopText-${index}`}
-                onPress={() => toggleModal(index)
-                }
-                style={{
-                    position: 'absolute', left: scale(left), top: scale(top),
-                    paddingHorizontal: scale(5), paddingVertical: scale(2),
-                    alignItems: 'center', justifyContent: 'center',
-                    borderColor, borderRadius: scale(20), borderWidth: scale(2),
-                }}>
-                <Text style={{ ...uiStyle.defaultText, color: borderColor, fontSize: scale(11), fontWeight: 'bold' }}>
-                    {buildingCode}
-                    <Text style={{ ...uiStyle.defaultText, fontWeight: 'normal' }}>{' ' + text}</Text>
-                </Text>
-            </TouchableScale >
-        );
-    }, [busPositionArr]);
+    const statusPresentation = useMemo(() => {
+        if (!snapshot) {
+            return {
+                color: themeColor,
+                icon: 'bus-clock',
+                text: isLoading ? t('正在載入巴士資料') : t('暫時無法取得巴士資料'),
+            };
+        }
+        if (snapshot.stale || snapshot.deliverySource === 'stale') {
+            return {
+                color: warning,
+                icon: 'alert-circle-outline',
+                text: t('資料更新較慢，顯示最後位置'),
+            };
+        }
+        if (snapshot.deliverySource === 'fallback') {
+            return {
+                color: warning,
+                icon: 'cloud-alert-outline',
+                text: snapshot.vehicles?.length > 0
+                    ? t('即時位置可用，預計時間暫不可用')
+                    : t('暫未偵測到行駛中的巴士'),
+            };
+        }
+        if (snapshot.deliverySource === 'cache') {
+            return {
+                color: warning,
+                icon: 'history',
+                text: t('暫時使用最近更新的資料'),
+            };
+        }
+        if (snapshot.serviceStatus === 'stopped') {
+            return {
+                color: black.third,
+                icon: 'bus-stop-covered',
+                text: snapshot.observerMode === 'scheduled_idle'
+                    ? t('目前停駛')
+                    : t('巴士服務暫停'),
+            };
+        }
+        if (snapshot.serviceStatus === 'running' && snapshot.vehicles?.length === 0) {
+            return {
+                color: black.third,
+                icon: 'bus-clock',
+                text: t('服務時段內，暫未有巴士出現'),
+            };
+        }
+        const observedAt = Date.parse(snapshot.observedAt || '');
+        const elapsedMinutes = Number.isFinite(observedAt)
+            ? Math.max(0, Math.floor((now - observedAt) / 60000))
+            : 0;
+        return {
+            color: success,
+            icon: 'bus-marker',
+            text: elapsedMinutes < 1
+                ? t('服務中 · 剛剛更新')
+                : t('服務中 · 約 {{minutes}} 分鐘前更新', {minutes: elapsedMinutes}),
+        };
+    }, [black.third, isLoading, now, snapshot, success, t, themeColor, warning]);
 
     return (
-        <View style={{ flex: 1, backgroundColor: bg_color }}>
-            <ScrollView horizontal={false} contentInsetAdjustmentBehavior="automatic">
-                <ImageBackground
-                    style={{
-                        width: scale(310),
-                        height: scale(600),
-                        marginLeft: scale(25),
-                        marginBottom: scale(40),
+        <View style={[s.container, contentTopStyle]}>
+            <ScrollView
+                ref={routeScrollRef}
+                style={s.routeScroll}
+                onLayout={event => setRouteViewportHeight(event.nativeEvent.layout.height)}
+                contentContainerStyle={[s.routeContent, routePanelInsetStyle]}
+                contentInsetAdjustmentBehavior="never"
+                showsVerticalScrollIndicator={false}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={isRefreshing}
+                        onRefresh={handleRefresh}
+                        tintColor={themeColor}
+                        colors={[themeColor]}
+                    />
+                }>
+                <BusRouteMap
+                    countdownEnabled={Boolean(
+                        isFocused
+                        && isAppActive
+                        && snapshot
+                        && !snapshot.stale
+                        && snapshot.deliverySource !== 'fallback'
+                        && snapshot.deliverySource !== 'stale'
+                    )}
+                    maxHeight={routeMapMaxHeight}
+                    observedAt={snapshot?.observedAt}
+                    onSelectStop={handleSelectStop}
+                    onSelectVehicle={plate => {
+                        setSelectedVehiclePlate(plate);
+                        setPanelExpanded(true);
                     }}
-                    source={busRouteImg}
-                    resizeMode={'contain'}>
-                    {/* Data From */}
-                    <View
-                        style={{
-                            ...s.infoContainer,
-                            left: scale(60),
-                            top: scale(575),
-                            marginTop: scale(10),
-                        }}>
-                        <Text
-                            style={{ ...uiStyle.defaultText, fontSize: scale(12), color: black.third }}>
-                            Data From: cmdo.um.edu.mo
-                        </Text>
-                    </View>
-                    {/* 澳大地圖 */}
-                    <TouchableOpacity
-                        style={{
-                            ...s.infoContainer,
-                            left: scale(110),
-                            top: scale(350),
-                        }}
-                        onPress={() => {
-                            trigger();
-                            openLink({URL: UM_MAP, mode: 'fullScreen'});
-                        }}
-                    >
-                        <Text style={{ ...uiStyle.defaultText, fontSize: scale(11), color: themeColor, fontWeight: 'bold' }}>{t('校園地圖', { ns: 'features' })}</Text>
-                    </TouchableOpacity>
-                    {/* Bus運行信息的渲染 */}
-                    <View
-                        style={{
-                            ...s.infoContainer,
-                            left: scale(65),
-                            top: scale(185),
-                            width: scale(160),
-                        }}>
-                        {busInfoArr.length > 0
-                            ? busInfoArr.map((item, idx) => (
-                                <Text
-                                    key={`busInfo-${idx}`}
-                                    style={{
-                                        ...uiStyle.defaultText,
-                                        color: black.third,
-                                        fontSize: scale(10),
-                                    }}>
-                                    {item}
-                                </Text>
-                            )) : null}
-                    </View>
-
-                    {/* 巴士圖標 */}
-                    {busPositionArr.length > 0
-                        ? busPositionArr.map(item => (
-                            <TouchableScale
-                                style={busStyleArr[item.index]}
-                                activeScale={0.6}
-                                key={`busIcon-${item.index}`}
-                                onPress={onBusIconPress}>
-                                <Image
-                                    source={busIcon}
-                                    style={{
-                                        width: scale(30),
-                                        height: scale(30),
-                                    }}
-                                />
-                            </TouchableScale>
-                        )) : null}
-
-                    {/* 巴士站點文字 */}
-                    {renderBusStopText(100, 455, 'PGH', '研究生宿舍(起)', 0)}
-                    {renderBusStopText(145, 302, 'E4', '劉少榮樓', 1)}
-                    {renderBusStopText(145, 82, 'N2', '大學會堂', 2)}
-                    {renderBusStopText(45, 90, 'N6', '行政樓', 3)}
-                    {renderBusStopText(79, 160, 'E11', '科技學院', 4)}
-                    {renderBusStopText(79, 267, 'E21', '人文社科樓', 5)}
-                    {renderBusStopText(79, 395, 'E32', '法學院', 6)}
-                    {renderBusStopText(80, 547, 'S4', '研究生宿舍南四座(終)', 7)}
-
-                    <View style={{
-                        position: 'absolute',
-                        top: scale(5),
-                        left: scale(130),
-                        width: scale(35),
-                    }}>
-                        <CountdownCircleTimer
-                            isPlaying
-                            duration={7}
-                            colors={['#004777', '#F7B801', '#A30000', '#A30000']}
-                            strokeWidth={verticalScale(5)}
-                            colorsTime={[7, 5, 2, 0]}
-                            size={scale(35)}
-                            onComplete={() => {
-                                return { shouldRepeat: true };
-                            }}
-                        >
-                            {({ remainingTime }) => <Text style={{ ...uiStyle.defaultText, color: black.third }}>{remainingTime}</Text>}
-                        </CountdownCircleTimer>
-                    </View>
-                </ImageBackground>
+                    selectedStop={selectedStop}
+                    selectedVehiclePlate={selectedVehiclePlate}
+                    theme={theme}
+                    translate={t}
+                    vehicles={snapshot?.vehicles || []}
+                />
             </ScrollView>
+
+            <View style={s.panelOverlay}>
+                <BusArrivalPanel
+                    expanded={panelExpanded}
+                    now={now}
+                    onOpenMap={() => openLink({URL: UM_MAP, mode: 'fullScreen'})}
+                    onOpenStats={() => setStatsVisible(true)}
+                    onRefresh={handleRefresh}
+                    onSelectStop={handleSelectStop}
+                    onSelectVehicle={setSelectedVehiclePlate}
+                    onToggleExpanded={() => setPanelExpanded(value => !value)}
+                    onViewStop={openSelectedStopImage}
+                    refreshing={isRefreshing}
+                    selectedStop={selectedStop}
+                    selectedVehiclePlate={selectedVehiclePlate}
+                    snapshot={snapshot}
+                    statusPresentation={statusPresentation}
+                    theme={theme}
+                    translate={t}
+                />
+            </View>
+
+            <BusEtaStatsSheet
+                visible={statsVisible}
+                onClose={() => setStatsVisible(false)}
+                selectedStop={selectedStop}
+                selectedVehiclePlate={selectedVehiclePlate}
+                snapshot={snapshot}
+            />
 
             {/* ARKImageView 圖片查看器 */}
             <ARKImageView

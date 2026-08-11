@@ -1,10 +1,11 @@
 import React from 'react';
-import {StyleSheet, Text, View} from 'react-native';
+import {StyleSheet, View} from 'react-native';
 
 import {useTranslation} from 'react-i18next';
 import {FlatGrid} from 'react-native-super-grid';
 import {scale, verticalScale} from 'react-native-size-matters';
 
+import Text from '../../../../components/AppText';
 import {uiStyle, useTheme} from '../../../../components/ThemeContext';
 import TouchableScale from '../../../../components/TouchableScale';
 import {trigger} from '../../../../utils/trigger';

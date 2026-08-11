@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, FlatList, RefreshControl } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, FlatList, RefreshControl } from 'react-native';
 
+import Text from '../../../../components/AppText';
 import EventCard from '../components/EventCard';
 import { useTheme, themes, uiStyle, ThemeContext } from '../../../../components/ThemeContext';
 import { BASE_URI, BASE_HOST, GET } from '../../../../utils/pathMap';

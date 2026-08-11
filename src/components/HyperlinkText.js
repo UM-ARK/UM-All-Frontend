@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text, Linking } from 'react-native';
+import { Linking } from 'react-native';
 
 import { useTheme } from '../components/ThemeContext';
 import { trigger } from '../utils/trigger';

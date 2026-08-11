@@ -2,7 +2,7 @@
  * 時段詳情 Sheet：可出席人數、未提交、有空成員
  */
 import React, {memo, useMemo, useRef, useEffect} from 'react';
-import {Pressable, StyleSheet, Text, View} from 'react-native';
+import {Pressable, StyleSheet, View} from 'react-native';
 
 import {Image} from 'expo-image';
 import {useTranslation} from 'react-i18next';
@@ -10,6 +10,7 @@ import ActionSheet, {ScrollView} from 'react-native-actions-sheet';
 import {scale, verticalScale} from 'react-native-size-matters';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
+import Text from '../../../components/AppText';
 import {uiStyle, useTheme} from '../../../components/ThemeContext';
 import {ARK_HARBOR_AVATAR_TEMPLATE} from '../../../utils/pathMap';
 import {

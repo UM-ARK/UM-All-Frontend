@@ -3,10 +3,10 @@ import {
     Platform,
     Pressable,
     ScrollView,
-    Text,
     View,
 } from 'react-native';
 
+import Text from '../../../components/AppText';
 import { useTheme, uiStyle } from '../../../components/ThemeContext';
 import { logToFirebase } from '../../../utils/firebaseAnalytics';
 import { openLink } from '../../../utils/browser';

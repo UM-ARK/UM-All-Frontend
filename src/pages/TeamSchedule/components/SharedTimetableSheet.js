@@ -2,17 +2,21 @@
  * 本人共享與管理課表的明確確認 Sheet。
  */
 import React, {memo, useEffect, useMemo, useRef, useState} from 'react';
-import {ActivityIndicator, Alert, Pressable, StyleSheet, Text, View} from 'react-native';
+import {ActivityIndicator, Alert, Pressable, StyleSheet, View} from 'react-native';
 
 import {useTranslation} from 'react-i18next';
-import ActionSheet from 'react-native-actions-sheet';
+import ActionSheet, {ScrollView} from 'react-native-actions-sheet';
 import {scale, verticalScale} from 'react-native-size-matters';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
+import Text from '../../../components/AppText';
 import {uiStyle, useTheme} from '../../../components/ThemeContext';
 import {logToFirebase} from '../../../utils/firebaseAnalytics';
 import {trigger} from '../../../utils/trigger';
-import {buildSharedTimetablePayload} from '../utils/sharedTimetable';
+import {
+    areSharedTimetablePayloadsEqual,
+    buildSharedTimetablePayload,
+} from '../utils/sharedTimetable';
 import {getWeekdayShortLabel} from './scheduleWeekHelpers';
 
 const SharedTimetableSheet = ({
@@ -86,6 +90,18 @@ const SharedTimetableSheet = ({
         local?.hasPlan &&
         !loading &&
         !saving;
+    const isLocalOutdated = Boolean(
+        serverSnapshot &&
+        local?.hasPlan &&
+        !areSharedTimetablePayloadsEqual(
+            buildSharedTimetablePayload({
+                sharingLevel: serverSnapshot.sharingLevel,
+                planList: local.planList,
+                planSlots: local.planSlots,
+            }),
+            serverSnapshot,
+        ),
+    );
     const timePreview = payload.busyRanges
         ?.map(item => {
             const formatMinute = minute => {
@@ -169,68 +185,371 @@ const SharedTimetableSheet = ({
                 borderTopRightRadius: scale(16),
             }}
             onClose={() => onClose?.()}>
-            <View style={[styles.sheet, {paddingBottom: Math.max(insets.bottom, verticalScale(16))}]}> 
-                <Text style={[styles.title, {color: theme.black.main}]}> 
-                    {serverSnapshot ? t('管理共享課表') : t('共享我的課表')}
-                </Text>
-                <Text style={[styles.hint, {color: theme.black.third}]}> 
-                    {t('只會向此組隊的成員顯示；可隨時停止共享。')}
-                </Text>
-                <Text style={[styles.hint, {color: theme.black.third}]}>
-                    {t('每個組隊的共享內容彼此獨立。本機課表變更後不會自動更新此組隊，需再次點擊「確定更新」。')}
-                </Text>
-                {loading ? <ActivityIndicator color={theme.themeColor} /> : null}
-                {loadError ? <Text style={[styles.error, {color: theme.unread}]}>{loadError}</Text> : null}
-                {!loading && !loadError && !local?.hasPlan ? (
-                    <Text style={[styles.error, {color: theme.black.second}]}>{t('尚未建立模擬課表')}</Text>
-                ) : null}
-                <Pressable
-                    accessibilityRole="radio"
-                    accessibilityState={{selected: sharingLevel === 'time_only'}}
-                    disabled={eventStatus !== 'active' || saving}
-                    onPress={() => {
-                        trigger();
-                        setSharingLevel('time_only');
-                    }}
-                    style={({pressed}) => [styles.option, {backgroundColor: sharingLevel === 'time_only' ? theme.tonal.primary15 : pressed ? theme.tonal.primary08 : theme.white, borderColor: theme.themeColorUltraLight}]}> 
-                    <Text style={[styles.optionTitle, {color: theme.black.main}]}>{t('只共享上課時間')}</Text>
-                    <Text style={[styles.optionHint, {color: theme.black.third}]}>{t('組員只會看到上課與時間。')}</Text>
-                </Pressable>
-                <Pressable
-                    accessibilityRole="radio"
-                    accessibilityState={{selected: sharingLevel === 'course_identity'}}
-                    disabled={eventStatus !== 'active' || saving}
-                    onPress={() => {
-                        trigger();
-                        setSharingLevel('course_identity');
-                    }}
-                    style={({pressed}) => [styles.option, {backgroundColor: sharingLevel === 'course_identity' ? theme.tonal.primary15 : pressed ? theme.tonal.primary08 : theme.white, borderColor: theme.themeColorUltraLight}]}> 
-                    <Text style={[styles.optionTitle, {color: theme.black.main}]}>{t('共享 Course Code + Section')}</Text>
-                    <Text style={[styles.optionHint, {color: theme.black.third}]}>{t('組員會看到 Course Code、Section 與可還原的上課時間。')}</Text>
-                </Pressable>
-                {local?.hasPlan ? <Text style={[styles.preview, {color: theme.black.second}]}>{sharingLevel === 'course_identity' ? payload.courses.map(item => `${item.courseCode} · ${item.section}`).join('\n') : timePreview}</Text> : null}
-                {serverSnapshot ? <Pressable accessibilityRole="button" disabled={saving} onPress={handleStop} style={({pressed}) => [styles.stop, {backgroundColor: pressed ? theme.tonal.unread30 : theme.tonal.unread15}]}><Text style={[styles.actionText, {color: theme.unread}]}>{t('停止共享')}</Text></Pressable> : null}
-                {eventStatus === 'active' ? <Pressable accessibilityRole="button" disabled={!canSave} onPress={handleSave} style={({pressed}) => [styles.action, {backgroundColor: pressed ? theme.tonal.primary50 : theme.themeColor, opacity: canSave ? 1 : 0.5}]}><Text style={[styles.actionText, {color: theme.trueWhite}]}>{serverSnapshot ? t('確定更新') : t('確定共享')}</Text></Pressable> : <Text style={[styles.closedHint, {color: theme.black.third}]}>{t('活動已關閉，不能新增或更新共享課表。')}</Text>}
-                <Pressable accessibilityRole="button" disabled={saving} onPress={() => { trigger(); sheetRef.current?.hide(); }} style={({pressed}) => [styles.cancel, {backgroundColor: pressed ? theme.tonal.primary15 : theme.white, borderColor: theme.themeColorUltraLight}]}><Text style={[styles.actionText, {color: theme.themeColor}]}>{t('取消')}</Text></Pressable>
+            <View
+                style={[
+                    styles.sheet,
+                    {
+                        paddingBottom: Math.max(
+                            insets.bottom,
+                            verticalScale(8),
+                        ),
+                    },
+                ]}>
+                <ScrollView
+                    style={styles.contentScroll}
+                    bounces={false}
+                    nestedScrollEnabled
+                    showsVerticalScrollIndicator={false}>
+                    <Text style={[styles.title, {color: theme.black.main}]}>
+                        {serverSnapshot
+                            ? t('管理共享課表')
+                            : t('共享我的課表')}
+                    </Text>
+                    <Text style={[styles.hint, {color: theme.black.third}]}>
+                        {t('只會向此組隊的成員顯示；可隨時停止共享。')}
+                    </Text>
+                    <Text style={[styles.hint, {color: theme.black.third}]}>
+                        {t(
+                            '每個組隊的共享內容彼此獨立。本機課表變更後不會自動更新此組隊，需再次點擊「確定更新」。',
+                        )}
+                    </Text>
+                    {isLocalOutdated ? (
+                        <View
+                            style={[
+                                styles.outdatedNotice,
+                                {
+                                    backgroundColor: theme.tonal.unread15,
+                                    borderColor: theme.tonal.unread30,
+                                },
+                            ]}>
+                            <Text
+                                style={[
+                                    styles.outdatedNoticeText,
+                                    {color: theme.unread},
+                                ]}>
+                                {t('本機課表已有變更，請確認內容後點擊「確定更新」。')}
+                            </Text>
+                        </View>
+                    ) : null}
+                    {loading ? (
+                        <ActivityIndicator
+                            color={theme.themeColor}
+                            style={styles.loading}
+                        />
+                    ) : null}
+                    {loadError ? (
+                        <Text style={[styles.error, {color: theme.unread}]}>
+                            {loadError}
+                        </Text>
+                    ) : null}
+                    {!loading && !loadError && !local?.hasPlan ? (
+                        <Text
+                            style={[
+                                styles.error,
+                                {color: theme.black.second},
+                            ]}>
+                            {t('尚未建立模擬課表')}
+                        </Text>
+                    ) : null}
+                    <Pressable
+                        accessibilityRole="radio"
+                        accessibilityState={{
+                            selected: sharingLevel === 'time_only',
+                        }}
+                        disabled={eventStatus !== 'active' || saving}
+                        onPress={() => {
+                            trigger();
+                            setSharingLevel('time_only');
+                        }}
+                        style={({pressed}) => [
+                            styles.option,
+                            {
+                                backgroundColor:
+                                    sharingLevel === 'time_only'
+                                        ? theme.tonal.primary15
+                                        : pressed
+                                          ? theme.tonal.primary08
+                                          : theme.white,
+                                borderColor: theme.themeColorUltraLight,
+                            },
+                        ]}>
+                        <Text
+                            style={[
+                                styles.optionTitle,
+                                {color: theme.black.main},
+                            ]}>
+                            {t('只共享上課時間')}
+                        </Text>
+                        <Text
+                            style={[
+                                styles.optionHint,
+                                {color: theme.black.third},
+                            ]}>
+                            {t('組員只會看到上課與時間。')}
+                        </Text>
+                    </Pressable>
+                    <Pressable
+                        accessibilityRole="radio"
+                        accessibilityState={{
+                            selected: sharingLevel === 'course_identity',
+                        }}
+                        disabled={eventStatus !== 'active' || saving}
+                        onPress={() => {
+                            trigger();
+                            setSharingLevel('course_identity');
+                        }}
+                        style={({pressed}) => [
+                            styles.option,
+                            {
+                                backgroundColor:
+                                    sharingLevel === 'course_identity'
+                                        ? theme.tonal.primary15
+                                        : pressed
+                                          ? theme.tonal.primary08
+                                          : theme.white,
+                                borderColor: theme.themeColorUltraLight,
+                            },
+                        ]}>
+                        <Text
+                            style={[
+                                styles.optionTitle,
+                                {color: theme.black.main},
+                            ]}>
+                            {t('共享 Course Code + Section')}
+                        </Text>
+                        <Text
+                            style={[
+                                styles.optionHint,
+                                {color: theme.black.third},
+                            ]}>
+                            {t(
+                                '組員會看到 Course Code、Section 與可還原的上課時間。',
+                            )}
+                        </Text>
+                    </Pressable>
+                    {local?.hasPlan ? (
+                        <Text
+                            style={[
+                                styles.preview,
+                                {color: theme.black.second},
+                            ]}>
+                            {sharingLevel === 'course_identity'
+                                ? payload.courses
+                                      .map(
+                                          item =>
+                                              `${item.courseCode} · ${item.section}`,
+                                      )
+                                      .join('\n')
+                                : timePreview}
+                        </Text>
+                    ) : null}
+                </ScrollView>
+
+                <View
+                    style={[
+                        styles.footer,
+                        {borderTopColor: theme.themeColorUltraLight},
+                    ]}>
+                    {eventStatus !== 'active' ? (
+                        <Text
+                            style={[
+                                styles.closedHint,
+                                {color: theme.black.third},
+                            ]}>
+                            {t('活動已關閉，不能新增或更新共享課表。')}
+                        </Text>
+                    ) : null}
+                    <View style={styles.footerRow}>
+                        {serverSnapshot ? (
+                            <Pressable
+                                accessibilityRole="button"
+                                disabled={saving}
+                                onPress={handleStop}
+                                style={({pressed}) => [
+                                    styles.footerBtn,
+                                    {
+                                        backgroundColor: pressed
+                                            ? theme.tonal.unread30
+                                            : theme.tonal.unread15,
+                                        opacity: saving ? 0.5 : 1,
+                                    },
+                                ]}>
+                                <Text
+                                    style={[
+                                        styles.actionText,
+                                        {color: theme.unread},
+                                    ]}
+                                    numberOfLines={1}>
+                                    {t('停止共享')}
+                                </Text>
+                            </Pressable>
+                        ) : null}
+                        <Pressable
+                            accessibilityRole="button"
+                            disabled={saving}
+                            onPress={() => {
+                                trigger();
+                                sheetRef.current?.hide();
+                            }}
+                            style={({pressed}) => [
+                                styles.footerBtn,
+                                {
+                                    backgroundColor: pressed
+                                        ? theme.tonal.primary15
+                                        : theme.white,
+                                    borderColor: theme.themeColorUltraLight,
+                                    borderWidth: StyleSheet.hairlineWidth,
+                                    opacity: saving ? 0.5 : 1,
+                                },
+                            ]}>
+                            <Text
+                                style={[
+                                    styles.actionText,
+                                    {color: theme.themeColor},
+                                ]}
+                                numberOfLines={1}>
+                                {t('取消')}
+                            </Text>
+                        </Pressable>
+                        {eventStatus === 'active' ? (
+                            <Pressable
+                                accessibilityRole="button"
+                                disabled={!canSave || saving}
+                                onPress={handleSave}
+                                style={({pressed}) => [
+                                    styles.footerBtn,
+                                    styles.footerPrimary,
+                                    {
+                                        backgroundColor:
+                                            !canSave || saving
+                                                ? theme.tonal.primary30
+                                                : pressed
+                                                  ? theme.tonal.primary50
+                                                  : theme.themeColor,
+                                    },
+                                ]}>
+                                {saving ? (
+                                    <ActivityIndicator
+                                        color={theme.trueWhite}
+                                    />
+                                ) : (
+                                    <Text
+                                        style={[
+                                            styles.actionText,
+                                            {color: theme.trueWhite},
+                                        ]}
+                                        numberOfLines={1}>
+                                        {serverSnapshot
+                                            ? t('確定更新')
+                                            : t('確定共享')}
+                                    </Text>
+                                )}
+                            </Pressable>
+                        ) : null}
+                    </View>
+                </View>
             </View>
         </ActionSheet>
     );
 };
 
 const styles = StyleSheet.create({
-    sheet: {paddingHorizontal: scale(18), paddingTop: verticalScale(18)},
-    title: {...uiStyle.defaultText, fontSize: scale(18), fontWeight: '700'},
-    hint: {...uiStyle.defaultText, fontSize: scale(12), lineHeight: verticalScale(18), marginTop: verticalScale(6)},
-    option: {borderRadius: scale(10), borderWidth: StyleSheet.hairlineWidth, marginTop: verticalScale(12), paddingHorizontal: scale(12), paddingVertical: verticalScale(10)},
-    optionTitle: {...uiStyle.defaultText, fontSize: scale(14), fontWeight: '700'},
-    optionHint: {...uiStyle.defaultText, fontSize: scale(11), lineHeight: verticalScale(16), marginTop: verticalScale(3)},
-    preview: {...uiStyle.defaultText, fontSize: scale(11), lineHeight: verticalScale(17), marginTop: verticalScale(12)},
-    error: {...uiStyle.defaultText, fontSize: scale(12), marginTop: verticalScale(12)},
-    action: {alignItems: 'center', borderRadius: scale(10), marginTop: verticalScale(14), paddingVertical: verticalScale(11)},
-    stop: {alignItems: 'center', borderRadius: scale(10), marginTop: verticalScale(14), paddingVertical: verticalScale(11)},
-    cancel: {alignItems: 'center', borderRadius: scale(10), borderWidth: StyleSheet.hairlineWidth, marginTop: verticalScale(10), paddingVertical: verticalScale(11)},
-    actionText: {...uiStyle.defaultText, fontSize: scale(13), fontWeight: '700'},
-    closedHint: {...uiStyle.defaultText, fontSize: scale(12), marginTop: verticalScale(14), textAlign: 'center'},
+    sheet: {
+        paddingTop: verticalScale(18),
+    },
+    contentScroll: {
+        maxHeight: verticalScale(420),
+        paddingHorizontal: scale(18),
+    },
+    title: {
+        ...uiStyle.defaultText,
+        fontSize: scale(18),
+        fontWeight: '700',
+    },
+    hint: {
+        ...uiStyle.defaultText,
+        fontSize: scale(12),
+        lineHeight: verticalScale(18),
+        marginTop: verticalScale(6),
+    },
+    loading: {
+        marginTop: verticalScale(12),
+    },
+    outdatedNotice: {
+        borderRadius: scale(8),
+        borderWidth: StyleSheet.hairlineWidth,
+        marginTop: verticalScale(10),
+        paddingHorizontal: scale(10),
+        paddingVertical: verticalScale(8),
+    },
+    outdatedNoticeText: {
+        ...uiStyle.defaultText,
+        fontSize: scale(12),
+        lineHeight: verticalScale(17),
+    },
+    option: {
+        borderRadius: scale(10),
+        borderWidth: StyleSheet.hairlineWidth,
+        marginTop: verticalScale(12),
+        paddingHorizontal: scale(12),
+        paddingVertical: verticalScale(10),
+    },
+    optionTitle: {
+        ...uiStyle.defaultText,
+        fontSize: scale(14),
+        fontWeight: '700',
+    },
+    optionHint: {
+        ...uiStyle.defaultText,
+        fontSize: scale(11),
+        lineHeight: verticalScale(16),
+        marginTop: verticalScale(3),
+    },
+    preview: {
+        ...uiStyle.defaultText,
+        fontSize: scale(11),
+        lineHeight: verticalScale(17),
+        marginBottom: verticalScale(8),
+        marginTop: verticalScale(12),
+    },
+    error: {
+        ...uiStyle.defaultText,
+        fontSize: scale(12),
+        marginTop: verticalScale(12),
+    },
+    footer: {
+        borderTopWidth: StyleSheet.hairlineWidth,
+        marginTop: verticalScale(8),
+        paddingHorizontal: scale(14),
+        paddingTop: verticalScale(10),
+    },
+    footerRow: {
+        flexDirection: 'row',
+        gap: scale(8),
+    },
+    footerBtn: {
+        alignItems: 'center',
+        borderRadius: scale(10),
+        flex: 1,
+        justifyContent: 'center',
+        minHeight: verticalScale(40),
+        paddingHorizontal: scale(6),
+        paddingVertical: verticalScale(8),
+    },
+    footerPrimary: {
+        flex: 1.25,
+    },
+    actionText: {
+        ...uiStyle.defaultText,
+        fontSize: scale(12),
+        fontWeight: '700',
+    },
+    closedHint: {
+        ...uiStyle.defaultText,
+        fontSize: scale(12),
+        marginBottom: verticalScale(8),
+        textAlign: 'center',
+    },
 });
 
 export default memo(SharedTimetableSheet);

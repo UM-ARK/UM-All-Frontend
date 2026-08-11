@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useLayoutEffect, useMemo, useCallback } from 'react';
-import { Text, View, ScrollView, FlatList, Alert, Share } from 'react-native';
+import { View, ScrollView, FlatList, Alert, Share } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { t } from 'i18next';
 
+import Text from '../../../../../../components/AppText';
 import { useTheme, uiStyle } from '../../../../../../components/ThemeContext';
 import { getDeepLinkShareHeaderOptions } from '../../../../../../components/DeepLinkShareButton';
 import SegmentControl from '../../../../../../components/SegmentControl';

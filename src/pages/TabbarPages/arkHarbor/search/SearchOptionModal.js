@@ -8,7 +8,6 @@ import {
     Modal,
     Pressable,
     StyleSheet,
-    Text,
     View,
 } from 'react-native';
 
@@ -17,6 +16,7 @@ import MaterialCommunityIcons from "@react-native-vector-icons/material-design-i
 import {scale, verticalScale} from 'react-native-size-matters';
 import {useTranslation} from 'react-i18next';
 
+import Text from '../../../../components/AppText';
 import {uiStyle, useTheme} from '../../../../components/ThemeContext';
 import {
     buildHarborCategoryRows,

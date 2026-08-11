@@ -2,7 +2,7 @@
  * 組隊約時間功能介紹 Sheet：向首次使用者說明約時間、共享課表與使用情境
  */
 import React, {memo, useEffect, useRef} from 'react';
-import {Pressable, StyleSheet, Text, View} from 'react-native';
+import {Pressable, StyleSheet, View} from 'react-native';
 
 import {useTranslation} from 'react-i18next';
 import Ionicons from '@react-native-vector-icons/ionicons';
@@ -10,6 +10,7 @@ import ActionSheet from 'react-native-actions-sheet';
 import {scale, verticalScale} from 'react-native-size-matters';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
+import Text from '../../../components/AppText';
 import {uiStyle, useTheme} from '../../../components/ThemeContext';
 import {trigger} from '../../../utils/trigger';
 

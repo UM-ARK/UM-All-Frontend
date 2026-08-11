@@ -9,7 +9,6 @@ import {
     ActivityIndicator,
     Pressable,
     StyleSheet,
-    Text,
     View,
 } from 'react-native';
 import { Image } from 'expo-image';
@@ -31,6 +30,7 @@ import {
 } from 'react-native-size-matters';
 import { isLiquidGlassSupported } from '@callstack/liquid-glass';
 
+import Text from '../../../../components/AppText';
 import ARKImageView from '../../../../components/ARKImageView';
 import HyperlinkText from '../../../../components/HyperlinkText';
 import {

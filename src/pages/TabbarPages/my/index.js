@@ -4,7 +4,6 @@ import {
     Animated,
     RefreshControl,
     StyleSheet,
-    Text,
     View,
     useWindowDimensions,
 } from 'react-native';
@@ -13,6 +12,7 @@ import { useTranslation } from 'react-i18next';
 import { scale, verticalScale } from 'react-native-size-matters';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import Text from '../../../components/AppText';
 import { uiStyle, useTheme } from '../../../components/ThemeContext';
 import { useHarborSession } from '../../../contexts/HarborSessionContext';
 import { trigger } from '../../../utils/trigger';

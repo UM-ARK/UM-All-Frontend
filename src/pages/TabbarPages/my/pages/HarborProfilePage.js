@@ -4,8 +4,6 @@ import {
     Alert,
     Pressable,
     StyleSheet,
-    Text,
-    TextInput,
     View,
 } from 'react-native';
 
@@ -28,6 +26,8 @@ import Animated, {
 } from 'react-native-reanimated';
 import { scale, verticalScale } from 'react-native-size-matters';
 
+import Text from '../../../../components/AppText';
+import TextInput from '../../../../components/AppTextInput';
 import { uiStyle, useTheme } from '../../../../components/ThemeContext';
 import { useHarborSession } from '../../../../contexts/HarborSessionContext';
 import { useSchedulingSession } from '../../../../contexts/SchedulingSessionContext';

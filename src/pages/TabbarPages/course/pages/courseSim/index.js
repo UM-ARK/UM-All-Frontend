@@ -8,12 +8,10 @@ import React, {
 } from 'react';
 import {
     View,
-    Text,
     TouchableOpacity,
     Pressable,
     Alert,
     StyleSheet,
-    TextInput,
     Keyboard,
     Platform,
     useWindowDimensions,
@@ -40,6 +38,8 @@ import { useTranslation } from 'react-i18next';
 import { useFocusEffect } from '@react-navigation/native';
 import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
 
+import Text from '../../../../../components/AppText';
+import TextInput from '../../../../../components/AppTextInput';
 import { useTheme, uiStyle } from '../../../../../components/ThemeContext';
 import { openLink } from '../../../../../utils/browser';
 import { UM_ISW } from '../../../../../utils/pathMap';

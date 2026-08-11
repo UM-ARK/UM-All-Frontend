@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext, memo } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 
+import Text from '../../../../components/AppText';
 import { useTheme, uiStyle } from '../../../../components/ThemeContext';
 import { logToFirebase } from '../../../../utils/firebaseAnalytics';
 import { openLink } from '../../../../utils/browser';

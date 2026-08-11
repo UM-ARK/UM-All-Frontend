@@ -6,7 +6,7 @@ import React, {
     useRef,
     useState,
 } from 'react';
-import { Platform, Text, View } from 'react-native';
+import { Platform, View } from 'react-native';
 import { KeyboardAwareScrollView, KeyboardToolbar } from 'react-native-keyboard-controller';
 import { useNavigation } from '@react-navigation/native';
 import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
@@ -15,6 +15,7 @@ import { scale, verticalScale } from 'react-native-size-matters';
 import { t } from 'i18next';
 import lodash from 'lodash';
 
+import Text from '../../../../../components/AppText';
 import { useTheme, uiStyle } from '../../../../../components/ThemeContext';
 import { trigger } from '../../../../../utils/trigger';
 import { logToFirebase } from '../../../../../utils/firebaseAnalytics';

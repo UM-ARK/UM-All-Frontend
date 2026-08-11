@@ -2,11 +2,12 @@
  * 熱力圖例：藍色越深＝可出席越多；未提交為未知；已提交 X／Y
  */
 import React, {memo} from 'react';
-import {StyleSheet, Text, View} from 'react-native';
+import {StyleSheet, View} from 'react-native';
 
 import {useTranslation} from 'react-i18next';
 import {scale, verticalScale} from 'react-native-size-matters';
 
+import Text from '../../../components/AppText';
 import {uiStyle, useTheme} from '../../../components/ThemeContext';
 
 /**

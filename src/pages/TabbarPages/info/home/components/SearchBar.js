@@ -1,10 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Animated, Pressable, StyleSheet, View } from 'react-native';
 
 import { scale, verticalScale } from 'react-native-size-matters';
 import Ionicons from "@react-native-vector-icons/ionicons";
 import { useTranslation } from 'react-i18next';
 
+import Text from '../../../../../components/AppText';
 import { useTheme, uiStyle } from '../../../../../components/ThemeContext';
 import { logToFirebase } from '../../../../../utils/firebaseAnalytics';
 import { trigger } from '../../../../../utils/trigger';

@@ -5,7 +5,6 @@ import {
     RefreshControl,
     ScrollView,
     StyleSheet,
-    Text,
     View,
 } from 'react-native';
 import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
@@ -17,6 +16,7 @@ import {
     verticalScale,
 } from 'react-native-size-matters';
 
+import Text from '../../components/AppText';
 import SegmentControl from '../../components/SegmentControl';
 import {uiStyle, useTheme} from '../../components/ThemeContext';
 import {UM_API_CAR_PARK, UM_API_TOKEN} from '../../utils/pathMap';

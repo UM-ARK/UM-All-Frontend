@@ -1168,9 +1168,103 @@ function normalizeBookmark(bookmark, index) {
     };
 }
 
+function resolveNotificationReactionValue(typeName, data) {
+    const raw =
+        (typeof data?.reaction_icon === 'string' && data.reaction_icon) ||
+        (typeof data?.reaction_value === 'string' && data.reaction_value) ||
+        '';
+    const name = raw.replace(/^:|:$/g, '').trim();
+    if (name) {
+        return name;
+    }
+    // 傳統點讚通知沒有 icon 時，預設顯示 heart
+    if (typeName === 'liked' || typeName === 'liked_consolidated') {
+        return 'heart';
+    }
+    return '';
+}
+
+// Discourse 僅對 heart 寫入 reaction_icon；其他表情需用 reactions-users 補齊
+async function enrichNotificationReactionValues(items, {signal} = {}) {
+    const targets = (items || []).filter(item => {
+        if (item?.reactionValue) {
+            return false;
+        }
+        if (item?.typeName !== 'reaction' && item?.typeName !== 'boost') {
+            return false;
+        }
+        return Number(item?.data?.original_post_id) > 0;
+    });
+    if (targets.length === 0) {
+        return items || [];
+    }
+
+    const postIds = [
+        ...new Set(
+            targets
+                .map(item => Number(item.data.original_post_id))
+                .filter(id => Number.isInteger(id) && id > 0),
+        ),
+    ];
+    const reactionGroupsByPostId = new Map();
+    await Promise.all(
+        postIds.map(async postId => {
+            try {
+                const response = await harborApi.get(
+                    `/discourse-reactions/posts/${postId}/reactions-users.json`,
+                    {signal},
+                );
+                const groups = Array.isArray(response.data)
+                    ? response.data
+                    : response.data?.reaction_users || [];
+                reactionGroupsByPostId.set(postId, groups);
+            } catch {
+                // 補齊失敗時保留原通知，不阻斷列表
+            }
+        }),
+    );
+
+    return items.map(item => {
+        if (item?.reactionValue) {
+            return item;
+        }
+        if (item?.typeName !== 'reaction' && item?.typeName !== 'boost') {
+            return item;
+        }
+        const postId = Number(item?.data?.original_post_id);
+        const groups = reactionGroupsByPostId.get(postId);
+        if (!Array.isArray(groups) || groups.length === 0) {
+            return item;
+        }
+
+        const actor = item.actingUsername || '';
+        if (actor) {
+            const matched = groups.find(group =>
+                (group?.users || []).some(user => user?.username === actor),
+            );
+            const value =
+                typeof matched?.id === 'string' ? matched.id.trim() : '';
+            if (value) {
+                return {...item, reactionValue: value};
+            }
+        }
+
+        // 該帖只有一種反應時，直接採用
+        if (groups.length === 1) {
+            const value =
+                typeof groups[0]?.id === 'string' ? groups[0].id.trim() : '';
+            if (value) {
+                return {...item, reactionValue: value};
+            }
+        }
+        return item;
+    });
+}
+
 function normalizeNotification(notification, index) {
     const data = notification.data || {};
     const type = Number(notification.notification_type) || 0;
+    const typeName = HARBOR_NOTIFICATION_TYPES[type] || 'unknown';
     return {
         id: String(notification.id || `notification-${index}`),
         title: stripHtml(
@@ -1186,7 +1280,7 @@ function normalizeNotification(notification, index) {
         createdAt: notification.created_at || '',
         isRead: Boolean(notification.read),
         type,
-        typeName: HARBOR_NOTIFICATION_TYPES[type] || 'unknown',
+        typeName,
         highPriority: Boolean(notification.high_priority),
         topicId: Number(notification.topic_id) || null,
         postNumber: Number(notification.post_number) || null,
@@ -1197,6 +1291,8 @@ function normalizeNotification(notification, index) {
             data.username ||
             notification.acting_user_name ||
             '',
+        // heart 會帶 reaction_icon；其他表情需後續 enrich
+        reactionValue: resolveNotificationReactionValue(typeName, data),
         data,
     };
 }
@@ -2269,13 +2365,17 @@ export async function fetchHarborUserActions(
 
 export async function fetchHarborNotifications({ signal } = {}) {
     const response = await harborApi.get('/notifications.json', { signal });
-    return (response.data?.notifications || []).map(normalizeNotification);
+    const items = (response.data?.notifications || []).map(
+        normalizeNotification,
+    );
+    return enrichNotificationReactionValues(items, { signal });
 }
 
 export async function fetchHarborNotificationPage({
     filter,
     offset = 0,
     limit = NOTIFICATION_PAGE_SIZE,
+    enrichReactions = true,
     signal,
 } = {}) {
     const normalizedOffset = Math.max(0, Math.floor(Number(offset) || 0));
@@ -2294,9 +2394,12 @@ export async function fetchHarborNotificationPage({
         params,
         signal,
     });
-    const items = (response.data?.notifications || []).map(
+    const normalizedItems = (response.data?.notifications || []).map(
         normalizeNotification,
     );
+    const items = enrichReactions
+        ? await enrichNotificationReactionValues(normalizedItems, { signal })
+        : normalizedItems;
     const totalCount = Number(response.data?.total_rows_notifications);
     const normalizedTotalCount = Number.isFinite(totalCount)
         ? totalCount
@@ -2314,6 +2417,7 @@ export async function fetchHarborUnreadNotificationCount({ signal } = {}) {
     const page = await fetchHarborNotificationPage({
         filter: 'unread',
         limit: 1,
+        enrichReactions: false,
         signal,
     });
     return page.totalCount;

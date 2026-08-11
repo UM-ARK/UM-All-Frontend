@@ -2,11 +2,11 @@ import React, {memo} from 'react';
 import {
     Pressable,
     StyleSheet,
-    Text,
 } from 'react-native';
 
 import {scale, verticalScale} from 'react-native-size-matters';
 
+import Text from '../../../../components/AppText';
 import {uiStyle, useTheme} from '../../../../components/ThemeContext';
 import {trigger} from '../../../../utils/trigger';
 

@@ -1009,6 +1009,43 @@ describe('Harbor API 資料正規化', () => {
                                 badge_name: '首次分享',
                             },
                         },
+                        {
+                            id: 10,
+                            read: false,
+                            created_at: '2026-07-21T09:30:00Z',
+                            notification_type: 25,
+                            topic_id: 44,
+                            post_number: 3,
+                            data: {
+                                topic_title: '反應話題',
+                                display_username: 'yyyyyyounger',
+                                original_post_id: 42,
+                                // Discourse 對非 heart 不會寫 reaction_icon
+                            },
+                        },
+                        {
+                            id: 11,
+                            read: true,
+                            created_at: '2026-07-21T09:45:00Z',
+                            notification_type: 5,
+                            topic_id: 45,
+                            post_number: 1,
+                            data: {
+                                topic_title: '點讚話題',
+                                display_username: 'reader',
+                            },
+                        },
+                    ],
+                },
+            })
+            .mockResolvedValueOnce({
+                data: {
+                    reaction_users: [
+                        {
+                            id: 'clap',
+                            count: 1,
+                            users: [{username: 'yyyyyyounger'}],
+                        },
                     ],
                 },
             })
@@ -1085,6 +1122,25 @@ describe('Harbor API 資料正規化', () => {
                 badgeId: 3,
                 topicId: null,
             }),
+        );
+        expect(notifications[2]).toEqual(
+            expect.objectContaining({
+                id: '10',
+                typeName: 'reaction',
+                actingUsername: 'yyyyyyounger',
+                reactionValue: 'clap',
+            }),
+        );
+        expect(notifications[3]).toEqual(
+            expect.objectContaining({
+                id: '11',
+                typeName: 'liked',
+                reactionValue: 'heart',
+            }),
+        );
+        expect(getSpy).toHaveBeenCalledWith(
+            '/discourse-reactions/posts/42/reactions-users.json',
+            expect.any(Object),
         );
         expect(messages[0]).toEqual(
             expect.objectContaining({

@@ -6,8 +6,6 @@ import {
     Alert,
     Pressable,
     StyleSheet,
-    Text,
-    TextInput,
     View,
 } from 'react-native';
 
@@ -18,6 +16,8 @@ import {scale, verticalScale} from 'react-native-size-matters';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-controller';
 
+import Text from '../../../components/AppText';
+import TextInput from '../../../components/AppTextInput';
 import {uiStyle, useTheme} from '../../../components/ThemeContext';
 import {parseTeamInviteLink} from '../../../utils/scheduling/teamInviteLink';
 import {trigger} from '../../../utils/trigger';

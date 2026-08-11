@@ -1,6 +1,7 @@
 import React, { useContext, memo } from 'react';
-import { View, Text, StyleSheet, Platform } from 'react-native';
+import { View, StyleSheet, Platform } from 'react-native';
 
+import Text from '../../../../../../components/AppText';
 import { useTheme, uiStyle } from '../../../../../../components/ThemeContext';
 import {
     OFFICIAL_COURSE_SEARCH,

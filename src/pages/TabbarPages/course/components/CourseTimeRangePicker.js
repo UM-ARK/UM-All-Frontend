@@ -4,7 +4,6 @@ import {
     Modal,
     Pressable,
     StyleSheet,
-    Text,
     View,
 } from 'react-native';
 import {ScrollView} from 'react-native-gesture-handler';
@@ -19,6 +18,7 @@ import {scale, verticalScale} from 'react-native-size-matters';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {t} from 'i18next';
 
+import Text from '../../../../components/AppText';
 import {useTheme, uiStyle} from '../../../../components/ThemeContext';
 import TouchableScale from '../../../../components/TouchableScale';
 import {trigger} from '../../../../utils/trigger';

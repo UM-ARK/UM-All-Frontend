@@ -4,8 +4,6 @@ import {
     Keyboard,
     Pressable,
     StyleSheet,
-    Text,
-    TextInput,
     View,
 } from 'react-native';
 
@@ -16,6 +14,8 @@ import { useHeaderHeight } from '@react-navigation/elements';
 import { useTranslation } from 'react-i18next';
 import { scale, verticalScale } from 'react-native-size-matters';
 
+import Text from '../../../components/AppText';
+import TextInput from '../../../components/AppTextInput';
 import { uiStyle, useTheme } from '../../../components/ThemeContext';
 import { openLink } from '../../../utils/browser';
 import { logToFirebase } from '../../../utils/firebaseAnalytics';

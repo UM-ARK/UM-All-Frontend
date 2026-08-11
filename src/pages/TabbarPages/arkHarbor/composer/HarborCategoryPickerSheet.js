@@ -8,7 +8,6 @@ import React, {
 import {
     Pressable,
     StyleSheet,
-    Text,
     View,
 } from 'react-native';
 
@@ -18,6 +17,7 @@ import {scale, verticalScale} from 'react-native-size-matters';
 import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
+import Text from '../../../../components/AppText';
 import {useTheme} from '../../../../components/ThemeContext';
 import CustomBottomSheet from '../../../../utils/BottomSheet';
 import {

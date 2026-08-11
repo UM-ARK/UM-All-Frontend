@@ -2,7 +2,7 @@
  * 小組課表總覽：固定時段內正在上課的成員與實際課堂明細。
  */
 import React, {memo, useEffect, useMemo, useRef} from 'react';
-import {Pressable, StyleSheet, Text, View} from 'react-native';
+import {Pressable, StyleSheet, View} from 'react-native';
 
 import {Image} from 'expo-image';
 import {useTranslation} from 'react-i18next';
@@ -10,6 +10,7 @@ import ActionSheet, {ScrollView} from 'react-native-actions-sheet';
 import {scale, verticalScale} from 'react-native-size-matters';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
+import Text from '../../../components/AppText';
 import {uiStyle, useTheme} from '../../../components/ThemeContext';
 import {ARK_HARBOR_AVATAR_TEMPLATE} from '../../../utils/pathMap';
 import {trigger} from '../../../utils/trigger';

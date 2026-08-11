@@ -9,6 +9,9 @@ export const SCHEDULING_BASE_URI = 'https://umall.one/api/v2';
 // 用適配API返回的圖片相對路徑
 export const BASE_HOST = 'https://umall.one';
 
+export const UM_BUS_LIVE = BASE_HOST + '/api/v2/bus/live';
+export const UM_BUS_STATS = BASE_HOST + '/api/v2/bus/stats';
+
 export const ARK_APP_LINK = BASE_HOST + '/app';
 
 export function ARK_COURSE_SHARE_URL(courseCode) {
@@ -291,6 +294,9 @@ export const UM_API_TOKEN = process.env.EXPO_PUBLIC_UM_API_TOKEN;
 // 澳大 - 環校巴士報站
 export const UM_BUS_LOOP_ZH = 'https://campusloop.cmdo.um.edu.mo/zh_TW/busstopinfo';
 export const UM_BUS_LOOP_EN = 'https://campusloop.cmdo.um.edu.mo/en_US/busstopinfo';
+// 澳大 - 環校穿梭巴士服務說明（CMDO）
+export const UM_BUS_LOOP_SERVICE =
+    'https://sfs.cmdo.um.edu.mo/our-services/transport-services/campus-loop-shuttle-service/';
 // 澳大 - 校曆
 export const UM_CALENDAR =
     'https://reg.um.edu.mo/university-almanac/?lang=zh-hant';

@@ -80,6 +80,17 @@ export async function setLocalStorage(itemName, data) {
     }
 }
 
+// 寫入頻繁更新、無需輸出日誌的本地緩存
+export async function setLocalStorageSilently(itemName, data) {
+    try {
+        const strData = JSON.stringify(data);
+        await AsyncStorage.setItem(itemName, strData);
+        return 'ok';
+    } catch (error) {
+        return error;
+    }
+}
+
 // log出當前所有的緩存資料
 export function logAllStorage() {
     AsyncStorage.getAllKeys((err, keys) => {

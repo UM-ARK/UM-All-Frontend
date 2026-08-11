@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import Animated, {
     useAnimatedStyle,
     withSpring,
@@ -8,6 +8,7 @@ import Animated, {
 import { BlurView } from 'expo-blur';
 import { scale, moderateScale } from 'react-native-size-matters';
 
+import Text from '../../../../components/AppText';
 import { useTheme, uiStyle } from '../../../../components/ThemeContext';
 import { clubTagMap } from '../../../../utils/clubMap';
 import { trigger } from '../../../../utils/trigger';

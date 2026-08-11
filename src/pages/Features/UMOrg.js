@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { Text, View, TouchableOpacity, StyleSheet, Image, ImageBackground, ScrollView, RefreshControl, Dimensions, TouchableWithoutFeedback, LayoutAnimation } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, Image, ImageBackground, ScrollView, RefreshControl, Dimensions, TouchableWithoutFeedback, LayoutAnimation } from 'react-native';
 
 // 引入本地工具
+import Text from '../../components/AppText';
 import { useTheme, themes, uiStyle, ThemeContext } from '../../components/ThemeContext';
 import { UM_API_TOKEN, UM_ORG } from '../../utils/pathMap';
 import { openLink } from '../../utils/browser';

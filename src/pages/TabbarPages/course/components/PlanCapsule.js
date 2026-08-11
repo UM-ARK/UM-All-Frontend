@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text, View } from 'react-native';
+import { View } from 'react-native';
 import Ionicons from "@react-native-vector-icons/ionicons";
 import { scale, verticalScale } from 'react-native-size-matters';
 import {
@@ -8,6 +8,7 @@ import {
 } from '@callstack/liquid-glass';
 import { t } from 'i18next';
 
+import Text from '../../../../components/AppText';
 import { useTheme, uiStyle } from '../../../../components/ThemeContext';
 import { trigger } from '../../../../utils/trigger';
 import TouchableScale from '../../../../components/TouchableScale';

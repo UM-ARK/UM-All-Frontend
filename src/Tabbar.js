@@ -78,9 +78,10 @@ const FORUM_BADGE_STALE_MS = 5 * 60 * 1000;
 const IOSNativeTabs = createNativeBottomTabNavigator();
 const AndroidBottomTabs = createBottomTabNavigator();
 
-// Android 預設內容區約 49；部分機型文字易貼底，略加高並多留底部間距
-const ANDROID_TAB_BAR_CONTENT_HEIGHT = 56;
-const ANDROID_TAB_LABEL_BOTTOM_PADDING = 4;
+// Android 內容區沿用 React Navigation 預設高度；底部為系統 inset（保底避免貼手勢條）
+const ANDROID_TAB_BAR_CONTENT_HEIGHT = 49;
+const ANDROID_TAB_BAR_MIN_BOTTOM_INSET = 8;
+const ANDROID_TAB_ICON_SIZE = 24;
 
 /**
  * 取得 Tab Bar 樣式（iOS 勿硬編碼純白，深色模式下會與主題脫節）
@@ -95,12 +96,11 @@ const getTabBarStyle = (theme, insets) => {
             borderTopWidth: 0,
         };
     }
-    // 部分機型 bottom inset 偏小甚至為 0，保底避免文字貼底
+    // 部分機型 insets.bottom 偏小甚至為 0，但仍有手勢白條，需保底
     const bottomInset = Math.max(
         insets?.bottom ?? 0,
-        verticalScale(ANDROID_TAB_LABEL_BOTTOM_PADDING),
+        verticalScale(ANDROID_TAB_BAR_MIN_BOTTOM_INSET),
     );
-    const extraBottom = verticalScale(ANDROID_TAB_LABEL_BOTTOM_PADDING);
     return {
         backgroundColor: theme.bg_color,
         borderTopColor: theme.isLight
@@ -108,10 +108,10 @@ const getTabBarStyle = (theme, insets) => {
             : 'rgba(255,255,255,0.1)',
         borderTopWidth: 0.5,
         elevation: 8,
-        // 覆寫預設 height / paddingBottom，讓文字與系統手勢條之間多一點空隙
-        height: ANDROID_TAB_BAR_CONTENT_HEIGHT + bottomInset + extraBottom,
-        paddingBottom: bottomInset + extraBottom,
-        paddingTop: verticalScale(2),
+        // 高度只加一次 bottomInset；icon/文字緊湊靠 item 樣式，不靠加高內容區
+        height: ANDROID_TAB_BAR_CONTENT_HEIGHT + bottomInset,
+        paddingBottom: bottomInset,
+        paddingTop: 0,
     };
 };
 
@@ -219,7 +219,7 @@ class AndroidTabbar {
             return (
                 <MaterialCommunityIcons
                     name={baseName}
-                    size={24}
+                    size={ANDROID_TAB_ICON_SIZE}
                     color={focused ? color : '#222'}
                 />
             );
@@ -260,14 +260,24 @@ class AndroidTabbar {
                     <this.Tabs.Navigator
                         screenOptions={{
                             headerShown: false,
+                            // 對齊 iOS：icon 與文字貼緊；底部空隙只留給系統手勢條
                             tabBarLabelStyle: {
                                 ...uiStyle.defaultText,
                                 fontSize: labelFontSize,
                                 fontWeight: '600',
-                                // 文字與底部系統列之間多留一點空隙
-                                paddingBottom: verticalScale(
-                                    ANDROID_TAB_LABEL_BOTTOM_PADDING,
-                                ),
+                                lineHeight: labelFontSize + 2,
+                                includeFontPadding: false,
+                                // 略為上拉，對齊 iOS icon/文字貼緊感
+                                marginTop: -2,
+                                paddingTop: 0,
+                                paddingBottom: 0,
+                            },
+                            tabBarIconStyle: {
+                                // 覆寫 uikit 預設 28 高容器，避免 icon 下方留白把文字撐開
+                                width: ANDROID_TAB_ICON_SIZE,
+                                height: ANDROID_TAB_ICON_SIZE,
+                                marginTop: 0,
+                                marginBottom: 0,
                             },
                             tabBarActiveTintColor: theme.themeColor,
                             tabBarInactiveTintColor: theme.black.main,

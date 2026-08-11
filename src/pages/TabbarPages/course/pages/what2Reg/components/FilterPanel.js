@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
-import { FlatList, LayoutAnimation, Switch, Text, View } from 'react-native';
+import { FlatList, LayoutAnimation, Switch, View } from 'react-native';
 import { scale, verticalScale } from 'react-native-size-matters';
 import { t } from 'i18next';
 import Ionicons from "@react-native-vector-icons/ionicons";
+import Text from '../../../../../../components/AppText';
 import { uiStyle } from '../../../../../../components/ThemeContext';
 import TouchableScale from '../../../../../../components/TouchableScale';
 import CourseTimeRangePicker from '../../../components/CourseTimeRangePicker';
 import { TIME_RANGE_PRESETS } from '../../../constants';
 import { DEFAULT_TIME_FROM, DEFAULT_TIME_TO, defaultTimeFilter } from '../constants/options';
+
+const FLAT_LIST_STYLE = { flexGrow: 0 };
 
 /**
  * 篩選面板
@@ -67,6 +70,7 @@ const FilterPanel = ({
         return (
             <FlatList
                 data={modeList}
+                style={FLAT_LIST_STYLE}
                 keyExtractor={item => item}
                 numColumns={modeList.length}
                 key={`flatList_mode_${modeList.length}`}
@@ -113,6 +117,7 @@ const FilterPanel = ({
     const renderCMGESwitch = () => (
         <FlatList
             data={CMGEList}
+            style={FLAT_LIST_STYLE}
             keyExtractor={item => item}
             numColumns={CMGEList.length}
             key={`flatList_cmge_${CMGEList.length}`}
@@ -155,6 +160,7 @@ const FilterPanel = ({
     const renderFacultySwitch = () => (
         <FlatList
             data={offerFacultyList}
+            style={FLAT_LIST_STYLE}
             keyExtractor={item => item}
             numColumns={offerFacultyList.length}
             key={`flatList_faculty_${offerFacultyList.length}`}
@@ -203,7 +209,7 @@ const FilterPanel = ({
             keyExtractor={item => item}
             horizontal
             scrollEnabled
-            style={{ marginTop: scale(5) }}
+            style={{ ...FLAT_LIST_STYLE, marginTop: scale(5) }}
             contentContainerStyle={{ alignItems: 'center' }}
             renderItem={({ item }) => (
                 <TouchableScale

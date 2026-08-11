@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
-    Text,
     StyleSheet,
     Dimensions,
     Animated,
@@ -15,6 +14,7 @@ import SimpleProgressBar from './SimpleProgressBar';
 import Icon from "@react-native-vector-icons/ant-design";
 import { NavigationContext } from '@react-navigation/native';
 import { scale } from 'react-native-size-matters';
+import Text from './AppText';
 import { useTheme } from './ThemeContext';
 
 const IntegratedWebView = ({

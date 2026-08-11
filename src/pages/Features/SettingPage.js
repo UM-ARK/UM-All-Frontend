@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
     View,
-    Text,
     ScrollView,
     TouchableOpacity,
     Pressable,
@@ -9,6 +8,7 @@ import {
     Alert,
     Platform,
 } from 'react-native';
+import Text from '../../components/AppText';
 import { useTheme, uiStyle } from '../../components/ThemeContext';
 import { useHarborSession } from '../../contexts/HarborSessionContext';
 import { openLink } from '../../utils/browser';

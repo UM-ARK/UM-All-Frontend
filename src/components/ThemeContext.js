@@ -1,7 +1,8 @@
 import React, { createContext, useState, useEffect, useContext, useCallback } from 'react';
-import { Appearance, StyleSheet } from 'react-native';
+import { Appearance, Platform, StyleSheet } from 'react-native';
 import { verticalScale, scale } from 'react-native-size-matters';
 import { getLocalStorage, setLocalStorage } from '../utils/storageKits';
+import { ANDROID_UI_FONT_FAMILY } from './typography';
 
 export const ThemeContext = createContext();
 
@@ -289,6 +290,7 @@ export const VERSION_EMOJI = {
 
 export const uiStyle = StyleSheet.create({
     defaultText: {
+        ...(Platform.OS === 'android' && { fontFamily: ANDROID_UI_FONT_FAMILY }),
         fontWeight: 'normal',
         fontSize: verticalScale(12),
     },

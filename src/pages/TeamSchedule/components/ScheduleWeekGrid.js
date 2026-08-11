@@ -10,13 +10,14 @@ import React, {
     useRef,
     useState,
 } from 'react';
-import {ScrollView, StyleSheet, Text, View} from 'react-native';
+import {ScrollView, StyleSheet, View} from 'react-native';
 
 import {useTranslation} from 'react-i18next';
 import {Gesture, GestureDetector} from 'react-native-gesture-handler';
 import {runOnJS} from 'react-native-reanimated';
 import {scale, verticalScale} from 'react-native-size-matters';
 
+import Text from '../../../components/AppText';
 import {uiStyle, useTheme} from '../../../components/ThemeContext';
 import {normalizeSlotMinutes} from '../../../utils/scheduling/schedulingModels';
 import {trigger} from '../../../utils/trigger';

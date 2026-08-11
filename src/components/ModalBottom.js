@@ -1,10 +1,11 @@
 // 自定義底部彈出層，用於保存圖片等
 import React, { Component } from 'react';
-import { Dimensions, View, Text, Button, TouchableOpacity } from 'react-native';
+import { Dimensions, View, Button, TouchableOpacity } from 'react-native';
 
 import Modal from 'react-native-modal';
 import { Appearance } from 'react-native';
 
+import Text from './AppText';
 import { themes, uiStyle } from './ThemeContext';
 import { scale } from 'react-native-size-matters';
 

@@ -13,7 +13,6 @@ import {
     Pressable,
     RefreshControl,
     Share,
-    Text,
     View,
     useWindowDimensions,
 } from 'react-native';
@@ -27,6 +26,7 @@ import MaterialCommunityIcons from "@react-native-vector-icons/material-design-i
 import { scale, verticalScale } from 'react-native-size-matters';
 import { useTranslation } from 'react-i18next';
 
+import Text from '../../../components/AppText';
 import { useTheme } from '../../../components/ThemeContext';
 import { getDeepLinkShareHeaderOptions } from '../../../components/DeepLinkShareButton';
 import { useHarborSession } from '../../../contexts/HarborSessionContext';
