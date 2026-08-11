@@ -1,4 +1,5 @@
 package one.umall
+import com.facebook.react.common.assets.ReactFontManager
 
 import android.app.Application
 import android.content.res.Configuration
@@ -29,6 +30,9 @@ class MainApplication : Application(), ReactApplication {
 
   override fun onCreate() {
     super.onCreate()
+    // @generated begin xml-fonts-init - expo prebuild (DO NOT MODIFY) sync-6b4c2c6e74a44e7c5123e11b9fcff918705132ac
+    ReactFontManager.getInstance().addCustomFont(this, "NotoSansTC", R.font.xml_noto_sans_tc)
+    // @generated end xml-fonts-init
     DefaultNewArchitectureEntryPoint.releaseLevel = try {
       ReleaseLevel.valueOf(BuildConfig.REACT_NATIVE_RELEASE_LEVEL.uppercase())
     } catch (e: IllegalArgumentException) {

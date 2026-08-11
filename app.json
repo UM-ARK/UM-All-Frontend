@@ -139,7 +139,28 @@
         }
       ],
       "expo-system-ui",
-      "expo-font",
+      [
+        "expo-font",
+        {
+          "android": {
+            "fonts": [
+              {
+                "fontFamily": "NotoSansTC",
+                "fontDefinitions": [
+                  {
+                    "path": "./src/static/fonts/NotoSansTC-Regular.ttf",
+                    "weight": 400
+                  },
+                  {
+                    "path": "./src/static/fonts/NotoSansTC-Bold.ttf",
+                    "weight": 700
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
       "@react-native-community/datetimepicker",
       "expo-image",
       "expo-status-bar",
