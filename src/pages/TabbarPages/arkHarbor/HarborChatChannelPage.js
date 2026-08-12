@@ -24,6 +24,7 @@ import TextInput from '../../../components/AppTextInput';
 import HyperlinkText from '../../../components/HyperlinkText';
 import {uiStyle, useTheme} from '../../../components/ThemeContext';
 import {useHarborSession} from '../../../contexts/HarborSessionContext';
+import {parseArkAppLink} from '../../../utils/appLinks';
 import {
     fetchHarborChatMessages,
     markHarborChatChannelRead,
@@ -91,12 +92,120 @@ const MessageAvatar = ({user}) => {
     );
 };
 
+const getArkAppLinkCardContent = (appLink, t) => {
+    switch (appLink.type) {
+        case 'course':
+            return {
+                description: t('查看課程資料、班別與時間'),
+                icon: 'book-open-page-variant-outline',
+                label: t('ARK ALL · 課程'),
+                title: appLink.params.courseCode,
+            };
+        case 'club':
+            return {
+                description: t('查看社團資料與活動'),
+                icon: 'account-group-outline',
+                label: t('ARK ALL · 社團'),
+                title: t('社團 #{{id}}', {id: appLink.params.clubNum}),
+            };
+        case 'event':
+            return {
+                description: t('查看校園活動詳情'),
+                icon: 'calendar-star',
+                label: t('ARK ALL · 活動'),
+                title: t('校園活動'),
+            };
+        case 'harborTopic':
+            return {
+                description: t('查看 Harbor 帖子與回覆'),
+                icon: 'forum-outline',
+                label: t('ARK ALL · Harbor'),
+                title: t('Harbor 帖子 #{{id}}', {
+                    id: appLink.params.topicId,
+                }),
+            };
+        case 'team':
+            return {
+                description: t('查看活動詳情與共享課表'),
+                icon: 'calendar-account-outline',
+                label: t('ARK ALL · 組隊約時間'),
+                title: t('組隊活動'),
+            };
+        default:
+            return null;
+    }
+};
+
+const ArkAppLinkCard = ({appLink, navigation}) => {
+    const {theme} = useTheme();
+    const {t} = useTranslation('harbor');
+    const content = getArkAppLinkCardContent(appLink, t);
+
+    if (!content) {
+        return null;
+    }
+
+    return (
+        <Pressable
+            accessibilityHint={t('在 ARK ALL 內開啟')}
+            accessibilityLabel={`${content.label}，${content.title}`}
+            accessibilityRole="link"
+            onPress={() => {
+                trigger();
+                navigation.navigate(appLink.routeName, appLink.params);
+            }}
+            style={({pressed}) => [
+                styles.appLinkCard,
+                {
+                    backgroundColor: theme.white,
+                    borderColor: theme.themeColorUltraLight,
+                    opacity: pressed ? 0.72 : 1,
+                },
+            ]}>
+            <View
+                style={[
+                    styles.appLinkIcon,
+                    {backgroundColor: theme.tonal.primary15},
+                ]}>
+                <MaterialCommunityIcons
+                    color={theme.themeColor}
+                    name={content.icon}
+                    size={scale(22)}
+                />
+            </View>
+            <View style={styles.appLinkContent}>
+                <Text
+                    numberOfLines={1}
+                    style={[styles.appLinkLabel, {color: theme.themeColor}]}>
+                    {content.label}
+                </Text>
+                <Text
+                    numberOfLines={1}
+                    style={[styles.appLinkTitle, {color: theme.black.main}]}>
+                    {content.title}
+                </Text>
+                <Text
+                    numberOfLines={2}
+                    style={[styles.appLinkDescription, {color: theme.black.third}]}>
+                    {content.description}
+                </Text>
+            </View>
+            <MaterialCommunityIcons
+                color={theme.black.third}
+                name="chevron-right"
+                size={scale(19)}
+            />
+        </Pressable>
+    );
+};
+
 const HarborChatMessage = ({isGroup, isOwn, language, message, navigation}) => {
     const {theme} = useTheme();
     const {t} = useTranslation('harbor');
     const content = message.deleted
         ? t('此訊息已刪除')
         : message.content;
+    const appLink = message.deleted ? null : parseArkAppLink(content);
 
     return (
         <View
@@ -120,41 +229,48 @@ const HarborChatMessage = ({isGroup, isOwn, language, message, navigation}) => {
                         {message.user.displayName || message.user.username}
                     </Text>
                 ) : null}
-                <View
-                    style={[
-                        styles.bubble,
-                        {
-                            backgroundColor: isOwn
-                                ? theme.themeColor
-                                : theme.tonal.primary15,
-                        },
-                    ]}>
-                    <HyperlinkText
-                        linkStyle={[
-                            styles.messageLink,
+                {appLink ? (
+                    <ArkAppLinkCard
+                        appLink={appLink}
+                        navigation={navigation}
+                    />
+                ) : (
+                    <View
+                        style={[
+                            styles.bubble,
                             {
-                                color: isOwn
-                                    ? theme.trueWhite
-                                    : theme.themeColor,
+                                backgroundColor: isOwn
+                                    ? theme.themeColor
+                                    : theme.tonal.primary15,
                             },
-                        ]}
-                        navigation={navigation}>
-                        <Text
-                            selectable
-                            style={[
-                                styles.messageText,
+                        ]}>
+                        <HyperlinkText
+                            linkStyle={[
+                                styles.messageLink,
                                 {
                                     color: isOwn
                                         ? theme.trueWhite
-                                        : message.deleted
-                                            ? theme.black.third
-                                            : theme.black.main,
+                                        : theme.themeColor,
                                 },
-                            ]}>
-                            {content}
-                        </Text>
-                    </HyperlinkText>
-                </View>
+                            ]}
+                            navigation={navigation}>
+                            <Text
+                                selectable
+                                style={[
+                                    styles.messageText,
+                                    {
+                                        color: isOwn
+                                            ? theme.trueWhite
+                                            : message.deleted
+                                                ? theme.black.third
+                                                : theme.black.main,
+                                    },
+                                ]}>
+                                {content}
+                            </Text>
+                        </HyperlinkText>
+                    </View>
+                )}
                 <Text
                     style={[
                         styles.messageTime,
@@ -488,6 +604,44 @@ const HarborChatChannelPage = ({navigation, route}) => {
 };
 
 const styles = StyleSheet.create({
+    appLinkCard: {
+        alignItems: 'center',
+        borderRadius: scale(15),
+        borderWidth: StyleSheet.hairlineWidth,
+        flexDirection: 'row',
+        gap: scale(9),
+        maxWidth: '100%',
+        paddingHorizontal: scale(11),
+        paddingVertical: verticalScale(11),
+        width: scale(240),
+    },
+    appLinkContent: {
+        flex: 1,
+    },
+    appLinkDescription: {
+        ...uiStyle.defaultText,
+        fontSize: scale(10),
+        lineHeight: verticalScale(14),
+        marginTop: verticalScale(3),
+    },
+    appLinkIcon: {
+        alignItems: 'center',
+        borderRadius: scale(11),
+        height: scale(42),
+        justifyContent: 'center',
+        width: scale(42),
+    },
+    appLinkLabel: {
+        ...uiStyle.defaultText,
+        fontSize: scale(9),
+        fontWeight: '620',
+    },
+    appLinkTitle: {
+        ...uiStyle.defaultText,
+        fontSize: scale(13),
+        fontWeight: '700',
+        marginTop: verticalScale(1),
+    },
     avatarFallback: {
         alignItems: 'center',
         justifyContent: 'center',

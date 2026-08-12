@@ -13,10 +13,30 @@ const decodeHtmlEntities = value =>
         .replace(/&#39;/gi, "'")
         .replace(/&quot;/gi, '"');
 
+const collapseHarborChatOneboxes = html =>
+    String(html || '').replace(
+        /<aside\b[^>]*>[\s\S]*?<\/aside>/gi,
+        block => {
+            const openingTag = block.match(/^<aside\b[^>]*>/i)?.[0] || '';
+            const className = getHarborHtmlAttribute(openingTag, 'class');
+            if (!className.toLowerCase().split(/\s+/).includes('onebox')) {
+                return block;
+            }
+            const sourceUrl = getHarborHtmlAttribute(
+                openingTag,
+                'data-onebox-src',
+            );
+            const anchorTag = block.match(/<a\b[^>]*>/i)?.[0] || '';
+            const href = getHarborHtmlAttribute(anchorTag, 'href');
+            const url = sourceUrl || href;
+            return url ? `\n${url}\n` : block;
+        },
+    );
+
 export const getHarborChatPlainText = value =>
     replaceHarborEmojiShortcodes(
         decodeHtmlEntities(
-            String(value || '')
+            collapseHarborChatOneboxes(value)
                 .replace(/<img\b[^>]*>/gi, tag => {
                     const className = getHarborHtmlAttribute(tag, 'class');
                     if (!className.split(/\s+/).includes('emoji')) {

@@ -1,4 +1,4 @@
-import { APP_LINKING } from '../appLinks';
+import { APP_LINKING, parseArkAppLink } from '../appLinks';
 import {
     ARK_CLUB_SHARE_URL,
     ARK_COURSE_SHARE_URL,
@@ -39,5 +39,50 @@ describe('ARK ALL 深度連結', () => {
         expect(ARK_HARBOR_TOPIC_SHARE_URL(123, 5)).toBe(
             'https://umall.one/app/harbor/topic/123/5',
         );
+    });
+
+    it('解析已註冊的 Universal Link 為 APP 路由', () => {
+        expect(parseArkAppLink(
+            'https://umall.one/app/course/COMP%201000',
+        )).toEqual(expect.objectContaining({
+            type: 'course',
+            routeName: 'LocalCourse',
+            params: {courseCode: 'COMP 1000'},
+        }));
+        expect(parseArkAppLink(
+            'https://umall.one/app/club/12',
+        )).toEqual(expect.objectContaining({
+            type: 'club',
+            routeName: 'ClubDetail',
+            params: {clubNum: '12'},
+        }));
+        expect(parseArkAppLink(
+            'https://umall.one/app/event/event%2Fid',
+        )).toEqual(expect.objectContaining({
+            type: 'event',
+            routeName: 'EventDetail',
+            params: {eventId: 'event/id'},
+        }));
+        expect(parseArkAppLink(
+            'https://umall.one/app/harbor/topic/123/5',
+        )).toEqual(expect.objectContaining({
+            type: 'harborTopic',
+            routeName: 'HarborTopicDetail',
+            params: {topicId: 123, postNumber: 5},
+        }));
+        expect(parseArkAppLink(
+            'one.umall://app/team/event%2F1?invite=token',
+        )).toEqual(expect.objectContaining({
+            type: 'team',
+            routeName: 'TeamScheduleDetail',
+            params: {eventId: 'event/1', invite: 'token'},
+        }));
+    });
+
+    it('拒絕未註冊或非 ARK 的連結', () => {
+        expect(parseArkAppLink('https://example.com/app/course/COMP1000'))
+            .toBeNull();
+        expect(parseArkAppLink('https://umall.one/app/unknown/1')).toBeNull();
+        expect(parseArkAppLink('普通訊息')).toBeNull();
     });
 });

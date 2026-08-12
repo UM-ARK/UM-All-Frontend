@@ -170,13 +170,13 @@ const AppShareSheet = ({visible, payload, onClose}) => {
     }, [hideSheet, payload?.url, t]);
 
     const handleSend = useCallback(async () => {
-        if (!payload?.message || !selectedChannel || isSending) {
+        if (!payload?.url || !selectedChannel || isSending) {
             return;
         }
         trigger();
         setIsSending(true);
         try {
-            await sendHarborChatMessage(selectedChannel.id, payload.message);
+            await sendHarborChatMessage(selectedChannel.id, payload.url);
             Toast.show(t('已傳送給 {{name}}', {name: selectedChannel.title}));
             hideSheet();
         } catch {
@@ -184,7 +184,7 @@ const AppShareSheet = ({visible, payload, onClose}) => {
         } finally {
             setIsSending(false);
         }
-    }, [hideSheet, isSending, payload?.message, selectedChannel, t]);
+    }, [hideSheet, isSending, payload?.url, selectedChannel, t]);
 
     return (
         <ActionSheet

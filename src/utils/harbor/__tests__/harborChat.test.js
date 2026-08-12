@@ -104,6 +104,20 @@ describe('Harbor Chat 資料', () => {
         ).toBe('再試一下😏');
     });
 
+    it('將 Discourse onebox 還原為可點擊的原始連結', () => {
+        expect(
+            getHarborChatPlainText(
+                '<aside class="onebox allowlistedgeneric" ' +
+                'data-onebox-src="https://umall.one/app/course/GEGA1003">' +
+                '<header><a href="https://umall.one/app/course/GEGA1003">' +
+                'ARK ALL</a></header><article><img src="/preview.png">' +
+                '<h3>課程 GEGA1003 · ARK ALL</h3>' +
+                '<p>在 ARK ALL 查看課程資料、班別與時間。</p>' +
+                '</article></aside>',
+            ),
+        ).toBe('https://umall.one/app/course/GEGA1003');
+    });
+
     it('正規化訊息分頁並合併去重', () => {
         const first = normalizeHarborChatMessages({
             messages: [

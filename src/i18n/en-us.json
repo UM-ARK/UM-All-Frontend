@@ -567,7 +567,22 @@
         "傳送": "Send",
         "無法載入較早訊息": "Unable to load earlier messages",
         "訊息傳送失敗": "Message not sent",
-        "訊息仍保留在輸入框，請稍後再試。": "Your message is still in the text box. Try again later."
+        "訊息仍保留在輸入框，請稍後再試。": "Your message is still in the text box. Try again later.",
+        "ARK ALL · 課程": "ARK ALL · Course",
+        "查看課程資料、班別與時間": "View course details, sections, and times",
+        "ARK ALL · 社團": "ARK ALL · Club",
+        "社團 #{{id}}": "Club #{{id}}",
+        "查看社團資料與活動": "View club details and events",
+        "ARK ALL · 活動": "ARK ALL · Event",
+        "校園活動": "Campus event",
+        "查看校園活動詳情": "View campus event details",
+        "ARK ALL · Harbor": "ARK ALL · Harbor",
+        "Harbor 帖子 #{{id}}": "Harbor topic #{{id}}",
+        "查看 Harbor 帖子與回覆": "View the Harbor topic and replies",
+        "ARK ALL · 組隊約時間": "ARK ALL · Team scheduling",
+        "組隊活動": "Team event",
+        "查看活動詳情與共享課表": "View event details and shared timetables",
+        "在 ARK ALL 內開啟": "Open in ARK ALL"
     },
     "my": {
         "個人中心": "Profile",
@@ -1079,6 +1094,7 @@
         "不衝突": "No conflict",
         "有衝突": "Conflict",
         "符合時段": "Matches time",
+        "當前選中": "Selected",
         "目前沒有可排入且不衝突的課程，可調整篩選或已排課表。": "No course currently fits without conflicts. Adjust the filters or your timetable."
     },
     "timetable": {
