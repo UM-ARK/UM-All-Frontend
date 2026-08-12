@@ -33,25 +33,15 @@ const decodeAppLinkSegment = value => {
     }
 };
 
+const ARK_APP_LINK_PATTERN =
+    /(?:https:\/\/umall\.one\/app\/|one\.umall:\/\/app\/)[^\s]+/g;
+
 export const parseArkAppLink = value => {
     if (typeof value !== 'string' || !value.trim()) {
         return null;
     }
 
-    const lines = value
-        .trim()
-        .split(/\r?\n/)
-        .map(line => line.trim())
-        .filter(Boolean);
-    const linkIndex = lines.findIndex(line =>
-        line.startsWith('https://umall.one/app/') ||
-        line.startsWith('one.umall://app/'),
-    );
-    if (linkIndex < 0) {
-        return null;
-    }
-    const link = lines[linkIndex];
-    const sharedTitle = linkIndex > 0 ? lines[linkIndex - 1] : '';
+    const link = value.trim();
 
     let url;
     try {
@@ -82,7 +72,6 @@ export const parseArkAppLink = value => {
             type: 'course',
             routeName: 'LocalCourse',
             params: {courseCode: segments[1]},
-            sharedTitle,
             url: link,
         };
     }
@@ -91,7 +80,6 @@ export const parseArkAppLink = value => {
             type: 'club',
             routeName: 'ClubDetail',
             params: {clubNum: segments[1]},
-            sharedTitle,
             url: link,
         };
     }
@@ -100,7 +88,6 @@ export const parseArkAppLink = value => {
             type: 'event',
             routeName: 'EventDetail',
             params: {eventId: segments[1]},
-            sharedTitle,
             url: link,
         };
     }
@@ -126,7 +113,6 @@ export const parseArkAppLink = value => {
                 topicId,
                 ...(postNumber == null ? {} : {postNumber}),
             },
-            sharedTitle,
             url: link,
         };
     }
@@ -139,10 +125,36 @@ export const parseArkAppLink = value => {
                 eventId: segments[1],
                 ...(invite ? {invite} : {}),
             },
-            sharedTitle,
             url: link,
         };
     }
 
     return null;
+};
+
+export const splitArkAppLinkContent = value => {
+    if (typeof value !== 'string' || !value.trim()) {
+        return [];
+    }
+
+    const parts = [];
+    let lastIndex = 0;
+    for (const match of value.matchAll(ARK_APP_LINK_PATTERN)) {
+        const appLink = parseArkAppLink(match[0]);
+        if (!appLink) {
+            continue;
+        }
+        const text = value.slice(lastIndex, match.index).trim();
+        if (text) {
+            parts.push({type: 'text', content: text});
+        }
+        parts.push({type: 'appLink', appLink});
+        lastIndex = match.index + match[0].length;
+    }
+
+    const trailingText = value.slice(lastIndex).trim();
+    if (trailingText) {
+        parts.push({type: 'text', content: trailingText});
+    }
+    return parts;
 };

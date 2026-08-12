@@ -1,4 +1,8 @@
-import { APP_LINKING, parseArkAppLink } from '../appLinks';
+import {
+    APP_LINKING,
+    parseArkAppLink,
+    splitArkAppLinkContent,
+} from '../appLinks';
 import {
     ARK_CLUB_SHARE_URL,
     ARK_COURSE_SHARE_URL,
@@ -64,15 +68,6 @@ describe('ARK ALL 深度連結', () => {
             params: {eventId: 'event/id'},
         }));
         expect(parseArkAppLink(
-            '屬會節攤位來啦\n' +
-            'https://umall.one/app/event/event%2Fid',
-        )).toEqual(expect.objectContaining({
-            type: 'event',
-            routeName: 'EventDetail',
-            params: {eventId: 'event/id'},
-            sharedTitle: '屬會節攤位來啦',
-        }));
-        expect(parseArkAppLink(
             'https://umall.one/app/harbor/topic/123/5',
         )).toEqual(expect.objectContaining({
             type: 'harborTopic',
@@ -86,6 +81,26 @@ describe('ARK ALL 深度連結', () => {
             routeName: 'TeamScheduleDetail',
             params: {eventId: 'event/1', invite: 'token'},
         }));
+    });
+
+    it('按原始順序拆分 Universal Link 前後的使用者文字', () => {
+        expect(splitArkAppLinkContent(
+            'Zhehshi https://umall.one/app/harbor/topic/285/1 後文',
+        )).toEqual([
+            {type: 'text', content: 'Zhehshi'},
+            {
+                type: 'appLink',
+                appLink: expect.objectContaining({
+                    type: 'harborTopic',
+                    routeName: 'HarborTopicDetail',
+                    params: {topicId: 285, postNumber: 1},
+                }),
+            },
+            {type: 'text', content: '後文'},
+        ]);
+        expect(splitArkAppLinkContent('普通訊息')).toEqual([
+            {type: 'text', content: '普通訊息'},
+        ]);
     });
 
     it('拒絕未註冊或非 ARK 的連結', () => {

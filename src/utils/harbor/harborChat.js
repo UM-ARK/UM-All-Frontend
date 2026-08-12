@@ -37,6 +37,13 @@ export const getHarborChatPlainText = value =>
     replaceHarborEmojiShortcodes(
         decodeHtmlEntities(
             collapseHarborChatOneboxes(value)
+                .replace(/<a\b[^>]*>[\s\S]*?<\/a>/gi, block => {
+                    const openingTag = block.match(/^<a\b[^>]*>/i)?.[0] || '';
+                    const href = getHarborHtmlAttribute(openingTag, 'href');
+                    return href.startsWith('https://umall.one/app/')
+                        ? `\n${href}\n`
+                        : block;
+                })
                 .replace(/<img\b[^>]*>/gi, tag => {
                     const className = getHarborHtmlAttribute(tag, 'class');
                     if (!className.split(/\s+/).includes('emoji')) {

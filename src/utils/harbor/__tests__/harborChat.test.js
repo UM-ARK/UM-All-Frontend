@@ -132,6 +132,20 @@ describe('Harbor Chat 資料', () => {
         );
     });
 
+    it('從帶文字的 Universal Link 錨點還原原始連結', () => {
+        expect(
+            getHarborChatPlainText(
+                '<p>Zhehshi 職涯港話題 285</p>' +
+                '<p><a href="https://umall.one/app/harbor/topic/285/1">' +
+                'Zhehshi 職涯港話題 285 · #1 · ARK ALL</a></p>' +
+                '<p>後文</p>',
+            ),
+        ).toBe(
+            'Zhehshi 職涯港話題 285\n\n' +
+            'https://umall.one/app/harbor/topic/285/1\n\n後文',
+        );
+    });
+
     it('正規化訊息分頁並合併去重', () => {
         const first = normalizeHarborChatMessages({
             messages: [
