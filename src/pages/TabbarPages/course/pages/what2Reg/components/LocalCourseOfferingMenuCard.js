@@ -273,7 +273,7 @@ const LocalCourseOfferingMenuCard = ({
                         style={{
                             width: '100%',
                             flexDirection: 'row',
-                            alignItems: 'center',
+                            alignItems: 'flex-start',
                             marginBottom: scale(2),
                         }}>
                         <View
@@ -283,6 +283,7 @@ const LocalCourseOfferingMenuCard = ({
                                 borderRadius: scale(2),
                                 backgroundColor: highlightColor,
                                 marginRight: scale(8),
+                                marginTop: scale(2),
                             }}
                         />
                         <Text
@@ -300,13 +301,11 @@ const LocalCourseOfferingMenuCard = ({
                             style={{
                                 ...uiStyle.defaultText,
                                 flex: 1,
-                                flexShrink: 1,
                                 marginLeft: scale(8),
                                 fontSize: scale(11),
                                 color: black.third,
                                 textAlign: 'right',
-                            }}
-                            numberOfLines={1}>
+                            }}>
                             {courseRow['Medium of Instruction']}
                         </Text>
                         {isHighlighted ? (
@@ -338,7 +337,7 @@ const LocalCourseOfferingMenuCard = ({
                         style={{
                             width: '100%',
                             flexDirection: 'row',
-                            alignItems: 'center',
+                            alignItems: 'flex-start',
                             marginBottom: scale(2),
                         }}>
                         <Text
@@ -356,13 +355,11 @@ const LocalCourseOfferingMenuCard = ({
                             style={{
                                 ...uiStyle.defaultText,
                                 flex: 1,
-                                flexShrink: 1,
                                 marginLeft: scale(8),
                                 fontSize: scale(11),
                                 color: black.third,
                                 textAlign: 'right',
-                            }}
-                            numberOfLines={1}>
+                            }}>
                             {courseRow['Medium of Instruction']}
                         </Text>
                         {isHighlighted ? (
