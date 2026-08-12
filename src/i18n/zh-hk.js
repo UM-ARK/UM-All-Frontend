@@ -47,6 +47,12 @@ export default {
         System: '跟隨系統',
         Application: '應用',
         'Clear Cache': '清除本機資料',
+        'Browser Cache Help': '清除瀏覽器快取',
+        'Browser Cache Help Hint': '網頁無法開啟或顯示舊內容時',
+        'Android Browser Cache Message':
+            '「清除本機資料」不會清除系統瀏覽器的資料。\n\n以 Chrome 為例：\n1. 開啟 Chrome\n2. 點擊右上角選單\n3. 選擇「刪除瀏覽資料」\n4. 勾選「快取圖片和檔案」；如果網站登入狀態異常，也勾選「Cookie 和網站資料」\n\n如 App 使用其他瀏覽器開啟連結，請在該瀏覽器內清除。此操作可能會令部分網站登出，也不能修復 DNS 或網站伺服器故障。',
+        'iOS Browser Cache Message':
+            'iOS 不允許 UM All 直接清除系統瀏覽器的資料。\n\n可前往：\n「設定」→「App」→「Safari」→「清除瀏覽記錄與網站資料」\n\n此操作可能會令部分網站登出。App 內瀏覽器的部分資料與 Safari 分開儲存，因此不保證全部清除，也不能修復 DNS 或網站伺服器故障。',
         'Check Update': '檢查更新',
         'App Settings': '系統設定',
         'App Settings Hint': '權限、預設開啟連結等',

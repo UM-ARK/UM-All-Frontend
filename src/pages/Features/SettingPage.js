@@ -386,6 +386,20 @@ const SettingPage = ({ navigation }) => {
     };
 
     /**
+     * 顯示目前平台的系統瀏覽器快取清除方法
+     */
+    const handleBrowserCacheHelp = () => {
+        Alert.alert(
+            t('setting:Browser Cache Help'),
+            t(
+                Platform.OS === 'android'
+                    ? 'setting:Android Browser Cache Message'
+                    : 'setting:iOS Browser Cache Message',
+            ),
+        );
+    };
+
+    /**
      * 向伺服器查詢 app_version，若有新版本則與首頁相同方式 Alert 並可跳轉商店／官網
      */
     const handleCheckUpdate = useCallback(async () => {
@@ -513,6 +527,14 @@ const SettingPage = ({ navigation }) => {
                         iconColor="#FF3B30"
                         title={t('setting:Clear Cache')}
                         onPress={handleClearCache}
+                    />
+                    <SettingItem
+                        grouped
+                        icon="globe-outline"
+                        iconColor={themeColor}
+                        title={t('setting:Browser Cache Help')}
+                        subtitle={t('setting:Browser Cache Help Hint')}
+                        onPress={handleBrowserCacheHelp}
                     />
                     <SettingItem
                         grouped
