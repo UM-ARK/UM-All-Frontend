@@ -6,7 +6,7 @@ export const UMEH_BACKUP_HOST = 'https://cf.umeh.top';
 
 const PREF_KEY = 'umeh_host_pref';
 const PROBE_TIMEOUT_MS = 2500;
-const PROBE_CACHE_TTL_MS = 5 * 60 * 1000; // 5分鐘
+const PROBE_CACHE_TTL_MS = 30 * 60 * 1000; // 30分鐘
 
 export async function getUmehHostPref() {
     const v = await getLocalStorage(PREF_KEY);
@@ -67,7 +67,7 @@ export async function refreshUmehHost() {
         return;
     }
 
-    // auto：探測 primary，5 分鐘內用緩存結果
+    // auto：探測 primary，30 分鐘內用緩存結果
     const now = Date.now();
     let primaryOk;
     if (now - _probeCache.ts < PROBE_CACHE_TTL_MS && _probeCache.result !== null) {

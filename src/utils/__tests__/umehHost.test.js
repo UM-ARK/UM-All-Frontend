@@ -21,6 +21,7 @@ describe('選咩課網站自動探測', () => {
     });
 
     afterEach(() => {
+        jest.restoreAllMocks();
         delete global.fetch;
     });
 
@@ -55,6 +56,24 @@ describe('選咩課網站自動探測', () => {
 
         expect(UMEH_PRIMARY_HOST).toBe('https://umeh.top');
         expect(getCurrentUmehHost()).toBe(UMEH_PRIMARY_HOST);
+    });
+
+    it('30 分鐘內重複刷新只探測一次', async () => {
+        let now = 0;
+        jest.spyOn(Date, 'now').mockImplementation(() => now);
+        global.fetch.mockResolvedValue({ok: true, status: 200});
+        const {refreshUmehHost} = loadUmehHost();
+
+        await refreshUmehHost();
+        now = 29 * 60 * 1000;
+        await refreshUmehHost();
+
+        expect(global.fetch).toHaveBeenCalledTimes(1);
+
+        now = 30 * 60 * 1000 + 1;
+        await refreshUmehHost();
+
+        expect(global.fetch).toHaveBeenCalledTimes(2);
     });
 
     it('primary 網絡失敗時使用後備網站', async () => {
