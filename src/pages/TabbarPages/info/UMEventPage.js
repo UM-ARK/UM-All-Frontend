@@ -6,6 +6,7 @@ import React, {
     useContext,
     useCallback,
     useImperativeHandle,
+    useMemo,
 } from 'react';
 import { View, RefreshControl } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
@@ -13,6 +14,7 @@ import { FlashList } from '@shopify/flash-list';
 import Text from '../../../components/AppText';
 import { uiStyle, ThemeContext } from '../../../components/ThemeContext';
 import { UM_API_EVENT, UM_API_TOKEN } from '../../../utils/pathMap';
+import { trigger } from '../../../utils/trigger';
 import {
     readUMOpenDataCache,
     UM_EVENT_CACHE_KEY,
@@ -21,6 +23,8 @@ import {
 
 import NewsCard from './components/NewsCard';
 import NewsListSkeleton from './components/NewsListSkeleton';
+import ClubSearchBar from './components/ClubSearchBar';
+import { filterUMOpenDataItemsBySearchQuery } from './utils/umOpenDataSearch';
 
 import axios from 'axios';
 import moment from 'moment-timezone';
@@ -89,10 +93,11 @@ const UMEventPage = forwardRef(function UMEventPage(
     const hasVisibleDataRef = useRef(false);
     const requestIdRef = useRef(0);
     const { theme } = useContext(ThemeContext);
-    const { i18n } = useTranslation();
+    const { t, i18n } = useTranslation('common');
     const currentLanguage = i18n.resolvedLanguage || i18n.language;
 
     const [data, setData] = useState(undefined);
+    const [searchQuery, setSearchQuery] = useState('');
     const [isLoading, setIsLoading] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -189,6 +194,15 @@ const UMEventPage = forwardRef(function UMEventPage(
         };
     }, [getData]);
 
+    const filteredData = useMemo(
+        () => filterUMOpenDataItemsBySearchQuery(data, searchQuery),
+        [data, searchQuery],
+    );
+
+    const handleSearchFocus = useCallback(() => {
+        trigger();
+    }, []);
+
     // 渲染列表 Item
     const renderItem = useCallback(
         ({ item }) => (
@@ -211,18 +225,30 @@ const UMEventPage = forwardRef(function UMEventPage(
     // 渲染主要內容
     const renderPage = () => {
         const { black, themeColor } = theme;
-        const listHeader = hideSourceLabel ? null : (
-            <View style={{ marginTop: verticalScale(8) }}>
-                <Text
-                    style={{
-                        ...uiStyle.defaultText,
-                        color: black.third,
-                        alignSelf: 'center',
-                        marginTop: scale(5),
-                        fontSize: verticalScale(12),
-                    }}>
-                    Data From: data.um.edu.mo
-                </Text>
+        const listHeader = (
+            <View>
+                <ClubSearchBar
+                    value={searchQuery}
+                    onChangeText={setSearchQuery}
+                    loading={isRefreshing}
+                    onFocus={handleSearchFocus}
+                    placeholder={t('搜索澳大活動')}
+                    cancelLabel={t('取消')}
+                    clearAccessibilityLabel={t('清除搜尋')}
+                    containerStyle={{ backgroundColor: bg_color }}
+                />
+                {hideSourceLabel ? null : (
+                    <Text
+                        style={{
+                            ...uiStyle.defaultText,
+                            color: black.third,
+                            alignSelf: 'center',
+                            marginTop: scale(5),
+                            fontSize: verticalScale(12),
+                        }}>
+                        Data From: data.um.edu.mo
+                    </Text>
+                )}
             </View>
         );
 
@@ -230,7 +256,7 @@ const UMEventPage = forwardRef(function UMEventPage(
             <View style={{ flex: 1, width: '100%' }}>
                 <FlashList
                     ref={scrollViewRef}
-                    data={data}
+                    data={filteredData}
                     contentInsetAdjustmentBehavior="automatic"
                     contentContainerStyle={{ paddingTop: contentTopInset }}
                     keyExtractor={item => item._id}

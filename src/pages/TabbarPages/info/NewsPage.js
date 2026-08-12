@@ -17,8 +17,10 @@ import {
 } from 'react-native';
 
 import Text from '../../../components/AppText';
+import ClubSearchBar from './components/ClubSearchBar';
 import NewsCard from './components/NewsCard';
 import NewsListSkeleton from './components/NewsListSkeleton';
+import { filterUMOpenDataItemsBySearchQuery } from './utils/umOpenDataSearch';
 
 import { uiStyle, ThemeContext } from '../../../components/ThemeContext';
 import { UM_API_NEWS, UM_API_TOKEN } from '../../../utils/pathMap';
@@ -107,6 +109,11 @@ const NewsPage = forwardRef(function NewsPage(
             fontWeight: 'bold',
             fontSize: verticalScale(20),
         },
+        searchContainer: {
+            backgroundColor: bg_color,
+            borderTopWidth: 0,
+            borderBottomWidth: 0,
+        },
     });
 
     const navigation = useContext(NavigationContext);
@@ -117,8 +124,17 @@ const NewsPage = forwardRef(function NewsPage(
 
     const [isLoading, setIsLoading] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
-    const [newsList, setNewsList] = useState([]);
-    const [topNews, setTopNews] = useState({});
+    const [newsItems, setNewsItems] = useState([]);
+    const [searchQuery, setSearchQuery] = useState('');
+
+    const filteredNewsItems = useMemo(
+        () => filterUMOpenDataItemsBySearchQuery(newsItems, searchQuery),
+        [newsItems, searchQuery],
+    );
+    const { topNewsData: topNews, filteredNewsList: newsList } = useMemo(
+        () => splitNewsData(filteredNewsItems),
+        [filteredNewsItems],
+    );
 
     useImperativeHandle(
         ref,
@@ -181,10 +197,8 @@ const NewsPage = forwardRef(function NewsPage(
             if (!canApply()) {
                 return;
             }
-            const { topNewsData, filteredNewsList } = splitNewsData(result);
             hasVisibleDataRef.current = true;
-            setTopNews(topNewsData);
-            setNewsList(filteredNewsList);
+            setNewsItems(result);
             writeUMOpenDataCache(UM_NEWS_CACHE_KEY, result);
         } catch (error) {
             if (!canApply()) {
@@ -216,10 +230,8 @@ const NewsPage = forwardRef(function NewsPage(
                 return;
             }
             if (cached) {
-                const { topNewsData, filteredNewsList } = splitNewsData(cached.items);
                 hasVisibleDataRef.current = true;
-                setTopNews(topNewsData);
-                setNewsList(filteredNewsList);
+                setNewsItems(cached.items);
                 setIsLoading(false);
                 if (cached.isFresh) {
                     return;
@@ -255,10 +267,13 @@ const NewsPage = forwardRef(function NewsPage(
         return typeof picked === 'string'
             ? picked.replace('http:', 'https:')
             : null;
-    }, [topNews?._id, topNews.common?.imageUrls]);
+    }, [topNews.common?.imageUrls]);
 
     // 頭條新聞的渲染
     const renderTopNews = useMemo(() => {
+        if (!topNews?._id) {
+            return null;
+        }
         const { title } = topNewsContent;
 
         return (
@@ -319,6 +334,27 @@ const NewsPage = forwardRef(function NewsPage(
         );
     }, [topNews, hideSourceLabel, topNewsContent, topNewsImage, imagePlaceholder, black.third, navigation, styles.topNewsContainer, styles.topNewsOverlay, styles.topNewsPosition, styles.topNewsText, t, trueWhite]);
 
+    const handleSearchFocus = useCallback(() => {
+        trigger();
+    }, []);
+
+    const listHeader = useMemo(() => (
+        <>
+            <ClubSearchBar
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                loading={isRefreshing}
+                onFocus={handleSearchFocus}
+                onCancel={() => setSearchQuery('')}
+                placeholder={t('搜索澳大新聞')}
+                cancelLabel={t('取消')}
+                clearAccessibilityLabel={t('清除搜尋')}
+                containerStyle={styles.searchContainer}
+            />
+            {renderTopNews}
+        </>
+    ), [handleSearchFocus, isRefreshing, renderTopNews, searchQuery, styles.searchContainer, t]);
+
     return (
         <View style={{
             flex: 1,
@@ -361,7 +397,7 @@ const NewsPage = forwardRef(function NewsPage(
                         // 渲染項目數量
                         getItemCount={getItemCount}
                         // 列表頭部渲染的組件 - 頭條新聞
-                        ListHeaderComponent={renderTopNews}
+                        ListHeaderComponent={listHeader}
                         refreshControl={
                             <RefreshControl
                                 colors={[themeColor]}

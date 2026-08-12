@@ -1,7 +1,6 @@
 import React, { memo, useCallback, useRef } from 'react';
 import {
     View,
-    Pressable,
     ActivityIndicator,
     StyleSheet,
 } from 'react-native';
@@ -32,6 +31,9 @@ function ClubSearchBar({
     onCancel,
     onFocus,
     containerStyle,
+    placeholder,
+    cancelLabel,
+    clearAccessibilityLabel,
 }) {
     const { t } = useTranslation(['club']);
     const { theme } = useTheme();
@@ -88,7 +90,7 @@ function ClubSearchBar({
                             value={value}
                             onChangeText={onChangeText}
                             onFocus={handleFocus}
-                            placeholder={t('club:SEARCH_PLACEHOLDER')}
+                            placeholder={placeholder ?? t('club:SEARCH_PLACEHOLDER')}
                             placeholderTextColor={black.third}
                             style={[
                                 uiStyle.defaultText,
@@ -111,7 +113,7 @@ function ClubSearchBar({
                                 onPress={handleClear}
                                 hitSlop={scale(8)}
                                 accessibilityRole="button"
-                                accessibilityLabel={t('club:A11Y_CLEAR_SEARCH')}
+                                accessibilityLabel={clearAccessibilityLabel ?? t('club:A11Y_CLEAR_SEARCH')}
                             >
                                 <Ionicons
                                     name="close-circle"
@@ -138,7 +140,7 @@ function ClubSearchBar({
                         hitSlop={scale(6)}
                     >
                         <Text style={[styles.cancelText, { color: themeColor }]}>
-                            {t('club:CANCEL')}
+                            {cancelLabel ?? t('club:CANCEL')}
                         </Text>
                     </TouchableScale>
                 </Animated.View>
