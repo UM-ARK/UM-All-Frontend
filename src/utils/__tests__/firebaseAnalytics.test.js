@@ -29,6 +29,44 @@ describe('Firebase Analytics 封裝', () => {
         );
     });
 
+    it('清理 checkCourse 的教授名稱首尾空白', async () => {
+        const analytics = {};
+        getAnalytics.mockReturnValue(analytics);
+
+        await logToFirebase('checkCourse', {
+            courseCode: 'TEST1000',
+            profName: '  TEST PROFESSOR  ',
+        });
+
+        expect(logEvent).toHaveBeenCalledWith(
+            analytics,
+            'checkCourse',
+            {
+                courseCode: 'TEST1000',
+                profName: 'TEST PROFESSOR',
+            },
+        );
+    });
+
+    it.each(['   ', '', null])(
+        'checkCourse 的教授名稱無效時不傳送 profName: %p',
+        async profName => {
+            const analytics = {};
+            getAnalytics.mockReturnValue(analytics);
+
+            await logToFirebase('checkCourse', {
+                courseCode: 'TEST1000',
+                profName,
+            });
+
+            expect(logEvent).toHaveBeenCalledWith(
+                analytics,
+                'checkCourse',
+                {courseCode: 'TEST1000'},
+            );
+        },
+    );
+
     it('Firebase 失敗時不影響主要操作', async () => {
         logEvent.mockImplementation(() => {
             throw new Error('analytics unavailable');
