@@ -33,6 +33,7 @@ const HarborProfileOverview = ({
     user,
     unreadCount,
     navigation,
+    onChatPress,
     onSettingsPress,
 }) => {
     const {theme} = useTheme();
@@ -98,6 +99,7 @@ const HarborProfileOverview = ({
                         mode: 'preview',
                     })
                 }
+                onChatPress={onChatPress}
                 onSettingsPress={onSettingsPress}
             />
             {user.partialProfile ? (

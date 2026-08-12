@@ -12,6 +12,11 @@ import {
     replaceHarborEmojiShortcodes,
 } from './harborHtml';
 import {
+    normalizeHarborChatChannel,
+    normalizeHarborChatMessages,
+    normalizeHarborDirectMessageChannels,
+} from './harborChat';
+import {
     createHarborRateLimitCooldownError,
     isHarborRateLimited,
     recordHarborRateLimit,
@@ -1516,6 +1521,9 @@ function normalizeProfile(
         avatarUrl: avatarTemplate
             ? ARK_HARBOR_AVATAR_TEMPLATE(avatarTemplate, 144)
             : matchingPreviousUser?.avatarUrl || null,
+        canChat:
+            profile.can_chat !== false &&
+            profile.has_chat_enabled !== false,
         isUMer,
         groups,
         profile: {
@@ -2547,6 +2555,97 @@ export async function fetchHarborMessages(username, { signal } = {}) {
             users,
             currentUsername: username,
         }),
+    );
+}
+
+export async function fetchHarborChatChannels({ signal } = {}) {
+    const response = await harborApi.get('/chat/api/me/channels', {signal});
+    return normalizeHarborDirectMessageChannels(response.data);
+}
+
+export async function createHarborDirectMessageChannel(
+    username,
+    {signal} = {},
+) {
+    const targetUsername = String(username || '').trim();
+    if (!targetUsername) {
+        throw new TypeError('Invalid Harbor Chat username');
+    }
+    const response = await harborApi.post(
+        '/chat/api/direct-message-channels',
+        {
+            target_usernames: [targetUsername],
+            upsert: true,
+        },
+        {signal},
+    );
+    const channel = response.data?.channel;
+    if (!Number.isInteger(Number(channel?.id)) || Number(channel.id) <= 0) {
+        throw new Error('Invalid Harbor Chat channel response');
+    }
+    return normalizeHarborChatChannel(channel);
+}
+
+export async function fetchHarborChatMessages(
+    channelId,
+    {
+        direction,
+        pageSize = 50,
+        signal,
+        targetMessageId,
+    } = {},
+) {
+    const id = Number(channelId);
+    if (!Number.isInteger(id) || id <= 0) {
+        throw new TypeError('Invalid Harbor Chat channel id');
+    }
+    const params = {page_size: pageSize};
+    if (direction) {
+        params.direction = direction;
+    }
+    if (targetMessageId != null) {
+        params.target_message_id = targetMessageId;
+    }
+    const response = await harborApi.get(
+        `/chat/api/channels/${encodeURIComponent(id)}/messages`,
+        {params, signal},
+    );
+    return normalizeHarborChatMessages(response.data);
+}
+
+export async function sendHarborChatMessage(channelId, message) {
+    const id = Number(channelId);
+    const content = String(message || '').trim();
+    if (!Number.isInteger(id) || id <= 0) {
+        throw new TypeError('Invalid Harbor Chat channel id');
+    }
+    if (!content) {
+        throw new TypeError('Invalid Harbor Chat message');
+    }
+    const response = await harborApi.post(
+        `/chat/${encodeURIComponent(id)}`,
+        {
+            chat_channel_id: id,
+            message: content,
+        },
+    );
+    return Number(response.data?.message_id) || null;
+}
+
+export async function markHarborChatChannelRead(channelId, messageId) {
+    const id = Number(channelId);
+    const lastReadMessageId = Number(messageId);
+    if (
+        !Number.isInteger(id) ||
+        id <= 0 ||
+        !Number.isInteger(lastReadMessageId) ||
+        lastReadMessageId <= 0
+    ) {
+        return;
+    }
+    await harborApi.put(
+        `/chat/api/channels/${encodeURIComponent(id)}/read`,
+        {message_id: lastReadMessageId},
     );
 }
 

@@ -23,6 +23,7 @@ import {useHarborSession} from '../../../../contexts/HarborSessionContext';
 import {openLink} from '../../../../utils/browser';
 import {
     calculateHarborInboxUnreadCount,
+    fetchHarborChatChannels,
     fetchHarborMessages,
     fetchHarborNotificationPage,
     fetchHarborUnreadNotificationCount,
@@ -330,7 +331,7 @@ const HarborInboxPage = ({
         return () => controllerRef.current?.abort();
     }, [loadItems, navigation, username]);
 
-    const handlePress = item => {
+    const handlePress = async item => {
         trigger();
         const isNotification = item.inboxType === 'notification';
         const presentation = isNotification
@@ -411,6 +412,31 @@ const HarborInboxPage = ({
             navigation.navigate('HarborTagTopics', {tag: target.tag});
         } else if (target.kind === 'search') {
             navigation.navigate('HarborSearch', {query: target.query});
+        } else if (target.kind === 'chat') {
+            try {
+                const result = await fetchHarborChatChannels();
+                const channel = result.items.find(
+                    candidate => candidate.id === target.channelId,
+                );
+                if (channel) {
+                    navigation.navigate('HarborChatChannel', {
+                        channelId: channel.id,
+                        messageId: target.messageId,
+                        channelTitle: channel.title,
+                        channelAvatarUrl: channel.avatarUrl,
+                        channelUsers: channel.users,
+                        isGroup: channel.isGroup,
+                    });
+                    return;
+                }
+            } catch {}
+            openLink({
+                URL: ARK_HARBOR_ABSOLUTE_URL(
+                    `/chat/c/-/${target.channelId}` +
+                    (target.messageId ? `/${target.messageId}` : ''),
+                ),
+                mode: 'fullScreen',
+            });
         } else if (target.kind === 'web') {
             const url = ARK_HARBOR_ABSOLUTE_URL(target.path);
             console.warn('[HarborInbox] Web fallback link:', url);

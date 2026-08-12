@@ -61,6 +61,12 @@ const HarborSearchPage = ({route, navigation}) => {
     } = actions;
 
     useEffect(() => {
+        if (route.params?.resultTab === 'users') {
+            selectResultTab('users');
+        }
+    }, [route.params?.resultTab, selectResultTab]);
+
+    useEffect(() => {
         const transitionSubscription = navigation.addListener(
             'transitionEnd',
             event => {

@@ -23,6 +23,7 @@ import { useHarborSession } from '../../../contexts/HarborSessionContext';
 import { logToFirebase } from '../../../utils/firebaseAnalytics';
 import {
     fetchHarborSiteCapabilities,
+    fetchHarborChatChannels,
     getHarborTopicViews,
 } from '../../../utils/harbor/harborApi';
 import { trigger } from '../../../utils/trigger';
@@ -135,8 +136,11 @@ const HarborStickyToolbar = ({
     sessionLabel,
     onSessionPress,
     onMenuPress,
+    onChatPress,
     onComposePress,
     onSearchPress,
+    chatUnreadCount,
+    chatVisible,
     onToolbarLayout,
 }) => {
     const { theme } = useTheme();
@@ -213,6 +217,46 @@ const HarborStickyToolbar = ({
                                 </Text>
                             </Pressable>
                         )}
+                        {isSignedIn && chatVisible ? (
+                            <Pressable
+                                accessibilityRole="button"
+                                accessibilityLabel={t('Chat')}
+                                hitSlop={scale(8)}
+                                onPress={() => {
+                                    trigger();
+                                    onChatPress();
+                                }}
+                                style={({ pressed }) => [
+                                    styles.toolbarIconButton,
+                                    pressed && {
+                                        backgroundColor:
+                                            theme.tonal.primary15,
+                                    },
+                                ]}>
+                                <MaterialCommunityIcons
+                                    name="chat-outline"
+                                    size={scale(19)}
+                                    color={theme.themeColor}
+                                />
+                                {chatUnreadCount > 0 ? (
+                                    <View
+                                        style={[
+                                            styles.chatUnreadBadge,
+                                            {backgroundColor: theme.unread},
+                                        ]}>
+                                        <Text
+                                            style={[
+                                                styles.chatUnreadText,
+                                                {color: theme.trueWhite},
+                                            ]}>
+                                            {chatUnreadCount > 99
+                                                ? '99+'
+                                                : chatUnreadCount}
+                                        </Text>
+                                    </View>
+                                ) : null}
+                            </Pressable>
+                        ) : null}
                         <Pressable
                             accessibilityRole="button"
                             accessibilityLabel={t('建立話題')}
@@ -321,6 +365,7 @@ const ForumPage = ({ navigation }) => {
         top: false,
     });
     const [consentVisible, setConsentVisible] = useState(false);
+    const [chatUnreadCount, setChatUnreadCount] = useState(0);
 
     useEffect(() => {
         logToFirebase('openPage', { page: 'HarborNativeHome' });
@@ -351,20 +396,32 @@ const ForumPage = ({ navigation }) => {
             });
     }, []);
 
+    const loadChatUnreadCount = useCallback(() => {
+        if (status !== 'signedIn') {
+            setChatUnreadCount(0);
+            return;
+        }
+        fetchHarborChatChannels()
+            .then(result => setChatUnreadCount(result.unreadCount))
+            .catch(() => {});
+    }, [status]);
+
     useEffect(() => {
         if (isFocused) {
             loadCapabilities();
+            loadChatUnreadCount();
         }
-    }, [isFocused, loadCapabilities, status]);
+    }, [isFocused, loadCapabilities, loadChatUnreadCount, status]);
 
     useEffect(() => {
         const subscription = AppState.addEventListener('change', nextState => {
             if (nextState === 'active' && isFocused) {
                 loadCapabilities();
+                loadChatUnreadCount();
             }
         });
         return () => subscription.remove();
-    }, [isFocused, loadCapabilities]);
+    }, [isFocused, loadCapabilities, loadChatUnreadCount]);
 
     useEffect(() => {
         return () => capabilitiesControllerRef.current?.abort();
@@ -618,12 +675,15 @@ const ForumPage = ({ navigation }) => {
                         sessionLabel={sessionLabel}
                         onSessionPress={handleSessionPress}
                         onMenuPress={() => navigation.openDrawer()}
+                        onChatPress={() => navigation.navigate('HarborChatList')}
                         onComposePress={() =>
                             navigation.navigate('HarborComposer', {
                                 mode: 'newTopic',
                             })
                         }
                         onSearchPress={() => navigation.navigate('HarborSearch')}
+                        chatUnreadCount={chatUnreadCount}
+                        chatVisible={capabilities?.chat !== false}
                         onToolbarLayout={handleToolbarLayout}
                     />
                 </View>
@@ -676,6 +736,22 @@ const styles = StyleSheet.create({
         borderRadius: scale(10),
         alignItems: 'center',
         justifyContent: 'center',
+    },
+    chatUnreadBadge: {
+        position: 'absolute',
+        top: scale(1),
+        right: scale(0),
+        minWidth: scale(13),
+        height: scale(13),
+        borderRadius: scale(7),
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingHorizontal: scale(3),
+    },
+    chatUnreadText: {
+        ...uiStyle.defaultText,
+        fontSize: scale(6),
+        fontWeight: '700',
     },
     sessionButton: {
         maxWidth: '100%',

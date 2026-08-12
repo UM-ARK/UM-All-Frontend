@@ -34,6 +34,7 @@ import { useSchedulingSession } from '../../../../contexts/SchedulingSessionCont
 import HarborAvatarPickerModal from '../components/HarborAvatarPickerModal';
 import HarborBadgeIcon from '../components/HarborBadgeIcon';
 import {
+    createHarborDirectMessageChannel,
     fetchHarborProfileMetadata,
     fetchHarborUserProfile,
     resolveCanUploadCustomAvatar,
@@ -197,6 +198,7 @@ const HarborProfilePage = ({ navigation, route }) => {
     const [isLoadingMetadata, setIsLoadingMetadata] = React.useState(true);
     const [metadataError, setMetadataError] = React.useState(false);
     const [isSaving, setIsSaving] = React.useState(false);
+    const [isOpeningChat, setIsOpeningChat] = React.useState(false);
     const [isUpdatingAvatar, setIsUpdatingAvatar] = React.useState(false);
     const [isAvatarPickerVisible, setIsAvatarPickerVisible] =
         React.useState(false);
@@ -671,6 +673,36 @@ const HarborProfilePage = ({ navigation, route }) => {
         });
     };
 
+    const openHarborChat = async () => {
+        if (!username || isOpeningChat) {
+            return;
+        }
+        trigger();
+        setIsOpeningChat(true);
+        try {
+            const channel = await createHarborDirectMessageChannel(username);
+            if (!channel) {
+                throw new Error('Invalid Harbor Chat channel');
+            }
+            navigation.navigate('HarborChatChannel', {
+                channelId: channel.id,
+                channelTitle:
+                    channel.title || viewedUser?.displayName || username,
+                channelAvatarUrl: channel.avatarUrl,
+                channelUsers: channel.users,
+                isGroup: channel.isGroup,
+            });
+        } catch {
+            Alert.alert(
+                t('無法開始 Chat'),
+                t('對方可能未開啟 Chat，或目前不接受新的聊天。'),
+                [{text: t('確定'), onPress: () => trigger()}],
+            );
+        } finally {
+            setIsOpeningChat(false);
+        }
+    };
+
     const openHarborProfile = () => {
         trigger();
         openLink({
@@ -800,6 +832,47 @@ const HarborProfilePage = ({ navigation, route }) => {
                                 ]}>
                                 {profile.workStatus || viewedUser?.role}
                             </Text>
+                            {sessionUsername &&
+                            !isOwnProfile &&
+                            viewedUser?.canChat !== false ? (
+                                <Pressable
+                                    accessibilityRole="button"
+                                    disabled={isOpeningChat}
+                                    onPress={openHarborChat}
+                                    style={({pressed}) => [
+                                        styles.chatButton,
+                                        {
+                                            backgroundColor: pressed
+                                                ? theme.tonal.primary30
+                                                : theme.tonal.primary15,
+                                            borderColor:
+                                                theme.themeColorUltraLight,
+                                        },
+                                        isOpeningChat && {opacity: 0.72},
+                                    ]}>
+                                    {isOpeningChat ? (
+                                        <ActivityIndicator
+                                            color={theme.themeColor}
+                                            size="small"
+                                        />
+                                    ) : (
+                                        <Ionicons
+                                            color={theme.themeColor}
+                                            name="chatbubble-outline"
+                                            size={scale(15)}
+                                        />
+                                    )}
+                                    <Text
+                                        style={[
+                                            styles.chatButtonText,
+                                            {color: theme.themeColor},
+                                        ]}>
+                                        {isOpeningChat
+                                            ? t('正在開啟…')
+                                            : t('開始 Chat')}
+                                    </Text>
+                                </Pressable>
+                            ) : null}
                         </View>
 
                         {isOwnProfile ? (
@@ -1404,11 +1477,11 @@ const styles = StyleSheet.create({
         gap: verticalScale(14),
     },
     identityCard: {
-        minHeight: verticalScale(180),
         alignItems: 'center',
         justifyContent: 'center',
         paddingHorizontal: scale(15),
-        paddingVertical: verticalScale(16),
+        paddingTop: verticalScale(16),
+        paddingBottom: verticalScale(2),
         overflow: 'visible',
     },
     avatarRing: {
@@ -1476,6 +1549,24 @@ const styles = StyleSheet.create({
         fontSize: scale(10),
         fontWeight: '600',
         marginTop: verticalScale(7),
+    },
+    chatButton: {
+        minHeight: verticalScale(34),
+        borderWidth: StyleSheet.hairlineWidth,
+        borderRadius: scale(999),
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        alignSelf: 'center',
+        gap: scale(6),
+        marginTop: verticalScale(10),
+        paddingHorizontal: scale(16),
+        paddingVertical: verticalScale(7),
+    },
+    chatButtonText: {
+        ...uiStyle.defaultText,
+        fontSize: scale(12),
+        fontWeight: '650',
     },
     loadingProfile: {
         minHeight: verticalScale(180),

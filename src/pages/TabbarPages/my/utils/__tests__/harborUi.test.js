@@ -177,8 +177,9 @@ describe('Harbor 消息中心', () => {
                 'ark-user',
             ),
         ).toEqual({
-            kind: 'web',
-            path: '/chat/c/-/4/9',
+            kind: 'chat',
+            channelId: 4,
+            messageId: 9,
         });
         expect(
             getHarborNotificationTarget(

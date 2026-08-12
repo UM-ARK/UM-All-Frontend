@@ -190,6 +190,9 @@ const MyScreen = ({ navigation }) => {
                                 user={user}
                                 unreadCount={inboxUnreadCount}
                                 navigation={navigation}
+                                onChatPress={() =>
+                                    navigation.navigate('HarborChatList')
+                                }
                                 onSettingsPress={() =>
                                     navigation.navigate('SettingPage')
                                 }
