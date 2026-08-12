@@ -23,6 +23,11 @@ import NewsListSkeleton from './components/NewsListSkeleton';
 import { uiStyle, ThemeContext } from '../../../components/ThemeContext';
 import { UM_API_NEWS, UM_API_TOKEN } from '../../../utils/pathMap';
 import { trigger } from '../../../utils/trigger';
+import {
+    readUMOpenDataCache,
+    UM_NEWS_CACHE_KEY,
+    writeUMOpenDataCache,
+} from '../../../utils/umOpenDataCache';
 
 import { Image } from 'expo-image';
 import { NavigationContext } from '@react-navigation/native';
@@ -42,6 +47,19 @@ const getItem = (data, index) => {
 // 返回數據數組的長度
 const getItemCount = data => {
     return data.length;
+};
+
+const splitNewsData = result => {
+    const chooseTopNewsIndex = result.findIndex(
+        item => Array.isArray(item.common?.imageUrls) && item.common.imageUrls.length > 0,
+    );
+    const topNewsIndex = chooseTopNewsIndex === -1 ? 0 : chooseTopNewsIndex;
+    const topNewsData = result[topNewsIndex] || {};
+    const filteredNewsList = result.filter(
+        (item, index) => index !== topNewsIndex && item.details?.length > 0,
+    );
+
+    return { topNewsData, filteredNewsList };
 };
 
 /**
@@ -93,8 +111,12 @@ const NewsPage = forwardRef(function NewsPage(
 
     const navigation = useContext(NavigationContext);
     const virtualizedList = useRef(null);
+    const mountedRef = useRef(true);
+    const hasVisibleDataRef = useRef(false);
+    const requestIdRef = useRef(0);
 
     const [isLoading, setIsLoading] = useState(true);
+    const [isRefreshing, setIsRefreshing] = useState(false);
     const [newsList, setNewsList] = useState([]);
     const [topNews, setTopNews] = useState({});
 
@@ -136,13 +158,15 @@ const NewsPage = forwardRef(function NewsPage(
         [onScrollOffsetChange],
     );
 
-    // 請求澳大新聞API
-    useEffect(() => {
-        getData();
-    }, []);
-
     // 請求澳大api返回新聞數據
-    const getData = async () => {
+    const getData = useCallback(async ({ refreshing = false, shouldApply } = {}) => {
+        const requestId = ++requestIdRef.current;
+        const canApply = () =>
+            (shouldApply ? shouldApply() : mountedRef.current) &&
+            requestId === requestIdRef.current;
+        if (refreshing) {
+            setIsRefreshing(true);
+        }
         try {
             const res = await axios.get(UM_API_NEWS, {
                 headers: {
@@ -151,39 +175,65 @@ const NewsPage = forwardRef(function NewsPage(
                 },
             });
             const result = res.data._embedded;
-
-            // 有時會沒有圖片imageUrls數組，所以只選擇有圖的新聞作為頭條
-            let chooseTopNewsIndex = 0;
-            while (true) {
-                if ('imageUrls' in result[chooseTopNewsIndex].common) {
-                    // 有圖
-                    break;
-                } else {
-                    // 沒圖
-                    chooseTopNewsIndex++;
-                }
+            if (!Array.isArray(result)) {
+                throw new Error('Invalid UM news response');
             }
-
-            // 頭條指定為當天最新的、有圖的新聞
-            const topNewsData = result[chooseTopNewsIndex];
-            result.splice(chooseTopNewsIndex, 1); // 刪除數組中頭條新聞的數據，剩下的全部渲染到新聞列表
-
-            // 非頭條的新聞渲染進新聞列表，過濾某些沒有detail的數據
-            const filteredNewsList = result.filter(item => item.details.length > 0);
-
+            if (!canApply()) {
+                return;
+            }
+            const { topNewsData, filteredNewsList } = splitNewsData(result);
+            hasVisibleDataRef.current = true;
             setTopNews(topNewsData);
             setNewsList(filteredNewsList);
-            setTimeout(() => {
-                setIsLoading(false);
-            }, 100);
+            writeUMOpenDataCache(UM_NEWS_CACHE_KEY, result);
         } catch (error) {
-            if (error.code == 'ERR_NETWORK' || error.code == 'ECONNABORTED') {
-                setIsLoading(true);
-            } else {
+            if (!canApply()) {
+                return;
+            }
+            if (
+                error.code !== 'ERR_NETWORK' &&
+                error.code !== 'ECONNABORTED' &&
+                !hasVisibleDataRef.current
+            ) {
                 alert('澳大新聞頁，未知錯誤，請聯繫開發者！');
             }
+        } finally {
+            if (canApply()) {
+                setIsLoading(false);
+                setIsRefreshing(false);
+            }
         }
-    };
+    }, []);
+
+    // 請求澳大新聞API
+    useEffect(() => {
+        let cancelled = false;
+        mountedRef.current = true;
+
+        const initializeData = async () => {
+            const cached = await readUMOpenDataCache(UM_NEWS_CACHE_KEY);
+            if (cancelled) {
+                return;
+            }
+            if (cached) {
+                const { topNewsData, filteredNewsList } = splitNewsData(cached.items);
+                hasVisibleDataRef.current = true;
+                setTopNews(topNewsData);
+                setNewsList(filteredNewsList);
+                setIsLoading(false);
+                if (cached.isFresh) {
+                    return;
+                }
+            }
+            getData({ shouldApply: () => !cancelled });
+        };
+
+        initializeData();
+        return () => {
+            cancelled = true;
+            mountedRef.current = false;
+        };
+    }, [getData]);
 
     const topNewsContent = useMemo(() => {
         const titleLocale = currentLanguage === 'tc' ? 'zh_TW' : 'en_US';
@@ -316,12 +366,9 @@ const NewsPage = forwardRef(function NewsPage(
                             <RefreshControl
                                 colors={[themeColor]}
                                 tintColor={themeColor}
-                                refreshing={isLoading}
+                                refreshing={isRefreshing}
                                 onRefresh={() => {
-                                    // 展示Loading標識
-                                    setIsLoading(true);
-                                    // setImgLoading(true);
-                                    getData();
+                                    getData({ refreshing: true });
                                 }}
                             />
                         }

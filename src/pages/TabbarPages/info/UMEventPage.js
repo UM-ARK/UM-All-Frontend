@@ -13,6 +13,11 @@ import { FlashList } from '@shopify/flash-list';
 import Text from '../../../components/AppText';
 import { uiStyle, ThemeContext } from '../../../components/ThemeContext';
 import { UM_API_EVENT, UM_API_TOKEN } from '../../../utils/pathMap';
+import {
+    readUMOpenDataCache,
+    UM_EVENT_CACHE_KEY,
+    writeUMOpenDataCache,
+} from '../../../utils/umOpenDataCache';
 
 import NewsCard from './components/NewsCard';
 import NewsListSkeleton from './components/NewsListSkeleton';
@@ -21,6 +26,49 @@ import axios from 'axios';
 import moment from 'moment-timezone';
 import { useTranslation } from 'react-i18next';
 import { scale, verticalScale } from 'react-native-size-matters';
+
+const orderEventData = result => {
+    const nowTimeStamp = new Date().getTime();
+    const nowMomentDate = moment(nowTimeStamp);
+
+    // 分隔今天/未來的活動 和 過往的活動
+    let resultList = [];
+    let outdatedList = [];
+    result.forEach(itm => {
+        let beginMomentDate = moment(itm.common.dateFrom);
+        if (
+            nowMomentDate.isSame(beginMomentDate, 'day') ||
+            beginMomentDate.isSameOrAfter(nowMomentDate)
+        ) {
+            resultList.push(itm);
+        } else {
+            outdatedList.push(itm);
+        }
+    });
+    // 排序：距離今天最近
+    resultList.sort((a, b) => {
+        return Math.abs(
+            nowTimeStamp - new Date(a.common.dateFrom).getTime(),
+        ) >
+            Math.abs(
+                nowTimeStamp - new Date(b.common.dateFrom).getTime(),
+            )
+            ? 1
+            : -1;
+    });
+    outdatedList.sort((a, b) => {
+        return Math.abs(
+            nowTimeStamp - new Date(a.common.dateFrom).getTime(),
+        ) >
+            Math.abs(
+                nowTimeStamp - new Date(b.common.dateFrom).getTime(),
+            )
+            ? 1
+            : -1;
+    });
+
+    return resultList.concat(outdatedList);
+};
 
 /**
  * 澳大活動列表
@@ -37,12 +85,16 @@ const UMEventPage = forwardRef(function UMEventPage(
     ref,
 ) {
     const scrollViewRef = useRef(null);
+    const mountedRef = useRef(true);
+    const hasVisibleDataRef = useRef(false);
+    const requestIdRef = useRef(0);
     const { theme } = useContext(ThemeContext);
     const { i18n } = useTranslation();
     const currentLanguage = i18n.resolvedLanguage || i18n.language;
 
     const [data, setData] = useState(undefined);
     const [isLoading, setIsLoading] = useState(true);
+    const [isRefreshing, setIsRefreshing] = useState(false);
 
     useImperativeHandle(
         ref,
@@ -66,77 +118,76 @@ const UMEventPage = forwardRef(function UMEventPage(
     );
 
     // 獲取澳大舉辦活動的資訊
-    const getData = async () => {
+    const getData = useCallback(async ({ refreshing = false, shouldApply } = {}) => {
+        const requestId = ++requestIdRef.current;
+        const canApply = () =>
+            (shouldApply ? shouldApply() : mountedRef.current) &&
+            requestId === requestIdRef.current;
+        if (refreshing) {
+            setIsRefreshing(true);
+        }
         try {
-            axios
-                .get(UM_API_EVENT, {
-                    headers: {
-                        Accept: 'application/json',
-                        Authorization: UM_API_TOKEN,
-                    },
-                })
-                .then(res => {
-                    let result = res.data._embedded;
-                    let nowTimeStamp = new Date().getTime();
-                    let nowMomentDate = moment(nowTimeStamp);
-
-                    // 分隔今天/未來的活動 和 過往的活動
-                    let resultList = [];
-                    let outdatedList = [];
-                    result.forEach(itm => {
-                        let beginMomentDate = moment(itm.common.dateFrom);
-                        if (
-                            nowMomentDate.isSame(beginMomentDate, 'day') ||
-                            beginMomentDate.isSameOrAfter(nowMomentDate)
-                        ) {
-                            resultList.push(itm);
-                        } else {
-                            outdatedList.push(itm);
-                        }
-                    });
-                    // 排序：距離今天最近
-                    resultList.sort((a, b) => {
-                        return Math.abs(
-                            nowTimeStamp -
-                            new Date(a.common.dateFrom).getTime(),
-                        ) >
-                            Math.abs(
-                                nowTimeStamp -
-                                new Date(b.common.dateFrom).getTime(),
-                            )
-                            ? 1
-                            : -1;
-                    });
-                    outdatedList.sort((a, b) => {
-                        return Math.abs(
-                            nowTimeStamp -
-                            new Date(a.common.dateFrom).getTime(),
-                        ) >
-                            Math.abs(
-                                nowTimeStamp -
-                                new Date(b.common.dateFrom).getTime(),
-                            )
-                            ? 1
-                            : -1;
-                    });
-
-                    resultList = resultList.concat(outdatedList);
-                    setData(resultList);
-                    setIsLoading(false);
-                });
+            const res = await axios.get(UM_API_EVENT, {
+                headers: {
+                    Accept: 'application/json',
+                    Authorization: UM_API_TOKEN,
+                },
+            });
+            const result = res.data._embedded;
+            if (!Array.isArray(result)) {
+                throw new Error('Invalid UM event response');
+            }
+            if (!canApply()) {
+                return;
+            }
+            hasVisibleDataRef.current = true;
+            setData(orderEventData(result));
+            writeUMOpenDataCache(UM_EVENT_CACHE_KEY, result);
         } catch (error) {
-            if (error.code == 'ERR_NETWORK' || error.code == 'ECONNABORTED') {
-                setData(undefined);
-                setIsLoading(false);
-            } else {
+            if (!canApply()) {
+                return;
+            }
+            if (
+                error.code !== 'ERR_NETWORK' &&
+                error.code !== 'ECONNABORTED' &&
+                !hasVisibleDataRef.current
+            ) {
                 alert('澳大活動頁，未知錯誤，請聯繫開發者！');
             }
+        } finally {
+            if (canApply()) {
+                setIsLoading(false);
+                setIsRefreshing(false);
+            }
         }
-    };
+    }, []);
 
     useEffect(() => {
-        getData();
-    }, []);
+        let cancelled = false;
+        mountedRef.current = true;
+
+        const initializeData = async () => {
+            const cached = await readUMOpenDataCache(UM_EVENT_CACHE_KEY);
+            if (cancelled) {
+                return;
+            }
+            if (cached) {
+                hasVisibleDataRef.current = true;
+                setData(orderEventData(cached.items));
+                setIsLoading(false);
+                if (cached.isFresh) {
+                    return;
+                }
+            }
+            getData({ shouldApply: () => !cancelled });
+        };
+
+        initializeData();
+        return () => {
+            cancelled = true;
+            mountedRef.current = false;
+        };
+    }, [getData]);
 
     // 渲染列表 Item
     const renderItem = useCallback(
@@ -192,10 +243,9 @@ const UMEventPage = forwardRef(function UMEventPage(
                         <RefreshControl
                             colors={[themeColor]}
                             tintColor={themeColor}
-                            refreshing={isLoading}
+                            refreshing={isRefreshing}
                             onRefresh={() => {
-                                setIsLoading(true);
-                                getData();
+                                getData({ refreshing: true });
                             }}
                         />
                     }
