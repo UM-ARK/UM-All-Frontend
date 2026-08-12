@@ -8,6 +8,7 @@ import {
 
 import Text from '../../../components/AppText';
 import { useTheme, uiStyle } from '../../../components/ThemeContext';
+import { useHarborSession } from '../../../contexts/HarborSessionContext';
 import { logToFirebase } from '../../../utils/firebaseAnalytics';
 import { openLink } from '../../../utils/browser';
 import { trigger } from '../../../utils/trigger';
@@ -51,6 +52,7 @@ const FEATURE_SHEET_SNAP_POINTS = ['32%', '48%'];
 function FeatureListPage({ navigation }) {
     const { theme } = useTheme();
     const { themeColor, white, black, bg_color, tonal } = theme;
+    const { status: harborStatus, user: harborUser, login } = useHarborSession();
     const { t, i18n } = useTranslation(['common', 'home', 'features']);
     const functionArr = useMemo(() => getFunctionArr(t), [t]);
     const isTc = i18n.language === 'tc';
@@ -116,8 +118,22 @@ function FeatureListPage({ navigation }) {
                 setUsageRecords,
             );
 
-            const { go_where, webview_param, needLogin } = item;
+            const { go_where, webview_param, needLogin, loginRoute } = item;
             if (needLogin) {
+                if (harborStatus === 'signedIn' && harborUser) {
+                    navigation.navigate(go_where);
+                } else if (
+                    harborStatus !== 'restoring' &&
+                    harborStatus !== 'authorizing'
+                ) {
+                    const loginIntent = loginRoute
+                        ? { routeName: loginRoute }
+                        : {
+                            routeName: 'Tabbar',
+                            params: { screen: go_where },
+                        };
+                    login(loginIntent).catch(() => {});
+                }
                 return;
             }
 
@@ -136,7 +152,7 @@ function FeatureListPage({ navigation }) {
                 }
             }, 50);
         },
-        [navigation],
+        [harborStatus, harborUser, login, navigation],
     );
 
     // 預留兩行標題高度，避免同列單行／雙行標籤把圖標頂歪
