@@ -3,7 +3,6 @@ import {
     View,
     ScrollView,
     TouchableOpacity,
-    Pressable,
     Linking,
     Alert,
     Platform,
@@ -555,10 +554,11 @@ const SettingPage = ({ navigation }) => {
                                         event.nativeEvent.event,
                                     )
                                 }
+                                onOpenMenu={() => trigger()}
                                 shouldOpenOnLongPress={false}
                                 style={{ width: scale(72) }}>
-                                <Pressable
-                                    style={({ pressed }) => ({
+                                <View
+                                    style={{
                                         width: scale(72),
                                         flexDirection: 'row',
                                         alignItems: 'center',
@@ -567,8 +567,7 @@ const SettingPage = ({ navigation }) => {
                                         borderRadius: scale(8),
                                         paddingHorizontal: scale(10),
                                         paddingVertical: scale(5),
-                                        opacity: pressed ? 0.7 : 1,
-                                    })}>
+                                    }}>
                                     <Text
                                         style={{
                                             ...uiStyle.defaultText,
@@ -584,7 +583,7 @@ const SettingPage = ({ navigation }) => {
                                         color="#007AFF"
                                         style={{ marginLeft: scale(4) }}
                                     />
-                                </Pressable>
+                                </View>
                             </MenuView>
                         }
                     />
