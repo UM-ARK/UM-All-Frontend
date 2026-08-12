@@ -5,6 +5,7 @@ const DISCOURSE_EMOJI_ALIASES = Object.freeze({
     plus: 'heavy_plus_sign',
     minus: 'heavy_minus_sign',
     slight_smile: 'slightly_smiling_face',
+    smirking_face: 'smirk',
 });
 
 const HARBOR_EMOJI_SHORTCODES = Object.freeze({

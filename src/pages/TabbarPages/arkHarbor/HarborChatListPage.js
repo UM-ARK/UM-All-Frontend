@@ -266,6 +266,9 @@ const HarborChatListPage = ({navigation}) => {
                     <RefreshControl
                         colors={[theme.themeColor]}
                         onRefresh={() => loadChannels({refresh: true})}
+                        progressViewOffset={
+                            isLiquidGlassSupported ? headerHeight : undefined
+                        }
                         refreshing={isRefreshing}
                         tintColor={theme.themeColor}
                     />
@@ -312,18 +315,18 @@ const styles = StyleSheet.create({
         marginRight: scale(8),
     },
     row: {
-        minHeight: verticalScale(76),
+        minHeight: verticalScale(64),
         flexDirection: 'row',
         alignItems: 'center',
     },
     rowBody: {
         flex: 1,
-        minHeight: verticalScale(76),
+        minHeight: verticalScale(64),
         borderBottomWidth: StyleSheet.hairlineWidth,
         justifyContent: 'center',
         marginLeft: scale(12),
         paddingRight: scale(14),
-        paddingVertical: verticalScale(10),
+        paddingVertical: verticalScale(6),
     },
     rowMain: {
         flexDirection: 'row',

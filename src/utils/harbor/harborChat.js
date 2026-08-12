@@ -1,5 +1,8 @@
 import {ARK_HARBOR_AVATAR_TEMPLATE} from '../pathMap';
-import {replaceHarborEmojiShortcodes} from './harborHtml';
+import {
+    getHarborHtmlAttribute,
+    replaceHarborEmojiShortcodes,
+} from './harborHtml';
 
 const decodeHtmlEntities = value =>
     String(value || '')
@@ -14,6 +17,16 @@ export const getHarborChatPlainText = value =>
     replaceHarborEmojiShortcodes(
         decodeHtmlEntities(
             String(value || '')
+                .replace(/<img\b[^>]*>/gi, tag => {
+                    const className = getHarborHtmlAttribute(tag, 'class');
+                    if (!className.split(/\s+/).includes('emoji')) {
+                        return '';
+                    }
+                    return (
+                        getHarborHtmlAttribute(tag, 'alt') ||
+                        getHarborHtmlAttribute(tag, 'title')
+                    );
+                })
                 .replace(/<br\s*\/?>/gi, '\n')
                 .replace(/<\/p>/gi, '\n')
                 .replace(/<[^>]*>/g, ''),

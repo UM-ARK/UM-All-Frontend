@@ -1,5 +1,6 @@
 import {
     formatHarborChatListTime,
+    getHarborChatPlainText,
     mergeHarborChatMessages,
     normalizeHarborChatMessages,
     normalizeHarborDirectMessageChannels,
@@ -86,6 +87,21 @@ describe('Harbor Chat 資料', () => {
                 lastMessageId: null,
             }),
         );
+    });
+
+    it('保留 cooked 內的 Emoji 圖片', () => {
+        expect(
+            getHarborChatPlainText(
+                '<p><img src="/images/emoji/twitter/smile.png" ' +
+                'title=":smile:" class="emoji" alt=":smile:"></p>',
+            ),
+        ).toBe('😄');
+        expect(
+            getHarborChatPlainText(
+                '<p>再試一下<img class="emoji" ' +
+                'title=":smirking_face:" alt=":smirking_face:"></p>',
+            ),
+        ).toBe('再試一下😏');
     });
 
     it('正規化訊息分頁並合併去重', () => {
