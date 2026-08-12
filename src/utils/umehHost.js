@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { getLocalStorage, setLocalStorage } from './storageKits';
 
-export const UMEH_PRIMARY_HOST = 'https://www.umeh.top';
+export const UMEH_PRIMARY_HOST = 'https://umeh.top';
 export const UMEH_BACKUP_HOST = 'https://cf.umeh.top';
 
 const PREF_KEY = 'umeh_host_pref';
 const PROBE_TIMEOUT_MS = 2500;
-const PROBE_CACHE_TTL_MS = 5 * 60 * 1000; // 5分鐘
+const PROBE_CACHE_TTL_MS = 30 * 60 * 1000; // 30分鐘
 
 export async function getUmehHostPref() {
     const v = await getLocalStorage(PREF_KEY);
@@ -24,8 +24,11 @@ async function probeHost(host) {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), PROBE_TIMEOUT_MS);
     try {
-        await fetch(host, { method: 'HEAD', signal: controller.signal });
-        return true;
+        const response = await fetch(host, {
+            method: 'HEAD',
+            signal: controller.signal,
+        });
+        return response.ok;
     } catch {
         return false;
     } finally {
@@ -34,7 +37,7 @@ async function probeHost(host) {
 }
 
 // 單例狀態
-let _currentHost = UMEH_PRIMARY_HOST;
+let _currentHost = UMEH_BACKUP_HOST;
 const _subs = new Set();
 
 function _notify() {
@@ -64,7 +67,7 @@ export async function refreshUmehHost() {
         return;
     }
 
-    // auto：探測 primary，5 分鐘內用緩存結果
+    // auto：探測 primary，30 分鐘內用緩存結果
     const now = Date.now();
     let primaryOk;
     if (now - _probeCache.ts < PROBE_CACHE_TTL_MS && _probeCache.result !== null) {

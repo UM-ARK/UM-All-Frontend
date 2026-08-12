@@ -3,7 +3,6 @@ import {
     View,
     ScrollView,
     TouchableOpacity,
-    Pressable,
     Linking,
     Alert,
     Platform,
@@ -387,6 +386,20 @@ const SettingPage = ({ navigation }) => {
     };
 
     /**
+     * 顯示目前平台的系統瀏覽器快取清除方法
+     */
+    const handleBrowserCacheHelp = () => {
+        Alert.alert(
+            t('setting:Browser Cache Help'),
+            t(
+                Platform.OS === 'android'
+                    ? 'setting:Android Browser Cache Message'
+                    : 'setting:iOS Browser Cache Message',
+            ),
+        );
+    };
+
+    /**
      * 向伺服器查詢 app_version，若有新版本則與首頁相同方式 Alert 並可跳轉商店／官網
      */
     const handleCheckUpdate = useCallback(async () => {
@@ -517,6 +530,14 @@ const SettingPage = ({ navigation }) => {
                     />
                     <SettingItem
                         grouped
+                        icon="globe-outline"
+                        iconColor={themeColor}
+                        title={t('setting:Browser Cache Help')}
+                        subtitle={t('setting:Browser Cache Help Hint')}
+                        onPress={handleBrowserCacheHelp}
+                    />
+                    <SettingItem
+                        grouped
                         icon="cloud-download"
                         iconColor="#34C759"
                         title={t('setting:Check Update')}
@@ -555,10 +576,11 @@ const SettingPage = ({ navigation }) => {
                                         event.nativeEvent.event,
                                     )
                                 }
+                                onOpenMenu={() => trigger()}
                                 shouldOpenOnLongPress={false}
                                 style={{ width: scale(72) }}>
-                                <Pressable
-                                    style={({ pressed }) => ({
+                                <View
+                                    style={{
                                         width: scale(72),
                                         flexDirection: 'row',
                                         alignItems: 'center',
@@ -567,8 +589,7 @@ const SettingPage = ({ navigation }) => {
                                         borderRadius: scale(8),
                                         paddingHorizontal: scale(10),
                                         paddingVertical: scale(5),
-                                        opacity: pressed ? 0.7 : 1,
-                                    })}>
+                                    }}>
                                     <Text
                                         style={{
                                             ...uiStyle.defaultText,
@@ -584,7 +605,7 @@ const SettingPage = ({ navigation }) => {
                                         color="#007AFF"
                                         style={{ marginLeft: scale(4) }}
                                     />
-                                </Pressable>
+                                </View>
                             </MenuView>
                         }
                     />

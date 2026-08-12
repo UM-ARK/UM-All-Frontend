@@ -248,7 +248,7 @@ export const USUAL_Q = 'https://umall.one/qa';
 
 // Webview 服務
 // 選咩課
-export const WHAT_2_REG = 'https://www.umeh.top';
+export const WHAT_2_REG = 'https://umeh.top';
 // 澳大討論區
 export const UM_WHOLE = 'https://umbbs.xyz';
 
