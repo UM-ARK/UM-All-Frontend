@@ -2563,6 +2563,46 @@ export async function fetchHarborChatChannels({ signal } = {}) {
     return normalizeHarborDirectMessageChannels(response.data);
 }
 
+export async function fetchHarborDirectMessagePreference(
+    username,
+    {signal} = {},
+) {
+    const normalizedUsername = String(username || '').trim();
+    if (!normalizedUsername) {
+        throw new TypeError('Invalid Harbor username');
+    }
+    const response = await harborApi.get(
+        `/u/${encodeURIComponent(normalizedUsername)}.json`,
+        {signal},
+    );
+    const allowPrivateMessages =
+        response.data?.user?.user_option?.allow_private_messages;
+    if (typeof allowPrivateMessages !== 'boolean') {
+        throw new Error('Invalid Harbor direct message preference response');
+    }
+    return allowPrivateMessages;
+}
+
+export async function updateHarborDirectMessagePreference(
+    username,
+    allowPrivateMessages,
+    {signal} = {},
+) {
+    const normalizedUsername = String(username || '').trim();
+    if (!normalizedUsername) {
+        throw new TypeError('Invalid Harbor username');
+    }
+    if (typeof allowPrivateMessages !== 'boolean') {
+        throw new TypeError('Invalid Harbor direct message preference');
+    }
+    const response = await harborApi.put(
+        `/u/${encodeURIComponent(normalizedUsername)}.json`,
+        {allow_private_messages: allowPrivateMessages},
+        {signal},
+    );
+    return response.data;
+}
+
 export async function createHarborDirectMessageChannel(
     username,
     {signal} = {},

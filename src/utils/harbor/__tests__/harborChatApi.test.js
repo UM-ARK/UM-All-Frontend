@@ -2,9 +2,11 @@ import {
     createHarborDirectMessageChannel,
     fetchHarborChatChannels,
     fetchHarborChatMessages,
+    fetchHarborDirectMessagePreference,
     harborApi,
     markHarborChatChannelRead,
     sendHarborChatMessage,
+    updateHarborDirectMessagePreference,
 } from '../harborApi';
 
 jest.mock('../../pathMap', () => ({
@@ -77,6 +79,42 @@ describe('Harbor Chat API', () => {
             {target_usernames: ['reader'], upsert: true},
             {signal: undefined},
         );
+    });
+
+    it('讀取並更新是否允許私人訊息', async () => {
+        getSpy.mockResolvedValue({
+            data: {
+                user: {
+                    user_option: {allow_private_messages: true},
+                },
+            },
+        });
+        putSpy.mockResolvedValue({data: {success: true}});
+
+        await expect(
+            fetchHarborDirectMessagePreference(' ark user '),
+        ).resolves.toBe(true);
+        await updateHarborDirectMessagePreference(' ark user ', false);
+
+        expect(getSpy).toHaveBeenCalledWith('/u/ark%20user.json', {
+            signal: undefined,
+        });
+        expect(putSpy).toHaveBeenCalledWith(
+            '/u/ark%20user.json',
+            {allow_private_messages: false},
+            {signal: undefined},
+        );
+    });
+
+    it('拒絕無效的私人訊息偏好', async () => {
+        getSpy.mockResolvedValue({data: {user: {user_option: {}}}});
+
+        await expect(
+            fetchHarborDirectMessagePreference('reader'),
+        ).rejects.toThrow('Invalid Harbor direct message preference response');
+        await expect(
+            updateHarborDirectMessagePreference('reader', 'yes'),
+        ).rejects.toThrow(TypeError);
     });
 
     it('取得較早訊息、發送並標記已讀', async () => {
