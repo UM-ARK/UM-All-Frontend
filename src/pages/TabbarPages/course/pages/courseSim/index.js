@@ -67,6 +67,10 @@ import {
 } from '../../utils/courseInfoMenu';
 import SegmentControl from '../../../../../components/SegmentControl';
 import { COURSE_SEARCH_SEGMENT } from '../../../../../utils/courseNavigation';
+import {
+    getCourseDisplayTitle,
+    getCourseSectionDisplayTitle,
+} from '../what2Reg/utils/courseTitle';
 import { getReplacementCourses } from './utils/replacementCourses';
 import {
     computeOverviewCourseFrames,
@@ -1783,7 +1787,10 @@ E11-0000
                                         color: black.second,
                                         fontSize: scale(13),
                                     }}>
-                                    {item['Course Title']}
+                                    {getCourseDisplayTitle(
+                                        item['Course Code'],
+                                        item['Course Title'],
+                                    )}
                                 </Text>
                                 {item['Course Title Chi'] ? (
                                     <Text
@@ -1792,7 +1799,10 @@ E11-0000
                                             color: black.third,
                                             fontSize: scale(12),
                                         }}>
-                                        {item['Course Title Chi']}
+                                        {getCourseDisplayTitle(
+                                            item['Course Code'],
+                                            item['Course Title Chi'],
+                                        )}
                                     </Text>
                                 ) : null}
                                 <Text
@@ -1898,7 +1908,10 @@ E11-0000
                                                 color: black.second,
                                                 fontSize: scale(13),
                                             }}>
-                                            {courseInfo['Course Title']}
+                                            {getCourseSectionDisplayTitle(
+                                                selectedCourse['Course Code'],
+                                                courseInfo['Course Title'],
+                                            )}
                                         </Text>
                                     ) : null}
                                     {courseInfo?.['Course Title Chi'] ? (
@@ -1908,7 +1921,10 @@ E11-0000
                                                 color: black.third,
                                                 fontSize: scale(12),
                                             }}>
-                                            {courseInfo['Course Title Chi']}
+                                            {getCourseSectionDisplayTitle(
+                                                selectedCourse['Course Code'],
+                                                courseInfo['Course Title Chi'],
+                                            )}
                                         </Text>
                                     ) : null}
                                 </>
@@ -2235,10 +2251,16 @@ E11-0000
                                             {item['Course Code']}
                                         </Text>
                                         <Text style={s.searchResultText}>
-                                            {item['Course Title']}
+                                            {getCourseDisplayTitle(
+                                                item['Course Code'],
+                                                item['Course Title'],
+                                            )}
                                         </Text>
                                         <Text style={s.searchResultText}>
-                                            {item['Course Title Chi']}
+                                            {getCourseDisplayTitle(
+                                                item['Course Code'],
+                                                item['Course Title Chi'],
+                                            )}
                                         </Text>
                                     </TouchableOpacity>
                                 );
@@ -2326,10 +2348,16 @@ E11-0000
                                             {i['Course Code']}
                                         </Text>
                                         <Text style={s.searchResultText}>
-                                            {i['Course Title']}
+                                            {getCourseDisplayTitle(
+                                                i['Course Code'],
+                                                i['Course Title'],
+                                            )}
                                         </Text>
                                         <Text style={s.searchResultText}>
-                                            {i['Course Title Chi']}
+                                            {getCourseDisplayTitle(
+                                                i['Course Code'],
+                                                i['Course Title Chi'],
+                                            )}
                                         </Text>
                                     </TouchableOpacity>
 
@@ -2395,33 +2423,37 @@ E11-0000
                                                                 0,
                                                             );
                                                         }}>
-                                                        {(courseInfo[
+                                                        {courseInfo[
                                                             'Course Code'
-                                                        ] === 'CPED1001' ||
-                                                            courseInfo[
-                                                            'Course Code'
-                                                            ] ===
-                                                            'CPED1002') && (
+                                                        ]?.startsWith(
+                                                            'CPED',
+                                                        ) && (
                                                                 <>
                                                                     <Text
                                                                         style={
                                                                             s.searchResultText
                                                                         }>
-                                                                        {
+                                                                        {getCourseSectionDisplayTitle(
                                                                             courseInfo[
-                                                                            'Course Title'
-                                                                            ]
-                                                                        }
+                                                                                'Course Code'
+                                                                            ],
+                                                                            courseInfo[
+                                                                                'Course Title'
+                                                                            ],
+                                                                        )}
                                                                     </Text>
                                                                     <Text
                                                                         style={
                                                                             s.searchResultText
                                                                         }>
-                                                                        {
+                                                                        {getCourseSectionDisplayTitle(
                                                                             courseInfo[
-                                                                            'Course Title Chi'
-                                                                            ]
-                                                                        }
+                                                                                'Course Code'
+                                                                            ],
+                                                                            courseInfo[
+                                                                                'Course Title Chi'
+                                                                            ],
+                                                                        )}
                                                                     </Text>
                                                                 </>
                                                             )}
