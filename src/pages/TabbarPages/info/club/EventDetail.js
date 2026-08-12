@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react';
 import {
-    Alert,
     View,
     TouchableOpacity,
     TouchableWithoutFeedback,
@@ -9,12 +8,12 @@ import {
     ScrollView,
     RefreshControl,
     Linking,
-    Share,
 } from 'react-native';
 
 import Text from '../../../../components/AppText';
 import { useTheme, uiStyle } from '../../../../components/ThemeContext';
 import { getDeepLinkShareHeaderOptions } from '../../../../components/DeepLinkShareButton';
+import { useAppShare } from '../../../../contexts/AppShareContext';
 import { BASE_URI, BASE_HOST, GET, ARK_EVENT_SHARE_URL, POST, MAIL } from '../../../../utils/pathMap';
 import { trigger } from '../../../../utils/trigger';
 import ModalBottom from '../../../../components/ModalBottom';
@@ -39,6 +38,7 @@ const CLUB_IMAGE_HEIGHT = PAGE_HEIGHT * 0.076;
 
 const EventDetail = (props) => {
     const { theme } = useTheme();
+    const { openShare } = useAppShare();
     const { bg_color, white, black, themeColor, secondThemeColor, viewShadow, success, warning, trueWhite, imagePlaceholder } = theme;
 
     // 統一化卡片樣式（與 ClubDetail 保持一致）
@@ -109,13 +109,11 @@ const EventDetail = (props) => {
 
     const shareEvent = useCallback(() => {
         const url = ARK_EVENT_SHARE_URL(eventId);
-        Share.share({
-            message: `${state.title || 'ARK ALL'}\n${url}`,
+        openShare({
+            title: state.title || 'ARK ALL',
             url,
-        }).catch(() => {
-            Alert.alert('分享失敗', '請稍後再試。');
         });
-    }, [eventId, state.title]);
+    }, [eventId, openShare, state.title]);
 
     useLayoutEffect(() => {
         if (!eventId) {return;}

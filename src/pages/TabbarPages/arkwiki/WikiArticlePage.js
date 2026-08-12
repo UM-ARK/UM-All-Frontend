@@ -1,9 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
     ActivityIndicator,
-    Alert,
     Pressable,
-    Share,
     StyleSheet,
     View,
 } from 'react-native';
@@ -19,6 +17,7 @@ import { scale, verticalScale } from 'react-native-size-matters';
 import Text from '../../../components/AppText';
 import ARKImageView from '../../../components/ARKImageView';
 import { uiStyle, useTheme } from '../../../components/ThemeContext';
+import { useAppShare } from '../../../contexts/AppShareContext';
 import { openLink } from '../../../utils/browser';
 import { logToFirebase } from '../../../utils/firebaseAnalytics';
 import { ARK_WIKI } from '../../../utils/pathMap';
@@ -38,6 +37,7 @@ import {
 
 const WikiArticlePage = ({route, navigation}) => {
     const {theme} = useTheme();
+    const {openShare} = useAppShare();
     const {t} = useTranslation('wiki');
     const headerHeight = useHeaderHeight();
     const title = normalizeWikiTitle(route.params?.title);
@@ -147,13 +147,9 @@ const WikiArticlePage = ({route, navigation}) => {
         imageViewerRef.current?.handleOpenImage(Math.max(index, 0));
     }, [imageUrls]);
 
-    const handleShare = async () => {
+    const handleShare = () => {
         trigger();
-        try {
-            await Share.share({message: articleUrl, url: articleUrl});
-        } catch (_error) {
-            Alert.alert(t('分享失敗'), t('請稍後再試'));
-        }
+        openShare({title: article.title || title, url: articleUrl});
     };
 
     const openWikiAction = path => {

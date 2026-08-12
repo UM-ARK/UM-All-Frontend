@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useMemo, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {
     ActivityIndicator,
     Modal,
@@ -22,7 +22,6 @@ import Text from '../../../components/AppText';
 import {uiStyle, useTheme} from '../../../components/ThemeContext';
 import {useHarborSession} from '../../../contexts/HarborSessionContext';
 import {
-    fetchHarborChatChannels,
     fetchHarborDirectMessagePreference,
     updateHarborDirectMessagePreference,
 } from '../../../utils/harbor/harborApi';
@@ -435,14 +434,14 @@ const HarborDirectMessageSettingsModal = ({onClose, username, visible}) => {
 const HarborChatListPage = ({navigation}) => {
     const {theme} = useTheme();
     const {t} = useTranslation('harbor');
-    const {patchChatUnreadCount, user} = useHarborSession();
+    const {chatChannels, refreshChatChannels, user} = useHarborSession();
     const username = user?.username || '';
     const headerHeight = useHeaderHeight();
-    const [channels, setChannels] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(chatChannels.length === 0);
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [error, setError] = useState(false);
     const [isSettingsVisible, setIsSettingsVisible] = useState(false);
+    const hasFocusedRef = useRef(false);
 
     const findSomeone = useCallback(() => {
         navigation.navigate('HarborSearch', {resultTab: 'users'});
@@ -500,16 +499,14 @@ const HarborChatListPage = ({navigation}) => {
         });
     }, [findSomeone, navigation, t, theme.themeColor, theme.tonal.primary15]);
 
-    const loadChannels = useCallback(async ({refresh = false} = {}) => {
+    const loadChannels = useCallback(async ({force = false, refresh = false} = {}) => {
         if (refresh) {
             setIsRefreshing(true);
-        } else {
+        } else if (chatChannels.length === 0) {
             setIsLoading(true);
         }
         try {
-            const result = await fetchHarborChatChannels();
-            setChannels(result.items);
-            patchChatUnreadCount(result.unreadCount, username);
+            await refreshChatChannels({force: force || refresh});
             setError(false);
         } catch {
             setError(true);
@@ -517,11 +514,13 @@ const HarborChatListPage = ({navigation}) => {
             setIsLoading(false);
             setIsRefreshing(false);
         }
-    }, [patchChatUnreadCount, username]);
+    }, [chatChannels.length, refreshChatChannels]);
 
     useFocusEffect(
         useCallback(() => {
-            loadChannels();
+            const force = hasFocusedRef.current;
+            hasFocusedRef.current = true;
+            loadChannels({force});
         }, [loadChannels]),
     );
 
@@ -552,7 +551,7 @@ const HarborChatListPage = ({navigation}) => {
         />
     );
 
-    if (isLoading && channels.length === 0) {
+    if (isLoading && chatChannels.length === 0) {
         return (
             <View
                 style={[
@@ -566,7 +565,7 @@ const HarborChatListPage = ({navigation}) => {
         );
     }
 
-    if (error && channels.length === 0) {
+    if (error && chatChannels.length === 0) {
         return (
             <View
                 style={[
@@ -590,7 +589,7 @@ const HarborChatListPage = ({navigation}) => {
         <View style={[styles.page, {backgroundColor: theme.white}]}>
             <FlashList
                 contentContainerStyle={contentContainerStyle}
-                data={channels}
+                data={chatChannels}
                 keyExtractor={item => String(item.id)}
                 ListEmptyComponent={
                     <HarborFullState

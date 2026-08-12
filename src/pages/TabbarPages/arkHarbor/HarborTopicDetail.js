@@ -12,7 +12,6 @@ import {
     InteractionManager,
     Pressable,
     RefreshControl,
-    Share,
     View,
     useWindowDimensions,
 } from 'react-native';
@@ -29,6 +28,7 @@ import { useTranslation } from 'react-i18next';
 import Text from '../../../components/AppText';
 import { useTheme } from '../../../components/ThemeContext';
 import { getDeepLinkShareHeaderOptions } from '../../../components/DeepLinkShareButton';
+import { useAppShare } from '../../../contexts/AppShareContext';
 import { useHarborSession } from '../../../contexts/HarborSessionContext';
 import { openLink } from '../../../utils/browser';
 import {
@@ -103,6 +103,7 @@ const TOPIC_NOTIFICATION_OPTIONS = [
 
 const HarborTopicDetail = ({ route, navigation }) => {
     const { theme } = useTheme();
+    const { openShare } = useAppShare();
     const { t } = useTranslation('harbor');
     const {
         login,
@@ -404,14 +405,12 @@ const HarborTopicDetail = ({ route, navigation }) => {
                 topicId,
                 post?.post_number,
             );
-            Share.share({
-                message: `${topic?.title || 'Harbor'}\n${url}`,
+            openShare({
+                title: topic?.title || 'Harbor',
                 url,
-            }).catch(() => {
-                Toast.show(t('分享失敗，請稍後再試'));
             });
         },
-        [t, topic?.title, topicId],
+        [openShare, topic?.title, topicId],
     );
 
     const shareCurrentPost = useCallback(() => {
@@ -419,13 +418,11 @@ const HarborTopicDetail = ({ route, navigation }) => {
             topicId,
             currentPostNumber > 0 ? currentPostNumber : undefined,
         );
-        Share.share({
-            message: `${topic?.title || 'Harbor'}\n${url}`,
+        openShare({
+            title: topic?.title || 'Harbor',
             url,
-        }).catch(() => {
-            Toast.show(t('分享失敗，請稍後再試'));
         });
-    }, [currentPostNumber, t, topic?.title, topicId]);
+    }, [currentPostNumber, openShare, topic?.title, topicId]);
 
     useLayoutEffect(() => {
         navigation.setOptions({

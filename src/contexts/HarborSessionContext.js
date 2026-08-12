@@ -52,6 +52,7 @@ import { getLocalStorage, setLocalStorage } from '../utils/storageKits';
 
 const PROFILE_CACHE_KEY = 'harbor_profile_cache';
 const PROFILE_VALIDATION_INTERVAL = 5 * 60 * 1000;
+const CHAT_CHANNELS_FRESHNESS_INTERVAL = 60 * 1000;
 
 const HarborSessionContext = createContext(null);
 
@@ -86,13 +87,17 @@ export const HarborSessionProvider = ({ children }) => {
     const [error, setError] = useState(null);
     const [inboxUnreadCount, setInboxUnreadCount] = useState(0);
     const [chatUnreadCount, setChatUnreadCount] = useState(0);
+    const [chatChannels, setChatChannels] = useState([]);
     const [pendingLoginIntent, setPendingLoginIntent] = useState(null);
     const credentialsRef = useRef(null);
     const userRef = useRef(null);
     const mountedRef = useRef(true);
     const inboxUnreadRequestRef = useRef(0);
     const chatUnreadRequestRef = useRef(0);
-    const chatUnreadInFlightRef = useRef(null);
+    const chatChannelsRef = useRef([]);
+    const chatUnreadCountRef = useRef(0);
+    const chatChannelsFetchedAtRef = useRef(0);
+    const chatChannelsInFlightRef = useRef(null);
     const lastValidationRef = useRef(0);
     const lastValidationAttemptRef = useRef(0);
     const validationInFlightRef = useRef(null);
@@ -111,12 +116,16 @@ export const HarborSessionProvider = ({ children }) => {
         validationInFlightRef.current = null;
         inboxUnreadRequestRef.current += 1;
         chatUnreadRequestRef.current += 1;
-        chatUnreadInFlightRef.current = null;
+        chatChannelsRef.current = [];
+        chatUnreadCountRef.current = 0;
+        chatChannelsFetchedAtRef.current = 0;
+        chatChannelsInFlightRef.current = null;
         setActiveHarborCredentials(null);
         if (mountedRef.current) {
             setUser(null);
             setInboxUnreadCount(0);
             setChatUnreadCount(0);
+            setChatChannels([]);
             setStatus(nextStatus);
         }
     }, []);
@@ -129,11 +138,15 @@ export const HarborSessionProvider = ({ children }) => {
         validationInFlightRef.current = null;
         inboxUnreadRequestRef.current += 1;
         chatUnreadRequestRef.current += 1;
-        chatUnreadInFlightRef.current = null;
+        chatChannelsRef.current = [];
+        chatUnreadCountRef.current = 0;
+        chatChannelsFetchedAtRef.current = 0;
+        chatChannelsInFlightRef.current = null;
         setActiveHarborCredentials(credentials);
         if (mountedRef.current) {
             setInboxUnreadCount(0);
             setChatUnreadCount(0);
+            setChatChannels([]);
         }
         return sessionGenerationRef.current;
     }, []);
@@ -184,20 +197,33 @@ export const HarborSessionProvider = ({ children }) => {
         }
         const normalizedCount = Math.max(0, Number(count) || 0);
         chatUnreadRequestRef.current += 1;
+        chatUnreadCountRef.current = normalizedCount;
         if (mountedRef.current) {
             setChatUnreadCount(normalizedCount);
         }
         return normalizedCount;
     }, []);
 
-    const refreshChatUnreadCount = useCallback(() => {
+    const refreshChatChannels = useCallback(({force = false} = {}) => {
         const username = userRef.current?.username;
         const credentialKey = credentialsRef.current?.userApiKey;
         if (!username || !credentialKey) {
             return Promise.resolve(null);
         }
 
-        const inFlight = chatUnreadInFlightRef.current;
+        if (
+            !force &&
+            Date.now() - chatChannelsFetchedAtRef.current <
+                CHAT_CHANNELS_FRESHNESS_INTERVAL
+        ) {
+            return Promise.resolve({
+                items: chatChannelsRef.current,
+                unreadCount: chatUnreadCountRef.current,
+            });
+        }
+
+        const generation = sessionGenerationRef.current;
+        const inFlight = chatChannelsInFlightRef.current;
         if (
             inFlight?.username === username &&
             inFlight?.credentialKey === credentialKey
@@ -215,26 +241,45 @@ export const HarborSessionProvider = ({ children }) => {
                 );
                 if (
                     mountedRef.current &&
-                    chatUnreadRequestRef.current === requestId &&
+                    sessionGenerationRef.current === generation &&
                     userRef.current?.username === username &&
                     credentialsRef.current?.userApiKey === credentialKey
                 ) {
-                    setChatUnreadCount(nextCount);
+                    chatChannelsRef.current = result.items;
+                    chatChannelsFetchedAtRef.current = Date.now();
+                    setChatChannels(result.items);
+                    if (chatUnreadRequestRef.current === requestId) {
+                        chatUnreadCountRef.current = nextCount;
+                        setChatUnreadCount(nextCount);
+                    }
+                    return {
+                        items: result.items,
+                        unreadCount:
+                            chatUnreadRequestRef.current === requestId
+                                ? nextCount
+                                : chatUnreadCountRef.current,
+                    };
                 }
-                return nextCount;
+                return null;
             })
             .finally(() => {
-                if (chatUnreadInFlightRef.current?.promise === request) {
-                    chatUnreadInFlightRef.current = null;
+                if (chatChannelsInFlightRef.current?.promise === request) {
+                    chatChannelsInFlightRef.current = null;
                 }
             });
-        chatUnreadInFlightRef.current = {
+        chatChannelsInFlightRef.current = {
             username,
             credentialKey,
             promise: request,
         };
         return request;
     }, []);
+
+    const refreshChatUnreadCount = useCallback(() => {
+        return refreshChatChannels().then(
+            result => result?.unreadCount ?? null,
+        );
+    }, [refreshChatChannels]);
 
     const expireSession = useCallback(
         async expectedCredentialKey => {
@@ -714,6 +759,7 @@ export const HarborSessionProvider = ({ children }) => {
             error,
             inboxUnreadCount,
             chatUnreadCount,
+            chatChannels,
             login,
             logout,
             pendingLoginIntent,
@@ -721,6 +767,7 @@ export const HarborSessionProvider = ({ children }) => {
             patchInboxUnreadCount,
             patchChatUnreadCount,
             refreshInboxUnreadCount,
+            refreshChatChannels,
             refreshChatUnreadCount,
             refresh: () =>
                 credentialsRef.current
@@ -733,6 +780,7 @@ export const HarborSessionProvider = ({ children }) => {
         [
             consumeLoginIntent,
             chatUnreadCount,
+            chatChannels,
             error,
             inboxUnreadCount,
             login,
@@ -741,6 +789,7 @@ export const HarborSessionProvider = ({ children }) => {
             patchInboxUnreadCount,
             pendingLoginIntent,
             refreshChatUnreadCount,
+            refreshChatChannels,
             refreshInboxUnreadCount,
             refreshProfile,
             status,
