@@ -9,7 +9,6 @@ import {
     Pressable,
     RefreshControl,
     ScrollView,
-    Share,
     StyleSheet,
     Switch,
     View,
@@ -26,6 +25,7 @@ import {scale, verticalScale} from 'react-native-size-matters';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import Ionicons from '@react-native-vector-icons/ionicons';
 
+import {useAppShare} from '../../contexts/AppShareContext';
 import {useHarborSession} from '../../contexts/HarborSessionContext';
 import {useSchedulingSession} from '../../contexts/SchedulingSessionContext';
 import Text from '../../components/AppText';
@@ -193,6 +193,7 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
     const {t} = useTranslation('my');
     const headerHeight = useHeaderHeight();
     const insets = useSafeAreaInsets();
+    const {openShare} = useAppShare();
     const {status: harborStatus, login} = useHarborSession();
     const {user: schedulingUser} = useSchedulingSession();
     const {favoriteEventIds, toggleFavorite} = useTeamEventFavorites();
@@ -924,7 +925,7 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
     const eventClosed = event?.status === 'closed';
     const isFavorite = favoriteEventIds.includes(eventId);
 
-    const handleShareInvite = useCallback(async () => {
+    const handleShareInvite = useCallback(() => {
         if (!eventId || eventClosed || inviteLink?.status !== 'open') {
             if (eventClosed) {
                 Alert.alert(
@@ -941,31 +942,22 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
             Alert.alert(t('無法分享'), t('暫時無法取得邀請連結。'));
             return;
         }
-        try {
-            const message = buildTeamInviteShareMessage({
-                title: event?.title,
-                url,
-                hint: t(
-                    '請用瀏覽器開啟下方連結，或於組隊頁手動貼上即可加入。',
-                ),
-            });
-            const result = await Share.share({
-                message,
-                url,
-            });
-            if (result?.action !== Share.dismissedAction) {
-                logToFirebase('team_schedule_invite_share', {
-                    source: 'detail_header',
-                });
-            }
-        } catch (requestError) {
-            const normalized = normalizeSchedulingError(requestError);
-            Alert.alert(
-                t('無法分享'),
-                normalized.message || t('暫時無法完成，請稍後再試。'),
-            );
-        }
-    }, [event?.title, eventClosed, eventId, inviteLink, t]);
+        const message = buildTeamInviteShareMessage({
+            title: event?.title,
+            url,
+            hint: t(
+                '請用瀏覽器開啟下方連結，或於組隊頁手動貼上即可加入。',
+            ),
+        });
+        openShare({
+            title: event?.title || '',
+            url,
+            message,
+        });
+        logToFirebase('team_schedule_invite_share', {
+            source: 'detail_header',
+        });
+    }, [event?.title, eventClosed, eventId, inviteLink, openShare, t]);
 
     const menuActions = useMemo(() => {
         if (isInvitePending || phase !== 'ready' || !event) {

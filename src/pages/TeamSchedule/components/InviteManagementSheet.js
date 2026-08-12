@@ -5,7 +5,6 @@ import React, {memo, useEffect, useRef, useState} from 'react';
 import {
     Alert,
     Pressable,
-    Share,
     StyleSheet,
     View,
 } from 'react-native';
@@ -17,6 +16,7 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 import Text from '../../../components/AppText';
 import {uiStyle, useTheme} from '../../../components/ThemeContext';
+import {useAppShare} from '../../../contexts/AppShareContext';
 import {logToFirebase} from '../../../utils/firebaseAnalytics';
 import {
     rotateInviteLink,
@@ -60,6 +60,7 @@ const InviteManagementSheet = ({
     const {theme} = useTheme();
     const {t} = useTranslation('my');
     const insets = useSafeAreaInsets();
+    const {openShare} = useAppShare();
     const sheetRef = useRef(null);
     const [busy, setBusy] = useState(false);
     const [inviteUrl, setInviteUrl] = useState(null);
@@ -99,44 +100,36 @@ const InviteManagementSheet = ({
         );
     };
 
-    const handleShare = async () => {
+    const handleShare = () => {
         trigger();
         if (eventClosed) {
             alertEventClosed();
             return;
         }
-        setBusy(true);
-        try {
-            const url = inviteUrl;
-            if (!url) {
-                Alert.alert(t('無法分享'), t('暫時無法取得邀請連結。'));
-                return;
-            }
-            const message = buildTeamInviteShareMessage({
-                title: eventTitle,
-                url,
-                hint: t(
-                    '請用瀏覽器開啟下方連結，或於組隊頁手動貼上即可加入。',
-                ),
-            });
-            const result = await Share.share({
-                message,
-                url,
-            });
-            if (result?.action !== Share.dismissedAction) {
-                logToFirebase('team_schedule_invite_share', {
-                    source: 'management_sheet',
-                });
-            }
-        } catch (requestError) {
-            const normalized = normalizeSchedulingError(requestError);
-            Alert.alert(
-                t('無法分享'),
-                normalized.message || t('暫時無法完成，請稍後再試。'),
-            );
-        } finally {
-            setBusy(false);
+        const url = inviteUrl;
+        if (!url) {
+            Alert.alert(t('無法分享'), t('暫時無法取得邀請連結。'));
+            return;
         }
+        const message = buildTeamInviteShareMessage({
+            title: eventTitle,
+            url,
+            hint: t(
+                '請用瀏覽器開啟下方連結，或於組隊頁手動貼上即可加入。',
+            ),
+        });
+        // 先關閉邀請 Sheet，再開 AppShareSheet，避免兩個 ActionSheet 重疊
+        onClose?.();
+        requestAnimationFrame(() => {
+            openShare({
+                title: eventTitle || '',
+                url,
+                message,
+            });
+            logToFirebase('team_schedule_invite_share', {
+                source: 'management_sheet',
+            });
+        });
     };
 
     const handleToggleStatus = async () => {
