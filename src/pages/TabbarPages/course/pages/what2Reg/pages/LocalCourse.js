@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useLayoutEffect, useMemo, useCallback } from 'react';
 import { View, ScrollView, FlatList, Alert, Share } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { t } from 'i18next';
 
@@ -10,6 +11,7 @@ import SegmentControl from '../../../../../../components/SegmentControl';
 import { ARK_COURSE_SHARE_URL, ARK_WIKI_SEARCH } from '../../../../../../utils/pathMap';
 import { openLink } from '../../../../../../utils/browser';
 import { getCourseCatalog } from '../../../../../../utils/checkCoursesKits';
+import { getLocalStorage } from '../../../../../../utils/storageKits';
 import { adddropCatalog } from '../../../../../../static/UMCourses/courseCatalogs';
 
 import { scale, verticalScale } from 'react-native-size-matters';
@@ -24,6 +26,9 @@ const LOCAL_SECTION_HORIZONTAL_PADDING = scale(10);
 
 /** 載入骨架重複班別卡數量，填滿首屏 */
 const LOCAL_COURSE_SKELETON_SECTION_COUNT = 3;
+
+/** 使用者模擬課表的選課清單 */
+const PLAN_STORAGE_KEY = 'ARK_Timetable_Storage';
 
 /** 單條課表時段佔位（日／教室／時間） */
 const LocalCourseSkeletonScheduleCol = ({ tonal }) => (
@@ -250,6 +255,47 @@ const LocalCourse = (props) => {
     const [relateSectionObj, setRelateSectionObj] = useState(null);
     const [relateTeacherObj, setRelateTeacherObj] = useState(null);
     const [courseInfo, setCourseInfo] = useState(null);
+    const [selectedSections, setSelectedSections] = useState([]);
+
+    useFocusEffect(
+        useCallback(() => {
+            let cancelled = false;
+
+            getLocalStorage(PLAN_STORAGE_KEY).then(planList => {
+                if (cancelled) {return;}
+                setSelectedSections(
+                    Array.isArray(planList)
+                        ? lodash
+                            .chain(planList)
+                            .filter(item => item['Course Code'] === courseCode)
+                            .map('Section')
+                            .uniq()
+                            .sortBy()
+                            .value()
+                        : [],
+                );
+            });
+
+            return () => {
+                cancelled = true;
+            };
+        }, [courseCode]),
+    );
+
+    const selectedSectionSummary = useMemo(
+        () => selectedSections.map(section => {
+            const teachers = lodash
+                .chain(relateSectionObj?.[section] || [])
+                .map('Teacher Information')
+                .filter(Boolean)
+                .uniq()
+                .value();
+            return `Section ${section}${teachers.length > 0
+                ? ` · ${teachers.join('／')}`
+                : ''}`;
+        }).join('、'),
+        [relateSectionObj, selectedSections],
+    );
 
     const shareCourse = useCallback(() => {
         const url = ARK_COURSE_SHARE_URL(courseCode);
@@ -470,6 +516,30 @@ const LocalCourse = (props) => {
                             )}
                         </View>
                     ) : null}
+
+                    <View
+                        style={{
+                            alignSelf: 'center',
+                            marginTop: scale(8),
+                            borderRadius: scale(999),
+                            backgroundColor: tonal.primary08,
+                            paddingHorizontal: scale(10),
+                            paddingVertical: scale(4),
+                        }}>
+                        <Text
+                            style={{
+                                ...uiStyle.defaultText,
+                                fontSize: scale(11),
+                                fontWeight: '600',
+                                color: selectedSections.length > 0
+                                    ? themeColor
+                                    : black.third,
+                            }}>
+                            {selectedSections.length > 0
+                                ? `目前模擬課表：${selectedSectionSummary}`
+                                : '目前模擬課表尚未選擇此課程的 Section'}
+                        </Text>
+                    </View>
 
                     {/* 按班別／教師切換 */}
                     <View style={{ alignSelf: 'center', marginVertical: scale(10) }}>
