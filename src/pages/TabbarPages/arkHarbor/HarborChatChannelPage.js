@@ -99,37 +99,39 @@ const getArkAppLinkCardContent = (appLink, t) => {
                 description: t('查看課程資料、班別與時間'),
                 icon: 'book-open-page-variant-outline',
                 label: t('ARK ALL · 課程'),
-                title: appLink.params.courseCode,
+                title: appLink.sharedTitle || appLink.params.courseCode,
             };
         case 'club':
             return {
                 description: t('查看社團資料與活動'),
                 icon: 'account-group-outline',
                 label: t('ARK ALL · 社團'),
-                title: t('社團 #{{id}}', {id: appLink.params.clubNum}),
+                title: appLink.sharedTitle ||
+                    t('社團 #{{id}}', {id: appLink.params.clubNum}),
             };
         case 'event':
             return {
                 description: t('查看校園活動詳情'),
                 icon: 'calendar-star',
                 label: t('ARK ALL · 活動'),
-                title: t('校園活動'),
+                title: appLink.sharedTitle || t('校園活動'),
             };
         case 'harborTopic':
             return {
                 description: t('查看 Harbor 帖子與回覆'),
                 icon: 'forum-outline',
                 label: t('ARK ALL · Harbor'),
-                title: t('Harbor 帖子 #{{id}}', {
-                    id: appLink.params.topicId,
-                }),
+                title: appLink.sharedTitle ||
+                    t('Harbor 帖子 #{{id}}', {
+                        id: appLink.params.topicId,
+                    }),
             };
         case 'team':
             return {
                 description: t('查看活動詳情與共享課表'),
                 icon: 'calendar-account-outline',
                 label: t('ARK ALL · 組隊約時間'),
-                title: t('組隊活動'),
+                title: appLink.sharedTitle || t('組隊活動'),
             };
         default:
             return null;

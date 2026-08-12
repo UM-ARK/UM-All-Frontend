@@ -106,17 +106,18 @@ const EventDetail = (props) => {
     const toast = useRef(null);
     const eventId = props.route.params?.eventId ??
         props.route.params?.data?._id;
+    const eventTitle = state.title || props.route.params?.data?.title || '';
 
     const shareEvent = useCallback(() => {
         const url = ARK_EVENT_SHARE_URL(eventId);
         openShare({
-            title: state.title || 'ARK ALL',
+            title: eventTitle,
             url,
         });
-    }, [eventId, openShare, state.title]);
+    }, [eventId, eventTitle, openShare]);
 
     useLayoutEffect(() => {
-        if (!eventId) {return;}
+        if (!eventId || !eventTitle) {return;}
         props.navigation.setOptions(
             getDeepLinkShareHeaderOptions({
                 accessibilityLabel: '分享',
@@ -124,7 +125,7 @@ const EventDetail = (props) => {
                 themeColor,
             }),
         );
-    }, [eventId, props.navigation, shareEvent, themeColor]);
+    }, [eventId, eventTitle, props.navigation, shareEvent, themeColor]);
 
     // 按社團id獲取社團資訊，頭像
     const getClubData = useCallback(async (club_num) => {

@@ -304,9 +304,16 @@ const Nav = () => {
                     <Stack.Screen
                         name="ClubDetail"
                         component={ClubDetail}
-                        options={{ statusBarStyle: 'light' }}
+                        options={{
+                            presentation: 'card',
+                            statusBarStyle: 'light',
+                        }}
                     />
-                    <Stack.Screen name="EventDetail" component={EventDetail} />
+                    <Stack.Screen
+                        name="EventDetail"
+                        component={EventDetail}
+                        options={{ presentation: 'card' }}
+                    />
                     <Stack.Screen name="NewsDetail" component={NewsDetail} />
                     <Stack.Screen
                         name="UMEventDetail"

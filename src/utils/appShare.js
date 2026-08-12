@@ -37,6 +37,13 @@ export function getRecentAppShareChannels(channels, limit = 8) {
         .map(entry => entry.channel);
 }
 
+export function getHarborAppShareMessage(payload) {
+    if (!payload?.url) {
+        return '';
+    }
+    return String(payload.message || payload.url).trim();
+}
+
 export function getSystemAppSharePayload(payload, platform) {
     if (!payload) {
         return null;

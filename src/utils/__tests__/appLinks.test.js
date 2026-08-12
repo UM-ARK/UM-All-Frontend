@@ -64,6 +64,15 @@ describe('ARK ALL 深度連結', () => {
             params: {eventId: 'event/id'},
         }));
         expect(parseArkAppLink(
+            '屬會節攤位來啦\n' +
+            'https://umall.one/app/event/event%2Fid',
+        )).toEqual(expect.objectContaining({
+            type: 'event',
+            routeName: 'EventDetail',
+            params: {eventId: 'event/id'},
+            sharedTitle: '屬會節攤位來啦',
+        }));
+        expect(parseArkAppLink(
             'https://umall.one/app/harbor/topic/123/5',
         )).toEqual(expect.objectContaining({
             type: 'harborTopic',

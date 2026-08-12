@@ -118,6 +118,20 @@ describe('Harbor Chat 資料', () => {
         ).toBe('https://umall.one/app/course/GEGA1003');
     });
 
+    it('保留 onebox 前的分享標題', () => {
+        expect(
+            getHarborChatPlainText(
+                '<p>屬會節攤位來啦</p>' +
+                '<aside class="onebox" ' +
+                'data-onebox-src="https://umall.one/app/event/event-1">' +
+                '<a href="https://umall.one/app/event/event-1">ARK ALL</a>' +
+                '</aside>',
+            ),
+        ).toBe(
+            '屬會節攤位來啦\n\nhttps://umall.one/app/event/event-1',
+        );
+    });
+
     it('正規化訊息分頁並合併去重', () => {
         const first = normalizeHarborChatMessages({
             messages: [

@@ -38,9 +38,24 @@ export const parseArkAppLink = value => {
         return null;
     }
 
+    const lines = value
+        .trim()
+        .split(/\r?\n/)
+        .map(line => line.trim())
+        .filter(Boolean);
+    const linkIndex = lines.findIndex(line =>
+        line.startsWith('https://umall.one/app/') ||
+        line.startsWith('one.umall://app/'),
+    );
+    if (linkIndex < 0) {
+        return null;
+    }
+    const link = lines[linkIndex];
+    const sharedTitle = linkIndex > 0 ? lines[linkIndex - 1] : '';
+
     let url;
     try {
-        url = new URL(value.trim());
+        url = new URL(link);
     } catch {
         return null;
     }
@@ -67,7 +82,8 @@ export const parseArkAppLink = value => {
             type: 'course',
             routeName: 'LocalCourse',
             params: {courseCode: segments[1]},
-            url: value.trim(),
+            sharedTitle,
+            url: link,
         };
     }
     if (segments[0] === 'club' && segments.length === 2) {
@@ -75,7 +91,8 @@ export const parseArkAppLink = value => {
             type: 'club',
             routeName: 'ClubDetail',
             params: {clubNum: segments[1]},
-            url: value.trim(),
+            sharedTitle,
+            url: link,
         };
     }
     if (segments[0] === 'event' && segments.length === 2) {
@@ -83,7 +100,8 @@ export const parseArkAppLink = value => {
             type: 'event',
             routeName: 'EventDetail',
             params: {eventId: segments[1]},
-            url: value.trim(),
+            sharedTitle,
+            url: link,
         };
     }
     if (segments[0] === 'harbor' && segments[1] === 'topic') {
@@ -108,7 +126,8 @@ export const parseArkAppLink = value => {
                 topicId,
                 ...(postNumber == null ? {} : {postNumber}),
             },
-            url: value.trim(),
+            sharedTitle,
+            url: link,
         };
     }
     if (segments[0] === 'team' && segments.length === 2) {
@@ -120,7 +139,8 @@ export const parseArkAppLink = value => {
                 eventId: segments[1],
                 ...(invite ? {invite} : {}),
             },
-            url: value.trim(),
+            sharedTitle,
+            url: link,
         };
     }
 

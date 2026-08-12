@@ -1,4 +1,5 @@
 import {
+    getHarborAppShareMessage,
     getRecentAppShareChannels,
     getSystemAppSharePayload,
     normalizeAppSharePayload,
@@ -19,6 +20,17 @@ describe('APP 內分享資料', () => {
     it('拒絕沒有內容的分享 payload', () => {
         expect(normalizeAppSharePayload(null)).toBeNull();
         expect(normalizeAppSharePayload({title: '只有標題'})).toBeNull();
+    });
+
+    it('Harbor 私信保留標題及 Universal Link', () => {
+        const payload = normalizeAppSharePayload({
+            title: '屬會節攤位來啦',
+            url: 'https://umall.one/app/event/event-1',
+        });
+
+        expect(getHarborAppShareMessage(payload)).toBe(
+            '屬會節攤位來啦\nhttps://umall.one/app/event/event-1',
+        );
     });
 
     it('Android message 保留連結，iOS 分開 message 和 URL', () => {

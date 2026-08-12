@@ -20,6 +20,7 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 import {useHarborSession} from '../contexts/HarborSessionContext';
 import {
+    getHarborAppShareMessage,
     getRecentAppShareChannels,
     getSystemAppSharePayload,
 } from '../utils/appShare';
@@ -170,13 +171,14 @@ const AppShareSheet = ({visible, payload, onClose}) => {
     }, [hideSheet, payload?.url, t]);
 
     const handleSend = useCallback(async () => {
-        if (!payload?.url || !selectedChannel || isSending) {
+        const message = getHarborAppShareMessage(payload);
+        if (!message || !selectedChannel || isSending) {
             return;
         }
         trigger();
         setIsSending(true);
         try {
-            await sendHarborChatMessage(selectedChannel.id, payload.url);
+            await sendHarborChatMessage(selectedChannel.id, message);
             Toast.show(t('已傳送給 {{name}}', {name: selectedChannel.title}));
             hideSheet();
         } catch {
@@ -184,7 +186,7 @@ const AppShareSheet = ({visible, payload, onClose}) => {
         } finally {
             setIsSending(false);
         }
-    }, [hideSheet, isSending, payload?.url, selectedChannel, t]);
+    }, [hideSheet, isSending, payload, selectedChannel, t]);
 
     return (
         <ActionSheet
