@@ -204,6 +204,8 @@ function CourseSim({ route, navigation }) {
     const [sheetIndex, setSheetIndex] = useState(initialCheckCode ? 1 : -1);
     // 已掛載後再帶 check 時 bump key remount，交給 animateOnMount 等 layout
     const [sheetKey, setSheetKey] = useState(0);
+    // 每次開啟重掛平替列表，避免沿用上一輪超出內容範圍的 offset
+    const [replacementListKey, setReplacementListKey] = useState(0);
     // 首次掛載已用初始 index 打開時，focus 清參不必再 remount
     const appliedInitialCheckRef = useRef(!!initialCheckCode);
     const [bottomSheetMode, setBottomSheetMode] = useState('search');
@@ -1014,9 +1016,10 @@ function CourseSim({ route, navigation }) {
         setReplacementTarget(course);
         setReplacementCourseCode(null);
         setReplacementSearchText('');
+        setReplacementListKey(key => key + 1);
         setHasOpenCourseSearch(true);
-        setSheetIndex(2);
-        bottomSheetRef.current?.snapToIndex(2);
+        setSheetIndex(3);
+        bottomSheetRef.current?.expand();
         verScroll.current?.scrollTo({ y: 0 });
 
         logToFirebase('checkCourseReplacement', {
@@ -2077,8 +2080,8 @@ E11-0000
                 <FlashList
                     key={
                         selectedCourse
-                            ? `replacement-${selectedCourse['Course Code']}`
-                            : 'replacement-courses'
+                            ? `replacement-${replacementListKey}-${selectedCourse['Course Code']}`
+                            : `replacement-courses-${replacementListKey}`
                     }
                     data={listData}
                     keyExtractor={item =>
