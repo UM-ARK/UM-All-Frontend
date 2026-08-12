@@ -21,6 +21,7 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 import Text from '../../../components/AppText';
 import TextInput from '../../../components/AppTextInput';
+import HyperlinkText from '../../../components/HyperlinkText';
 import {uiStyle, useTheme} from '../../../components/ThemeContext';
 import {useHarborSession} from '../../../contexts/HarborSessionContext';
 import {
@@ -90,7 +91,7 @@ const MessageAvatar = ({user}) => {
     );
 };
 
-const HarborChatMessage = ({isGroup, isOwn, language, message}) => {
+const HarborChatMessage = ({isGroup, isOwn, language, message, navigation}) => {
     const {theme} = useTheme();
     const {t} = useTranslation('harbor');
     const content = message.deleted
@@ -128,20 +129,31 @@ const HarborChatMessage = ({isGroup, isOwn, language, message}) => {
                                 : theme.tonal.primary15,
                         },
                     ]}>
-                    <Text
-                        selectable
-                        style={[
-                            styles.messageText,
+                    <HyperlinkText
+                        linkStyle={[
+                            styles.messageLink,
                             {
                                 color: isOwn
                                     ? theme.trueWhite
-                                    : message.deleted
-                                        ? theme.black.third
-                                        : theme.black.main,
+                                    : theme.themeColor,
                             },
-                        ]}>
-                        {content}
-                    </Text>
+                        ]}
+                        navigation={navigation}>
+                        <Text
+                            selectable
+                            style={[
+                                styles.messageText,
+                                {
+                                    color: isOwn
+                                        ? theme.trueWhite
+                                        : message.deleted
+                                            ? theme.black.third
+                                            : theme.black.main,
+                                },
+                            ]}>
+                            {content}
+                        </Text>
+                    </HyperlinkText>
                 </View>
                 <Text
                     style={[
@@ -406,6 +418,7 @@ const HarborChatChannelPage = ({navigation, route}) => {
                         isOwn={item.user.username === user?.username}
                         language={i18n.language}
                         message={item}
+                        navigation={navigation}
                     />
                 )}
             />
@@ -538,6 +551,9 @@ const styles = StyleSheet.create({
     },
     messageColumnOwn: {
         alignItems: 'flex-end',
+    },
+    messageLink: {
+        textDecorationLine: 'underline',
     },
     messageRow: {
         flexDirection: 'row',
