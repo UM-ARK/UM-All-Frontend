@@ -13,9 +13,9 @@ import { trigger } from '../../../../../utils/trigger';
 import TouchableScale from '../../../../../components/TouchableScale';
 
 const calItemWidth = Math.max(scale(40), verticalScale(40));
+const calRangeItemWidth = Math.max(scale(70), verticalScale(40));
 const calItemHeight = verticalScale(40);
 const calItemMargin = scale(1);
-const calItemStride = calItemWidth + calItemMargin * 2;
 
 const calendarTextProps = {
     adjustsFontSizeToFit: true,
@@ -26,6 +26,7 @@ const calendarTextProps = {
 
 const getItem = (data, index) => data[index];
 const getItemCount = data => data.length;
+const getCalItemWidth = item => moment(item.endDate).diff(item.startDate, 'day') > 1 ? calRangeItemWidth : calItemWidth;
 
 const CalendarBar = ({ refreshTrigger = 0 }) => {
     const { theme } = useTheme();
@@ -33,7 +34,29 @@ const CalendarBar = ({ refreshTrigger = 0 }) => {
 
     const calScrollRef = useRef(null);
     const [selectDay, setSelectDay] = useState(0);
-    const cal = useMemo(() => UMCalendar, []);
+    const cal = useMemo(() => {
+        const seenEvents = new Set();
+
+        return UMCalendar.filter(item => {
+            const eventKey = `${item.endDate}\u0000${item.summary}\u0000${item.summary_cn || ''}`;
+
+            if (seenEvents.has(eventKey)) {return false;}
+
+            seenEvents.add(eventKey);
+            return true;
+        });
+    }, []);
+    const calItemLayouts = useMemo(() => {
+        let offset = 0;
+
+        return cal.map((item, index) => {
+            const length = getCalItemWidth(item) + calItemMargin * 2;
+            const layout = { length, offset, index };
+
+            offset += length;
+            return layout;
+        });
+    }, [cal]);
 
     // 計算應顯示的日期，並滾動到當前/下一個日期
     const getCal = useCallback(() => {
@@ -44,8 +67,8 @@ const CalendarBar = ({ refreshTrigger = 0 }) => {
         if (nowTimeStamp.isSameOrAfter(cal[CAL_LENGTH - 1].startDate)) {
             newSelectDay = CAL_LENGTH - 1;
         } else if (nowTimeStamp.isSameOrAfter(cal[0].startDate)) {
-            for (let i = 0; i <= CAL_LENGTH; i++) {
-                if (moment(cal[i].startDate).isSameOrAfter(nowTimeStamp)) {
+            for (let i = 0; i < CAL_LENGTH; i++) {
+                if (nowTimeStamp.isBefore(cal[i].endDate)) {
                     newSelectDay = i;
                     break;
                 }
@@ -56,18 +79,22 @@ const CalendarBar = ({ refreshTrigger = 0 }) => {
 
         setTimeout(() => {
             calScrollRef?.current?.scrollToOffset({
-                offset: newSelectDay * calItemStride,
+                offset: calItemLayouts[newSelectDay]?.offset || 0,
                 animated: true,
             });
         }, 100);
-    }, [cal]);
+    }, [cal, calItemLayouts]);
 
     useEffect(() => {
         getCal();
     }, [getCal, refreshTrigger]);
 
     const renderCal = (item, index) => {
-        const momentItm = moment(item.startDate).format('YYYYMMDD');
+        const startDate = moment(item.startDate);
+        const lastDate = moment(item.endDate).subtract(1, 'days');
+        const isDateRange = lastDate.isAfter(startDate, 'day');
+        const displayDate = isDateRange ? `${startDate.format('MM.DD')}–${lastDate.format('MM.DD')}` : startDate.format('MM.DD');
+        const displayWeek = isDateRange ? `${getWeek(item.startDate)}–${getWeek(lastDate)}` : getWeek(item.startDate);
         const isThisDateSelected = selectDay === index;
         const isEssencial = item.summary.toUpperCase().indexOf('EXAM') !== -1 ||
             (item.summary.toUpperCase().indexOf('SEMESTER') !== -1 && item.summary.toUpperCase().indexOf('BREAK') === -1);
@@ -83,7 +110,7 @@ const CalendarBar = ({ refreshTrigger = 0 }) => {
         return (
             <TouchableScale
                 style={{
-                    width: calItemWidth,
+                    width: getCalItemWidth(item),
                     height: calItemHeight,
                     margin: calItemMargin,
                     justifyContent: 'center',
@@ -107,15 +134,15 @@ const CalendarBar = ({ refreshTrigger = 0 }) => {
                 >
                     <View style={{ alignItems: 'center', justifyContent: 'center' }}>
                         <Text {...calendarTextProps} style={{ ...textStyle, fontSize: moderateScale(8) }}>
-                            {momentItm.substring(0, 4)}
+                            {startDate.format('YYYY')}
                         </Text>
 
                         <Text {...calendarTextProps} style={{ ...textStyle, fontSize: moderateScale(12) }}>
-                            {`${momentItm.substring(4, 6)}.${momentItm.substring(6, 8)}`}
+                            {displayDate}
                         </Text>
 
                         <Text {...calendarTextProps} style={{ ...textStyle, fontSize: moderateScale(7) }}>
-                            {getWeek(item.startDate)}
+                            {displayWeek}
                         </Text>
                     </View>
                 </View>
@@ -147,11 +174,7 @@ const CalendarBar = ({ refreshTrigger = 0 }) => {
                 windowSize={4}
                 initialScrollIndex={selectDay < cal.length ? selectDay : 0}
                 getItemLayout={(data, index) => {
-                    return {
-                        length: calItemStride,
-                        offset: calItemStride * index,
-                        index,
-                    };
+                    return calItemLayouts[index];
                 }}
                 renderItem={({ item, index }) => renderCal(item, index)}
                 horizontal
