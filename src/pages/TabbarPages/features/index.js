@@ -155,9 +155,12 @@ function FeatureListPage({ navigation }) {
         [harborStatus, harborUser, login, navigation],
     );
 
-    // 預留兩行標題高度，避免同列單行／雙行標籤把圖標頂歪
+    // 預留兩行標題高度（英文如 Canteen Queue 會換行），避免同列單／雙行把圖標頂歪
     const featureLabelLineHeight = fontSize * 1.25;
     const featureLabelHeight = featureLabelLineHeight * 2;
+    // FlatGrid 末列會再加 marginBottom: spacing，與 row paddingBottom 重疊，需抵銷
+    const gridSpacing = scale(10);
+    const gridBottomTrim = -gridSpacing;
 
     const renderFeatureItem = useCallback(
         item => (
@@ -240,7 +243,8 @@ function FeatureListPage({ navigation }) {
                 <FlatGrid
                     maxItemsPerRow={5}
                     itemDimension={scale(50)}
-                    spacing={scale(10)}
+                    spacing={gridSpacing}
+                    style={{ marginBottom: gridBottomTrim }}
                     itemContainerStyle={{
                         alignItems: 'center',
                         justifyContent: 'flex-start',
@@ -253,7 +257,7 @@ function FeatureListPage({ navigation }) {
             </View>
             );
         },
-        [white, bg_color, black.main, renderFeatureItem],
+        [white, bg_color, black.main, renderFeatureItem, gridSpacing, gridBottomTrim],
     );
 
     // BottomSheet內容渲染
@@ -380,8 +384,8 @@ function FeatureListPage({ navigation }) {
                         <FlatGrid
                             maxItemsPerRow={4}
                             itemDimension={scale(50)}
-                            spacing={scale(10)}
-                            style={{ marginBottom: verticalScale(-6) }}
+                            spacing={gridSpacing}
+                            style={{ marginBottom: gridBottomTrim }}
                             itemContainerStyle={{
                                 alignItems: 'center',
                                 justifyContent: 'flex-start',
