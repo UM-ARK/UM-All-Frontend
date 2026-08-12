@@ -10,6 +10,7 @@ jest.mock('../../storageKits', () => ({
 
 import {
     acknowledgeHarborForumBadgeState,
+    calculateHarborUnreadTotal,
     createHarborForumBadgeState,
     formatHarborTabBadge,
     getHarborForumBadgeCount,
@@ -30,6 +31,12 @@ describe('Harbor 論壇 Tab 角標', () => {
         expect(formatHarborTabBadge(0)).toBeUndefined();
         expect(formatHarborTabBadge(8)).toBe(8);
         expect(formatHarborTabBadge(100)).toBe('99+');
+    });
+
+    it('將消息中心與 Chat 未讀合併為我的總角標', () => {
+        expect(calculateHarborUnreadTotal(3, 2)).toBe(5);
+        expect(calculateHarborUnreadTotal(undefined, 2)).toBe(2);
+        expect(calculateHarborUnreadTotal(3, -1)).toBe(3);
     });
 
     it('首次升級時以目前最新內容建立基準而不顯示歷史角標', () => {

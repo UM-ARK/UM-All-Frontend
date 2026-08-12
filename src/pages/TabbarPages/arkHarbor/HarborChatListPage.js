@@ -18,6 +18,7 @@ import {useTranslation} from 'react-i18next';
 
 import Text from '../../../components/AppText';
 import {uiStyle, useTheme} from '../../../components/ThemeContext';
+import {useHarborSession} from '../../../contexts/HarborSessionContext';
 import {fetchHarborChatChannels} from '../../../utils/harbor/harborApi';
 import {formatHarborChatListTime} from '../../../utils/harbor/harborChat';
 import {trigger} from '../../../utils/trigger';
@@ -133,6 +134,8 @@ const HarborChatRow = ({channel, onPress}) => {
 const HarborChatListPage = ({navigation}) => {
     const {theme} = useTheme();
     const {t} = useTranslation('harbor');
+    const {patchChatUnreadCount, user} = useHarborSession();
+    const username = user?.username || '';
     const headerHeight = useHeaderHeight();
     const [channels, setChannels] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -180,6 +183,7 @@ const HarborChatListPage = ({navigation}) => {
         try {
             const result = await fetchHarborChatChannels();
             setChannels(result.items);
+            patchChatUnreadCount(result.unreadCount, username);
             setError(false);
         } catch {
             setError(true);
@@ -187,7 +191,7 @@ const HarborChatListPage = ({navigation}) => {
             setIsLoading(false);
             setIsRefreshing(false);
         }
-    }, []);
+    }, [patchChatUnreadCount, username]);
 
     useFocusEffect(
         useCallback(() => {

@@ -19,6 +19,7 @@ const HarborProfileCard = ({
     user,
     onProfilePress,
     onChatPress,
+    chatUnreadCount = 0,
     onSettingsPress,
 }) => {
     const {theme} = useTheme();
@@ -143,6 +144,23 @@ const HarborProfileCard = ({
                                 size={verticalScale(18)}
                                 color={theme.black.third}
                             />
+                            {chatUnreadCount > 0 ? (
+                                <View
+                                    style={[
+                                        styles.chatUnreadBadge,
+                                        {backgroundColor: theme.unread},
+                                    ]}>
+                                    <Text
+                                        style={[
+                                            styles.chatUnreadText,
+                                            {color: theme.trueWhite},
+                                        ]}>
+                                        {chatUnreadCount > 99
+                                            ? '99+'
+                                            : chatUnreadCount}
+                                    </Text>
+                                </View>
+                            ) : null}
                         </TouchableScale>
                     ) : null}
                     {onSettingsPress ? (
@@ -196,6 +214,22 @@ const styles = StyleSheet.create({
         height: scale(28),
         alignItems: 'center',
         justifyContent: 'center',
+    },
+    chatUnreadBadge: {
+        position: 'absolute',
+        top: scale(-2),
+        right: scale(-3),
+        minWidth: scale(13),
+        height: scale(13),
+        borderRadius: scale(7),
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingHorizontal: scale(3),
+    },
+    chatUnreadText: {
+        ...uiStyle.defaultText,
+        fontSize: scale(6),
+        fontWeight: '700',
     },
     avatarWrap: {
         marginRight: scale(13),

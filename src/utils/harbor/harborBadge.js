@@ -47,6 +47,13 @@ export function formatHarborTabBadge(count) {
     return normalized > 99 ? '99+' : normalized;
 }
 
+export function calculateHarborUnreadTotal(inboxUnreadCount, chatUnreadCount) {
+    return (
+        Math.max(0, Number(inboxUnreadCount) || 0) +
+        Math.max(0, Number(chatUnreadCount) || 0)
+    );
+}
+
 export function createHarborForumBadgeState(username = '') {
     return {
         username,

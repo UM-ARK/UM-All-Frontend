@@ -23,7 +23,6 @@ import { useHarborSession } from '../../../contexts/HarborSessionContext';
 import { logToFirebase } from '../../../utils/firebaseAnalytics';
 import {
     fetchHarborSiteCapabilities,
-    fetchHarborChatChannels,
     getHarborTopicViews,
 } from '../../../utils/harbor/harborApi';
 import { trigger } from '../../../utils/trigger';
@@ -347,7 +346,12 @@ const HarborFeedPane = ({
 const ForumPage = ({ navigation }) => {
     const { theme } = useTheme();
     const { t } = useTranslation('harbor');
-    const { status, login } = useHarborSession();
+    const {
+        status,
+        login,
+        chatUnreadCount,
+        refreshChatUnreadCount,
+    } = useHarborSession();
     const isFocused = useIsFocused();
     const pagerRef = useRef(null);
     const pageScrollOffset = useRef(new Animated.Value(0)).current;
@@ -365,7 +369,6 @@ const ForumPage = ({ navigation }) => {
         top: false,
     });
     const [consentVisible, setConsentVisible] = useState(false);
-    const [chatUnreadCount, setChatUnreadCount] = useState(0);
 
     useEffect(() => {
         logToFirebase('openPage', { page: 'HarborNativeHome' });
@@ -396,32 +399,22 @@ const ForumPage = ({ navigation }) => {
             });
     }, []);
 
-    const loadChatUnreadCount = useCallback(() => {
-        if (status !== 'signedIn') {
-            setChatUnreadCount(0);
-            return;
-        }
-        fetchHarborChatChannels()
-            .then(result => setChatUnreadCount(result.unreadCount))
-            .catch(() => {});
-    }, [status]);
-
     useEffect(() => {
         if (isFocused) {
             loadCapabilities();
-            loadChatUnreadCount();
+            refreshChatUnreadCount().catch(() => {});
         }
-    }, [isFocused, loadCapabilities, loadChatUnreadCount, status]);
+    }, [isFocused, loadCapabilities, refreshChatUnreadCount, status]);
 
     useEffect(() => {
         const subscription = AppState.addEventListener('change', nextState => {
             if (nextState === 'active' && isFocused) {
                 loadCapabilities();
-                loadChatUnreadCount();
+                refreshChatUnreadCount().catch(() => {});
             }
         });
         return () => subscription.remove();
-    }, [isFocused, loadCapabilities, loadChatUnreadCount]);
+    }, [isFocused, loadCapabilities, refreshChatUnreadCount]);
 
     useEffect(() => {
         return () => capabilitiesControllerRef.current?.abort();
