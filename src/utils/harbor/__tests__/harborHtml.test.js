@@ -148,9 +148,10 @@ describe('replaceHarborEmojiShortcodes', () => {
     it('連續 shortcode 與 Discourse 別名皆可轉換', () => {
         expect(
             replaceHarborEmojiShortcodes(
-                '錯峰吃飯！:clap::tada: 加價:plus:5 :smirking_face:',
+                '錯峰吃飯！:clap::tada: 加價:plus:5 :smirking_face: ' +
+                ':waving_hand:t2: :åland_islands:',
             ),
-        ).toBe('錯峰吃飯！👏🎉 加價➕5 😏');
+        ).toBe('錯峰吃飯！👏🎉 加價➕5 😏 👋🏻 🇦🇽');
     });
 
     it('未知 shortcode 原樣保留', () => {
