@@ -4,6 +4,7 @@ import { View, Platform, useWindowDimensions } from 'react-native';
 // 反寫 Fabric ShadowTree 並 abort）。改用 @react-native-menu/menu（原生 UIButton）。
 // Teacher 分類橫滑靠固定 cardWidth；時段每行最多兩天，避免多天撐破寬度。
 import { MenuView } from '@react-native-menu/menu';
+import Ionicons from '@react-native-vector-icons/ionicons';
 import Animated, {
     useAnimatedStyle,
     useSharedValue,
@@ -45,6 +46,7 @@ const LocalCourseOfferingMenuCard = ({
     slots,
     variant,
     highlightStatus,
+    isSelected = false,
 }) => {
     const { width: windowWidth } = useWindowDimensions();
     // Section 單卡置中：用螢幕寬扣除左右邊距
@@ -286,25 +288,32 @@ const LocalCourseOfferingMenuCard = ({
                         <Text
                             style={{
                                 ...uiStyle.defaultText,
-                                flex: 1,
+                                flexShrink: 0,
                                 fontSize: scale(13),
                                 fontWeight: '700',
                                 color: black.second,
-                            }}>
+                            }}
+                            numberOfLines={1}>
                             Section {courseRow.Section}
                         </Text>
                         <Text
                             style={{
                                 ...uiStyle.defaultText,
+                                flex: 1,
+                                flexShrink: 1,
+                                marginLeft: scale(8),
                                 fontSize: scale(11),
                                 color: black.third,
-                            }}>
+                                textAlign: 'right',
+                            }}
+                            numberOfLines={1}>
                             {courseRow['Medium of Instruction']}
                         </Text>
                         {isHighlighted ? (
                             <View
                                 style={{
                                     marginLeft: scale(8),
+                                    flexShrink: 0,
                                     borderRadius: scale(999),
                                     backgroundColor: `${highlightColor}15`,
                                     paddingHorizontal: scale(7),
@@ -335,25 +344,32 @@ const LocalCourseOfferingMenuCard = ({
                         <Text
                             style={{
                                 ...uiStyle.defaultText,
-                                flex: 1,
+                                flexShrink: 0,
                                 fontSize: scale(13),
                                 fontWeight: '700',
                                 color: black.second,
-                            }}>
+                            }}
+                            numberOfLines={1}>
                             {courseRow.Section}
                         </Text>
                         <Text
                             style={{
                                 ...uiStyle.defaultText,
+                                flex: 1,
+                                flexShrink: 1,
+                                marginLeft: scale(8),
                                 fontSize: scale(11),
                                 color: black.third,
-                            }}>
+                                textAlign: 'right',
+                            }}
+                            numberOfLines={1}>
                             {courseRow['Medium of Instruction']}
                         </Text>
                         {isHighlighted ? (
                             <View
                                 style={{
                                     marginLeft: scale(8),
+                                    flexShrink: 0,
                                     borderRadius: scale(999),
                                     backgroundColor: `${highlightColor}15`,
                                     paddingHorizontal: scale(7),
@@ -521,6 +537,42 @@ const LocalCourseOfferingMenuCard = ({
                             ))}
                         </View>
                     )}
+                {isSelected ? (
+                    <View
+                        style={{
+                            width: '100%',
+                            flexDirection: 'row',
+                            justifyContent: 'flex-end',
+                            marginTop: scale(2),
+                        }}>
+                        <View
+                            style={{
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                                borderRadius: scale(999),
+                                backgroundColor: tonal.primary15,
+                                paddingHorizontal: scale(7),
+                                paddingVertical: scale(2),
+                            }}>
+                            <Ionicons
+                                name="checkmark-circle"
+                                color={themeColor}
+                                size={scale(12)}
+                            />
+                            <Text
+                                style={{
+                                    ...uiStyle.defaultText,
+                                    marginLeft: scale(3),
+                                    fontSize: scale(10),
+                                    fontWeight: '700',
+                                    color: themeColor,
+                                }}
+                                numberOfLines={1}>
+                                {t('當前選中', { ns: 'catalog' })}
+                            </Text>
+                        </View>
+                    </View>
+                ) : null}
             </Animated.View>
         </MenuView>
     );

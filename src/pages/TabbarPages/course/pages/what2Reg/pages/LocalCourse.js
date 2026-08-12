@@ -415,6 +415,7 @@ const LocalCourse = (props) => {
                                     slots={slots}
                                     variant="section"
                                     highlightStatus={sectionStatuses[itm]}
+                                    isSelected={selectedSections.includes(itm)}
                                 />
                             </View>
                         </View>
@@ -460,6 +461,7 @@ const LocalCourse = (props) => {
                                             slots={slots}
                                             variant="teacher"
                                             highlightStatus={sectionStatuses[itm]}
+                                            isSelected={selectedSections.includes(itm)}
                                         />
                                     );
                                 }}
