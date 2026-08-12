@@ -135,8 +135,11 @@ const HarborStickyToolbar = ({
     sessionLabel,
     onSessionPress,
     onMenuPress,
+    onChatPress,
     onComposePress,
     onSearchPress,
+    chatUnreadCount,
+    chatVisible,
     onToolbarLayout,
 }) => {
     const { theme } = useTheme();
@@ -213,6 +216,46 @@ const HarborStickyToolbar = ({
                                 </Text>
                             </Pressable>
                         )}
+                        {isSignedIn && chatVisible ? (
+                            <Pressable
+                                accessibilityRole="button"
+                                accessibilityLabel={t('Chat')}
+                                hitSlop={scale(8)}
+                                onPress={() => {
+                                    trigger();
+                                    onChatPress();
+                                }}
+                                style={({ pressed }) => [
+                                    styles.toolbarIconButton,
+                                    pressed && {
+                                        backgroundColor:
+                                            theme.tonal.primary15,
+                                    },
+                                ]}>
+                                <MaterialCommunityIcons
+                                    name="chat-outline"
+                                    size={scale(19)}
+                                    color={theme.themeColor}
+                                />
+                                {chatUnreadCount > 0 ? (
+                                    <View
+                                        style={[
+                                            styles.chatUnreadBadge,
+                                            {backgroundColor: theme.unread},
+                                        ]}>
+                                        <Text
+                                            style={[
+                                                styles.chatUnreadText,
+                                                {color: theme.trueWhite},
+                                            ]}>
+                                            {chatUnreadCount > 99
+                                                ? '99+'
+                                                : chatUnreadCount}
+                                        </Text>
+                                    </View>
+                                ) : null}
+                            </Pressable>
+                        ) : null}
                         <Pressable
                             accessibilityRole="button"
                             accessibilityLabel={t('建立話題')}
@@ -303,7 +346,12 @@ const HarborFeedPane = ({
 const ForumPage = ({ navigation }) => {
     const { theme } = useTheme();
     const { t } = useTranslation('harbor');
-    const { status, login } = useHarborSession();
+    const {
+        status,
+        login,
+        chatUnreadCount,
+        refreshChatUnreadCount,
+    } = useHarborSession();
     const isFocused = useIsFocused();
     const pagerRef = useRef(null);
     const pageScrollOffset = useRef(new Animated.Value(0)).current;
@@ -354,17 +402,19 @@ const ForumPage = ({ navigation }) => {
     useEffect(() => {
         if (isFocused) {
             loadCapabilities();
+            refreshChatUnreadCount().catch(() => {});
         }
-    }, [isFocused, loadCapabilities, status]);
+    }, [isFocused, loadCapabilities, refreshChatUnreadCount, status]);
 
     useEffect(() => {
         const subscription = AppState.addEventListener('change', nextState => {
             if (nextState === 'active' && isFocused) {
                 loadCapabilities();
+                refreshChatUnreadCount().catch(() => {});
             }
         });
         return () => subscription.remove();
-    }, [isFocused, loadCapabilities]);
+    }, [isFocused, loadCapabilities, refreshChatUnreadCount]);
 
     useEffect(() => {
         return () => capabilitiesControllerRef.current?.abort();
@@ -618,12 +668,15 @@ const ForumPage = ({ navigation }) => {
                         sessionLabel={sessionLabel}
                         onSessionPress={handleSessionPress}
                         onMenuPress={() => navigation.openDrawer()}
+                        onChatPress={() => navigation.navigate('HarborChatList')}
                         onComposePress={() =>
                             navigation.navigate('HarborComposer', {
                                 mode: 'newTopic',
                             })
                         }
                         onSearchPress={() => navigation.navigate('HarborSearch')}
+                        chatUnreadCount={chatUnreadCount}
+                        chatVisible={capabilities?.chat !== false}
                         onToolbarLayout={handleToolbarLayout}
                     />
                 </View>
@@ -676,6 +729,22 @@ const styles = StyleSheet.create({
         borderRadius: scale(10),
         alignItems: 'center',
         justifyContent: 'center',
+    },
+    chatUnreadBadge: {
+        position: 'absolute',
+        top: scale(1),
+        right: scale(0),
+        minWidth: scale(13),
+        height: scale(13),
+        borderRadius: scale(7),
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingHorizontal: scale(3),
+    },
+    chatUnreadText: {
+        ...uiStyle.defaultText,
+        fontSize: scale(6),
+        fontWeight: '700',
     },
     sessionButton: {
         maxWidth: '100%',

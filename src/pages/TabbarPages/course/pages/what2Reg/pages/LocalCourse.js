@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useLayoutEffect, useMemo, useCallback } from 'react';
-import { View, ScrollView, FlatList, Alert, Share } from 'react-native';
+import { View, ScrollView, FlatList, Alert } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { t } from 'i18next';
@@ -7,6 +7,7 @@ import { t } from 'i18next';
 import Text from '../../../../../../components/AppText';
 import { useTheme, uiStyle } from '../../../../../../components/ThemeContext';
 import { getDeepLinkShareHeaderOptions } from '../../../../../../components/DeepLinkShareButton';
+import { useAppShare } from '../../../../../../contexts/AppShareContext';
 import SegmentControl from '../../../../../../components/SegmentControl';
 import { ARK_COURSE_SHARE_URL, ARK_WIKI_SEARCH } from '../../../../../../utils/pathMap';
 import { openLink } from '../../../../../../utils/browser';
@@ -230,6 +231,7 @@ const daySort = (objArr) => {
 
 const LocalCourse = (props) => {
     const { theme } = useTheme();
+    const { openShare } = useAppShare();
     const { themeColor, black, bg_color, white, tonal } = theme;
     const insets = useSafeAreaInsets();
 
@@ -299,13 +301,11 @@ const LocalCourse = (props) => {
 
     const shareCourse = useCallback(() => {
         const url = ARK_COURSE_SHARE_URL(courseCode);
-        Share.share({
-            message: `${courseCode}\n${url}`,
+        openShare({
+            title: courseCode,
             url,
-        }).catch(() => {
-            Alert.alert('分享失敗', '請稍後再試。');
         });
-    }, [courseCode]);
+    }, [courseCode, openShare]);
 
     useLayoutEffect(() => {
         if (!courseCode) {return;}
@@ -415,6 +415,7 @@ const LocalCourse = (props) => {
                                     slots={slots}
                                     variant="section"
                                     highlightStatus={sectionStatuses[itm]}
+                                    isSelected={selectedSections.includes(itm)}
                                 />
                             </View>
                         </View>
@@ -460,6 +461,7 @@ const LocalCourse = (props) => {
                                             slots={slots}
                                             variant="teacher"
                                             highlightStatus={sectionStatuses[itm]}
+                                            isSelected={selectedSections.includes(itm)}
                                         />
                                     );
                                 }}

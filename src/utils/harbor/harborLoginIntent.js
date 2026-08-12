@@ -9,6 +9,7 @@ const HARBOR_LOGIN_INTENT_TTL = 5 * 60 * 1000;
 // login intent params 只可含 eventId，不可含 invite token
 const HARBOR_LOGIN_INTENT_ROUTES = new Set([
     'HarborAccountSettings',
+    'HarborChatList',
     'HarborComposer',
     'HarborDrafts',
     'HarborTopicDetail',

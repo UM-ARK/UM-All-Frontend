@@ -1,5 +1,6 @@
 import {
     calculateHarborInboxUnreadCount,
+    checkHarborUsername,
     clearHarborComposerMetadataCache,
     clearHarborDiscoveryCache,
     createHarborPostBookmark,
@@ -45,6 +46,7 @@ import {
     unlikeHarborPost,
     updateHarborAvatar,
     updateHarborProfile,
+    updateHarborUsername,
     updateHarborBookmark,
     validateActiveHarborSession,
 } from '../harborApi';
@@ -214,6 +216,7 @@ describe('Harbor API 資料正規化', () => {
                         user_fields: {'1': '在讀'},
                         groups: [{id: 41, name: 'UMer'}],
                         can_edit: true,
+                        can_edit_username: true,
                         can_edit_name: true,
                         can_change_bio: true,
                         can_change_location: true,
@@ -241,6 +244,7 @@ describe('Harbor API 資料正規化', () => {
             website: 'https://umall.one',
             workStatus: '在讀',
             canEdit: true,
+            canEditUsername: true,
             canChangeBio: true,
             canChangeLocation: true,
             canChangeWebsite: true,
@@ -267,6 +271,8 @@ describe('Harbor API 資料正規化', () => {
                 selectable_avatars:
                     '//harbor.example.r2.cloudflarestorage.com/original/avatar-1.png|/uploads/avatar-2.png',
                 selectable_avatars_mode: 'everyone',
+                min_username_length: 3,
+                max_username_length: 20,
             },
         });
         putSpy.mockResolvedValueOnce({data: {success: 'OK'}});
@@ -299,6 +305,8 @@ describe('Harbor API 資料正規化', () => {
             ],
             selectableAvatarsMode: 'everyone',
             canUploadCustomAvatar: true,
+            minUsernameLength: 3,
+            maxUsernameLength: 20,
         });
         await expect(
             updateHarborProfile('ark user', {
@@ -318,6 +326,33 @@ describe('Harbor API 資料正規化', () => {
                 user_fields: {'1': '在讀'},
             },
             {signal: undefined},
+        );
+    });
+
+    it('檢查可用 username 並使用獨立端點修改', async () => {
+        const signal = new AbortController().signal;
+        getSpy.mockResolvedValueOnce({
+            data: {available: true},
+        });
+        putSpy.mockResolvedValueOnce({
+            data: {id: 7, username: 'new-user'},
+        });
+
+        await expect(
+            checkHarborUsername(' new-user ', {signal, userId: 7}),
+        ).resolves.toEqual({available: true});
+        expect(getSpy).toHaveBeenCalledWith('/u/check_username.json', {
+            params: {username: 'new-user', for_user_id: 7},
+            signal,
+        });
+
+        await expect(
+            updateHarborUsername(' old user ', ' new-user ', {signal}),
+        ).resolves.toEqual({id: 7, username: 'new-user'});
+        expect(putSpy).toHaveBeenCalledWith(
+            '/u/old%20user/preferences/username.json',
+            {new_username: 'new-user'},
+            {signal},
         );
     });
 

@@ -17,12 +17,19 @@ import {
 } from 'react-native';
 
 import Text from '../../../components/AppText';
+import ClubSearchBar from './components/ClubSearchBar';
 import NewsCard from './components/NewsCard';
 import NewsListSkeleton from './components/NewsListSkeleton';
+import { filterUMOpenDataItemsBySearchQuery } from './utils/umOpenDataSearch';
 
 import { uiStyle, ThemeContext } from '../../../components/ThemeContext';
 import { UM_API_NEWS, UM_API_TOKEN } from '../../../utils/pathMap';
 import { trigger } from '../../../utils/trigger';
+import {
+    readUMOpenDataCache,
+    UM_NEWS_CACHE_KEY,
+    writeUMOpenDataCache,
+} from '../../../utils/umOpenDataCache';
 
 import { Image } from 'expo-image';
 import { NavigationContext } from '@react-navigation/native';
@@ -42,6 +49,19 @@ const getItem = (data, index) => {
 // 返回數據數組的長度
 const getItemCount = data => {
     return data.length;
+};
+
+const splitNewsData = result => {
+    const chooseTopNewsIndex = result.findIndex(
+        item => Array.isArray(item.common?.imageUrls) && item.common.imageUrls.length > 0,
+    );
+    const topNewsIndex = chooseTopNewsIndex === -1 ? 0 : chooseTopNewsIndex;
+    const topNewsData = result[topNewsIndex] || {};
+    const filteredNewsList = result.filter(
+        (item, index) => index !== topNewsIndex && item.details?.length > 0,
+    );
+
+    return { topNewsData, filteredNewsList };
 };
 
 /**
@@ -89,14 +109,32 @@ const NewsPage = forwardRef(function NewsPage(
             fontWeight: 'bold',
             fontSize: verticalScale(20),
         },
+        searchContainer: {
+            backgroundColor: bg_color,
+            borderTopWidth: 0,
+            borderBottomWidth: 0,
+        },
     });
 
     const navigation = useContext(NavigationContext);
     const virtualizedList = useRef(null);
+    const mountedRef = useRef(true);
+    const hasVisibleDataRef = useRef(false);
+    const requestIdRef = useRef(0);
 
     const [isLoading, setIsLoading] = useState(true);
-    const [newsList, setNewsList] = useState([]);
-    const [topNews, setTopNews] = useState({});
+    const [isRefreshing, setIsRefreshing] = useState(false);
+    const [newsItems, setNewsItems] = useState([]);
+    const [searchQuery, setSearchQuery] = useState('');
+
+    const filteredNewsItems = useMemo(
+        () => filterUMOpenDataItemsBySearchQuery(newsItems, searchQuery),
+        [newsItems, searchQuery],
+    );
+    const { topNewsData: topNews, filteredNewsList: newsList } = useMemo(
+        () => splitNewsData(filteredNewsItems),
+        [filteredNewsItems],
+    );
 
     useImperativeHandle(
         ref,
@@ -136,13 +174,15 @@ const NewsPage = forwardRef(function NewsPage(
         [onScrollOffsetChange],
     );
 
-    // 請求澳大新聞API
-    useEffect(() => {
-        getData();
-    }, []);
-
     // 請求澳大api返回新聞數據
-    const getData = async () => {
+    const getData = useCallback(async ({ refreshing = false, shouldApply } = {}) => {
+        const requestId = ++requestIdRef.current;
+        const canApply = () =>
+            (shouldApply ? shouldApply() : mountedRef.current) &&
+            requestId === requestIdRef.current;
+        if (refreshing) {
+            setIsRefreshing(true);
+        }
         try {
             const res = await axios.get(UM_API_NEWS, {
                 headers: {
@@ -151,39 +191,61 @@ const NewsPage = forwardRef(function NewsPage(
                 },
             });
             const result = res.data._embedded;
-
-            // 有時會沒有圖片imageUrls數組，所以只選擇有圖的新聞作為頭條
-            let chooseTopNewsIndex = 0;
-            while (true) {
-                if ('imageUrls' in result[chooseTopNewsIndex].common) {
-                    // 有圖
-                    break;
-                } else {
-                    // 沒圖
-                    chooseTopNewsIndex++;
-                }
+            if (!Array.isArray(result)) {
+                throw new Error('Invalid UM news response');
             }
-
-            // 頭條指定為當天最新的、有圖的新聞
-            const topNewsData = result[chooseTopNewsIndex];
-            result.splice(chooseTopNewsIndex, 1); // 刪除數組中頭條新聞的數據，剩下的全部渲染到新聞列表
-
-            // 非頭條的新聞渲染進新聞列表，過濾某些沒有detail的數據
-            const filteredNewsList = result.filter(item => item.details.length > 0);
-
-            setTopNews(topNewsData);
-            setNewsList(filteredNewsList);
-            setTimeout(() => {
-                setIsLoading(false);
-            }, 100);
+            if (!canApply()) {
+                return;
+            }
+            hasVisibleDataRef.current = true;
+            setNewsItems(result);
+            writeUMOpenDataCache(UM_NEWS_CACHE_KEY, result);
         } catch (error) {
-            if (error.code == 'ERR_NETWORK' || error.code == 'ECONNABORTED') {
-                setIsLoading(true);
-            } else {
+            if (!canApply()) {
+                return;
+            }
+            if (
+                error.code !== 'ERR_NETWORK' &&
+                error.code !== 'ECONNABORTED' &&
+                !hasVisibleDataRef.current
+            ) {
                 alert('澳大新聞頁，未知錯誤，請聯繫開發者！');
             }
+        } finally {
+            if (canApply()) {
+                setIsLoading(false);
+                setIsRefreshing(false);
+            }
         }
-    };
+    }, []);
+
+    // 請求澳大新聞API
+    useEffect(() => {
+        let cancelled = false;
+        mountedRef.current = true;
+
+        const initializeData = async () => {
+            const cached = await readUMOpenDataCache(UM_NEWS_CACHE_KEY);
+            if (cancelled) {
+                return;
+            }
+            if (cached) {
+                hasVisibleDataRef.current = true;
+                setNewsItems(cached.items);
+                setIsLoading(false);
+                if (cached.isFresh) {
+                    return;
+                }
+            }
+            getData({ shouldApply: () => !cancelled });
+        };
+
+        initializeData();
+        return () => {
+            cancelled = true;
+            mountedRef.current = false;
+        };
+    }, [getData]);
 
     const topNewsContent = useMemo(() => {
         const titleLocale = currentLanguage === 'tc' ? 'zh_TW' : 'en_US';
@@ -205,10 +267,13 @@ const NewsPage = forwardRef(function NewsPage(
         return typeof picked === 'string'
             ? picked.replace('http:', 'https:')
             : null;
-    }, [topNews?._id, topNews.common?.imageUrls]);
+    }, [topNews.common?.imageUrls]);
 
     // 頭條新聞的渲染
     const renderTopNews = useMemo(() => {
+        if (!topNews?._id) {
+            return null;
+        }
         const { title } = topNewsContent;
 
         return (
@@ -269,6 +334,27 @@ const NewsPage = forwardRef(function NewsPage(
         );
     }, [topNews, hideSourceLabel, topNewsContent, topNewsImage, imagePlaceholder, black.third, navigation, styles.topNewsContainer, styles.topNewsOverlay, styles.topNewsPosition, styles.topNewsText, t, trueWhite]);
 
+    const handleSearchFocus = useCallback(() => {
+        trigger();
+    }, []);
+
+    const listHeader = useMemo(() => (
+        <>
+            <ClubSearchBar
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                loading={isRefreshing}
+                onFocus={handleSearchFocus}
+                onCancel={() => setSearchQuery('')}
+                placeholder={t('搜索澳大新聞')}
+                cancelLabel={t('取消')}
+                clearAccessibilityLabel={t('清除搜尋')}
+                containerStyle={styles.searchContainer}
+            />
+            {renderTopNews}
+        </>
+    ), [handleSearchFocus, isRefreshing, renderTopNews, searchQuery, styles.searchContainer, t]);
+
     return (
         <View style={{
             flex: 1,
@@ -311,17 +397,14 @@ const NewsPage = forwardRef(function NewsPage(
                         // 渲染項目數量
                         getItemCount={getItemCount}
                         // 列表頭部渲染的組件 - 頭條新聞
-                        ListHeaderComponent={renderTopNews}
+                        ListHeaderComponent={listHeader}
                         refreshControl={
                             <RefreshControl
                                 colors={[themeColor]}
                                 tintColor={themeColor}
-                                refreshing={isLoading}
+                                refreshing={isRefreshing}
                                 onRefresh={() => {
-                                    // 展示Loading標識
-                                    setIsLoading(true);
-                                    // setImgLoading(true);
-                                    getData();
+                                    getData({ refreshing: true });
                                 }}
                             />
                         }

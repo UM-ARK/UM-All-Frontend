@@ -23,7 +23,7 @@ const EventCard = ({ data, cardWidth }) => {
     const navigation = useContext(NavigationContext);
 
     const { theme } = useTheme();
-    const { white, black, viewShadow, imagePlaceholder } = theme;
+    const { white, black, imagePlaceholder } = theme;
 
     const imageSize = cardWidth || DEFAULT_IMAGE_SIZE;
 
@@ -162,15 +162,22 @@ const EventCard = ({ data, cardWidth }) => {
                     {/* website類型活動展示link圖標 */}
                     {type === 'WEBSITE' && (
                         <View style={{
-                            position: 'absolute', zIndex: 2,
-                            top: 10, right: 10,
-                            transform: [{ rotate: '-45deg' }],
+                            position: 'absolute',
+                            zIndex: 2,
+                            top: scale(8),
+                            right: scale(8),
+                            width: scale(28),
+                            height: scale(28),
+                            borderRadius: scale(14),
+                            backgroundColor: `${black.main}8C`,
+                            justifyContent: 'center',
+                            alignItems: 'center',
                         }}>
                             <Ionicons
                                 name={'link'}
-                                size={verticalScale(20)}
+                                size={verticalScale(16)}
                                 color={white}
-                                style={{ ...viewShadow }}
+                                style={{ transform: [{ rotate: '-45deg' }] }}
                             />
                         </View>
                     )}

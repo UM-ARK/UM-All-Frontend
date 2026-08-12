@@ -37,6 +37,16 @@ describe('Harbor 登入意圖', () => {
         });
     });
 
+    it('允許登入後前往私信列表', async () => {
+        await saveHarborLoginIntent({routeName: 'HarborChatList'});
+
+        await expect(loadHarborLoginIntent()).resolves.toEqual({
+            routeName: 'HarborChatList',
+            params: undefined,
+            createdAt: 1000,
+        });
+    });
+
     it('拒絕未知路由並清除逾時意圖', async () => {
         await expect(
             saveHarborLoginIntent({routeName: 'SettingPage'}),

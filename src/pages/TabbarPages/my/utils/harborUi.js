@@ -263,6 +263,24 @@ export function getHarborNotificationTarget(item, username) {
     }
 
     const data = item?.data || {};
+    if (chatNotificationTypes.has(item?.typeName)) {
+        const channelId = Number(
+            data.chat_channel_id || data.channel_id,
+        );
+        const messageId = Number(
+            data.chat_message_id || data.message_id,
+        );
+        if (Number.isInteger(channelId) && channelId > 0) {
+            return {
+                kind: 'chat',
+                channelId,
+                messageId:
+                    Number.isInteger(messageId) && messageId > 0
+                        ? messageId
+                        : null,
+            };
+        }
+    }
     const explicitPath =
         data.url ||
         data.path ||
@@ -314,25 +332,6 @@ export function getHarborNotificationTarget(item, username) {
                     : ''),
         };
     }
-    if (chatNotificationTypes.has(item?.typeName)) {
-        const channelId = Number(
-            data.chat_channel_id || data.channel_id,
-        );
-        const messageId = Number(
-            data.chat_message_id || data.message_id,
-        );
-        if (Number.isInteger(channelId) && channelId > 0) {
-            return {
-                kind: 'web',
-                path:
-                    `/chat/c/-/${channelId}` +
-                    (Number.isInteger(messageId) && messageId > 0
-                        ? `/${messageId}`
-                        : ''),
-            };
-        }
-    }
-
     return {kind: 'none'};
 }
 

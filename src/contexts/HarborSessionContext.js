@@ -22,6 +22,7 @@ import {
 } from '../utils/harbor/harborAuth';
 import {
     fetchCurrentHarborUser,
+    fetchHarborChatChannels,
     fetchHarborInboxUnreadCount,
     isHarborCredentialRejected,
     revokeHarborCredentials,
@@ -39,6 +40,7 @@ import {
     logHarborAuthError,
     logHarborAuthEvent,
 } from '../utils/harbor/harborLogger';
+import { calculateHarborUnreadTotal } from '../utils/harbor/harborBadge';
 import {
     clearHarborLoginIntent,
     loadHarborLoginIntent,
@@ -50,6 +52,7 @@ import { getLocalStorage, setLocalStorage } from '../utils/storageKits';
 
 const PROFILE_CACHE_KEY = 'harbor_profile_cache';
 const PROFILE_VALIDATION_INTERVAL = 5 * 60 * 1000;
+const CHAT_CHANNELS_FRESHNESS_INTERVAL = 60 * 1000;
 
 const HarborSessionContext = createContext(null);
 
@@ -83,11 +86,18 @@ export const HarborSessionProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [error, setError] = useState(null);
     const [inboxUnreadCount, setInboxUnreadCount] = useState(0);
+    const [chatUnreadCount, setChatUnreadCount] = useState(0);
+    const [chatChannels, setChatChannels] = useState([]);
     const [pendingLoginIntent, setPendingLoginIntent] = useState(null);
     const credentialsRef = useRef(null);
     const userRef = useRef(null);
     const mountedRef = useRef(true);
     const inboxUnreadRequestRef = useRef(0);
+    const chatUnreadRequestRef = useRef(0);
+    const chatChannelsRef = useRef([]);
+    const chatUnreadCountRef = useRef(0);
+    const chatChannelsFetchedAtRef = useRef(0);
+    const chatChannelsInFlightRef = useRef(null);
     const lastValidationRef = useRef(0);
     const lastValidationAttemptRef = useRef(0);
     const validationInFlightRef = useRef(null);
@@ -105,10 +115,17 @@ export const HarborSessionProvider = ({ children }) => {
         lastValidationAttemptRef.current = 0;
         validationInFlightRef.current = null;
         inboxUnreadRequestRef.current += 1;
+        chatUnreadRequestRef.current += 1;
+        chatChannelsRef.current = [];
+        chatUnreadCountRef.current = 0;
+        chatChannelsFetchedAtRef.current = 0;
+        chatChannelsInFlightRef.current = null;
         setActiveHarborCredentials(null);
         if (mountedRef.current) {
             setUser(null);
             setInboxUnreadCount(0);
+            setChatUnreadCount(0);
+            setChatChannels([]);
             setStatus(nextStatus);
         }
     }, []);
@@ -120,9 +137,16 @@ export const HarborSessionProvider = ({ children }) => {
         lastValidationAttemptRef.current = 0;
         validationInFlightRef.current = null;
         inboxUnreadRequestRef.current += 1;
+        chatUnreadRequestRef.current += 1;
+        chatChannelsRef.current = [];
+        chatUnreadCountRef.current = 0;
+        chatChannelsFetchedAtRef.current = 0;
+        chatChannelsInFlightRef.current = null;
         setActiveHarborCredentials(credentials);
         if (mountedRef.current) {
             setInboxUnreadCount(0);
+            setChatUnreadCount(0);
+            setChatChannels([]);
         }
         return sessionGenerationRef.current;
     }, []);
@@ -162,6 +186,100 @@ export const HarborSessionProvider = ({ children }) => {
         }
         return nextCount;
     }, []);
+
+    const patchChatUnreadCount = useCallback((count, expectedUsername) => {
+        if (
+            !credentialsRef.current ||
+            (expectedUsername &&
+                userRef.current?.username !== expectedUsername)
+        ) {
+            return null;
+        }
+        const normalizedCount = Math.max(0, Number(count) || 0);
+        chatUnreadRequestRef.current += 1;
+        chatUnreadCountRef.current = normalizedCount;
+        if (mountedRef.current) {
+            setChatUnreadCount(normalizedCount);
+        }
+        return normalizedCount;
+    }, []);
+
+    const refreshChatChannels = useCallback(({force = false} = {}) => {
+        const username = userRef.current?.username;
+        const credentialKey = credentialsRef.current?.userApiKey;
+        if (!username || !credentialKey) {
+            return Promise.resolve(null);
+        }
+
+        if (
+            !force &&
+            Date.now() - chatChannelsFetchedAtRef.current <
+                CHAT_CHANNELS_FRESHNESS_INTERVAL
+        ) {
+            return Promise.resolve({
+                items: chatChannelsRef.current,
+                unreadCount: chatUnreadCountRef.current,
+            });
+        }
+
+        const generation = sessionGenerationRef.current;
+        const inFlight = chatChannelsInFlightRef.current;
+        if (
+            inFlight?.username === username &&
+            inFlight?.credentialKey === credentialKey
+        ) {
+            return inFlight.promise;
+        }
+
+        const requestId = chatUnreadRequestRef.current + 1;
+        chatUnreadRequestRef.current = requestId;
+        const request = fetchHarborChatChannels()
+            .then(result => {
+                const nextCount = Math.max(
+                    0,
+                    Number(result.unreadCount) || 0,
+                );
+                if (
+                    mountedRef.current &&
+                    sessionGenerationRef.current === generation &&
+                    userRef.current?.username === username &&
+                    credentialsRef.current?.userApiKey === credentialKey
+                ) {
+                    chatChannelsRef.current = result.items;
+                    chatChannelsFetchedAtRef.current = Date.now();
+                    setChatChannels(result.items);
+                    if (chatUnreadRequestRef.current === requestId) {
+                        chatUnreadCountRef.current = nextCount;
+                        setChatUnreadCount(nextCount);
+                    }
+                    return {
+                        items: result.items,
+                        unreadCount:
+                            chatUnreadRequestRef.current === requestId
+                                ? nextCount
+                                : chatUnreadCountRef.current,
+                    };
+                }
+                return null;
+            })
+            .finally(() => {
+                if (chatChannelsInFlightRef.current?.promise === request) {
+                    chatChannelsInFlightRef.current = null;
+                }
+            });
+        chatChannelsInFlightRef.current = {
+            username,
+            credentialKey,
+            promise: request,
+        };
+        return request;
+    }, []);
+
+    const refreshChatUnreadCount = useCallback(() => {
+        return refreshChatChannels().then(
+            result => result?.unreadCount ?? null,
+        );
+    }, [refreshChatChannels]);
 
     const expireSession = useCallback(
         async expectedCredentialKey => {
@@ -419,16 +537,29 @@ export const HarborSessionProvider = ({ children }) => {
 
     useEffect(() => {
         if (status === 'signedIn' && user?.username) {
-            refreshInboxUnreadCount().catch(() => {});
+            Promise.allSettled([
+                refreshInboxUnreadCount(),
+                refreshChatUnreadCount(),
+            ]);
         }
-    }, [refreshInboxUnreadCount, status, user?.username]);
+    }, [
+        refreshChatUnreadCount,
+        refreshInboxUnreadCount,
+        status,
+        user?.username,
+    ]);
 
-    // 將 Harbor 收件匣未讀同步到主畫面 App 角標；登出時清零
+    // 將 Harbor 收件匣及 Chat 未讀同步到主畫面 App 角標；登出時清零
     useEffect(() => {
         const badgeCount =
-            status === 'signedIn' ? inboxUnreadCount : 0;
+            status === 'signedIn'
+                ? calculateHarborUnreadTotal(
+                    inboxUnreadCount,
+                    chatUnreadCount,
+                )
+                : 0;
         syncAppIconBadgeCount(badgeCount).catch(() => {});
-    }, [inboxUnreadCount, status]);
+    }, [chatUnreadCount, inboxUnreadCount, status]);
 
     useEffect(() => {
         const subscription = AppState.addEventListener('change', nextState => {
@@ -456,12 +587,15 @@ export const HarborSessionProvider = ({ children }) => {
                 });
             }
             if (nextState === 'active' && credentials) {
-                refreshInboxUnreadCount().catch(() => {});
+                Promise.allSettled([
+                    refreshInboxUnreadCount(),
+                    refreshChatUnreadCount(),
+                ]);
             }
         });
 
         return () => subscription.remove();
-    }, [refreshInboxUnreadCount, refreshProfile]);
+    }, [refreshChatUnreadCount, refreshInboxUnreadCount, refreshProfile]);
 
     const activateCredentialsFromCallback = useCallback(
         async credentials => {
@@ -624,12 +758,17 @@ export const HarborSessionProvider = ({ children }) => {
             user,
             error,
             inboxUnreadCount,
+            chatUnreadCount,
+            chatChannels,
             login,
             logout,
             pendingLoginIntent,
             consumeLoginIntent,
             patchInboxUnreadCount,
+            patchChatUnreadCount,
             refreshInboxUnreadCount,
+            refreshChatChannels,
+            refreshChatUnreadCount,
             refresh: () =>
                 credentialsRef.current
                     ? refreshProfile(
@@ -640,12 +779,17 @@ export const HarborSessionProvider = ({ children }) => {
         }),
         [
             consumeLoginIntent,
+            chatUnreadCount,
+            chatChannels,
             error,
             inboxUnreadCount,
             login,
             logout,
+            patchChatUnreadCount,
             patchInboxUnreadCount,
             pendingLoginIntent,
+            refreshChatUnreadCount,
+            refreshChatChannels,
             refreshInboxUnreadCount,
             refreshProfile,
             status,

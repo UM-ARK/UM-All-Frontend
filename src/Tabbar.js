@@ -26,6 +26,7 @@ import { useHarborSession } from './contexts/HarborSessionContext';
 import { fetchHarborForumBadgeSnapshot } from './utils/harbor/harborApi';
 import {
     acknowledgeHarborForumBadgeState,
+    calculateHarborUnreadTotal,
     createHarborForumBadgeState,
     formatHarborTabBadge,
     getHarborForumBadgeCount,
@@ -334,8 +335,10 @@ const Tabbar = () => {
         status,
         user,
         inboxUnreadCount,
+        chatUnreadCount,
         refresh,
         refreshInboxUnreadCount,
+        refreshChatUnreadCount,
     } = useHarborSession();
     const [forumBadgeState, setForumBadgeState] = useState(() =>
         createHarborForumBadgeState(),
@@ -363,7 +366,7 @@ const Tabbar = () => {
     const labelFontSize = isLandscape ? verticalScale(10) : scale(10);
 
     const myUnreadTotal = isSignedIn
-        ? inboxUnreadCount
+        ? calculateHarborUnreadTotal(inboxUnreadCount, chatUnreadCount)
         : 0;
 
     const refreshForumBadge = useCallback(
@@ -550,6 +553,7 @@ const Tabbar = () => {
                         Promise.allSettled([
                             refresh(),
                             refreshInboxUnreadCount(),
+                            refreshChatUnreadCount(),
                         ]);
                     }
                 },
@@ -559,6 +563,7 @@ const Tabbar = () => {
             acknowledgeForumBadge,
             isSignedIn,
             refresh,
+            refreshChatUnreadCount,
             refreshInboxUnreadCount,
             refreshForumBadge,
         ],

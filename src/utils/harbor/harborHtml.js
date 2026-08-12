@@ -1,23 +1,7 @@
-import harborEmojiShortcodes from './harborEmojiShortcodes.json';
+import harborEmojiShortcodes from './harborDiscourseEmojiShortcodes.json';
 
-// Discourse 常用別名（與 gemoji 名稱不完全一致）
-const DISCOURSE_EMOJI_ALIASES = Object.freeze({
-    plus: 'heavy_plus_sign',
-    minus: 'heavy_minus_sign',
-    slight_smile: 'slightly_smiling_face',
-});
-
-const HARBOR_EMOJI_SHORTCODES = Object.freeze({
-    ...harborEmojiShortcodes,
-    ...Object.fromEntries(
-        Object.entries(DISCOURSE_EMOJI_ALIASES).map(([alias, target]) => [
-            alias,
-            harborEmojiShortcodes[target],
-        ]),
-    ),
-});
-
-const HARBOR_EMOJI_SHORTCODE_PATTERN = /:([a-zA-Z0-9_+-]+):/g;
+const HARBOR_EMOJI_SHORTCODE_PATTERN =
+    /:([^:\s]+(?::t\d)?):/g;
 
 export const getHarborHtmlAttribute = (tag, attribute) => {
     const expression = new RegExp(`${attribute}=(?:"([^"]*)"|'([^']*)')`, 'i');
@@ -32,7 +16,12 @@ export const replaceHarborEmojiShortcodes = text => {
     }
 
     return text.replace(HARBOR_EMOJI_SHORTCODE_PATTERN, (match, name) => {
-        return HARBOR_EMOJI_SHORTCODES[name] || match;
+        return Object.prototype.hasOwnProperty.call(
+            harborEmojiShortcodes,
+            name,
+        )
+            ? harborEmojiShortcodes[name]
+            : match;
     });
 };
 

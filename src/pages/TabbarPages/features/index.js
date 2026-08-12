@@ -8,6 +8,7 @@ import {
 
 import Text from '../../../components/AppText';
 import { useTheme, uiStyle } from '../../../components/ThemeContext';
+import { useHarborSession } from '../../../contexts/HarborSessionContext';
 import { logToFirebase } from '../../../utils/firebaseAnalytics';
 import { openLink } from '../../../utils/browser';
 import { trigger } from '../../../utils/trigger';
@@ -51,6 +52,7 @@ const FEATURE_SHEET_SNAP_POINTS = ['32%', '48%'];
 function FeatureListPage({ navigation }) {
     const { theme } = useTheme();
     const { themeColor, white, black, bg_color, tonal } = theme;
+    const { status: harborStatus, user: harborUser, login } = useHarborSession();
     const { t, i18n } = useTranslation(['common', 'home', 'features']);
     const functionArr = useMemo(() => getFunctionArr(t), [t]);
     const isTc = i18n.language === 'tc';
@@ -116,8 +118,22 @@ function FeatureListPage({ navigation }) {
                 setUsageRecords,
             );
 
-            const { go_where, webview_param, needLogin } = item;
+            const { go_where, webview_param, needLogin, loginRoute } = item;
             if (needLogin) {
+                if (harborStatus === 'signedIn' && harborUser) {
+                    navigation.navigate(go_where);
+                } else if (
+                    harborStatus !== 'restoring' &&
+                    harborStatus !== 'authorizing'
+                ) {
+                    const loginIntent = loginRoute
+                        ? { routeName: loginRoute }
+                        : {
+                            routeName: 'Tabbar',
+                            params: { screen: go_where },
+                        };
+                    login(loginIntent).catch(() => {});
+                }
                 return;
             }
 
@@ -136,12 +152,15 @@ function FeatureListPage({ navigation }) {
                 }
             }, 50);
         },
-        [navigation],
+        [harborStatus, harborUser, login, navigation],
     );
 
-    // 預留兩行標題高度，避免同列單行／雙行標籤把圖標頂歪
+    // 預留兩行標題高度（英文如 Canteen Queue 會換行），避免同列單／雙行把圖標頂歪
     const featureLabelLineHeight = fontSize * 1.25;
     const featureLabelHeight = featureLabelLineHeight * 2;
+    // FlatGrid 末列會再加 marginBottom: spacing，與 row paddingBottom 重疊，需抵銷
+    const gridSpacing = scale(10);
+    const gridBottomTrim = -gridSpacing;
 
     const renderFeatureItem = useCallback(
         item => (
@@ -224,7 +243,8 @@ function FeatureListPage({ navigation }) {
                 <FlatGrid
                     maxItemsPerRow={5}
                     itemDimension={scale(50)}
-                    spacing={scale(10)}
+                    spacing={gridSpacing}
+                    style={{ marginBottom: gridBottomTrim }}
                     itemContainerStyle={{
                         alignItems: 'center',
                         justifyContent: 'flex-start',
@@ -237,7 +257,7 @@ function FeatureListPage({ navigation }) {
             </View>
             );
         },
-        [white, bg_color, black.main, renderFeatureItem],
+        [white, bg_color, black.main, renderFeatureItem, gridSpacing, gridBottomTrim],
     );
 
     // BottomSheet內容渲染
@@ -364,8 +384,8 @@ function FeatureListPage({ navigation }) {
                         <FlatGrid
                             maxItemsPerRow={4}
                             itemDimension={scale(50)}
-                            spacing={scale(10)}
-                            style={{ marginBottom: verticalScale(-6) }}
+                            spacing={gridSpacing}
+                            style={{ marginBottom: gridBottomTrim }}
                             itemContainerStyle={{
                                 alignItems: 'center',
                                 justifyContent: 'flex-start',

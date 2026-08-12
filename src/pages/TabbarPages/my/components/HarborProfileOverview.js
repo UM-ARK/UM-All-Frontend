@@ -32,7 +32,9 @@ const QUICK_ACTION_ROUTES = {
 const HarborProfileOverview = ({
     user,
     unreadCount,
+    chatUnreadCount,
     navigation,
+    onChatPress,
     onSettingsPress,
 }) => {
     const {theme} = useTheme();
@@ -98,6 +100,8 @@ const HarborProfileOverview = ({
                         mode: 'preview',
                     })
                 }
+                onChatPress={onChatPress}
+                chatUnreadCount={chatUnreadCount}
                 onSettingsPress={onSettingsPress}
             />
             {user.partialProfile ? (

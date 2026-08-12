@@ -10,12 +10,12 @@ import {
     StyleSheet,
     RefreshControl,
     Linking,
-    Share,
 } from 'react-native';
 
 import Text from '../../../../components/AppText';
 import { useTheme, themes, uiStyle, ThemeContext } from '../../../../components/ThemeContext';
 import { getDeepLinkShareHeaderOptions } from '../../../../components/DeepLinkShareButton';
+import { useAppShare } from '../../../../contexts/AppShareContext';
 import { clubTagMap } from '../../../../utils/clubMap';
 import { setAPPInfo } from '../../../../utils/storageKits';
 import { logToFirebase } from '../../../../utils/firebaseAnalytics';
@@ -50,6 +50,7 @@ const CLUB_IMAGE_HEIGHT = verticalScale(55);
 
 const ClubDetail = (props) => {
     const { theme } = useTheme();
+    const { openShare } = useAppShare();
     const { bg_color, white, black, themeColor, secondThemeColor, viewShadow, success, warning, trueWhite, imagePlaceholder } = theme;
     const styles = StyleSheet.create({
         cardContainer: {
@@ -141,13 +142,11 @@ const ClubDetail = (props) => {
 
     const shareClub = useCallback(() => {
         const url = ARK_CLUB_SHARE_URL(clubNum);
-        Share.share({
-            message: `${clubData?.name || 'ARK ALL'}\n${url}`,
+        openShare({
+            title: clubData?.name || 'ARK ALL',
             url,
-        }).catch(() => {
-            Alert.alert('分享失敗', '請稍後再試。');
         });
-    }, [clubData?.name, clubNum]);
+    }, [clubData?.name, clubNum, openShare]);
 
     useLayoutEffect(() => {
         // club_num=0 為 ARK ALL 管理員帳號，不可用 truthy 判斷

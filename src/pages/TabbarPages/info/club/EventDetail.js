@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react';
 import {
-    Alert,
     View,
     TouchableOpacity,
     TouchableWithoutFeedback,
@@ -9,12 +8,12 @@ import {
     ScrollView,
     RefreshControl,
     Linking,
-    Share,
 } from 'react-native';
 
 import Text from '../../../../components/AppText';
 import { useTheme, uiStyle } from '../../../../components/ThemeContext';
 import { getDeepLinkShareHeaderOptions } from '../../../../components/DeepLinkShareButton';
+import { useAppShare } from '../../../../contexts/AppShareContext';
 import { BASE_URI, BASE_HOST, GET, ARK_EVENT_SHARE_URL, POST, MAIL } from '../../../../utils/pathMap';
 import { trigger } from '../../../../utils/trigger';
 import ModalBottom from '../../../../components/ModalBottom';
@@ -39,6 +38,7 @@ const CLUB_IMAGE_HEIGHT = PAGE_HEIGHT * 0.076;
 
 const EventDetail = (props) => {
     const { theme } = useTheme();
+    const { openShare } = useAppShare();
     const { bg_color, white, black, themeColor, secondThemeColor, viewShadow, success, warning, trueWhite, imagePlaceholder } = theme;
 
     // 統一化卡片樣式（與 ClubDetail 保持一致）
@@ -106,19 +106,18 @@ const EventDetail = (props) => {
     const toast = useRef(null);
     const eventId = props.route.params?.eventId ??
         props.route.params?.data?._id;
+    const eventTitle = state.title || props.route.params?.data?.title || '';
 
     const shareEvent = useCallback(() => {
         const url = ARK_EVENT_SHARE_URL(eventId);
-        Share.share({
-            message: `${state.title || 'ARK ALL'}\n${url}`,
+        openShare({
+            title: eventTitle,
             url,
-        }).catch(() => {
-            Alert.alert('分享失敗', '請稍後再試。');
         });
-    }, [eventId, state.title]);
+    }, [eventId, eventTitle, openShare]);
 
     useLayoutEffect(() => {
-        if (!eventId) {return;}
+        if (!eventId || !eventTitle) {return;}
         props.navigation.setOptions(
             getDeepLinkShareHeaderOptions({
                 accessibilityLabel: '分享',
@@ -126,7 +125,7 @@ const EventDetail = (props) => {
                 themeColor,
             }),
         );
-    }, [eventId, props.navigation, shareEvent, themeColor]);
+    }, [eventId, eventTitle, props.navigation, shareEvent, themeColor]);
 
     // 按社團id獲取社團資訊，頭像
     const getClubData = useCallback(async (club_num) => {

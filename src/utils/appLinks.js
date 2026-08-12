@@ -24,3 +24,137 @@ export const APP_LINKING = {
         },
     },
 };
+
+const decodeAppLinkSegment = value => {
+    try {
+        return decodeURIComponent(value);
+    } catch {
+        return '';
+    }
+};
+
+const ARK_APP_LINK_PATTERN =
+    /(?:https:\/\/umall\.one\/app\/|one\.umall:\/\/app\/)[^\s]+/g;
+
+export const parseArkAppLink = value => {
+    if (typeof value !== 'string' || !value.trim()) {
+        return null;
+    }
+
+    const link = value.trim();
+
+    let url;
+    try {
+        url = new URL(link);
+    } catch {
+        return null;
+    }
+
+    let path;
+    if (url.protocol === 'https:' && url.hostname === 'umall.one') {
+        if (!url.pathname.startsWith('/app/')) {
+            return null;
+        }
+        path = url.pathname.slice('/app/'.length);
+    } else if (url.protocol === 'one.umall:' && url.hostname === 'app') {
+        path = url.pathname.replace(/^\//, '');
+    } else {
+        return null;
+    }
+
+    const segments = path.split('/').map(decodeAppLinkSegment);
+    if (segments.some(segment => !segment)) {
+        return null;
+    }
+
+    if (segments[0] === 'course' && segments.length === 2) {
+        return {
+            type: 'course',
+            routeName: 'LocalCourse',
+            params: {courseCode: segments[1]},
+            url: link,
+        };
+    }
+    if (segments[0] === 'club' && segments.length === 2) {
+        return {
+            type: 'club',
+            routeName: 'ClubDetail',
+            params: {clubNum: segments[1]},
+            url: link,
+        };
+    }
+    if (segments[0] === 'event' && segments.length === 2) {
+        return {
+            type: 'event',
+            routeName: 'EventDetail',
+            params: {eventId: segments[1]},
+            url: link,
+        };
+    }
+    if (segments[0] === 'harbor' && segments[1] === 'topic') {
+        const topicId = Number(segments[2]);
+        const postNumber = segments[3] == null
+            ? null
+            : Number(segments[3]);
+        if (
+            segments.length < 3 ||
+            segments.length > 4 ||
+            !Number.isInteger(topicId) ||
+            topicId <= 0 ||
+            (postNumber != null &&
+                (!Number.isInteger(postNumber) || postNumber <= 0))
+        ) {
+            return null;
+        }
+        return {
+            type: 'harborTopic',
+            routeName: 'HarborTopicDetail',
+            params: {
+                topicId,
+                ...(postNumber == null ? {} : {postNumber}),
+            },
+            url: link,
+        };
+    }
+    if (segments[0] === 'team' && segments.length === 2) {
+        const invite = url.searchParams.get('invite');
+        return {
+            type: 'team',
+            routeName: 'TeamScheduleDetail',
+            params: {
+                eventId: segments[1],
+                ...(invite ? {invite} : {}),
+            },
+            url: link,
+        };
+    }
+
+    return null;
+};
+
+export const splitArkAppLinkContent = value => {
+    if (typeof value !== 'string' || !value.trim()) {
+        return [];
+    }
+
+    const parts = [];
+    let lastIndex = 0;
+    for (const match of value.matchAll(ARK_APP_LINK_PATTERN)) {
+        const appLink = parseArkAppLink(match[0]);
+        if (!appLink) {
+            continue;
+        }
+        const text = value.slice(lastIndex, match.index).trim();
+        if (text) {
+            parts.push({type: 'text', content: text});
+        }
+        parts.push({type: 'appLink', appLink});
+        lastIndex = match.index + match[0].length;
+    }
+
+    const trailingText = value.slice(lastIndex).trim();
+    if (trailingText) {
+        parts.push({type: 'text', content: trailingText});
+    }
+    return parts;
+};
