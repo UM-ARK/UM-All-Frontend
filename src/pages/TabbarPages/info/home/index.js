@@ -73,7 +73,13 @@ const openDonateLink = async () => {
     let url = AFD_UMACARK;
 
     try {
-        await fetch(AFD_UMACARK, { method: 'HEAD', signal: controller.signal });
+        const response = await fetch(AFD_UMACARK, {
+            method: 'HEAD',
+            signal: controller.signal,
+        });
+        if (!response.ok) {
+            url = GITHUB_DONATE;
+        }
     } catch {
         url = GITHUB_DONATE;
     } finally {

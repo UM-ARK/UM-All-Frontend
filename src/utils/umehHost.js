@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getLocalStorage, setLocalStorage } from './storageKits';
 
-export const UMEH_PRIMARY_HOST = 'https://www.umeh.top';
+export const UMEH_PRIMARY_HOST = 'https://umeh.top';
 export const UMEH_BACKUP_HOST = 'https://cf.umeh.top';
 
 const PREF_KEY = 'umeh_host_pref';
@@ -24,8 +24,11 @@ async function probeHost(host) {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), PROBE_TIMEOUT_MS);
     try {
-        await fetch(host, { method: 'HEAD', signal: controller.signal });
-        return true;
+        const response = await fetch(host, {
+            method: 'HEAD',
+            signal: controller.signal,
+        });
+        return response.ok;
     } catch {
         return false;
     } finally {
@@ -34,7 +37,7 @@ async function probeHost(host) {
 }
 
 // 單例狀態
-let _currentHost = UMEH_PRIMARY_HOST;
+let _currentHost = UMEH_BACKUP_HOST;
 const _subs = new Set();
 
 function _notify() {
