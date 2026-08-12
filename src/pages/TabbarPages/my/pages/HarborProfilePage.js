@@ -33,6 +33,7 @@ import { useHarborSession } from '../../../../contexts/HarborSessionContext';
 import { useSchedulingSession } from '../../../../contexts/SchedulingSessionContext';
 import HarborAvatarPickerModal from '../components/HarborAvatarPickerModal';
 import HarborBadgeIcon from '../components/HarborBadgeIcon';
+import HarborUsernameEditorModal from '../components/HarborUsernameEditorModal';
 import {
     createHarborDirectMessageChannel,
     fetchHarborProfileMetadata,
@@ -41,6 +42,7 @@ import {
     selectHarborAvatar,
     updateHarborAvatar,
     updateHarborProfile,
+    updateHarborUsername,
 } from '../../../../utils/harbor/harborApi';
 import { openLink } from '../../../../utils/browser';
 import { ARK_HARBOR } from '../../../../utils/pathMap';
@@ -60,6 +62,18 @@ const resolveUmerBadgeLabel = (groups, isUMer) => {
     const hasUmerGroup =
         Array.isArray(groups) && groups.some(isUmerGroupLabel);
     return isUMer || hasUmerGroup ? UMER_DISPLAY_LABEL : null;
+};
+
+const getHarborUsernameErrorMessage = error => {
+    const data = error?.response?.data;
+    const errors = data?.errors;
+    if (Array.isArray(errors)) {
+        return errors.filter(Boolean).join(' ');
+    }
+    if (typeof errors === 'string') {
+        return errors;
+    }
+    return data?.error || data?.message || '';
 };
 
 // 頭像右上角 UMer 角標：45° 傾斜並輕微浮動
@@ -165,8 +179,9 @@ const HarborProfilePage = ({ navigation, route }) => {
     const { user, refresh } = useHarborSession();
     const headerHeight = useHeaderHeight();
     const sessionUsername = user?.username || '';
+    const [renamedUsername, setRenamedUsername] = React.useState('');
     const requestedUsername = String(
-        route?.params?.username || sessionUsername,
+        renamedUsername || route?.params?.username || sessionUsername,
     );
     const isOwnProfile = Boolean(
         sessionUsername &&
@@ -198,6 +213,11 @@ const HarborProfilePage = ({ navigation, route }) => {
     const [isLoadingMetadata, setIsLoadingMetadata] = React.useState(true);
     const [metadataError, setMetadataError] = React.useState(false);
     const [isSaving, setIsSaving] = React.useState(false);
+    const [isUpdatingUsername, setIsUpdatingUsername] = React.useState(false);
+    const [isUsernameEditorVisible, setIsUsernameEditorVisible] =
+        React.useState(false);
+    const [minUsernameLength, setMinUsernameLength] = React.useState(3);
+    const [maxUsernameLength, setMaxUsernameLength] = React.useState(20);
     const [isOpeningChat, setIsOpeningChat] = React.useState(false);
     const [isUpdatingAvatar, setIsUpdatingAvatar] = React.useState(false);
     const [isAvatarPickerVisible, setIsAvatarPickerVisible] =
@@ -296,6 +316,8 @@ const HarborProfilePage = ({ navigation, route }) => {
                     setSelectableAvatarsMode(
                         metadata.selectableAvatarsMode || 'disabled',
                     );
+                    setMinUsernameLength(metadata.minUsernameLength || 3);
+                    setMaxUsernameLength(metadata.maxUsernameLength || 20);
                     setMetadataError(!metadata.workStatusField);
                     if (__DEV__) {
                         console.log('[HarborProfile] avatar.metadata.loaded', {
@@ -357,6 +379,7 @@ const HarborProfilePage = ({ navigation, route }) => {
         profile.canEdit &&
         hasChanges &&
         !isSaving &&
+        !isUpdatingUsername &&
         !isUpdatingAvatar &&
         username,
     );
@@ -560,9 +583,44 @@ const HarborProfilePage = ({ navigation, route }) => {
         }
     };
 
+    const handleUsernameSubmit = async newUsername => {
+        if (isUpdatingUsername) {
+            return;
+        }
+
+        setIsUpdatingUsername(true);
+        try {
+            const result = await updateHarborUsername(username, newUsername);
+            const nextUser = await refresh();
+            const resolvedUsername =
+                result?.username || nextUser?.username || newUsername;
+            setRenamedUsername(resolvedUsername);
+            if (nextUser) {
+                setViewedUser(nextUser);
+            }
+            syncIdentity().catch(() => null);
+            setIsUsernameEditorVisible(false);
+            Alert.alert(
+                t('使用者名稱已更新'),
+                t('你在 Harbor 的使用者名稱已改為 @{{username}}。', {
+                    username: resolvedUsername,
+                }),
+            );
+        } catch (error) {
+            Alert.alert(
+                t('無法修改使用者名稱'),
+                getHarborUsernameErrorMessage(error) ||
+                    t('Harbor 暫時無法修改使用者名稱，請稍後再試。'),
+                [{ text: t('確定'), onPress: () => trigger() }],
+            );
+        } finally {
+            setIsUpdatingUsername(false);
+        }
+    };
+
     const handleAvatarPress = () => {
         trigger();
-        if (isSaving || isUpdatingAvatar) {
+        if (isSaving || isUpdatingAvatar || isUpdatingUsername) {
             return;
         }
 
@@ -783,7 +841,11 @@ const HarborProfilePage = ({ navigation, route }) => {
                                     <Pressable
                                         accessibilityLabel={t('更換頭像')}
                                         accessibilityRole="button"
-                                        disabled={isSaving || isUpdatingAvatar}
+                                        disabled={
+                                            isSaving ||
+                                            isUpdatingAvatar ||
+                                            isUpdatingUsername
+                                        }
                                         onPress={handleAvatarPress}
                                         style={({ pressed }) => [
                                             styles.avatarEditButton,
@@ -1254,6 +1316,73 @@ const HarborProfilePage = ({ navigation, route }) => {
                                         <Text
                                             style={[
                                                 styles.fieldLabel,
+                                                {color: theme.black.second},
+                                            ]}>
+                                            {t('使用者名稱')}
+                                        </Text>
+                                        <View
+                                            style={[
+                                                styles.usernameField,
+                                                {
+                                                    backgroundColor:
+                                                        theme.tonal.primary08,
+                                                    borderColor:
+                                                        theme.themeColorUltraLight,
+                                                },
+                                            ]}>
+                                            <Text
+                                                numberOfLines={1}
+                                                style={[
+                                                    styles.usernameFieldText,
+                                                    {color: theme.black.main},
+                                                ]}>
+                                                @{username}
+                                            </Text>
+                                            {profile.canEditUsername ? (
+                                                <Pressable
+                                                    accessibilityLabel={t('修改使用者名稱')}
+                                                    accessibilityRole="button"
+                                                    disabled={
+                                                        isSaving ||
+                                                        isUpdatingAvatar ||
+                                                        isUpdatingUsername
+                                                    }
+                                                    hitSlop={scale(6)}
+                                                    onPress={() => {
+                                                        trigger();
+                                                        setIsUsernameEditorVisible(true);
+                                                    }}
+                                                    style={({pressed}) => [
+                                                        styles.usernameEditButton,
+                                                        {
+                                                            backgroundColor:
+                                                                theme.tonal.primary15,
+                                                        },
+                                                        pressed && {opacity: 0.72},
+                                                    ]}>
+                                                    <Ionicons
+                                                        color={theme.themeColor}
+                                                        name="pencil"
+                                                        size={scale(16)}
+                                                    />
+                                                </Pressable>
+                                            ) : null}
+                                        </View>
+                                        <Text
+                                            style={[
+                                                styles.fieldHint,
+                                                {color: theme.black.third},
+                                            ]}>
+                                            {profile.canEditUsername
+                                                ? t('目前可以修改；儲存前會檢查名稱是否可用。')
+                                                : t('目前無法修改；是否可以更改由 Harbor 的站點時限與登入設定決定。')}
+                                        </Text>
+                                    </View>
+
+                                    <View style={styles.field}>
+                                        <Text
+                                            style={[
+                                                styles.fieldLabel,
                                                 { color: theme.black.second },
                                             ]}>
                                             {t('工作狀態')}
@@ -1450,6 +1579,16 @@ const HarborProfilePage = ({ navigation, route }) => {
                 </Pressable>
             </KeyboardAwareScrollView>
             {isEditing ? <KeyboardToolbar /> : null}
+            <HarborUsernameEditorModal
+                currentUsername={username}
+                isSubmitting={isUpdatingUsername}
+                maxLength={maxUsernameLength}
+                minLength={minUsernameLength}
+                onClose={() => setIsUsernameEditorVisible(false)}
+                onSubmit={handleUsernameSubmit}
+                userId={viewedUser?.id}
+                visible={isUsernameEditorVisible}
+            />
             <HarborAvatarPickerModal
                 avatars={selectableAvatars}
                 canUpload={canUploadCustomAvatar}
@@ -1754,6 +1893,28 @@ const styles = StyleSheet.create({
         fontSize: scale(12),
         paddingHorizontal: scale(12),
         paddingVertical: verticalScale(10),
+    },
+    usernameField: {
+        minHeight: verticalScale(44),
+        borderWidth: StyleSheet.hairlineWidth,
+        borderRadius: scale(12),
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: scale(8),
+        paddingHorizontal: scale(12),
+        paddingVertical: verticalScale(6),
+    },
+    usernameFieldText: {
+        ...uiStyle.defaultText,
+        flex: 1,
+        fontSize: scale(12),
+    },
+    usernameEditButton: {
+        width: scale(32),
+        height: scale(32),
+        borderRadius: scale(9),
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     multilineInput: {
         minHeight: verticalScale(108),

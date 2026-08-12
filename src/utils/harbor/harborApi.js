@@ -1549,6 +1549,10 @@ function normalizeProfile(
                 typeof profile.can_edit === 'boolean'
                     ? profile.can_edit
                     : Boolean(previousProfile.canEdit),
+            canEditUsername:
+                typeof profile.can_edit_username === 'boolean'
+                    ? profile.can_edit_username
+                    : Boolean(previousProfile.canEditUsername),
             canChangeBio:
                 typeof profile.can_change_bio === 'boolean'
                     ? profile.can_change_bio
@@ -2017,6 +2021,8 @@ export async function fetchHarborProfileMetadata({ signal, user } = {}) {
             .filter(Boolean),
         selectableAvatarsMode: settings?.selectable_avatars_mode || 'disabled',
         canUploadCustomAvatar: resolveCanUploadCustomAvatar(settings, user),
+        minUsernameLength: Number(settings?.min_username_length) || 3,
+        maxUsernameLength: Number(settings?.max_username_length) || 20,
     };
 }
 
@@ -2053,6 +2059,47 @@ export async function fetchHarborUserProfile(username, { signal } = {}) {
         },
         null,
     );
+}
+
+export async function checkHarborUsername(
+    username,
+    {signal, userId} = {},
+) {
+    const normalizedUsername = String(username || '').trim();
+    if (!normalizedUsername) {
+        throw new TypeError('Invalid Harbor username');
+    }
+
+    const params = {username: normalizedUsername};
+    const normalizedUserId = Number(userId);
+    if (Number.isInteger(normalizedUserId) && normalizedUserId > 0) {
+        params.for_user_id = normalizedUserId;
+    }
+
+    const response = await harborApi.get('/u/check_username.json', {
+        params,
+        signal,
+    });
+    return response.data;
+}
+
+export async function updateHarborUsername(
+    username,
+    newUsername,
+    {signal} = {},
+) {
+    const currentUsername = String(username || '').trim();
+    const normalizedUsername = String(newUsername || '').trim();
+    if (!currentUsername || !normalizedUsername) {
+        throw new TypeError('Invalid Harbor username');
+    }
+
+    const response = await harborApi.put(
+        `/u/${encodeURIComponent(currentUsername)}/preferences/username.json`,
+        {new_username: normalizedUsername},
+        {signal},
+    );
+    return response.data;
 }
 
 export async function updateHarborProfile(
