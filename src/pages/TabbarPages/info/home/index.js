@@ -7,7 +7,6 @@ import {
     RefreshControl,
     TouchableWithoutFeedback,
     Platform,
-    Linking,
     AppState,
     Keyboard,
     FlatList,
@@ -21,10 +20,6 @@ import {
     GITHUB_DONATE,
     BASE_URI,
     GET,
-    APPSTORE_URL,
-    PLAYSTORE_URL,
-    GITHUB_RELEASE_URL,
-    ARK_APP_LINK,
     MAIL,
     ARK_WIKI,
     UM_Moodle,
@@ -35,7 +30,7 @@ import {
 import EventPage from './EventPage.js';
 import ModalBottom from '../../../../components/ModalBottom.js';
 import { setAPPInfo, handleLogout } from '../../../../utils/storageKits.js';
-import { getLocalAppVersion, isLocalAppOlderThanServer, showAppStoreUpdateAlert } from '../../../../utils/appUpdateKits.js';
+import { getAppUpdateChannels, getAppUpdateHint, getAppUpdateSectionTitle, getLocalAppVersion, isLocalAppOlderThanServer, openAppUpdateUrl, showAppStoreUpdateAlert } from '../../../../utils/appUpdateKits.js';
 import HomeCard from './components/HomeCard.js';
 import { trigger } from '../../../../utils/trigger.js';
 import { logToFirebase } from '../../../../utils/firebaseAnalytics.js';
@@ -64,7 +59,7 @@ import Ionicons from '@react-native-vector-icons/ionicons';
 
 const MIN_REFRESH_DURATION = 800;
 const DONATE_PROBE_TIMEOUT_MS = 2500;
-const DEBUG_SHOW_UPDATE_INFO = __DEV__ && false;
+const DEBUG_SHOW_UPDATE_INFO = __DEV__ && true;
 const wait = duration => new Promise(resolve => setTimeout(resolve, duration));
 
 const openDonateLink = async () => {
@@ -479,6 +474,10 @@ const HomeScreen = ({ navigation }) => {
         );
     };
 
+    const updateChannels = useMemo(() => getAppUpdateChannels(), []);
+    const updateHint = useMemo(() => getAppUpdateHint(), []);
+    const updateSectionTitle = useMemo(() => getAppUpdateSectionTitle(), []);
+
     // 主渲染
     return (
         <View style={{ flex: 1, backgroundColor: bg_color, alignItems: 'center', justifyContent: 'center' }}>
@@ -673,15 +672,20 @@ const HomeScreen = ({ navigation }) => {
                                 marginTop: verticalScale(12),
                                 marginBottom: verticalScale(6),
                             }}>
-                                {Platform.OS === 'ios' ? '前往 App Store 更新' : '選擇安裝方式'}
+                                {updateSectionTitle}
                             </Text>
-                            {(Platform.OS === 'ios' ? [
-                                { label: 'App Store', detail: '官方商店更新', icon: 'logo-apple', url: APPSTORE_URL },
-                            ] : [
-                                { label: 'Google Play Store', detail: '推薦，自動接收後續更新', icon: 'logo-google-playstore', url: PLAYSTORE_URL },
-                                { label: 'GitHub Release APK', detail: '從 GitHub 下載最新版 APK', icon: 'logo-github', url: GITHUB_RELEASE_URL },
-                                { label: '官網 APK', detail: '從 ARK ALL 官網下載安裝', icon: 'globe-outline', url: ARK_APP_LINK },
-                            ]).map(item => (
+                            {updateHint ? (
+                                <Text style={{
+                                    ...uiStyle.defaultText,
+                                    color: black.third,
+                                    fontSize: scale(10),
+                                    lineHeight: scale(15),
+                                    marginBottom: verticalScale(4),
+                                }}>
+                                    {updateHint}
+                                </Text>
+                            ) : null}
+                            {updateChannels.map(item => (
                                 <Pressable
                                     key={item.label}
                                     style={({ pressed }) => ({
@@ -697,7 +701,7 @@ const HomeScreen = ({ navigation }) => {
                                     })}
                                     onPress={() => {
                                         trigger();
-                                        Linking.openURL(item.url);
+                                        openAppUpdateUrl(item.url);
                                     }}>
                                     <Ionicons name={item.icon} size={scale(21)} color={themeColor} />
                                     <View style={{ flex: 1, marginLeft: scale(10) }}>
