@@ -16,7 +16,10 @@ import {scale, verticalScale} from 'react-native-size-matters';
 import Text from '../../../../components/AppText';
 import {uiStyle, useTheme} from '../../../../components/ThemeContext';
 import {useHarborSession} from '../../../../contexts/HarborSessionContext';
-import {fetchHarborBadges} from '../../../../utils/harbor/harborApi';
+import {
+    fetchHarborBadgesQuery,
+    readHarborBadgesQuery,
+} from '../../../../utils/harbor/harborPageQueries';
 import {trigger} from '../../../../utils/trigger';
 import {HarborInlineRetry} from '../../arkHarbor/components/HarborListStates';
 import HarborBadgeIcon from '../components/HarborBadgeIcon';
@@ -30,11 +33,19 @@ const HarborBadgesPage = ({navigation}) => {
     const {user} = useHarborSession();
     const headerHeight = useHeaderHeight();
     const username = user?.username || '';
-    const [badges, setBadges] = React.useState(user?.badges || []);
-    const [isLoading, setIsLoading] = React.useState(!user?.badges?.length);
+    const cachedBadges = readHarborBadgesQuery(username);
+    const hasSessionBadges = Array.isArray(user?.badges);
+    const [badges, setBadges] = React.useState(
+        hasSessionBadges ? user.badges : cachedBadges || [],
+    );
+    const [isLoading, setIsLoading] = React.useState(
+        !hasSessionBadges && !cachedBadges,
+    );
     const [isRefreshing, setIsRefreshing] = React.useState(false);
     const [loadError, setLoadError] = React.useState(false);
-    const hasInitialBadgesRef = React.useRef(Boolean(user?.badges?.length));
+    const hasInitialBadgesRef = React.useRef(
+        hasSessionBadges || Boolean(cachedBadges),
+    );
     const controllerRef = React.useRef(null);
 
     React.useEffect(() => {
@@ -54,8 +65,8 @@ const HarborBadgesPage = ({navigation}) => {
             setLoadError(false);
 
             try {
-                const nextBadges = await fetchHarborBadges(username, {
-                    signal: controller.signal,
+                const nextBadges = await fetchHarborBadgesQuery(username, {
+                    force: refresh,
                 });
                 if (!controller.signal.aborted) {
                     setBadges(nextBadges);
@@ -80,9 +91,19 @@ const HarborBadgesPage = ({navigation}) => {
             navigation.goBack();
             return undefined;
         }
+        const nextCachedBadges = readHarborBadgesQuery(username);
+        const hasNextSessionBadges = Array.isArray(user?.badges);
+        const initialBadges = hasNextSessionBadges
+            ? user.badges
+            : nextCachedBadges || [];
+        const hasInitialBadges =
+            hasNextSessionBadges || Boolean(nextCachedBadges);
+        hasInitialBadgesRef.current = hasInitialBadges;
+        setBadges(initialBadges);
+        setIsLoading(!hasInitialBadges);
         loadBadges();
         return () => controllerRef.current?.abort();
-    }, [loadBadges, navigation, username]);
+    }, [loadBadges, navigation, user?.badges, username]);
 
     if (isLoading) {
         return (

@@ -108,11 +108,11 @@ const useHarborTopicReading = ({
                     nextLastRead,
             );
             const unreadCount = Math.max(0, highestPostNumber - nextLastRead);
-            if (latestTopicRef.current) {
-                latestTopicRef.current.last_read_post_number = nextLastRead;
-                latestTopicRef.current.unread_posts = unreadCount;
-            }
             publishHarborTopicUpdate(topicId, {
+                detailPatch: {
+                    last_read_post_number: nextLastRead,
+                    unread_posts: unreadCount,
+                },
                 lastReadPostNumber: nextLastRead,
                 unreadCount,
                 isUnread: unreadCount > 0,
@@ -295,7 +295,7 @@ const useHarborTopicReading = ({
 
         const revealRequestedPost = async () => {
             if (composerRefreshAt) {
-                await loadTopic();
+                await loadTopic({force: true});
             }
             await scrollToPost(requestedPostNumber, { animated: false });
         };

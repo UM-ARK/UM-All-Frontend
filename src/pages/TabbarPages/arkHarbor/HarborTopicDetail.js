@@ -108,6 +108,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
     const {
         login,
         status: sessionStatus,
+        sessionGeneration,
         user: harborUser,
     } = useHarborSession();
     const { height, width } = useWindowDimensions();
@@ -164,6 +165,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
         onNewRepliesLoaded: revealNewReplies,
         onResetReading: resetTopicReading,
         sessionStatus,
+        sessionGeneration,
         sessionStatusRef,
         t,
         topicId,
@@ -1007,7 +1009,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
                         refreshing={isRefreshing}
                         onRefresh={() => {
                             trigger();
-                            loadTopic({ refresh: true });
+                            loadTopic({ refresh: true, force: true });
                         }}
                     />
                 }

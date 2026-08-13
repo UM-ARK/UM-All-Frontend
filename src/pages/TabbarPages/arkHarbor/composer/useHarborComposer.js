@@ -12,6 +12,9 @@ import {
     fetchHarborComposerMetadata,
     fetchHarborPostForEdit,
     fetchHarborTopic,
+    readCachedHarborCategories,
+    readCachedHarborComposerSettings,
+    readCachedHarborTags,
 } from '../../../../utils/harbor/harborApi';
 import {
     getHarborRateLimitDelayMs,
@@ -55,11 +58,32 @@ export function useHarborComposer({route, t}) {
     const [selectedTags, setSelectedTags] = useState([]);
     const [raw, setRaw] = useState(initialRaw);
     const [originalText, setOriginalText] = useState('');
-    const [categories, setCategories] = useState([]);
-    const [tags, setTags] = useState([]);
-    const [composerSettings, setComposerSettings] = useState(null);
+    const cachedCategoriesRef = useRef(readCachedHarborCategories());
+    const cachedTagsRef = useRef(readCachedHarborTags());
+    const cachedComposerSettingsRef = useRef(
+        readCachedHarborComposerSettings(),
+    );
+    const cachedCategories = cachedCategoriesRef.current;
+    const cachedTags = cachedTagsRef.current;
+    const cachedComposerSettings = cachedComposerSettingsRef.current;
+    const hasCachedNewTopicMetadata = Boolean(
+        cachedCategories && cachedTags && cachedComposerSettings,
+    );
+    const [categories, setCategories] = useState(
+        () => cachedCategories?.items || [],
+    );
+    const [tags, setTags] = useState(
+        () => (cachedTags?.items || []).filter(tag => !tag.pmOnly),
+    );
+    const [composerSettings, setComposerSettings] = useState(
+        cachedComposerSettings || null,
+    );
     const [isLoading, setIsLoading] = useState(
-        isEdit || supportsImages,
+        isEdit ||
+            (supportsImages &&
+                !(isNewTopic
+                    ? hasCachedNewTopicMetadata
+                    : cachedComposerSettings)),
     );
     const [loadError, setLoadError] = useState('');
     const [isRetryBlocked, setIsRetryBlocked] = useState(false);
@@ -88,7 +112,15 @@ export function useHarborComposer({route, t}) {
         loadControllerRef.current = controller;
         setLoadError('');
         setPublishRestriction('');
-        setIsLoading(true);
+        if (
+            forceRefresh ||
+            isEdit ||
+            (isNewTopic
+                ? !hasCachedNewTopicMetadata
+                : !cachedComposerSettings)
+        ) {
+            setIsLoading(true);
+        }
 
         try {
             if (isNewTopic) {
@@ -289,6 +321,8 @@ export function useHarborComposer({route, t}) {
             }
         }
     }, [
+        cachedComposerSettings,
+        hasCachedNewTopicMetadata,
         isEdit,
         isNewTopic,
         isReply,

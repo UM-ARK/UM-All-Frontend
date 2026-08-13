@@ -89,6 +89,7 @@ export const HarborSessionProvider = ({ children }) => {
     const [chatUnreadCount, setChatUnreadCount] = useState(0);
     const [chatChannels, setChatChannels] = useState([]);
     const [pendingLoginIntent, setPendingLoginIntent] = useState(null);
+    const [sessionGeneration, setSessionGeneration] = useState(0);
     const credentialsRef = useRef(null);
     const userRef = useRef(null);
     const mountedRef = useRef(true);
@@ -110,6 +111,7 @@ export const HarborSessionProvider = ({ children }) => {
 
     const applySignedOutState = useCallback((nextStatus = 'signedOut') => {
         sessionGenerationRef.current += 1;
+        const nextSessionGeneration = sessionGenerationRef.current;
         credentialsRef.current = null;
         lastValidationRef.current = 0;
         lastValidationAttemptRef.current = 0;
@@ -126,12 +128,14 @@ export const HarborSessionProvider = ({ children }) => {
             setInboxUnreadCount(0);
             setChatUnreadCount(0);
             setChatChannels([]);
+            setSessionGeneration(nextSessionGeneration);
             setStatus(nextStatus);
         }
     }, []);
 
     const activateSession = useCallback(credentials => {
         sessionGenerationRef.current += 1;
+        const nextSessionGeneration = sessionGenerationRef.current;
         credentialsRef.current = credentials;
         lastValidationRef.current = 0;
         lastValidationAttemptRef.current = 0;
@@ -147,6 +151,7 @@ export const HarborSessionProvider = ({ children }) => {
             setInboxUnreadCount(0);
             setChatUnreadCount(0);
             setChatChannels([]);
+            setSessionGeneration(nextSessionGeneration);
         }
         return sessionGenerationRef.current;
     }, []);
@@ -763,6 +768,7 @@ export const HarborSessionProvider = ({ children }) => {
             login,
             logout,
             pendingLoginIntent,
+            sessionGeneration,
             consumeLoginIntent,
             patchInboxUnreadCount,
             patchChatUnreadCount,
@@ -792,6 +798,7 @@ export const HarborSessionProvider = ({ children }) => {
             refreshChatChannels,
             refreshInboxUnreadCount,
             refreshProfile,
+            sessionGeneration,
             status,
             user,
         ],

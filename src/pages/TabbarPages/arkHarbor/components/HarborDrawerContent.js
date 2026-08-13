@@ -28,7 +28,10 @@ import Text from '../../../../components/AppText';
 import { uiStyle, useTheme } from '../../../../components/ThemeContext';
 import { openLink } from '../../../../utils/browser';
 import { logToFirebase } from '../../../../utils/firebaseAnalytics';
-import { fetchHarborCategories } from '../../../../utils/harbor/harborApi';
+import {
+    fetchHarborCategories,
+    readCachedHarborCategories,
+} from '../../../../utils/harbor/harborApi';
 import {
     buildHarborCategoryRows,
     getHarborCategoryKey,
@@ -345,8 +348,11 @@ const HarborDrawerContent = ({ navigation }) => {
     const tabBarHeight =
         useContext(BottomTabBarHeightContext) ?? insets.bottom + 49;
     const controllerRef = useRef(null);
-    const [categories, setCategories] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const cachedCategories = readCachedHarborCategories();
+    const [categories, setCategories] = useState(
+        () => cachedCategories?.items || [],
+    );
+    const [isLoading, setIsLoading] = useState(!cachedCategories?.items);
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [loadError, setLoadError] = useState(false);
     const [collapsedCategoryIds, setCollapsedCategoryIds] = useState(
@@ -368,7 +374,7 @@ const HarborDrawerContent = ({ navigation }) => {
 
         try {
             const response = await fetchHarborCategories({
-                signal: controller.signal,
+                forceRefresh: refreshing,
             });
             if (!controller.signal.aborted) {
                 setCategories(response.items);

@@ -389,10 +389,15 @@ const HarborComposerPage = ({route, navigation}) => {
                         try {
                             await deleteHarborPost(route.params?.postId);
                             publishHarborTopicUpdate(topicId, {
+                                invalidateActivity: true,
+                                invalidateSearch: true,
                                 reloadLists: true,
                                 ...(isFirstPost
-                                    ? {removeFromLists: true}
-                                    : {}),
+                                    ? {
+                                        removeDetail: true,
+                                        removeFromLists: true,
+                                    }
+                                    : {invalidateDetail: true}),
                             });
                             await clearDraftAfterPublish().catch(() => null);
                             Toast.show(

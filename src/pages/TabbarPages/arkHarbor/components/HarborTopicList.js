@@ -16,6 +16,12 @@ import { useTheme } from '../../../../components/ThemeContext';
 import { useHarborSession } from '../../../../contexts/HarborSessionContext';
 import { fetchHarborTopicList } from '../../../../utils/harbor/harborApi';
 import {
+    fetchHarborQueryCache,
+    patchHarborQueryCache,
+    readHarborQueryCache,
+    setHarborQueryNamespaceLimit,
+} from '../../../../utils/harbor/harborQueryCache';
+import {
     getHarborRateLimitDelayMs,
     isHarborRateLimited,
 } from '../../../../utils/harbor/harborRateLimit';
@@ -29,38 +35,12 @@ import {
 import HarborTopicCard from './HarborTopicCard';
 
 const SKELETON_ITEMS = ['one', 'two', 'three', 'four'];
-const TOPIC_LIST_CACHE_LIMIT = 20;
-const topicListCache = new Map();
+const TOPIC_LIST_CACHE_NAMESPACE = 'topic-list';
+const TOPIC_LIST_CACHE_FRESH_MS = 30 * 1000;
+const TOPIC_LIST_CACHE_STALE_MS = 5 * 60 * 1000;
 let sharedRateLimit = null;
 
-const getCachedTopicList = cacheKey => {
-    const cachedResult = topicListCache.get(cacheKey);
-    if (!cachedResult) {
-        return null;
-    }
-
-    topicListCache.delete(cacheKey);
-    topicListCache.set(cacheKey, cachedResult);
-    return cachedResult;
-};
-
-const cacheTopicList = (cacheKey, result) => {
-    if (!cacheKey) {
-        return;
-    }
-
-    topicListCache.delete(cacheKey);
-    topicListCache.set(cacheKey, {
-        items: result.items,
-        hasMore: result.hasMore,
-        nextPage: result.nextPage,
-    });
-
-    if (topicListCache.size > TOPIC_LIST_CACHE_LIMIT) {
-        const oldestKey = topicListCache.keys().next().value;
-        topicListCache.delete(oldestKey);
-    }
-};
+setHarborQueryNamespaceLimit(TOPIC_LIST_CACHE_NAMESPACE, 20);
 
 const getSourceKey = source =>
     [
@@ -93,7 +73,7 @@ const HarborTopicList = ({
 }) => {
     const { theme } = useTheme();
     const { t } = useTranslation('harbor');
-    const { status, user, login } = useHarborSession();
+    const { status, login } = useHarborSession();
     const isScreenFocused = useIsFocused();
     const isVisible = isActive && isScreenFocused;
     const controllerRef = useRef(null);
@@ -118,10 +98,11 @@ const HarborTopicList = ({
     const [rateLimit, setRateLimit] = useState(null);
     const [clock, setClock] = useState(() => Date.now());
     const sourceKey = getSourceKey(source);
-    const sessionIdentity =
-        status === 'signedIn' ? user?.username || 'member' : 'guest';
     const isSessionReady = status !== 'restoring' && status !== 'authorizing';
-    const cacheKey = `${sessionIdentity}:${sourceKey}`;
+    const cacheKey = useMemo(
+        () => ['topic-list', sourceKey],
+        [sourceKey],
+    );
 
     const replaceItems = useCallback(nextItems => {
         itemsRef.current = nextItems;
@@ -200,11 +181,20 @@ const HarborTopicList = ({
             setFirstPageError(null);
 
             try {
-                const result = await fetchTopicListPage({
-                    ...sourceRef.current,
-                    page: 0,
-                    signal: controller.signal,
-                });
+                const result = await fetchHarborQueryCache(
+                    activeCacheKeyRef.current,
+                    ({signal}) => fetchTopicListPage({
+                        ...sourceRef.current,
+                        page: 0,
+                        signal,
+                    }),
+                    {
+                        force: refresh,
+                        freshMs: TOPIC_LIST_CACHE_FRESH_MS,
+                        namespace: TOPIC_LIST_CACHE_NAMESPACE,
+                        staleMs: TOPIC_LIST_CACHE_STALE_MS,
+                    },
+                );
                 if (
                     controller.signal.aborted ||
                     requestGeneration !== requestGenerationRef.current
@@ -216,7 +206,6 @@ const HarborTopicList = ({
                 setNextPage(result.nextPage);
                 loadMoreErrorRef.current = null;
                 setLoadMoreError(null);
-                cacheTopicList(activeCacheKeyRef.current, result);
                 clearRateLimit();
                 onCapabilities?.(result.capabilities);
             } catch (error) {
@@ -267,7 +256,14 @@ const HarborTopicList = ({
             return undefined;
         }
 
-        const cachedResult = getCachedTopicList(cacheKey);
+        const freshResult = readHarborQueryCache(cacheKey, {
+            namespace: TOPIC_LIST_CACHE_NAMESPACE,
+            maxAgeMs: TOPIC_LIST_CACHE_FRESH_MS,
+        });
+        const cachedResult = freshResult || readHarborQueryCache(cacheKey, {
+            namespace: TOPIC_LIST_CACHE_NAMESPACE,
+            maxAgeMs: TOPIC_LIST_CACHE_STALE_MS,
+        });
         activeCacheKeyRef.current = cacheKey;
         firstPageErrorRef.current = null;
         setFirstPageError(null);
@@ -279,7 +275,10 @@ const HarborTopicList = ({
             setHasMore(cachedResult.hasMore);
             setNextPage(cachedResult.nextPage);
             setIsLoading(false);
-            loadFirstPage({ refresh: true, showIndicator: false });
+            onCapabilities?.(cachedResult.capabilities);
+            if (!freshResult) {
+                loadFirstPage({ refresh: true, showIndicator: false });
+            }
         } else {
             replaceItems([]);
             setHasMore(false);
@@ -293,7 +292,7 @@ const HarborTopicList = ({
             firstPageLoadingRef.current = false;
             controllerRef.current?.abort();
         };
-    }, [cacheKey, isSessionReady, loadFirstPage, replaceItems]);
+    }, [cacheKey, isSessionReady, loadFirstPage, onCapabilities, replaceItems]);
 
     useEffect(() => {
         return subscribeHarborTopicUpdates((topicId, patch) => {
@@ -305,18 +304,28 @@ const HarborTopicList = ({
                         item.id === topicId ? { ...item, ...itemPatch } : item,
                     );
             replaceItems(updateItems(itemsRef.current));
-            topicListCache.forEach((cachedResult, cachedKey) => {
-                topicListCache.set(cachedKey, {
-                    ...cachedResult,
-                    items: updateItems(cachedResult.items),
-                });
-            });
             // 發帖／刪帖等需重排時刷新當前列表；主頁僅有 latest／top，不可再限死 new／unread
-            if (reloadLists) {
+            if (reloadLists && isVisible) {
                 loadFirstPage({ refresh: true, showIndicator: false });
             }
         });
-    }, [loadFirstPage, replaceItems]);
+    }, [isVisible, loadFirstPage, replaceItems]);
+
+    useEffect(() => {
+        if (
+            isVisible &&
+            isSessionReady &&
+            !readHarborQueryCache(cacheKey, {
+                namespace: TOPIC_LIST_CACHE_NAMESPACE,
+                maxAgeMs: TOPIC_LIST_CACHE_STALE_MS,
+            })
+        ) {
+            loadFirstPage({
+                refresh: itemsRef.current.length > 0,
+                showIndicator: false,
+            });
+        }
+    }, [cacheKey, isSessionReady, isVisible, loadFirstPage]);
 
     useEffect(() => {
         if (!rateLimit?.until) {
@@ -391,11 +400,21 @@ const HarborTopicList = ({
                 replaceItems(nextItems);
                 setHasMore(result.hasMore);
                 setNextPage(result.nextPage);
-                cacheTopicList(activeCacheKeyRef.current, {
-                    items: nextItems,
-                    hasMore: result.hasMore,
-                    nextPage: result.nextPage,
-                });
+                patchHarborQueryCache(
+                    activeCacheKeyRef.current,
+                    current => ({
+                        ...current,
+                        items: nextItems,
+                        hasMore: result.hasMore,
+                        nextPage: result.nextPage,
+                        capabilities:
+                            result.capabilities || current?.capabilities,
+                    }),
+                    {
+                        namespace: TOPIC_LIST_CACHE_NAMESPACE,
+                        preserveUpdatedAt: true,
+                    },
+                );
                 clearRateLimit();
                 onCapabilities?.(result.capabilities);
             } catch (error) {

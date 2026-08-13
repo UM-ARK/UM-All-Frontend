@@ -16,6 +16,12 @@ import {
     fetchHarborTopicPosts,
 } from '../../../../utils/harbor/harborApi';
 import {
+    fetchHarborQueryCache,
+    patchHarborQueryCache,
+    readHarborQueryCache,
+    setHarborQueryNamespaceLimit,
+} from '../../../../utils/harbor/harborQueryCache';
+import {
     appendTopicPosts,
     collectNestedPosts,
     extractPostImages,
@@ -29,6 +35,11 @@ import {
 } from './harborTopicModels';
 
 const TOPIC_POST_BATCH_SIZE = 20;
+const TOPIC_CACHE_NAMESPACE = 'topic';
+const TOPIC_CACHE_FRESH_MS = 60 * 1000;
+const TOPIC_CACHE_STALE_MS = 10 * 60 * 1000;
+
+setHarborQueryNamespaceLimit(TOPIC_CACHE_NAMESPACE, 20);
 
 const loadNestedReplyPreviews = async ({signal, topic, topicId}) => {
     const previewLimit = getNestedReplyPreviewLimit(topic?.posts_count);
@@ -106,18 +117,29 @@ const loadNestedReplyPreviews = async ({signal, topic, topicId}) => {
 const useHarborTopicData = ({
     onNewRepliesLoaded,
     onResetReading,
+    sessionGeneration,
     sessionStatus,
     sessionStatusRef,
     t,
     topicId,
 }) => {
     const requestGenerationRef = useRef(0);
-    const controllerRef = useRef(null);
     const latestTopicRef = useRef(null);
     const trackedPageViewTopicIdRef = useRef(null);
     const pendingTopicRef = useRef(null);
     const adjacentLoadingRef = useRef({ previous: false, next: false });
-    const [topic, setTopic] = useState(null);
+    const topicSessionGenerationRef = useRef(sessionGeneration);
+    const topicCacheKey = useMemo(() => ['topic', topicId], [topicId]);
+    const isTopicSessionReady =
+        sessionStatus !== 'restoring' && sessionStatus !== 'authorizing';
+    const [topic, setTopicState] = useState(() =>
+        isTopicSessionReady
+            ? readHarborQueryCache(['topic', topicId], {
+                namespace: TOPIC_CACHE_NAMESPACE,
+                maxAgeMs: TOPIC_CACHE_STALE_MS,
+            }) || null
+            : null,
+    );
     const [topicSessionStatus, setTopicSessionStatus] = useState(sessionStatus);
     const [isLoading, setIsLoading] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
@@ -195,6 +217,28 @@ const useHarborTopicData = ({
         latestTopicRef.current = topic;
     }, [topic]);
 
+    const setTopic = useCallback(
+        updater => {
+            setTopicState(current => {
+                const nextTopic =
+                    typeof updater === 'function' ? updater(current) : updater;
+                if (nextTopic) {
+                    patchHarborQueryCache(
+                        topicCacheKey,
+                        () => nextTopic,
+                        {
+                            namespace: TOPIC_CACHE_NAMESPACE,
+                            preserveUpdatedAt: true,
+                        },
+                    );
+                }
+                latestTopicRef.current = nextTopic;
+                return nextTopic;
+            });
+        },
+        [topicCacheKey],
+    );
+
     useEffect(() => {
         sessionStatusRef.current = sessionStatus;
     }, [sessionStatus, sessionStatusRef]);
@@ -222,19 +266,58 @@ const useHarborTopicData = ({
                 },
             };
         });
-    }, []);
+    }, [setTopic]);
+
+    const hydrateTopic = useCallback(
+        cachedTopic => {
+            const serverLastReadPostNumber = Number(
+                cachedTopic?.last_read_post_number || 0,
+            );
+            const serverUnreadCount = Number(
+                cachedTopic?.unread_posts ?? cachedTopic?.new_posts ?? 0,
+            );
+            setUnreadAfterPostNumber(
+                serverUnreadCount > 0 ? serverLastReadPostNumber : -1,
+            );
+            onResetReading();
+            latestTopicRef.current = cachedTopic;
+            setTopicState(cachedTopic);
+        },
+        [onResetReading],
+    );
 
     const loadTopic = useCallback(
-        async ({ refresh = false } = {}) => {
+        async ({ refresh = false, force = refresh } = {}) => {
             const requestGeneration = ++requestGenerationRef.current;
-            controllerRef.current?.abort();
-            const controller = new AbortController();
-            controllerRef.current = controller;
             const requestSessionStatus = sessionStatusRef.current;
+
+            const freshTopic = !force
+                ? readHarborQueryCache(topicCacheKey, {
+                    namespace: TOPIC_CACHE_NAMESPACE,
+                    maxAgeMs: TOPIC_CACHE_FRESH_MS,
+                })
+                : null;
+            if (freshTopic) {
+                if (latestTopicRef.current !== freshTopic) {
+                    hydrateTopic(freshTopic);
+                }
+                setTopicSessionStatus(requestSessionStatus);
+                setErrorMessage('');
+                setIsLoading(false);
+                setIsRefreshing(false);
+                return;
+            }
+            const staleTopic = readHarborQueryCache(topicCacheKey, {
+                namespace: TOPIC_CACHE_NAMESPACE,
+                maxAgeMs: TOPIC_CACHE_STALE_MS,
+            });
+            if (staleTopic && !latestTopicRef.current) {
+                hydrateTopic(staleTopic);
+            }
 
             if (refresh) {
                 setIsRefreshing(true);
-            } else {
+            } else if (!staleTopic) {
                 setIsLoading(true);
             }
             setErrorMessage('');
@@ -243,7 +326,6 @@ const useHarborTopicData = ({
                 setErrorMessage(t('帖子地址無效'));
                 setIsLoading(false);
                 setIsRefreshing(false);
-                controllerRef.current = null;
                 return;
             }
 
@@ -251,20 +333,31 @@ const useHarborTopicData = ({
                 const shouldTrackPageView =
                     !refresh &&
                     trackedPageViewTopicIdRef.current !== topicId;
-                let nextTopic = await fetchHarborTopic(topicId, {
-                    signal: controller.signal,
-                    trackPageView: shouldTrackPageView,
-                });
-                nextTopic = await loadNestedReplyPreviews({
-                    signal: controller.signal,
-                    topic: nextTopic,
-                    topicId,
-                });
+                let nextTopic = await fetchHarborQueryCache(
+                    topicCacheKey,
+                    async ({signal}) => {
+                        let fetchedTopic = await fetchHarborTopic(topicId, {
+                            signal,
+                            trackPageView: shouldTrackPageView,
+                        });
+                        fetchedTopic = await loadNestedReplyPreviews({
+                            signal,
+                            topic: fetchedTopic,
+                            topicId,
+                        });
+                        return fetchedTopic;
+                    },
+                    {
+                        force: force || Boolean(staleTopic),
+                        freshMs: TOPIC_CACHE_FRESH_MS,
+                        namespace: TOPIC_CACHE_NAMESPACE,
+                        staleMs: TOPIC_CACHE_STALE_MS,
+                    },
+                );
                 if (shouldTrackPageView) {
                     trackedPageViewTopicIdRef.current = topicId;
                 }
                 if (
-                    controller.signal.aborted ||
                     requestGeneration !== requestGenerationRef.current
                 ) {
                     return;
@@ -289,7 +382,7 @@ const useHarborTopicData = ({
                     if (newPostIds.length > 0) {
                         pendingTopicRef.current = nextTopic;
                         setPendingNewPostIds(newPostIds);
-                        setTopic(current => ({
+                        setTopicState(current => ({
                             ...current,
                             ...nextTopic,
                             post_stream: current.post_stream,
@@ -315,7 +408,7 @@ const useHarborTopicData = ({
                 latestTopicRef.current = nextTopic;
                 setTopic(nextTopic);
             } catch (error) {
-                if (!isCanceledRequest(error, controller.signal)) {
+                if (!isCanceledRequest(error)) {
                     setErrorMessage(t('帖子載入失敗，請檢查網絡後再試'));
                     if (refresh) {
                         Toast.show(t('帖子更新失敗，請稍後再試'));
@@ -325,11 +418,10 @@ const useHarborTopicData = ({
                 if (requestGeneration === requestGenerationRef.current) {
                     setIsLoading(false);
                     setIsRefreshing(false);
-                    controllerRef.current = null;
                 }
             }
         },
-        [onResetReading, sessionStatusRef, t, topicId],
+        [hydrateTopic, onResetReading, sessionStatusRef, setTopic, t, topicCacheKey, topicId],
     );
 
     useEffect(() => {
@@ -338,26 +430,63 @@ const useHarborTopicData = ({
     }, [topicId]);
 
     useEffect(() => {
+        if (topicSessionGenerationRef.current === sessionGeneration) {
+            return;
+        }
+        topicSessionGenerationRef.current = sessionGeneration;
+        requestGenerationRef.current += 1;
+        trackedPageViewTopicIdRef.current = null;
+        latestTopicRef.current = null;
+        pendingTopicRef.current = null;
+        setPendingNewPostIds([]);
+        setUnreadAfterPostNumber(-1);
+        setTopicState(null);
+        setIsLoading(true);
+        onResetReading();
+        if (isTopicSessionReady) {
+            loadTopic({force: true});
+        }
+    }, [isTopicSessionReady, loadTopic, onResetReading, sessionGeneration]);
+
+    useEffect(() => {
         if (
             topic?.id &&
             topicSessionStatus !== sessionStatus
         ) {
-            loadTopic({ refresh: true });
+            latestTopicRef.current = null;
+            pendingTopicRef.current = null;
+            setPendingNewPostIds([]);
+            setUnreadAfterPostNumber(-1);
+            setTopicState(null);
+            onResetReading();
+            loadTopic({force: true});
         }
-    }, [loadTopic, sessionStatus, topic?.id, topicSessionStatus]);
+    }, [loadTopic, onResetReading, sessionStatus, topic?.id, topicSessionStatus]);
 
     useEffect(() => {
+        if (!isTopicSessionReady) {
+            return undefined;
+        }
         logToFirebase('openPage', {
             page: 'HarborTopicDetail',
             topicId,
         });
+        const cachedTopic = readHarborQueryCache(topicCacheKey, {
+            namespace: TOPIC_CACHE_NAMESPACE,
+            maxAgeMs: TOPIC_CACHE_STALE_MS,
+        });
+        if (cachedTopic) {
+            hydrateTopic(cachedTopic);
+        } else {
+            latestTopicRef.current = null;
+            setTopicState(null);
+        }
         loadTopic();
 
         return () => {
             requestGenerationRef.current += 1;
-            controllerRef.current?.abort();
         };
-    }, [loadTopic, topicId]);
+    }, [hydrateTopic, isTopicSessionReady, loadTopic, topicCacheKey, topicId]);
 
     const loadAdjacentPosts = useCallback(
         async direction => {
@@ -511,7 +640,7 @@ const useHarborTopicData = ({
                 }
             }
         },
-        [t, topicId],
+        [setTopic, t, topicId],
     );
 
     const toggleNestedReplies = useCallback(
@@ -624,6 +753,7 @@ const useHarborTopicData = ({
             latestTopicRef,
             nestedReplyLimits,
             pendingNestedPostNumbers,
+            setTopic,
             t,
             topicId,
         ],
@@ -671,6 +801,7 @@ const useHarborTopicData = ({
         isLoadingNext,
         onNewRepliesLoaded,
         pendingNewPostIds,
+        setTopic,
         t,
         topicId,
     ]);

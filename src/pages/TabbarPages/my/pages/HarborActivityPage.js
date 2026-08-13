@@ -15,9 +15,9 @@ import {scale, verticalScale} from 'react-native-size-matters';
 import {useTheme} from '../../../../components/ThemeContext';
 import {useHarborSession} from '../../../../contexts/HarborSessionContext';
 import {
-    fetchHarborUserActions,
-    fetchHarborUserCreatedTopics,
-} from '../../../../utils/harbor/harborApi';
+    fetchHarborActivityQuery,
+    readHarborActivityQuery,
+} from '../../../../utils/harbor/harborPageQueries';
 import {trigger} from '../../../../utils/trigger';
 import {HarborInlineRetry} from '../../arkHarbor/components/HarborListStates';
 import HarborTopicCard from '../../arkHarbor/components/HarborTopicCard';
@@ -52,12 +52,23 @@ const HarborActivityPage = ({
         '';
     const controllerRef = React.useRef(null);
     const loadingMoreRef = React.useRef(false);
-    const [items, setItems] = React.useState([]);
-    const [isLoading, setIsLoading] = React.useState(true);
+    const requestGenerationRef = React.useRef(0);
+    const initialResult = React.useMemo(
+        () => readHarborActivityQuery(username, kind, 0),
+        [kind, username],
+    );
+    const [items, setItems] = React.useState(initialResult?.items || []);
+    const [isLoading, setIsLoading] = React.useState(!initialResult);
     const [isRefreshing, setIsRefreshing] = React.useState(false);
     const [isLoadingMore, setIsLoadingMore] = React.useState(false);
-    const [hasMore, setHasMore] = React.useState(false);
-    const [nextCursor, setNextCursor] = React.useState(0);
+    const [hasMore, setHasMore] = React.useState(
+        initialResult?.hasMore || false,
+    );
+    const [nextCursor, setNextCursor] = React.useState(
+        isTopicsKind
+            ? initialResult?.nextPage || 0
+            : initialResult?.nextOffset || 0,
+    );
     const [loadError, setLoadError] = React.useState(false);
     const [loadMoreError, setLoadMoreError] = React.useState(false);
 
@@ -75,21 +86,32 @@ const HarborActivityPage = ({
             if (refresh) {
                 setIsRefreshing(true);
             } else {
-                setIsLoading(true);
+                const cachedResult = readHarborActivityQuery(
+                    username,
+                    kind,
+                    0,
+                );
+                if (cachedResult) {
+                    setItems(cachedResult.items);
+                    setHasMore(cachedResult.hasMore);
+                    setNextCursor(
+                        isTopicsKind
+                            ? cachedResult.nextPage
+                            : cachedResult.nextOffset,
+                    );
+                } else {
+                    setIsLoading(true);
+                }
             }
             setLoadError(false);
 
             try {
-                const result = isTopicsKind
-                    ? await fetchHarborUserCreatedTopics(username, {
-                          page: 0,
-                          signal: controller.signal,
-                      })
-                    : await fetchHarborUserActions(username, {
-                          kind,
-                          offset: 0,
-                          signal: controller.signal,
-                      });
+                const result = await fetchHarborActivityQuery(
+                    username,
+                    kind,
+                    0,
+                    {force: refresh},
+                );
                 if (controller.signal.aborted) {
                     return;
                 }
@@ -119,9 +141,24 @@ const HarborActivityPage = ({
             navigation.goBack();
             return undefined;
         }
+        const cachedResult = readHarborActivityQuery(username, kind, 0);
+        requestGenerationRef.current += 1;
+        loadingMoreRef.current = false;
+        setIsLoadingMore(false);
+        setItems(cachedResult?.items || []);
+        setHasMore(cachedResult?.hasMore || false);
+        setNextCursor(
+            isTopicsKind
+                ? cachedResult?.nextPage || 0
+                : cachedResult?.nextOffset || 0,
+        );
+        setIsLoading(!cachedResult);
         loadFirstPage();
-        return () => controllerRef.current?.abort();
-    }, [loadFirstPage, navigation, username]);
+        return () => {
+            requestGenerationRef.current += 1;
+            controllerRef.current?.abort();
+        };
+    }, [isTopicsKind, kind, loadFirstPage, navigation, username]);
 
     const loadMore = React.useCallback(
         async ({force = false} = {}) => {
@@ -135,17 +172,19 @@ const HarborActivityPage = ({
                 return;
             }
             loadingMoreRef.current = true;
+            const requestGeneration = requestGenerationRef.current;
             setIsLoadingMore(true);
             setLoadMoreError(false);
             try {
-                const result = isTopicsKind
-                    ? await fetchHarborUserCreatedTopics(username, {
-                          page: nextCursor,
-                      })
-                    : await fetchHarborUserActions(username, {
-                          kind,
-                          offset: nextCursor,
-                      });
+                const result = await fetchHarborActivityQuery(
+                    username,
+                    kind,
+                    nextCursor,
+                    {force},
+                );
+                if (requestGeneration !== requestGenerationRef.current) {
+                    return;
+                }
                 setItems(currentItems => {
                     const seenIds = new Set(currentItems.map(item => item.id));
                     return [
@@ -158,10 +197,14 @@ const HarborActivityPage = ({
                     isTopicsKind ? result.nextPage : result.nextOffset,
                 );
             } catch (error) {
-                setLoadMoreError(true);
+                if (requestGeneration === requestGenerationRef.current) {
+                    setLoadMoreError(true);
+                }
             } finally {
-                loadingMoreRef.current = false;
-                setIsLoadingMore(false);
+                if (requestGeneration === requestGenerationRef.current) {
+                    loadingMoreRef.current = false;
+                    setIsLoadingMore(false);
+                }
             }
         },
         [

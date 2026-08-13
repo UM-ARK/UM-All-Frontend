@@ -26,6 +26,8 @@ import { uiStyle, useTheme } from '../../../components/ThemeContext';
 import {
     fetchHarborCategories,
     fetchHarborTags,
+    readCachedHarborCategories,
+    readCachedHarborTags,
 } from '../../../utils/harbor/harborApi';
 import {
     buildHarborCategoryRows,
@@ -306,14 +308,17 @@ const HarborDirectoryPane = ({
     const { t } = useTranslation('harbor');
     const controllerRef = useRef(null);
     const requestGenerationRef = useRef(0);
-    const [items, setItems] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const isCategory = type === 'category';
+    const cachedDirectory = isCategory
+        ? readCachedHarborCategories()
+        : readCachedHarborTags();
+    const [items, setItems] = useState(() => cachedDirectory?.items || []);
+    const [isLoading, setIsLoading] = useState(!cachedDirectory?.items);
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [loadError, setLoadError] = useState(null);
     const [collapsedCategoryIds, setCollapsedCategoryIds] = useState(
         () => new Set(),
     );
-    const isCategory = type === 'category';
 
     const loadDirectory = useCallback(
         async ({ refresh = false } = {}) => {
@@ -330,8 +335,8 @@ const HarborDirectoryPane = ({
 
             try {
                 const result = isCategory
-                    ? await fetchHarborCategories({ signal: controller.signal })
-                    : await fetchHarborTags({ signal: controller.signal });
+                    ? await fetchHarborCategories({forceRefresh: refresh})
+                    : await fetchHarborTags({forceRefresh: refresh});
                 if (
                     controller.signal.aborted ||
                     requestGeneration !== requestGenerationRef.current

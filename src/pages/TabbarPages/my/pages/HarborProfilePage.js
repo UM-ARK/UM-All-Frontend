@@ -36,14 +36,19 @@ import HarborBadgeIcon from '../components/HarborBadgeIcon';
 import HarborUsernameEditorModal from '../components/HarborUsernameEditorModal';
 import {
     createHarborDirectMessageChannel,
-    fetchHarborProfileMetadata,
-    fetchHarborUserProfile,
     resolveCanUploadCustomAvatar,
     selectHarborAvatar,
     updateHarborAvatar,
     updateHarborProfile,
     updateHarborUsername,
 } from '../../../../utils/harbor/harborApi';
+import {
+    fetchHarborProfileMetadataQuery,
+    fetchHarborProfileQuery,
+    invalidateHarborProfileQuery,
+    readHarborProfileMetadataQuery,
+    readHarborProfileQuery,
+} from '../../../../utils/harbor/harborPageQueries';
 import { openLink } from '../../../../utils/browser';
 import { ARK_HARBOR } from '../../../../utils/pathMap';
 import { trigger } from '../../../../utils/trigger';
@@ -187,11 +192,11 @@ const HarborProfilePage = ({ navigation, route }) => {
         sessionUsername &&
         requestedUsername.toLowerCase() === sessionUsername.toLowerCase(),
     );
-    const [viewedUser, setViewedUser] = React.useState(
-        isOwnProfile ? user : null,
+    const [viewedUser, setViewedUser] = React.useState(() =>
+        isOwnProfile ? user : readHarborProfileQuery(requestedUsername),
     );
     const [isLoadingProfile, setIsLoadingProfile] = React.useState(
-        !isOwnProfile,
+        !isOwnProfile && !readHarborProfileQuery(requestedUsername),
     );
     const [profileError, setProfileError] = React.useState(false);
     const [mode, setMode] = React.useState(
@@ -209,23 +214,37 @@ const HarborProfilePage = ({ navigation, route }) => {
     const [workStatus, setWorkStatus] = React.useState(
         profile.workStatus || '',
     );
-    const [workStatusField, setWorkStatusField] = React.useState(null);
-    const [isLoadingMetadata, setIsLoadingMetadata] = React.useState(true);
+    const initialMetadata = React.useMemo(
+        () => readHarborProfileMetadataQuery(),
+        [],
+    );
+    const [workStatusField, setWorkStatusField] = React.useState(
+        initialMetadata?.workStatusField || null,
+    );
+    const [isLoadingMetadata, setIsLoadingMetadata] = React.useState(
+        !initialMetadata,
+    );
     const [metadataError, setMetadataError] = React.useState(false);
     const [isSaving, setIsSaving] = React.useState(false);
     const [isUpdatingUsername, setIsUpdatingUsername] = React.useState(false);
     const [isUsernameEditorVisible, setIsUsernameEditorVisible] =
         React.useState(false);
-    const [minUsernameLength, setMinUsernameLength] = React.useState(3);
-    const [maxUsernameLength, setMaxUsernameLength] = React.useState(20);
+    const [minUsernameLength, setMinUsernameLength] = React.useState(
+        initialMetadata?.minUsernameLength || 3,
+    );
+    const [maxUsernameLength, setMaxUsernameLength] = React.useState(
+        initialMetadata?.maxUsernameLength || 20,
+    );
     const [isOpeningChat, setIsOpeningChat] = React.useState(false);
     const [isUpdatingAvatar, setIsUpdatingAvatar] = React.useState(false);
     const [isAvatarPickerVisible, setIsAvatarPickerVisible] =
         React.useState(false);
     const [pendingAvatar, setPendingAvatar] = React.useState(null);
-    const [selectableAvatars, setSelectableAvatars] = React.useState([]);
+    const [selectableAvatars, setSelectableAvatars] = React.useState(
+        initialMetadata?.selectableAvatars || [],
+    );
     const [selectableAvatarsMode, setSelectableAvatarsMode] =
-        React.useState('disabled');
+        React.useState(initialMetadata?.selectableAvatarsMode || 'disabled');
     const canUploadCustomAvatar = React.useMemo(
         () =>
             resolveCanUploadCustomAvatar(
@@ -262,14 +281,17 @@ const HarborProfilePage = ({ navigation, route }) => {
             return;
         }
 
-        const controller = new AbortController();
         let isActive = true;
-        setIsLoadingProfile(true);
+        const cachedProfile = readHarborProfileQuery(requestedUsername);
+        if (cachedProfile) {
+            setViewedUser(cachedProfile);
+        } else {
+            setViewedUser(null);
+            setIsLoadingProfile(true);
+        }
         setProfileError(false);
 
-        fetchHarborUserProfile(requestedUsername, {
-            signal: controller.signal,
-        })
+        fetchHarborProfileQuery(requestedUsername)
             .then(nextUser => {
                 if (isActive) {
                     setViewedUser(nextUser);
@@ -277,7 +299,7 @@ const HarborProfilePage = ({ navigation, route }) => {
             })
             .catch(error => {
                 if (isActive && error?.name !== 'CanceledError') {
-                    setProfileError(true);
+                    setProfileError(!cachedProfile);
                 }
             })
             .finally(() => {
@@ -288,7 +310,6 @@ const HarborProfilePage = ({ navigation, route }) => {
 
         return () => {
             isActive = false;
-            controller.abort();
         };
     }, [isOwnProfile, requestedUsername, user]);
 
@@ -300,7 +321,6 @@ const HarborProfilePage = ({ navigation, route }) => {
     }, [profile]);
 
     React.useEffect(() => {
-        const controller = new AbortController();
         let isActive = true;
 
         if (!isOwnProfile) {
@@ -308,7 +328,19 @@ const HarborProfilePage = ({ navigation, route }) => {
             return undefined;
         }
 
-        fetchHarborProfileMetadata({signal: controller.signal})
+        const cachedMetadata = readHarborProfileMetadataQuery();
+        if (cachedMetadata) {
+            setWorkStatusField(cachedMetadata.workStatusField);
+            setSelectableAvatars(cachedMetadata.selectableAvatars);
+            setSelectableAvatarsMode(
+                cachedMetadata.selectableAvatarsMode || 'disabled',
+            );
+            setMinUsernameLength(cachedMetadata.minUsernameLength || 3);
+            setMaxUsernameLength(cachedMetadata.maxUsernameLength || 20);
+            setIsLoadingMetadata(false);
+        }
+
+        fetchHarborProfileMetadataQuery()
             .then(metadata => {
                 if (isActive) {
                     setWorkStatusField(metadata.workStatusField);
@@ -348,7 +380,6 @@ const HarborProfilePage = ({ navigation, route }) => {
 
         return () => {
             isActive = false;
-            controller.abort();
         };
     }, [isOwnProfile]);
 
@@ -574,6 +605,7 @@ const HarborProfilePage = ({ navigation, route }) => {
                     }
                     : {}),
             });
+            invalidateHarborProfileQuery(username);
             await refresh();
             Alert.alert(t('已儲存'), t('Harbor 個人資料已更新。'));
         } catch (error) {
@@ -591,6 +623,8 @@ const HarborProfilePage = ({ navigation, route }) => {
         setIsUpdatingUsername(true);
         try {
             const result = await updateHarborUsername(username, newUsername);
+            invalidateHarborProfileQuery(username);
+            invalidateHarborProfileQuery(newUsername);
             const nextUser = await refresh();
             const resolvedUsername =
                 result?.username || nextUser?.username || newUsername;
@@ -708,6 +742,7 @@ const HarborProfilePage = ({ navigation, route }) => {
                 await selectHarborAvatar(username, pendingAvatar.value);
             }
             syncIdentity().catch(() => null);
+            invalidateHarborProfileQuery(username);
             await refresh();
             handleCloseAvatarPicker();
         } catch (error) {

@@ -1983,6 +1983,7 @@ describe('Harbor API 資料正規化', () => {
                 '/categories.json',
                 {
                     params: {include_subcategories: true},
+                    signal: expect.anything(),
                     skipHarborCredentials: true,
                 },
             ],
@@ -2084,12 +2085,14 @@ describe('Harbor API 資料正規化', () => {
                 {
                     params: {include_subcategories: true},
                     harborCredentials: credentials,
+                    signal: expect.anything(),
                 },
             ],
             [
                 '/categories.json',
                 {
                     params: {include_subcategories: true},
+                    signal: expect.anything(),
                     skipHarborCredentials: true,
                 },
             ],
@@ -2133,6 +2136,7 @@ describe('Harbor API 資料正規化', () => {
         );
         expect(getSpy).toHaveBeenNthCalledWith(2, '/categories.json', {
             params: {include_subcategories: true},
+            signal: expect.anything(),
             skipHarborCredentials: true,
         });
     });

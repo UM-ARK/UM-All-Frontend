@@ -252,6 +252,9 @@ const useHarborTopicActions = ({
                     : await deleteHarborPost(post.id);
                 if (isFirstPost) {
                     publishHarborTopicUpdate(topicId, {
+                        invalidateActivity: true,
+                        invalidateSearch: true,
+                        removeDetail: true,
                         reloadLists: true,
                         removeFromLists: true,
                     });
@@ -279,6 +282,8 @@ const useHarborTopicActions = ({
                     ),
                 }));
                 publishHarborTopicUpdate(topicId, {
+                    invalidateActivity: true,
+                    invalidateSearch: true,
                     reloadLists: true,
                     replyCount: Math.max(previousPostsCount - 2, 0),
                 });
