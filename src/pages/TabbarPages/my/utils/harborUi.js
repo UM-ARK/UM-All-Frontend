@@ -131,6 +131,28 @@ const actorAvatarNotificationTypes = new Set([
     'private_message',
     'invited_to_private_message',
 ]);
+// 這些通知的 post_number 指向「自己被互動的那則」
+const ownPostNotificationTypes = new Set([
+    'liked',
+    'liked_consolidated',
+    'reaction',
+    'boost',
+]);
+
+function getHarborNotificationLocationLabel(item, translate) {
+    const postNumber = Number(item?.postNumber);
+    if (!Number.isInteger(postNumber) || postNumber < 1) {
+        return '';
+    }
+    const isOwnPost = ownPostNotificationTypes.has(item?.typeName);
+    if (postNumber === 1) {
+        return translate(isOwnPost ? '你的首帖' : '首帖');
+    }
+    const template = translate(
+        isOwnPost ? '你的第 {{count}} 樓' : '第 {{count}} 樓',
+    );
+    return String(template).replace(/\{\{count\}\}/g, String(postNumber));
+}
 
 function decodeHarborPathPart(value) {
     try {
@@ -195,7 +217,9 @@ function getHarborPathTarget(value) {
 
 export function getHarborNotificationPresentation(item, translate = value => value) {
     const meta = notificationMeta[item?.typeName] || defaultNotificationMeta;
-    const label = translate(meta.label);
+    const typeLabel = translate(meta.label);
+    const location = getHarborNotificationLocationLabel(item, translate);
+    const label = location ? `${typeLabel} · ${location}` : typeLabel;
     const actor = item?.actingUsername || '';
     const context = actor || item?.data?.group_name || '';
     const link =
@@ -212,10 +236,11 @@ export function getHarborNotificationPresentation(item, translate = value => val
         context ||
         (meta === defaultNotificationMeta
             ? translate('Harbor 通知')
-            : label);
+            : typeLabel);
     const excerpt =
         item?.excerpt ||
-        (context && title !== context ? context : '');
+        (context && title !== context ? context : '') ||
+        location;
 
     return {
         icon: meta.icon,

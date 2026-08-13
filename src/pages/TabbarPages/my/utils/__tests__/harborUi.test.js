@@ -53,6 +53,45 @@ describe('Harbor 消息中心', () => {
             excerpt: 'reader',
         });
         expect(
+            getHarborNotificationPresentation(
+                {
+                    typeName: 'reaction',
+                    actingUsername: 'reader',
+                    title: '測試話題',
+                    postNumber: 1,
+                },
+                value => `t:${value}`,
+            ),
+        ).toEqual({
+            icon: 'happy-outline',
+            isAdmin: false,
+            label: 't:反應 · t:你的首帖',
+            title: '測試話題',
+            excerpt: 'reader',
+        });
+        expect(
+            getHarborNotificationPresentation(
+                {
+                    typeName: 'reaction',
+                    actingUsername: 'yyyyyounger',
+                    title: '可以使用 Event 功能開啟時間表',
+                    postNumber: 3,
+                },
+                value => `t:${value}`,
+            ).label,
+        ).toBe('t:反應 · t:你的第 3 樓');
+        expect(
+            getHarborNotificationPresentation(
+                {
+                    typeName: 'replied',
+                    actingUsername: 'reader',
+                    title: '新回覆',
+                    postNumber: 5,
+                },
+                value => `t:${value}`,
+            ).label,
+        ).toBe('t:回覆 · t:第 5 樓');
+        expect(
             getHarborNotificationTarget(
                 {topicId: 31, postNumber: 2},
                 'ark-user',
