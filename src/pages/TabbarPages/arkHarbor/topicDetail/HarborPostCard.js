@@ -592,6 +592,7 @@ const HarborPostCard = memo(
         ];
         const reactionControl = reactionsEnabled ? (
             <HarborReactionControl
+                allowPicker={false}
                 currentReaction={currentReaction}
                 disabled={reactionDisabled}
                 hitSlop={8}

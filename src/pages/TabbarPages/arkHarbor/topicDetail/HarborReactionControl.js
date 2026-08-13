@@ -162,6 +162,7 @@ const HarborReactionIcon = ({ name, size = scale(24), color }) => {
 };
 
 const HarborReactionControl = ({
+    allowPicker = true,
     children,
     currentReaction,
     disabled,
@@ -270,15 +271,17 @@ const HarborReactionControl = ({
                 ref={anchorRef}
                 accessibilityRole="button"
                 accessibilityLabel={accessibilityLabel}
-                accessibilityHint={t('長按選擇其他回應')}
-                delayLongPress={400}
+                accessibilityHint={
+                    allowPicker ? t('長按選擇其他回應') : undefined
+                }
+                delayLongPress={allowPicker ? 400 : undefined}
                 disabled={pending}
                 hitSlop={hitSlop}
                 onPress={handlePress}
                 onPressIn={() => {
                     longPressTriggeredRef.current = false;
                 }}
-                onLongPress={handleLongPress}
+                onLongPress={allowPicker ? handleLongPress : undefined}
                 style={style}>
                 {children}
             </Pressable>
