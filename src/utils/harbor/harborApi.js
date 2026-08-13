@@ -1665,6 +1665,7 @@ async function buildNormalizedTopicListResult(data, page) {
 export async function fetchHarborTopicList({
     view = 'latest',
     page = 0,
+    period,
     categoryId,
     categorySlug,
     tag,
@@ -1678,7 +1679,10 @@ export async function fetchHarborTopicList({
         tag,
     });
     const response = await harborApi.get(path, {
-        params: { page: normalizedPage },
+        params: {
+            page: normalizedPage,
+            ...(view === 'top' && period ? {period} : {}),
+        },
         signal,
     });
     return buildNormalizedTopicListResult(response.data, normalizedPage);

@@ -9,10 +9,11 @@ import {
 import { useIsFocused } from '@react-navigation/native';
 import { FlashList } from '@shopify/flash-list';
 import { useTranslation } from 'react-i18next';
-import { verticalScale } from 'react-native-size-matters';
+import { scale, verticalScale } from 'react-native-size-matters';
 import Toast from 'react-native-toast-message';
 
-import { useTheme } from '../../../../components/ThemeContext';
+import Text from '../../../../components/AppText';
+import { uiStyle, useTheme } from '../../../../components/ThemeContext';
 import { useHarborSession } from '../../../../contexts/HarborSessionContext';
 import { fetchHarborTopicList } from '../../../../utils/harbor/harborApi';
 import {
@@ -21,6 +22,13 @@ import {
     readHarborQueryCache,
     setHarborQueryNamespaceLimit,
 } from '../../../../utils/harbor/harborQueryCache';
+import {
+    composeHarborRecommendedFeed,
+    fetchHarborRecommendationCandidates,
+    isHarborRecommendationCandidate,
+    readCachedHarborRecommendationCandidates,
+    selectHarborRecommendations,
+} from '../../../../utils/harbor/harborRecommendations';
 import {
     getHarborRateLimitDelayMs,
     isHarborRateLimited,
@@ -41,6 +49,7 @@ const SKELETON_ITEMS = ['one', 'two', 'three', 'four'];
 const TOPIC_LIST_CACHE_NAMESPACE = 'topic-list';
 const TOPIC_LIST_CACHE_FRESH_MS = 30 * 1000;
 const TOPIC_LIST_CACHE_STALE_MS = 5 * 60 * 1000;
+const RECOMMENDATION_WAIT_MS = 1200;
 let sharedRateLimit = null;
 
 setHarborQueryNamespaceLimit(TOPIC_LIST_CACHE_NAMESPACE, 20);
@@ -56,6 +65,22 @@ const getSourceKey = source =>
     ].join(':');
 
 const fetchTopicListPage = source => fetchHarborTopicList(source);
+
+const resolveRecommendationRequest = request =>
+    new Promise(resolve => {
+        let settled = false;
+        const finish = value => {
+            if (settled) {
+                return;
+            }
+            settled = true;
+            clearTimeout(timer);
+            resolve(value);
+        };
+        // 推薦是可選內容，不能令 latest 首頁長時間停留在 skeleton。
+        const timer = setTimeout(() => finish(null), RECOMMENDATION_WAIT_MS);
+        request.then(finish, () => finish(null));
+    });
 
 const HarborTopicList = ({
     source,
@@ -76,7 +101,7 @@ const HarborTopicList = ({
 }) => {
     const { theme } = useTheme();
     const { t } = useTranslation('harbor');
-    const { status, login } = useHarborSession();
+    const { status, login, sessionGeneration } = useHarborSession();
     const isScreenFocused = useIsFocused();
     const isVisible = isActive && isScreenFocused;
     const controllerRef = useRef(null);
@@ -86,6 +111,7 @@ const HarborTopicList = ({
     const loadingMoreRef = useRef(false);
     const loadMoreErrorRef = useRef(null);
     const itemsRef = useRef([]);
+    const recommendationItemsRef = useRef([]);
     const activeCacheKeyRef = useRef(null);
     const rateLimitRef = useRef(null);
     const sourceRef = useRef(source);
@@ -98,18 +124,30 @@ const HarborTopicList = ({
     const [nextPage, setNextPage] = useState(null);
     const [firstPageError, setFirstPageError] = useState(null);
     const [loadMoreError, setLoadMoreError] = useState(null);
+    const [recommendationItems, setRecommendationItems] = useState([]);
     const [rateLimit, setRateLimit] = useState(null);
     const [clock, setClock] = useState(() => Date.now());
     const sourceKey = getSourceKey(source);
     const isSessionReady = status !== 'restoring' && status !== 'authorizing';
+    const supportsRecommendations =
+        status === 'signedIn' &&
+        source.view === 'latest' &&
+        source.categoryId == null &&
+        !source.categorySlug &&
+        source.tag == null;
     const cacheKey = useMemo(
-        () => ['topic-list', sourceKey],
-        [sourceKey],
+        () => ['topic-list', sourceKey, sessionGeneration],
+        [sessionGeneration, sourceKey],
     );
 
     const replaceItems = useCallback(nextItems => {
         itemsRef.current = nextItems;
         setItems(nextItems);
+    }, []);
+
+    const replaceRecommendationItems = useCallback(nextItems => {
+        recommendationItemsRef.current = nextItems;
+        setRecommendationItems(nextItems);
     }, []);
 
     const applyRateLimit = useCallback((error, scope) => {
@@ -184,6 +222,13 @@ const HarborTopicList = ({
             setFirstPageError(null);
 
             try {
+                const recommendationRequest = supportsRecommendations
+                    ? resolveRecommendationRequest(
+                        fetchHarborRecommendationCandidates(
+                            sessionGeneration,
+                        ),
+                    )
+                    : Promise.resolve(null);
                 const result = await fetchHarborQueryCache(
                     activeCacheKeyRef.current,
                     ({signal}) => fetchTopicListPage({
@@ -198,6 +243,7 @@ const HarborTopicList = ({
                         staleMs: TOPIC_LIST_CACHE_STALE_MS,
                     },
                 );
+                const recommendationResult = await recommendationRequest;
                 if (
                     controller.signal.aborted ||
                     requestGeneration !== requestGenerationRef.current
@@ -205,6 +251,15 @@ const HarborTopicList = ({
                     return;
                 }
                 replaceItems(result.items);
+                replaceRecommendationItems(
+                    supportsRecommendations
+                        ? selectHarborRecommendations(
+                            recommendationResult?.items ||
+                                recommendationItemsRef.current,
+                            result.items,
+                        )
+                        : [],
+                );
                 setHasMore(result.hasMore);
                 setNextPage(result.nextPage);
                 loadMoreErrorRef.current = null;
@@ -250,7 +305,10 @@ const HarborTopicList = ({
             getActiveRateLimit,
             onCapabilities,
             replaceItems,
+            replaceRecommendationItems,
+            sessionGeneration,
             sourceKey,
+            supportsRecommendations,
         ],
     );
 
@@ -267,6 +325,9 @@ const HarborTopicList = ({
             namespace: TOPIC_LIST_CACHE_NAMESPACE,
             maxAgeMs: TOPIC_LIST_CACHE_STALE_MS,
         });
+        const cachedRecommendationResult = supportsRecommendations
+            ? readCachedHarborRecommendationCandidates(sessionGeneration)
+            : null;
         activeCacheKeyRef.current = cacheKey;
         firstPageErrorRef.current = null;
         setFirstPageError(null);
@@ -275,15 +336,30 @@ const HarborTopicList = ({
 
         if (cachedResult) {
             replaceItems(cachedResult.items);
+            replaceRecommendationItems(
+                supportsRecommendations
+                    ? selectHarborRecommendations(
+                        cachedRecommendationResult?.items,
+                        cachedResult.items,
+                    )
+                    : [],
+            );
             setHasMore(cachedResult.hasMore);
             setNextPage(cachedResult.nextPage);
             setIsLoading(false);
             onCapabilities?.(cachedResult.capabilities);
-            if (!freshResult) {
-                loadFirstPage({ refresh: true, showIndicator: false });
+            if (
+                !freshResult ||
+                (supportsRecommendations && !cachedRecommendationResult)
+            ) {
+                loadFirstPage({
+                    refresh: !freshResult,
+                    showIndicator: false,
+                });
             }
         } else {
             replaceItems([]);
+            replaceRecommendationItems([]);
             setHasMore(false);
             setNextPage(null);
             setIsLoading(true);
@@ -295,7 +371,16 @@ const HarborTopicList = ({
             firstPageLoadingRef.current = false;
             controllerRef.current?.abort();
         };
-    }, [cacheKey, isSessionReady, loadFirstPage, onCapabilities, replaceItems]);
+    }, [
+        cacheKey,
+        isSessionReady,
+        loadFirstPage,
+        onCapabilities,
+        replaceItems,
+        replaceRecommendationItems,
+        sessionGeneration,
+        supportsRecommendations,
+    ]);
 
     useEffect(() => {
         return subscribeHarborTopicUpdates((topicId, patch) => {
@@ -309,12 +394,22 @@ const HarborTopicList = ({
                             : item,
                     );
             replaceItems(updateItems(itemsRef.current));
+            replaceRecommendationItems(
+                updateItems(recommendationItemsRef.current).filter(
+                    isHarborRecommendationCandidate,
+                ),
+            );
             // 發帖／刪帖等需重排時刷新當前列表；主頁僅有 latest／top，不可再限死 new／unread
             if (reloadLists && isVisible) {
                 loadFirstPage({ refresh: true, showIndicator: false });
             }
         });
-    }, [isVisible, loadFirstPage, replaceItems]);
+    }, [
+        isVisible,
+        loadFirstPage,
+        replaceItems,
+        replaceRecommendationItems,
+    ]);
 
     useEffect(() => {
         if (
@@ -520,21 +615,57 @@ const HarborTopicList = ({
         [navigation],
     );
 
+    const displayItems = useMemo(
+        () =>
+            supportsRecommendations
+                ? composeHarborRecommendedFeed(items, recommendationItems)
+                : items,
+        [items, recommendationItems, supportsRecommendations],
+    );
+
     const renderTopic = useCallback(
         ({ item }) => (
-            <HarborTopicCard
-                topic={item}
-                onPress={handleTopicPress}
-                onAuthorPress={handleAuthorPress}
-                onCategoryPress={handleCategoryPress}
-                isPressAllowed={isTopicPressAllowed}
-            />
+            <>
+                {item.isHarborRecommendation ? (
+                    <View style={styles.recommendationHeader}>
+                        <View
+                            style={[
+                                styles.recommendationLine,
+                                {backgroundColor: theme.disabled},
+                            ]}
+                        />
+                        <Text
+                            style={[
+                                styles.recommendationLabel,
+                                {color: theme.black.third},
+                            ]}>
+                            {t('你可能錯過')}
+                        </Text>
+                        <View
+                            style={[
+                                styles.recommendationLine,
+                                {backgroundColor: theme.disabled},
+                            ]}
+                        />
+                    </View>
+                ) : null}
+                <HarborTopicCard
+                    topic={item}
+                    onPress={handleTopicPress}
+                    onAuthorPress={handleAuthorPress}
+                    onCategoryPress={handleCategoryPress}
+                    isPressAllowed={isTopicPressAllowed}
+                />
+            </>
         ),
         [
             handleCategoryPress,
             handleAuthorPress,
             handleTopicPress,
             isTopicPressAllowed,
+            t,
+            theme.black.third,
+            theme.disabled,
         ],
     );
 
@@ -757,8 +888,12 @@ const HarborTopicList = ({
 
     return (
         <FlashList
-            data={items}
-            keyExtractor={item => `harbor-topic-${item.id}`}
+            data={displayItems}
+            keyExtractor={item =>
+                item.isHarborRecommendation
+                    ? `harbor-recommendation-${item.id}`
+                    : `harbor-topic-${item.id}`
+            }
             renderItem={renderTopic}
             ListHeaderComponent={header}
             ListEmptyComponent={emptyState}
@@ -788,6 +923,23 @@ const HarborTopicList = ({
 };
 
 const styles = StyleSheet.create({
+    recommendationHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginHorizontal: scale(14),
+        marginBottom: verticalScale(6),
+        marginTop: verticalScale(4),
+    },
+    recommendationLine: {
+        flex: 1,
+        height: StyleSheet.hairlineWidth,
+    },
+    recommendationLabel: {
+        ...uiStyle.defaultText,
+        fontSize: scale(10),
+        fontWeight: '600',
+        marginHorizontal: scale(8),
+    },
     footerLoading: {
         paddingVertical: verticalScale(20),
     },

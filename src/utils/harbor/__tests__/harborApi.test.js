@@ -2461,6 +2461,25 @@ describe('Harbor API 資料正規化', () => {
         );
     });
 
+    it('熱門話題可指定 Discourse 統計週期', async () => {
+        getSpy.mockResolvedValue({
+            data: {
+                topic_list: {
+                    per_page: 30,
+                    more_topics_url: null,
+                    topics: [],
+                },
+            },
+        });
+
+        await fetchHarborTopicList({view: 'top', period: 'monthly'});
+
+        expect(getSpy).toHaveBeenCalledWith('/top.json', {
+            params: {page: 0, period: 'monthly'},
+            signal: undefined,
+        });
+    });
+
     it('為分類及標籤話題建立正確的 Discourse 路徑', async () => {
         getSpy.mockResolvedValue({
             data: {
