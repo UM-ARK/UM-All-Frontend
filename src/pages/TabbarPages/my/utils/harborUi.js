@@ -122,8 +122,12 @@ const messageNotificationTypes = new Set([
     'group_message_summary',
     'membership_request_consolidated',
 ]);
-// 消息中心以頭像展示操作者：點讚／反應／私信
+// 消息中心以頭像展示操作者：回覆／提及／點讚／反應／私信
 const actorAvatarNotificationTypes = new Set([
+    'replied',
+    'quoted',
+    'mentioned',
+    'question_answer_user_commented',
     'liked',
     'liked_consolidated',
     'reaction',

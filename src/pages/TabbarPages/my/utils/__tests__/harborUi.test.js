@@ -252,7 +252,7 @@ describe('Harbor 消息中心', () => {
         });
     });
 
-    it('為點讚與私信提供操作者資訊', () => {
+    it('為回覆、點讚與私信提供操作者資訊', () => {
         expect(
             getHarborInboxActor({
                 inboxType: 'notification',
@@ -275,6 +275,26 @@ describe('Harbor 消息中心', () => {
         });
         expect(
             getHarborInboxActor({
+                inboxType: 'notification',
+                typeName: 'replied',
+                actingUsername: 'yyyyyyounger',
+            }),
+        ).toEqual({
+            username: 'yyyyyyounger',
+            avatarUrl: '',
+        });
+        expect(
+            getHarborInboxActor({
+                inboxType: 'notification',
+                typeName: 'quoted',
+                actingUsername: 'reader',
+            }),
+        ).toEqual({
+            username: 'reader',
+            avatarUrl: '',
+        });
+        expect(
+            getHarborInboxActor({
                 inboxType: 'message',
                 actingUsername: 'reader',
                 avatarUrl: 'https://harbor.umall.one/avatar.png',
@@ -287,13 +307,6 @@ describe('Harbor 消息中心', () => {
             getHarborInboxActor({
                 inboxType: 'notification',
                 typeName: 'granted_badge',
-                actingUsername: 'reader',
-            }),
-        ).toEqual({username: '', avatarUrl: ''});
-        expect(
-            getHarborInboxActor({
-                inboxType: 'notification',
-                typeName: 'replied',
                 actingUsername: 'reader',
             }),
         ).toEqual({username: '', avatarUrl: ''});
