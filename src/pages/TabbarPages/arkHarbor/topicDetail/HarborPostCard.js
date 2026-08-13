@@ -72,6 +72,14 @@ const formatHarborPostTime = (iso, language) => {
     }
     return created.format('YYYY/MM/DD HH:mm');
 };
+
+const logHarborPostCardAction = (event, details) => {
+    if (typeof __DEV__ !== 'undefined' && !__DEV__) {
+        return;
+    }
+    console.warn(`[HarborPostAction] ${event}`, details);
+};
+
 const MetaItem = ({ icon, value, color, style }) => {
     if (!value) {
         return null;
@@ -587,8 +595,27 @@ const HarborPostCard = memo(
                 currentReaction={currentReaction}
                 disabled={reactionDisabled}
                 hitSlop={8}
-                onPressDisabled={() => onPressDisabledReaction(post.id)}
+                onPressDisabled={() => {
+                    logHarborPostCardAction('card.reaction_disabled', {
+                        postId: post.id,
+                        postNumber: post.post_number,
+                        nestedDepth: Number(nestedDepth || 0),
+                        reactionDisabled,
+                        canAct: likeAction?.can_act ?? null,
+                        currentReaction: currentReaction || null,
+                    });
+                    onPressDisabledReaction(post.id);
+                }}
                 onSelectReaction={reaction => {
+                    logHarborPostCardAction('card.reaction_select', {
+                        postId: post.id,
+                        postNumber: post.post_number,
+                        nestedDepth: Number(nestedDepth || 0),
+                        reaction,
+                        reactionDisabled,
+                        pendingLike: Boolean(pendingLike),
+                        pendingReaction: Boolean(pendingReaction),
+                    });
                     onSelectReaction(post.id, reaction);
                 }}
                 pending={Boolean(pendingLike || pendingReaction)}
@@ -606,6 +633,13 @@ const HarborPostCard = memo(
                 hitSlop={8}
                 onPress={() => {
                     trigger();
+                    logHarborPostCardAction('card.like_press', {
+                        postId: post.id,
+                        postNumber: post.post_number,
+                        nestedDepth: Number(nestedDepth || 0),
+                        reactionDisabled,
+                        isLiked,
+                    });
                     if (reactionDisabled) {
                         onPressDisabledReaction(post.id);
                         return;

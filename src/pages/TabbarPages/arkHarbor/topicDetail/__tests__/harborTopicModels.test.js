@@ -11,6 +11,7 @@ import {
     canShowFlagMenu,
     canUpdatePostReaction,
     extractPostImages,
+    findTopicPost,
     flattenNestedPosts,
     formatHarborFlagTypesForPost,
     getFlagActions,
@@ -448,5 +449,15 @@ describe('Nested Replies 資料模型', () => {
         expect(updated[1].children[0].children[0]).toBe(
             posts[1].children[0].children[0],
         );
+    });
+
+    it('巢狀視圖可依 id 找到樓中樓回覆', () => {
+        const topic = {
+            is_nested_view: true,
+            post_stream: { posts },
+        };
+        expect(findTopicPost(topic, 6)?.post_number).toBe(6);
+        expect(findTopicPost(topic, 2)?.post_number).toBe(2);
+        expect(findTopicPost({ post_stream: { posts } }, 6)).toBeNull();
     });
 });

@@ -25,6 +25,7 @@ import { publishHarborTopicUpdate } from '../../../../utils/harbor/harborTopicUp
 import {
     canDeleteHarborPost,
     canUpdatePostReaction,
+    findTopicPost,
     getHarborMutationError,
     getLikeAction,
     isOwnHarborPost,
@@ -81,6 +82,24 @@ const logHarborPostAction = (event, details) => {
         return;
     }
     console.warn(`[HarborPostAction] ${event}`, details);
+};
+
+const getTopicPostLookup = (topic, postId) => {
+    const targetId = Number(postId);
+    const posts = topic?.post_stream?.posts;
+    const rootPost = Array.isArray(posts)
+        ? posts.find(item => Number(item.id) === targetId)
+        : null;
+    const post = findTopicPost(topic, postId);
+    return {
+        post,
+        postId: Number.isInteger(targetId) ? targetId : postId,
+        postNumber: post?.post_number ?? null,
+        isNestedView: Boolean(topic?.is_nested_view),
+        foundInRoots: Boolean(rootPost),
+        foundInNestedTree: Boolean(post),
+        rootPostCount: Array.isArray(posts) ? posts.length : 0,
+    };
 };
 
 const getMutationErrorDiagnostics = error => ({
@@ -304,10 +323,26 @@ const useHarborTopicActions = ({
         async post => {
             const key = `like:${post.id}`;
             const wasSignedIn = sessionStatusRef.current === 'signedIn';
+            logHarborPostAction('like.press', {
+                postId: post?.id ?? null,
+                postNumber: post?.post_number ?? null,
+                sessionStatus: sessionStatusRef.current,
+                ...getPostActionDiagnostics(
+                    post,
+                    currentUsername,
+                    currentTrustLevel,
+                ),
+            });
             if (
                 !(await requireHarborSignIn(post?.post_number)) ||
                 !beginMutation(key)
             ) {
+                logHarborPostAction('like.skipped', {
+                    postId: post?.id ?? null,
+                    reason: sessionStatusRef.current !== 'signedIn'
+                        ? 'sign_in_required_or_cancelled'
+                        : 'mutation_pending',
+                });
                 return;
             }
 
@@ -409,10 +444,17 @@ const useHarborTopicActions = ({
 
     const explainPostReactionDisabled = useCallback(
         postId => {
-            const post = latestTopicRef.current?.post_stream?.posts?.find(
-                item => Number(item.id) === Number(postId),
+            const {post, ...lookup} = getTopicPostLookup(
+                latestTopicRef.current,
+                postId,
             );
+            logHarborPostAction('reaction.disabled_press', lookup);
             if (!post) {
+                logHarborPostAction('blocked.post_not_found', {
+                    action: 'reaction',
+                    reason: 'nested_or_unloaded_post',
+                    ...lookup,
+                });
                 return;
             }
             const diagnostics = getPostActionDiagnostics(
@@ -427,6 +469,7 @@ const useHarborTopicActions = ({
                     : 'post_permission',
                 sessionStatus: sessionStatusRef.current,
                 ...diagnostics,
+                ...lookup,
             });
             if (diagnostics.isOwnPost) {
                 Toast.show(t('你不能回應自己的帖子'));
@@ -449,10 +492,21 @@ const useHarborTopicActions = ({
 
     const selectPostReaction = useCallback(
         async (postId, reactionId) => {
-            const post = latestTopicRef.current?.post_stream?.posts?.find(
-                item => Number(item.id) === Number(postId),
+            const {post, ...lookup} = getTopicPostLookup(
+                latestTopicRef.current,
+                postId,
             );
+            logHarborPostAction('reaction.press', {
+                reactionId,
+                ...lookup,
+            });
             if (!post) {
+                logHarborPostAction('blocked.post_not_found', {
+                    action: 'reaction',
+                    reactionId,
+                    reason: 'nested_or_unloaded_post',
+                    ...lookup,
+                });
                 return;
             }
             const wasSignedIn = sessionStatusRef.current === 'signedIn';
@@ -495,6 +549,11 @@ const useHarborTopicActions = ({
 
             const key = `reaction:${post.id}`;
             if (!beginMutation(key)) {
+                logHarborPostAction('reaction.skipped', {
+                    reactionId,
+                    reason: 'mutation_pending',
+                    ...lookup,
+                });
                 return;
             }
             updateTopicPost(post.id, current =>
@@ -509,6 +568,10 @@ const useHarborTopicActions = ({
                     ...current,
                     ...updatedPost,
                 }));
+                logHarborPostAction('reaction.success', {
+                    reactionId,
+                    ...lookup,
+                });
             } catch (error) {
                 updateTopicPost(post.id, current => ({
                     ...current,

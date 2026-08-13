@@ -450,6 +450,25 @@ const collectNestedPosts = posts => {
     return collected;
 };
 
+const findTopicPost = (topic, postId) => {
+    const targetId = Number(postId);
+    if (!Number.isInteger(targetId) || targetId <= 0) {
+        return null;
+    }
+    const posts = topic?.post_stream?.posts;
+    if (!Array.isArray(posts)) {
+        return null;
+    }
+    if (topic?.is_nested_view) {
+        return (
+            collectNestedPosts(posts).find(
+                post => Number(post.id) === targetId,
+            ) || null
+        );
+    }
+    return posts.find(post => Number(post.id) === targetId) || null;
+};
+
 const flattenNestedPosts = (
     posts,
     nestedReplyLimits,
@@ -553,6 +572,7 @@ export {
     canUpdatePostReaction,
     collectNestedPosts,
     extractPostImages,
+    findTopicPost,
     flattenNestedPosts,
     formatHarborFlagTypesForPost,
     getFlagActions,

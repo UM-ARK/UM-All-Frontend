@@ -208,6 +208,9 @@ const HarborReactionControl = ({
             return;
         }
         if (pending) {
+            if (typeof __DEV__ !== 'undefined' && __DEV__) {
+                console.warn('[HarborPostAction] reaction.pending_ignore');
+            }
             return;
         }
         trigger();
