@@ -29,6 +29,7 @@
 - [🎉 首次運行該項目](#-首次運行該項目)
   - [🤖 Android 環境 Setup](#-android-環境-setup)
   - [🍎 iOS 環境 Setup](#-ios-環境-setup)
+    - [React Native 預編譯依賴下載失敗](#react-native-預編譯依賴下載失敗)
   - [📘 Expo CNG 工作流說明](#-expo-cng-工作流說明)
 - [🌈 開發本項目準備](#-開發本項目準備)
   - [⛵ 啟動流程](#-啟動流程)
@@ -104,6 +105,30 @@ yarn iosBig       # 運行 iPad Pro 13-inch 模擬器
 ```
 
 > **注意**：Expo CNG 會自動處理 iOS 原生代碼生成和 CocoaPods 依賴，無需手動運行 `pod install` 或 `prebuild`。首次運行 `yarn ios` 時會自動生成原生項目文件。
+
+#### React Native 預編譯依賴下載失敗
+
+如果 prebuild 後運行 iOS 時出現 `ReactNativeFeatureFlagsDefaults.h`、`react_native_assert.h` 或 `folly/dynamic.h` 等 header 找不到，可能是當前網絡對 Maven Central 的 React Native 預編譯依賴檢查返回 HTTP 403，令 CocoaPods 回退至從源碼編譯。
+
+可改用 Maven mirror 重新生成 iOS 原生項目：
+
+```console
+env ENTERPRISE_REPOSITORY=https://maven.aliyun.com/repository/central npx expo prebuild --clean --platform ios
+```
+
+生成後確認 `ios/Podfile.lock` 包含 `React-Core-prebuilt` 和 `ReactNativeDependencies`：
+
+```console
+rg -n "React-Core-prebuilt \(|ReactNativeDependencies \(" ios/Podfile.lock
+```
+
+然後在同一 mirror 設定下運行 iOS：
+
+```console
+env ENTERPRISE_REPOSITORY=https://maven.aliyun.com/repository/central yarn iosNew
+```
+
+此方案只適用於預編譯依賴探測或下載受阻的情況，無需修改 `node_modules`、Pod header search paths 或 `useFrameworks` 設定。
 
 ---
 
