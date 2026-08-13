@@ -33,6 +33,7 @@ import { useHarborSession } from '../../../contexts/HarborSessionContext';
 import { openLink } from '../../../utils/browser';
 import {
     HARBOR_TOPIC_NOTIFICATION_LEVELS,
+    stripHtml,
 } from '../../../utils/harbor/harborApi';
 import {
     openHarborComposer,
@@ -45,6 +46,7 @@ import {
 } from '../../../utils/pathMap';
 import { trigger } from '../../../utils/trigger';
 import HarborPostCard from './topicDetail/HarborPostCard';
+import HarborPostMoreSheet from './topicDetail/HarborPostMoreSheet';
 import HarborRelatedTopics from './topicDetail/HarborRelatedTopics';
 import HarborTopicActionBar from './topicDetail/HarborTopicActionBar';
 import HarborTopicDetailOverlays from './topicDetail/HarborTopicDetailOverlays';
@@ -108,6 +110,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
     const {
         login,
         status: sessionStatus,
+        sessionGeneration,
         user: harborUser,
     } = useHarborSession();
     const { height, width } = useWindowDimensions();
@@ -164,6 +167,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
         onNewRepliesLoaded: revealNewReplies,
         onResetReading: resetTopicReading,
         sessionStatus,
+        sessionGeneration,
         sessionStatusRef,
         t,
         topicId,
@@ -238,6 +242,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
     );
     const [postBodyHeights, setPostBodyHeights] = useState({});
     const [collapsedPostNumbers, setCollapsedPostNumbers] = useState({});
+    const [postMoreMenu, setPostMoreMenu] = useState(null);
 
     const firstPost = useMemo(
         () =>
@@ -389,6 +394,10 @@ const HarborTopicDetail = ({ route, navigation }) => {
         [navigation],
     );
 
+    const openPostMoreMenu = useCallback(menu => {
+        setPostMoreMenu(menu);
+    }, []);
+
     const copyPostPermalink = useCallback(
         post => {
             Clipboard.setString(
@@ -397,6 +406,14 @@ const HarborTopicDetail = ({ route, navigation }) => {
             Toast.show(t('永久連結已複製'));
         },
         [t, topicId],
+    );
+
+    const copyPostContent = useCallback(
+        post => {
+            Clipboard.setString(stripHtml(post?.cooked));
+            Toast.show(t('內容已複製'));
+        },
+        [t],
     );
 
     const sharePost = useCallback(
@@ -745,10 +762,12 @@ const HarborTopicDetail = ({ route, navigation }) => {
                         }
                         imageUrls={imageUrls}
                         onOpenImage={openImage}
+                        onOpenMoreMenu={openPostMoreMenu}
                         onPressAuthor={openAuthor}
                         onPressBookmark={openBookmarkEditor}
                         onPressCategory={openCategory}
                         onPressComposeReply={openPostReplyComposer}
+                        onPressCopyContent={copyPostContent}
                         onPressCopy={copyPostPermalink}
                         onPressDelete={confirmDeletePost}
                         onPressEdit={openPostEditComposer}
@@ -835,6 +854,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
             contentWidth,
             imageUrls,
             isLoadingPrevious,
+            copyPostContent,
             copyPostPermalink,
             confirmDeletePost,
             explainPostReactionDisabled,
@@ -848,6 +868,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
             openImage,
             openNotificationLevels,
             openOriginalTopic,
+            openPostMoreMenu,
             openPostEditComposer,
             openPostReplyComposer,
             openTag,
@@ -1007,7 +1028,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
                         refreshing={isRefreshing}
                         onRefresh={() => {
                             trigger();
-                            loadTopic({ refresh: true });
+                            loadTopic({ refresh: true, force: true });
                         }}
                     />
                 }
@@ -1126,6 +1147,11 @@ const HarborTopicDetail = ({ route, navigation }) => {
                     </Text>
                 </Pressable>
             ) : null}
+
+            <HarborPostMoreSheet
+                menu={postMoreMenu}
+                onClose={() => setPostMoreMenu(null)}
+            />
 
             <HarborTopicDetailOverlays
                 bookmarkEditor={bookmarkEditor}

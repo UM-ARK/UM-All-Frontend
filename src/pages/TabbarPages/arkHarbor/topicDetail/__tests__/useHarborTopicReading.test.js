@@ -16,7 +16,10 @@ jest.mock('../harborTopicModels', () => ({
     mergeTopicWindow: jest.fn(),
 }));
 
-import {getReadingPostNumber} from '../useHarborTopicReading';
+import {
+    getReadingPostNumber,
+    getTopicReadStateAfterVisit,
+} from '../useHarborTopicReading';
 
 describe('Harbor 話題閱讀樓層', () => {
     const visiblePosts = [
@@ -58,5 +61,114 @@ describe('Harbor 話題閱讀樓層', () => {
                 visiblePosts,
             }),
         ).toBe(3);
+    });
+});
+
+describe('Harbor 話題返回列表已讀狀態', () => {
+    it('已讀帖即使只看到 1 樓也不會憑空造出新回覆', () => {
+        expect(
+            getTopicReadStateAfterVisit({
+                highestPostNumber: 10,
+                lastReadPostNumber: 0,
+                lastVisiblePostNumber: 1,
+                postsCount: 10,
+                unreadPosts: 0,
+            }),
+        ).toEqual({
+            highestPostNumber: 10,
+            lastReadPostNumber: 1,
+            unreadCount: 0,
+            isUnread: false,
+            isNew: false,
+            shouldReloadLists: false,
+        });
+    });
+
+    it('未讀帖未讀完時保留伺服器未讀數，不用樓層差猜測', () => {
+        expect(
+            getTopicReadStateAfterVisit({
+                highestPostNumber: 8,
+                lastReadPostNumber: 3,
+                lastVisiblePostNumber: 5,
+                unreadPosts: 5,
+            }),
+        ).toEqual({
+            highestPostNumber: 8,
+            lastReadPostNumber: 5,
+            unreadCount: 5,
+            isUnread: true,
+            isNew: false,
+            shouldReloadLists: false,
+        });
+    });
+
+    it('讀到最後一樓時清未讀並重排未讀／新帖視圖', () => {
+        expect(
+            getTopicReadStateAfterVisit({
+                highestPostNumber: 8,
+                lastReadPostNumber: 3,
+                lastVisiblePostNumber: 8,
+                unreadPosts: 5,
+            }),
+        ).toEqual({
+            highestPostNumber: 8,
+            lastReadPostNumber: 8,
+            unreadCount: 0,
+            isUnread: false,
+            isNew: false,
+            shouldReloadLists: true,
+        });
+    });
+
+    it('新帖看過後清 isNew，並重排新帖視圖', () => {
+        expect(
+            getTopicReadStateAfterVisit({
+                highestPostNumber: 6,
+                lastReadPostNumber: 0,
+                lastVisiblePostNumber: 1,
+                unreadPosts: 0,
+                unseen: true,
+            }),
+        ).toEqual({
+            highestPostNumber: 6,
+            lastReadPostNumber: 1,
+            unreadCount: 0,
+            isUnread: false,
+            isNew: false,
+            shouldReloadLists: true,
+        });
+    });
+
+    it('詳情沒有未讀欄位時不覆蓋列表未讀狀態', () => {
+        expect(
+            getTopicReadStateAfterVisit({
+                highestPostNumber: 10,
+                lastReadPostNumber: null,
+                lastVisiblePostNumber: 1,
+            }),
+        ).toEqual({
+            highestPostNumber: 10,
+            lastReadPostNumber: 1,
+            unreadCount: null,
+            isUnread: null,
+            isNew: false,
+            shouldReloadLists: false,
+        });
+    });
+
+    it('詳情連最高樓層也缺少時不把目前樓層當成結尾', () => {
+        expect(
+            getTopicReadStateAfterVisit({
+                lastReadPostNumber: null,
+                lastVisiblePostNumber: 1,
+            }),
+        ).toEqual({
+            highestPostNumber: null,
+            lastReadPostNumber: 1,
+            unreadCount: null,
+            isUnread: null,
+            isNew: false,
+            shouldReloadLists: false,
+        });
     });
 });

@@ -1,15 +1,14 @@
 import React, {
     memo,
     useMemo,
+    useRef,
 } from 'react';
 import {
     ActivityIndicator,
-    Platform,
     Pressable,
     View,
 } from 'react-native';
 
-import { MenuView } from '@react-native-menu/menu';
 import { Image } from 'expo-image';
 import moment from 'moment-timezone';
 import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
@@ -72,6 +71,14 @@ const formatHarborPostTime = (iso, language) => {
     }
     return created.format('YYYY/MM/DD HH:mm');
 };
+
+const logHarborPostCardAction = (event, details) => {
+    if (typeof __DEV__ !== 'undefined' && !__DEV__) {
+        return;
+    }
+    console.warn(`[HarborPostAction] ${event}`, details);
+};
+
 const MetaItem = ({ icon, value, color, style }) => {
     if (!value) {
         return null;
@@ -95,10 +102,12 @@ const HarborPostCard = memo(
         contentWidth,
         imageUrls,
         onOpenImage,
+        onOpenMoreMenu,
         onPressAuthor,
         onPressBookmark,
         onPressCategory,
         onPressComposeReply,
+        onPressCopyContent,
         onPressCopy,
         onPressDelete,
         onPressDisabledReaction,
@@ -138,12 +147,12 @@ const HarborPostCard = memo(
     }) => {
         const { theme } = useTheme();
         const { t, i18n } = useTranslation('harbor');
+        const contentLongPressRef = useRef(false);
         const {
             black,
             disabled,
             themeColor,
             tonal,
-            unread,
             white,
         } = theme;
         // 分割線／邊框統一用淺灰
@@ -175,6 +184,10 @@ const HarborPostCard = memo(
                 : !reactionsEnabled && reactionCount > 0
                     ? [{ id: 'heart', count: reactionCount }]
                     : [];
+        const reactionCountLabel =
+            Number.isFinite(reactionCount) && reactionCount > 0
+                ? String(reactionCount)
+                : '';
         // 1 樓操作改由頁面底部欄承接，卡片僅保留「更多」；標題併入本卡
         const isFirstPost = Number(post.post_number) === 1;
         const topicTags = useMemo(() => {
@@ -218,28 +231,23 @@ const HarborPostCard = memo(
             post.post_type === 3,
         );
         const moreMenuActions = useMemo(() => {
-            // @react-native-menu/menu：iOS 用 SF Symbol；Android 用系統 drawable 名稱
-            const actions = [];
+            const actions = [
+                {
+                    id: 'copyContent',
+                    title: t('複製'),
+                    icon: 'content-copy',
+                },
+            ];
             if (isFirstPost) {
                 actions.push({
                     id: 'openOriginal',
                     title: t('查看 Web 原文'),
-                    image: Platform.select({
-                        ios: 'safari',
-                        android: 'ic_menu_view',
-                    }),
-                    imageColor: black.third,
-                    titleColor: black.third,
+                    icon: 'web',
                 });
                 actions.push({
                     id: 'notifications',
                     title: t('通知設定'),
-                    image: Platform.select({
-                        ios: 'bell',
-                        android: 'ic_menu_info_details',
-                    }),
-                    imageColor: black.third,
-                    titleColor: black.third,
+                    icon: 'bell-outline',
                     attributes: {
                         disabled: Boolean(pendingNotification),
                     },
@@ -250,36 +258,21 @@ const HarborPostCard = memo(
                 actions.push({
                     id: 'reply',
                     title: t('回覆'),
-                    image: Platform.select({
-                        ios: 'bubble.left',
-                        android: 'ic_menu_revert',
-                    }),
-                    imageColor: black.third,
-                    titleColor: black.third,
+                    icon: 'reply-outline',
                 });
             }
             if (post.can_edit) {
                 actions.push({
                     id: 'edit',
                     title: t('編輯'),
-                    image: Platform.select({
-                        ios: 'pencil',
-                        android: 'ic_menu_edit',
-                    }),
-                    imageColor: black.third,
-                    titleColor: black.third,
+                    icon: 'pencil-outline',
                 });
             }
             if (canDeleteHarborPost(post, topic)) {
                 actions.push({
                     id: 'delete',
                     title: t('刪除'),
-                    image: Platform.select({
-                        ios: 'trash',
-                        android: 'ic_menu_delete',
-                    }),
-                    imageColor: unread,
-                    titleColor: unread,
+                    icon: 'delete-outline',
                     attributes: {
                         destructive: true,
                         disabled: Boolean(pendingDelete),
@@ -291,12 +284,9 @@ const HarborPostCard = memo(
                 actions.push({
                     id: 'bookmark',
                     title: post.bookmarked ? t('已收藏') : t('收藏'),
-                    image: Platform.select({
-                        ios: post.bookmarked ? 'bookmark.fill' : 'bookmark',
-                        android: 'ic_menu_save',
-                    }),
-                    imageColor: black.third,
-                    titleColor: black.third,
+                    icon: post.bookmarked
+                        ? 'bookmark'
+                        : 'bookmark-outline',
                     attributes: {
                         disabled: Boolean(pendingBookmark),
                     },
@@ -305,23 +295,13 @@ const HarborPostCard = memo(
             actions.push({
                 id: 'copy',
                 title: t('複製連結'),
-                image: Platform.select({
-                    ios: 'link',
-                    android: 'ic_menu_agenda',
-                }),
-                imageColor: black.third,
-                titleColor: black.third,
+                icon: 'link-variant',
             });
             if (canShowFlag) {
                 actions.push({
                     id: 'flag',
                     title: t('舉報'),
-                    image: Platform.select({
-                        ios: 'flag',
-                        android: 'ic_menu_report_image',
-                    }),
-                    imageColor: unread,
-                    titleColor: unread,
+                    icon: 'flag-outline',
                     attributes: {
                         destructive: true,
                         disabled: Boolean(pendingFlag),
@@ -331,16 +311,10 @@ const HarborPostCard = memo(
             actions.push({
                 id: 'share',
                 title: t('分享'),
-                image: Platform.select({
-                    ios: 'square.and.arrow.up',
-                    android: 'ic_menu_share',
-                }),
-                imageColor: black.third,
-                titleColor: black.third,
+                icon: 'share-variant-outline',
             });
             return actions;
         }, [
-            black.third,
             canReply,
             canShowFlag,
             isFirstPost,
@@ -351,7 +325,6 @@ const HarborPostCard = memo(
             post,
             t,
             topic,
-            unread,
         ]);
         const nestedRepliesButton =
             nestedReplyCount > 0 &&
@@ -409,9 +382,7 @@ const HarborPostCard = memo(
                 </Pressable>
             ) : null;
 
-        const handleMoreMenuAction = event => {
-            trigger();
-            const actionId = event.nativeEvent.event;
+        const handleMoreMenuAction = actionId => {
             if (actionId === 'openOriginal') {
                 onPressOpenOriginal?.();
                 return;
@@ -436,6 +407,10 @@ const HarborPostCard = memo(
                 onPressBookmark(post);
                 return;
             }
+            if (actionId === 'copyContent') {
+                onPressCopyContent(post);
+                return;
+            }
             if (actionId === 'copy') {
                 onPressCopy(post);
                 return;
@@ -449,12 +424,19 @@ const HarborPostCard = memo(
             }
         };
 
+        const openMoreMenu = () => {
+            trigger();
+            onOpenMoreMenu({
+                actions: moreMenuActions,
+                onPressAction: handleMoreMenuAction,
+            });
+        };
+
         const moreMenu = (
-            <MenuView
-                actions={moreMenuActions}
-                onOpenMenu={() => trigger()}
-                onPressAction={handleMoreMenuAction}
-                shouldOpenOnLongPress={false}
+            <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('更多')}
+                onPress={openMoreMenu}
                 style={
                     isFirstPost
                         ? { flexShrink: 0 }
@@ -495,7 +477,7 @@ const HarborPostCard = memo(
                         </Text>
                     ) : null}
                 </View>
-            </MenuView>
+            </Pressable>
         );
 
         const reactionSummaryView =
@@ -549,25 +531,68 @@ const HarborPostCard = memo(
             />
         );
 
+        const reactionActive = Boolean(currentReaction || isLiked);
+        const reactionButtonContent = (
+            <View
+                style={[
+                    styles.postMetaIconButton,
+                    reactionCountLabel
+                        ? styles.postMetaIconButtonWithCount
+                        : null,
+                ]}>
+                {reactionIcon}
+                {reactionCountLabel ? (
+                    <Text
+                        style={[
+                            styles.postMetaCount,
+                            {
+                                color: reactionActive
+                                    ? themeColor
+                                    : black.third,
+                            },
+                        ]}>
+                        {reactionCountLabel}
+                    </Text>
+                ) : null}
+            </View>
+        );
+        const reactionControlStyle = [
+            styles.postMetaIconMenu,
+            reactionCountLabel ? styles.postMetaIconMenuWithCount : null,
+        ];
         const reactionControl = reactionsEnabled ? (
             <HarborReactionControl
+                allowPicker={false}
                 currentReaction={currentReaction}
                 disabled={reactionDisabled}
                 hitSlop={8}
-                onPressDisabled={() => onPressDisabledReaction(post.id)}
+                onPressDisabled={() => {
+                    logHarborPostCardAction('card.reaction_disabled', {
+                        postId: post.id,
+                        postNumber: post.post_number,
+                        nestedDepth: Number(nestedDepth || 0),
+                        reactionDisabled,
+                        canAct: likeAction?.can_act ?? null,
+                        currentReaction: currentReaction || null,
+                    });
+                    onPressDisabledReaction(post.id);
+                }}
                 onSelectReaction={reaction => {
+                    logHarborPostCardAction('card.reaction_select', {
+                        postId: post.id,
+                        postNumber: post.post_number,
+                        nestedDepth: Number(nestedDepth || 0),
+                        reaction,
+                        reactionDisabled,
+                        pendingLike: Boolean(pendingLike),
+                        pendingReaction: Boolean(pendingReaction),
+                    });
                     onSelectReaction(post.id, reaction);
                 }}
                 pending={Boolean(pendingLike || pendingReaction)}
                 reactions={reactions}
-                style={styles.postMetaIconMenu}>
-                <View
-                    style={[
-                        styles.postMetaIconButton,
-                        reactionDisabled ? styles.disabledAction : null,
-                    ]}>
-                    {reactionIcon}
-                </View>
+                style={reactionControlStyle}>
+                {reactionButtonContent}
             </HarborReactionControl>
         ) : (
             <Pressable
@@ -579,10 +604,21 @@ const HarborPostCard = memo(
                 hitSlop={8}
                 onPress={() => {
                     trigger();
+                    logHarborPostCardAction('card.like_press', {
+                        postId: post.id,
+                        postNumber: post.post_number,
+                        nestedDepth: Number(nestedDepth || 0),
+                        reactionDisabled,
+                        isLiked,
+                    });
+                    if (reactionDisabled) {
+                        onPressDisabledReaction(post.id);
+                        return;
+                    }
                     onPressLike(post);
                 }}
-                style={styles.postMetaIconButton}>
-                {reactionIcon}
+                style={reactionControlStyle}>
+                {reactionButtonContent}
             </Pressable>
         );
 
@@ -1052,11 +1088,41 @@ const HarborPostCard = memo(
                                 </View>
                             </View>
 
-                            <View
-                                style={[
+                            <Pressable
+                                accessibilityRole={
+                                    canReply ? 'button' : undefined
+                                }
+                                accessibilityLabel={
+                                    canReply ? t('回覆') : undefined
+                                }
+                                onLongPress={() => {
+                                    contentLongPressRef.current = true;
+                                    openMoreMenu();
+                                }}
+                                onPress={() => {
+                                    if (contentLongPressRef.current) {
+                                        contentLongPressRef.current = false;
+                                        return;
+                                    }
+                                    if (!canReply) {
+                                        return;
+                                    }
+                                    trigger();
+                                    onPressComposeReply(post);
+                                }}
+                                onPressIn={() => {
+                                    contentLongPressRef.current = false;
+                                }}
+                                style={({ pressed }) => [
                                     styles.replyBody,
                                     isPostCollapsed
                                         ? styles.postBodyCollapsed
+                                        : null,
+                                    pressed
+                                        ? {
+                                              backgroundColor:
+                                                  tonal.primary08,
+                                          }
                                         : null,
                                 ]}>
                                 <View onLayout={onPostBodyLayout}>
@@ -1084,7 +1150,7 @@ const HarborPostCard = memo(
                                         ) : null}
                                     </HarborPostContent>
                                 </View>
-                            </View>
+                            </Pressable>
 
                             {postContentToggle}
 

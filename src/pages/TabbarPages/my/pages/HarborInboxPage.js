@@ -1,6 +1,8 @@
 import React from 'react';
 import {
     ActivityIndicator,
+    Alert,
+    Platform,
     Pressable,
     RefreshControl,
     StyleSheet,
@@ -28,7 +30,15 @@ import {
     fetchHarborNotificationPage,
     fetchHarborUnreadNotificationCount,
     markHarborNotificationRead,
+    markHarborNotificationsReadAll,
 } from '../../../../utils/harbor/harborApi';
+import {
+    fetchHarborInboxFirstPage,
+    patchHarborInboxMessageRead,
+    patchHarborInboxNotificationRead,
+    patchHarborInboxNotificationsReadAll,
+    readHarborInboxFirstPage,
+} from '../../../../utils/harbor/harborInboxQueries';
 import {ARK_HARBOR_ABSOLUTE_URL, ARK_HARBOR_AVATAR} from '../../../../utils/pathMap';
 import {trigger} from '../../../../utils/trigger';
 import {HarborInlineRetry} from '../../arkHarbor/components/HarborListStates';
@@ -108,6 +118,31 @@ const sortInboxItems = items => {
     });
 };
 
+const HarborInboxMarkAllButton = ({
+    accessibilityLabel,
+    onPress,
+    themeColor,
+}) => (
+    <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={accessibilityLabel}
+        onPress={() => {
+            trigger();
+            onPress();
+        }}
+        style={styles.headerButton}>
+        <Ionicons
+            name="checkmark-done-outline"
+            size={scale(22)}
+            color={themeColor}
+        />
+    </Pressable>
+);
+
+const createHarborInboxMarkAllButton = props => () => (
+    <HarborInboxMarkAllButton {...props} />
+);
+
 const HarborInboxPage = ({
     navigation,
     embedded = false,
@@ -126,20 +161,33 @@ const HarborInboxPage = ({
     } = useHarborSession();
     const headerHeight = React.useContext(HeaderHeightContext) || 0;
     const username = user?.username || '';
+    const initialCachedPageRef = React.useRef(
+        readHarborInboxFirstPage(username),
+    );
+    const initialCachedPage = initialCachedPageRef.current;
     const [notificationFilterIndex, setNotificationFilterIndex] =
         React.useState(0);
-    const [items, setItems] = React.useState([]);
-    const [isLoading, setIsLoading] = React.useState(true);
+    const [items, setItems] = React.useState(
+        () => initialCachedPage?.items || [],
+    );
+    const [isLoading, setIsLoading] = React.useState(!initialCachedPage);
     const [isRefreshing, setIsRefreshing] = React.useState(false);
     const [isLoadingMore, setIsLoadingMore] = React.useState(false);
     const [loadError, setLoadError] = React.useState(false);
-    const [hasMore, setHasMore] = React.useState(false);
+    const [hasMore, setHasMore] = React.useState(
+        Boolean(initialCachedPage?.hasMore),
+    );
+    const [unreadNotificationCount, setUnreadNotificationCount] =
+        React.useState(initialCachedPage?.unreadNotificationCount || 0);
     const controllerRef = React.useRef(null);
     const loadingMoreRef = React.useRef(false);
-    const nextOffsetRef = React.useRef(0);
+    const nextOffsetRef = React.useRef(initialCachedPage?.nextOffset || 0);
     const markingIdsRef = React.useRef(new Set());
+    const markingAllRef = React.useRef(false);
     const unreadCountRef = React.useRef(inboxUnreadCount);
     const unreadCountRequestRef = React.useRef(0);
+    const itemsRef = React.useRef(items);
+    itemsRef.current = items;
     const filterOptions = [
         {key: 'all', label: t('全部消息')},
         {
@@ -163,12 +211,6 @@ const HarborInboxPage = ({
     React.useEffect(() => {
         unreadCountRef.current = inboxUnreadCount;
     }, [inboxUnreadCount]);
-
-    React.useEffect(() => {
-        if (!embedded) {
-            navigation.setOptions({headerTitle: t('消息中心')});
-        }
-    }, [embedded, navigation, t]);
 
     const loadItems = React.useCallback(
         async ({refresh = false, append = false} = {}) => {
@@ -194,20 +236,19 @@ const HarborInboxPage = ({
                 setIsLoadingMore(true);
             } else if (refresh) {
                 setIsRefreshing(true);
-            } else {
+            } else if (!readHarborInboxFirstPage(username, notificationFilter)) {
                 setIsLoading(true);
             }
             setLoadError(false);
 
             try {
-                const pageRequest = fetchHarborNotificationPage({
-                    filter: notificationFilter,
-                    offset: append ? nextOffsetRef.current : 0,
-                    signal: controller.signal,
-                });
                 let nextItems;
                 if (append) {
-                    const page = await pageRequest;
+                    const page = await fetchHarborNotificationPage({
+                        filter: notificationFilter,
+                        offset: nextOffsetRef.current,
+                        signal: controller.signal,
+                    });
                     nextItems = page.items.map(item => ({
                         ...item,
                         inboxType: 'notification',
@@ -216,70 +257,113 @@ const HarborInboxPage = ({
                     nextOffsetRef.current = page.nextOffset;
                     setHasMore(page.hasMore);
                 } else {
-                    const unreadCountRequest =
-                        !notificationFilter
-                            ? fetchHarborUnreadNotificationCount({
-                                signal: controller.signal,
-                            })
-                            : Promise.resolve(null);
-                    const [pageResult, messagesResult, unreadCountResult] =
-                        await Promise.allSettled([
-                            pageRequest,
-                            fetchHarborMessages(username, {
-                                signal: controller.signal,
-                            }),
-                            unreadCountRequest,
-                        ]);
-                    if (pageResult.status === 'rejected') {
-                        throw pageResult.reason;
-                    }
-
-                    const page = pageResult.value;
-                    const notifications = page.items.map(item => ({
-                        ...item,
-                        inboxType: 'notification',
-                        listId: `notification:${item.id}`,
-                    }));
-                    const messages =
-                        messagesResult.status === 'fulfilled'
-                            ? messagesResult.value
-                                .filter(
-                                    item =>
-                                        !notificationFilter ||
-                                        item.unreadCount > 0,
-                                )
-                                .map(item => ({
+                    const {cachedResult, request} =
+                        fetchHarborInboxFirstPage(
+                            username,
+                            notificationFilter,
+                            async ({signal}) => {
+                                const unreadCountRequest =
+                                    !notificationFilter
+                                        ? fetchHarborUnreadNotificationCount({
+                                            signal,
+                                        })
+                                        : Promise.resolve(null);
+                                const [
+                                    pageResult,
+                                    messagesResult,
+                                    unreadCountResult,
+                                ] = await Promise.allSettled([
+                                    fetchHarborNotificationPage({
+                                        filter: notificationFilter,
+                                        offset: 0,
+                                        signal,
+                                    }),
+                                    fetchHarborMessages(username, {signal}),
+                                    unreadCountRequest,
+                                ]);
+                                if (pageResult.status === 'rejected') {
+                                    throw pageResult.reason;
+                                }
+                                const page = pageResult.value;
+                                const notifications = page.items.map(item => ({
                                     ...item,
-                                    inboxType: 'message',
-                                    listId: `message:${item.id}`,
-                                }))
-                            : [];
-                    nextItems = sortInboxItems([
-                        ...notifications,
-                        ...messages,
-                    ]);
-                    nextOffsetRef.current = page.nextOffset;
-                    setHasMore(page.hasMore);
-                    setLoadError(messagesResult.status === 'rejected');
+                                    inboxType: 'notification',
+                                    listId: `notification:${item.id}`,
+                                }));
+                                const messages =
+                                    messagesResult.status === 'fulfilled'
+                                        ? messagesResult.value
+                                            .filter(
+                                                item =>
+                                                    !notificationFilter ||
+                                                    item.unreadCount > 0,
+                                            )
+                                            .map(item => ({
+                                                ...item,
+                                                inboxType: 'message',
+                                                listId: `message:${item.id}`,
+                                            }))
+                                        : [];
+                                const nextUnreadNotificationCount =
+                                    notificationFilter
+                                        ? page.totalCount
+                                        : unreadCountResult.status === 'fulfilled'
+                                        ? unreadCountResult.value
+                                        : null;
+                                return {
+                                    items: sortInboxItems([
+                                        ...notifications,
+                                        ...messages,
+                                    ]),
+                                    hasMore: page.hasMore,
+                                    nextOffset: page.nextOffset,
+                                    unreadNotificationCount:
+                                        nextUnreadNotificationCount,
+                                    partialError:
+                                        messagesResult.status === 'rejected',
+                                };
+                            },
+                            {force: refresh},
+                        );
+                    const applyPage = payload => {
+                        if (controller.signal.aborted) {
+                            return false;
+                        }
+                        nextItems = payload.items;
+                        nextOffsetRef.current = payload.nextOffset;
+                        setHasMore(payload.hasMore);
+                        setLoadError(payload.partialError);
+                        if (payload.unreadNotificationCount != null) {
+                            setUnreadNotificationCount(
+                                payload.unreadNotificationCount,
+                            );
+                        }
+                        return true;
+                    };
+                    if (cachedResult) {
+                        applyPage(cachedResult);
+                        setItems(cachedResult.items);
+                        setIsLoading(false);
+                    }
+                    const payload = await request;
+                    if (!applyPage(payload)) {
+                        return;
+                    }
+                    nextItems = payload.items;
                     const canPublishUnreadCount =
-                        messagesResult.status === 'fulfilled' &&
-                        (notificationFilter ||
-                            unreadCountResult.status === 'fulfilled');
+                        !payload.partialError &&
+                        payload.unreadNotificationCount != null;
                     if (
                         canPublishUnreadCount &&
                         unreadCountRequestRef.current ===
                             unreadCountRequestId
                     ) {
-                        const unreadNotificationCount =
-                            notificationFilter
-                                ? page.totalCount
-                                : unreadCountResult.status === 'fulfilled'
-                                ? unreadCountResult.value
-                                : 0;
                         const nextUnreadCount =
                             calculateHarborInboxUnreadCount(
-                                unreadNotificationCount,
-                                messages,
+                                payload.unreadNotificationCount,
+                                payload.items.filter(
+                                    item => item.inboxType === 'message',
+                                ),
                             );
                         publishUnreadCount(nextUnreadCount);
                     }
@@ -331,6 +415,116 @@ const HarborInboxPage = ({
         return () => controllerRef.current?.abort();
     }, [loadItems, navigation, username]);
 
+    const markAllNotificationsRead = React.useCallback(async () => {
+        if (markingAllRef.current) {
+            return;
+        }
+        markingAllRef.current = true;
+        try {
+            await markHarborNotificationsReadAll();
+            patchHarborInboxNotificationsReadAll(username);
+            unreadCountRequestRef.current += 1;
+            setUnreadNotificationCount(0);
+            if (notificationFilter) {
+                setHasMore(false);
+            }
+            setItems(currentItems =>
+                notificationFilter
+                    ? currentItems.filter(
+                        item => item.inboxType !== 'notification',
+                    )
+                    : currentItems.map(item =>
+                        item.inboxType === 'notification'
+                            ? {...item, isRead: true}
+                            : item,
+                    ),
+            );
+            publishUnreadCount(
+                itemsRef.current.filter(
+                    item =>
+                        item.inboxType === 'message' &&
+                        item.unreadCount > 0,
+                ).length,
+            );
+            Toast.show(t('通知已全部標為已讀'));
+        } catch (error) {
+            Toast.show(t('通知已讀狀態更新失敗，請稍後再試。'));
+        } finally {
+            markingAllRef.current = false;
+        }
+    }, [notificationFilter, publishUnreadCount, t, username]);
+
+    const handleMarkAllRead = React.useCallback(() => {
+        if (unreadNotificationCount <= 0 || markingAllRef.current) {
+            return;
+        }
+        Alert.alert(
+            t('將所有通知標為已讀？'),
+            t('只會清除通知的未讀狀態，私人訊息仍會保持未讀。'),
+            [
+                {
+                    text: t('取消'),
+                    style: 'cancel',
+                    onPress: () => trigger(),
+                },
+                {
+                    text: t('全部已讀'),
+                    onPress: () => {
+                        trigger();
+                        markAllNotificationsRead();
+                    },
+                },
+            ],
+        );
+    }, [markAllNotificationsRead, t, unreadNotificationCount]);
+
+    const canMarkAllRead =
+        !embedded && unreadNotificationCount > 0 && !isLoading;
+
+    React.useEffect(() => {
+        if (embedded) {
+            return;
+        }
+        navigation.setOptions({
+            headerTitle: t('消息中心'),
+            headerRight: canMarkAllRead
+                ? Platform.OS === 'ios'
+                    ? undefined
+                    : createHarborInboxMarkAllButton({
+                        accessibilityLabel: t('全部已讀'),
+                        onPress: handleMarkAllRead,
+                        themeColor: theme.themeColor,
+                    })
+                : undefined,
+            unstable_headerRightItems:
+                canMarkAllRead && Platform.OS === 'ios'
+                    ? () => [
+                        {
+                            type: 'button',
+                            label: t('全部已讀'),
+                            accessibilityLabel: t('全部已讀'),
+                            icon: {
+                                type: 'sfSymbol',
+                                name: 'checkmark.circle',
+                            },
+                            tintColor: theme.themeColor,
+                            onPress: () => {
+                                trigger();
+                                handleMarkAllRead();
+                            },
+                        },
+                    ]
+                    : undefined,
+        });
+    }, [
+        canMarkAllRead,
+        embedded,
+        handleMarkAllRead,
+        navigation,
+        t,
+        theme.themeColor,
+    ]);
+
     const handlePress = async item => {
         trigger();
         const isNotification = item.inboxType === 'notification';
@@ -353,8 +547,21 @@ const HarborInboxPage = ({
             );
             markHarborNotificationRead(item.id)
                 .then(() => {
+                    patchHarborInboxNotificationRead(username, item.id);
+                    if (notificationFilter) {
+                        setItems(currentItems =>
+                            currentItems.filter(
+                                currentItem =>
+                                    currentItem.inboxType !== 'notification' ||
+                                    currentItem.id !== item.id,
+                            ),
+                        );
+                    }
                     unreadCountRequestRef.current += 1;
                     publishUnreadCount(unreadCountRef.current - 1);
+                    setUnreadNotificationCount(count =>
+                        Math.max(0, count - 1),
+                    );
                 })
                 .catch(() => {
                     setItems(currentItems =>
@@ -376,6 +583,7 @@ const HarborInboxPage = ({
 
         if (!isNotification) {
             if (item.unreadCount > 0) {
+                patchHarborInboxMessageRead(username, item.id);
                 setItems(currentItems =>
                     currentItems.map(currentItem =>
                         currentItem.listId === item.listId
@@ -721,6 +929,13 @@ const styles = StyleSheet.create({
     },
     loading: {
         flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    headerButton: {
+        width: scale(36),
+        height: scale(36),
+        borderRadius: scale(18),
         alignItems: 'center',
         justifyContent: 'center',
     },

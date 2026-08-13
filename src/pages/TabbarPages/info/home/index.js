@@ -59,7 +59,7 @@ import Ionicons from '@react-native-vector-icons/ionicons';
 
 const MIN_REFRESH_DURATION = 800;
 const DONATE_PROBE_TIMEOUT_MS = 2500;
-const DEBUG_SHOW_UPDATE_INFO = __DEV__ && true;
+const DEBUG_SHOW_UPDATE_INFO = __DEV__ && false;
 const wait = duration => new Promise(resolve => setTimeout(resolve, duration));
 
 const openDonateLink = async () => {

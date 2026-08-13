@@ -35,6 +35,7 @@ import {
     likeHarborPost,
     markHarborTopicUnread,
     markHarborNotificationRead,
+    markHarborNotificationsReadAll,
     normalizeHarborFlagTypes,
     saveHarborTopicTimings,
     selectHarborAvatar,
@@ -42,6 +43,7 @@ import {
     setHarborCredentialRejectedHandler,
     setHarborTopicNotificationLevel,
     resolveCanUploadCustomAvatar,
+    stripHtml,
     toggleHarborPostReaction,
     unlikeHarborPost,
     updateHarborAvatar,
@@ -88,6 +90,14 @@ describe('Harbor API 資料正規化', () => {
         postSpy.mockRestore();
         putSpy.mockRestore();
         deleteSpy.mockRestore();
+    });
+
+    it('將帖子 HTML 轉成適合複製的純文字', () => {
+        expect(
+            stripHtml(
+                '<p>第一段 &amp; 內容</p><p>第二段 <img class="emoji" alt=":heart:" src="emoji.png"></p>',
+            ),
+        ).toBe('第一段 & 內容 第二段 ♡');
     });
 
     it('輕量 Session 驗證共用進行中的請求並使用短期快取', async () => {
@@ -1305,6 +1315,14 @@ describe('Harbor API 資料正規化', () => {
         });
     });
 
+    it('不帶通知 ID 時將全部通知標為已讀', async () => {
+        putSpy.mockResolvedValue({data: {success: 'OK'}});
+
+        await markHarborNotificationsReadAll();
+
+        expect(putSpy).toHaveBeenCalledWith('/notifications/mark-read.json');
+    });
+
     it('首次建立論壇角標基準時只讀取最新一頁', async () => {
         getSpy.mockResolvedValueOnce({
             data: {
@@ -1974,6 +1992,7 @@ describe('Harbor API 資料正規化', () => {
                 '/categories.json',
                 {
                     params: {include_subcategories: true},
+                    signal: expect.anything(),
                     skipHarborCredentials: true,
                 },
             ],
@@ -2075,12 +2094,14 @@ describe('Harbor API 資料正規化', () => {
                 {
                     params: {include_subcategories: true},
                     harborCredentials: credentials,
+                    signal: expect.anything(),
                 },
             ],
             [
                 '/categories.json',
                 {
                     params: {include_subcategories: true},
+                    signal: expect.anything(),
                     skipHarborCredentials: true,
                 },
             ],
@@ -2124,6 +2145,7 @@ describe('Harbor API 資料正規化', () => {
         );
         expect(getSpy).toHaveBeenNthCalledWith(2, '/categories.json', {
             params: {include_subcategories: true},
+            signal: expect.anything(),
             skipHarborCredentials: true,
         });
     });
@@ -2437,6 +2459,25 @@ describe('Harbor API 資料正規化', () => {
                 nextPage: null,
             }),
         );
+    });
+
+    it('熱門話題可指定 Discourse 統計週期', async () => {
+        getSpy.mockResolvedValue({
+            data: {
+                topic_list: {
+                    per_page: 30,
+                    more_topics_url: null,
+                    topics: [],
+                },
+            },
+        });
+
+        await fetchHarborTopicList({view: 'top', period: 'monthly'});
+
+        expect(getSpy).toHaveBeenCalledWith('/top.json', {
+            params: {page: 0, period: 'monthly'},
+            signal: undefined,
+        });
     });
 
     it('為分類及標籤話題建立正確的 Discourse 路徑', async () => {

@@ -299,7 +299,12 @@ export function useHarborComposerSubmit({
                 throw resultError;
             }
 
-            publishHarborTopicUpdate(resultTopicId, {reloadLists: true});
+            publishHarborTopicUpdate(resultTopicId, {
+                invalidateActivity: true,
+                invalidateDetail: true,
+                invalidateSearch: true,
+                reloadLists: true,
+            });
             await onPublished();
             Toast.show(
                 isEdit
@@ -328,7 +333,12 @@ export function useHarborComposerSubmit({
                         editMetadata.post_number ??
                         route.params?.postNumber,
                     );
-                publishHarborTopicUpdate(resultTopicId, {reloadLists: true});
+                publishHarborTopicUpdate(resultTopicId, {
+                    invalidateActivity: true,
+                    invalidateDetail: true,
+                    invalidateSearch: true,
+                    reloadLists: true,
+                });
                 await onPublished();
                 Toast.show(
                     t('貼文正文已更新，但部分話題資料更新失敗，請重新載入確認。'),

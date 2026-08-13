@@ -9,6 +9,16 @@
 - 完成前必須檢查 `git diff --check` 和完整 `git diff`，移除自己造成的 whitespace-only 或無關差異。
 - 如果無法在不改變既有格式的情況下完成，先停止並向使用者說明。
 
+## i18n 翻譯檔（重要）
+
+多數新字串**只需寫 `src/i18n/en-us.json`**，不要為 identity map（key === value）徒增 `src/i18n/zh-hk.js`。
+
+- 新 key 優先用繁體中文（如 `t('開啟選單')`），不要用英文 key。
+- 繁中 key 且文案就是 key：只在 `en-us.json` 寫英文譯文；`zh-hk.js` 不必寫 `"開啟選單": "開啟選單"`。`fallbackLng` 為 `tc`，缺 key 會直接顯示 key。
+- 僅在繁中文案與 key 不同、或使用英文 key（如 `Settings`）時，才同時改 `zh-hk.js`。
+- 英文模式缺譯會露出中文 key，故 `en-us.json` 不可省。
+- 細節見 `.cursor/rules/i18n-patterns.mdc`。
+
 ## JavaScript 格式化
 
 - JavaScript 使用 Cursor 內建的 `vscode.typescript-language-features` formatter。
@@ -20,4 +30,5 @@
 
 - 修改 JavaScript 前讀取 `.cursor/rules/code-style.mdc`。
 - 所有任務都遵守 `.cursor/rules/critical-donts.mdc` 與 `.cursor/rules/language-requirements.mdc`。
+- 新增或修改翻譯字串時讀取 `.cursor/rules/i18n-patterns.mdc`；預設不要改 `src/i18n/zh-hk.js`。
 - 其他 `.cursor/rules/*.mdc` 依任務內容按需讀取。

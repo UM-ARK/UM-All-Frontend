@@ -31,6 +31,13 @@ import {
     sendHarborChatMessage,
 } from '../../../utils/harbor/harborApi';
 import {mergeHarborChatMessages} from '../../../utils/harbor/harborChat';
+import {
+    getHarborChatMessagesCacheKey,
+    patchHarborChatChannelMessagesCache,
+    patchHarborChatMessagesCache,
+    readHarborChatMessagesCache,
+    writeHarborChatMessagesCache,
+} from '../../../utils/harbor/harborChatQueries';
 import {trigger} from '../../../utils/trigger';
 import {HarborFullState} from './components/HarborListStates';
 
@@ -307,19 +314,86 @@ const HarborChatChannelPage = ({navigation, route}) => {
     const loadingRef = useRef(false);
     const channelId = Number(route.params?.channelId);
     const isGroup = Boolean(route.params?.isGroup);
-    const [messages, setMessages] = useState([]);
+    const initialTargetMessageId = Number(route.params?.messageId) || null;
+    const initialCacheKey = getHarborChatMessagesCacheKey(
+        user?.username,
+        channelId,
+        initialTargetMessageId,
+    );
+    const initialCachedResultRef = useRef();
+    if (initialCachedResultRef.current === undefined) {
+        initialCachedResultRef.current =
+            readHarborChatMessagesCache(initialCacheKey) || null;
+    }
+    const initialCachedResult = initialCachedResultRef.current;
+    const currentCacheKeyRef = useRef(initialCacheKey);
+    const messagesRef = useRef(initialCachedResult?.items || []);
+    const hasCachedResultRef = useRef(Boolean(initialCachedResult));
+    const [messages, setMessages] = useState(initialCachedResult?.items || []);
     const [draft, setDraft] = useState('');
-    const [canLoadMorePast, setCanLoadMorePast] = useState(false);
-    const [isLoading, setIsLoading] = useState(true);
+    const [canLoadMorePast, setCanLoadMorePast] = useState(
+        Boolean(initialCachedResult?.canLoadMorePast),
+    );
+    const [isLoading, setIsLoading] = useState(!initialCachedResult);
     const [isLoadingPast, setIsLoadingPast] = useState(false);
     const [isSending, setIsSending] = useState(false);
     const [error, setError] = useState(false);
+    const username = user?.username || '';
+    const cacheIdentityRef = useRef(`${username}:${channelId}`);
+
+    const patchCachedMessages = useCallback(
+        updater => patchHarborChatChannelMessagesCache(
+            username,
+            channelId,
+            updater,
+        ),
+        [channelId, username],
+    );
+
+    const updateMessages = useCallback(
+        updater => {
+            setMessages(current => {
+                const nextMessages =
+                    typeof updater === 'function' ? updater(current) : updater;
+                messagesRef.current = nextMessages;
+                patchCachedMessages(currentCache => ({
+                    ...currentCache,
+                    items: nextMessages,
+                }));
+                return nextMessages;
+            });
+        },
+        [patchCachedMessages],
+    );
 
     useEffect(() => {
         navigation.setOptions({
             headerTitle: route.params?.channelTitle || t('Chat'),
         });
     }, [navigation, route.params?.channelTitle, t]);
+
+    useEffect(() => {
+        const cacheIdentity = `${username}:${channelId}`;
+        if (cacheIdentityRef.current === cacheIdentity) {
+            return;
+        }
+        cacheIdentityRef.current = cacheIdentity;
+        const cacheKey = getHarborChatMessagesCacheKey(
+            username,
+            channelId,
+            initialTargetMessageRef.current,
+        );
+        const cachedResult = readHarborChatMessagesCache(cacheKey);
+        currentCacheKeyRef.current = cacheKey;
+        hasCachedResultRef.current = Boolean(cachedResult);
+        messagesRef.current = cachedResult?.items || [];
+        setMessages(messagesRef.current);
+        setCanLoadMorePast(Boolean(cachedResult?.canLoadMorePast));
+        setIsLoading(!cachedResult);
+        setError(false);
+        initialScrollRef.current = false;
+        lastMarkedReadRef.current = 0;
+    }, [channelId, username]);
 
     const markLatestRead = useCallback(
         nextMessages => {
@@ -347,19 +421,39 @@ const HarborChatChannelPage = ({navigation, route}) => {
                 return;
             }
             loadingRef.current = true;
-            if (!poll) {
+            if (!poll && !hasCachedResultRef.current) {
                 setIsLoading(true);
             }
             try {
+                const targetMessageId = initialTargetMessageRef.current;
                 const result = await fetchHarborChatMessages(channelId, {
-                    targetMessageId: initialTargetMessageRef.current,
+                    targetMessageId,
                 });
                 initialTargetMessageRef.current = null;
+                const cacheKey = getHarborChatMessagesCacheKey(
+                    username,
+                    channelId,
+                    targetMessageId,
+                );
+                currentCacheKeyRef.current = cacheKey;
                 setMessages(current => {
                     const nextMessages = mergeHarborChatMessages(
                         current,
                         result.items,
                     );
+                    messagesRef.current = nextMessages;
+                    hasCachedResultRef.current = true;
+                    writeHarborChatMessagesCache(cacheKey, {
+                        canLoadMorePast: result.canLoadMorePast,
+                        items: nextMessages,
+                    });
+                    patchCachedMessages(currentCache => ({
+                        ...currentCache,
+                        items: mergeHarborChatMessages(
+                            currentCache.items,
+                            result.items,
+                        ),
+                    }));
                     markLatestRead(nextMessages);
                     return nextMessages;
                 });
@@ -376,7 +470,7 @@ const HarborChatChannelPage = ({navigation, route}) => {
                 }
             }
         },
-        [channelId, markLatestRead],
+        [channelId, markLatestRead, patchCachedMessages, username],
     );
 
     useFocusEffect(
@@ -401,10 +495,14 @@ const HarborChatChannelPage = ({navigation, route}) => {
                 direction: 'past',
                 targetMessageId: firstMessage.id,
             });
-            setMessages(current =>
+            updateMessages(current =>
                 mergeHarborChatMessages(result.items, current),
             );
             setCanLoadMorePast(result.canLoadMorePast);
+            patchHarborChatMessagesCache(currentCacheKeyRef.current, current => ({
+                ...current,
+                canLoadMorePast: result.canLoadMorePast,
+            }));
         } catch {
             Alert.alert(
                 t('無法載入較早訊息'),
@@ -414,7 +512,7 @@ const HarborChatChannelPage = ({navigation, route}) => {
         } finally {
             setIsLoadingPast(false);
         }
-    }, [canLoadMorePast, channelId, isLoadingPast, messages, t]);
+    }, [canLoadMorePast, channelId, isLoadingPast, messages, t, updateMessages]);
 
     const sendMessage = useCallback(async () => {
         const content = draft.trim();
@@ -441,7 +539,7 @@ const HarborChatChannelPage = ({navigation, route}) => {
                         avatarUrl: user?.avatarUrl || '',
                     },
                 };
-                setMessages(current =>
+                updateMessages(current =>
                     mergeHarborChatMessages(current, [optimisticMessage]),
                 );
                 lastMarkedReadRef.current = messageId;
@@ -462,7 +560,7 @@ const HarborChatChannelPage = ({navigation, route}) => {
         } finally {
             setIsSending(false);
         }
-    }, [channelId, draft, isSending, loadLatest, t, user]);
+    }, [channelId, draft, isSending, loadLatest, t, updateMessages, user]);
 
     const contentContainerStyle = useMemo(
         () => ({

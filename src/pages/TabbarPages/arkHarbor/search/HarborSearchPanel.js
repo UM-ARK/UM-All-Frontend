@@ -586,6 +586,8 @@ const styles = StyleSheet.create({
         flex: 1,
         width: 0,
         marginLeft: scale(4),
+        // 覆寫 iOS TextInput 預設內距，避免 placeholder／游標下沉
+        paddingVertical: scale(6),
         textAlignVertical: 'center',
         fontSize: verticalScale(12),
     },

@@ -21,6 +21,13 @@ import {
     isHarborRateLimited,
     recordHarborRateLimit,
 } from './harborRateLimit';
+import {
+    fetchHarborQueryCache,
+    invalidateHarborQueryCache,
+    readHarborQueryCache,
+    resetHarborQueryCache,
+    setHarborQueryNamespaceLimit,
+} from './harborQueryCache';
 
 const REQUEST_TIMEOUT = 15000;
 const TOPIC_POST_BATCH_SIZE = 20;
@@ -30,6 +37,7 @@ const REACTION_GIVEN_PAGE_SIZE = 20;
 const DEFAULT_TOPIC_PAGE_SIZE = 30;
 const COMPOSER_METADATA_TTL = 5 * 60 * 1000;
 const COMPOSER_SETTINGS_TTL = 30 * 60 * 1000;
+const DISCOVERY_STALE_TTL = 30 * 60 * 1000;
 const SESSION_VALIDATION_COOLDOWN = 30 * 1000;
 const TOPIC_VIEWS = ['latest', 'top', 'new', 'unread'];
 const PUBLIC_TOPIC_VIEWS = ['latest', 'top'];
@@ -117,15 +125,12 @@ let sessionValidationRequest = null;
 let sessionValidationAt = 0;
 let sessionValidationResult = null;
 let sessionValidationError = null;
-let discoveryCategoryCache = null;
-let discoveryCategoryRequest = null;
-let discoveryCategoryCacheGeneration = 0;
 const composerMetadataCache = {
-    categories: {value: null, expiresAt: 0, request: null, generation: 0},
-    tags: {value: null, expiresAt: 0, request: null, generation: 0},
     settings: {value: null, expiresAt: 0, request: null, generation: 0},
     flagTypes: {value: null, expiresAt: 0, request: null, generation: 0},
 };
+
+setHarborQueryNamespaceLimit('discovery', 4);
 
 harborApi.interceptors.request.use(config => {
     const cooldownError = createHarborRateLimitCooldownError();
@@ -166,14 +171,19 @@ harborApi.interceptors.response.use(
 
 export function setActiveHarborCredentials(credentials) {
     const previousCredentialKey = activeCredentials?.userApiKey;
+    const previousClientId = activeCredentials?.clientId;
     activeCredentials = credentials;
-    if (previousCredentialKey !== credentials?.userApiKey) {
+    if (
+        previousCredentialKey !== credentials?.userApiKey ||
+        previousClientId !== credentials?.clientId
+    ) {
         sessionValidationRequest = null;
         sessionValidationAt = 0;
         sessionValidationResult = null;
         sessionValidationError = null;
         clearHarborDiscoveryCache();
         clearHarborComposerMetadataCache();
+        resetHarborQueryCache();
     }
 }
 
@@ -182,9 +192,9 @@ export function setHarborCredentialRejectedHandler(handler) {
 }
 
 export function clearHarborDiscoveryCache() {
-    discoveryCategoryCacheGeneration += 1;
-    discoveryCategoryCache = null;
-    discoveryCategoryRequest = null;
+    invalidateHarborQueryCache(['discovery', 'categories'], {
+        namespace: 'discovery',
+    });
 }
 
 export function clearHarborComposerMetadataCache() {
@@ -193,6 +203,15 @@ export function clearHarborComposerMetadataCache() {
         entry.value = null;
         entry.expiresAt = 0;
         entry.request = null;
+    });
+    invalidateHarborQueryCache(['discovery', 'categories'], {
+        namespace: 'discovery',
+    });
+    invalidateHarborQueryCache(['discovery', 'tags'], {
+        namespace: 'discovery',
+    });
+    invalidateHarborQueryCache(['discovery', 'composer-settings'], {
+        namespace: 'discovery',
     });
 }
 
@@ -274,7 +293,7 @@ export function getHarborTopicViews(
         : [...fallbackViews];
 }
 
-function stripHtml(value) {
+export function stripHtml(value) {
     if (typeof value !== 'string') {
         return '';
     }
@@ -530,36 +549,7 @@ function normalizeCategories(data) {
 }
 
 function fetchHarborDiscoveryCategories() {
-    if (discoveryCategoryCache) {
-        return Promise.resolve(discoveryCategoryCache);
-    }
-    if (discoveryCategoryRequest) {
-        return discoveryCategoryRequest;
-    }
-
-    const requestGeneration = discoveryCategoryCacheGeneration;
-    const credentials = activeCredentials;
-    const request = harborApi
-        .get('/categories.json', {
-            params: { include_subcategories: true },
-            ...(credentials
-                ? { harborCredentials: credentials }
-                : { skipHarborCredentials: true }),
-        })
-        .then(response => {
-            const categories = normalizeCategories(response.data);
-            if (requestGeneration === discoveryCategoryCacheGeneration) {
-                discoveryCategoryCache = categories;
-            }
-            return categories;
-        })
-        .finally(() => {
-            if (discoveryCategoryRequest === request) {
-                discoveryCategoryRequest = null;
-            }
-        });
-    discoveryCategoryRequest = request;
-    return discoveryCategoryRequest;
+    return fetchHarborCategories().then(result => result.items);
 }
 
 async function resolveTopicCategory(topic) {
@@ -1675,6 +1665,7 @@ async function buildNormalizedTopicListResult(data, page) {
 export async function fetchHarborTopicList({
     view = 'latest',
     page = 0,
+    period,
     categoryId,
     categorySlug,
     tag,
@@ -1688,7 +1679,10 @@ export async function fetchHarborTopicList({
         tag,
     });
     const response = await harborApi.get(path, {
-        params: { page: normalizedPage },
+        params: {
+            page: normalizedPage,
+            ...(view === 'top' && period ? {period} : {}),
+        },
         signal,
     });
     return buildNormalizedTopicListResult(response.data, normalizedPage);
@@ -1791,36 +1785,76 @@ export async function fetchHarborSearch({
     );
 }
 
-export async function fetchHarborCategories({ signal } = {}) {
-    const response = await harborApi.get('/categories.json', {
-        params: { include_subcategories: true },
-        signal,
+export function readCachedHarborCategories() {
+    return readHarborQueryCache(['discovery', 'categories'], {
+        namespace: 'discovery',
+        maxAgeMs: DISCOVERY_STALE_TTL,
     });
-    const items = normalizeCategories(response.data);
-
-    return {
-        items,
-        hasMore: false,
-        nextPage: null,
-        canCreateCategory: Boolean(
-            response.data?.category_list?.can_create_category,
-        ),
-        canCreateTopic: Boolean(response.data?.category_list?.can_create_topic),
-    };
 }
 
-export async function fetchHarborTags({ signal } = {}) {
-    const response = await harborApi.get('/tags.json', { signal });
-    const rawTags = Array.isArray(response.data?.tags)
-        ? response.data.tags
-        : [];
-    const items = rawTags.map(tag => normalizeTag(tag)).filter(Boolean);
+export function fetchHarborCategories({forceRefresh = false} = {}) {
+    return fetchHarborQueryCache(
+        ['discovery', 'categories'],
+        async ({signal}) => {
+            const credentials = activeCredentials;
+            const response = await harborApi.get('/categories.json', {
+                params: {include_subcategories: true},
+                signal,
+                ...(credentials
+                    ? {harborCredentials: credentials}
+                    : {skipHarborCredentials: true}),
+            });
+            const items = normalizeCategories(response.data);
+            return {
+                items,
+                hasMore: false,
+                nextPage: null,
+                canCreateCategory: Boolean(
+                    response.data?.category_list?.can_create_category,
+                ),
+                canCreateTopic: Boolean(
+                    response.data?.category_list?.can_create_topic,
+                ),
+            };
+        },
+        {
+            namespace: 'discovery',
+            freshMs: COMPOSER_METADATA_TTL,
+            staleMs: DISCOVERY_STALE_TTL,
+            force: forceRefresh,
+        },
+    );
+}
 
-    return {
-        items,
-        hasMore: false,
-        nextPage: null,
-    };
+export function readCachedHarborTags() {
+    return readHarborQueryCache(['discovery', 'tags'], {
+        namespace: 'discovery',
+        maxAgeMs: DISCOVERY_STALE_TTL,
+    });
+}
+
+export function fetchHarborTags({forceRefresh = false} = {}) {
+    return fetchHarborQueryCache(
+        ['discovery', 'tags'],
+        async ({signal}) => {
+            const response = await harborApi.get('/tags.json', {signal});
+            const rawTags = Array.isArray(response.data?.tags)
+                ? response.data.tags
+                : [];
+            const items = rawTags.map(tag => normalizeTag(tag)).filter(Boolean);
+            return {
+                items,
+                hasMore: false,
+                nextPage: null,
+            };
+        },
+        {
+            namespace: 'discovery',
+            freshMs: COMPOSER_METADATA_TTL,
+            staleMs: DISCOVERY_STALE_TTL,
+            force: forceRefresh,
+        },
+    );
 }
 
 export async function fetchHarborComposerSettings({ signal } = {}) {
@@ -1897,24 +1931,9 @@ export async function fetchHarborComposerMetadata({
         tags,
         settings,
     ] = await Promise.all([
-        getCachedComposerMetadata(
-            'categories',
-            () => fetchHarborCategories(),
-            COMPOSER_METADATA_TTL,
-            forceRefresh,
-        ),
-        getCachedComposerMetadata(
-            'tags',
-            () => fetchHarborTags(),
-            COMPOSER_METADATA_TTL,
-            forceRefresh,
-        ),
-        getCachedComposerMetadata(
-            'settings',
-            () => fetchHarborComposerSettings(),
-            COMPOSER_SETTINGS_TTL,
-            forceRefresh,
-        ),
+        fetchHarborCategories({forceRefresh}),
+        fetchHarborTags({forceRefresh}),
+        fetchCachedHarborComposerSettings({forceRefresh}),
     ]);
     return {categories, tags, settings};
 }
@@ -1922,12 +1941,23 @@ export async function fetchHarborComposerMetadata({
 export function fetchCachedHarborComposerSettings({
     forceRefresh = false,
 } = {}) {
-    return getCachedComposerMetadata(
-        'settings',
-        () => fetchHarborComposerSettings(),
-        COMPOSER_SETTINGS_TTL,
-        forceRefresh,
+    return fetchHarborQueryCache(
+        ['discovery', 'composer-settings'],
+        ({signal}) => fetchHarborComposerSettings({signal}),
+        {
+            namespace: 'discovery',
+            freshMs: COMPOSER_SETTINGS_TTL,
+            staleMs: COMPOSER_SETTINGS_TTL,
+            force: forceRefresh,
+        },
     );
+}
+
+export function readCachedHarborComposerSettings() {
+    return readHarborQueryCache(['discovery', 'composer-settings'], {
+        namespace: 'discovery',
+        maxAgeMs: COMPOSER_SETTINGS_TTL,
+    });
 }
 
 export async function fetchHarborSiteCapabilities({ signal } = {}) {
@@ -2588,6 +2618,10 @@ export async function markHarborNotificationRead(notificationId) {
         return;
     }
     await harborApi.put('/notifications/mark-read.json', { id });
+}
+
+export async function markHarborNotificationsReadAll() {
+    await harborApi.put('/notifications/mark-read.json');
 }
 
 export async function fetchHarborMessages(username, { signal } = {}) {

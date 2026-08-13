@@ -113,6 +113,25 @@ describe('Harbor Composer API', () => {
         expect(getSpy).toHaveBeenCalledTimes(3);
     });
 
+    it('強制更新 Composer metadata 時重新取得共享探索資料', async () => {
+        getSpy.mockImplementation(url => {
+            if (url === '/categories.json') {
+                return Promise.resolve({
+                    data: {category_list: {categories: []}},
+                });
+            }
+            if (url === '/tags.json') {
+                return Promise.resolve({data: {tags: []}});
+            }
+            return Promise.resolve({data: {min_topic_title_length: 3}});
+        });
+
+        await fetchHarborComposerMetadata();
+        await fetchHarborComposerMetadata({forceRefresh: true});
+
+        expect(getSpy).toHaveBeenCalledTimes(6);
+    });
+
     it('保留分類的標籤要求與 Topic template', async () => {
         getSpy.mockResolvedValue({
             data: {

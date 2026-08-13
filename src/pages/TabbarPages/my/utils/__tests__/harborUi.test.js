@@ -53,6 +53,45 @@ describe('Harbor 消息中心', () => {
             excerpt: 'reader',
         });
         expect(
+            getHarborNotificationPresentation(
+                {
+                    typeName: 'reaction',
+                    actingUsername: 'reader',
+                    title: '測試話題',
+                    postNumber: 1,
+                },
+                value => `t:${value}`,
+            ),
+        ).toEqual({
+            icon: 'happy-outline',
+            isAdmin: false,
+            label: 't:反應 · t:你的首帖',
+            title: '測試話題',
+            excerpt: 'reader',
+        });
+        expect(
+            getHarborNotificationPresentation(
+                {
+                    typeName: 'reaction',
+                    actingUsername: 'yyyyyounger',
+                    title: '可以使用 Event 功能開啟時間表',
+                    postNumber: 3,
+                },
+                value => `t:${value}`,
+            ).label,
+        ).toBe('t:反應 · t:你的第 3 樓');
+        expect(
+            getHarborNotificationPresentation(
+                {
+                    typeName: 'replied',
+                    actingUsername: 'reader',
+                    title: '新回覆',
+                    postNumber: 5,
+                },
+                value => `t:${value}`,
+            ).label,
+        ).toBe('t:回覆 · t:第 5 樓');
+        expect(
             getHarborNotificationTarget(
                 {topicId: 31, postNumber: 2},
                 'ark-user',
@@ -213,7 +252,7 @@ describe('Harbor 消息中心', () => {
         });
     });
 
-    it('為點讚與私信提供操作者資訊', () => {
+    it('為回覆、點讚與私信提供操作者資訊', () => {
         expect(
             getHarborInboxActor({
                 inboxType: 'notification',
@@ -236,6 +275,26 @@ describe('Harbor 消息中心', () => {
         });
         expect(
             getHarborInboxActor({
+                inboxType: 'notification',
+                typeName: 'replied',
+                actingUsername: 'yyyyyyounger',
+            }),
+        ).toEqual({
+            username: 'yyyyyyounger',
+            avatarUrl: '',
+        });
+        expect(
+            getHarborInboxActor({
+                inboxType: 'notification',
+                typeName: 'quoted',
+                actingUsername: 'reader',
+            }),
+        ).toEqual({
+            username: 'reader',
+            avatarUrl: '',
+        });
+        expect(
+            getHarborInboxActor({
                 inboxType: 'message',
                 actingUsername: 'reader',
                 avatarUrl: 'https://harbor.umall.one/avatar.png',
@@ -248,13 +307,6 @@ describe('Harbor 消息中心', () => {
             getHarborInboxActor({
                 inboxType: 'notification',
                 typeName: 'granted_badge',
-                actingUsername: 'reader',
-            }),
-        ).toEqual({username: '', avatarUrl: ''});
-        expect(
-            getHarborInboxActor({
-                inboxType: 'notification',
-                typeName: 'replied',
                 actingUsername: 'reader',
             }),
         ).toEqual({username: '', avatarUrl: ''});
