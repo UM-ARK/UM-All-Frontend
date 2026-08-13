@@ -48,6 +48,44 @@ export const getReadingPostNumber = ({
     return Number(readingPost.item.post_number);
 };
 
+export const getTopicReadStateAfterVisit = ({
+    highestPostNumber,
+    lastReadPostNumber,
+    lastVisiblePostNumber,
+    newPosts,
+    postsCount,
+    unreadPosts,
+    unseen,
+}) => {
+    const previousLastRead = Number(lastReadPostNumber || 0);
+    const nextLastRead = Math.max(
+        previousLastRead,
+        Number(lastVisiblePostNumber || 0),
+    );
+    const knownHighest = Number(highestPostNumber || postsCount || 0);
+    const highest = knownHighest > 0 ? knownHighest : null;
+    const serverUnread = unreadPosts ?? newPosts;
+    const hasServerUnread = serverUnread != null;
+    const previousUnread = hasServerUnread
+        ? Math.max(0, Number(serverUnread) || 0)
+        : null;
+    const isAtKnownEnd = highest != null && nextLastRead >= highest;
+    // 未讀數不是樓層差；部分閱讀先保留伺服器值，讀到結尾才安全清零
+    const unreadCount = isAtKnownEnd ? 0 : previousUnread;
+    return {
+        highestPostNumber: highest,
+        lastReadPostNumber: nextLastRead,
+        unreadCount,
+        isUnread: unreadCount == null ? null : unreadCount > 0,
+        isNew: false,
+        shouldReloadLists:
+            unreadCount === 0 &&
+            (Number(previousUnread || 0) > 0 ||
+                Boolean(unseen) ||
+                Number(newPosts || 0) > 0),
+    };
+};
+
 const useHarborTopicReading = ({
     composerRefreshAt,
     headerHeight,
@@ -98,34 +136,48 @@ const useHarborTopicReading = ({
             }).catch(() => { });
 
             // 返回列表時就地更新該帖已讀狀態，避免整表刷新
-            const previousLastRead = Number(
-                latestTopicRef.current?.last_read_post_number || 0,
-            );
-            const nextLastRead = Math.max(previousLastRead, lastPostNumber);
-            const highestPostNumber = Number(
-                latestTopicRef.current?.highest_post_number ||
-                    latestTopicRef.current?.posts_count ||
-                    nextLastRead,
-            );
-            const unreadCount = Math.max(0, highestPostNumber - nextLastRead);
+            const latestTopic = latestTopicRef.current;
+            const readState = getTopicReadStateAfterVisit({
+                highestPostNumber: latestTopic?.highest_post_number,
+                lastReadPostNumber: latestTopic?.last_read_post_number,
+                lastVisiblePostNumber: lastPostNumber,
+                newPosts: latestTopic?.new_posts,
+                postsCount: latestTopic?.posts_count,
+                unreadPosts: latestTopic?.unread_posts,
+                unseen: latestTopic?.unseen,
+            });
             publishHarborTopicUpdate(topicId, {
                 detailPatch: {
-                    last_read_post_number: nextLastRead,
-                    unread_posts: unreadCount,
+                    last_read_post_number: readState.lastReadPostNumber,
+                    ...(readState.unreadCount == null
+                        ? {}
+                        : {unread_posts: readState.unreadCount}),
                 },
-                lastReadPostNumber: nextLastRead,
-                unreadCount,
-                isUnread: unreadCount > 0,
-                isNew: false,
-                // 已讀完時讓 unread／new 視圖軟刷新以移出該帖
-                ...(unreadCount === 0 ? { reloadLists: true } : {}),
+                ...(readState.highestPostNumber == null
+                    ? {}
+                    : {highestPostNumber: readState.highestPostNumber}),
+                lastReadPostNumber: readState.lastReadPostNumber,
+                isNew: readState.isNew,
+                ...(readState.unreadCount == null
+                    ? {}
+                    : {
+                        unreadCount: readState.unreadCount,
+                        isUnread: readState.isUnread,
+                    }),
+                ...(readState.shouldReloadLists
+                    ? {newContentType: null}
+                    : {}),
+                // 僅在未讀／新帖真正讀完時重排列表，已讀帖返回不打列表 API
+                ...(readState.shouldReloadLists
+                    ? { reloadLists: true }
+                    : {}),
             });
         }
     }, [latestTopicRef, sessionStatusRef, topicId]);
 
     useEffect(() => {
         return () => disposeTopicReading();
-    }, [disposeTopicReading, loadTopic, topicId]);
+    }, [disposeTopicReading, topicId]);
 
     const revealNewReplies = useCallback(latestPostNumber => {
         pendingScrollRef.current = latestPostNumber;

@@ -11,6 +11,7 @@ jest.mock('../harborQueryCache', () => ({
 }));
 
 import {
+    mergeHarborTopicListItem,
     publishHarborTopicUpdate,
     subscribeHarborTopicUpdates,
 } from '../harborTopicUpdates';
@@ -40,6 +41,94 @@ describe('harborTopicUpdates', () => {
         expect(updateList({items: [{id: 12, muted: false}]}).items).toEqual([
             {id: 12, muted: true},
         ]);
+    });
+
+    test('列表已讀樓層只前進，不因詳情缺欄位回退', () => {
+        expect(
+            mergeHarborTopicListItem(
+                {
+                    id: 12,
+                    highestPostNumber: 13,
+                    lastReadPostNumber: 10,
+                    unreadCount: 3,
+                    isUnread: true,
+                },
+                {
+                    highestPostNumber: 10,
+                    lastReadPostNumber: 1,
+                    unreadCount: 0,
+                    isUnread: false,
+                    isNew: false,
+                },
+            ),
+        ).toEqual({
+            id: 12,
+            highestPostNumber: 13,
+            lastReadPostNumber: 10,
+            unreadCount: 3,
+            isUnread: true,
+            isNew: false,
+        });
+    });
+
+    test('列表有較新回覆時不套用較舊詳情的未讀數', () => {
+        expect(
+            mergeHarborTopicListItem(
+                {
+                    id: 12,
+                    highestPostNumber: 13,
+                    lastReadPostNumber: 3,
+                    unreadCount: 10,
+                    isUnread: true,
+                    newContentType: 'reply',
+                },
+                {
+                    highestPostNumber: 8,
+                    lastReadPostNumber: 5,
+                    unreadCount: 5,
+                    isUnread: true,
+                    newContentType: null,
+                },
+            ),
+        ).toEqual({
+            id: 12,
+            highestPostNumber: 13,
+            lastReadPostNumber: 5,
+            unreadCount: 10,
+            isUnread: true,
+            newContentType: 'reply',
+        });
+    });
+
+    test('讀完後立即清除合併列表的新內容分類', () => {
+        expect(
+            mergeHarborTopicListItem(
+                {
+                    id: 12,
+                    highestPostNumber: 8,
+                    lastReadPostNumber: 3,
+                    unreadCount: 5,
+                    isUnread: true,
+                    newContentType: 'reply',
+                },
+                {
+                    highestPostNumber: 8,
+                    lastReadPostNumber: 8,
+                    unreadCount: 0,
+                    isUnread: false,
+                    isNew: false,
+                    newContentType: null,
+                },
+            ),
+        ).toEqual({
+            id: 12,
+            highestPostNumber: 8,
+            lastReadPostNumber: 8,
+            unreadCount: 0,
+            isUnread: false,
+            isNew: false,
+            newContentType: null,
+        });
     });
 
     test('需重排列表時失效列表 cache 並保留 listener 契約', () => {

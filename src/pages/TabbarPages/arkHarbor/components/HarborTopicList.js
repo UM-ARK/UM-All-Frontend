@@ -25,7 +25,10 @@ import {
     getHarborRateLimitDelayMs,
     isHarborRateLimited,
 } from '../../../../utils/harbor/harborRateLimit';
-import { subscribeHarborTopicUpdates } from '../../../../utils/harbor/harborTopicUpdates';
+import {
+    mergeHarborTopicListItem,
+    subscribeHarborTopicUpdates,
+} from '../../../../utils/harbor/harborTopicUpdates';
 import { trigger } from '../../../../utils/trigger';
 import {
     HarborFullState,
@@ -301,7 +304,9 @@ const HarborTopicList = ({
                 removeFromLists
                     ? currentItems.filter(item => item.id !== topicId)
                     : currentItems.map(item =>
-                        item.id === topicId ? { ...item, ...itemPatch } : item,
+                        item.id === topicId
+                            ? mergeHarborTopicListItem(item, itemPatch)
+                            : item,
                     );
             replaceItems(updateItems(itemsRef.current));
             // 發帖／刪帖等需重排時刷新當前列表；主頁僅有 latest／top，不可再限死 new／unread
