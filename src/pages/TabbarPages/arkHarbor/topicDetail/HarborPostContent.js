@@ -512,6 +512,7 @@ const HarborPostContent = memo(
             () => ({
                 a: {
                     onPress: (event, href) => {
+                        event?.stopPropagation?.();
                         trigger();
                         const normalizedUrl = normalizeHtmlUrl(href);
                         const imageIndex = imageUrls.indexOf(normalizedUrl);
@@ -586,7 +587,7 @@ const HarborPostContent = memo(
                     customHTMLElementModels={customHTMLElementModels}
                     ignoredDomTags={['svg']}
                     defaultTextProps={{
-                        selectable: true,
+                        selectable: !compact,
                         style: styles.renderedText,
                     }}
                     enableExperimentalBRCollapsing

@@ -43,6 +43,7 @@ import {
     setHarborCredentialRejectedHandler,
     setHarborTopicNotificationLevel,
     resolveCanUploadCustomAvatar,
+    stripHtml,
     toggleHarborPostReaction,
     unlikeHarborPost,
     updateHarborAvatar,
@@ -89,6 +90,14 @@ describe('Harbor API 資料正規化', () => {
         postSpy.mockRestore();
         putSpy.mockRestore();
         deleteSpy.mockRestore();
+    });
+
+    it('將帖子 HTML 轉成適合複製的純文字', () => {
+        expect(
+            stripHtml(
+                '<p>第一段 &amp; 內容</p><p>第二段 <img class="emoji" alt=":heart:" src="emoji.png"></p>',
+            ),
+        ).toBe('第一段 & 內容 第二段 ♡');
     });
 
     it('輕量 Session 驗證共用進行中的請求並使用短期快取', async () => {

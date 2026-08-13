@@ -293,7 +293,7 @@ export function getHarborTopicViews(
         : [...fallbackViews];
 }
 
-function stripHtml(value) {
+export function stripHtml(value) {
     if (typeof value !== 'string') {
         return '';
     }

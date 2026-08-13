@@ -198,6 +198,8 @@
         "隨時通過本頁面右下角設置按鈕修改偏好": "You can change your preference anytime via the settings button at the bottom right of this page",
         "暫不修改，返回": "Not now, go back",
         "已編輯": "Edited",
+        "複製": "Copy",
+        "內容已複製": "Content copied.",
         "回覆樓層": "Reply to #{{postNumber}}",
         "展開 {{count}} 則回覆": "Expand {{count}} replies",
         "再展開 {{count}} 則回覆": "Expand {{count}} more replies",
