@@ -1112,39 +1112,43 @@ const HarborPostCard = memo(
                                 }}
                                 onPressIn={() => {
                                     contentLongPressRef.current = false;
-                                }}>
-                                <View
-                                    style={[
-                                        styles.replyBody,
-                                        isPostCollapsed
-                                            ? styles.postBodyCollapsed
-                                            : null,
-                                    ]}>
-                                    <View onLayout={onPostBodyLayout}>
-                                        <HarborPostContent
-                                            cooked={post.cooked}
-                                            contentWidth={
-                                                contentWidth -
-                                                (isNestedReply
-                                                    ? scale(28)
-                                                    : scale(38))
-                                            }
-                                            imageUrls={imageUrls}
-                                            onOpenImage={onOpenImage}
-                                            onPressLink={onPressLink}
-                                            postUrl={postUrl}
-                                            compact
-                                            forceInteractiveFallback={Boolean(
-                                                postEvent,
-                                            )}>
-                                            {postEvent ? (
-                                                <HarborPostEventCard
-                                                    event={postEvent}
-                                                    postUrl={postUrl}
-                                                />
-                                            ) : null}
-                                        </HarborPostContent>
-                                    </View>
+                                }}
+                                style={({ pressed }) => [
+                                    styles.replyBody,
+                                    isPostCollapsed
+                                        ? styles.postBodyCollapsed
+                                        : null,
+                                    pressed
+                                        ? {
+                                              backgroundColor:
+                                                  tonal.primary08,
+                                          }
+                                        : null,
+                                ]}>
+                                <View onLayout={onPostBodyLayout}>
+                                    <HarborPostContent
+                                        cooked={post.cooked}
+                                        contentWidth={
+                                            contentWidth -
+                                            (isNestedReply
+                                                ? scale(28)
+                                                : scale(38))
+                                        }
+                                        imageUrls={imageUrls}
+                                        onOpenImage={onOpenImage}
+                                        onPressLink={onPressLink}
+                                        postUrl={postUrl}
+                                        compact
+                                        forceInteractiveFallback={Boolean(
+                                            postEvent,
+                                        )}>
+                                        {postEvent ? (
+                                            <HarborPostEventCard
+                                                event={postEvent}
+                                                postUrl={postUrl}
+                                            />
+                                        ) : null}
+                                    </HarborPostContent>
                                 </View>
                             </Pressable>
 

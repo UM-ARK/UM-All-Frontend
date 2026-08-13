@@ -214,6 +214,7 @@ const styles = StyleSheet.create({
     },
     replyBody: {
         marginTop: 0,
+        borderRadius: scale(8),
     },
     firstPostCard: {
         paddingTop: verticalScale(12),
