@@ -175,6 +175,10 @@ const HarborPostCard = memo(
                 : !reactionsEnabled && reactionCount > 0
                     ? [{ id: 'heart', count: reactionCount }]
                     : [];
+        const reactionCountLabel =
+            Number.isFinite(reactionCount) && reactionCount > 0
+                ? String(reactionCount)
+                : '';
         // 1 樓操作改由頁面底部欄承接，卡片僅保留「更多」；標題併入本卡
         const isFirstPost = Number(post.post_number) === 1;
         const topicTags = useMemo(() => {
@@ -549,6 +553,35 @@ const HarborPostCard = memo(
             />
         );
 
+        const reactionActive = Boolean(currentReaction || isLiked);
+        const reactionButtonContent = (
+            <View
+                style={[
+                    styles.postMetaIconButton,
+                    reactionCountLabel
+                        ? styles.postMetaIconButtonWithCount
+                        : null,
+                ]}>
+                {reactionIcon}
+                {reactionCountLabel ? (
+                    <Text
+                        style={[
+                            styles.postMetaCount,
+                            {
+                                color: reactionActive
+                                    ? themeColor
+                                    : black.third,
+                            },
+                        ]}>
+                        {reactionCountLabel}
+                    </Text>
+                ) : null}
+            </View>
+        );
+        const reactionControlStyle = [
+            styles.postMetaIconMenu,
+            reactionCountLabel ? styles.postMetaIconMenuWithCount : null,
+        ];
         const reactionControl = reactionsEnabled ? (
             <HarborReactionControl
                 currentReaction={currentReaction}
@@ -560,14 +593,8 @@ const HarborPostCard = memo(
                 }}
                 pending={Boolean(pendingLike || pendingReaction)}
                 reactions={reactions}
-                style={styles.postMetaIconMenu}>
-                <View
-                    style={[
-                        styles.postMetaIconButton,
-                        reactionDisabled ? styles.disabledAction : null,
-                    ]}>
-                    {reactionIcon}
-                </View>
+                style={reactionControlStyle}>
+                {reactionButtonContent}
             </HarborReactionControl>
         ) : (
             <Pressable
@@ -579,10 +606,14 @@ const HarborPostCard = memo(
                 hitSlop={8}
                 onPress={() => {
                     trigger();
+                    if (reactionDisabled) {
+                        onPressDisabledReaction(post.id);
+                        return;
+                    }
                     onPressLike(post);
                 }}
-                style={styles.postMetaIconButton}>
-                {reactionIcon}
+                style={reactionControlStyle}>
+                {reactionButtonContent}
             </Pressable>
         );
 

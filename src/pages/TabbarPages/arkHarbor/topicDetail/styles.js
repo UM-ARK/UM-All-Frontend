@@ -360,11 +360,26 @@ const styles = StyleSheet.create({
         height: scale(22),
         flexShrink: 0,
     },
+    postMetaIconMenuWithCount: {
+        width: 'auto',
+    },
     postMetaIconButton: {
         width: scale(22),
         height: scale(22),
         alignItems: 'center',
         justifyContent: 'center',
+    },
+    postMetaIconButtonWithCount: {
+        width: 'auto',
+        minWidth: scale(22),
+        flexDirection: 'row',
+        paddingRight: scale(2),
+        columnGap: scale(2),
+    },
+    postMetaCount: {
+        ...uiStyle.defaultText,
+        fontSize: scale(10),
+        fontWeight: '600',
     },
     postMetaStats: {
         flexDirection: 'row',
