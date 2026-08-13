@@ -2590,6 +2590,10 @@ export async function markHarborNotificationRead(notificationId) {
     await harborApi.put('/notifications/mark-read.json', { id });
 }
 
+export async function markHarborNotificationsReadAll() {
+    await harborApi.put('/notifications/mark-read.json');
+}
+
 export async function fetchHarborMessages(username, { signal } = {}) {
     const encodedUsername = encodeURIComponent(username);
     const response = await harborApi.get(

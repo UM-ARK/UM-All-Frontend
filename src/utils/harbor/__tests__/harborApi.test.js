@@ -35,6 +35,7 @@ import {
     likeHarborPost,
     markHarborTopicUnread,
     markHarborNotificationRead,
+    markHarborNotificationsReadAll,
     normalizeHarborFlagTypes,
     saveHarborTopicTimings,
     selectHarborAvatar,
@@ -1303,6 +1304,14 @@ describe('Harbor API 資料正規化', () => {
         expect(putSpy).toHaveBeenCalledWith('/notifications/mark-read.json', {
             id: 8,
         });
+    });
+
+    it('不帶通知 ID 時將全部通知標為已讀', async () => {
+        putSpy.mockResolvedValue({data: {success: 'OK'}});
+
+        await markHarborNotificationsReadAll();
+
+        expect(putSpy).toHaveBeenCalledWith('/notifications/mark-read.json');
     });
 
     it('首次建立論壇角標基準時只讀取最新一頁', async () => {
