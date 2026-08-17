@@ -923,6 +923,21 @@ function CourseSim({ route, navigation }) {
                         {course.Section}
                     </Text>
 
+                    {/* Prof */}
+                    {course['Teacher Information']?.trim?.() ? (
+                        <Text
+                            style={{
+                                ...uiStyle.defaultText,
+                                color: black.main,
+                                textAlign: 'center',
+                                alignSelf: 'stretch',
+                                fontSize: scale(10),
+                                opacity: 0.45,
+                            }}>
+                            {course['Teacher Information']}
+                        </Text>
+                    ) : null}
+
                     {/* 課程名稱 */}
                     <Text
                         style={{

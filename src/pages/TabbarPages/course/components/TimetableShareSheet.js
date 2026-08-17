@@ -315,6 +315,14 @@ const TimetableSharePreview = ({
                     color: black.main,
                     opacity: 0.8,
                 },
+                detailTeacher: {
+                    ...uiStyle.defaultText,
+                    color: black.main,
+                    textAlign: 'center',
+                    alignSelf: 'stretch',
+                    fontSize: scale(10),
+                    opacity: 0.45,
+                },
                 detailCourseTitle: {
                     ...uiStyle.defaultText,
                     color: black.main,
@@ -474,6 +482,11 @@ const TimetableSharePreview = ({
                         </Text>
                     </Text>
                     <Text style={styles.detailSection}>{course.Section}</Text>
+                    {course['Teacher Information']?.trim?.() ? (
+                        <Text style={styles.detailTeacher}>
+                            {course['Teacher Information']}
+                        </Text>
+                    ) : null}
                     <Text
                         style={styles.detailCourseTitle}
                         numberOfLines={4}>
