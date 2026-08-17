@@ -556,17 +556,14 @@ const What2Reg = () => {
                     <Text style={{ ...uiStyle.defaultText, fontSize: scale(9), color: black.third }}>
                         數據日期版本: {courseMode === 'ad' ? catalogMetadata.adddrop.updateTime : catalogMetadata.pre.updateTime}
                     </Text>
-                    <Text style={{ ...uiStyle.defaultText, fontSize: scale(9), color: themeColor }}>
-                        記得提醒開發者最新Excel課表版本
-                    </Text>
-                    <Text style={{ ...uiStyle.defaultText, fontSize: scale(9), color: themeColor }} selectable>
-                        遇到BUG可聯繫umacark@gmail.com
-                    </Text>
                 </View>
 
                 <View style={{ margin: scale(10), padding: scale(10), alignItems: 'center' }}>
                     <Text style={{ ...uiStyle.defaultText, color: black.third, fontSize: scale(12) }}>
                         知識無價，評論只供參考
+                    </Text>
+                    <Text style={{ ...uiStyle.defaultText, color: black.third, fontSize: scale(12) }}>
+                        選咩課與ARK ALL是兩個獨立項目
                     </Text>
                 </View>
 
