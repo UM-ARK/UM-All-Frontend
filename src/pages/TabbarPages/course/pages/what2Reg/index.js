@@ -21,9 +21,10 @@ import { trigger } from '../../../../../utils/trigger';
 import { logToFirebase } from '../../../../../utils/firebaseAnalytics';
 import { openLink } from '../../../../../utils/browser';
 import { getLocalStorage, setLocalStorage } from '../../../../../utils/storageKits';
-import { USER_AGREE, ARK_WIKI_SEARCH, OFFICIAL_COURSE_SEARCH } from '../../../../../utils/pathMap';
+import { USER_AGREE, OFFICIAL_COURSE_SEARCH } from '../../../../../utils/pathMap';
 import { refreshUmehHost, useUmehHost } from '../../../../../utils/umehHost';
 import { COURSE_TIMETABLE_SEGMENT } from '../../../../../utils/courseNavigation';
+import { navigateToWikiSearch } from '../../../../../utils/wikiNavigation';
 import { useCoursePlan } from '../../context/CoursePlanContext';
 import PlanCapsule from '../../components/PlanCapsule';
 
@@ -364,9 +365,20 @@ const What2Reg = () => {
     const onPressSearchAction = useCallback(eventId => {
         trigger();
         switch (eventId) {
+            case 'harbor-discuss': {
+                logToFirebase('checkCourse', {
+                    courseCode: inputText,
+                    action: 'harbor-discuss',
+                });
+                navigation.navigate('HarborSearch', { query: inputText });
+                break;
+            }
             case 'wiki': {
-                const url = ARK_WIKI_SEARCH + encodeURIComponent(inputText);
-                openLink(url);
+                logToFirebase('checkCourse', {
+                    courseCode: inputText,
+                    action: 'ark-wiki',
+                });
+                navigateToWikiSearch(navigation, inputText, { autoOpenUnique: true });
                 break;
             }
             case 'what2reg': {
@@ -383,7 +395,7 @@ const What2Reg = () => {
             default:
                 break;
         }
-    }, [inputText, searchHost]);
+    }, [inputText, navigation, searchHost]);
 
     const onClearInput = useCallback(() => {
         trigger();
@@ -392,10 +404,6 @@ const What2Reg = () => {
             textInputRef.current?.focus();
         }, 0);
     }, [clearInput]);
-
-    const onPressSearchButton = useCallback(() => {
-        trigger();
-    }, []);
 
     const handleUserAgreePress = useCallback(() => {
         trigger();
@@ -483,7 +491,6 @@ const What2Reg = () => {
                     onChangeText={setInputText}
                     onClear={onClearInput}
                     onPressAction={onPressSearchAction}
-                    onPressSearchButton={onPressSearchButton}
                     trigger={trigger}
                 />
 
