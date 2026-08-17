@@ -428,6 +428,11 @@ const HarborDrawerContent = ({ navigation }) => {
         navigation.navigate('MyTabbar');
     }, [navigation]);
 
+    const handleChatPress = useCallback(() => {
+        logToFirebase('harbor_drawer_chat', {});
+        navigateFromDrawer('HarborChatList');
+    }, [navigateFromDrawer]);
+
     const handleCategoryPress = useCallback(
         category => {
             logToFirebase('harbor_drawer_category', {
@@ -556,6 +561,11 @@ const HarborDrawerContent = ({ navigation }) => {
                         onPress={handleMyPress}
                     />
                     <DrawerMenuItem
+                        icon="chat-outline"
+                        label={t('即時聊天')}
+                        onPress={handleChatPress}
+                    />
+                    <DrawerMenuItem
                         icon="file-document-edit-outline"
                         label={t('草稿箱')}
                         onPress={() => navigateFromDrawer('HarborDrafts')}
@@ -590,6 +600,7 @@ const HarborDrawerContent = ({ navigation }) => {
         ),
         [
             categories.length,
+            handleChatPress,
             handleMyPress,
             isCategoriesExpanded,
             loadCategories,

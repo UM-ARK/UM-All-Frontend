@@ -2,6 +2,7 @@ import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {
     ActivityIndicator,
     Alert,
+    Platform,
     Pressable,
     StyleSheet,
     View,
@@ -42,6 +43,57 @@ import {trigger} from '../../../utils/trigger';
 import {HarborFullState} from './components/HarborListStates';
 
 const CHAT_POLL_INTERVAL_MS = 8000;
+
+const HarborChatProfileButton = ({
+    accessibilityLabel,
+    onPress,
+    themeColor,
+}) => (
+    <Pressable
+        accessibilityLabel={accessibilityLabel}
+        accessibilityRole="button"
+        onPress={() => {
+            trigger();
+            onPress();
+        }}
+        style={styles.headerProfileButton}>
+        <MaterialCommunityIcons
+            color={themeColor}
+            name="account-circle-outline"
+            size={scale(22)}
+        />
+    </Pressable>
+);
+
+const createHarborChatProfileButton = props => () => (
+    <HarborChatProfileButton {...props} />
+);
+
+const getHarborChatPeerUsername = ({
+    channelUsers,
+    currentUsername,
+    isGroup,
+    messages,
+}) => {
+    const users = Array.isArray(channelUsers) ? channelUsers : [];
+    const others = users.filter(
+        candidate =>
+            candidate?.username &&
+            candidate.username !== currentUsername,
+    );
+    if (others.length === 1) {
+        return others[0].username;
+    }
+    if (isGroup || others.length > 1) {
+        return '';
+    }
+    const otherMessage = messages.find(
+        message =>
+            message?.user?.username &&
+            message.user.username !== currentUsername,
+    );
+    return otherMessage?.user?.username || '';
+};
 
 const formatMessageTime = (value, language) => {
     const date = moment(value);
@@ -340,6 +392,26 @@ const HarborChatChannelPage = ({navigation, route}) => {
     const [error, setError] = useState(false);
     const username = user?.username || '';
     const cacheIdentityRef = useRef(`${username}:${channelId}`);
+    const peerUsername = useMemo(
+        () =>
+            getHarborChatPeerUsername({
+                channelUsers: route.params?.channelUsers,
+                currentUsername: username,
+                isGroup,
+                messages,
+            }),
+        [isGroup, messages, route.params?.channelUsers, username],
+    );
+
+    const openPeerProfile = useCallback(() => {
+        if (!peerUsername) {
+            return;
+        }
+        navigation.navigate('HarborProfile', {
+            username: peerUsername,
+            mode: 'preview',
+        });
+    }, [navigation, peerUsername]);
 
     const patchCachedMessages = useCallback(
         updater => patchHarborChatChannelMessagesCache(
@@ -367,10 +439,47 @@ const HarborChatChannelPage = ({navigation, route}) => {
     );
 
     useEffect(() => {
+        const canOpenPeerProfile = Boolean(peerUsername);
         navigation.setOptions({
             headerTitle: route.params?.channelTitle || t('Chat'),
+            // iOS：原生 UIBarButtonItem，液態玻璃下才是標準圓形
+            headerRight: canOpenPeerProfile
+                ? Platform.OS === 'ios'
+                    ? undefined
+                    : createHarborChatProfileButton({
+                          accessibilityLabel: t('查看個人檔案'),
+                          onPress: openPeerProfile,
+                          themeColor: theme.themeColor,
+                      })
+                : undefined,
+            unstable_headerRightItems:
+                canOpenPeerProfile && Platform.OS === 'ios'
+                    ? () => [
+                          {
+                              type: 'button',
+                              label: t('查看個人檔案'),
+                              accessibilityLabel: t('查看個人檔案'),
+                              icon: {
+                                  type: 'sfSymbol',
+                                  name: 'person.crop.circle',
+                              },
+                              tintColor: theme.themeColor,
+                              onPress: () => {
+                                  trigger();
+                                  openPeerProfile();
+                              },
+                          },
+                      ]
+                    : undefined,
         });
-    }, [navigation, route.params?.channelTitle, t]);
+    }, [
+        navigation,
+        openPeerProfile,
+        peerUsername,
+        route.params?.channelTitle,
+        t,
+        theme.themeColor,
+    ]);
 
     useEffect(() => {
         const cacheIdentity = `${username}:${channelId}`;
@@ -762,6 +871,13 @@ const styles = StyleSheet.create({
     },
     center: {
         flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    headerProfileButton: {
+        width: scale(36),
+        height: scale(36),
+        borderRadius: scale(18),
         alignItems: 'center',
         justifyContent: 'center',
     },
