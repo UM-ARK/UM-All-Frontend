@@ -69,6 +69,8 @@
 	<string>允許 ARK ALL 保存照片到相冊。</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>允許 ARK ALL 訪問您的照片以保存圖片。</string>
+	<key>RCTMetroPort</key>
+	<string>$(RCT_METRO_PORT)</string>
 	<key>RCTNewArchEnabled</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
