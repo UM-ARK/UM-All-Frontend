@@ -338,7 +338,9 @@ const HarborPostCard = memo(
                     disabled={nestedRepliesLoading}
                     onPress={() => {
                         trigger();
-                        onToggleNestedReplies(post);
+                        onToggleNestedReplies(
+                            post.__harborNestedTogglePost || post,
+                        );
                     }}
                     style={({ pressed }) => [
                         styles.nestedRepliesButton,
