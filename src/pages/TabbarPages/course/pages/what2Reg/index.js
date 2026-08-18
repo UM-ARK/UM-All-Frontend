@@ -6,7 +6,7 @@ import React, {
     useRef,
     useState,
 } from 'react';
-import { Platform, View } from 'react-native';
+import { Alert, Platform, View } from 'react-native';
 import { KeyboardAwareScrollView, KeyboardToolbar } from 'react-native-keyboard-controller';
 import { useNavigation } from '@react-navigation/native';
 import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
@@ -145,6 +145,7 @@ const CourseCardRow = ({
     availableWidth,
     programmeLevel,
     courseMode,
+    isHistoricalPeriod,
     sectionStatusesByCourseCode,
 }) => {
     const [measuredHeights, setMeasuredHeights] = useState({});
@@ -171,6 +172,7 @@ const CourseCardRow = ({
                     mode={'json'}
                     programmeLevel={programmeLevel}
                     courseMode={courseMode}
+                    isHistoricalPeriod={isHistoricalPeriod}
                     cardWidth={getCourseCardWidth(entry.span, availableWidth)}
                     cardHeight={rowHeight}
                     onMeasureHeight={height => handleMeasureHeight(entry.key, height)}
@@ -225,10 +227,22 @@ const What2Reg = () => {
         activeCourseList,
         courseTimeList,
         catalogMetadata,
+        coursePeriodOptions,
+        activeCoursePeriod,
+        isHistoricalPeriod,
+        historicalCatalogStatus,
+        selectCoursePeriod,
         planCourseCodes,
         planSlots,
     } = useCoursePlan();
     const isPostgraduate = programmeLevel === PROGRAMME_LEVELS.postgraduate;
+    const activeCoursePeriodLabel = activeCoursePeriod
+        ? t('{{academicYear}} 第{{sem}}學期', {
+            ns: 'catalog',
+            academicYear: activeCoursePeriod.academicYear,
+            sem: activeCoursePeriod.sem,
+        })
+        : '';
     const filterStorageKey = getCourseFilterStorageKey(programmeLevel);
 
     const {
@@ -445,6 +459,17 @@ const What2Reg = () => {
         navigation.navigate(COURSE_TIMETABLE_SEGMENT);
     }, [navigation]);
 
+    const handleSelectCoursePeriod = useCallback(async periodId => {
+        try {
+            await selectCoursePeriod(periodId);
+        } catch {
+            Alert.alert(
+                t('無法載入歷史課表', { ns: 'catalog' }),
+                t('請檢查網絡後再試；已下載的歷史課表仍可離線使用。', { ns: 'catalog' }),
+            );
+        }
+    }, [selectCoursePeriod]);
+
     const onScrollToLetter = useCallback(letter => {
         trigger();
         const offsetY = scrollData[letter];
@@ -468,11 +493,12 @@ const What2Reg = () => {
             {courseGridWidth > 0
                 ? groupCourseCardsByRow(list).map(entries => (
                     <CourseCardRow
-                        key={`${programmeLevel}-${courseMode}-${Math.round(courseGridWidth)}-${entries.map(entry => `${entry.key}:${entry.span}`).join('_')}`}
+                        key={`${programmeLevel}-${courseMode}-${activeCoursePeriod?.id}-${Math.round(courseGridWidth)}-${entries.map(entry => `${entry.key}:${entry.span}`).join('_')}`}
                         entries={entries}
                         availableWidth={courseGridWidth}
                         programmeLevel={programmeLevel}
                         courseMode={courseMode}
+                        isHistoricalPeriod={isHistoricalPeriod}
                         sectionStatusesByCourseCode={
                             showSectionStatuses
                                 ? sectionStatusesByCourseCode
@@ -482,7 +508,7 @@ const What2Reg = () => {
                 ))
                 : null}
         </View>
-    ), [courseGridWidth, courseMode, programmeLevel, sectionStatusesByCourseCode]);
+    ), [activeCoursePeriod?.id, courseGridWidth, courseMode, isHistoricalPeriod, programmeLevel, sectionStatusesByCourseCode]);
 
     // 搜尋結果不套用星期／時段篩選：此時 FilterPanel 不渲染，使用者既看不到也無法清除該篩選
     const hasSearchResult = searchFilterCourse?.length > 0;
@@ -554,12 +580,17 @@ const What2Reg = () => {
                             dayList={dayList}
                             timeFilter={timeFilter}
                             recommendationOnly={recommendationOnly}
+                            coursePeriodOptions={coursePeriodOptions}
+                            activeCoursePeriod={activeCoursePeriod}
+                            isHistoricalPeriod={isHistoricalPeriod}
+                            historicalCatalogStatus={historicalCatalogStatus}
                             onUpdateFilterOptions={updateFilterOptions}
                             onUpdateTimeFilter={updateTimeFilter}
                             onToggleRecommendation={() => {
                                 setRecommendationOnly(currentValue => !currentValue);
                             }}
                             onSetCourseMode={setCourseMode}
+                            onSelectCoursePeriod={handleSelectCoursePeriod}
                             onPressProgrammeLevel={() => {
                                 navigation.navigate('SettingPage');
                             }}
@@ -601,12 +632,19 @@ const What2Reg = () => {
                                 : '預選'}課程:`}
                     </Text>
                     <Text style={{ ...uiStyle.defaultText, fontSize: scale(9), color: black.third }}>
-                        數據日期版本: {isPostgraduate
-                            ? catalogMetadata.postgraduate.updateTime
-                            : courseMode === 'ad'
-                                ? catalogMetadata.adddrop.updateTime
-                                : catalogMetadata.pre.updateTime}
+                        {isHistoricalPeriod
+                            ? `${activeCoursePeriodLabel} · ${t('歷史課表', { ns: 'catalog' })}`
+                            : `數據日期版本: ${isPostgraduate
+                                ? catalogMetadata.postgraduate.updateTime
+                                : courseMode === 'ad'
+                                    ? catalogMetadata.adddrop.updateTime
+                                    : catalogMetadata.pre.updateTime}`}
                     </Text>
+                    {isHistoricalPeriod ? (
+                        <Text style={{ ...uiStyle.defaultText, fontSize: scale(9), color: theme.warning, textAlign: 'center' }}>
+                            {t('歷史開課資料按最新課程目錄辨認本科／研究生，僅供規劃參考。', { ns: 'catalog' })}
+                        </Text>
+                    ) : null}
                 </View>
 
                 <View style={{ margin: scale(10), padding: scale(10), alignItems: 'center' }}>

@@ -41,6 +41,21 @@ describe('courseProgramme', () => {
         expect(getCourseFilterStorageKey(PROGRAMME_LEVELS.postgraduate)).toBe(
             'ARK_Courses_filterOptions_postgraduate',
         );
+        const historicalPeriod = {
+            isHistorical: true,
+            year: 2025,
+            sem: '2',
+        };
+        expect(getCoursePlanStorageKey(
+            PROGRAMME_LEVELS.undergraduate,
+            historicalPeriod,
+        )).toBe('ARK_Timetable_Storage_history_2025_2');
+        expect(getCourseWeekPlanStorageKey(
+            PROGRAMME_LEVELS.postgraduate,
+            historicalPeriod,
+        )).toBe(
+            'ARK_WeekTimetable_Storage_postgraduate_history_2025_2',
+        );
     });
 
     test('只保存合法課表模式', async () => {

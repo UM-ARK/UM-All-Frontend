@@ -1133,7 +1133,14 @@
         "有衝突": "Conflict",
         "符合時段": "Matches time",
         "當前選中": "Selected",
-        "目前沒有可排入且不衝突的課程，可調整篩選或已排課表。": "No course currently fits without conflicts. Adjust the filters or your timetable."
+        "目前沒有可排入且不衝突的課程，可調整篩選或已排課表。": "No course currently fits without conflicts. Adjust the filters or your timetable.",
+        "{{academicYear}} 第{{sem}}學期": "{{academicYear}} Semester {{sem}}",
+        "切換學年及學期": "Switch academic year and semester",
+        "歷史課表": "Historical timetable",
+        "歷史開課資料按最新課程目錄辨認本科／研究生，僅供規劃參考。": "Historical offerings use the latest course catalog to identify UG and PG courses and are for planning reference only.",
+        "本機緩存日期：{{date}}": "Cached on: {{date}}",
+        "無法載入歷史課表": "Unable to load historical timetable",
+        "請檢查網絡後再試；已下載的歷史課表仍可離線使用。": "Check your connection and try again. Downloaded historical timetables remain available offline."
     },
     "timetable": {
         "課表模擬": "Timetable Simulation",

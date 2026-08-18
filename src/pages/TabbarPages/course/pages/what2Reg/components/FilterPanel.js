@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { FlatList, LayoutAnimation, Switch, View } from 'react-native';
+import { ActivityIndicator, FlatList, LayoutAnimation, Switch, View } from 'react-native';
 import { scale, verticalScale } from 'react-native-size-matters';
 import { t } from 'i18next';
 import Ionicons from "@react-native-vector-icons/ionicons";
+import { MenuView } from '@react-native-menu/menu';
 import Text from '../../../../../../components/AppText';
 import { uiStyle } from '../../../../../../components/ThemeContext';
 import TouchableScale from '../../../../../../components/TouchableScale';
@@ -45,14 +46,19 @@ const FilterPanel = ({
     dayList,
     timeFilter = defaultTimeFilter,
     recommendationOnly = false,
+    coursePeriodOptions = [],
+    activeCoursePeriod,
+    isHistoricalPeriod = false,
+    historicalCatalogStatus = 'idle',
     onUpdateFilterOptions,
     onUpdateTimeFilter,
     onToggleRecommendation,
     onSetCourseMode,
+    onSelectCoursePeriod,
     onPressProgrammeLevel,
     trigger,
 }) => {
-    const { themeColor, secondThemeColor, black, white, tonal } = theme;
+    const { themeColor, secondThemeColor, black, white, tonal, warning } = theme;
     const isPostgraduate = programmeLevel === PROGRAMME_LEVELS.postgraduate;
     const activeColor = isPostgraduate || courseMode === 'ad'
         ? themeColor
@@ -126,6 +132,83 @@ const FilterPanel = ({
             />
         </TouchableScale>
     );
+
+    const renderCoursePeriodSelector = () => {
+        if (!activeCoursePeriod || coursePeriodOptions.length === 0) {
+            return null;
+        }
+
+        const periodLabel = `${activeCoursePeriod.academicYear} · S${activeCoursePeriod.sem}`;
+        const actions = coursePeriodOptions.map(period => ({
+            id: period.id,
+            title: t('{{academicYear}} 第{{sem}}學期', {
+                ns: 'catalog',
+                academicYear: period.academicYear,
+                sem: period.sem,
+            }),
+            state: period.id === activeCoursePeriod.id ? 'on' : 'off',
+        }));
+
+        return (
+            <MenuView
+                actions={actions}
+                onPressAction={event => {
+                    trigger();
+                    onSelectCoursePeriod(event.nativeEvent.event);
+                }}
+                onOpenMenu={() => trigger('rigid')}
+                shouldOpenOnLongPress={false}
+                accessibilityLabel={t('切換學年及學期', { ns: 'catalog' })}
+                style={{
+                    position: 'absolute',
+                    right: verticalScale(5),
+                    top: verticalScale(5),
+                    zIndex: 2,
+                }}>
+                <View style={{
+                    ...classItmStyle,
+                    marginHorizontal: 0,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    paddingHorizontal: scale(6),
+                    paddingVertical: verticalScale(2),
+                    borderColor: isHistoricalPeriod ? warning : themeColor,
+                    backgroundColor: isHistoricalPeriod
+                        ? `${warning}15`
+                        : tonal.primary15,
+                }}>
+                    {historicalCatalogStatus === 'loading' ? (
+                        <ActivityIndicator
+                            size="small"
+                            color={warning}
+                            style={{ marginRight: scale(3), transform: [{ scale: 0.7 }] }}
+                        />
+                    ) : (
+                        <Ionicons
+                            name={isHistoricalPeriod ? 'time-outline' : 'calendar-outline'}
+                            size={scale(12)}
+                            color={isHistoricalPeriod ? warning : themeColor}
+                            style={{ marginRight: scale(3) }}
+                        />
+                    )}
+                    <Text style={{
+                        ...uiStyle.defaultText,
+                        color: isHistoricalPeriod ? warning : themeColor,
+                        fontWeight: '900',
+                        fontSize: scale(11),
+                    }}>
+                        {periodLabel}
+                    </Text>
+                    <Ionicons
+                        name="chevron-down"
+                        size={scale(11)}
+                        color={isHistoricalPeriod ? warning : themeColor}
+                        style={{ marginLeft: scale(2) }}
+                    />
+                </View>
+            </MenuView>
+        );
+    };
 
     const renderADPESwitch = () => {
         const modeList = Object.keys(adpeMap);
@@ -573,7 +656,8 @@ const FilterPanel = ({
             padding: scale(5),
         }}>
             {renderProgrammeLevelChip()}
-            {isPostgraduate ? null : renderADPESwitch()}
+            {renderCoursePeriodSelector()}
+            {isPostgraduate || isHistoricalPeriod ? null : renderADPESwitch()}
             {isPostgraduate ? null : (
                 <View style={{ width: '100%', marginTop: scale(10) }}>
                     {renderCMGESwitch()}

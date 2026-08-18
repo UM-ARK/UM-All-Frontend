@@ -11,7 +11,12 @@ import {
 import {getCurrentUmehHost} from '../../../../utils/umehHost';
 
 /** 建立課程卡片共用的查詢選項。 */
-export function getCourseInfoMenuActions({t, themeColor, secondaryColor}) {
+export function getCourseInfoMenuActions({
+    t,
+    themeColor,
+    secondaryColor,
+    includeSection = true,
+}) {
     return [
         {
             id: 'wiki',
@@ -53,16 +58,20 @@ export function getCourseInfoMenuActions({t, themeColor, secondaryColor}) {
             imageColor: secondaryColor,
             titleColor: secondaryColor,
         },
-        {
-            id: 'section',
-            title: t('Section / 老師', {ns: 'catalog'}),
-            image: Platform.select({
-                ios: 'list.bullet',
-                android: 'ic_menu_sort_by_size',
-            }),
-            imageColor: secondaryColor,
-            titleColor: secondaryColor,
-        },
+        ...(includeSection
+            ? [
+                {
+                    id: 'section',
+                    title: t('Section / 老師', {ns: 'catalog'}),
+                    image: Platform.select({
+                        ios: 'list.bullet',
+                        android: 'ic_menu_sort_by_size',
+                    }),
+                    imageColor: secondaryColor,
+                    titleColor: secondaryColor,
+                },
+            ]
+            : []),
     ];
 }
 

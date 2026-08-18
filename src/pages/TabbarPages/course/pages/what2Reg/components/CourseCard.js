@@ -43,7 +43,7 @@ const styles = StyleSheet.create({
 });
 
 const CourseCard = memo(
-    ({ item, mode, prof_info, programmeLevel = PROGRAMME_LEVELS.undergraduate, courseMode = 'ad', cardWidth, cardHeight, onMeasureHeight, sectionStatuses }) => {
+    ({ item, mode, prof_info, programmeLevel = PROGRAMME_LEVELS.undergraduate, courseMode = 'ad', isHistoricalPeriod = false, cardWidth, cardHeight, onMeasureHeight, sectionStatuses }) => {
         // const { item, mode, prof_info, courseMode = 'ad' } = props;
         const navigation = useContext(NavigationContext);
         const { theme } = useTheme();
@@ -162,16 +162,20 @@ const CourseCard = memo(
                         imageColor: black.third,
                         titleColor: black.third,
                     },
-                    {
-                        id: 'section',
-                        title: 'Section',
-                        image: Platform.select({
-                            ios: 'list.bullet',
-                            android: 'ic_menu_sort_by_size',
-                        }),
-                        imageColor: black.third,
-                        titleColor: black.third,
-                    },
+                    ...(!isHistoricalPeriod
+                        ? [
+                            {
+                                id: 'section',
+                                title: 'Section',
+                                image: Platform.select({
+                                    ios: 'list.bullet',
+                                    android: 'ic_menu_sort_by_size',
+                                }),
+                                imageColor: black.third,
+                                titleColor: black.third,
+                            },
+                        ]
+                        : []),
                 ]
                 : []),
         ];

@@ -89,31 +89,49 @@ export const CoursePlanProvider = ({ children }) => {
         preenrollCatalog,
         adddropCatalog,
         postgraduateCatalog,
+        activeCatalog,
         catalogMetadata,
+        coursePeriodOptions,
+        activeCoursePeriod,
+        isHistoricalPeriod,
+        historicalCatalogStatus,
+        selectCoursePeriod,
         initCourseData,
         refreshCourseData,
     } = useCourseData();
 
     const [planList, setPlanList] = useState([]);
 
-    const planStorageKey = getCoursePlanStorageKey(programmeLevel);
-    const weekPlanStorageKey = getCourseWeekPlanStorageKey(programmeLevel);
+    const planStorageKey = getCoursePlanStorageKey(
+        programmeLevel,
+        activeCoursePeriod,
+    );
+    const weekPlanStorageKey = getCourseWeekPlanStorageKey(
+        programmeLevel,
+        activeCoursePeriod,
+    );
 
     const courseTimeList = useMemo(
-        () => programmeLevel === PROGRAMME_LEVELS.postgraduate
-            ? postgraduateCatalog?.Courses || []
-            : adddropCatalog?.Courses || [],
-        [adddropCatalog, postgraduateCatalog, programmeLevel],
+        () => activeCatalog?.Courses || [],
+        [activeCatalog],
     );
 
     const adddropCourseList = useMemo(
-        () => buildAdddropCourseList(adddropCatalog?.Courses),
-        [adddropCatalog],
+        () => buildAdddropCourseList(
+            programmeLevel === PROGRAMME_LEVELS.undergraduate
+                ? activeCatalog?.Courses
+                : adddropCatalog?.Courses,
+        ),
+        [activeCatalog, adddropCatalog, programmeLevel],
     );
 
     const postgraduateCourseList = useMemo(
-        () => buildAdddropCourseList(postgraduateCatalog?.Courses),
-        [postgraduateCatalog],
+        () => buildAdddropCourseList(
+            programmeLevel === PROGRAMME_LEVELS.postgraduate
+                ? activeCatalog?.Courses
+                : postgraduateCatalog?.Courses,
+        ),
+        [activeCatalog, postgraduateCatalog, programmeLevel],
     );
 
     const activeCourseList = programmeLevel === PROGRAMME_LEVELS.postgraduate
@@ -356,7 +374,13 @@ export const CoursePlanProvider = ({ children }) => {
             preenrollCatalog,
             adddropCatalog,
             postgraduateCatalog,
+            activeCatalog,
             catalogMetadata,
+            coursePeriodOptions,
+            activeCoursePeriod,
+            isHistoricalPeriod,
+            historicalCatalogStatus,
+            selectCoursePeriod,
             initCourseData,
             refreshCourseData,
             courseTimeList,
@@ -388,7 +412,13 @@ export const CoursePlanProvider = ({ children }) => {
             preenrollCatalog,
             adddropCatalog,
             postgraduateCatalog,
+            activeCatalog,
             catalogMetadata,
+            coursePeriodOptions,
+            activeCoursePeriod,
+            isHistoricalPeriod,
+            historicalCatalogStatus,
+            selectCoursePeriod,
             initCourseData,
             refreshCourseData,
             courseTimeList,

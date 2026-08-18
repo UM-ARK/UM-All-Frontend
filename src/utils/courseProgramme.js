@@ -40,11 +40,18 @@ export async function setCourseProgrammeLevel(level) {
     return setLocalStorage(PROGRAMME_LEVEL_STORAGE_KEY, level);
 }
 
-export const getCoursePlanStorageKey = level =>
-    PLAN_STORAGE_KEYS[level] || PLAN_STORAGE_KEYS.undergraduate;
+const getHistoricalPeriodSuffix = period =>
+    period?.isHistorical && Number.isInteger(period.year) && period.sem
+        ? `_history_${period.year}_${period.sem}`
+        : '';
 
-export const getCourseWeekPlanStorageKey = level =>
-    WEEK_PLAN_STORAGE_KEYS[level] || WEEK_PLAN_STORAGE_KEYS.undergraduate;
+export const getCoursePlanStorageKey = (level, period) =>
+    (PLAN_STORAGE_KEYS[level] || PLAN_STORAGE_KEYS.undergraduate) +
+    getHistoricalPeriodSuffix(period);
+
+export const getCourseWeekPlanStorageKey = (level, period) =>
+    (WEEK_PLAN_STORAGE_KEYS[level] || WEEK_PLAN_STORAGE_KEYS.undergraduate) +
+    getHistoricalPeriodSuffix(period);
 
 export const getCourseFilterStorageKey = level =>
     FILTER_STORAGE_KEYS[level] || FILTER_STORAGE_KEYS.undergraduate;

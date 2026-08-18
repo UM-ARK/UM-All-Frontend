@@ -293,6 +293,12 @@ export const UM_API_EVENT =
 // 澳大 - API 新聞
 export const UM_API_NEWS =
     'https://api.data.um.edu.mo/service/media/news/all';
+// 澳大 - 歷史開課資料
+export const UM_API_COURSES =
+    'https://api.data.um.edu.mo/service/academic/courses/all';
+// 澳大 - 最新課程目錄（歷史開課只用它辨認本科／研究生及補充學院資料）
+export const UM_API_COURSE_CATALOG =
+    'https://api.data.um.edu.mo/service/academic/course_catalog/all';
 // 澳大 - API token
 export const UM_API_TOKEN = process.env.EXPO_PUBLIC_UM_API_TOKEN;
 

@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
     adddropCatalog as bundledAdddropCatalog,
     postgraduateCatalog as bundledPostgraduateCatalog,
@@ -6,7 +6,9 @@ import {
 } from '../../../../../../static/UMCourses/courseCatalogs';
 import {
     getCourseCatalogs,
+    getHistoricalCourseCatalog,
     getPostgraduateCatalog,
+    getRecentCoursePeriods,
     refreshCourseCatalogs,
     refreshPostgraduateCatalog,
 } from '../../../../../../utils/checkCoursesKits';
@@ -22,7 +24,7 @@ const getCatalogMetadata = (
     preenrollCatalog,
     adddropCatalog,
     postgraduateCatalog,
-    programmeLevel,
+    activeCatalog,
 ) => ({
     pre: {
         updateTime: preenrollCatalog.updateTime,
@@ -42,19 +44,12 @@ const getCatalogMetadata = (
         sem: postgraduateCatalog.sem,
         revision: postgraduateCatalog.revision,
     },
-    active: programmeLevel === PROGRAMME_LEVELS.postgraduate
-        ? {
-            updateTime: postgraduateCatalog.updateTime,
-            academicYear: postgraduateCatalog.academicYear,
-            sem: postgraduateCatalog.sem,
-            revision: postgraduateCatalog.revision,
-        }
-        : {
-            updateTime: adddropCatalog.updateTime,
-            academicYear: adddropCatalog.academicYear,
-            sem: adddropCatalog.sem,
-            revision: adddropCatalog.revision,
-        },
+    active: {
+        updateTime: activeCatalog.updateTime,
+        academicYear: activeCatalog.academicYear,
+        sem: activeCatalog.sem,
+        revision: activeCatalog.revision,
+    },
 });
 
 /**
@@ -74,20 +69,50 @@ const useCourseData = () => {
     const [postgraduateCatalog, setPostgraduateCatalog] = useState(
         bundledPostgraduateCatalog,
     );
+    const [selectedCoursePeriod, setSelectedCoursePeriod] = useState(null);
+    const [historicalCatalog, setHistoricalCatalog] = useState(null);
+    const [historicalCatalogStatus, setHistoricalCatalogStatus] = useState('idle');
+    const historicalRequestIdRef = useRef(0);
+    const currentCatalog = programmeLevel === PROGRAMME_LEVELS.postgraduate
+        ? postgraduateCatalog
+        : adddropCatalog;
+    const coursePeriodOptions = useMemo(
+        () => getRecentCoursePeriods(currentCatalog),
+        [currentCatalog],
+    );
+    const currentCoursePeriod = coursePeriodOptions[0] || null;
+    const hasActiveHistoricalPeriod = selectedCoursePeriod?.isHistorical &&
+        selectedCoursePeriod.programmeLevel === programmeLevel;
+    const activeCoursePeriod = hasActiveHistoricalPeriod
+        ? selectedCoursePeriod
+        : currentCoursePeriod;
+    const activeCatalog = hasActiveHistoricalPeriod &&
+        historicalCatalog?.programmeLevel === programmeLevel &&
+        historicalCatalog?.year === selectedCoursePeriod.year &&
+        String(historicalCatalog?.sem) === selectedCoursePeriod.sem
+        ? historicalCatalog
+        : currentCatalog;
     const catalogMetadata = useMemo(
         () => getCatalogMetadata(
             preenrollCatalog,
             adddropCatalog,
             postgraduateCatalog,
-            programmeLevel,
+            activeCatalog,
         ),
         [
             adddropCatalog,
             postgraduateCatalog,
             preenrollCatalog,
-            programmeLevel,
+            activeCatalog,
         ],
     );
+
+    useEffect(() => {
+        historicalRequestIdRef.current += 1;
+        setSelectedCoursePeriod(null);
+        setHistoricalCatalog(null);
+        setHistoricalCatalogStatus('idle');
+    }, [programmeLevel]);
 
     const applyCatalogs = useCallback(catalogs => {
         setPreenrollCatalog(catalogs.preenrollCatalog);
@@ -122,6 +147,9 @@ const useCourseData = () => {
     }, [applyCatalogs, applyPostgraduateCatalog, programmeLevel]);
 
     const refreshCourseData = useCallback(async ({ force = false } = {}) => {
+        if (hasActiveHistoricalPeriod) {
+            return;
+        }
         if (programmeLevel === PROGRAMME_LEVELS.postgraduate) {
             const result = await refreshPostgraduateCatalog({ force });
             applyPostgraduateCatalog(result);
@@ -129,7 +157,45 @@ const useCourseData = () => {
         }
         const catalogs = await refreshCourseCatalogs({ force });
         applyCatalogs(catalogs);
-    }, [applyCatalogs, applyPostgraduateCatalog, programmeLevel]);
+    }, [applyCatalogs, applyPostgraduateCatalog, hasActiveHistoricalPeriod, programmeLevel]);
+
+    const selectCoursePeriod = useCallback(async periodId => {
+        const period = coursePeriodOptions.find(option => option.id === periodId);
+        if (!period) {
+            throw new Error('Unknown course period');
+        }
+
+        const requestId = historicalRequestIdRef.current + 1;
+        historicalRequestIdRef.current = requestId;
+        if (!period.isHistorical) {
+            setSelectedCoursePeriod(null);
+            setHistoricalCatalog(null);
+            setHistoricalCatalogStatus('idle');
+            return;
+        }
+
+        setHistoricalCatalogStatus('loading');
+        try {
+            const result = await getHistoricalCourseCatalog({
+                programmeLevel,
+                year: period.year,
+                sem: period.sem,
+            });
+            if (historicalRequestIdRef.current !== requestId) {
+                return;
+            }
+            setCourseMode('ad');
+            setHistoricalCatalog(result.catalog);
+            setSelectedCoursePeriod({ ...period, programmeLevel });
+            setHistoricalCatalogStatus('idle');
+        } catch (error) {
+            if (historicalRequestIdRef.current !== requestId) {
+                return;
+            }
+            setHistoricalCatalogStatus('error');
+            throw error;
+        }
+    }, [coursePeriodOptions, programmeLevel]);
 
     return {
         courseMode,
@@ -137,7 +203,13 @@ const useCourseData = () => {
         preenrollCatalog,
         adddropCatalog,
         postgraduateCatalog,
+        activeCatalog,
         catalogMetadata,
+        coursePeriodOptions,
+        activeCoursePeriod,
+        isHistoricalPeriod: Boolean(hasActiveHistoricalPeriod),
+        historicalCatalogStatus,
+        selectCoursePeriod,
         initCourseData,
         refreshCourseData,
     };
