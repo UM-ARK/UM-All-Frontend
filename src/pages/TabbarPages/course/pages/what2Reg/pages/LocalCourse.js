@@ -11,9 +11,21 @@ import { useAppShare } from '../../../../../../contexts/AppShareContext';
 import SegmentControl from '../../../../../../components/SegmentControl';
 import { ARK_COURSE_SHARE_URL, ARK_WIKI_SEARCH } from '../../../../../../utils/pathMap';
 import { openLink } from '../../../../../../utils/browser';
-import { getCourseCatalog } from '../../../../../../utils/checkCoursesKits';
+import {
+    getCourseCatalog,
+    getPostgraduateCatalog,
+} from '../../../../../../utils/checkCoursesKits';
 import { getLocalStorage } from '../../../../../../utils/storageKits';
-import { adddropCatalog } from '../../../../../../static/UMCourses/courseCatalogs';
+import {
+    adddropCatalog,
+    postgraduateCatalog,
+} from '../../../../../../static/UMCourses/courseCatalogs';
+import { useProgrammeLevel } from '../../../../../../contexts/ProgrammeLevelContext';
+import {
+    getCoursePlanStorageKey,
+    isProgrammeLevel,
+    PROGRAMME_LEVELS,
+} from '../../../../../../utils/courseProgramme';
 
 import { scale, verticalScale } from 'react-native-size-matters';
 import groupBy from 'lodash/groupBy';
@@ -27,9 +39,6 @@ const LOCAL_SECTION_HORIZONTAL_PADDING = scale(10);
 
 /** 載入骨架重複班別卡數量，填滿首屏 */
 const LOCAL_COURSE_SKELETON_SECTION_COUNT = 3;
-
-/** 使用者模擬課表的選課清單 */
-const PLAN_STORAGE_KEY = 'ARK_Timetable_Storage';
 
 /** 單條課表時段佔位（日／教室／時間） */
 const LocalCourseSkeletonScheduleCol = ({ tonal }) => (
@@ -234,11 +243,16 @@ const LocalCourse = (props) => {
     const { openShare } = useAppShare();
     const { themeColor, black, bg_color, white, tonal } = theme;
     const insets = useSafeAreaInsets();
+    const { programmeLevel: preferredProgrammeLevel } = useProgrammeLevel();
 
     const { navigation } = props;
 
     // 狀態管理
     const routeParams = props.route.params;
+    const selectedProgrammeLevel = isProgrammeLevel(routeParams?.programmeLevel)
+        ? routeParams.programmeLevel
+        : preferredProgrammeLevel;
+    const planStorageKey = getCoursePlanStorageKey(selectedProgrammeLevel);
     const [courseCode] = useState(
         typeof routeParams === 'string'
             ? routeParams
@@ -252,7 +266,11 @@ const LocalCourse = (props) => {
         [routeParams],
     );
     const [isLoading, setIsLoading] = useState(true);
-    const [localAdddropCatalog, setLocalAdddropCatalog] = useState(adddropCatalog);
+    const [localAdddropCatalog, setLocalAdddropCatalog] = useState(
+        selectedProgrammeLevel === PROGRAMME_LEVELS.postgraduate
+            ? postgraduateCatalog
+            : adddropCatalog,
+    );
     const [groupChoice, setGroupChoice] = useState('section');
     const [relateSectionObj, setRelateSectionObj] = useState(null);
     const [relateTeacherObj, setRelateTeacherObj] = useState(null);
@@ -263,7 +281,7 @@ const LocalCourse = (props) => {
         useCallback(() => {
             let cancelled = false;
 
-            getLocalStorage(PLAN_STORAGE_KEY).then(planList => {
+            getLocalStorage(planStorageKey).then(planList => {
                 if (cancelled) {return;}
                 setSelectedSections(
                     Array.isArray(planList)
@@ -281,7 +299,7 @@ const LocalCourse = (props) => {
             return () => {
                 cancelled = true;
             };
-        }, [courseCode]),
+        }, [courseCode, planStorageKey]),
     );
 
     const selectedSectionSummary = useMemo(
@@ -322,7 +340,10 @@ const LocalCourse = (props) => {
     useEffect(() => {
         const init = async () => {
             try {
-                const storageCoursePlanList = await getCourseCatalog('adddrop');
+                const storageCoursePlanList =
+                    selectedProgrammeLevel === PROGRAMME_LEVELS.postgraduate
+                        ? (await getPostgraduateCatalog()).catalog
+                        : await getCourseCatalog('adddrop');
                 setLocalAdddropCatalog(storageCoursePlanList);
             } catch (error) {
                 Alert.alert(JSON.stringify(error));
@@ -332,7 +353,7 @@ const LocalCourse = (props) => {
         };
 
         init();
-    }, []);
+    }, [selectedProgrammeLevel]);
 
     const adddropSlots = useMemo(() => {
         return localAdddropCatalog.Courses || [];

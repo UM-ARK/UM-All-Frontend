@@ -14,11 +14,14 @@ export const modeENStr = {
     'preEnroll': 'Pre Enroll',
 };
 
+export const DEPARTMENT_ALL = '__all__';
+export const DEPARTMENT_UNSPECIFIED = '__unspecified__';
+
 export const defaultFilterOptions = {
     mode: 'ad',
     option: 'CMRE',
     facultyName: 'FST',
-    depaName: 'ECE',
+    depaName: DEPARTMENT_ALL,
     GE: 'GEST',
 };
 

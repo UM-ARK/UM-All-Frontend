@@ -31,7 +31,14 @@ import {useSchedulingSession} from '../../contexts/SchedulingSessionContext';
 import Text from '../../components/AppText';
 import {uiStyle, useTheme} from '../../components/ThemeContext';
 import SegmentControl from '../../components/SegmentControl';
-import {getCourseCatalog} from '../../utils/checkCoursesKits';
+import {
+    getCourseCatalog,
+    getPostgraduateCatalog,
+} from '../../utils/checkCoursesKits';
+import {
+    getCourseProgrammeLevel,
+    PROGRAMME_LEVELS,
+} from '../../utils/courseProgramme';
 import {logToFirebase} from '../../utils/firebaseAnalytics';
 import {ARK_HARBOR_AVATAR_TEMPLATE} from '../../utils/pathMap';
 import {
@@ -96,6 +103,13 @@ const DISPLAY_SLOT_MINUTES_STORAGE_KEY = 'ARK_TeamSchedule_Display_Slot_Minutes'
 const SCHEDULE_MODE_STORAGE_KEY = 'ARK_TeamSchedule_Schedule_Mode';
 const DEFAULT_DISPLAY_SLOT_MINUTES = 30;
 const EDIT_SLOT_MINUTES = 15;
+
+const getActiveCourseCatalog = async () => {
+    const programmeLevel = await getCourseProgrammeLevel();
+    return programmeLevel === PROGRAMME_LEVELS.postgraduate
+        ? (await getPostgraduateCatalog()).catalog
+        : getCourseCatalog('adddrop');
+};
 
 const isScheduleMode = value =>
     value === 'availability' || value === 'shared';
@@ -331,7 +345,7 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
     const loadSharedTimetables = useCallback(async ({force = false} = {}) => {
         const [sharedResult, courseResult] = await Promise.allSettled([
             sharedTimetables.load({force}),
-            getCourseCatalog('adddrop'),
+            getActiveCourseCatalog(),
         ]);
         if (courseResult.status === 'fulfilled') {
             const slots = courseResult.value?.Courses;

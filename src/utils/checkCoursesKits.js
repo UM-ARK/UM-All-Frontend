@@ -5,6 +5,7 @@ import { COURSE_API_CF_WORKERS } from './pathMap';
 import { getLocalAppVersion } from './appUpdateKits';
 import {
     adddropCatalog as bundledAdddropCatalog,
+    postgraduateCatalog as bundledPostgraduateCatalog,
     preenrollCatalog as bundledPreenrollCatalog,
 } from '../static/UMCourses/courseCatalogs';
 
@@ -14,19 +15,26 @@ export const COURSE_CATALOG_STORAGE_KEYS = {
     metadata: 'ARK_CourseCatalog_v2_metadata',
 };
 
+export const POSTGRADUATE_CATALOG_STORAGE_KEYS = {
+    catalog: 'ARK_CourseCatalog_v2_postgraduate',
+    metadata: 'ARK_CourseCatalog_v2_postgraduate_metadata',
+};
+
 const COURSE_CATALOG_MODES = ['preenroll', 'adddrop'];
 export const COURSE_CATALOG_REFRESH_INTERVAL_MS = 6 * 60 * 60 * 1000;
+export const POSTGRADUATE_CATALOG_RETRY_INTERVAL_MS = 5 * 60 * 1000;
 const bundledCatalogs = {
     preenroll: bundledPreenrollCatalog,
     adddrop: bundledAdddropCatalog,
 };
 let refreshCourseCatalogsPromise = null;
+let refreshPostgraduateCatalogPromise = null;
 
 /**
  * 驗證 v2 catalog 契約，避免把只有 Courses 的 v1 payload 寫入新緩存。
  *
  * @param {Object} catalog 待驗證的 catalog
- * @param {'preenroll'|'adddrop'} mode 預期模式
+ * @param {'preenroll'|'adddrop'|'postgraduate'} mode 預期模式
  * @returns {boolean} 是否符合 v2 catalog 契約
  */
 export function isValidCourseCatalog(catalog, mode) {
@@ -337,4 +345,185 @@ export async function getCourseCatalog(mode) {
     return mode === 'preenroll'
         ? catalogs.preenrollCatalog
         : catalogs.adddropCatalog;
+}
+
+/**
+ * 讀取研究生 catalog 緩存；只在研究生模式被選取時由頁面呼叫。
+ */
+export async function getPostgraduateCatalog() {
+    const [cache, storedMetadata] = await Promise.all([
+        getLocalStorage(POSTGRADUATE_CATALOG_STORAGE_KEYS.catalog),
+        getLocalStorage(POSTGRADUATE_CATALOG_STORAGE_KEYS.metadata),
+    ]);
+    const metadata = storedMetadata?.schemaVersion === 2
+        ? storedMetadata
+        : {schemaVersion: 2};
+    const hasValidCache = isValidCourseCatalog(cache, 'postgraduate');
+    const shouldPromote = hasValidCache &&
+        isBundledCatalogNewer(bundledPostgraduateCatalog, cache);
+    const catalog = !hasValidCache || shouldPromote
+        ? bundledPostgraduateCatalog
+        : cache;
+
+    if (!shouldPromote) {
+        return {catalog, metadata};
+    }
+
+    const nextMetadata = {
+        schemaVersion: 2,
+        postgraduate: getCatalogMetadata(catalog),
+    };
+    const catalogSaveResult = await setLocalStorage(
+        POSTGRADUATE_CATALOG_STORAGE_KEYS.catalog,
+        catalog,
+    );
+    if (catalogSaveResult !== 'ok') {
+        throw catalogSaveResult;
+    }
+    const metadataSaveResult = await setLocalStorage(
+        POSTGRADUATE_CATALOG_STORAGE_KEYS.metadata,
+        nextMetadata,
+    );
+    if (metadataSaveResult !== 'ok') {
+        throw metadataSaveResult;
+    }
+
+    return {catalog, metadata: nextMetadata};
+}
+
+async function requestPostgraduateCatalog(currentCatalog, metadata) {
+    const cachedETag =
+        metadata?.postgraduate?.revision === currentCatalog.revision
+            ? metadata.postgraduate.etag
+            : null;
+
+    try {
+        let response = await axios.get(
+            `${COURSE_API_CF_WORKERS}/v2/catalog/postgraduate`,
+            {
+                headers: getRequestHeaders(cachedETag),
+                validateStatus: status => status === 200 || status === 304,
+            },
+        );
+        if (response.status === 304 && !cachedETag) {
+            response = await axios.get(
+                `${COURSE_API_CF_WORKERS}/v2/catalog/postgraduate`,
+                {
+                    headers: getRequestHeaders(),
+                    validateStatus: status => status === 200,
+                },
+            );
+        }
+        if (response.status === 304) {
+            return {
+                succeeded: true,
+                catalog: currentCatalog,
+                metadata: {
+                    ...getCatalogMetadata(currentCatalog),
+                    ...metadata?.postgraduate,
+                },
+            };
+        }
+        if (!isValidCourseCatalog(response.data, 'postgraduate')) {
+            throw new Error('Invalid postgraduate course catalog');
+        }
+        return {
+            succeeded: true,
+            catalog: response.data,
+            metadata: {
+                ...getCatalogMetadata(response.data),
+                etag: getResponseETag(response),
+            },
+        };
+    } catch {
+        return {
+            succeeded: false,
+            catalog: currentCatalog,
+            metadata: {
+                ...getCatalogMetadata(currentCatalog),
+                ...metadata?.postgraduate,
+            },
+        };
+    }
+}
+
+/**
+ * 按需刷新研究生 catalog。失敗時保留現有資料，亦不推進 lastCheckedAt。
+ */
+export async function refreshPostgraduateCatalog({ force = false } = {}) {
+    if (refreshPostgraduateCatalogPromise) {
+        return refreshPostgraduateCatalogPromise;
+    }
+
+    refreshPostgraduateCatalogPromise = (async () => {
+        const current = await getPostgraduateCatalog();
+        const lastCheckedAt = Date.parse(current.metadata?.lastCheckedAt);
+        const lastAttemptAt = Date.parse(current.metadata?.lastAttemptAt);
+        const isConsistent =
+            current.metadata?.postgraduate?.revision ===
+            current.catalog.revision;
+        if (
+            !force &&
+            isConsistent &&
+            Number.isFinite(lastCheckedAt) &&
+            Date.now() - lastCheckedAt < COURSE_CATALOG_REFRESH_INTERVAL_MS
+        ) {
+            return current;
+        }
+        if (
+            !force &&
+            Number.isFinite(lastAttemptAt) &&
+            Date.now() - lastAttemptAt < POSTGRADUATE_CATALOG_RETRY_INTERVAL_MS
+        ) {
+            return current;
+        }
+
+        const result = await requestPostgraduateCatalog(
+            current.catalog,
+            current.metadata,
+        );
+        const attemptedAt = new Date().toISOString();
+
+        if (result.succeeded) {
+            const catalogSaveResult = await setLocalStorage(
+                POSTGRADUATE_CATALOG_STORAGE_KEYS.catalog,
+                result.catalog,
+            );
+            if (catalogSaveResult !== 'ok') {
+                throw catalogSaveResult;
+            }
+        }
+
+        const nextMetadata = result.succeeded
+            ? {
+                ...current.metadata,
+                schemaVersion: 2,
+                lastAttemptAt: attemptedAt,
+                lastCheckedAt: attemptedAt,
+                postgraduate: result.metadata,
+            }
+            : {
+                schemaVersion: 2,
+                lastAttemptAt: attemptedAt,
+                postgraduate: result.metadata,
+            };
+        const metadataSaveResult = await setLocalStorage(
+            POSTGRADUATE_CATALOG_STORAGE_KEYS.metadata,
+            nextMetadata,
+        );
+        if (metadataSaveResult !== 'ok') {
+            throw metadataSaveResult;
+        }
+
+        return {
+            catalog: result.catalog,
+            metadata: nextMetadata,
+        };
+    })();
+
+    try {
+        return await refreshPostgraduateCatalogPromise;
+    } finally {
+        refreshPostgraduateCatalogPromise = null;
+    }
 }

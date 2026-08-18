@@ -8,7 +8,14 @@ import { uiStyle } from '../../../../../../components/ThemeContext';
 import TouchableScale from '../../../../../../components/TouchableScale';
 import CourseTimeRangePicker from '../../../components/CourseTimeRangePicker';
 import { TIME_RANGE_PRESETS } from '../../../constants';
-import { DEFAULT_TIME_FROM, DEFAULT_TIME_TO, defaultTimeFilter } from '../constants/options';
+import {
+    DEPARTMENT_ALL,
+    DEPARTMENT_UNSPECIFIED,
+    DEFAULT_TIME_FROM,
+    DEFAULT_TIME_TO,
+    defaultTimeFilter,
+} from '../constants/options';
+import { PROGRAMME_LEVELS } from '../../../../../../utils/courseProgramme';
 
 const FLAT_LIST_STYLE = { flexGrow: 0 };
 
@@ -22,6 +29,7 @@ const FLAT_LIST_STYLE = { flexGrow: 0 };
  */
 const FilterPanel = ({
     theme,
+    programmeLevel,
     courseMode,
     filterOptions,
     offerFacultyList,
@@ -43,7 +51,10 @@ const FilterPanel = ({
     trigger,
 }) => {
     const { themeColor, secondThemeColor, black, white, tonal } = theme;
-    const activeColor = courseMode === 'ad' ? themeColor : secondThemeColor;
+    const isPostgraduate = programmeLevel === PROGRAMME_LEVELS.postgraduate;
+    const activeColor = isPostgraduate || courseMode === 'ad'
+        ? themeColor
+        : secondThemeColor;
     const activeBackgroundColor = `${activeColor}15`;
 
     const [showTimePicker, setShowTimePicker] = useState(false);
@@ -177,10 +188,7 @@ const FilterPanel = ({
                     onPress={() => {
                         trigger();
                         const nextFilterOptions = { ...filterOptions, facultyName: item };
-                        const depaList = offerFacultyDepaListObj[item] || [];
-                        if (depaList.length > 0) {
-                            nextFilterOptions.depaName = depaList[0];
-                        }
+                        nextFilterOptions.depaName = DEPARTMENT_ALL;
                         onUpdateFilterOptions(nextFilterOptions);
                     }}
                 >
@@ -196,7 +204,7 @@ const FilterPanel = ({
             )}
             ListHeaderComponent={() => (
                 <Text style={classItmTitleTextStyle}>
-                    {unitMap[filterOptions.facultyName]}
+                    {unitMap[filterOptions.facultyName] || filterOptions.facultyName}
                 </Text>
             )}
             scrollEnabled={false}
@@ -231,7 +239,11 @@ const FilterPanel = ({
                         fontWeight: filterOptions.depaName === item ? '900' : 'normal',
                         fontSize: scale(12),
                     }}>
-                        {item}
+                        {item === DEPARTMENT_ALL
+                            ? t('全部', { ns: 'catalog' })
+                            : item === DEPARTMENT_UNSPECIFIED
+                                ? t('未指定學系', { ns: 'catalog' })
+                                : item}
                     </Text>
                 </TouchableScale>
             )}
@@ -508,12 +520,14 @@ const FilterPanel = ({
             marginHorizontal: scale(10),
             padding: scale(5),
         }}>
-            {renderADPESwitch()}
-            <View style={{ width: '100%', marginTop: scale(10) }}>
-                {renderCMGESwitch()}
-            </View>
+            {isPostgraduate ? null : renderADPESwitch()}
+            {isPostgraduate ? null : (
+                <View style={{ width: '100%', marginTop: scale(10) }}>
+                    {renderCMGESwitch()}
+                </View>
+            )}
 
-            {filterOptions.option === 'GE' ? (
+            {!isPostgraduate && filterOptions.option === 'GE' ? (
                 <View style={{ marginTop: scale(5), alignItems: 'center', width: '100%' }}>
                     <Text style={classItmTitleTextStyle}>
                         {geClassMap[filterOptions.GE]}
@@ -550,7 +564,9 @@ const FilterPanel = ({
                     {renderFacultySwitch()}
                     {offerDepaList.length > 0 ? (
                         <View style={{ alignItems: 'center', justifyContent: 'center', marginVertical: scale(10) }}>
-                            {filterOptions.depaName in depaMap ? (
+                            {filterOptions.depaName !== DEPARTMENT_ALL &&
+                            filterOptions.depaName !== DEPARTMENT_UNSPECIFIED &&
+                            filterOptions.depaName in depaMap ? (
                                 <Text style={{ ...classItmTitleTextStyle, marginBottom: scale(-5) }}>
                                     {depaMap[filterOptions.depaName]}
                                 </Text>
@@ -561,7 +577,7 @@ const FilterPanel = ({
                 </View>
             )}
 
-            {courseMode === 'preEnroll' ? null : (
+            {!isPostgraduate && courseMode === 'preEnroll' ? null : (
                 <View style={{ marginTop: scale(5), width: '100%', alignItems: 'center' }}>
                     <Text style={classItmTitleTextStyle}>
                         {t('上課星期與時段', { ns: 'catalog' })}
@@ -570,7 +586,9 @@ const FilterPanel = ({
                     {timeFilter.day ? renderTimeRangeFilter() : null}
                 </View>
             )}
-            {courseMode === 'preEnroll' ? null : renderRecommendationFilter()}
+            {!isPostgraduate && courseMode === 'preEnroll'
+                ? null
+                : renderRecommendationFilter()}
         </View>
     );
 };

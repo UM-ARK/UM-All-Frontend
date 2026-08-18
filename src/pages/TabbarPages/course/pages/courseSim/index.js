@@ -165,7 +165,7 @@ function CourseSim({ route, navigation }) {
     const {
         catalogMetadata,
         courseTimeList,
-        adddropCourseList,
+        activeCourseList,
         planList,
         planSlots,
         planCourseCodes,
@@ -420,14 +420,14 @@ function CourseSim({ route, navigation }) {
                 planSlots,
                 planList,
                 courseTimeList,
-                adddropCourseList,
+                adddropCourseList: activeCourseList,
             }),
         [
             replacementTarget,
             planSlots,
             planList,
             courseTimeList,
-            adddropCourseList,
+            activeCourseList,
         ],
     );
     const overviewRows = useMemo(() => {
@@ -2569,7 +2569,7 @@ E11-0000
      */
     function handleSearchFilterCourse(inputText) {
         return lodash.sortBy(
-            lodash.filter(adddropCourseList, course =>
+            lodash.filter(activeCourseList, course =>
                 courseMatchesSearch(course, inputText),
             ),
             ['Course Code'],
@@ -2766,7 +2766,7 @@ E11-0000
                         textAlign: 'center',
                     }}>
                     Timetable Version:{' '}
-                    {catalogMetadata.adddrop.updateTime}
+                    {catalogMetadata.active.updateTime}
                 </Text>
                 <Text
                     style={{

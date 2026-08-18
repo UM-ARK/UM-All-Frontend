@@ -18,6 +18,7 @@ const SearchBarSection = ({
     onChangeText,
     onClear,
     onPressAction,
+    showOfficial = true,
     trigger,
 }) => {
     const { themeColor, black, white } = theme;
@@ -43,7 +44,7 @@ const SearchBarSection = ({
             title: t('官方', { ns: 'catalog' }),
             icon: 'school-outline',
         },
-    ];
+    ].filter(action => showOfficial || action.id !== 'official');
 
     return (
         <View

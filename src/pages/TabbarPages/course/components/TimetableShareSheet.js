@@ -592,10 +592,10 @@ const TimetableSharePreview = ({
             </View>
             {mode === 'detail' ? renderDetail() : renderOverview()}
             <View style={styles.footer}>
-                {catalogMetadata?.adddrop?.updateTime ? (
+                {catalogMetadata?.active?.updateTime ? (
                     <Text style={styles.footerText}>
                         Timetable Version:{' '}
-                        {catalogMetadata.adddrop.updateTime}
+                        {catalogMetadata.active.updateTime}
                     </Text>
                 ) : null}
                 <Text style={styles.footerText}>{t('僅作模擬!')}</Text>

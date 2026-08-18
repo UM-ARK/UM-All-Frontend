@@ -2,13 +2,25 @@ jest.mock('../../../constants', () => ({
     DEFAULT_TIME_FROM: '00:00',
     DEFAULT_TIME_TO: '23:59',
 }));
+jest.mock('../../../../../../utils/courseProgramme', () => ({
+    PROGRAMME_LEVELS: {
+        undergraduate: 'undergraduate',
+        postgraduate: 'postgraduate',
+    },
+}));
 
 import {
     getSectionFilterStatus,
+    getFacultyDepartmentOptions,
+    filterFacultyCoursesByDepartment,
     isCourseRecommended,
     isSectionRecommended,
     isSlotWithinTimeFilter,
 } from '../hooks/useCourseFiltering';
+import {
+    DEPARTMENT_ALL,
+    DEPARTMENT_UNSPECIFIED,
+} from '../constants/options';
 
 const makeSlot = (courseCode, section, day, timeFrom, timeTo) => ({
     'Course Code': courseCode,
@@ -197,5 +209,39 @@ describe('isSectionRecommended', () => {
             sectionSlots,
             timeFilter,
         })).toBe(false);
+    });
+});
+
+describe('研究生 Department 篩選', () => {
+    const facultyCourses = [
+        {'Course Code': 'FST-CIS', 'Offering Department': 'CIS'},
+        {'Course Code': 'FST-ECE', 'Offering Department': 'ECE'},
+        {'Course Code': 'FST-UNKNOWN', 'Offering Department': ''},
+    ];
+
+    it('提供全部及未指定學系選項', () => {
+        expect(getFacultyDepartmentOptions(facultyCourses)).toEqual([
+            DEPARTMENT_ALL,
+            'CIS',
+            'ECE',
+            DEPARTMENT_UNSPECIFIED,
+        ]);
+    });
+
+    it('只在目前學院資料內篩 Department', () => {
+        const result = filterFacultyCoursesByDepartment(
+            facultyCourses,
+            'CIS',
+        );
+
+        expect(result.map(course => course['Course Code'])).toEqual([
+            'FST-CIS',
+        ]);
+        expect(filterFacultyCoursesByDepartment(
+            facultyCourses,
+            DEPARTMENT_UNSPECIFIED,
+        ).map(course => course['Course Code'])).toEqual([
+            'FST-UNKNOWN',
+        ]);
     });
 });

@@ -129,6 +129,7 @@ const CourseTabContent = () => {
     const isFocused = useIsFocused();
 
     const {
+        programmeLevel,
         catalogMetadata,
         initCourseData,
         refreshCourseData,
@@ -224,6 +225,7 @@ const CourseTabContent = () => {
         props => (
             <CourseTabBar
                 {...props}
+                programmeLevel={programmeLevel}
                 catalogMetadata={catalogMetadata}
                 onManualUpdate={handleManualUpdate}
                 onOpenSharePoint={handleOpenSharePoint}
@@ -233,6 +235,7 @@ const CourseTabContent = () => {
         ),
         [
             catalogMetadata,
+            programmeLevel,
             handleClearPlan,
             handleManualUpdate,
             handleOpenSharePoint,

@@ -1,10 +1,13 @@
 import axios from 'axios';
 import {
     COURSE_CATALOG_STORAGE_KEYS,
+    POSTGRADUATE_CATALOG_STORAGE_KEYS,
     getCourseCatalogs,
+    getPostgraduateCatalog,
     isBundledCatalogNewer,
     isValidCourseCatalog,
     refreshCourseCatalogs,
+    refreshPostgraduateCatalog,
 } from '../checkCoursesKits';
 import { getLocalStorage, setLocalStorage } from '../storageKits';
 
@@ -39,6 +42,15 @@ jest.mock('../../static/UMCourses/courseCatalogs', () => ({
         revision: 'adddrop-2026-04-02-bundled',
         Courses: [{ 'Course Code': 'BUNDLED-AD' }],
     },
+    postgraduateCatalog: {
+        schemaVersion: 2,
+        mode: 'postgraduate',
+        updateTime: '2026-08-18',
+        academicYear: '26/27',
+        sem: '1',
+        revision: 'postgraduate-2026-08-18-bundled',
+        Courses: [{ 'Course Code': 'BUNDLED-PG' }],
+    },
 }));
 
 const makeCatalog = (mode, revision, courseCode = revision, updateTime = '2026-08-07') => ({
@@ -71,6 +83,10 @@ describe('v2 course catalog adapter', () => {
             makeCatalog('preenroll', 'preenroll-2026-08-07-hash'),
             'adddrop',
         )).toBe(false);
+        expect(isValidCourseCatalog(
+            makeCatalog('postgraduate', 'postgraduate-2026-08-18-hash'),
+            'postgraduate',
+        )).toBe(true);
     });
 
     test('isBundledCatalogNewer 僅在 updateTime 嚴格較新時為 true', () => {
@@ -322,5 +338,127 @@ describe('v2 course catalog adapter', () => {
                 expect.stringMatching(/\/pre$/),
             ]),
         );
+    });
+
+    test('研究生緩存缺失時只讀 bundled catalog', async () => {
+        setStorageValues({});
+
+        const result = await getPostgraduateCatalog();
+
+        expect(result.catalog.Courses[0]['Course Code']).toBe('BUNDLED-PG');
+        expect(axios.get).not.toHaveBeenCalled();
+        expect(setLocalStorage).not.toHaveBeenCalled();
+    });
+
+    test('研究生 catalog 六小時內不重複請求', async () => {
+        const catalog = makeCatalog(
+            'postgraduate',
+            'postgraduate-cache',
+            'postgraduate-cache',
+            '2026-08-19',
+        );
+        setStorageValues({
+            [POSTGRADUATE_CATALOG_STORAGE_KEYS.catalog]: catalog,
+            [POSTGRADUATE_CATALOG_STORAGE_KEYS.metadata]: {
+                schemaVersion: 2,
+                lastCheckedAt: new Date().toISOString(),
+                postgraduate: {revision: 'postgraduate-cache'},
+            },
+        });
+
+        await expect(refreshPostgraduateCatalog()).resolves.toMatchObject({
+            catalog,
+        });
+        expect(axios.get).not.toHaveBeenCalled();
+        expect(setLocalStorage).not.toHaveBeenCalled();
+    });
+
+    test('研究生刷新成功時先寫 catalog 再寫獨立 metadata', async () => {
+        const current = makeCatalog(
+            'postgraduate',
+            'postgraduate-cache',
+            'postgraduate-cache',
+            '2026-08-19',
+        );
+        const remote = makeCatalog(
+            'postgraduate',
+            'postgraduate-remote',
+            'REMOTE-PG',
+            '2026-08-20',
+        );
+        setStorageValues({
+            [POSTGRADUATE_CATALOG_STORAGE_KEYS.catalog]: current,
+            [POSTGRADUATE_CATALOG_STORAGE_KEYS.metadata]: {
+                schemaVersion: 2,
+                postgraduate: {
+                    revision: 'postgraduate-cache',
+                    etag: '"sha256-pg"',
+                },
+            },
+        });
+        axios.get.mockResolvedValue({
+            status: 200,
+            data: remote,
+            headers: {etag: '"sha256-pg-new"'},
+        });
+
+        const result = await refreshPostgraduateCatalog({force: true});
+
+        expect(result.catalog.Courses[0]['Course Code']).toBe('REMOTE-PG');
+        expect(axios.get).toHaveBeenCalledTimes(1);
+        expect(axios.get.mock.calls[0][0]).toMatch(
+            /\/v2\/catalog\/postgraduate$/,
+        );
+        expect(axios.get.mock.calls[0][1].headers).toMatchObject({
+            'If-None-Match': '"sha256-pg"',
+            'X-UMall-App-Version': '9.8.7',
+            'X-UMall-Course-Schema': '2',
+        });
+        expect(setLocalStorage.mock.calls.map(([key]) => key)).toEqual([
+            POSTGRADUATE_CATALOG_STORAGE_KEYS.catalog,
+            POSTGRADUATE_CATALOG_STORAGE_KEYS.metadata,
+        ]);
+        expect(setLocalStorage.mock.calls[1][1]).toMatchObject({
+            lastCheckedAt: expect.any(String),
+            postgraduate: {
+                revision: 'postgraduate-remote',
+                etag: '"sha256-pg-new"',
+            },
+        });
+    });
+
+    test('研究生刷新失敗保留 fallback 且不走本科 legacy route', async () => {
+        const current = makeCatalog(
+            'postgraduate',
+            'postgraduate-cache',
+            'postgraduate-cache',
+            '2026-08-19',
+        );
+        setStorageValues({
+            [POSTGRADUATE_CATALOG_STORAGE_KEYS.catalog]: current,
+            [POSTGRADUATE_CATALOG_STORAGE_KEYS.metadata]: {
+                schemaVersion: 2,
+                postgraduate: {revision: 'postgraduate-cache'},
+            },
+        });
+        axios.get.mockRejectedValue(new Error('offline'));
+
+        const result = await refreshPostgraduateCatalog({force: true});
+
+        expect(result.catalog).toBe(current);
+        expect(axios.get.mock.calls.map(([url]) => url)).toEqual([
+            'https://course-api.test/v2/catalog/postgraduate',
+        ]);
+        expect(setLocalStorage).toHaveBeenCalledTimes(1);
+        expect(setLocalStorage).toHaveBeenCalledWith(
+            POSTGRADUATE_CATALOG_STORAGE_KEYS.metadata,
+            expect.objectContaining({
+                lastAttemptAt: expect.any(String),
+                postgraduate: expect.objectContaining({
+                    revision: 'postgraduate-cache',
+                }),
+            }),
+        );
+        expect(setLocalStorage.mock.calls[0][1].lastCheckedAt).toBeUndefined();
     });
 });
