@@ -1,6 +1,11 @@
 import axios from 'axios';
 
-import { getLocalStorage, setLocalStorage } from './storageKits';
+import {
+    getLocalStorage,
+    getLocalStorageKeys,
+    removeLocalStorageItems,
+    setLocalStorage,
+} from './storageKits';
 import {
     COURSE_API_CF_WORKERS,
     UM_API_COURSE_CATALOG,
@@ -8,7 +13,11 @@ import {
     UM_API_TOKEN,
 } from './pathMap';
 import { getLocalAppVersion } from './appUpdateKits';
-import { PROGRAMME_LEVELS } from './courseProgramme';
+import {
+    getCoursePlanStorageKey,
+    getCourseWeekPlanStorageKey,
+    PROGRAMME_LEVELS,
+} from './courseProgramme';
 import {
     adddropCatalog as bundledAdddropCatalog,
     postgraduateCatalog as bundledPostgraduateCatalog,
@@ -112,6 +121,48 @@ export const getHistoricalCourseCatalogStorageKey = (
     year,
     sem,
 ) => `${HISTORICAL_COURSE_CATALOG_STORAGE_KEY_PREFIX}_${programmeLevel}_${year}_${sem}`;
+
+export async function pruneHistoricalCourseData(programmeLevel, currentCatalog) {
+    const historicalPeriods = getRecentCoursePeriods(currentCatalog)
+        .filter(period => period.isHistorical);
+    if (historicalPeriods.length === 0) {
+        return [];
+    }
+
+    const allowedStorageKeys = new Set();
+    historicalPeriods.forEach(period => {
+        allowedStorageKeys.add(getHistoricalCourseCatalogStorageKey(
+            programmeLevel,
+            period.year,
+            period.sem,
+        ));
+        allowedStorageKeys.add(getCoursePlanStorageKey(programmeLevel, period));
+        allowedStorageKeys.add(getCourseWeekPlanStorageKey(programmeLevel, period));
+    });
+
+    const storageKeys = await getLocalStorageKeys();
+    if (!Array.isArray(storageKeys)) {
+        throw storageKeys;
+    }
+    const managedPrefixes = [
+        `${HISTORICAL_COURSE_CATALOG_STORAGE_KEY_PREFIX}_${programmeLevel}_`,
+        `${getCoursePlanStorageKey(programmeLevel)}_history_`,
+        `${getCourseWeekPlanStorageKey(programmeLevel)}_history_`,
+    ];
+    const staleStorageKeys = storageKeys.filter(storageKey =>
+        managedPrefixes.some(prefix => storageKey.startsWith(prefix)) &&
+        !allowedStorageKeys.has(storageKey),
+    );
+    if (staleStorageKeys.length === 0) {
+        return [];
+    }
+
+    const removeResult = await removeLocalStorageItems(staleStorageKeys);
+    if (removeResult !== 'ok') {
+        throw removeResult;
+    }
+    return staleStorageKeys;
+}
 
 export const isValidHistoricalCourseCatalog = (
     catalog,

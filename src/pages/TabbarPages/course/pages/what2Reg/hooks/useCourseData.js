@@ -9,6 +9,7 @@ import {
     getHistoricalCourseCatalog,
     getPostgraduateCatalog,
     getRecentCoursePeriods,
+    pruneHistoricalCourseData,
     refreshCourseCatalogs,
     refreshPostgraduateCatalog,
 } from '../../../../../../utils/checkCoursesKits';
@@ -117,10 +118,18 @@ const useCourseData = () => {
     const applyCatalogs = useCallback(catalogs => {
         setPreenrollCatalog(catalogs.preenrollCatalog);
         setAdddropCatalog(catalogs.adddropCatalog);
+        pruneHistoricalCourseData(
+            PROGRAMME_LEVELS.undergraduate,
+            catalogs.adddropCatalog,
+        ).catch(() => undefined);
     }, []);
 
     const applyPostgraduateCatalog = useCallback(result => {
         setPostgraduateCatalog(result.catalog);
+        pruneHistoricalCourseData(
+            PROGRAMME_LEVELS.postgraduate,
+            result.catalog,
+        ).catch(() => undefined);
     }, []);
 
     const initCourseData = useCallback(async () => {

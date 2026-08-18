@@ -91,6 +91,29 @@ export async function setLocalStorageSilently(itemName, data) {
     }
 }
 
+// 獲取所有本地緩存 key
+export async function getLocalStorageKeys() {
+    try {
+        return await AsyncStorage.getAllKeys();
+    } catch (error) {
+        return error;
+    }
+}
+
+// 批量移除本地緩存
+export async function removeLocalStorageItems(itemNames) {
+    if (!Array.isArray(itemNames) || itemNames.length === 0) {
+        return 'ok';
+    }
+    try {
+        await AsyncStorage.multiRemove(itemNames);
+        return 'ok';
+    } catch (error) {
+        console.log('批量移除緩存失敗', error);
+        return error;
+    }
+}
+
 // log出當前所有的緩存資料
 export function logAllStorage() {
     AsyncStorage.getAllKeys((err, keys) => {

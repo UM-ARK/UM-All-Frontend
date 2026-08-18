@@ -10,10 +10,16 @@ import {
     getRecentCoursePeriods,
     isBundledCatalogNewer,
     isValidCourseCatalog,
+    pruneHistoricalCourseData,
     refreshCourseCatalogs,
     refreshPostgraduateCatalog,
 } from '../checkCoursesKits';
-import { getLocalStorage, setLocalStorage } from '../storageKits';
+import {
+    getLocalStorage,
+    getLocalStorageKeys,
+    removeLocalStorageItems,
+    setLocalStorage,
+} from '../storageKits';
 
 jest.mock('axios');
 jest.mock('../pathMap', () => ({
@@ -27,6 +33,8 @@ jest.mock('../appUpdateKits', () => ({
 }));
 jest.mock('../storageKits', () => ({
     getLocalStorage: jest.fn(),
+    getLocalStorageKeys: jest.fn(),
+    removeLocalStorageItems: jest.fn(),
     setLocalStorage: jest.fn(),
     logAllStorage: jest.fn(),
 }));
@@ -77,6 +85,8 @@ const setStorageValues = values => {
 describe('v2 course catalog adapter', () => {
     beforeEach(() => {
         jest.clearAllMocks();
+        getLocalStorageKeys.mockResolvedValue([]);
+        removeLocalStorageItems.mockResolvedValue('ok');
         setLocalStorage.mockResolvedValue('ok');
     });
 
@@ -487,6 +497,36 @@ describe('v2 course catalog adapter', () => {
             '2025-2',
             '2025-1',
         ]);
+    });
+
+    test('清除已退出最近兩學年的同類歷史緩存', async () => {
+        const staleStorageKeys = [
+            `${HISTORICAL_COURSE_CATALOG_STORAGE_KEY_PREFIX}_undergraduate_2024_2`,
+            'ARK_Timetable_Storage_history_2024_1',
+            'ARK_WeekTimetable_Storage_history_2023_2',
+        ];
+        getLocalStorageKeys.mockResolvedValue([
+            ...staleStorageKeys,
+            `${HISTORICAL_COURSE_CATALOG_STORAGE_KEY_PREFIX}_undergraduate_2025_2`,
+            'ARK_Timetable_Storage_history_2025_1',
+            'ARK_WeekTimetable_Storage_history_2025_2',
+            `${HISTORICAL_COURSE_CATALOG_STORAGE_KEY_PREFIX}_postgraduate_2024_2`,
+            'ARK_Timetable_Storage',
+            'unrelated-storage-key',
+        ]);
+
+        await expect(pruneHistoricalCourseData('undergraduate', {
+            academicYear: '26/27',
+            sem: '1',
+        })).resolves.toEqual(staleStorageKeys);
+        expect(removeLocalStorageItems).toHaveBeenCalledWith(staleStorageKeys);
+    });
+
+    test('當前學期 metadata 不合法時不清除任何歷史緩存', async () => {
+        await expect(pruneHistoricalCourseData('undergraduate', {}))
+            .resolves.toEqual([]);
+        expect(getLocalStorageKeys).not.toHaveBeenCalled();
+        expect(removeLocalStorageItems).not.toHaveBeenCalled();
     });
 
     test('歷史 Courses 與指定課程目錄按 courseCode 合併並展開課節', () => {
