@@ -1,7 +1,10 @@
 {
+    "schemaVersion": 2,
+    "mode": "postgraduate",
     "updateTime": "2026-08-18",
     "academicYear": "26/27",
     "sem": "1",
+    "revision": "postgraduate-2026-08-18-f1c7d12247de8976",
     "Courses": [
         {
             "Offering Unit": "FBA",
@@ -2800,7 +2803,7 @@
             "Offering Unit": "FST",
             "Offering Department": "CEE",
             "Course Code": "CIVL8002",
-            "Course Title": "Frontiers of Modern Civil Engineering",
+            "Course Title": "Frontiers of Modern Civil Engineering",
             "Section": "001",
             "Course Type": "",
             "Medium of Instruction": "English",
