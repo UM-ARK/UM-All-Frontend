@@ -22,7 +22,7 @@ const FLAT_LIST_STYLE = { flexGrow: 0 };
 
 /**
  * 篩選面板
- * - 課表模式：本科 / 研究生（點擊前往設置）
+ * - 課表模式：本科 / 研究生（點擊前往設置）；與歷史課表選擇器獨佔一行，Pre Enroll 不顯示
  * - 模式切換：Add Drop / Pre Enroll
  * - 類型切換：CMRE / GE
  * - 學院 / 學系 / GE 細分
@@ -91,15 +91,6 @@ const FilterPanel = ({
         <TouchableScale
             style={{
                 ...classItmStyle,
-                // 本科可疊在 Add Drop 列左上角；研究生沒有該列，改走文件流以免擋住學院標題
-                ...(isPostgraduate
-                    ? {alignSelf: 'flex-start', marginBottom: scale(4)}
-                    : {
-                        position: 'absolute',
-                        left: verticalScale(5),
-                        top: verticalScale(5),
-                        zIndex: 1,
-                    }),
                 marginHorizontal: 0,
                 flexDirection: 'row',
                 alignItems: 'center',
@@ -158,13 +149,7 @@ const FilterPanel = ({
                 }}
                 onOpenMenu={() => trigger('rigid')}
                 shouldOpenOnLongPress={false}
-                accessibilityLabel={t('切換學年及學期', { ns: 'catalog' })}
-                style={{
-                    position: 'absolute',
-                    right: verticalScale(5),
-                    top: verticalScale(5),
-                    zIndex: 2,
-                }}>
+                accessibilityLabel={t('切換學年及學期', { ns: 'catalog' })}>
                 <View style={{
                     ...classItmStyle,
                     marginHorizontal: 0,
@@ -655,8 +640,18 @@ const FilterPanel = ({
             marginHorizontal: scale(10),
             padding: scale(5),
         }}>
-            {renderProgrammeLevelChip()}
-            {renderCoursePeriodSelector()}
+            {courseMode === 'preEnroll' ? null : (
+                <View style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    width: '100%',
+                    marginBottom: scale(4),
+                }}>
+                    {renderProgrammeLevelChip()}
+                    {renderCoursePeriodSelector()}
+                </View>
+            )}
             {isPostgraduate || isHistoricalPeriod ? null : renderADPESwitch()}
             {isPostgraduate ? null : (
                 <View style={{ width: '100%', marginTop: scale(10) }}>
