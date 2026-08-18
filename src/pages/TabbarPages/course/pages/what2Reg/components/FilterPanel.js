@@ -85,10 +85,15 @@ const FilterPanel = ({
         <TouchableScale
             style={{
                 ...classItmStyle,
-                position: 'absolute',
-                left: verticalScale(5),
-                top: verticalScale(5),
-                zIndex: 1,
+                // 本科可疊在 Add Drop 列左上角；研究生沒有該列，改走文件流以免擋住學院標題
+                ...(isPostgraduate
+                    ? {alignSelf: 'flex-start', marginBottom: scale(4)}
+                    : {
+                        position: 'absolute',
+                        left: verticalScale(5),
+                        top: verticalScale(5),
+                        zIndex: 1,
+                    }),
                 marginHorizontal: 0,
                 flexDirection: 'row',
                 alignItems: 'center',
