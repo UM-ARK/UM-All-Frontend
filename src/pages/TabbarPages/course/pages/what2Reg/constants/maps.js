@@ -18,6 +18,7 @@ export const unitMap = {
     'MSC': ' - ',
     'RC': '書院 - Residential College',
     'HC': '榮譽學院 - Honours College',
+    'ICI': '協同創新研究院 - Institute of Collaborative Innovation',
 };
 
 // 部門/學系名中文參考
@@ -98,6 +99,9 @@ export const depaMap = {
     'AUD': '建築及城市設計系',
     'VCD': '視覺傳達設計系',
     'IND': '工業設計系',
+
+    // ICI
+    'CCBS': '認知與腦科學研究中心',
 };
 
 // GE課中文參考
