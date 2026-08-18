@@ -21,6 +21,7 @@ const FLAT_LIST_STYLE = { flexGrow: 0 };
 
 /**
  * 篩選面板
+ * - 課表模式：本科 / 研究生（點擊前往設置）
  * - 模式切換：Add Drop / Pre Enroll
  * - 類型切換：CMRE / GE
  * - 學院 / 學系 / GE 細分
@@ -48,6 +49,7 @@ const FilterPanel = ({
     onUpdateTimeFilter,
     onToggleRecommendation,
     onSetCourseMode,
+    onPressProgrammeLevel,
     trigger,
 }) => {
     const { themeColor, secondThemeColor, black, white, tonal } = theme;
@@ -74,6 +76,51 @@ const FilterPanel = ({
         marginLeft: scale(5),
         textAlign: 'center',
     };
+
+    const programmeLevelLabel = isPostgraduate
+        ? t('研究生', { ns: 'catalog' })
+        : t('本科', { ns: 'catalog' });
+
+    const renderProgrammeLevelChip = () => (
+        <TouchableScale
+            style={{
+                ...classItmStyle,
+                position: 'absolute',
+                left: verticalScale(5),
+                top: verticalScale(5),
+                zIndex: 1,
+                marginHorizontal: 0,
+                flexDirection: 'row',
+                alignItems: 'center',
+                paddingHorizontal: scale(5),
+                paddingVertical: verticalScale(2),
+                backgroundColor: tonal.primary15,
+            }}
+            hitSlop={{ top: scale(8), bottom: scale(8), left: scale(8), right: scale(8) }}
+            onPress={() => {
+                trigger();
+                onPressProgrammeLevel();
+            }}
+            accessibilityRole="button"
+            accessibilityLabel={programmeLevelLabel}
+            accessibilityHint={t('前往設置切換課表模式', { ns: 'catalog' })}
+        >
+            <Text style={{
+                ...uiStyle.defaultText,
+                color: themeColor,
+                fontWeight: '900',
+                fontSize: scale(12),
+            }}>
+                {programmeLevelLabel}
+            </Text>
+            <Ionicons
+                name="chevron-forward"
+                size={scale(12)}
+                color={themeColor}
+                style={{ marginLeft: scale(1) }}
+            />
+        </TouchableScale>
+    );
 
     const renderADPESwitch = () => {
         const modeList = Object.keys(adpeMap);
@@ -520,6 +567,7 @@ const FilterPanel = ({
             marginHorizontal: scale(10),
             padding: scale(5),
         }}>
+            {renderProgrammeLevelChip()}
             {isPostgraduate ? null : renderADPESwitch()}
             {isPostgraduate ? null : (
                 <View style={{ width: '100%', marginTop: scale(10) }}>

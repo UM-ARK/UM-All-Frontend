@@ -560,6 +560,9 @@ const What2Reg = () => {
                                 setRecommendationOnly(currentValue => !currentValue);
                             }}
                             onSetCourseMode={setCourseMode}
+                            onPressProgrammeLevel={() => {
+                                navigation.navigate('SettingPage');
+                            }}
                             trigger={trigger}
                         />
 
