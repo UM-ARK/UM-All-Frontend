@@ -74,6 +74,7 @@ const ViewerChromeButton = ({
  * GalleryPreview 自訂圖片元件：expo-image + blurhash 模糊加載
  * 需回傳真實寬高給庫，才能正確計算縮放邊界
  * 白底：透明 PNG / logo 在黑色查看器背景上才看得清
+ * allowDownscaling=false：庫用 transform scale 放大，若依容器縮小解碼，超寬圖會糊
  */
 const GalleryExpoImage = ({ source, onLoad, style, imagePlaceholder, trueWhite }) => {
     return (
@@ -84,6 +85,7 @@ const GalleryExpoImage = ({ source, onLoad, style, imagePlaceholder, trueWhite }
             placeholder={imagePlaceholder}
             placeholderContentFit="contain"
             cachePolicy="memory-disk"
+            allowDownscaling={false}
             onLoad={e => {
                 onLoad(e.source.width, e.source.height);
             }}

@@ -164,8 +164,10 @@ function CourseSim({ route, navigation }) {
     // 課程資料與排課狀態一律來自 CoursePlanProvider，本段落不再自行持有
     const {
         catalogMetadata,
+        activeCoursePeriod,
+        isHistoricalPeriod,
         courseTimeList,
-        adddropCourseList,
+        activeCourseList,
         planList,
         planSlots,
         planCourseCodes,
@@ -252,6 +254,7 @@ function CourseSim({ route, navigation }) {
         bg_color,
         unread,
         success,
+        warning,
         TIME_TABLE_COLOR,
         isLight,
     } = theme;
@@ -420,14 +423,14 @@ function CourseSim({ route, navigation }) {
                 planSlots,
                 planList,
                 courseTimeList,
-                adddropCourseList,
+                adddropCourseList: activeCourseList,
             }),
         [
             replacementTarget,
             planSlots,
             planList,
             courseTimeList,
-            adddropCourseList,
+            activeCourseList,
         ],
     );
     const overviewRows = useMemo(() => {
@@ -655,6 +658,7 @@ function CourseSim({ route, navigation }) {
                 t,
                 themeColor,
                 secondaryColor: black.third,
+                includeSection: !isHistoricalPeriod,
             }),
             {
                 id: 'replacement',
@@ -1853,6 +1857,7 @@ E11-0000
                     t,
                     themeColor,
                     secondaryColor: black.third,
+                    includeSection: !isHistoricalPeriod,
                 }),
                 {
                     id: 'replace-course',
@@ -2569,7 +2574,7 @@ E11-0000
      */
     function handleSearchFilterCourse(inputText) {
         return lodash.sortBy(
-            lodash.filter(adddropCourseList, course =>
+            lodash.filter(activeCourseList, course =>
                 courseMatchesSearch(course, inputText),
             ),
             ['Course Code'],
@@ -2758,6 +2763,38 @@ E11-0000
                     marginTop: verticalScale(5),
                     marginBottom: scale(5),
                 }}>
+                {isHistoricalPeriod ? (
+                    <View style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        borderWidth: 1,
+                        borderColor: warning,
+                        borderRadius: scale(999),
+                        backgroundColor: `${warning}15`,
+                        paddingHorizontal: scale(8),
+                        paddingVertical: verticalScale(3),
+                        marginBottom: verticalScale(3),
+                    }}>
+                        <Ionicons
+                            name="time-outline"
+                            size={scale(13)}
+                            color={warning}
+                            style={{ marginRight: scale(4) }}
+                        />
+                        <Text style={{
+                            ...uiStyle.defaultText,
+                            fontSize: verticalScale(10),
+                            color: warning,
+                            fontWeight: '900',
+                        }}>
+                            {`${t('{{academicYear}} 第{{sem}}學期', {
+                                ns: 'catalog',
+                                academicYear: activeCoursePeriod.academicYear,
+                                sem: activeCoursePeriod.sem,
+                            })} · ${t('歷史課表', { ns: 'catalog' })}`}
+                        </Text>
+                    </View>
+                ) : null}
                 <Text
                     style={{
                         ...uiStyle.defaultText,
@@ -2765,8 +2802,12 @@ E11-0000
                         color: black.third,
                         textAlign: 'center',
                     }}>
-                    Timetable Version:{' '}
-                    {catalogMetadata.adddrop.updateTime}
+                    {isHistoricalPeriod
+                        ? t('本機緩存日期：{{date}}', {
+                            ns: 'catalog',
+                            date: catalogMetadata.active.updateTime,
+                        })
+                        : `Timetable Version: ${catalogMetadata.active.updateTime}`}
                 </Text>
                 <Text
                     style={{
@@ -2801,6 +2842,9 @@ E11-0000
                 }}>
                 {/* 渲染課表或首次使用提示 */}
                 <View style={{ flex: 1 }}>
+                    {isHistoricalPeriod && planSlots.length === 0
+                        ? renderReminder()
+                        : null}
                     {planSlots.length > 0 ? (
                         timetableView ? (
                             <>

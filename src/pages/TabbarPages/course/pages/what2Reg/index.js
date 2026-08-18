@@ -6,7 +6,7 @@ import React, {
     useRef,
     useState,
 } from 'react';
-import { Platform, View } from 'react-native';
+import { Alert, Platform, View } from 'react-native';
 import { KeyboardAwareScrollView, KeyboardToolbar } from 'react-native-keyboard-controller';
 import { useNavigation } from '@react-navigation/native';
 import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
@@ -41,6 +41,10 @@ import { unitMap, depaMap, geClassMap } from './constants/maps';
 import { adpeMap, CMGEList, dayList, defaultFilterOptions, defaultTimeFilter, modeENStr } from './constants/options';
 import { getCourseDisplayTitle } from './utils/courseTitle';
 import TouchableScale from '../../../../../components/TouchableScale';
+import {
+    getCourseFilterStorageKey,
+    PROGRAMME_LEVELS,
+} from '../../../../../utils/courseProgramme';
 
 const itemHeight = scale(75);
 const COURSE_CARD_GAP = scale(10);
@@ -139,7 +143,9 @@ const groupCourseCardsByRow = list => {
 const CourseCardRow = ({
     entries,
     availableWidth,
+    programmeLevel,
     courseMode,
+    isHistoricalPeriod,
     sectionStatusesByCourseCode,
 }) => {
     const [measuredHeights, setMeasuredHeights] = useState({});
@@ -164,7 +170,9 @@ const CourseCardRow = ({
                     key={entry.key}
                     item={entry.item}
                     mode={'json'}
+                    programmeLevel={programmeLevel}
                     courseMode={courseMode}
+                    isHistoricalPeriod={isHistoricalPeriod}
                     cardWidth={getCourseCardWidth(entry.span, availableWidth)}
                     cardHeight={rowHeight}
                     onMeasureHeight={height => handleMeasureHeight(entry.key, height)}
@@ -190,6 +198,7 @@ const What2Reg = () => {
     const [timeFilter, setTimeFilter] = useState(defaultTimeFilter);
     const [recommendationOnly, setRecommendationOnly] = useState(false);
     const [courseGridWidth, setCourseGridWidth] = useState(0);
+    const [loadedFilterStorageKey, setLoadedFilterStorageKey] = useState(null);
 
     const textInputRef = useRef(null);
     const scrollViewRef = useRef(null);
@@ -209,15 +218,32 @@ const What2Reg = () => {
     // 課程資料、模擬課表與衝突狀態一律取自容器的 CoursePlanProvider，
     // 段落不再自行持有 useCourseData，避免與課表段落各自抓一份而不同步
     const {
+        programmeLevel,
         courseMode,
         setCourseMode,
         preenrollCatalog,
-        adddropCatalog,
         adddropCourseList,
+        postgraduateCourseList,
+        activeCourseList,
+        courseTimeList,
         catalogMetadata,
+        coursePeriodOptions,
+        activeCoursePeriod,
+        isHistoricalPeriod,
+        historicalCatalogStatus,
+        selectCoursePeriod,
         planCourseCodes,
         planSlots,
     } = useCoursePlan();
+    const isPostgraduate = programmeLevel === PROGRAMME_LEVELS.postgraduate;
+    const activeCoursePeriodLabel = activeCoursePeriod
+        ? t('{{academicYear}} 第{{sem}}學期', {
+            ns: 'catalog',
+            academicYear: activeCoursePeriod.academicYear,
+            sem: activeCoursePeriod.sem,
+        })
+        : '';
+    const filterStorageKey = getCourseFilterStorageKey(programmeLevel);
 
     const {
         offerCourseList,
@@ -230,10 +256,12 @@ const What2Reg = () => {
         isRecommendationFilterActive,
     } = useCourseFiltering({
         courseMode,
+        programmeLevel,
         preenrollCatalog,
         adddropCourseList,
+        postgraduateCourseList,
         filterOptions,
-        adddropCatalog,
+        courseTimeList,
         timeFilter,
         recommendationOnly,
         planCourseCodes,
@@ -246,7 +274,7 @@ const What2Reg = () => {
         }
 
         const slotsByCourseCode = lodash.groupBy(
-            adddropCatalog?.Courses || [],
+            courseTimeList,
             'Course Code',
         );
         return filterCourseList.reduce((result, course) => {
@@ -286,7 +314,7 @@ const What2Reg = () => {
             return result;
         }, {});
     }, [
-        adddropCatalog,
+        courseTimeList,
         filterCourseList,
         isRecommendationFilterActive,
         isTimeFilterActive,
@@ -302,13 +330,13 @@ const What2Reg = () => {
         searchFilterCourse,
     } = useCourseSearch({
         offerCourseList,
-        adddropCourses: adddropCatalog?.Courses || [],
-        adddropCourseList,
+        adddropCourses: courseTimeList,
+        adddropCourseList: activeCourseList,
     });
 
-    const activeCourseList = searchFilterCourse?.length > 0 ? searchFilterCourse : filterCourseList;
+    const visibleCourseList = searchFilterCourse?.length > 0 ? searchFilterCourse : filterCourseList;
     const { firstLetterList, scrollData } = useFirstLetterNav({
-        courseList: activeCourseList,
+        courseList: visibleCourseList,
         itemHeight,
     });
 
@@ -320,8 +348,8 @@ const What2Reg = () => {
             return;
         }
         setFilterOptions(nextOptions);
-        await setLocalStorage('ARK_Courses_filterOptions', nextOptions);
-    }, [filterOptions]);
+        await setLocalStorage(filterStorageKey, nextOptions);
+    }, [filterOptions, filterStorageKey]);
 
     const updateTimeFilter = useCallback(nextTimeFilter => {
         setTimeFilter(nextTimeFilter);
@@ -332,27 +360,43 @@ const What2Reg = () => {
         logToFirebase('openPage', { page: 'chooseCourses' });
         refreshUmehHost(); // 不 await，背景探測 host
 
-        getLocalStorage('ARK_Courses_filterOptions').then(storedFilterOptions => {
-            if (storedFilterOptions) {
-                setFilterOptions(storedFilterOptions);
-            }
-        });
     }, []);
+
+    useEffect(() => {
+        let cancelled = false;
+
+        setLoadedFilterStorageKey(null);
+        setFilterOptions(defaultFilterOptions);
+        getLocalStorage(filterStorageKey).then(storedFilterOptions => {
+            if (cancelled) {
+                return;
+            }
+            setFilterOptions(storedFilterOptions || defaultFilterOptions);
+            setLoadedFilterStorageKey(filterStorageKey);
+        });
+
+        return () => {
+            cancelled = true;
+        };
+    }, [filterStorageKey]);
 
     /**
      * 當資料版本更新導致篩選值失效時，
      * 自動修正為合法值並回寫緩存，避免空列表卡死。
      */
     useEffect(() => {
+        if (loadedFilterStorageKey !== filterStorageKey) {
+            return;
+        }
         if (!lodash.isEqual(filterOptions, normalizedFilterOptions)) {
             setFilterOptions(normalizedFilterOptions);
-            setLocalStorage('ARK_Courses_filterOptions', normalizedFilterOptions);
+            setLocalStorage(filterStorageKey, normalizedFilterOptions);
         }
-    }, [filterOptions, normalizedFilterOptions]);
+    }, [filterOptions, filterStorageKey, loadedFilterStorageKey, normalizedFilterOptions]);
 
     // 預選課沒有上課時間資料，切到該模式時清空星期／時段，避免留下不可見卻仍在生效的篩選
     useEffect(() => {
-        if (courseMode === 'preEnroll') {
+        if (!isPostgraduate && courseMode === 'preEnroll') {
             setTimeFilter(currentTimeFilter => (
                 lodash.isEqual(currentTimeFilter, defaultTimeFilter)
                     ? currentTimeFilter
@@ -360,7 +404,7 @@ const What2Reg = () => {
             ));
             setRecommendationOnly(false);
         }
-    }, [courseMode]);
+    }, [courseMode, isPostgraduate]);
 
     const onPressSearchAction = useCallback(eventId => {
         trigger();
@@ -415,6 +459,17 @@ const What2Reg = () => {
         navigation.navigate(COURSE_TIMETABLE_SEGMENT);
     }, [navigation]);
 
+    const handleSelectCoursePeriod = useCallback(async periodId => {
+        try {
+            await selectCoursePeriod(periodId);
+        } catch {
+            Alert.alert(
+                t('無法載入歷史課表', { ns: 'catalog' }),
+                t('請檢查網絡後再試；已下載的歷史課表仍可離線使用。', { ns: 'catalog' }),
+            );
+        }
+    }, [selectCoursePeriod]);
+
     const onScrollToLetter = useCallback(letter => {
         trigger();
         const offsetY = scrollData[letter];
@@ -438,10 +493,12 @@ const What2Reg = () => {
             {courseGridWidth > 0
                 ? groupCourseCardsByRow(list).map(entries => (
                     <CourseCardRow
-                        key={`${courseMode}-${Math.round(courseGridWidth)}-${entries.map(entry => `${entry.key}:${entry.span}`).join('_')}`}
+                        key={`${programmeLevel}-${courseMode}-${activeCoursePeriod?.id}-${Math.round(courseGridWidth)}-${entries.map(entry => `${entry.key}:${entry.span}`).join('_')}`}
                         entries={entries}
                         availableWidth={courseGridWidth}
+                        programmeLevel={programmeLevel}
                         courseMode={courseMode}
+                        isHistoricalPeriod={isHistoricalPeriod}
                         sectionStatusesByCourseCode={
                             showSectionStatuses
                                 ? sectionStatusesByCourseCode
@@ -451,7 +508,7 @@ const What2Reg = () => {
                 ))
                 : null}
         </View>
-    ), [courseGridWidth, courseMode, sectionStatusesByCourseCode]);
+    ), [activeCoursePeriod?.id, courseGridWidth, courseMode, isHistoricalPeriod, programmeLevel, sectionStatusesByCourseCode]);
 
     // 搜尋結果不套用星期／時段篩選：此時 FilterPanel 不渲染，使用者既看不到也無法清除該篩選
     const hasSearchResult = searchFilterCourse?.length > 0;
@@ -491,6 +548,7 @@ const What2Reg = () => {
                     onChangeText={setInputText}
                     onClear={onClearInput}
                     onPressAction={onPressSearchAction}
+                    showOfficial={!isPostgraduate}
                     trigger={trigger}
                 />
 
@@ -507,6 +565,7 @@ const What2Reg = () => {
                     <View>
                         <FilterPanel
                             theme={theme}
+                            programmeLevel={programmeLevel}
                             courseMode={courseMode}
                             filterOptions={filterOptions}
                             offerFacultyList={offerFacultyList}
@@ -521,12 +580,20 @@ const What2Reg = () => {
                             dayList={dayList}
                             timeFilter={timeFilter}
                             recommendationOnly={recommendationOnly}
+                            coursePeriodOptions={coursePeriodOptions}
+                            activeCoursePeriod={activeCoursePeriod}
+                            isHistoricalPeriod={isHistoricalPeriod}
+                            historicalCatalogStatus={historicalCatalogStatus}
                             onUpdateFilterOptions={updateFilterOptions}
                             onUpdateTimeFilter={updateTimeFilter}
                             onToggleRecommendation={() => {
                                 setRecommendationOnly(currentValue => !currentValue);
                             }}
                             onSetCourseMode={setCourseMode}
+                            onSelectCoursePeriod={handleSelectCoursePeriod}
+                            onPressProgrammeLevel={() => {
+                                navigation.navigate('SettingPage');
+                            }}
                             trigger={trigger}
                         />
 
@@ -558,11 +625,26 @@ const What2Reg = () => {
 
                 <View style={{ marginTop: scale(10), alignItems: 'center' }}>
                     <Text style={{ ...uiStyle.defaultText, fontSize: scale(10), color: black.third }}>
-                        {`${courseMode === 'ad' ? '開設' : '預選'}課程:`}
+                        {`${isPostgraduate
+                            ? '研究生'
+                            : courseMode === 'ad'
+                                ? '開設'
+                                : '預選'}課程:`}
                     </Text>
                     <Text style={{ ...uiStyle.defaultText, fontSize: scale(9), color: black.third }}>
-                        數據日期版本: {courseMode === 'ad' ? catalogMetadata.adddrop.updateTime : catalogMetadata.pre.updateTime}
+                        {isHistoricalPeriod
+                            ? `${activeCoursePeriodLabel} · ${t('歷史課表', { ns: 'catalog' })}`
+                            : `數據日期版本: ${isPostgraduate
+                                ? catalogMetadata.postgraduate.updateTime
+                                : courseMode === 'ad'
+                                    ? catalogMetadata.adddrop.updateTime
+                                    : catalogMetadata.pre.updateTime}`}
                     </Text>
+                    {isHistoricalPeriod ? (
+                        <Text style={{ ...uiStyle.defaultText, fontSize: scale(9), color: theme.warning, textAlign: 'center' }}>
+                            {t('歷史開課資料按最新課程目錄辨認本科／研究生，僅供規劃參考。', { ns: 'catalog' })}
+                        </Text>
+                    ) : null}
                 </View>
 
                 <View style={{ margin: scale(10), padding: scale(10), alignItems: 'center' }}>

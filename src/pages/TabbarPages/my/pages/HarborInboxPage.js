@@ -675,7 +675,7 @@ const HarborInboxPage = ({
         const avatarUrl =
             avatarActor.avatarUrl ||
             (avatarActor.username
-                ? ARK_HARBOR_AVATAR(avatarActor.username, 72)
+                ? ARK_HARBOR_AVATAR(avatarActor.username)
                 : '');
         return (
             <Pressable

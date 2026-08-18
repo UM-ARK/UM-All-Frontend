@@ -66,7 +66,7 @@ const SharedTimetableMemberSelector = ({
                     const name = memberName(member, t);
                     const selected = String(selectedId) === key;
                     const avatarUri = member.avatarTemplate
-                        ? ARK_HARBOR_AVATAR_TEMPLATE(member.avatarTemplate, 72)
+                        ? ARK_HARBOR_AVATAR_TEMPLATE(member.avatarTemplate)
                         : null;
                     return (
                         <Pressable

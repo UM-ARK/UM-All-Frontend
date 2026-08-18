@@ -19,11 +19,12 @@ import {
 import parseImportData from '../utils/parseImportData';
 import { buildAdddropCourseList } from '../utils/courseCatalog';
 import { getLocalStorage, setLocalStorage } from '../../../../utils/storageKits';
-
-/** 使用者選課清單（僅 Course Code 與 Section） */
-const PLAN_STORAGE_KEY = 'ARK_Timetable_Storage';
-/** 一週課表，首頁「下節課」功能依賴此鍵 */
-const WEEK_PLAN_STORAGE_KEY = 'ARK_WeekTimetable_Storage';
+import { useProgrammeLevel } from '../../../../contexts/ProgrammeLevelContext';
+import {
+    getCoursePlanStorageKey,
+    getCourseWeekPlanStorageKey,
+    PROGRAMME_LEVELS,
+} from '../../../../utils/courseProgramme';
 
 const CoursePlanContext = createContext(null);
 
@@ -81,27 +82,61 @@ const buildWeekPlan = planSlots =>
  * 這些一律留給呼叫端頁面處理。
  */
 export const CoursePlanProvider = ({ children }) => {
+    const { programmeLevel } = useProgrammeLevel();
     const {
         courseMode,
         setCourseMode,
         preenrollCatalog,
         adddropCatalog,
+        postgraduateCatalog,
+        activeCatalog,
         catalogMetadata,
+        coursePeriodOptions,
+        activeCoursePeriod,
+        isHistoricalPeriod,
+        historicalCatalogStatus,
+        selectCoursePeriod,
         initCourseData,
         refreshCourseData,
     } = useCourseData();
 
     const [planList, setPlanList] = useState([]);
 
+    const planStorageKey = getCoursePlanStorageKey(
+        programmeLevel,
+        activeCoursePeriod,
+    );
+    const weekPlanStorageKey = getCourseWeekPlanStorageKey(
+        programmeLevel,
+        activeCoursePeriod,
+    );
+
     const courseTimeList = useMemo(
-        () => adddropCatalog?.Courses || [],
-        [adddropCatalog],
+        () => activeCatalog?.Courses || [],
+        [activeCatalog],
     );
 
     const adddropCourseList = useMemo(
-        () => buildAdddropCourseList(adddropCatalog?.Courses),
-        [adddropCatalog],
+        () => buildAdddropCourseList(
+            programmeLevel === PROGRAMME_LEVELS.undergraduate
+                ? activeCatalog?.Courses
+                : adddropCatalog?.Courses,
+        ),
+        [activeCatalog, adddropCatalog, programmeLevel],
     );
+
+    const postgraduateCourseList = useMemo(
+        () => buildAdddropCourseList(
+            programmeLevel === PROGRAMME_LEVELS.postgraduate
+                ? activeCatalog?.Courses
+                : postgraduateCatalog?.Courses,
+        ),
+        [activeCatalog, postgraduateCatalog, programmeLevel],
+    );
+
+    const activeCourseList = programmeLevel === PROGRAMME_LEVELS.postgraduate
+        ? postgraduateCourseList
+        : adddropCourseList;
 
     const sectionsByCourseCode = useMemo(
         () => lodash.groupBy(courseTimeList, 'Course Code'),
@@ -120,6 +155,7 @@ export const CoursePlanProvider = ({ children }) => {
 
     // 同一個事件中可能連續呼叫多次增刪，用 ref 取代 state 閉包避免讀到舊清單
     const planListRef = useRef(planList);
+    const loadedPlanStorageKeyRef = useRef(null);
     useEffect(() => {
         planListRef.current = planList;
     }, [planList]);
@@ -133,46 +169,50 @@ export const CoursePlanProvider = ({ children }) => {
         nextPlanList => {
             const nextPlanSlots = buildPlanSlots(nextPlanList, courseTimeList);
 
-            setLocalStorage(WEEK_PLAN_STORAGE_KEY, buildWeekPlan(nextPlanSlots));
+            setLocalStorage(weekPlanStorageKey, buildWeekPlan(nextPlanSlots));
             planListRef.current = nextPlanList;
             setPlanList(nextPlanList);
-            setLocalStorage(PLAN_STORAGE_KEY, nextPlanList);
+            setLocalStorage(planStorageKey, nextPlanList);
         },
-        [courseTimeList],
+        [courseTimeList, planStorageKey, weekPlanStorageKey],
     );
 
     // 掛載時還原選課清單。還原本身不回寫，避免蓋掉尚未讀取完成的儲存內容
     useEffect(() => {
         let cancelled = false;
 
-        getLocalStorage(PLAN_STORAGE_KEY).then(storedPlanList => {
+        loadedPlanStorageKeyRef.current = null;
+        planListRef.current = [];
+        setPlanList([]);
+
+        getLocalStorage(planStorageKey).then(storedPlanList => {
             if (cancelled) {
                 return;
             }
-            if (Array.isArray(storedPlanList) && storedPlanList.length > 0) {
-                planListRef.current = storedPlanList;
-                setPlanList(storedPlanList);
-            }
+            const nextPlanList = Array.isArray(storedPlanList)
+                ? storedPlanList
+                : [];
+            loadedPlanStorageKeyRef.current = planStorageKey;
+            planListRef.current = nextPlanList;
+            setPlanList(nextPlanList);
         });
 
         return () => {
             cancelled = true;
         };
-    }, []);
+    }, [planStorageKey]);
 
     // planList 的寫入由 commitPlan 負責，這裡只處理課程資料更新的情況：
     // 同一個 section 的上課時間可能被改動，需重算課節並更新首頁依賴的週課表
-    const skipFirstCourseDataSyncRef = useRef(true);
     useEffect(() => {
-        if (skipFirstCourseDataSyncRef.current) {
-            skipFirstCourseDataSyncRef.current = false;
+        if (loadedPlanStorageKeyRef.current !== planStorageKey) {
             return;
         }
         if (planListRef.current.length === 0) {
             return;
         }
         commitPlan(planListRef.current);
-    }, [courseTimeList, commitPlan]);
+    }, [courseTimeList, commitPlan, planStorageKey]);
 
     /**
      * 加入單一 section，同一 Course Code 的既有選擇會被取代。
@@ -259,9 +299,9 @@ export const CoursePlanProvider = ({ children }) => {
     const clearPlan = useCallback(() => {
         planListRef.current = [];
         setPlanList([]);
-        setLocalStorage(PLAN_STORAGE_KEY, []);
-        setLocalStorage(WEEK_PLAN_STORAGE_KEY, []);
-    }, []);
+        setLocalStorage(planStorageKey, []);
+        setLocalStorage(weekPlanStorageKey, []);
+    }, [planStorageKey, weekPlanStorageKey]);
 
     /**
      * 匯入 UM ISW 課表文字。
@@ -328,15 +368,25 @@ export const CoursePlanProvider = ({ children }) => {
 
     const value = useMemo(
         () => ({
+            programmeLevel,
             courseMode,
             setCourseMode,
             preenrollCatalog,
             adddropCatalog,
+            postgraduateCatalog,
+            activeCatalog,
             catalogMetadata,
+            coursePeriodOptions,
+            activeCoursePeriod,
+            isHistoricalPeriod,
+            historicalCatalogStatus,
+            selectCoursePeriod,
             initCourseData,
             refreshCourseData,
             courseTimeList,
             adddropCourseList,
+            postgraduateCourseList,
+            activeCourseList,
             sectionsByCourseCode,
             planList,
             planSlots,
@@ -356,15 +406,25 @@ export const CoursePlanProvider = ({ children }) => {
             getSectionConflicts,
         }),
         [
+            programmeLevel,
             courseMode,
             setCourseMode,
             preenrollCatalog,
             adddropCatalog,
+            postgraduateCatalog,
+            activeCatalog,
             catalogMetadata,
+            coursePeriodOptions,
+            activeCoursePeriod,
+            isHistoricalPeriod,
+            historicalCatalogStatus,
+            selectCoursePeriod,
             initCourseData,
             refreshCourseData,
             courseTimeList,
             adddropCourseList,
+            postgraduateCourseList,
+            activeCourseList,
             sectionsByCourseCode,
             planList,
             planSlots,

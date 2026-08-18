@@ -117,6 +117,8 @@ function buildOverviewRows(planSlots) {
  * @param {number} props.overviewMaxHeight 畫面概覽可用高度
  * @param {'detail'|'overview'} props.mode 分享課表模式
  * @param {Object} props.captureTargetRef 截圖內容 ref
+ * @param {boolean} props.isHistoricalPeriod 是否正在檢視歷史課表
+ * @param {Object|null} props.activeCoursePeriod 當前學期（歷史課表時用於底部提示）
  */
 const TimetableSharePreview = ({
     planSlots,
@@ -128,6 +130,8 @@ const TimetableSharePreview = ({
     overviewMaxHeight,
     mode,
     captureTargetRef,
+    isHistoricalPeriod,
+    activeCoursePeriod,
 }) => {
     const { t } = useTranslation(['timetable', 'catalog']);
     const { theme } = useTheme();
@@ -137,6 +141,7 @@ const TimetableSharePreview = ({
         themeColor,
         themeColorUltraLight,
         unread,
+        warning,
         TIME_TABLE_COLOR,
     } = theme;
 
@@ -354,6 +359,26 @@ const TimetableSharePreview = ({
                     paddingBottom: verticalScale(12),
                     alignItems: 'center',
                 },
+                historyBadge: {
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    borderWidth: 1,
+                    borderColor: warning,
+                    borderRadius: scale(999),
+                    backgroundColor: `${warning}15`,
+                    paddingHorizontal: scale(8),
+                    paddingVertical: verticalScale(3),
+                    marginBottom: verticalScale(3),
+                },
+                historyBadgeIcon: {
+                    marginRight: scale(4),
+                },
+                historyBadgeText: {
+                    ...uiStyle.defaultText,
+                    fontSize: verticalScale(10),
+                    color: warning,
+                    fontWeight: '900',
+                },
                 footerText: {
                     ...uiStyle.defaultText,
                     color: black.third,
@@ -371,6 +396,7 @@ const TimetableSharePreview = ({
             previewWidth,
             themeColor,
             themeColorUltraLight,
+            warning,
         ],
     );
 
@@ -592,10 +618,31 @@ const TimetableSharePreview = ({
             </View>
             {mode === 'detail' ? renderDetail() : renderOverview()}
             <View style={styles.footer}>
-                {catalogMetadata?.adddrop?.updateTime ? (
+                {isHistoricalPeriod && activeCoursePeriod ? (
+                    <View style={styles.historyBadge}>
+                        <Ionicons
+                            name="time-outline"
+                            size={scale(13)}
+                            color={warning}
+                            style={styles.historyBadgeIcon}
+                        />
+                        <Text style={styles.historyBadgeText}>
+                            {`${t('{{academicYear}} 第{{sem}}學期', {
+                                ns: 'catalog',
+                                academicYear: activeCoursePeriod.academicYear,
+                                sem: activeCoursePeriod.sem,
+                            })} · ${t('歷史課表', { ns: 'catalog' })}`}
+                        </Text>
+                    </View>
+                ) : null}
+                {catalogMetadata?.active?.updateTime ? (
                     <Text style={styles.footerText}>
-                        Timetable Version:{' '}
-                        {catalogMetadata.adddrop.updateTime}
+                        {isHistoricalPeriod
+                            ? t('本機緩存日期：{{date}}', {
+                                  ns: 'catalog',
+                                  date: catalogMetadata.active.updateTime,
+                              })
+                            : `Timetable Version: ${catalogMetadata.active.updateTime}`}
                     </Text>
                 ) : null}
                 <Text style={styles.footerText}>{t('僅作模擬!')}</Text>
@@ -618,8 +665,14 @@ const TimetableShareSheet = forwardRef(({ catalogMetadata }, ref) => {
     const insets = useSafeAreaInsets();
     const tabBarHeight =
         useContext(BottomTabBarHeightContext) ?? insets.bottom + 49;
-    const { planList, planSlots, planCourseCodes, conflictSlotKeys } =
-        useCoursePlan();
+    const {
+        planList,
+        planSlots,
+        planCourseCodes,
+        conflictSlotKeys,
+        isHistoricalPeriod,
+        activeCoursePeriod,
+    } = useCoursePlan();
     const {
         themeColor,
         tonal,
@@ -919,6 +972,8 @@ const TimetableShareSheet = forwardRef(({ catalogMetadata }, ref) => {
                         overviewMaxHeight={overviewMaxHeight}
                         mode={shareMode}
                         captureTargetRef={previewCaptureRef}
+                        isHistoricalPeriod={isHistoricalPeriod}
+                        activeCoursePeriod={activeCoursePeriod}
                     />
                 </ScrollView>
             </ScrollView>

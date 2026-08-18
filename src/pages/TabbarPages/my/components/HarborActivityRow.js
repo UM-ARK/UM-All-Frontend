@@ -108,7 +108,7 @@ const HarborActivityRow = ({
     const avatarUrl =
         item.avatarUrl ||
         (item.actingUsername
-            ? ARK_HARBOR_AVATAR(item.actingUsername, 72)
+            ? ARK_HARBOR_AVATAR(item.actingUsername)
             : '');
     const metaLabel = item.actingUsername
         ? [item.actingUsername, t(meta.label)].filter(Boolean).join(' · ')

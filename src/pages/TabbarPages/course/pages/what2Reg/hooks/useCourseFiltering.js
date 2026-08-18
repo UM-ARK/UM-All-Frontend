@@ -1,6 +1,11 @@
 import { useMemo } from 'react';
 import lodash from 'lodash';
-import { defaultTimeFilter } from '../constants/options';
+import {
+    DEPARTMENT_ALL,
+    DEPARTMENT_UNSPECIFIED,
+    defaultTimeFilter,
+} from '../constants/options';
+import { PROGRAMME_LEVELS } from '../../../../../../utils/courseProgramme';
 import {
     getSectionFilterStatus,
     isSlotWithinTimeFilter,
@@ -11,6 +16,35 @@ export {
     getSectionFilterStatus,
     isSlotWithinTimeFilter,
     parseTimeToMinutes,
+};
+
+export const getFacultyDepartmentOptions = courses => {
+    const departments = lodash.chain(courses)
+        .uniqBy('Offering Department')
+        .map('Offering Department')
+        .compact()
+        .sort()
+        .value();
+    const hasUnspecified = courses.some(
+        course => !course['Offering Department'],
+    );
+    return [
+        DEPARTMENT_ALL,
+        ...departments,
+        ...(hasUnspecified ? [DEPARTMENT_UNSPECIFIED] : []),
+    ];
+};
+
+export const filterFacultyCoursesByDepartment = (courses, department) => {
+    if (department === DEPARTMENT_ALL) {
+        return courses;
+    }
+    if (department === DEPARTMENT_UNSPECIFIED) {
+        return courses.filter(course => !course['Offering Department']);
+    }
+    return courses.filter(
+        course => course['Offering Department'] === department,
+    );
 };
 
 /**
@@ -55,18 +89,24 @@ export const isCourseRecommended = ({
  */
 const useCourseFiltering = ({
     courseMode,
+    programmeLevel,
     preenrollCatalog,
     adddropCourseList,
+    postgraduateCourseList,
     filterOptions,
-    adddropCatalog,
+    courseTimeList = [],
     timeFilter = defaultTimeFilter,
     recommendationOnly = false,
     planCourseCodes = [],
     planSlots = [],
 }) => {
+    const isPostgraduate = programmeLevel === PROGRAMME_LEVELS.postgraduate;
     const offerCourseList = useMemo(() => {
+        if (isPostgraduate) {
+            return postgraduateCourseList;
+        }
         return courseMode === 'ad' ? adddropCourseList : preenrollCatalog?.Courses || [];
-    }, [courseMode, adddropCourseList, preenrollCatalog]);
+    }, [courseMode, adddropCourseList, isPostgraduate, postgraduateCourseList, preenrollCatalog]);
 
     const offerFacultyList = useMemo(() => {
         return lodash.uniq(offerCourseList.map(itm => itm['Offering Unit']).filter(Boolean)).sort();
@@ -84,10 +124,6 @@ const useCourseFiltering = ({
         return lodash.groupBy(offerCourseList, 'Offering Unit');
     }, [offerCourseList]);
 
-    const offerCourseByDepa = useMemo(() => {
-        return lodash.groupBy(offerCourseList, 'Offering Department');
-    }, [offerCourseList]);
-
     const offerCourseByGE = useMemo(() => {
         return offerGEList.reduce((acc, geName) => {
             acc[geName] = offerCourseList.filter(itm => itm['Course Code']?.substring(0, 4) === geName);
@@ -96,13 +132,9 @@ const useCourseFiltering = ({
     }, [offerGEList, offerCourseList]);
 
     const offerFacultyDepaListObj = useMemo(() => {
-        return lodash.mapValues(offerCourseByFaculty, courses =>
-            lodash.chain(courses)
-                .uniqBy('Offering Department')
-                .map('Offering Department')
-                .compact()
-                .sort()
-                .value(),
+        return lodash.mapValues(
+            offerCourseByFaculty,
+            getFacultyDepartmentOptions,
         );
     }, [offerCourseByFaculty]);
 
@@ -123,8 +155,16 @@ const useCourseFiltering = ({
 
         if (nextOptions.option === 'CMRE') {
             const depaList = offerFacultyDepaListObj[nextOptions.facultyName] || [];
-            if (depaList.length > 0 && !depaList.includes(nextOptions.depaName)) {
-                nextOptions.depaName = depaList[0];
+            if (!depaList.includes(nextOptions.depaName)) {
+                nextOptions.depaName = DEPARTMENT_ALL;
+            }
+        }
+
+        if (isPostgraduate) {
+            nextOptions.option = 'CMRE';
+            const depaList = offerFacultyDepaListObj[nextOptions.facultyName] || [];
+            if (!depaList.includes(nextOptions.depaName)) {
+                nextOptions.depaName = DEPARTMENT_ALL;
             }
         }
 
@@ -135,7 +175,7 @@ const useCourseFiltering = ({
         }
 
         return nextOptions;
-    }, [filterOptions, offerCourseByFaculty, offerFacultyDepaListObj, offerFacultyList, offerGEList]);
+    }, [filterOptions, isPostgraduate, offerCourseByFaculty, offerFacultyDepaListObj, offerFacultyList, offerGEList]);
 
     const scopedCourseList = useMemo(() => {
         if (normalizedFilterOptions.option === 'GE') {
@@ -143,28 +183,26 @@ const useCourseFiltering = ({
         }
 
         const facultyName = normalizedFilterOptions.facultyName;
-        const depaList = offerFacultyDepaListObj[facultyName] || [];
+        const facultyCourses = offerCourseByFaculty[facultyName] || [];
 
-        if (depaList.length > 0) {
-            return offerCourseByDepa[normalizedFilterOptions.depaName] || [];
-        }
-
-        return offerCourseByFaculty[facultyName] || [];
+        return filterFacultyCoursesByDepartment(
+            facultyCourses,
+            normalizedFilterOptions.depaName,
+        );
     }, [
         normalizedFilterOptions,
         offerCourseByGE,
-        offerFacultyDepaListObj,
-        offerCourseByDepa,
         offerCourseByFaculty,
     ]);
 
     // 以 Course Code 建索引，避免對每個課程線性掃描數萬筆課節資料
     const slotsByCourseCode = useMemo(() => {
-        return lodash.groupBy(adddropCatalog?.Courses || [], 'Course Code');
-    }, [adddropCatalog]);
+        return lodash.groupBy(courseTimeList, 'Course Code');
+    }, [courseTimeList]);
 
-    // 預選課資料沒有上課時間，故時段篩選只在 Add Drop 模式生效
-    const isTimeFilterActive = courseMode === 'ad' && Boolean(timeFilter?.day);
+    // 預選課資料沒有上課時間，故時段篩選只在 Add Drop／研究生模式生效
+    const isTimeFilterActive =
+        (isPostgraduate || courseMode === 'ad') && Boolean(timeFilter?.day);
 
     const timeFilteredCourseList = useMemo(() => {
         if (!isTimeFilterActive) {
@@ -183,8 +221,9 @@ const useCourseFiltering = ({
         });
     }, [isTimeFilterActive, scopedCourseList, slotsByCourseCode, timeFilter]);
 
-    // 加課建議只適用於有 Section 時間資料的 Add Drop 模式
-    const isRecommendationFilterActive = courseMode === 'ad' && recommendationOnly;
+    // 加課建議只適用於有 Section 時間資料的 Add Drop／研究生模式
+    const isRecommendationFilterActive =
+        (isPostgraduate || courseMode === 'ad') && recommendationOnly;
     const planCourseCodeSet = useMemo(
         () => new Set(planCourseCodes),
         [planCourseCodes],

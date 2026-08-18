@@ -39,6 +39,8 @@ import { reloadAppAsync } from 'expo';
 import { useTranslation } from 'react-i18next';
 import Ionicons from "@react-native-vector-icons/ionicons";
 import SegmentControl from '../../components/SegmentControl';
+import { useProgrammeLevel } from '../../contexts/ProgrammeLevelContext';
+import { PROGRAMME_LEVELS } from '../../utils/courseProgramme';
 import {
     fetchAppInfoFromServer,
     getLocalAppVersion,
@@ -239,6 +241,7 @@ const SettingPage = ({ navigation }) => {
     const { bg_color, black, themeColor } = theme;
     const { t, i18n } = useTranslation(['setting', 'about', 'common', 'my']);
     const { status, user, login } = useHarborSession();
+    const { programmeLevel, setProgrammeLevel } = useProgrammeLevel();
     const [umehHostPref, setUmehHostPrefState] = useState('auto');
 
     useEffect(() => {
@@ -444,6 +447,19 @@ const SettingPage = ({ navigation }) => {
         { key: 'en', label: 'EN' },
     ];
     const languageIndex = i18n.language === 'en' ? 1 : 0;
+    const programmeLevelOptions = [
+        {
+            key: PROGRAMME_LEVELS.undergraduate,
+            label: t('setting:Undergraduate'),
+        },
+        {
+            key: PROGRAMME_LEVELS.postgraduate,
+            label: t('setting:Postgraduate'),
+        },
+    ];
+    const programmeLevelIndex = programmeLevel === PROGRAMME_LEVELS.postgraduate
+        ? 1
+        : 0;
 
     return (
         <View style={{ flex: 1, backgroundColor: bg_color }}>
@@ -512,6 +528,31 @@ const SettingPage = ({ navigation }) => {
                                         languageOptions[index].key,
                                     )
                                 }
+                            />
+                        }
+                    />
+                </SettingSectionCard>
+
+                <SettingSection title={t('setting:Courses')} icon="school" />
+
+                <SettingSectionCard>
+                    <SettingItem
+                        grouped
+                        icon="school-outline"
+                        iconColor={themeColor}
+                        title={t('setting:Programme Level')}
+                        subtitle={programmeLevelOptions[programmeLevelIndex].label}
+                        showArrow={false}
+                        rightElement={
+                            <SegmentControl
+                                options={programmeLevelOptions}
+                                selectedIndex={programmeLevelIndex}
+                                onChange={index =>
+                                    setProgrammeLevel(
+                                        programmeLevelOptions[index].key,
+                                    )
+                                }
+                                compact
                             />
                         }
                     />

@@ -74,7 +74,7 @@ const normalizeChatUser = user => {
         username: user?.username || '',
         displayName: user?.name || user?.username || '',
         avatarUrl: avatarTemplate
-            ? ARK_HARBOR_AVATAR_TEMPLATE(avatarTemplate, 96)
+            ? ARK_HARBOR_AVATAR_TEMPLATE(avatarTemplate)
             : '',
         canChat: user?.can_chat !== false && user?.has_chat_enabled !== false,
     };

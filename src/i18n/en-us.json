@@ -125,6 +125,7 @@
         "APP Version": "APP Version: ",
         "Add Drop Data Version": "Add Drop Data Version: ",
         "PreEnroll Data Version": "PreEnroll Data Version: ",
+        "研究生課表數據日期版本: ": "Postgraduate timetable data version: ",
         "Language Setting": "Language Setting: ",
         "ARK Describe 1": "ARK ALL was developed by UM students for love and is not an official app!",
         "ARK Describe 2": "ARK ALL is not an official app of UM‼",
@@ -1094,6 +1095,8 @@
         "課表有課": "Class scheduled"
     },
     "catalog": {
+        "全部": "All",
+        "未指定學系": "Unspecified Department",
         "試試ECE or Electrical or 電氣": "Try ECE or Electrical or 電氣",
         "必修課 與 選修課": "Compulsory and Required Elective ",
         "通識課": "General Education",
@@ -1120,6 +1123,9 @@
         "如日期已更新，課表數據未更新，可重啟APP再試~": "If the date has been updated and the timetable data has not been updated, you can try restarting the APP~",
         "檢查課表版本!": "Check timetable version!",
         "以官網課表Excel為準!": "Based on the official timetable Excel!",
+        "本科": "UG",
+        "研究生": "PG",
+        "前往設置切換課表模式": "Go to settings to switch timetable mode",
         "上課星期與時段": "Class Day & Time",
         "該時段沒有符合的課程，可調整或清除星期與時段篩選。": "No course matches this time range. Adjust or clear the day and time filter.",
         "只看不衝突": "No conflicts only",
@@ -1127,7 +1133,14 @@
         "有衝突": "Conflict",
         "符合時段": "Matches time",
         "當前選中": "Selected",
-        "目前沒有可排入且不衝突的課程，可調整篩選或已排課表。": "No course currently fits without conflicts. Adjust the filters or your timetable."
+        "目前沒有可排入且不衝突的課程，可調整篩選或已排課表。": "No course currently fits without conflicts. Adjust the filters or your timetable.",
+        "{{academicYear}} 第{{sem}}學期": "{{academicYear}} Semester {{sem}}",
+        "切換學年及學期": "Switch academic year and semester",
+        "歷史課表": "Historical timetable",
+        "歷史開課資料按最新課程目錄辨認本科／研究生，僅供規劃參考。": "Historical offerings use the latest course catalog to identify UG and PG courses and are for planning reference only.",
+        "本機緩存日期：{{date}}": "Cached on: {{date}}",
+        "無法載入歷史課表": "Unable to load historical timetable",
+        "請檢查網絡後再試；已下載的歷史課表仍可離線使用。": "Check your connection and try again. Downloaded historical timetables remain available offline."
     },
     "timetable": {
         "課表模擬": "Timetable Simulation",
@@ -1417,6 +1430,10 @@
         "Light": "Light",
         "Dark": "Dark",
         "System": "System",
+        "Courses": "Courses",
+        "Programme Level": "Timetable Mode",
+        "Undergraduate": "Undergraduate",
+        "Postgraduate": "Postgraduate",
         "Application": "Application",
         "Clear Cache": "Clear Local Data",
         "Browser Cache Help": "Clear Browser Cache",

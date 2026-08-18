@@ -27,6 +27,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import lodash from 'lodash';
 import { t } from 'i18next';
+import { PROGRAMME_LEVELS } from '../../../../../../utils/courseProgramme';
 
 /** 與 TouchableScale 預設相近的彈簧參數 */
 const COURSE_CARD_SPRING = {
@@ -42,13 +43,14 @@ const styles = StyleSheet.create({
 });
 
 const CourseCard = memo(
-    ({ item, mode, prof_info, courseMode = 'ad', cardWidth, cardHeight, onMeasureHeight, sectionStatuses }) => {
+    ({ item, mode, prof_info, programmeLevel = PROGRAMME_LEVELS.undergraduate, courseMode = 'ad', isHistoricalPeriod = false, cardWidth, cardHeight, onMeasureHeight, sectionStatuses }) => {
         // const { item, mode, prof_info, courseMode = 'ad' } = props;
         const navigation = useContext(NavigationContext);
         const { theme } = useTheme();
         const { baseHost } = useUmehHost();
         const { themeColor, black, secondThemeColor, white } = theme;
-        const isPreEnroll = courseMode === 'preEnroll';
+        const isPostgraduate = programmeLevel === PROGRAMME_LEVELS.postgraduate;
+        const isPreEnroll = !isPostgraduate && courseMode === 'preEnroll';
 
         // 原生 UIButton 會吃掉子層 pressIn，故縮放回饋改由選單開合驅動
         const cardScale = useSharedValue(1);
@@ -134,16 +136,20 @@ const CourseCard = memo(
                 imageColor: black.third,
                 titleColor: black.third,
             },
-            {
-                id: 'official',
-                title: t('官方', { ns: 'catalog' }),
-                image: Platform.select({
-                    ios: 'graduationcap',
-                    android: 'ic_menu_info_details',
-                }),
-                imageColor: black.third,
-                titleColor: black.third,
-            },
+            ...(!isPostgraduate
+                ? [
+                    {
+                        id: 'official',
+                        title: t('官方', { ns: 'catalog' }),
+                        image: Platform.select({
+                            ios: 'graduationcap',
+                            android: 'ic_menu_info_details',
+                        }),
+                        imageColor: black.third,
+                        titleColor: black.third,
+                    },
+                ]
+                : []),
             ...(!isPreEnroll
                 ? [
                     {
@@ -156,16 +162,20 @@ const CourseCard = memo(
                         imageColor: black.third,
                         titleColor: black.third,
                     },
-                    {
-                        id: 'section',
-                        title: 'Section',
-                        image: Platform.select({
-                            ios: 'list.bullet',
-                            android: 'ic_menu_sort_by_size',
-                        }),
-                        imageColor: black.third,
-                        titleColor: black.third,
-                    },
+                    ...(!isHistoricalPeriod
+                        ? [
+                            {
+                                id: 'section',
+                                title: 'Section',
+                                image: Platform.select({
+                                    ios: 'list.bullet',
+                                    android: 'ic_menu_sort_by_size',
+                                }),
+                                imageColor: black.third,
+                                titleColor: black.third,
+                            },
+                        ]
+                        : []),
                 ]
                 : []),
         ];
@@ -248,12 +258,11 @@ const CourseCard = memo(
                         courseCode: courseCode,
                         action: 'section',
                     });
-                    navigation.navigate(
-                        'LocalCourse',
-                        sectionStatuses
-                            ? { courseCode, sectionStatuses }
-                            : courseCode,
-                    );
+                    navigation.navigate('LocalCourse', {
+                        courseCode,
+                        programmeLevel,
+                        ...(sectionStatuses ? {sectionStatuses} : {}),
+                    });
                     break;
                 }
                 default:

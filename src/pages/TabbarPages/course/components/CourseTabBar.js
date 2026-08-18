@@ -13,6 +13,7 @@ import CourseMoreMenu from './CourseMoreMenu';
  * 不疊在內容上（全透明會讓 Tab／搜尋列與課表卡片搶在一起）。
  */
 const CourseTabBar = ({
+    programmeLevel,
     catalogMetadata,
     onManualUpdate,
     onOpenSharePoint,
@@ -48,6 +49,7 @@ const CourseTabBar = ({
                     <MaterialTopTabBar {...tabBarProps} />
                 </View>
                 <CourseMoreMenu
+                    programmeLevel={programmeLevel}
                     catalogMetadata={catalogMetadata}
                     onManualUpdate={onManualUpdate}
                     onOpenSharePoint={onOpenSharePoint}

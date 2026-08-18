@@ -10,6 +10,7 @@ import { useTheme, uiStyle } from '../../../../components/ThemeContext';
 import { trigger } from '../../../../utils/trigger';
 import TouchableScale from '../../../../components/TouchableScale';
 import TimetableShareSheet from './TimetableShareSheet';
+import { PROGRAMME_LEVELS } from '../../../../utils/courseProgramme';
 
 /**
  * 選課頁次要操作選單（⋯）。
@@ -25,6 +26,7 @@ import TimetableShareSheet from './TimetableShareSheet';
  * @param {Function} onClearPress 清空模擬課表
  */
 const CourseMoreMenu = ({
+    programmeLevel,
     catalogMetadata,
     onManualUpdate,
     onOpenSharePoint,
@@ -107,6 +109,16 @@ const CourseMoreMenu = ({
     );
 
     const metadataSummary = useMemo(() => {
+        if (programmeLevel === PROGRAMME_LEVELS.postgraduate) {
+            const postgraduate = catalogMetadata?.postgraduate;
+            if (!postgraduate) {
+                return '';
+            }
+            return [
+                `${t('研究生課表數據日期版本: ', { ns: 'about' })}${postgraduate.updateTime}`,
+                `${postgraduate.academicYear} - Sem ${postgraduate.sem}`,
+            ].join('\n');
+        }
         const adddrop = catalogMetadata?.adddrop;
         const pre = catalogMetadata?.pre;
         if (!adddrop || !pre) {
@@ -119,7 +131,7 @@ const CourseMoreMenu = ({
             `${t('PreEnroll Data Version', { ns: 'about' })}${pre.updateTime}`,
             `${pre.academicYear} - Sem ${pre.sem}`,
         ].join('\n');
-    }, [catalogMetadata]);
+    }, [catalogMetadata, programmeLevel]);
 
     const handleOpenSheet = useCallback(() => {
         trigger();
@@ -215,18 +227,20 @@ const CourseMoreMenu = ({
                         </Text>
                     </TouchableScale>
 
-                    <TouchableScale
-                        style={styles.actionButton(tonal.primary15)}
-                        onPress={() => runAction(onOpenSharePoint)}>
-                        <Ionicons
-                            name="cloud-outline"
-                            size={scale(18)}
-                            color={themeColor}
-                        />
-                        <Text style={styles.actionButtonText(themeColor)}>
-                            {t('檢查官方SharePoint版本', { ns: 'catalog' })}
-                        </Text>
-                    </TouchableScale>
+                    {programmeLevel === PROGRAMME_LEVELS.postgraduate ? null : (
+                        <TouchableScale
+                            style={styles.actionButton(tonal.primary15)}
+                            onPress={() => runAction(onOpenSharePoint)}>
+                            <Ionicons
+                                name="cloud-outline"
+                                size={scale(18)}
+                                color={themeColor}
+                            />
+                            <Text style={styles.actionButtonText(themeColor)}>
+                                {t('檢查官方SharePoint版本', { ns: 'catalog' })}
+                            </Text>
+                        </TouchableScale>
+                    )}
 
                     <TouchableScale
                         style={styles.actionButton(tonal.primary08)}

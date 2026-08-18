@@ -36,6 +36,10 @@ import { trigger } from '../../../../utils/trigger.js';
 import { logToFirebase } from '../../../../utils/firebaseAnalytics.js';
 import { openLink } from '../../../../utils/browser.js';
 import { getLocalStorage } from '../../../../utils/storageKits.js';
+import {
+    getCourseWeekPlanStorageKey,
+} from '../../../../utils/courseProgramme';
+import { useProgrammeLevel } from '../../../../contexts/ProgrammeLevelContext';
 import { navigateToCourseTab } from '../../../../utils/courseNavigation.js';
 import { recordFeatureUsage } from '../../../../utils/featureRecentUsage';
 import { toastTextArr, toastKaomojiArr } from '../../../../static/UMARK_Assets/EasterEgg.js';
@@ -101,6 +105,7 @@ const HomeScreen = ({ navigation }) => {
     const { theme } = useTheme();
     const { white, bg_color, black, themeColor, themeColorLight, themeColorUltraLight, viewShadow, TIME_TABLE_COLOR } = theme;
     const { t, i18n } = useTranslation(['common', 'home']);
+    const { programmeLevel } = useProgrammeLevel();
     const { width: windowWidth } = useWindowDimensions();
     const isTc = i18n.language === 'tc';
     const featureFontSize = isTc ? verticalScale(8) : verticalScale(7);
@@ -212,7 +217,7 @@ const HomeScreen = ({ navigation }) => {
             if (toastTimer.current) {clearTimeout(toastTimer.current);}
             if (appStateListener.current) {appStateListener.current.remove();}
         };
-    }, []);
+    }, [programmeLevel]);
 
     // 其餘方法轉為函式
     // App 從背景回到前景時：更新 App 資訊、曆與下節課，但不自動重打活動 API，
@@ -334,7 +339,9 @@ const HomeScreen = ({ navigation }) => {
     const getUpcomingCourse = async () => {
         try {
             const now = moment(new Date());
-            const s_allCourseAllTime = await getLocalStorage('ARK_WeekTimetable_Storage');
+            const s_allCourseAllTime = await getLocalStorage(
+                getCourseWeekPlanStorageKey(programmeLevel),
+            );
             const curTime = moment().format('HH:mm');
             const curDay = now.format('ddd').toUpperCase();
 

@@ -1,19 +1,28 @@
 import React, { useState } from 'react';
-import { FlatList, LayoutAnimation, Switch, View } from 'react-native';
+import { ActivityIndicator, FlatList, LayoutAnimation, Switch, View } from 'react-native';
 import { scale, verticalScale } from 'react-native-size-matters';
 import { t } from 'i18next';
 import Ionicons from "@react-native-vector-icons/ionicons";
+import { MenuView } from '@react-native-menu/menu';
 import Text from '../../../../../../components/AppText';
 import { uiStyle } from '../../../../../../components/ThemeContext';
 import TouchableScale from '../../../../../../components/TouchableScale';
 import CourseTimeRangePicker from '../../../components/CourseTimeRangePicker';
 import { TIME_RANGE_PRESETS } from '../../../constants';
-import { DEFAULT_TIME_FROM, DEFAULT_TIME_TO, defaultTimeFilter } from '../constants/options';
+import {
+    DEPARTMENT_ALL,
+    DEPARTMENT_UNSPECIFIED,
+    DEFAULT_TIME_FROM,
+    DEFAULT_TIME_TO,
+    defaultTimeFilter,
+} from '../constants/options';
+import { PROGRAMME_LEVELS } from '../../../../../../utils/courseProgramme';
 
 const FLAT_LIST_STYLE = { flexGrow: 0 };
 
 /**
  * 篩選面板
+ * - 課表模式：本科 / 研究生（點擊前往設置）；與歷史課表選擇器獨佔一行，Pre Enroll 不顯示
  * - 模式切換：Add Drop / Pre Enroll
  * - 類型切換：CMRE / GE
  * - 學院 / 學系 / GE 細分
@@ -22,6 +31,7 @@ const FLAT_LIST_STYLE = { flexGrow: 0 };
  */
 const FilterPanel = ({
     theme,
+    programmeLevel,
     courseMode,
     filterOptions,
     offerFacultyList,
@@ -36,14 +46,23 @@ const FilterPanel = ({
     dayList,
     timeFilter = defaultTimeFilter,
     recommendationOnly = false,
+    coursePeriodOptions = [],
+    activeCoursePeriod,
+    isHistoricalPeriod = false,
+    historicalCatalogStatus = 'idle',
     onUpdateFilterOptions,
     onUpdateTimeFilter,
     onToggleRecommendation,
     onSetCourseMode,
+    onSelectCoursePeriod,
+    onPressProgrammeLevel,
     trigger,
 }) => {
-    const { themeColor, secondThemeColor, black, white, tonal } = theme;
-    const activeColor = courseMode === 'ad' ? themeColor : secondThemeColor;
+    const { themeColor, secondThemeColor, black, white, tonal, warning } = theme;
+    const isPostgraduate = programmeLevel === PROGRAMME_LEVELS.postgraduate;
+    const activeColor = isPostgraduate || courseMode === 'ad'
+        ? themeColor
+        : secondThemeColor;
     const activeBackgroundColor = `${activeColor}15`;
 
     const [showTimePicker, setShowTimePicker] = useState(false);
@@ -62,6 +81,118 @@ const FilterPanel = ({
         alignSelf: 'center',
         marginLeft: scale(5),
         textAlign: 'center',
+    };
+
+    const programmeLevelLabel = isPostgraduate
+        ? t('研究生', { ns: 'catalog' })
+        : t('本科', { ns: 'catalog' });
+
+    const renderProgrammeLevelChip = () => (
+        <TouchableScale
+            style={{
+                ...classItmStyle,
+                marginHorizontal: 0,
+                flexDirection: 'row',
+                alignItems: 'center',
+                paddingHorizontal: scale(5),
+                paddingVertical: verticalScale(2),
+                backgroundColor: tonal.primary15,
+            }}
+            hitSlop={{ top: scale(8), bottom: scale(8), left: scale(8), right: scale(8) }}
+            onPress={() => {
+                trigger();
+                onPressProgrammeLevel();
+            }}
+            accessibilityRole="button"
+            accessibilityLabel={programmeLevelLabel}
+            accessibilityHint={t('前往設置切換課表模式', { ns: 'catalog' })}
+        >
+            <Text style={{
+                ...uiStyle.defaultText,
+                color: themeColor,
+                fontWeight: '900',
+                fontSize: scale(12),
+            }}>
+                {programmeLevelLabel}
+            </Text>
+            <Ionicons
+                name="chevron-forward"
+                size={scale(12)}
+                color={themeColor}
+                style={{ marginLeft: scale(1) }}
+            />
+        </TouchableScale>
+    );
+
+    const renderCoursePeriodSelector = () => {
+        if (!activeCoursePeriod || coursePeriodOptions.length === 0) {
+            return null;
+        }
+
+        const periodLabel = `${activeCoursePeriod.academicYear} · S${activeCoursePeriod.sem}`;
+        const actions = coursePeriodOptions.map(period => ({
+            id: period.id,
+            title: t('{{academicYear}} 第{{sem}}學期', {
+                ns: 'catalog',
+                academicYear: period.academicYear,
+                sem: period.sem,
+            }),
+            state: period.id === activeCoursePeriod.id ? 'on' : 'off',
+        }));
+
+        return (
+            <MenuView
+                actions={actions}
+                onPressAction={event => {
+                    trigger();
+                    onSelectCoursePeriod(event.nativeEvent.event);
+                }}
+                onOpenMenu={() => trigger('rigid')}
+                shouldOpenOnLongPress={false}
+                accessibilityLabel={t('切換學年及學期', { ns: 'catalog' })}>
+                <View style={{
+                    ...classItmStyle,
+                    marginHorizontal: 0,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    paddingHorizontal: scale(6),
+                    paddingVertical: verticalScale(2),
+                    borderColor: isHistoricalPeriod ? warning : themeColor,
+                    backgroundColor: isHistoricalPeriod
+                        ? `${warning}15`
+                        : tonal.primary15,
+                }}>
+                    {historicalCatalogStatus === 'loading' ? (
+                        <ActivityIndicator
+                            size="small"
+                            color={warning}
+                            style={{ marginRight: scale(3), transform: [{ scale: 0.7 }] }}
+                        />
+                    ) : (
+                        <Ionicons
+                            name={isHistoricalPeriod ? 'time-outline' : 'calendar-outline'}
+                            size={scale(12)}
+                            color={isHistoricalPeriod ? warning : themeColor}
+                            style={{ marginRight: scale(3) }}
+                        />
+                    )}
+                    <Text style={{
+                        ...uiStyle.defaultText,
+                        color: isHistoricalPeriod ? warning : themeColor,
+                        fontWeight: '900',
+                        fontSize: scale(11),
+                    }}>
+                        {periodLabel}
+                    </Text>
+                    <Ionicons
+                        name="chevron-down"
+                        size={scale(11)}
+                        color={isHistoricalPeriod ? warning : themeColor}
+                        style={{ marginLeft: scale(2) }}
+                    />
+                </View>
+            </MenuView>
+        );
     };
 
     const renderADPESwitch = () => {
@@ -177,10 +308,7 @@ const FilterPanel = ({
                     onPress={() => {
                         trigger();
                         const nextFilterOptions = { ...filterOptions, facultyName: item };
-                        const depaList = offerFacultyDepaListObj[item] || [];
-                        if (depaList.length > 0) {
-                            nextFilterOptions.depaName = depaList[0];
-                        }
+                        nextFilterOptions.depaName = DEPARTMENT_ALL;
                         onUpdateFilterOptions(nextFilterOptions);
                     }}
                 >
@@ -196,7 +324,7 @@ const FilterPanel = ({
             )}
             ListHeaderComponent={() => (
                 <Text style={classItmTitleTextStyle}>
-                    {unitMap[filterOptions.facultyName]}
+                    {unitMap[filterOptions.facultyName] || filterOptions.facultyName}
                 </Text>
             )}
             scrollEnabled={false}
@@ -231,7 +359,11 @@ const FilterPanel = ({
                         fontWeight: filterOptions.depaName === item ? '900' : 'normal',
                         fontSize: scale(12),
                     }}>
-                        {item}
+                        {item === DEPARTMENT_ALL
+                            ? t('全部', { ns: 'catalog' })
+                            : item === DEPARTMENT_UNSPECIFIED
+                                ? t('未指定學系', { ns: 'catalog' })
+                                : item}
                     </Text>
                 </TouchableScale>
             )}
@@ -508,12 +640,26 @@ const FilterPanel = ({
             marginHorizontal: scale(10),
             padding: scale(5),
         }}>
-            {renderADPESwitch()}
-            <View style={{ width: '100%', marginTop: scale(10) }}>
-                {renderCMGESwitch()}
-            </View>
+            {courseMode === 'preEnroll' ? null : (
+                <View style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    width: '100%',
+                    marginBottom: scale(4),
+                }}>
+                    {renderProgrammeLevelChip()}
+                    {renderCoursePeriodSelector()}
+                </View>
+            )}
+            {isPostgraduate || isHistoricalPeriod ? null : renderADPESwitch()}
+            {isPostgraduate ? null : (
+                <View style={{ width: '100%', marginTop: scale(10) }}>
+                    {renderCMGESwitch()}
+                </View>
+            )}
 
-            {filterOptions.option === 'GE' ? (
+            {!isPostgraduate && filterOptions.option === 'GE' ? (
                 <View style={{ marginTop: scale(5), alignItems: 'center', width: '100%' }}>
                     <Text style={classItmTitleTextStyle}>
                         {geClassMap[filterOptions.GE]}
@@ -550,7 +696,9 @@ const FilterPanel = ({
                     {renderFacultySwitch()}
                     {offerDepaList.length > 0 ? (
                         <View style={{ alignItems: 'center', justifyContent: 'center', marginVertical: scale(10) }}>
-                            {filterOptions.depaName in depaMap ? (
+                            {filterOptions.depaName !== DEPARTMENT_ALL &&
+                            filterOptions.depaName !== DEPARTMENT_UNSPECIFIED &&
+                            filterOptions.depaName in depaMap ? (
                                 <Text style={{ ...classItmTitleTextStyle, marginBottom: scale(-5) }}>
                                     {depaMap[filterOptions.depaName]}
                                 </Text>
@@ -561,7 +709,7 @@ const FilterPanel = ({
                 </View>
             )}
 
-            {courseMode === 'preEnroll' ? null : (
+            {!isPostgraduate && courseMode === 'preEnroll' ? null : (
                 <View style={{ marginTop: scale(5), width: '100%', alignItems: 'center' }}>
                     <Text style={classItmTitleTextStyle}>
                         {t('上課星期與時段', { ns: 'catalog' })}
@@ -570,7 +718,9 @@ const FilterPanel = ({
                     {timeFilter.day ? renderTimeRangeFilter() : null}
                 </View>
             )}
-            {courseMode === 'preEnroll' ? null : renderRecommendationFilter()}
+            {!isPostgraduate && courseMode === 'preEnroll'
+                ? null
+                : renderRecommendationFilter()}
         </View>
     );
 };

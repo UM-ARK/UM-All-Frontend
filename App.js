@@ -19,6 +19,7 @@ import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { HarborSessionProvider } from './src/contexts/HarborSessionContext';
 import { SchedulingSessionProvider } from './src/contexts/SchedulingSessionContext';
 import { AppShareProvider } from './src/contexts/AppShareContext';
+import { ProgrammeLevelProvider } from './src/contexts/ProgrammeLevelContext';
 
 const { width: PAGE_WIDTH } = Dimensions.get('window');
 const LOGO_WIDTH = PAGE_WIDTH * 0.5;
@@ -174,13 +175,15 @@ const App = () => {
         <SafeAreaProvider>
             <KeyboardProvider>
                 <ThemeProvider>
-                    <HarborSessionProvider>
-                        <AppShareProvider>
-                            <SchedulingSessionProvider>
-                                <Nav />
-                            </SchedulingSessionProvider>
-                        </AppShareProvider>
-                    </HarborSessionProvider>
+                    <ProgrammeLevelProvider>
+                        <HarborSessionProvider>
+                            <AppShareProvider>
+                                <SchedulingSessionProvider>
+                                    <Nav />
+                                </SchedulingSessionProvider>
+                            </AppShareProvider>
+                        </HarborSessionProvider>
+                    </ProgrammeLevelProvider>
                 </ThemeProvider>
                 <Toast config={toastConfig} />
             </KeyboardProvider>
