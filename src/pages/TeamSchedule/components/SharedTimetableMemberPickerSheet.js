@@ -162,7 +162,7 @@ const SharedTimetableMemberPickerSheet = ({
                             key === String(myHarborUserId);
                         const selected = key === String(selectedId);
                         const avatarUri = item.avatarTemplate
-                            ? ARK_HARBOR_AVATAR_TEMPLATE(item.avatarTemplate, 96)
+                            ? ARK_HARBOR_AVATAR_TEMPLATE(item.avatarTemplate)
                             : null;
                         return (
                             <Pressable

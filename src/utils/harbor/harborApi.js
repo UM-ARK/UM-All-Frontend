@@ -377,7 +377,7 @@ function normalizeUser(user) {
         username,
         name: user.name || '',
         avatarUrl: avatarTemplate
-            ? ARK_HARBOR_AVATAR_TEMPLATE(avatarTemplate, 96)
+            ? ARK_HARBOR_AVATAR_TEMPLATE(avatarTemplate)
             : user.avatar_url || null,
         trustLevel: toNumberOrNull(user.trust_level),
         isAdmin: Boolean(user.admin),
@@ -1117,7 +1117,7 @@ function normalizeReactionReceived(item, index) {
         postNumber: Number(post.post_number) || null,
         actingUsername: actor.username || '',
         avatarUrl: avatarTemplate
-            ? ARK_HARBOR_AVATAR_TEMPLATE(avatarTemplate, 72)
+            ? ARK_HARBOR_AVATAR_TEMPLATE(avatarTemplate)
             : '',
         reactionValue:
             typeof reaction.reaction_value === 'string'
@@ -1509,7 +1509,7 @@ function normalizeProfile(
             ? currentUnreadMessages
             : Number(matchingPreviousUser?.unreadMessages || 0),
         avatarUrl: avatarTemplate
-            ? ARK_HARBOR_AVATAR_TEMPLATE(avatarTemplate, 144)
+            ? ARK_HARBOR_AVATAR_TEMPLATE(avatarTemplate)
             : matchingPreviousUser?.avatarUrl || null,
         canChat:
             profile.can_chat !== false &&

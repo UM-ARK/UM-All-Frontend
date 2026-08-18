@@ -101,7 +101,13 @@ export function ARK_HARBOR_UPLOAD_URL(url) {
         : absoluteUrl;
 }
 
-export function ARK_HARBOR_AVATAR_TEMPLATE(avatarTemplate, size = 96) {
+// Harbor 頭像統一解析尺寸，讓 expo-image 跨頁共用磁碟快取
+export const ARK_HARBOR_AVATAR_SIZE = 96;
+
+export function ARK_HARBOR_AVATAR_TEMPLATE(
+    avatarTemplate,
+    size = ARK_HARBOR_AVATAR_SIZE,
+) {
     if (!avatarTemplate || typeof avatarTemplate !== 'string') {
         return '';
     }
@@ -110,7 +116,7 @@ export function ARK_HARBOR_AVATAR_TEMPLATE(avatarTemplate, size = 96) {
     );
 }
 
-export function ARK_HARBOR_AVATAR(username, size = 96) {
+export function ARK_HARBOR_AVATAR(username, size = ARK_HARBOR_AVATAR_SIZE) {
     if (!username || typeof username !== 'string') {
         return '';
     }

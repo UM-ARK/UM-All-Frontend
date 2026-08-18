@@ -129,7 +129,7 @@ const HarborTopicCard = ({
     const avatarUrl =
         author.avatarUrl ||
         (avatarTemplate
-            ? ARK_HARBOR_AVATAR_TEMPLATE(avatarTemplate, 72)
+            ? ARK_HARBOR_AVATAR_TEMPLATE(avatarTemplate)
             : null);
     const coverUrl = topic.imageUrl
         ? ARK_HARBOR_ABSOLUTE_URL(topic.imageUrl)

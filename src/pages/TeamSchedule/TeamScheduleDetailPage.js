@@ -1797,7 +1797,6 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                             const avatarUri = member.avatarTemplate
                                 ? ARK_HARBOR_AVATAR_TEMPLATE(
                                       member.avatarTemplate,
-                                      72,
                                   )
                                 : null;
                             const canOpenProfile = Boolean(member.username);

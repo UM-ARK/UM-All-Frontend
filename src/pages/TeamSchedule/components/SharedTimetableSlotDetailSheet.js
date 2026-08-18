@@ -116,7 +116,6 @@ const SharedTimetableSlotDetailSheet = ({
                                 const avatarUri = member.avatarTemplate
                                     ? ARK_HARBOR_AVATAR_TEMPLATE(
                                           member.avatarTemplate,
-                                          72,
                                       )
                                     : null;
                                 return (

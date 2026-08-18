@@ -285,7 +285,6 @@ const SlotDetailSheet = ({
                                                         member.avatarTemplate
                                                             ? ARK_HARBOR_AVATAR_TEMPLATE(
                                                                   member.avatarTemplate,
-                                                                  48,
                                                               )
                                                             : null;
                                                     const canOpenProfile =
@@ -452,7 +451,6 @@ const SlotDetailSheet = ({
                                     const avatarUri = member.avatarTemplate
                                         ? ARK_HARBOR_AVATAR_TEMPLATE(
                                               member.avatarTemplate,
-                                              72,
                                           )
                                         : null;
                                     const canOpenProfile = Boolean(

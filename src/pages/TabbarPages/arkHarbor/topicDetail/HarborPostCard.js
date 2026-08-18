@@ -40,8 +40,6 @@ import {
 } from './harborTopicModels';
 import styles from './styles';
 
-const AVATAR_SIZE = 60;
-const NESTED_AVATAR_SIZE = 40;
 // 24 小時內顯示相對時間（分鐘／小時前）
 const RECENT_POST_HOURS = 24;
 
@@ -212,10 +210,7 @@ const HarborPostCard = memo(
             post.topic_id,
             post.post_number,
         );
-        const avatarUrl = ARK_HARBOR_AVATAR_TEMPLATE(
-            post.avatar_template,
-            isNestedReply ? NESTED_AVATAR_SIZE : AVATAR_SIZE,
-        );
+        const avatarUrl = ARK_HARBOR_AVATAR_TEMPLATE(post.avatar_template);
         const displayName =
             post.username || post.display_username || t('Harbor 會員');
         const wasEdited =
