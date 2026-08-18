@@ -809,7 +809,10 @@ const HarborTopicDetail = ({ route, navigation }) => {
                         }
                         nestedRepliesLoading={
                             pendingNestedPostNumbers.includes(
-                                Number(item.post_number),
+                                Number(
+                                    item.__harborNestedTogglePost
+                                        ?.post_number || item.post_number,
+                                ),
                             )
                         }
                         nestedReplyCount={

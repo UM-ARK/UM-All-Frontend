@@ -269,6 +269,7 @@
         "標籤": "Tags",
         "探索": "Explore",
         "討論話題": "Discussion Topics",
+        "即時聊天": "Live Chat",
         "Harbor 職涯港": "Harbor",
         "求職、提問、校友、應有盡有！": "Jobs, Q&A, alumni—everything you need!",
         "我的貼文": "My Posts",
@@ -585,7 +586,8 @@
         "ARK ALL · 組隊約時間": "ARK ALL · Team scheduling",
         "組隊活動": "Team event",
         "查看活動詳情與共享課表": "View event details and shared timetables",
-        "在 ARK ALL 內開啟": "Open in ARK ALL"
+        "在 ARK ALL 內開啟": "Open in ARK ALL",
+        "查看個人檔案": "View profile"
     },
     "my": {
         "個人中心": "Profile",

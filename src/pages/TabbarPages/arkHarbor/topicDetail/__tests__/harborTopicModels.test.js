@@ -396,12 +396,12 @@ describe('Nested Replies 資料模型', () => {
             })),
         ).toEqual([
             {depth: 0, id: 1, replyCount: 0, visibleReplyCount: 0},
-            {depth: 0, id: 2, replyCount: 6, visibleReplyCount: 5},
+            {depth: 0, id: 2, replyCount: 0, visibleReplyCount: 0},
             {depth: 1, id: 3, replyCount: 0, visibleReplyCount: 0},
             {depth: 2, id: 4, replyCount: 0, visibleReplyCount: 0},
             {depth: 2, id: 5, replyCount: 0, visibleReplyCount: 0},
             {depth: 2, id: 6, replyCount: 0, visibleReplyCount: 0},
-            {depth: 2, id: 7, replyCount: 0, visibleReplyCount: 0},
+            {depth: 2, id: 7, replyCount: 6, visibleReplyCount: 5},
         ]);
     });
 
@@ -422,20 +422,24 @@ describe('Nested Replies 資料模型', () => {
         );
 
         expect(flattened.map(post => post.id)).toEqual([1, 2, 3, 4]);
-        expect(flattened[1].__harborNestedReplyPreviewCount).toBe(2);
-        expect(flattened[1].__harborNestedVisibleReplyCount).toBe(2);
+        expect(flattened[1].__harborNestedReplyCount).toBe(0);
+        expect(flattened[3].__harborNestedReplyPreviewCount).toBe(2);
+        expect(flattened[3].__harborNestedVisibleReplyCount).toBe(2);
+        expect(flattened[3].__harborNestedTogglePost?.id).toBe(2);
     });
 
     it('十則評論起維持樓中樓預設收合', () => {
         expect(getNestedReplyPreviewLimit(10)).toBe(2);
         expect(getNestedReplyPreviewLimit(11)).toBe(0);
-        expect(
-            flattenNestedPosts(
-                posts,
-                new Map(),
-                getNestedReplyPreviewLimit(11),
-            ).map(post => post.id),
-        ).toEqual([1, 2]);
+        const collapsed = flattenNestedPosts(
+            posts,
+            new Map(),
+            getNestedReplyPreviewLimit(11),
+        );
+        expect(collapsed.map(post => post.id)).toEqual([1, 2]);
+        expect(collapsed[1].__harborNestedReplyCount).toBe(6);
+        expect(collapsed[1].__harborNestedVisibleReplyCount).toBe(0);
+        expect(collapsed[1].__harborNestedTogglePost).toBeUndefined();
     });
 
     it('可在巢狀子樹中更新指定貼文而不改動其他分支', () => {

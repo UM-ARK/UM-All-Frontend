@@ -21,9 +21,10 @@ import { trigger } from '../../../../../utils/trigger';
 import { logToFirebase } from '../../../../../utils/firebaseAnalytics';
 import { openLink } from '../../../../../utils/browser';
 import { getLocalStorage, setLocalStorage } from '../../../../../utils/storageKits';
-import { USER_AGREE, ARK_WIKI_SEARCH, OFFICIAL_COURSE_SEARCH } from '../../../../../utils/pathMap';
+import { USER_AGREE, OFFICIAL_COURSE_SEARCH } from '../../../../../utils/pathMap';
 import { refreshUmehHost, useUmehHost } from '../../../../../utils/umehHost';
 import { COURSE_TIMETABLE_SEGMENT } from '../../../../../utils/courseNavigation';
+import { navigateToWikiSearch } from '../../../../../utils/wikiNavigation';
 import { useCoursePlan } from '../../context/CoursePlanContext';
 import PlanCapsule from '../../components/PlanCapsule';
 
@@ -364,9 +365,20 @@ const What2Reg = () => {
     const onPressSearchAction = useCallback(eventId => {
         trigger();
         switch (eventId) {
+            case 'harbor-discuss': {
+                logToFirebase('checkCourse', {
+                    courseCode: inputText,
+                    action: 'harbor-discuss',
+                });
+                navigation.navigate('HarborSearch', { query: inputText });
+                break;
+            }
             case 'wiki': {
-                const url = ARK_WIKI_SEARCH + encodeURIComponent(inputText);
-                openLink(url);
+                logToFirebase('checkCourse', {
+                    courseCode: inputText,
+                    action: 'ark-wiki',
+                });
+                navigateToWikiSearch(navigation, inputText, { autoOpenUnique: true });
                 break;
             }
             case 'what2reg': {
@@ -383,7 +395,7 @@ const What2Reg = () => {
             default:
                 break;
         }
-    }, [inputText, searchHost]);
+    }, [inputText, navigation, searchHost]);
 
     const onClearInput = useCallback(() => {
         trigger();
@@ -392,10 +404,6 @@ const What2Reg = () => {
             textInputRef.current?.focus();
         }, 0);
     }, [clearInput]);
-
-    const onPressSearchButton = useCallback(() => {
-        trigger();
-    }, []);
 
     const handleUserAgreePress = useCallback(() => {
         trigger();
@@ -483,7 +491,6 @@ const What2Reg = () => {
                     onChangeText={setInputText}
                     onClear={onClearInput}
                     onPressAction={onPressSearchAction}
-                    onPressSearchButton={onPressSearchButton}
                     trigger={trigger}
                 />
 
@@ -556,17 +563,14 @@ const What2Reg = () => {
                     <Text style={{ ...uiStyle.defaultText, fontSize: scale(9), color: black.third }}>
                         數據日期版本: {courseMode === 'ad' ? catalogMetadata.adddrop.updateTime : catalogMetadata.pre.updateTime}
                     </Text>
-                    <Text style={{ ...uiStyle.defaultText, fontSize: scale(9), color: themeColor }}>
-                        記得提醒開發者最新Excel課表版本
-                    </Text>
-                    <Text style={{ ...uiStyle.defaultText, fontSize: scale(9), color: themeColor }} selectable>
-                        遇到BUG可聯繫umacark@gmail.com
-                    </Text>
                 </View>
 
                 <View style={{ margin: scale(10), padding: scale(10), alignItems: 'center' }}>
                     <Text style={{ ...uiStyle.defaultText, color: black.third, fontSize: scale(12) }}>
                         知識無價，評論只供參考
+                    </Text>
+                    <Text style={{ ...uiStyle.defaultText, color: black.third, fontSize: scale(12) }}>
+                        選咩課與ARK ALL是兩個獨立項目
                     </Text>
                 </View>
 

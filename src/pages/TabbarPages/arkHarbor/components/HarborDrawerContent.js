@@ -26,6 +26,7 @@ import { useTranslation } from 'react-i18next';
 
 import Text from '../../../../components/AppText';
 import { uiStyle, useTheme } from '../../../../components/ThemeContext';
+import { useHarborSession } from '../../../../contexts/HarborSessionContext';
 import { openLink } from '../../../../utils/browser';
 import { logToFirebase } from '../../../../utils/firebaseAnalytics';
 import {
@@ -343,6 +344,7 @@ const DrawerSectionTitle = ({
 const HarborDrawerContent = ({ navigation }) => {
     const { theme } = useTheme();
     const { t } = useTranslation('harbor');
+    const { status, sessionGeneration } = useHarborSession();
     const insets = useSafeAreaInsets();
     // 抽屜在 Tab 內：底部需避開浮動 Tabbar，避免末項被遮擋
     const tabBarHeight =
@@ -379,8 +381,11 @@ const HarborDrawerContent = ({ navigation }) => {
             if (!controller.signal.aborted) {
                 setCategories(response.items);
             }
-        } catch {
-            if (!controller.signal.aborted) {
+        } catch (error) {
+            if (
+                !controller.signal.aborted &&
+                error?.code !== 'ERR_CANCELED'
+            ) {
                 setLoadError(true);
             }
         } finally {
@@ -392,9 +397,16 @@ const HarborDrawerContent = ({ navigation }) => {
     }, []);
 
     useEffect(() => {
+        if (status === 'restoring') {
+            return;
+        }
+        const currentCache = readCachedHarborCategories();
+        setCategories(currentCache?.items || []);
+        setIsLoading(!currentCache?.items);
+        setLoadError(false);
         loadCategories();
         return () => controllerRef.current?.abort();
-    }, [loadCategories]);
+    }, [loadCategories, sessionGeneration, status]);
 
     const categoryRows = useMemo(
         () => buildHarborCategoryRows(categories, collapsedCategoryIds),
@@ -415,6 +427,11 @@ const HarborDrawerContent = ({ navigation }) => {
         navigation.closeDrawer();
         navigation.navigate('MyTabbar');
     }, [navigation]);
+
+    const handleChatPress = useCallback(() => {
+        logToFirebase('harbor_drawer_chat', {});
+        navigateFromDrawer('HarborChatList');
+    }, [navigateFromDrawer]);
 
     const handleCategoryPress = useCallback(
         category => {
@@ -544,6 +561,11 @@ const HarborDrawerContent = ({ navigation }) => {
                         onPress={handleMyPress}
                     />
                     <DrawerMenuItem
+                        icon="chat-outline"
+                        label={t('即時聊天')}
+                        onPress={handleChatPress}
+                    />
+                    <DrawerMenuItem
                         icon="file-document-edit-outline"
                         label={t('草稿箱')}
                         onPress={() => navigateFromDrawer('HarborDrafts')}
@@ -578,6 +600,7 @@ const HarborDrawerContent = ({ navigation }) => {
         ),
         [
             categories.length,
+            handleChatPress,
             handleMyPress,
             isCategoriesExpanded,
             loadCategories,

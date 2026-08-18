@@ -518,20 +518,44 @@ const flattenNestedPosts = (
             0,
             requestedReplyLimit,
         );
-        flattened.push({
-            ...post,
-            __harborNestedDepth: 0,
+        // 已有可見樓中樓時，展開按鈕改掛在最後一則可見回覆下方
+        const nestedMeta = {
             __harborNestedReplyCount: nestedReplyCount,
             __harborNestedReplyPreviewCount: defaultPostReplyLimit,
             __harborNestedVisibleReplyCount: visibleDescendants.length,
-        });
-        visibleDescendants.forEach(descendant => {
+        };
+        const parentItem = {
+            ...post,
+            __harborNestedDepth: 0,
+            ...nestedMeta,
+        };
+        const hasVisibleDescendants = visibleDescendants.length > 0;
+        flattened.push(
+            hasVisibleDescendants
+                ? {
+                    ...parentItem,
+                    __harborNestedReplyCount: 0,
+                    __harborNestedReplyPreviewCount: 0,
+                    __harborNestedVisibleReplyCount: 0,
+                }
+                : parentItem,
+        );
+        visibleDescendants.forEach((descendant, index) => {
+            const isLastVisible =
+                index === visibleDescendants.length - 1;
             flattened.push({
                 ...descendant.post,
                 __harborNestedDepth: descendant.depth,
-                __harborNestedReplyCount: 0,
-                __harborNestedReplyPreviewCount: 0,
-                __harborNestedVisibleReplyCount: 0,
+                ...(isLastVisible
+                    ? {
+                        ...nestedMeta,
+                        __harborNestedTogglePost: parentItem,
+                    }
+                    : {
+                        __harborNestedReplyCount: 0,
+                        __harborNestedReplyPreviewCount: 0,
+                        __harborNestedVisibleReplyCount: 0,
+                    }),
             });
         });
     });
