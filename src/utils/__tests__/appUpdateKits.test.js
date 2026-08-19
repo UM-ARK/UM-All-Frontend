@@ -9,10 +9,9 @@ import {
     openAppUpdateUrl,
     showAppStoreUpdateAlert,
 } from '../appUpdateKits';
-import {openLink} from '../browser';
 import {
     APPSTORE_URL,
-    ARK_APP_LINK,
+    BASE_HOST,
     GITHUB_RELEASE_URL,
     PLAYSTORE_URL,
 } from '../pathMap';
@@ -24,9 +23,6 @@ jest.mock('expo-device', () => ({
     brand: 'google',
     manufacturer: 'Google',
     modelName: 'Pixel 8',
-}));
-jest.mock('../browser', () => ({
-    openLink: jest.fn(() => Promise.resolve()),
 }));
 jest.mock('../trigger', () => ({
     trigger: jest.fn(),
@@ -60,7 +56,7 @@ describe('getAppUpdateChannels', () => {
             platform: 'android',
             huaweiLike: false,
         }).map(item => item.url);
-        expect(urls).toEqual([PLAYSTORE_URL, ARK_APP_LINK, GITHUB_RELEASE_URL]);
+        expect(urls).toEqual([PLAYSTORE_URL, BASE_HOST, GITHUB_RELEASE_URL]);
     });
 
     it('華為裝置隱藏 Play Store 並以官網為先', () => {
@@ -68,7 +64,7 @@ describe('getAppUpdateChannels', () => {
             platform: 'android',
             huaweiLike: true,
         }).map(item => item.url);
-        expect(urls).toEqual([ARK_APP_LINK, GITHUB_RELEASE_URL]);
+        expect(urls).toEqual([BASE_HOST, GITHUB_RELEASE_URL]);
     });
 });
 
@@ -99,37 +95,40 @@ describe('openAppUpdateUrl', () => {
     it('商店連結優先使用系統 Intent', async () => {
         await openAppUpdateUrl(PLAYSTORE_URL);
         expect(Linking.openURL).toHaveBeenCalledWith(PLAYSTORE_URL);
-        expect(openLink).not.toHaveBeenCalled();
+        expect(Linking.openURL).toHaveBeenCalledTimes(1);
     });
 
-    it('商店 Intent 失敗時改開官網下載頁', async () => {
+    it('商店 Intent 失敗時改開官網', async () => {
         Platform.OS = 'android';
         Linking.openURL.mockRejectedValueOnce(new Error('no play store'));
         await openAppUpdateUrl(PLAYSTORE_URL);
-        expect(openLink).toHaveBeenCalledWith(ARK_APP_LINK);
+        expect(Linking.openURL).toHaveBeenNthCalledWith(1, PLAYSTORE_URL);
+        expect(Linking.openURL).toHaveBeenNthCalledWith(2, BASE_HOST);
     });
 
-    it('官網與 GitHub 走 openLink', async () => {
-        await openAppUpdateUrl(ARK_APP_LINK);
-        expect(Linking.openURL).not.toHaveBeenCalled();
-        expect(openLink).toHaveBeenCalledWith(ARK_APP_LINK);
+    it('官網與 GitHub 走系統瀏覽器', async () => {
+        await openAppUpdateUrl(BASE_HOST);
+        expect(Linking.openURL).toHaveBeenCalledWith(BASE_HOST);
+        await openAppUpdateUrl(GITHUB_RELEASE_URL);
+        expect(Linking.openURL).toHaveBeenCalledWith(GITHUB_RELEASE_URL);
     });
 
-    it('openLink 也失敗時提示手動開啟', async () => {
+    it('系統瀏覽器也失敗時提示手動開啟', async () => {
         Platform.OS = 'android';
-        openLink.mockRejectedValueOnce(new Error('no browser'));
-        await openAppUpdateUrl(ARK_APP_LINK);
+        Linking.openURL.mockRejectedValue(new Error('no browser'));
+        await openAppUpdateUrl(BASE_HOST);
         expect(Alert.alert).toHaveBeenCalledWith(
             '無法開啟連結',
-            expect.stringContaining(ARK_APP_LINK),
+            expect.stringContaining(BASE_HOST),
         );
     });
 });
 
 describe('showAppStoreUpdateAlert', () => {
-    it('Android 按 Yes 開啟官網 APK 頁', async () => {
+    it('Android 按 Yes 開啟官網', async () => {
         Platform.OS = 'android';
         Alert.alert = jest.fn();
+        Linking.openURL = jest.fn(() => Promise.resolve());
         showAppStoreUpdateAlert({
             app_version: '26.8.5',
             version_info: 'fix',
@@ -137,6 +136,6 @@ describe('showAppStoreUpdateAlert', () => {
         const buttons = Alert.alert.mock.calls[0][2];
         const yes = buttons.find(button => button.text === 'Yes');
         await yes.onPress();
-        expect(openLink).toHaveBeenCalledWith(ARK_APP_LINK);
+        expect(Linking.openURL).toHaveBeenCalledWith(BASE_HOST);
     });
 });

@@ -2,8 +2,7 @@ import { Alert, Linking, Platform } from 'react-native';
 import axios from 'axios';
 import * as Application from 'expo-application';
 import * as Device from 'expo-device';
-import { APPSTORE_URL, ARK_APP_LINK, BASE_URI, GET, GITHUB_RELEASE_URL, PLAYSTORE_URL } from './pathMap';
-import { openLink } from './browser';
+import { APPSTORE_URL, BASE_HOST, BASE_URI, GET, GITHUB_RELEASE_URL, PLAYSTORE_URL } from './pathMap';
 import { versionStringCompare } from './versionKits';
 import { trigger } from './trigger';
 
@@ -88,7 +87,7 @@ export function getAppUpdateChannels(options = {}) {
         label: '官網 APK',
         detail: '從 ARK ALL 官網下載安裝，適用華為等無 Google 服務裝置',
         icon: 'globe-outline',
-        url: ARK_APP_LINK,
+        url: BASE_HOST,
     };
     const github = {
         label: 'GitHub Release APK',
@@ -126,34 +125,36 @@ export function getAppUpdateHint(options = {}) {
 }
 
 /**
- * 開啟更新連結：商店優先走系統 Intent，失敗或一般網址改走 openLink，避免華為上無聲失敗
+ * 開啟更新連結：一律走系統 Intent／瀏覽器。
+ * Android 不用 Custom Tabs，否則華為等裝置從 in-app browser 下載的 APK 常無法覆蓋安裝。
  */
 export async function openAppUpdateUrl(url) {
-    const fallbackUrl = Platform.OS === 'ios' ? APPSTORE_URL : ARK_APP_LINK;
-    const preferSystemLinking =
-        url === APPSTORE_URL || url === PLAYSTORE_URL;
+    const fallbackUrl = Platform.OS === 'ios' ? APPSTORE_URL : BASE_HOST;
 
-    if (preferSystemLinking) {
+    try {
+        await Linking.openURL(url);
+        return;
+    } catch {
+        // 無對應商店（如華為無 GMS）時改開官網
+    }
+
+    if (url !== fallbackUrl) {
         try {
-            await Linking.openURL(url);
+            await Linking.openURL(fallbackUrl);
             return;
         } catch {
-            // 無對應商店（如華為無 GMS）時改開官網下載頁
+            // 繼續下方提示
         }
     }
 
-    try {
-        await openLink(preferSystemLinking ? fallbackUrl : url);
-    } catch {
-        Alert.alert(
-            '無法開啟連結',
-            `請用系統瀏覽器手動開啟：\n${fallbackUrl}`,
-        );
-    }
+    Alert.alert(
+        '無法開啟連結',
+        `請用系統瀏覽器手動開啟：\n${fallbackUrl}`,
+    );
 }
 
 /**
- * 與首頁相同：有新版本時 Alert，並依平台開啟 App Store 或官網 APK 下載頁
+ * 與首頁相同：有新版本時 Alert，並依平台開啟 App Store 或官網
  */
 export function showAppStoreUpdateAlert(serverInfo) {
     const message =
@@ -171,7 +172,7 @@ export function showAppStoreUpdateAlert(serverInfo) {
             isPreferred: true,
             onPress: () => {
                 trigger();
-                const url = Platform.OS === 'ios' ? APPSTORE_URL : ARK_APP_LINK;
+                const url = Platform.OS === 'ios' ? APPSTORE_URL : BASE_HOST;
                 openAppUpdateUrl(url);
             },
         },
