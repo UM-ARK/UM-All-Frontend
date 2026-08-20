@@ -83,6 +83,7 @@ function getCredentialCacheId(credentials) {
 
 export const HarborSessionProvider = ({ children }) => {
     const [status, setStatus] = useState('restoring');
+    const [authorizationPhase, setAuthorizationPhase] = useState(null);
     const [user, setUser] = useState(null);
     const [error, setError] = useState(null);
     const [inboxUnreadCount, setInboxUnreadCount] = useState(0);
@@ -672,6 +673,7 @@ export const HarborSessionProvider = ({ children }) => {
         const startedAt = Date.now();
         logHarborAuthEvent('login.start');
         setStatus('authorizing');
+        setAuthorizationPhase('preparing');
         setError(null);
 
         try {
@@ -689,9 +691,20 @@ export const HarborSessionProvider = ({ children }) => {
                 throw pendingError;
             }
 
-            const credentials = await startHarborAuthorization(
-                authorizationOptions,
-            );
+            const credentials = await startHarborAuthorization({
+                ...authorizationOptions,
+                onBrowserOpen: () => {
+                    if (mountedRef.current) {
+                        setAuthorizationPhase('browser');
+                        return new Promise(resolve =>
+                            requestAnimationFrame(resolve),
+                        );
+                    }
+                },
+            });
+            if (mountedRef.current) {
+                setAuthorizationPhase('finishing');
+            }
             logHarborAuthEvent('login.credentials.ready');
             const generation = activateSession(credentials);
             await refreshProfile(credentials, generation);
@@ -722,6 +735,10 @@ export const HarborSessionProvider = ({ children }) => {
                 setStatus(credentialsRef.current ? 'signedIn' : 'signedOut');
             }
             throw authError;
+        } finally {
+            if (mountedRef.current) {
+                setAuthorizationPhase(null);
+            }
         }
     }, [activateSession, refreshProfile, retryPendingRevocation]);
 
@@ -762,6 +779,7 @@ export const HarborSessionProvider = ({ children }) => {
     const value = useMemo(
         () => ({
             status,
+            authorizationPhase,
             user,
             error,
             inboxUnreadCount,
@@ -786,6 +804,7 @@ export const HarborSessionProvider = ({ children }) => {
                     : Promise.resolve(null),
         }),
         [
+            authorizationPhase,
             consumeLoginIntent,
             chatUnreadCount,
             chatChannels,

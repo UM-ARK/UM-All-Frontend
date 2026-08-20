@@ -1,5 +1,6 @@
 import React from 'react';
 import {
+    ActivityIndicator,
     Alert,
     Linking,
     Pressable,
@@ -37,6 +38,9 @@ const HarborAccountSettingsPage = ({navigation}) => {
     const headerHeight = useHeaderHeight();
     const scrollTopInset = isLiquidGlassSupported ? headerHeight : 0;
     const username = user?.username || '';
+    const [isPushActionLoading, setIsPushActionLoading] =
+        React.useState(false);
+    const pushActionInFlightRef = React.useRef(false);
 
     React.useEffect(() => {
         navigation.setOptions({headerTitle: t('Harbor 帳號')});
@@ -96,6 +100,11 @@ const HarborAccountSettingsPage = ({navigation}) => {
                     : t('開啟');
 
     const handlePushAction = async () => {
+        if (pushActionInFlightRef.current) {
+            return;
+        }
+        pushActionInFlightRef.current = true;
+        setIsPushActionLoading(true);
         trigger();
         try {
             if (
@@ -120,6 +129,9 @@ const HarborAccountSettingsPage = ({navigation}) => {
             }
         } catch (error) {
             showOperationError();
+        } finally {
+            pushActionInFlightRef.current = false;
+            setIsPushActionLoading(false);
         }
     };
 
@@ -300,6 +312,11 @@ const HarborAccountSettingsPage = ({navigation}) => {
                     </View>
                     <Pressable
                         accessibilityRole="button"
+                        accessibilityState={{
+                            busy: isPushActionLoading,
+                            disabled: isPushActionLoading,
+                        }}
+                        disabled={isPushActionLoading}
                         style={({pressed}) => [
                             styles.pushButton,
                             {
@@ -310,8 +327,15 @@ const HarborAccountSettingsPage = ({navigation}) => {
                                         : theme.tonal.primary15,
                             },
                             pressed && {opacity: 0.7},
+                            isPushActionLoading && styles.disabled,
                         ]}
                         onPress={handlePushAction}>
+                        {isPushActionLoading ? (
+                            <ActivityIndicator
+                                size="small"
+                                color={theme.themeColor}
+                            />
+                        ) : null}
                         <Text
                             style={[
                                 styles.pushButtonText,
@@ -323,7 +347,9 @@ const HarborAccountSettingsPage = ({navigation}) => {
                                             : theme.themeColor,
                                 },
                             ]}>
-                            {pushActionLabel}
+                            {isPushActionLoading
+                                ? t('處理中…')
+                                : pushActionLabel}
                         </Text>
                     </Pressable>
                 </View>
@@ -488,8 +514,14 @@ const styles = StyleSheet.create({
     },
     pushButton: {
         borderRadius: scale(12),
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: scale(5),
         paddingHorizontal: scale(12),
         paddingVertical: verticalScale(8),
+    },
+    disabled: {
+        opacity: 0.65,
     },
     pushButtonText: {
         ...uiStyle.defaultText,

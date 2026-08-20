@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Dimensions, Alert, Appearance } from 'react-native';
+import { Dimensions, Alert, Appearance, StyleSheet, View } from 'react-native';
 
 // 本地引用
 import Nav from './src/Nav';
@@ -21,6 +21,7 @@ import { SchedulingSessionProvider } from './src/contexts/SchedulingSessionConte
 import { AppShareProvider } from './src/contexts/AppShareContext';
 import { ProgrammeLevelProvider } from './src/contexts/ProgrammeLevelContext';
 import { PushRegistrationProvider } from './src/contexts/PushRegistrationContext';
+import HarborAuthorizationLoadingOverlay from './src/components/HarborAuthorizationLoadingOverlay';
 
 const { width: PAGE_WIDTH } = Dimensions.get('window');
 const LOGO_WIDTH = PAGE_WIDTH * 0.5;
@@ -181,7 +182,10 @@ const App = () => {
                             <AppShareProvider>
                                 <SchedulingSessionProvider>
                                     <PushRegistrationProvider>
-                                        <Nav />
+                                        <View style={styles.appContainer}>
+                                            <Nav />
+                                            <HarborAuthorizationLoadingOverlay />
+                                        </View>
                                     </PushRegistrationProvider>
                                 </SchedulingSessionProvider>
                             </AppShareProvider>
@@ -193,5 +197,11 @@ const App = () => {
         </SafeAreaProvider>
     );
 };
+
+const styles = StyleSheet.create({
+    appContainer: {
+        flex: 1,
+    },
+});
 
 export default App;

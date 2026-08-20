@@ -620,6 +620,8 @@
         "在一個地方查看你的 Harbor 身份、互動記錄與消息。": "See your Harbor identity, activity, and messages in one place.",
         "登入 Harbor": "Sign in to Harbor",
         "處理中…": "Signing in…",
+        "正在準備 Harbor 安全登入…": "Preparing secure Harbor sign-in…",
+        "請稍候，不要重複操作。": "Please wait and do not repeat the action.",
         "正在恢復 Harbor 登入狀態…": "Restoring your Harbor session…",
         "Harbor 操作失敗": "Harbor action failed",
         "無法完成 Harbor 操作，請稍後再試。": "Unable to complete the Harbor action. Please try again later.",

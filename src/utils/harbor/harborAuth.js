@@ -463,6 +463,7 @@ export async function startHarborAuthorization({
     purpose = 'harbor_login',
     scopes = DEFAULT_HARBOR_AUTH_SCOPES,
     pushUrl = HARBOR_PUSH_URL,
+    onBrowserOpen,
 } = {}) {
     let stage = 'rsa_ensure';
     logHarborAuthEvent('authorization.start');
@@ -511,6 +512,9 @@ export async function startHarborAuthorization({
                 browserPackage: browserPackage || null,
             });
 
+            if (onBrowserOpen) {
+                await onBrowserOpen();
+            }
             harborAuthSessionActive = true;
             const browserPromise = WebBrowser.openAuthSessionAsync(
                 authUrl,
