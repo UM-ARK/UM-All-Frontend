@@ -158,6 +158,17 @@ export const PushRegistrationProvider = ({children}) => {
         try {
             const nextPermission = await readVisiblePushPermission();
             foregroundPermission = nextPermission;
+            logPushEvent('permission.read', {
+                status: nextPermission.status,
+                allowsAlert: nextPermission.allowsAlert,
+                allowsDisplayInNotificationCenter:
+                    nextPermission.allowsDisplayInNotificationCenter,
+                allowsDisplayOnLockScreen:
+                    nextPermission.allowsDisplayOnLockScreen,
+                allowsSound: nextPermission.allowsSound,
+                allowsBadge: nextPermission.allowsBadge,
+                usable: nextPermission.usable,
+            });
             if (mountedRef.current) {
                 setPermission(nextPermission);
             }

@@ -275,7 +275,12 @@ const MyScreen = ({ navigation }) => {
                                                     styles.pushPromptGoText,
                                                     {color: theme.themeColor},
                                                 ]}>
-                                                {t('前往', {ns: 'my'})}
+                                                {t(
+                                                    isHarborPushSetupIncomplete
+                                                        ? '繼續'
+                                                        : '前往',
+                                                    {ns: 'my'},
+                                                )}
                                             </Text>
                                         </Pressable>
                                         {!isHarborPushSetupIncomplete ? (

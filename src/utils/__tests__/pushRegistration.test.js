@@ -201,6 +201,28 @@ describe('pushRegistration', () => {
         expect(mockGetExpoPushTokenAsync).not.toHaveBeenCalled();
     });
 
+    it('iOS 通知中心或鎖定畫面可顯示時可繼續註冊', async () => {
+        mockGetPermissionsAsync.mockResolvedValue({
+            granted: true,
+            canAskAgain: false,
+            ios: {
+                status: 2,
+                allowsAlert: false,
+                allowsDisplayInNotificationCenter: true,
+                allowsDisplayOnLockScreen: false,
+                allowsSound: true,
+                allowsBadge: true,
+            },
+        });
+
+        await expect(
+            ensureVisiblePushRegistration({requestPermission: false}),
+        ).resolves.toMatchObject({endpointId: 'endpoint-id'});
+        expect(mockRequestPermissionsAsync).not.toHaveBeenCalled();
+        expect(mockGetExpoPushTokenAsync).toHaveBeenCalledTimes(1);
+        expect(mockPushApi.putCurrentPushEndpoint).toHaveBeenCalledTimes(1);
+    });
+
     it('多個 caller 共用 single-flight token 與 endpoint request', async () => {
         let resolveToken;
         mockGetExpoPushTokenAsync.mockReturnValue(

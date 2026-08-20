@@ -32,6 +32,7 @@ const HarborAccountSettingsPage = ({navigation}) => {
         harborDisplayStatus,
         enableHarborPush,
         disableHarborPush,
+        updatePermission,
     } = usePushRegistration();
     const headerHeight = useHeaderHeight();
     const scrollTopInset = isLiquidGlassSupported ? headerHeight : 0;
@@ -60,7 +61,10 @@ const HarborAccountSettingsPage = ({navigation}) => {
         },
         needs_permission: {
             title: t('需要系統權限'),
-            description: t('請允許通知、聲音及 App 圖示角標。'),
+            description:
+                permission?.canAskAgain === false
+                    ? t('請在系統設定允許通知，返回 App 後按「檢查並繼續」。')
+                    : t('請允許通知、聲音及 App 圖示角標。'),
         },
         needs_harbor_authorization: {
             title: t('需要 Harbor 授權'),
@@ -88,19 +92,22 @@ const HarborAccountSettingsPage = ({navigation}) => {
                 ? t('重試')
                 : harborDisplayStatus === 'needs_permission' &&
                     permission?.canAskAgain === false
-                    ? t('前往設定')
+                    ? t('檢查並繼續')
                     : t('開啟');
 
     const handlePushAction = async () => {
         trigger();
-        if (
-            harborDisplayStatus === 'needs_permission' &&
-            permission?.canAskAgain === false
-        ) {
-            await Linking.openSettings();
-            return;
-        }
         try {
+            if (
+                harborDisplayStatus === 'needs_permission' &&
+                permission?.canAskAgain === false
+            ) {
+                const currentPermission = await updatePermission();
+                if (!currentPermission?.usable) {
+                    await Linking.openSettings();
+                    return;
+                }
+            }
             if (harborState.pendingAction === 'disable') {
                 await disableHarborPush();
             } else if (

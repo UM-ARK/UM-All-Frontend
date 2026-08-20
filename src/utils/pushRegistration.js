@@ -121,6 +121,10 @@ export function evaluateVisiblePushPermission(settings) {
             ios.status === Notifications.IosAuthorizationStatus.DENIED;
         const undetermined =
             ios.status === Notifications.IosAuthorizationStatus.NOT_DETERMINED;
+        const allowsVisibleNotification =
+            ios.allowsAlert === true ||
+            ios.allowsDisplayInNotificationCenter === true ||
+            ios.allowsDisplayOnLockScreen === true;
         return {
             status: provisional
                 ? 'provisional'
@@ -130,11 +134,15 @@ export function evaluateVisiblePushPermission(settings) {
                         ? 'undetermined'
                         : 'granted',
             allowsAlert: ios.allowsAlert === true,
+            allowsDisplayInNotificationCenter:
+                ios.allowsDisplayInNotificationCenter === true,
+            allowsDisplayOnLockScreen:
+                ios.allowsDisplayOnLockScreen === true,
             allowsSound: ios.allowsSound === true,
             allowsBadge: ios.allowsBadge === true,
             canAskAgain:
                 undetermined && settings?.canAskAgain !== false,
-            usable: provisional || ios.allowsAlert === true,
+            usable: provisional || allowsVisibleNotification,
         };
     }
 
@@ -144,6 +152,8 @@ export function evaluateVisiblePushPermission(settings) {
     return {
         status: granted ? 'granted' : denied ? 'denied' : 'undetermined',
         allowsAlert: granted,
+        allowsDisplayInNotificationCenter: granted,
+        allowsDisplayOnLockScreen: granted,
         allowsSound: granted,
         allowsBadge: granted,
         canAskAgain: settings?.canAskAgain !== false,
