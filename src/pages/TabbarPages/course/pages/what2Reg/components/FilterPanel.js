@@ -22,7 +22,7 @@ const FLAT_LIST_STYLE = { flexGrow: 0 };
 
 /**
  * 篩選面板
- * - 課表模式：本科 / 研究生（點擊前往設置）；與歷史課表選擇器獨佔一行，Pre Enroll 不顯示
+ * - 課表模式：本科 / 研究生（點擊前往設置）；與課表版本獨佔一行。Add Drop 可切歷史學期，Pre Enroll 僅顯示當前預選課版本
  * - 模式切換：Add Drop / Pre Enroll
  * - 類型切換：CMRE / GE
  * - 學院 / 學系 / GE 細分
@@ -48,6 +48,7 @@ const FilterPanel = ({
     recommendationOnly = false,
     coursePeriodOptions = [],
     activeCoursePeriod,
+    catalogMetadata,
     isHistoricalPeriod = false,
     historicalCatalogStatus = 'idle',
     onUpdateFilterOptions,
@@ -124,20 +125,78 @@ const FilterPanel = ({
         </TouchableScale>
     );
 
-    const renderCoursePeriodSelector = () => {
-        if (!activeCoursePeriod || coursePeriodOptions.length === 0) {
+    const renderCoursePeriodChip = ({
+        period,
+        interactive = true,
+        isHistorical = false,
+        isLoading = false,
+    }) => {
+        if (!period?.academicYear || period.sem == null || period.sem === '') {
             return null;
         }
 
-        const periodLabel = `${activeCoursePeriod.academicYear} · S${activeCoursePeriod.sem}`;
-        const actions = coursePeriodOptions.map(period => ({
-            id: period.id,
+        const periodLabel = `${period.academicYear} · S${period.sem}`;
+        const accentColor = isHistorical ? warning : themeColor;
+        const chip = (
+            <View
+                accessibilityLabel={periodLabel}
+                style={{
+                    ...classItmStyle,
+                    marginHorizontal: 0,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    paddingHorizontal: scale(6),
+                    paddingVertical: verticalScale(2),
+                    borderColor: accentColor,
+                    backgroundColor: isHistorical
+                        ? `${warning}15`
+                        : tonal.primary15,
+                }}>
+                {isLoading ? (
+                    <ActivityIndicator
+                        size="small"
+                        color={warning}
+                        style={{ marginRight: scale(3), transform: [{ scale: 0.7 }] }}
+                    />
+                ) : (
+                    <Ionicons
+                        name={isHistorical ? 'time-outline' : 'calendar-outline'}
+                        size={scale(12)}
+                        color={accentColor}
+                        style={{ marginRight: scale(3) }}
+                    />
+                )}
+                <Text style={{
+                    ...uiStyle.defaultText,
+                    color: accentColor,
+                    fontWeight: '900',
+                    fontSize: scale(11),
+                }}>
+                    {periodLabel}
+                </Text>
+                {interactive ? (
+                    <Ionicons
+                        name="chevron-down"
+                        size={scale(11)}
+                        color={accentColor}
+                        style={{ marginLeft: scale(2) }}
+                    />
+                ) : null}
+            </View>
+        );
+
+        if (!interactive) {
+            return chip;
+        }
+
+        const actions = coursePeriodOptions.map(option => ({
+            id: option.id,
             title: t('{{academicYear}} 第{{sem}}學期', {
                 ns: 'catalog',
-                academicYear: period.academicYear,
-                sem: period.sem,
+                academicYear: option.academicYear,
+                sem: option.sem,
             }),
-            state: period.id === activeCoursePeriod.id ? 'on' : 'off',
+            state: option.id === period.id ? 'on' : 'off',
         }));
 
         return (
@@ -150,49 +209,29 @@ const FilterPanel = ({
                 onOpenMenu={() => trigger('rigid')}
                 shouldOpenOnLongPress={false}
                 accessibilityLabel={t('切換學年及學期', { ns: 'catalog' })}>
-                <View style={{
-                    ...classItmStyle,
-                    marginHorizontal: 0,
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    paddingHorizontal: scale(6),
-                    paddingVertical: verticalScale(2),
-                    borderColor: isHistoricalPeriod ? warning : themeColor,
-                    backgroundColor: isHistoricalPeriod
-                        ? `${warning}15`
-                        : tonal.primary15,
-                }}>
-                    {historicalCatalogStatus === 'loading' ? (
-                        <ActivityIndicator
-                            size="small"
-                            color={warning}
-                            style={{ marginRight: scale(3), transform: [{ scale: 0.7 }] }}
-                        />
-                    ) : (
-                        <Ionicons
-                            name={isHistoricalPeriod ? 'time-outline' : 'calendar-outline'}
-                            size={scale(12)}
-                            color={isHistoricalPeriod ? warning : themeColor}
-                            style={{ marginRight: scale(3) }}
-                        />
-                    )}
-                    <Text style={{
-                        ...uiStyle.defaultText,
-                        color: isHistoricalPeriod ? warning : themeColor,
-                        fontWeight: '900',
-                        fontSize: scale(11),
-                    }}>
-                        {periodLabel}
-                    </Text>
-                    <Ionicons
-                        name="chevron-down"
-                        size={scale(11)}
-                        color={isHistoricalPeriod ? warning : themeColor}
-                        style={{ marginLeft: scale(2) }}
-                    />
-                </View>
+                {chip}
             </MenuView>
         );
+    };
+
+    const renderCoursePeriodSelector = () => {
+        if (courseMode === 'preEnroll') {
+            return renderCoursePeriodChip({
+                period: catalogMetadata?.pre,
+                interactive: false,
+            });
+        }
+
+        if (!activeCoursePeriod || coursePeriodOptions.length === 0) {
+            return null;
+        }
+
+        return renderCoursePeriodChip({
+            period: activeCoursePeriod,
+            interactive: true,
+            isHistorical: isHistoricalPeriod,
+            isLoading: historicalCatalogStatus === 'loading',
+        });
     };
 
     const renderADPESwitch = () => {
@@ -640,18 +679,16 @@ const FilterPanel = ({
             marginHorizontal: scale(10),
             padding: scale(5),
         }}>
-            {courseMode === 'preEnroll' ? null : (
-                <View style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    width: '100%',
-                    marginBottom: scale(4),
-                }}>
-                    {renderProgrammeLevelChip()}
-                    {renderCoursePeriodSelector()}
-                </View>
-            )}
+            <View style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                width: '100%',
+                marginBottom: scale(4),
+            }}>
+                {renderProgrammeLevelChip()}
+                {renderCoursePeriodSelector()}
+            </View>
             {isPostgraduate || isHistoricalPeriod ? null : renderADPESwitch()}
             {isPostgraduate ? null : (
                 <View style={{ width: '100%', marginTop: scale(10) }}>

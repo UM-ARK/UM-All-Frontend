@@ -582,6 +582,7 @@ const What2Reg = () => {
                             recommendationOnly={recommendationOnly}
                             coursePeriodOptions={coursePeriodOptions}
                             activeCoursePeriod={activeCoursePeriod}
+                            catalogMetadata={catalogMetadata}
                             isHistoricalPeriod={isHistoricalPeriod}
                             historicalCatalogStatus={historicalCatalogStatus}
                             onUpdateFilterOptions={updateFilterOptions}
