@@ -12,10 +12,12 @@ import {AppState} from 'react-native';
 import * as Notifications from 'expo-notifications';
 
 import {useHarborSession} from './HarborSessionContext';
+import i18n from '../i18n/i18n';
 import {loadHarborCredentials} from '../utils/harbor/harborAuthStorage';
 import {HARBOR_PUSH_URL} from '../utils/pathMap';
 import {
     deleteCurrentHarborPushBinding,
+    patchCurrentPushEndpointLocale,
     putCurrentPushEndpoint,
 } from '../utils/pushApi';
 import {
@@ -28,6 +30,7 @@ import {
     canAutomaticallyRetryHarborDisable,
     canAutomaticallyRetryPushRegistration,
     ensureVisiblePushRegistration,
+    getPushNotificationLocale,
     isPushAuthorizationCurrent,
     readVisiblePushPermission,
     runPushSchedulingOperation,
@@ -51,6 +54,7 @@ import {getSchedulingDeviceId} from '../utils/scheduling/schedulingAuthStorage';
 const RETRY_BASE_DELAY_MS = 2000;
 const RETRY_MAX_DELAY_MS = 60 * 1000;
 const RETRY_MAX_COUNT = 5;
+const LOCALE_SYNC_DEBOUNCE_MS = 300;
 const PERMISSION_STATE_FIELDS = [
     'status',
     'systemStatus',
@@ -160,6 +164,9 @@ export const PushRegistrationProvider = ({children}) => {
     const accountKeyRef = useRef(accountKey);
     const handledResponseIdsRef = useRef(new Set());
     const reconcileRef = useRef(null);
+    const localeSyncRef = useRef(null);
+    const localeSyncInFlightRef = useRef(null);
+    const localeSyncTimerRef = useRef(null);
     const disableInFlightRef = useRef(new Map());
 
     useEffect(() => {
@@ -286,6 +293,9 @@ export const PushRegistrationProvider = ({children}) => {
         });
         return () => {
             mountedRef.current = false;
+            if (localeSyncTimerRef.current) {
+                clearTimeout(localeSyncTimerRef.current);
+            }
         };
     }, [updatePermission]);
 
@@ -419,6 +429,9 @@ export const PushRegistrationProvider = ({children}) => {
             }
             const initialSchedulingSessionId =
                 getSchedulingSession()?.sessionId || 'exchange';
+            const notificationLocale = getPushNotificationLocale(
+                i18n.resolvedLanguage || i18n.language,
+            );
             let operationSchedulingSessionId = null;
 
             try {
@@ -426,7 +439,9 @@ export const PushRegistrationProvider = ({children}) => {
                     reason: 'harbor',
                     requestPermission,
                     singleFlightKey:
-                        `${operationAccountKey}:${initialSchedulingSessionId}`,
+                        `${operationAccountKey}:${initialSchedulingSessionId}:` +
+                        notificationLocale,
+                    notificationLocale,
                     prepareAuthorization: async () => {
                         const authorizationContext =
                             await prepareHarborAuthorization(
@@ -493,6 +508,12 @@ export const PushRegistrationProvider = ({children}) => {
                     retryCount: 0,
                     retryAt: null,
                     errorCode: null,
+                    registeredLocale: result.notificationLocale,
+                    localeSyncPending:
+                        result.notificationLocale !==
+                        getPushNotificationLocale(
+                            i18n.resolvedLanguage || i18n.language,
+                        ),
                 });
                 const committedState = await updateHarborState({
                     desiredEnabled: true,
@@ -551,6 +572,160 @@ export const PushRegistrationProvider = ({children}) => {
     useEffect(() => {
         reconcileRef.current = reconcileHarborPush;
     }, [reconcileHarborPush]);
+
+    const syncNotificationLocale = useCallback(() => {
+        if (
+            harborSessionStatus !== 'signedIn' ||
+            !accountKeyRef.current ||
+            harborStateRef.current.desiredEnabled !== true
+        ) {
+            return Promise.resolve(null);
+        }
+        const desiredLocale = getPushNotificationLocale(
+            i18n.resolvedLanguage || i18n.language,
+        );
+        if (
+            registrationRef.current.registeredLocale === desiredLocale &&
+            registrationRef.current.localeSyncPending !== true
+        ) {
+            return Promise.resolve(desiredLocale);
+        }
+        if (localeSyncInFlightRef.current) {
+            return localeSyncInFlightRef.current;
+        }
+
+        const operationAccountKey = accountKeyRef.current;
+        let completedLocale = null;
+        let needsFullRegistration = false;
+        const request = runPushSchedulingOperation(async () => {
+            if (
+                accountKeyRef.current !== operationAccountKey ||
+                harborStateRef.current.desiredEnabled !== true
+            ) {
+                return null;
+            }
+            const notificationLocale = getPushNotificationLocale(
+                i18n.resolvedLanguage || i18n.language,
+            );
+            await updateRegistration({localeSyncPending: true});
+            const installationId = await getSchedulingDeviceId();
+            const response = await patchCurrentPushEndpointLocale(
+                installationId,
+                notificationLocale,
+            );
+            if (!response?.endpoint?.active) {
+                const error = new Error('推送 endpoint 尚未準備完成。');
+                error.code = 'push_endpoint_not_ready';
+                throw error;
+            }
+            if (
+                response.endpoint.notificationLocale !== notificationLocale
+            ) {
+                const error = new Error('推送語言回應無效。');
+                error.code = 'push_locale_response_invalid';
+                throw error;
+            }
+            if (accountKeyRef.current !== operationAccountKey) {
+                return null;
+            }
+            completedLocale = response.endpoint.notificationLocale;
+            const currentLocale = getPushNotificationLocale(
+                i18n.resolvedLanguage || i18n.language,
+            );
+            await updateRegistration({
+                registeredLocale: completedLocale,
+                localeSyncPending: completedLocale !== currentLocale,
+            });
+            logPushEvent('notification.locale.synced', {
+                notificationLocale: completedLocale,
+            });
+            return completedLocale;
+        }).catch(async error => {
+            needsFullRegistration = [
+                'push_endpoint_not_found',
+                'push_endpoint_not_ready',
+            ].includes(error?.code);
+            await updateRegistration({localeSyncPending: true});
+            logPushError('notification.locale.sync.failed', error);
+            return null;
+        }).finally(() => {
+            if (localeSyncInFlightRef.current === request) {
+                localeSyncInFlightRef.current = null;
+            }
+            if (
+                accountKeyRef.current !== operationAccountKey ||
+                harborStateRef.current.desiredEnabled !== true
+            ) {
+                return;
+            }
+            const currentLocale = getPushNotificationLocale(
+                i18n.resolvedLanguage || i18n.language,
+            );
+            if (needsFullRegistration) {
+                setTimeout(() => {
+                    reconcileRef.current?.({requestPermission: false}).catch(
+                        () => {},
+                    );
+                }, 0);
+            } else if (completedLocale && completedLocale !== currentLocale) {
+                setTimeout(() => {
+                    localeSyncRef.current?.().catch(() => {});
+                }, 0);
+            }
+        });
+        localeSyncInFlightRef.current = request;
+        return request;
+    }, [harborSessionStatus, updateRegistration]);
+
+    useEffect(() => {
+        localeSyncRef.current = syncNotificationLocale;
+    }, [syncNotificationLocale]);
+
+    const scheduleNotificationLocaleSync = useCallback(() => {
+        if (localeSyncTimerRef.current) {
+            clearTimeout(localeSyncTimerRef.current);
+        }
+        localeSyncTimerRef.current = setTimeout(() => {
+            localeSyncTimerRef.current = null;
+            localeSyncRef.current?.().catch(() => {});
+        }, LOCALE_SYNC_DEBOUNCE_MS);
+    }, []);
+
+    useEffect(() => {
+        const handleLanguageChanged = () => {
+            if (harborStateRef.current.desiredEnabled !== true) {
+                return;
+            }
+            updateRegistration({localeSyncPending: true}).catch(() => {});
+            scheduleNotificationLocaleSync();
+        };
+        i18n.on('languageChanged', handleLanguageChanged);
+        return () => {
+            i18n.off('languageChanged', handleLanguageChanged);
+        };
+    }, [scheduleNotificationLocaleSync, updateRegistration]);
+
+    useEffect(() => {
+        const notificationLocale = getPushNotificationLocale(
+            i18n.resolvedLanguage || i18n.language,
+        );
+        if (
+            harborSessionStatus === 'signedIn' &&
+            accountKey &&
+            harborState.desiredEnabled &&
+            registration.status === 'registered' &&
+            registration.registeredLocale !== notificationLocale
+        ) {
+            syncNotificationLocale().catch(() => {});
+        }
+    }, [
+        accountKey,
+        harborSessionStatus,
+        harborState.desiredEnabled,
+        registration.registeredLocale,
+        registration.status,
+        syncNotificationLocale,
+    ]);
 
     useEffect(() => {
         if (
@@ -810,6 +985,14 @@ export const PushRegistrationProvider = ({children}) => {
                 reconcileRef.current?.({requestPermission: false}).catch(
                     () => {},
                 );
+            } else if (
+                harborStateRef.current.desiredEnabled === true &&
+                registrationRef.current.registeredLocale !==
+                    getPushNotificationLocale(
+                        i18n.resolvedLanguage || i18n.language,
+                    )
+            ) {
+                localeSyncRef.current?.().catch(() => {});
             }
         });
         return () => subscription.remove();

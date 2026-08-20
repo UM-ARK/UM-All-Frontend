@@ -11,6 +11,7 @@ jest.mock('../storageKits', () => ({
 import {
     createHarborPushAccountKey,
     loadHarborPushState,
+    loadPushRegistrationState,
     saveHarborPushState,
 } from '../pushStorage';
 
@@ -18,6 +19,19 @@ describe('pushStorage', () => {
     beforeEach(() => {
         mockValues.clear();
         jest.clearAllMocks();
+    });
+
+    it('舊版註冊狀態會標記語言尚未同步', async () => {
+        mockValues.set('push_registration_v1', {
+            status: 'registered',
+            endpointId: 'endpoint-id',
+        });
+
+        await expect(loadPushRegistrationState()).resolves.toMatchObject({
+            status: 'registered',
+            registeredLocale: null,
+            localeSyncPending: false,
+        });
     });
 
     it('Harbor intent 以帳號及 installation 隔離', async () => {

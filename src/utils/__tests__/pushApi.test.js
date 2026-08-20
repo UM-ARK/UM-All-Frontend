@@ -7,6 +7,7 @@ const mockSchedulingApi = jest.requireMock('../scheduling/schedulingApi');
 
 import {
     deleteCurrentHarborPushBinding,
+    patchCurrentPushEndpointLocale,
     putCurrentPushEndpoint,
 } from '../pushApi';
 
@@ -22,6 +23,7 @@ describe('pushApi', () => {
             platform: 'ios',
             appVersion: '26.8.8',
             buildNumber: '90',
+            notificationLocale: 'en',
         };
         await putCurrentPushEndpoint(payload);
 
@@ -31,6 +33,21 @@ describe('pushApi', () => {
             method: 'put',
             url: '/push/endpoints/current',
             data: payload,
+        });
+    });
+
+    it('只更新目前 installation 的通知語言', async () => {
+        await patchCurrentPushEndpointLocale('installation-id', 'en');
+
+        expect(
+            mockSchedulingApi.requestSchedulingWithAuth,
+        ).toHaveBeenCalledWith({
+            method: 'patch',
+            url: '/push/endpoints/current',
+            data: {
+                installationId: 'installation-id',
+                notificationLocale: 'en',
+            },
         });
     });
 

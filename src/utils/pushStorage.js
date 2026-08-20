@@ -13,6 +13,8 @@ export const DEFAULT_PUSH_REGISTRATION_STATE = Object.freeze({
     retryCount: 0,
     retryAt: null,
     errorCode: null,
+    registeredLocale: null,
+    localeSyncPending: false,
 });
 
 export const DEFAULT_HARBOR_PUSH_STATE = Object.freeze({

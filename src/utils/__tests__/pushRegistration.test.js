@@ -50,6 +50,7 @@ import {
     canAutomaticallyRetryPushRegistration,
     ensureVisiblePushRegistration,
     evaluateVisiblePushPermission,
+    getPushNotificationLocale,
     isPushAuthorizationCurrent,
     shouldShowHarborPushPrompt,
 } from '../pushRegistration';
@@ -79,6 +80,7 @@ describe('pushRegistration', () => {
                 endpointId: 'endpoint-id',
                 active: true,
                 tokenStored: true,
+                notificationLocale: 'zh-Hant',
             },
         });
     });
@@ -142,7 +144,32 @@ describe('pushRegistration', () => {
             platform: 'ios',
             appVersion: '26.8.8',
             buildNumber: '90',
+            notificationLocale: 'zh-Hant',
         });
+    });
+
+    it('把 App 語言映射成後端通知語言', async () => {
+        expect(getPushNotificationLocale('tc')).toBe('zh-Hant');
+        expect(getPushNotificationLocale('en')).toBe('en');
+        expect(getPushNotificationLocale(undefined)).toBe('zh-Hant');
+
+        mockPushApi.putCurrentPushEndpoint.mockResolvedValueOnce({
+            endpoint: {
+                endpointId: 'endpoint-id',
+                active: true,
+                tokenStored: true,
+                notificationLocale: 'en',
+            },
+        });
+
+        await expect(ensureVisiblePushRegistration({
+            requestPermission: false,
+            notificationLocale: 'en',
+        })).resolves.toMatchObject({notificationLocale: 'en'});
+
+        expect(mockPushApi.putCurrentPushEndpoint).toHaveBeenCalledWith(
+            expect.objectContaining({notificationLocale: 'en'}),
+        );
     });
 
     it('非 CTA reconcile 不會首次請權限或取得 token', async () => {

@@ -9,8 +9,13 @@ import {putCurrentPushEndpoint} from './pushApi';
 
 const PROJECT_ID = appConfig.expo?.extra?.eas?.projectId;
 const TOKEN_REQUEST_TIMEOUT_MS = 15000;
+const DEFAULT_NOTIFICATION_LOCALE = 'zh-Hant';
 const registrationInFlight = new Map();
 let schedulingOperationQueue = Promise.resolve();
+
+export function getPushNotificationLocale(language) {
+    return language === 'en' ? 'en' : DEFAULT_NOTIFICATION_LOCALE;
+}
 
 function normalizeOptionalBoolean(value) {
     if (value === true || value === false) {
@@ -224,6 +229,7 @@ async function performVisiblePushRegistration({
     requestPermission,
     prepareAuthorization,
     registerEndpoint = putCurrentPushEndpoint,
+    notificationLocale = DEFAULT_NOTIFICATION_LOCALE,
     onStateChange,
 }) {
     let permission = await readVisiblePushPermission();
@@ -286,6 +292,7 @@ async function performVisiblePushRegistration({
         platform: Platform.OS,
         appVersion: Application.nativeApplicationVersion || '',
         buildNumber: Application.nativeBuildVersion || '',
+        notificationLocale: getPushNotificationLocale(notificationLocale),
     };
     const response = authorizationContext === undefined
         ? await registerEndpoint(endpointPayload)
@@ -302,6 +309,9 @@ async function performVisiblePushRegistration({
         installationId,
         permission,
         authorizationContext,
+        notificationLocale:
+            response.endpoint.notificationLocale ||
+            endpointPayload.notificationLocale,
     };
     onStateChange?.({
         status: 'registered',

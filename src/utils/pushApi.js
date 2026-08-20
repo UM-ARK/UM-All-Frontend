@@ -14,6 +14,17 @@ export function putCurrentPushEndpoint(payload, verifiedSession = null) {
         : requestSchedulingWithAuth(config);
 }
 
+export function patchCurrentPushEndpointLocale(
+    installationId,
+    notificationLocale,
+) {
+    return requestSchedulingWithAuth({
+        method: 'patch',
+        url: '/push/endpoints/current',
+        data: {installationId, notificationLocale},
+    });
+}
+
 export function deleteCurrentHarborPushBinding(
     installationId,
     verifiedSession = null,
