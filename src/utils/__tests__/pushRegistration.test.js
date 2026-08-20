@@ -352,7 +352,7 @@ describe('pushRegistration', () => {
             status: 'registered',
             retryCount: 0,
             retryAt: null,
-        }, 1000, 5)).toBe(true);
+        }, 1000, 5)).toBe(false);
         expect(canAutomaticallyRetryPushRegistration({
             status: 'idle',
             retryCount: 0,

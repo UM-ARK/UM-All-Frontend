@@ -53,6 +53,7 @@ import { getLocalStorage, setLocalStorage } from '../utils/storageKits';
 const PROFILE_CACHE_KEY = 'harbor_profile_cache';
 const PROFILE_VALIDATION_INTERVAL = 5 * 60 * 1000;
 const CHAT_CHANNELS_FRESHNESS_INTERVAL = 60 * 1000;
+const UNREAD_FOREGROUND_REFRESH_INTERVAL = 5 * 60 * 1000;
 
 const HarborSessionContext = createContext(null);
 
@@ -105,6 +106,7 @@ export const HarborSessionProvider = ({ children }) => {
     const validationInFlightRef = useRef(null);
     const revocationInFlightRef = useRef(null);
     const sessionGenerationRef = useRef(0);
+    const unreadForegroundLastRefreshAtRef = useRef(0);
 
     useEffect(() => {
         userRef.current = user;
@@ -123,6 +125,7 @@ export const HarborSessionProvider = ({ children }) => {
         chatUnreadCountRef.current = 0;
         chatChannelsFetchedAtRef.current = 0;
         chatChannelsInFlightRef.current = null;
+        unreadForegroundLastRefreshAtRef.current = 0;
         setActiveHarborCredentials(null);
         if (mountedRef.current) {
             setUser(null);
@@ -147,6 +150,7 @@ export const HarborSessionProvider = ({ children }) => {
         chatUnreadCountRef.current = 0;
         chatChannelsFetchedAtRef.current = 0;
         chatChannelsInFlightRef.current = null;
+        unreadForegroundLastRefreshAtRef.current = 0;
         setActiveHarborCredentials(credentials);
         if (mountedRef.current) {
             setInboxUnreadCount(0);
@@ -543,6 +547,7 @@ export const HarborSessionProvider = ({ children }) => {
 
     useEffect(() => {
         if (status === 'signedIn' && user?.username) {
+            unreadForegroundLastRefreshAtRef.current = Date.now();
             Promise.allSettled([
                 refreshInboxUnreadCount(),
                 refreshChatUnreadCount(),
@@ -579,6 +584,11 @@ export const HarborSessionProvider = ({ children }) => {
                 credentials &&
                 !validationInFlightRef.current &&
                 Date.now() - lastValidationTime > PROFILE_VALIDATION_INTERVAL;
+            const shouldRefreshUnread =
+                nextState === 'active' &&
+                credentials &&
+                Date.now() - unreadForegroundLastRefreshAtRef.current >
+                    UNREAD_FOREGROUND_REFRESH_INTERVAL;
 
             if (shouldValidate) {
                 const validationRequest = refreshProfile(
@@ -592,7 +602,8 @@ export const HarborSessionProvider = ({ children }) => {
                     }
                 });
             }
-            if (nextState === 'active' && credentials) {
+            if (shouldRefreshUnread) {
+                unreadForegroundLastRefreshAtRef.current = Date.now();
                 Promise.allSettled([
                     refreshInboxUnreadCount(),
                     refreshChatUnreadCount(),

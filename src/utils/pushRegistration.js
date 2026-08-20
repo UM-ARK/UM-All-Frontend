@@ -65,9 +65,6 @@ export function canAutomaticallyRetryPushRegistration(
     now,
     maxRetryCount,
 ) {
-    if (registration?.status === 'registered') {
-        return true;
-    }
     if (
         registration?.status !== 'retry_pending' ||
         Number(registration?.retryCount || 0) >= maxRetryCount

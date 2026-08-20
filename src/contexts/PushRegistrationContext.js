@@ -51,8 +51,28 @@ import {getSchedulingDeviceId} from '../utils/scheduling/schedulingAuthStorage';
 const RETRY_BASE_DELAY_MS = 2000;
 const RETRY_MAX_DELAY_MS = 60 * 1000;
 const RETRY_MAX_COUNT = 5;
+const PERMISSION_STATE_FIELDS = [
+    'status',
+    'systemStatus',
+    'iosAuthorizationStatus',
+    'allowsAlert',
+    'allowsDisplayInNotificationCenter',
+    'allowsDisplayOnLockScreen',
+    'allowsSound',
+    'allowsBadge',
+    'canAskAgain',
+    'usable',
+];
 
 let foregroundPermission = null;
+
+function arePermissionStatesEqual(current, next) {
+    return (
+        current &&
+        next &&
+        PERMISSION_STATE_FIELDS.every(key => current[key] === next[key])
+    );
+}
 
 Notifications.setNotificationHandler({
     handleNotification: async notification => {
@@ -173,7 +193,14 @@ export const PushRegistrationProvider = ({children}) => {
                 usable: nextPermission.usable,
             });
             if (mountedRef.current) {
-                setPermission(nextPermission);
+                setPermission(currentPermission =>
+                    arePermissionStatesEqual(
+                        currentPermission,
+                        nextPermission,
+                    )
+                        ? currentPermission
+                        : nextPermission,
+                );
             }
             return nextPermission;
         } catch (error) {
@@ -770,10 +797,6 @@ export const PushRegistrationProvider = ({children}) => {
                 return;
             }
             updatePermission().catch(() => {});
-            Promise.allSettled([
-                refreshInboxUnreadCount(),
-                refreshChatUnreadCount(),
-            ]);
             if (harborStateRef.current.pendingAction === 'disable') {
                 disableHarborPush({automatic: true}).catch(() => {});
             } else if (
@@ -792,8 +815,6 @@ export const PushRegistrationProvider = ({children}) => {
         return () => subscription.remove();
     }, [
         disableHarborPush,
-        refreshChatUnreadCount,
-        refreshInboxUnreadCount,
         updatePermission,
     ]);
 
