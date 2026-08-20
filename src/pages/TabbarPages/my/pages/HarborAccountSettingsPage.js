@@ -135,6 +135,11 @@ const HarborAccountSettingsPage = ({navigation}) => {
         }
     };
 
+    const handleOpenNotificationSettings = async () => {
+        trigger();
+        await Linking.openSettings();
+    };
+
     const handleReauthorize = async () => {
         trigger();
         try {
@@ -310,48 +315,71 @@ const HarborAccountSettingsPage = ({navigation}) => {
                             {currentPushCopy.description}
                         </Text>
                     </View>
-                    <Pressable
-                        accessibilityRole="button"
-                        accessibilityState={{
-                            busy: isPushActionLoading,
-                            disabled: isPushActionLoading,
-                        }}
-                        disabled={isPushActionLoading}
-                        style={({pressed}) => [
-                            styles.pushButton,
-                            {
-                                backgroundColor:
-                                    harborDisplayStatus === 'enabled' ||
-                                    harborDisplayStatus === 'silent'
-                                        ? theme.tonal.unread15
-                                        : theme.tonal.primary15,
-                            },
-                            pressed && {opacity: 0.7},
-                            isPushActionLoading && styles.disabled,
-                        ]}
-                        onPress={handlePushAction}>
-                        {isPushActionLoading ? (
-                            <ActivityIndicator
-                                size="small"
-                                color={theme.themeColor}
-                            />
+                    <View style={styles.pushActions}>
+                        {harborDisplayStatus === 'silent' ? (
+                            <Pressable
+                                accessibilityRole="button"
+                                style={({pressed}) => [
+                                    styles.pushButton,
+                                    {
+                                        backgroundColor:
+                                            theme.tonal.primary15,
+                                    },
+                                    pressed && {opacity: 0.7},
+                                ]}
+                                onPress={handleOpenNotificationSettings}>
+                                <Text
+                                    style={[
+                                        styles.pushButtonText,
+                                        {color: theme.themeColor},
+                                    ]}>
+                                    {t('前往設定')}
+                                </Text>
+                            </Pressable>
                         ) : null}
-                        <Text
-                            style={[
-                                styles.pushButtonText,
+                        <Pressable
+                            accessibilityRole="button"
+                            accessibilityState={{
+                                busy: isPushActionLoading,
+                                disabled: isPushActionLoading,
+                            }}
+                            disabled={isPushActionLoading}
+                            style={({pressed}) => [
+                                styles.pushButton,
                                 {
-                                    color:
+                                    backgroundColor:
                                         harborDisplayStatus === 'enabled' ||
                                         harborDisplayStatus === 'silent'
-                                            ? theme.unread
-                                            : theme.themeColor,
+                                            ? theme.tonal.unread15
+                                            : theme.tonal.primary15,
                                 },
-                            ]}>
-                            {isPushActionLoading
-                                ? t('處理中…')
-                                : pushActionLabel}
-                        </Text>
-                    </Pressable>
+                                pressed && {opacity: 0.7},
+                                isPushActionLoading && styles.disabled,
+                            ]}
+                            onPress={handlePushAction}>
+                            {isPushActionLoading ? (
+                                <ActivityIndicator
+                                    size="small"
+                                    color={theme.themeColor}
+                                />
+                            ) : null}
+                            <Text
+                                style={[
+                                    styles.pushButtonText,
+                                    {
+                                        color:
+                                            harborDisplayStatus === 'enabled' ||
+                                            harborDisplayStatus === 'silent'
+                                                ? theme.unread
+                                                : theme.themeColor,
+                                    },
+                                ]}>
+                                {isPushActionLoading
+                                    ? t('處理中…')
+                                    : pushActionLabel}
+                            </Text>
+                        </Pressable>
+                    </View>
                 </View>
 
                 <View
@@ -511,6 +539,10 @@ const styles = StyleSheet.create({
         fontSize: scale(10),
         fontWeight: '650',
         marginTop: verticalScale(3),
+    },
+    pushActions: {
+        alignItems: 'flex-end',
+        gap: verticalScale(6),
     },
     pushButton: {
         borderRadius: scale(12),

@@ -177,9 +177,27 @@ describe('pushRegistration', () => {
                 allowAlert: true,
                 allowBadge: true,
                 allowSound: true,
-                allowProvisional: true,
             },
         });
+    });
+
+    it('明確開啟推送時把 provisional 升級為完整通知權限', async () => {
+        mockGetPermissionsAsync.mockResolvedValue({
+            granted: false,
+            canAskAgain: false,
+            ios: {
+                status: 3,
+                allowsAlert: true,
+                allowsSound: false,
+                allowsBadge: true,
+            },
+        });
+        mockRequestPermissionsAsync.mockResolvedValue(GRANTED_PERMISSION);
+
+        await ensureVisiblePushRegistration({requestPermission: true});
+
+        expect(mockRequestPermissionsAsync).toHaveBeenCalledTimes(1);
+        expect(mockGetExpoPushTokenAsync).toHaveBeenCalledTimes(1);
     });
 
     it('既有 badge-only iOS 授權必須引導至系統設定', async () => {

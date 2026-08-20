@@ -203,7 +203,6 @@ export async function requestVisiblePushPermission() {
                 allowAlert: true,
                 allowBadge: true,
                 allowSound: true,
-                allowProvisional: true,
             },
         }),
     );
@@ -216,7 +215,11 @@ async function performVisiblePushRegistration({
     onStateChange,
 }) {
     let permission = await readVisiblePushPermission();
-    if (!permission.usable && requestPermission && permission.canAskAgain) {
+    if (
+        requestPermission &&
+        (permission.status === 'provisional' ||
+            (!permission.usable && permission.canAskAgain))
+    ) {
         permission = await requestVisiblePushPermission();
     }
     if (!permission.usable) {
