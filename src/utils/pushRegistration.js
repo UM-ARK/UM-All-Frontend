@@ -12,6 +12,13 @@ const TOKEN_REQUEST_TIMEOUT_MS = 15000;
 const registrationInFlight = new Map();
 let schedulingOperationQueue = Promise.resolve();
 
+function normalizeOptionalBoolean(value) {
+    if (value === true || value === false) {
+        return value;
+    }
+    return null;
+}
+
 function createPushError(code, message, retryable = false) {
     const error = new Error(message);
     error.code = code;
@@ -133,13 +140,19 @@ export function evaluateVisiblePushPermission(settings) {
                     : undetermined
                         ? 'undetermined'
                         : 'granted',
-            allowsAlert: ios.allowsAlert === true,
+            systemStatus: settings?.status ?? null,
+            iosAuthorizationStatus: ios.status ?? null,
+            allowsAlert: normalizeOptionalBoolean(ios.allowsAlert),
             allowsDisplayInNotificationCenter:
-                ios.allowsDisplayInNotificationCenter === true,
+                normalizeOptionalBoolean(
+                    ios.allowsDisplayInNotificationCenter,
+                ),
             allowsDisplayOnLockScreen:
-                ios.allowsDisplayOnLockScreen === true,
-            allowsSound: ios.allowsSound === true,
-            allowsBadge: ios.allowsBadge === true,
+                normalizeOptionalBoolean(
+                    ios.allowsDisplayOnLockScreen,
+                ),
+            allowsSound: normalizeOptionalBoolean(ios.allowsSound),
+            allowsBadge: normalizeOptionalBoolean(ios.allowsBadge),
             canAskAgain:
                 undetermined && settings?.canAskAgain !== false,
             usable: provisional || allowsVisibleNotification,
@@ -151,6 +164,8 @@ export function evaluateVisiblePushPermission(settings) {
     const denied = settings?.status === 'denied';
     return {
         status: granted ? 'granted' : denied ? 'denied' : 'undetermined',
+        systemStatus: settings?.status ?? null,
+        iosAuthorizationStatus: null,
         allowsAlert: granted,
         allowsDisplayInNotificationCenter: granted,
         allowsDisplayOnLockScreen: granted,

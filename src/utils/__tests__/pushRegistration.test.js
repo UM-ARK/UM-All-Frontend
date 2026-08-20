@@ -49,6 +49,7 @@ import {
     canAutomaticallyRetryHarborDisable,
     canAutomaticallyRetryPushRegistration,
     ensureVisiblePushRegistration,
+    evaluateVisiblePushPermission,
     isPushAuthorizationCurrent,
     shouldShowHarborPushPrompt,
 } from '../pushRegistration';
@@ -198,6 +199,27 @@ describe('pushRegistration', () => {
 
         expect(mockRequestPermissionsAsync).toHaveBeenCalledTimes(1);
         expect(mockGetExpoPushTokenAsync).toHaveBeenCalledTimes(1);
+    });
+
+    it('iOS 未提供聲音設定時保留 unknown，不誤判為禁止', () => {
+        expect(evaluateVisiblePushPermission({
+            status: 'granted',
+            canAskAgain: false,
+            ios: {
+                status: 2,
+                allowsAlert: true,
+                allowsDisplayInNotificationCenter: true,
+                allowsDisplayOnLockScreen: true,
+                allowsSound: null,
+                allowsBadge: true,
+            },
+        })).toMatchObject({
+            status: 'granted',
+            systemStatus: 'granted',
+            iosAuthorizationStatus: 2,
+            allowsSound: null,
+            usable: true,
+        });
     });
 
     it('既有 badge-only iOS 授權必須引導至系統設定', async () => {

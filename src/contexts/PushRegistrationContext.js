@@ -160,6 +160,9 @@ export const PushRegistrationProvider = ({children}) => {
             foregroundPermission = nextPermission;
             logPushEvent('permission.read', {
                 status: nextPermission.status,
+                systemStatus: nextPermission.systemStatus,
+                iosAuthorizationStatus:
+                    nextPermission.iosAuthorizationStatus,
                 allowsAlert: nextPermission.allowsAlert,
                 allowsDisplayInNotificationCenter:
                     nextPermission.allowsDisplayInNotificationCenter,
@@ -879,6 +882,32 @@ export const PushRegistrationProvider = ({children}) => {
         permission,
         registration.status,
     ]);
+
+    useEffect(() => {
+        if (!permission) {
+            return;
+        }
+        logPushEvent('harbor.display_status', {
+            displayStatus: harborDisplayStatus,
+            reason:
+                harborDisplayStatus === 'silent'
+                    ? permission.status === 'provisional'
+                        ? 'provisional_authorization'
+                        : 'sound_disabled'
+                    : null,
+            permissionStatus: permission.status,
+            systemStatus: permission.systemStatus,
+            iosAuthorizationStatus: permission.iosAuthorizationStatus,
+            allowsAlert: permission.allowsAlert,
+            allowsDisplayInNotificationCenter:
+                permission.allowsDisplayInNotificationCenter,
+            allowsDisplayOnLockScreen:
+                permission.allowsDisplayOnLockScreen,
+            allowsSound: permission.allowsSound,
+            allowsBadge: permission.allowsBadge,
+            usable: permission.usable,
+        });
+    }, [harborDisplayStatus, permission]);
 
     const value = useMemo(
         () => ({
