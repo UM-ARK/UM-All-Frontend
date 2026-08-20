@@ -543,6 +543,8 @@
         "每個話題最多只能選擇 {{count}} 個標籤。": "A topic can have at most {{count}} tags.",
         "正文至少需要 {{count}} 個字。": "The body must be at least {{count}} characters.",
         "正文最多只能有 {{count}} 個字。": "The body can contain at most {{count}} characters.",
+        "回覆至少需要 {{count}} 個字。": "The reply must be at least {{count}} characters.",
+        "回覆最多只能有 {{count}} 個字。": "The reply can contain at most {{count}} characters.",
         "已準備好上傳": "Ready to upload",
         "部分圖片上傳失敗，請重試或移除後再發布。": "Some images could not be uploaded. Retry or remove them before publishing.",
         "Chat": "Chat",

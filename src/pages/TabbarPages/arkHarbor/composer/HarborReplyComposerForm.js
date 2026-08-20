@@ -280,8 +280,10 @@ const HarborReplyComposerForm = ({
                         ) : null}
                         <Pressable
                             accessibilityRole="button"
-                            accessibilityState={{disabled: sendDisabled}}
-                            disabled={sendDisabled}
+                            accessibilityState={{
+                                disabled: isSubmitDisabled,
+                            }}
+                            disabled={isSubmitDisabled}
                             onPress={handleSubmit}
                             style={({pressed}) => [
                                 styles.sendButton,
@@ -291,6 +293,10 @@ const HarborReplyComposerForm = ({
                                         : pressed
                                             ? theme.themeColorLight
                                             : theme.themeColor,
+                                    opacity:
+                                        pressed && sendDisabled
+                                            ? 0.8
+                                            : 1,
                                 },
                             ]}>
                             {isSubmitting ? (

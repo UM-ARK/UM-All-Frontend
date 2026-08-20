@@ -132,17 +132,25 @@ export function useHarborComposerSubmit({
             contentLength < minimumPostLength &&
             !(beforeUpload && supportsImages && images.length > 0)
         ) {
-            return t('正文至少需要 {{count}} 個字。', {
-                count: minimumPostLength,
-            });
+            return isReply
+                ? t('回覆至少需要 {{count}} 個字。', {
+                    count: minimumPostLength,
+                })
+                : t('正文至少需要 {{count}} 個字。', {
+                    count: minimumPostLength,
+                });
         }
         if (
             maximumPostLength != null &&
             contentLength > maximumPostLength
         ) {
-            return t('正文最多只能有 {{count}} 個字。', {
-                count: maximumPostLength,
-            });
+            return isReply
+                ? t('回覆最多只能有 {{count}} 個字。', {
+                    count: maximumPostLength,
+                })
+                : t('正文最多只能有 {{count}} 個字。', {
+                    count: maximumPostLength,
+                });
         }
         return '';
     }, [
@@ -153,6 +161,7 @@ export function useHarborComposerSubmit({
         images.length,
         isEditingFirstPost,
         isNewTopic,
+        isReply,
         maximumPostLength,
         maximumTagCount,
         maximumTitleLength,
