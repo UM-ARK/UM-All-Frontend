@@ -50,6 +50,7 @@ import {
     canAutomaticallyRetryPushRegistration,
     ensureVisiblePushRegistration,
     isPushAuthorizationCurrent,
+    shouldShowHarborPushPrompt,
 } from '../pushRegistration';
 
 const GRANTED_PERMISSION = {
@@ -79,6 +80,43 @@ describe('pushRegistration', () => {
                 tokenStored: true,
             },
         });
+    });
+
+    it('推送尚未完成時持續顯示提示，成功後才隱藏', () => {
+        const baseState = {
+            desiredEnabled: true,
+            pendingAction: 'enable',
+            dismissedPrompt: false,
+        };
+
+        expect(shouldShowHarborPushPrompt({
+            sessionStatus: 'signedIn',
+            accountKey: '2893:installation-id',
+            harborState: baseState,
+            harborDisplayStatus: 'needs_permission',
+        })).toBe(true);
+        expect(shouldShowHarborPushPrompt({
+            sessionStatus: 'signedIn',
+            accountKey: '2893:installation-id',
+            harborState: {...baseState, dismissedPrompt: true},
+            harborDisplayStatus: 'syncing',
+        })).toBe(true);
+        expect(shouldShowHarborPushPrompt({
+            sessionStatus: 'signedIn',
+            accountKey: '2893:installation-id',
+            harborState: baseState,
+            harborDisplayStatus: 'enabled',
+        })).toBe(false);
+        expect(shouldShowHarborPushPrompt({
+            sessionStatus: 'signedIn',
+            accountKey: '2893:installation-id',
+            harborState: {
+                desiredEnabled: false,
+                pendingAction: null,
+                dismissedPrompt: true,
+            },
+            harborDisplayStatus: 'disabled',
+        })).toBe(false);
     });
 
     it('已授權時按正確順序準備身份及註冊 endpoint', async () => {

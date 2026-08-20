@@ -31,6 +31,7 @@ import {
     isPushAuthorizationCurrent,
     readVisiblePushPermission,
     runPushSchedulingOperation,
+    shouldShowHarborPushPrompt,
 } from '../utils/pushRegistration';
 import {
     createHarborPushAccountKey,
@@ -579,6 +580,7 @@ export const PushRegistrationProvider = ({children}) => {
             const savedIntent = await updateHarborState({
                 desiredEnabled: false,
                 pendingAction: 'disable',
+                dismissedPrompt: true,
                 ...(!automatic
                     ? {
                         disableRetryCount: 0,
@@ -873,12 +875,12 @@ export const PushRegistrationProvider = ({children}) => {
             registration,
             harborState,
             harborDisplayStatus,
-            shouldShowHarborPrompt:
-                harborSessionStatus === 'signedIn' &&
-                Boolean(accountKey) &&
-                !harborState.desiredEnabled &&
-                !harborState.pendingAction &&
-                !harborState.dismissedPrompt,
+            shouldShowHarborPrompt: shouldShowHarborPushPrompt({
+                sessionStatus: harborSessionStatus,
+                accountKey,
+                harborState,
+                harborDisplayStatus,
+            }),
             pendingNotificationResponse,
             enableHarborPush,
             disableHarborPush,

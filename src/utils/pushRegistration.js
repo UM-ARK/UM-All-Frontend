@@ -86,6 +86,24 @@ export function canAutomaticallyRetryHarborDisable(
     );
 }
 
+export function shouldShowHarborPushPrompt({
+    sessionStatus,
+    accountKey,
+    harborState,
+    harborDisplayStatus,
+}) {
+    if (sessionStatus !== 'signedIn' || !accountKey) {
+        return false;
+    }
+    if (harborState?.desiredEnabled === true) {
+        return !['enabled', 'silent'].includes(harborDisplayStatus);
+    }
+    return (
+        !harborState?.pendingAction &&
+        harborState?.dismissedPrompt !== true
+    );
+}
+
 export function runPushSchedulingOperation(operation) {
     const request = schedulingOperationQueue
         .catch(() => {})

@@ -761,6 +761,8 @@
         "調整 Harbor 網頁內的電郵及社群通知偏好": "Manage email and community notification preferences on Harbor.",
         "開啟 Harbor 推送通知": "Turn On Harbor Push Notifications",
         "收到新回覆時以中性內容提醒你。": "Get a privacy-safe alert when you receive a new reply.",
+        "完成 Harbor 推送設定": "Finish Setting Up Harbor Push",
+        "推送設定尚未完成，請前往查看或重試。": "Push setup is not complete. Open it to review or retry.",
         "前往": "Go",
         "暫不顯示": "Not Now",
         "需要 Harbor 登入": "Harbor Sign-in Required",

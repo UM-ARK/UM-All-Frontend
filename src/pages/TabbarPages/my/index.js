@@ -40,6 +40,8 @@ const MyScreen = ({ navigation }) => {
     } = useHarborSession();
     const {
         dismissHarborPushPrompt,
+        harborDisplayStatus,
+        harborState,
         shouldShowHarborPrompt,
     } = usePushRegistration();
     const insets = useSafeAreaInsets();
@@ -51,6 +53,10 @@ const MyScreen = ({ navigation }) => {
     // 暫時關閉下滑頂部頭像動畫
     // const scrollY = React.useRef(new Animated.Value(0)).current;
     const isSignedIn = status === 'signedIn' && !!user;
+    const isHarborPushSetupIncomplete =
+        harborState.desiredEnabled &&
+        harborDisplayStatus !== 'enabled' &&
+        harborDisplayStatus !== 'silent';
 
     const presentHarborError = React.useCallback(
         sessionError => {
@@ -229,9 +235,12 @@ const MyScreen = ({ navigation }) => {
                                                 styles.pushPromptTitle,
                                                 {color: theme.black.main},
                                             ]}>
-                                            {t('開啟 Harbor 推送通知', {
-                                                ns: 'my',
-                                            })}
+                                            {t(
+                                                isHarborPushSetupIncomplete
+                                                    ? '完成 Harbor 推送設定'
+                                                    : '開啟 Harbor 推送通知',
+                                                {ns: 'my'},
+                                            )}
                                         </Text>
                                         <Text
                                             style={[
@@ -239,7 +248,9 @@ const MyScreen = ({ navigation }) => {
                                                 {color: theme.black.second},
                                             ]}>
                                             {t(
-                                                '收到新回覆時以中性內容提醒你。',
+                                                isHarborPushSetupIncomplete
+                                                    ? '推送設定尚未完成，請前往查看或重試。'
+                                                    : '收到新回覆時以中性內容提醒你。',
                                                 {ns: 'my'},
                                             )}
                                         </Text>
@@ -267,23 +278,25 @@ const MyScreen = ({ navigation }) => {
                                                 {t('前往', {ns: 'my'})}
                                             </Text>
                                         </Pressable>
-                                        <Pressable
-                                            accessibilityRole="button"
-                                            hitSlop={8}
-                                            onPress={() => {
-                                                trigger();
-                                                dismissHarborPushPrompt().catch(
-                                                    () => {},
-                                                );
-                                            }}>
-                                            <Text
-                                                style={[
-                                                    styles.pushPromptDismiss,
-                                                    {color: theme.black.third},
-                                                ]}>
-                                                {t('暫不顯示', {ns: 'my'})}
-                                            </Text>
-                                        </Pressable>
+                                        {!isHarborPushSetupIncomplete ? (
+                                            <Pressable
+                                                accessibilityRole="button"
+                                                hitSlop={8}
+                                                onPress={() => {
+                                                    trigger();
+                                                    dismissHarborPushPrompt().catch(
+                                                        () => {},
+                                                    );
+                                                }}>
+                                                <Text
+                                                    style={[
+                                                        styles.pushPromptDismiss,
+                                                        {color: theme.black.third},
+                                                    ]}>
+                                                    {t('暫不顯示', {ns: 'my'})}
+                                                </Text>
+                                            </Pressable>
+                                        ) : null}
                                     </View>
                                 </View>
                             ) : null}
