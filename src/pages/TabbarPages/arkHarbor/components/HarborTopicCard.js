@@ -151,8 +151,8 @@ const HarborTopicCard = ({
     const lastReadPostNumber = Number(topic.lastReadPostNumber || 0);
     const replyCount = Number(topic.replyCount || 0);
     const isNewReply =
-        topic.newContentType === 'reply' ||
-        (!topic.newContentType && unreadCount > 0);
+        unreadCount > 0 &&
+        (topic.newContentType === 'reply' || !topic.newContentType);
     const isNewTopic =
         topic.newContentType === 'topic' ||
         (!topic.newContentType && topic.isNew);

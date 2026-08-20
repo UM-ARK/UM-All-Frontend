@@ -35,6 +35,7 @@ import {
 } from '../../../../utils/harbor/harborRateLimit';
 import {
     mergeHarborTopicListItem,
+    reconcileHarborTopicListItems,
     subscribeHarborTopicUpdates,
 } from '../../../../utils/harbor/harborTopicUpdates';
 import { trigger } from '../../../../utils/trigger';
@@ -250,13 +251,24 @@ const HarborTopicList = ({
                 ) {
                     return;
                 }
-                replaceItems(result.items);
+                const localReadItems = [
+                    ...itemsRef.current,
+                    ...recommendationItemsRef.current,
+                ];
+                const nextItems = reconcileHarborTopicListItems(
+                    result.items,
+                    localReadItems,
+                );
+                replaceItems(nextItems);
                 replaceRecommendationItems(
                     supportsRecommendations
-                        ? selectHarborRecommendations(
-                            recommendationResult?.items ||
-                                recommendationItemsRef.current,
-                            result.items,
+                        ? reconcileHarborTopicListItems(
+                            selectHarborRecommendations(
+                                recommendationResult?.items ||
+                                    recommendationItemsRef.current,
+                                nextItems,
+                            ),
+                            localReadItems,
                         )
                         : [],
                 );
@@ -895,6 +907,7 @@ const HarborTopicList = ({
                     : `harbor-topic-${item.id}`
             }
             renderItem={renderTopic}
+            extraData={displayItems}
             ListHeaderComponent={header}
             ListEmptyComponent={emptyState}
             ListFooterComponent={footer}

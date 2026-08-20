@@ -43,6 +43,42 @@ export function mergeHarborTopicListItem(item, patch) {
     return next;
 }
 
+export function reconcileHarborTopicListItems(fetchedItems, localItems) {
+    if (!Array.isArray(fetchedItems) || fetchedItems.length === 0) {
+        return fetchedItems;
+    }
+    const localById = new Map();
+    (Array.isArray(localItems) ? localItems : []).forEach(item => {
+        const id = Number(item?.id);
+        if (id > 0) {
+            localById.set(id, item);
+        }
+    });
+    if (localById.size === 0) {
+        return fetchedItems;
+    }
+    return fetchedItems.map(item => {
+        const local = localById.get(item.id);
+        if (!local) {
+            return item;
+        }
+        const localLastRead = Number(local.lastReadPostNumber || 0);
+        const fetchedLastRead = Number(item.lastReadPostNumber || 0);
+        // 本地已讀樓層較新時保留樂觀狀態，避免 timings 尚未寫入的舊列表蓋掉紅點／新回覆
+        if (localLastRead <= fetchedLastRead) {
+            return item;
+        }
+        return mergeHarborTopicListItem(item, {
+            highestPostNumber: local.highestPostNumber,
+            isNew: local.isNew,
+            isUnread: local.isUnread,
+            lastReadPostNumber: local.lastReadPostNumber,
+            newContentType: local.newContentType,
+            unreadCount: local.unreadCount,
+        });
+    });
+}
+
 export function publishHarborTopicUpdate(topicId, patch) {
     const id = Number(topicId);
     if (!Number.isInteger(id) || id <= 0 || !patch) {

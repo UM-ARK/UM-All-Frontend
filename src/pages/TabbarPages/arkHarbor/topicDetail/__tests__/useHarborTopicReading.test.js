@@ -1,3 +1,6 @@
+jest.mock('@react-navigation/native', () => ({
+    useFocusEffect: jest.fn(),
+}));
 jest.mock('@callstack/liquid-glass', () => ({
     isLiquidGlassSupported: false,
 }));
@@ -17,6 +20,7 @@ jest.mock('../harborTopicModels', () => ({
 }));
 
 import {
+    getHighestVisiblePostNumber,
     getReadingPostNumber,
     getTopicReadStateAfterVisit,
 } from '../useHarborTopicReading';
@@ -84,7 +88,17 @@ describe('Harbor 話題返回列表已讀狀態', () => {
         });
     });
 
-    it('未讀帖未讀完時保留伺服器未讀數，不用樓層差猜測', () => {
+    it('同屏可見多樓時以上報最高樓層', () => {
+        expect(
+            getHighestVisiblePostNumber([
+                {item: {post_number: 1}},
+                {item: {post_number: 4}},
+                {item: {post_number: 3}},
+            ]),
+        ).toBe(4);
+    });
+
+    it('未讀帖往前讀時下修未讀數，而不是整段保留', () => {
         expect(
             getTopicReadStateAfterVisit({
                 highestPostNumber: 8,
@@ -95,7 +109,25 @@ describe('Harbor 話題返回列表已讀狀態', () => {
         ).toEqual({
             highestPostNumber: 8,
             lastReadPostNumber: 5,
-            unreadCount: 5,
+            unreadCount: 3,
+            isUnread: true,
+            isNew: false,
+            shouldReloadLists: false,
+        });
+    });
+
+    it('未讀帖沒有往前讀時保留伺服器未讀數', () => {
+        expect(
+            getTopicReadStateAfterVisit({
+                highestPostNumber: 8,
+                lastReadPostNumber: 5,
+                lastVisiblePostNumber: 1,
+                unreadPosts: 3,
+            }),
+        ).toEqual({
+            highestPostNumber: 8,
+            lastReadPostNumber: 5,
+            unreadCount: 3,
             isUnread: true,
             isNew: false,
             shouldReloadLists: false,
