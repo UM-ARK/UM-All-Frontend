@@ -6,6 +6,7 @@ export const BASE_URI = 'https://umall.one/api/';
 // TODO: 上線前修改 umall.one
 // export const SCHEDULING_BASE_URI = 'http://192.168.1.230:8000/api/v2';
 export const SCHEDULING_BASE_URI = 'https://umall.one/api/v2';
+export const HARBOR_PUSH_URL = SCHEDULING_BASE_URI + '/push/harbor';
 // 用適配API返回的圖片相對路徑
 export const BASE_HOST = 'https://umall.one';
 

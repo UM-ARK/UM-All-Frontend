@@ -60,37 +60,22 @@ describe('appIconBadge', () => {
         expect(mockSetBadgeCountAsync).toHaveBeenCalledWith(5);
     });
 
-    it('尚未決定權限時會請求 allowBadge 再寫入', async () => {
+    it('尚未決定權限時不會自行彈出權限請求', async () => {
         mockGetPermissionsAsync.mockResolvedValue({
             ios: {
                 status: 0,
                 allowsBadge: null,
             },
         });
-        mockRequestPermissionsAsync.mockResolvedValue({
-            granted: true,
-            ios: {
-                status: 2,
-                allowsBadge: true,
-            },
-        });
-        mockSetBadgeCountAsync.mockResolvedValue(true);
-
         const {
             syncAppIconBadgeCount,
             resetAppIconBadgePermissionCacheForTests,
         } = require('../appIconBadge');
         resetAppIconBadgePermissionCacheForTests();
 
-        await expect(syncAppIconBadgeCount(2)).resolves.toBe(true);
-        expect(mockRequestPermissionsAsync).toHaveBeenCalledWith({
-            ios: {
-                allowAlert: false,
-                allowBadge: true,
-                allowSound: false,
-            },
-        });
-        expect(mockSetBadgeCountAsync).toHaveBeenCalledWith(2);
+        await expect(syncAppIconBadgeCount(2)).resolves.toBe(false);
+        expect(mockRequestPermissionsAsync).not.toHaveBeenCalled();
+        expect(mockSetBadgeCountAsync).not.toHaveBeenCalled();
     });
 
     it('權限被拒時不寫入角標', async () => {

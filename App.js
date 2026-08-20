@@ -20,6 +20,7 @@ import { HarborSessionProvider } from './src/contexts/HarborSessionContext';
 import { SchedulingSessionProvider } from './src/contexts/SchedulingSessionContext';
 import { AppShareProvider } from './src/contexts/AppShareContext';
 import { ProgrammeLevelProvider } from './src/contexts/ProgrammeLevelContext';
+import { PushRegistrationProvider } from './src/contexts/PushRegistrationContext';
 
 const { width: PAGE_WIDTH } = Dimensions.get('window');
 const LOGO_WIDTH = PAGE_WIDTH * 0.5;
@@ -179,7 +180,9 @@ const App = () => {
                         <HarborSessionProvider>
                             <AppShareProvider>
                                 <SchedulingSessionProvider>
-                                    <Nav />
+                                    <PushRegistrationProvider>
+                                        <Nav />
+                                    </PushRegistrationProvider>
                                 </SchedulingSessionProvider>
                             </AppShareProvider>
                         </HarborSessionProvider>

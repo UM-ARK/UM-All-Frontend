@@ -10,7 +10,7 @@ import {
 } from 'react-native-quick-crypto';
 
 import { getBestBrowserPackage } from '../browserPackage';
-import { ARK_HARBOR } from '../pathMap';
+import { ARK_HARBOR, HARBOR_PUSH_URL } from '../pathMap';
 import {
     clearHarborRsaKeyPair,
     clearPendingHarborAuthorization,
@@ -28,7 +28,7 @@ const APPLICATION_NAME = 'ARK ALL';
 const AUTH_PATH = '/user-api-key/new';
 const HTTPS_REDIRECT_URL = 'https://umall.one/auth/discourse';
 const CUSTOM_REDIRECT_URL = 'one.umall://auth/discourse';
-const AUTH_SCOPES = ['read', 'write'];
+export const DEFAULT_HARBOR_AUTH_SCOPES = ['read', 'write', 'push'];
 // 僅在使用者點擊登入後的時間窗內承認 callback（含 OEM 瀏覽器 deep link）。
 export const AUTH_TTL_MS = 5 * 60 * 1000;
 // Auth Session 關閉後，短暫等待 OEM 瀏覽器 deep link 到達。
@@ -211,16 +211,26 @@ export function getHarborAuthRedirect() {
         : CUSTOM_REDIRECT_URL;
 }
 
-export function buildHarborAuthUrl({ clientId, nonce, publicKey, redirectUrl }) {
+export function buildHarborAuthUrl({
+    clientId,
+    nonce,
+    publicKey,
+    redirectUrl,
+    scopes = DEFAULT_HARBOR_AUTH_SCOPES,
+    pushUrl = HARBOR_PUSH_URL,
+}) {
     const params = new URLSearchParams({
         application_name: APPLICATION_NAME,
         client_id: clientId,
         auth_redirect: redirectUrl,
-        scopes: AUTH_SCOPES.join(','),
+        scopes: scopes.join(','),
         nonce,
         public_key: publicKey,
         padding: RSA_AUTH_PADDING,
     });
+    if (scopes.includes('push')) {
+        params.set('push_url', pushUrl);
+    }
 
     return `${ARK_HARBOR}${AUTH_PATH}?${params.toString()}`;
 }
@@ -409,7 +419,13 @@ async function completeHarborAuthorizationInternal(url) {
             userApiKey: decryptedPayload.key,
             clientId: pendingAuthorization.clientId,
             apiVersion: decryptedPayload.api ?? null,
-            scopes: AUTH_SCOPES,
+            scopes:
+                pendingAuthorization.scopes ||
+                ['read', 'write'],
+            push:
+                typeof decryptedPayload.push === 'boolean'
+                    ? decryptedPayload.push
+                    : null,
             createdAt: Date.now(),
         };
 
@@ -443,7 +459,11 @@ export async function completeHarborAuthorization(url) {
     return harborAuthCompletionPromise;
 }
 
-export async function startHarborAuthorization() {
+export async function startHarborAuthorization({
+    purpose = 'harbor_login',
+    scopes = DEFAULT_HARBOR_AUTH_SCOPES,
+    pushUrl = HARBOR_PUSH_URL,
+} = {}) {
     let stage = 'rsa_ensure';
     logHarborAuthEvent('authorization.start');
     try {
@@ -464,6 +484,9 @@ export async function startHarborAuthorization() {
             clientId,
             nonce,
             redirectUrl,
+            purpose,
+            scopes,
+            pushUrl,
             createdAt: Date.now(),
             rsaKeyVersion: RSA_KEY_VERSION,
         });
@@ -475,6 +498,8 @@ export async function startHarborAuthorization() {
             nonce,
             publicKey,
             redirectUrl,
+            scopes,
+            pushUrl,
         });
 
         try {

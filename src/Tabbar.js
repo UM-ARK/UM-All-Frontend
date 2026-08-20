@@ -23,10 +23,11 @@ import { trigger } from './utils/trigger';
 import { uiStyle } from './components/ThemeContext';
 import { isLiquidGlassSupported } from '@callstack/liquid-glass';
 import { useHarborSession } from './contexts/HarborSessionContext';
+import { usePushRegistration } from './contexts/PushRegistrationContext';
 import { fetchHarborForumBadgeSnapshot } from './utils/harbor/harborApi';
 import {
     acknowledgeHarborForumBadgeState,
-    calculateHarborUnreadTotal,
+    calculateHarborMyTabBadgeTotal,
     createHarborForumBadgeState,
     formatHarborTabBadge,
     getHarborForumBadgeCount,
@@ -340,6 +341,7 @@ const Tabbar = () => {
         refreshInboxUnreadCount,
         refreshChatUnreadCount,
     } = useHarborSession();
+    const { shouldShowHarborPrompt } = usePushRegistration();
     const [forumBadgeState, setForumBadgeState] = useState(() =>
         createHarborForumBadgeState(),
     );
@@ -365,8 +367,12 @@ const Tabbar = () => {
     // 字體大小
     const labelFontSize = isLandscape ? verticalScale(10) : scale(10);
 
-    const myUnreadTotal = isSignedIn
-        ? calculateHarborUnreadTotal(inboxUnreadCount, chatUnreadCount)
+    const myTabBadgeTotal = isSignedIn
+        ? calculateHarborMyTabBadgeTotal(
+            inboxUnreadCount,
+            chatUnreadCount,
+            shouldShowHarborPrompt,
+        )
         : 0;
 
     const refreshForumBadge = useCallback(
@@ -533,9 +539,13 @@ const Tabbar = () => {
             ForumTabbar: formatHarborTabBadge(
                 isSignedIn ? forumNewTopicsSinceEntry : 0,
             ),
-            MyTabbar: formatHarborTabBadge(myUnreadTotal),
+            MyTabbar: formatHarborTabBadge(myTabBadgeTotal),
         }),
-        [forumNewTopicsSinceEntry, isSignedIn, myUnreadTotal],
+        [
+            forumNewTopicsSinceEntry,
+            isSignedIn,
+            myTabBadgeTotal,
+        ],
     );
 
     const badgeListeners = useMemo(

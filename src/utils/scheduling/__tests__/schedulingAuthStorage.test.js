@@ -21,15 +21,19 @@ import * as Crypto from 'expo-crypto';
 
 import {
     clearSchedulingDeviceId,
+    clearPendingSchedulingLogout,
     clearSchedulingSessionStorage,
     getSchedulingDeviceId,
+    loadPendingSchedulingLogouts,
     loadSchedulingSession,
+    savePendingSchedulingLogout,
     saveSchedulingSession,
 } from '../schedulingAuthStorage';
 
 const SESSION_KEY = 'scheduling.auth.session.v2';
 const LEGACY_SESSION_KEY = 'scheduling.auth.session.v1';
 const DEVICE_ID_KEY = 'scheduling.auth.device-id.v1';
+const PENDING_LOGOUTS_KEY = 'scheduling.auth.pending-logouts.v1';
 const DEVICE_ID = '5d2b67a4-d4ca-4b8a-b409-466fcdab198d';
 const SecureStore = jest.requireMock('expo-secure-store');
 
@@ -92,5 +96,28 @@ describe('schedulingAuthStorage', () => {
         expect(SecureStore.__values.has(SESSION_KEY)).toBe(false);
         expect(SecureStore.__values.get(DEVICE_ID_KEY)).toBe(DEVICE_ID);
         await clearSchedulingDeviceId();
+    });
+
+    it('離線登出 session 以 sessionId 去重保存並可逐筆清除', async () => {
+        await savePendingSchedulingLogout(SESSION);
+        await savePendingSchedulingLogout({
+            ...SESSION,
+            refreshToken: 'rotated-refresh-token',
+        });
+
+        await expect(loadPendingSchedulingLogouts()).resolves.toEqual([
+            {
+                sessionId: 'session-id',
+                refreshToken: 'rotated-refresh-token',
+            },
+        ]);
+        await clearSchedulingSessionStorage();
+        expect(SecureStore.__values.has(PENDING_LOGOUTS_KEY)).toBe(true);
+        expect(SecureStore.__values.get(PENDING_LOGOUTS_KEY)).not.toContain(
+            'access-token',
+        );
+
+        await clearPendingSchedulingLogout(SESSION);
+        await expect(loadPendingSchedulingLogouts()).resolves.toEqual([]);
     });
 });

@@ -38,7 +38,7 @@ function shouldReexchangeOnUnauthorized(error) {
 /**
  * 帶 Bearer JWT 的請求；遇 401 invalid_token 時 refresh 並最多重試一次。
  */
-async function requestWithAuth(config, hasRetried = false) {
+export async function requestSchedulingWithAuth(config, hasRetried = false) {
     const accessToken = await ensureSchedulingAccessToken();
 
     try {
@@ -58,7 +58,7 @@ async function requestWithAuth(config, hasRetried = false) {
             shouldReexchangeOnUnauthorized(normalized)
         ) {
             await refreshSchedulingAfterUnauthorized();
-            return requestWithAuth(config, true);
+            return requestSchedulingWithAuth(config, true);
         }
 
         if (
@@ -73,6 +73,30 @@ async function requestWithAuth(config, hasRetried = false) {
         throw normalized;
     }
 }
+
+/** 使用剛完成 reverify 的固定 Bearer；推送操作不可在切帳號後改用新 session。 */
+export async function requestSchedulingWithVerifiedSession(config, session) {
+    if (!session?.sessionId || !session?.accessToken) {
+        const error = new Error('推送 session 尚未準備完成');
+        error.code = 'push_session_not_ready';
+        error.retryable = false;
+        throw error;
+    }
+    try {
+        const response = await schedulingHttp.request({
+            ...config,
+            headers: {
+                ...(config.headers || {}),
+                Authorization: `Bearer ${session.accessToken}`,
+            },
+        });
+        return response.data;
+    } catch (error) {
+        throw normalizeSchedulingError(error);
+    }
+}
+
+const requestWithAuth = requestSchedulingWithAuth;
 
 export function listMyTeamEvents() {
     return requestWithAuth({

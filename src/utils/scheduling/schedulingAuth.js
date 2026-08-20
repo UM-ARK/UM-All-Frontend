@@ -5,8 +5,11 @@ import { loadHarborCredentials } from '../harbor/harborAuthStorage';
 import { SCHEDULING_BASE_URI } from '../pathMap';
 import {
     clearSchedulingSessionStorage,
+    clearPendingSchedulingLogout,
     getSchedulingDeviceId,
+    loadPendingSchedulingLogouts,
     loadSchedulingSession,
+    savePendingSchedulingLogout,
     saveSchedulingSession,
 } from './schedulingAuthStorage';
 import {
@@ -262,6 +265,15 @@ async function saveAuthenticatedSession(data, previousSession = null) {
 async function performHarborExchange() {
     const startedAt = Date.now();
     ensureAuthCooldownHasPassed();
+    const pendingLogoutResult = await retryPendingSchedulingLogouts();
+    if (pendingLogoutResult.remainingCount > 0) {
+        throw createSchedulingError({
+            code: 'scheduling_logout_pending',
+            message: '正在完成上一個帳號的登出，請稍後再試',
+            status: null,
+            retryable: true,
+        });
+    }
     const [credentials, deviceId] = await Promise.all([
         getHarborCredentialsOrThrow(),
         getSchedulingDeviceId(),
@@ -411,6 +423,15 @@ export async function reverifyExistingSchedulingSession() {
     return reverifySchedulingSession(session);
 }
 
+/** Harbor 推送啟用前必須重新核對 binding；沒有既有 session 才 exchange。 */
+export async function reverifyHarborBindingForPush() {
+    const session =
+        schedulingSession || (await hydrateSchedulingSessionFromStorage());
+    return session
+        ? reverifySchedulingSession(session)
+        : exchangeSchedulingToken();
+}
+
 async function refreshOrReverify(session) {
     try {
         if (isHarborReverificationDue(session)) {
@@ -475,12 +496,47 @@ export async function refreshSchedulingAfterUnauthorized() {
     return refreshOrReverify(session);
 }
 
+function isTerminalSchedulingLogoutError(error) {
+    return (
+        error?.status === 401 &&
+        (error.code === 'invalid_refresh_token' ||
+            error.code === 'refresh_token_reused')
+    );
+}
+
+/** 啟動、恢復或下次換票前重試尚未送達後端的登出。 */
+export async function retryPendingSchedulingLogouts() {
+    const queue = await loadPendingSchedulingLogouts();
+    let remainingCount = 0;
+    for (const pendingSession of queue) {
+        try {
+            await axios.post(
+                `${SCHEDULING_BASE_URI}/auth/logout`,
+                {refreshToken: pendingSession.refreshToken},
+                {timeout: REQUEST_TIMEOUT},
+            );
+            await clearPendingSchedulingLogout(pendingSession);
+        } catch (error) {
+            const normalized = normalizeSchedulingError(error);
+            if (isTerminalSchedulingLogoutError(normalized)) {
+                await clearPendingSchedulingLogout(pendingSession);
+            } else {
+                remainingCount += 1;
+            }
+        }
+    }
+    return {remainingCount};
+}
+
 /**
  * 撤銷目前裝置的 refresh session；網絡失敗仍清除本機資料。
  */
 export async function logoutSchedulingSession() {
     const session =
         schedulingSession || (await hydrateSchedulingSessionFromStorage());
+    if (session?.refreshToken) {
+        await savePendingSchedulingLogout(session);
+    }
     try {
         if (session?.refreshToken) {
             await axios.post(
@@ -488,7 +544,14 @@ export async function logoutSchedulingSession() {
                 {refreshToken: session.refreshToken},
                 {timeout: REQUEST_TIMEOUT},
             );
+            await clearPendingSchedulingLogout(session);
         }
+    } catch (error) {
+        const normalized = normalizeSchedulingError(error);
+        if (isTerminalSchedulingLogoutError(normalized)) {
+            await clearPendingSchedulingLogout(session);
+        }
+        throw normalized;
     } finally {
         schedulingSession = null;
         await clearSchedulingSessionStorage();

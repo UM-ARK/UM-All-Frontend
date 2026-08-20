@@ -6,6 +6,7 @@ import React, {
     useMemo,
     useState,
 } from 'react';
+import {AppState} from 'react-native';
 
 import {useHarborSession} from './HarborSessionContext';
 import {
@@ -13,6 +14,7 @@ import {
     ensureSchedulingSession,
     getSchedulingSession,
     reverifyExistingSchedulingSession,
+    retryPendingSchedulingLogouts,
     setSchedulingHarborAuthFailureHandler,
 } from '../utils/scheduling/schedulingAuth';
 import {
@@ -32,6 +34,19 @@ export const SchedulingSessionProvider = ({children}) => {
     const [status, setStatus] = useState('idle');
     const [user, setUser] = useState(null);
     const [error, setError] = useState(null);
+
+    useEffect(() => {
+        retryPendingSchedulingLogouts().catch(() => {});
+        const subscription = AppState.addEventListener(
+            'change',
+            nextState => {
+                if (nextState === 'active') {
+                    retryPendingSchedulingLogouts().catch(() => {});
+                }
+            },
+        );
+        return () => subscription.remove();
+    }, []);
 
     useEffect(() => {
         setSchedulingHarborAuthFailureHandler(authError => {

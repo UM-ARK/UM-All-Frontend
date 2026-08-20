@@ -668,7 +668,7 @@ export const HarborSessionProvider = ({ children }) => {
         return () => subscription.remove();
     }, [activateCredentialsFromCallback]);
 
-    const login = useCallback(async intent => {
+    const login = useCallback(async (intent, authorizationOptions) => {
         const startedAt = Date.now();
         logHarborAuthEvent('login.start');
         setStatus('authorizing');
@@ -689,7 +689,9 @@ export const HarborSessionProvider = ({ children }) => {
                 throw pendingError;
             }
 
-            const credentials = await startHarborAuthorization();
+            const credentials = await startHarborAuthorization(
+                authorizationOptions,
+            );
             logHarborAuthEvent('login.credentials.ready');
             const generation = activateSession(credentials);
             await refreshProfile(credentials, generation);
