@@ -5,8 +5,8 @@ export const unitMap = {
     'FDS': '設計學院 - Design',
     'FED': '教育學院 - Education',
     'FST': '科技學院 - Science and Technology',
-    'FEG': '工程學院 - Engineering',
-    'FIC': '資訊科學與計算學院 - Information Science and Computing',
+    'FEG': '工學院 - Engineering',
+    'FIC': '信息學院 - Information Science and Computing',
     'FHS': '健康科學學院 - Health Sciences',
     'FSS': '社會科學學院 - Social Sciences',
     'FLL': '法學院 - Law',
@@ -16,16 +16,20 @@ export const unitMap = {
     'ICMS': '中華醫藥研究院 - Institute of Chinese Medical Sciences',
     'IME': '微電子研究院 - Institute of Microelectronics',
     'MSC': ' - ',
-    'RC': '書院 - Residential College',
+    'RC': '住宿式書院 - Residential College',
     'HC': '榮譽學院 - Honours College',
     'ICI': '協同創新研究院 - Institute of Collaborative Innovation',
+    'IAS': '人文社科高等研究院 - Institute of Advanced Studies in Humanities and Social Sciences',
+    'IAIBS': '人工智能與腦科學研究院 - Institute of Artificial Intelligence and Brain Sciences',
+    'ISCT': '智慧城市技術研究院 - Institute of Smart City Technologies',
+    'CMS': '澳門研究中心 - Centre for Macau Studies',
 };
 
 // 部門/學系名中文參考
 export const depaMap = {
     // FAH
     'CCHC': '中國歷史文化中心',
-    'DAD': '藝術設計系',
+    'DAD': '藝術與設計系',
     'DCH': '中國語言文學系',
     'DENG': '英文系',
     'DHIST': '歷史系',
@@ -35,6 +39,7 @@ export const depaMap = {
     'ELC': '英語中心',
     'DPHIL': '哲學及宗教學系',
     'PHIL': '哲學及宗教學系',
+    'MTRS': '翻譯傳譯認知研究中心',
 
     // FBA
     'AIM': '會計及資訊管理學系',
@@ -45,13 +50,13 @@ export const depaMap = {
     // FHS
     'DBS': '生物醫學系',
     'DPS': '藥物科學系',
-    'DPM': '藥學系',
+    'DPM': '公共衛生及醫藥管理學系',
 
     // FMD
     'BMS': '生物醫學系',
     'CLM': '臨床醫學系',
     'DEN': '口腔醫學系',
-    'MFN': '藥用食品及營養學系',
+    'MFN': '藥用食品及營養科學系',
     'PPS': '藥學系',
     'PMA': '公共衛生及醫藥管理學系',
 
@@ -60,12 +65,13 @@ export const depaMap = {
     'MLS': '澳門法學系',
 
     // FSS
-    'CAD': '藝術與設計中心',
+    'CAD': '藝術設計中心',
     'DCOM': '傳播系',
     'DECO': '經濟學系',
     'DGPA': '政府與行政學系',
     'DPSY': '心理學系',
     'DSOC': '社會學系',
+    'MOS': '澳門研究中心',
 
     // FEG
     'CEE': '土木及環境工程系',
@@ -75,7 +81,7 @@ export const depaMap = {
     'ECE': '電機及計算機工程系',
     'EME': '機電工程系',
     'MAT': '數學系',
-    'OST': '海洋科學與技術系',
+    'OST': '海洋科學及技術系',
     'BME': '生物醫學工程系',
     'CBE': '化學工程及生物工程系',
     'ESE': '能源科學及工程系',
@@ -99,6 +105,8 @@ export const depaMap = {
     'AUD': '建築及城市設計系',
     'VCD': '視覺傳達設計系',
     'IND': '工業設計系',
+    // 研究生課表暫以 DAD 開視覺傳達課，待改為 VCD 後可刪
+    'FDS/DAD': '視覺傳達設計系',
 
     // ICI
     'CCBS': '認知與腦科學研究中心',
