@@ -15,6 +15,7 @@ import {
     DEFAULT_TIME_FROM,
     DEFAULT_TIME_TO,
     defaultTimeFilter,
+    getDefaultFacultyDepartment,
 } from '../constants/options';
 import { PROGRAMME_LEVELS } from '../../../../../../utils/courseProgramme';
 
@@ -347,7 +348,9 @@ const FilterPanel = ({
                     onPress={() => {
                         trigger();
                         const nextFilterOptions = { ...filterOptions, facultyName: item };
-                        nextFilterOptions.depaName = DEPARTMENT_ALL;
+                        nextFilterOptions.depaName = getDefaultFacultyDepartment(
+                            offerFacultyDepaListObj[item],
+                        );
                         onUpdateFilterOptions(nextFilterOptions);
                     }}
                 >
@@ -616,6 +619,11 @@ const FilterPanel = ({
     const offerDepaList = filterOptions.option !== 'GE' && filterOptions.facultyName in offerFacultyDepaListObj
         ? offerFacultyDepaListObj[filterOptions.facultyName]
         : [];
+    const shouldShowDepaSwitch = offerDepaList.some(
+        name => name !== DEPARTMENT_ALL && name !== DEPARTMENT_UNSPECIFIED,
+    );
+    const depaLabel = depaMap[`${filterOptions.facultyName}/${filterOptions.depaName}`]
+        || depaMap[filterOptions.depaName];
 
     const renderRecommendationFilter = () => (
         <View style={{ width: '100%', alignItems: 'center', marginTop: verticalScale(2) }}>
@@ -731,13 +739,13 @@ const FilterPanel = ({
             ) : (
                 <View style={{ marginTop: scale(10), width: '100%' }}>
                     {renderFacultySwitch()}
-                    {offerDepaList.length > 0 ? (
+                    {shouldShowDepaSwitch ? (
                         <View style={{ alignItems: 'center', justifyContent: 'center', marginVertical: scale(10) }}>
                             {filterOptions.depaName !== DEPARTMENT_ALL &&
                             filterOptions.depaName !== DEPARTMENT_UNSPECIFIED &&
-                            filterOptions.depaName in depaMap ? (
+                            depaLabel ? (
                                 <Text style={{ ...classItmTitleTextStyle, marginBottom: scale(-5) }}>
-                                    {depaMap[filterOptions.depaName]}
+                                    {depaLabel}
                                 </Text>
                             ) : null}
                             {renderDepaSwitch(offerDepaList)}

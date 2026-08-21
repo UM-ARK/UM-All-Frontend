@@ -20,6 +20,7 @@ import {
 import {
     DEPARTMENT_ALL,
     DEPARTMENT_UNSPECIFIED,
+    getDefaultFacultyDepartment,
 } from '../constants/options';
 
 const makeSlot = (courseCode, section, day, timeFrom, timeTo) => ({
@@ -219,13 +220,29 @@ describe('研究生 Department 篩選', () => {
         {'Course Code': 'FST-UNKNOWN', 'Offering Department': ''},
     ];
 
-    it('提供全部及未指定學系選項', () => {
+    it('提供學系及未指定學系選項，不包含全部', () => {
         expect(getFacultyDepartmentOptions(facultyCourses)).toEqual([
-            DEPARTMENT_ALL,
             'CIS',
             'ECE',
             DEPARTMENT_UNSPECIFIED,
         ]);
+        expect(getDefaultFacultyDepartment(
+            getFacultyDepartmentOptions(facultyCourses),
+        )).toBe('CIS');
+    });
+
+    it('僅有未指定學系時直接選中該選項', () => {
+        const unspecifiedOnly = [
+            {'Course Code': 'FST-UNKNOWN', 'Offering Department': ''},
+            {'Course Code': 'FST-EMPTY'},
+        ];
+
+        expect(getFacultyDepartmentOptions(unspecifiedOnly)).toEqual([
+            DEPARTMENT_UNSPECIFIED,
+        ]);
+        expect(getDefaultFacultyDepartment(
+            getFacultyDepartmentOptions(unspecifiedOnly),
+        )).toBe(DEPARTMENT_UNSPECIFIED);
     });
 
     it('只在目前學院資料內篩 Department', () => {

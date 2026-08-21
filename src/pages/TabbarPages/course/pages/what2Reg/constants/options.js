@@ -17,6 +17,14 @@ export const modeENStr = {
 export const DEPARTMENT_ALL = '__all__';
 export const DEPARTMENT_UNSPECIFIED = '__unspecified__';
 
+export const getDefaultFacultyDepartment = depaList => {
+    if (!Array.isArray(depaList) || depaList.length === 0) {
+        return DEPARTMENT_UNSPECIFIED;
+    }
+    const firstSelectable = depaList.find(name => name !== DEPARTMENT_ALL);
+    return firstSelectable || DEPARTMENT_UNSPECIFIED;
+};
+
 export const defaultFilterOptions = {
     mode: 'ad',
     option: 'CMRE',
