@@ -3,7 +3,7 @@
     "name": "ARK ALL",
     "slug": "arkall",
     "scheme": "one.umall",
-    "version": "26.8.8",
+    "version": "26.9.0",
     "icon": "./src/static/img/logo.png",
     "userInterfaceStyle": "automatic",
     "ios": {
@@ -13,7 +13,7 @@
       "googleServicesFile": "./GoogleService-Info.plist",
       "bundleIdentifier": "one.umall",
       "appleTeamId": "UVSHNJYJWU",
-      "buildNumber": "26.8.8",
+      "buildNumber": "26.9.0",
       "associatedDomains": [
         "applinks:umall.one",
         "webcredentials:umall.one"
@@ -28,7 +28,7 @@
       "userInterfaceStyle": "automatic",
       "googleServicesFile": "./google-services.json",
       "package": "one.umall",
-      "versionCode": 90,
+      "versionCode": 91,
       "adaptiveIcon": {
         "foregroundImage": "./src/static/img/ic_launcher_foreground.png",
         "backgroundColor": "#E6AB52"
@@ -168,7 +168,13 @@
       "react-native-quick-crypto",
       "expo-quick-actions",
       "expo-sharing",
-      "@react-native-firebase/analytics"
+      "@react-native-firebase/analytics",
+      "@react-native-vector-icons/ant-design",
+      "@react-native-vector-icons/evil-icons",
+      "@react-native-vector-icons/feather",
+      "@react-native-vector-icons/fontawesome6",
+      "@react-native-vector-icons/ionicons",
+      "@react-native-vector-icons/material-design-icons"
     ],
     "extra": {
       "eas": {

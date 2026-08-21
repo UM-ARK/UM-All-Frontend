@@ -2772,17 +2772,17 @@
   resolved "https://registry.npmjs.org/@react-native-community/slider/-/slider-5.2.0.tgz#c154ac4ec10537160462d7a9f3e2e43098257302"
   integrity sha512-484sH8aWEaSjxaZ7HT3YZ8CKDcNes2synko1vdEz5DFEdvKAduxKJTj22L/qBMD7rtIkfbX69DMzWDAGbOAV6w==
 
-"@react-native-firebase/analytics@^26.3.0":
-  version "26.3.0"
-  resolved "https://registry.npmjs.org/@react-native-firebase/analytics/-/analytics-26.3.0.tgz#4f2a510e554812e77e9399278265aa3ea151eb42"
-  integrity sha512-JH1G9me+RwWJialwTmJ8WXB9qfCMZ4TjvFu8gbriPv/0MekOeUmqnMpv4kaT7pExOwk4bgBEWMamRRrSFV/n4Q==
+"@react-native-firebase/analytics@^26.3.2":
+  version "26.3.2"
+  resolved "https://registry.npmjs.org/@react-native-firebase/analytics/-/analytics-26.3.2.tgz#3c67c780f0ab6c961c3208ed5ae9180debea4b90"
+  integrity sha512-wNlhlIZiELrTuzxYorKLxmJZdSXdpHb9sJZ1qUBuSjYC9RbFm1gsy0zK9O4paGL1/sO4WnDwllF41N7bANuG2g==
   dependencies:
     superstruct "^2.0.2"
 
-"@react-native-firebase/app@^26.3.0":
-  version "26.3.0"
-  resolved "https://registry.npmjs.org/@react-native-firebase/app/-/app-26.3.0.tgz#c25469c7b0c81c8799751792a91f8087fd9f362b"
-  integrity sha512-GmGq9pDnmVLded+qoToONM1TuZtstR7Hgkgg5INHiJbiDggfkn2dchOjIOGH1HnR7o0dVQGbYRM88RIbKvxLTw==
+"@react-native-firebase/app@^26.3.2":
+  version "26.3.2"
+  resolved "https://registry.npmjs.org/@react-native-firebase/app/-/app-26.3.2.tgz#de02c4e6a0e32c9b76444415163c23ef360b8cd4"
+  integrity sha512-AtPF1PhUI7AjYCKp7XS9+IMP+T1IpPk9rx0ZhjhS2hcxKjNFThpH1ntSlolvwGXORov7e51PZ2XfYOnkmuJuEQ==
   dependencies:
     firebase "12.17.1"
 
@@ -2791,56 +2791,56 @@
   resolved "https://registry.npmjs.org/@react-native-menu/menu/-/menu-2.0.0.tgz#21d3fcb15687df86386fee7815cc5ff79d26bc9e"
   integrity sha512-hb8Mirw6aKPGONhgo52IiNpwHtISVrgCT3rMdFX1qS7eOFNzOcQh8d2UDnaH5zVpxN+QuvWtaaiRMGFpIjzdtA==
 
-"@react-native-vector-icons/ant-design@^13.1.2":
-  version "13.1.2"
-  resolved "https://registry.npmjs.org/@react-native-vector-icons/ant-design/-/ant-design-13.1.2.tgz#05fa9e425aee66fd4f44a2dff171db63b717e83f"
-  integrity sha512-ugERUvjK8hX2o2IJGSoinotn/MNlhJq+pZ0T1qJ2i1FbrfcgFAdhaMmhcueIk6J6ZrEFzNJex9T7bS+AyikdXA==
+"@react-native-vector-icons/ant-design@^13.1.3":
+  version "13.1.3"
+  resolved "https://registry.npmjs.org/@react-native-vector-icons/ant-design/-/ant-design-13.1.3.tgz#c87b60d50d681cc99bbf01cee7bb2adc3b04a26c"
+  integrity sha512-USlvTjKeUOxq7O7VeuEHF9b7vx9YWh71I3ob++IMQyB7cSHYT6+zUCfMXVpqqNS+47WYXscMoIFjfy3kMAlxcw==
   dependencies:
-    "@react-native-vector-icons/common" "^13.0.1"
+    "@react-native-vector-icons/common" "^13.0.2"
 
-"@react-native-vector-icons/common@^13.0.1":
-  version "13.0.1"
-  resolved "https://registry.npmjs.org/@react-native-vector-icons/common/-/common-13.0.1.tgz#040b88bde5361a13137e060036ad497503820d50"
-  integrity sha512-UPC6L3tW5rXCjBn4kgw9RPURUILIg8tFpEY2uaYwU8aCjEHkywNCMcAO8+PvMCDkR6aICPeHYA0OXvMgrjsF4g==
+"@react-native-vector-icons/common@^13.0.2":
+  version "13.0.2"
+  resolved "https://registry.npmjs.org/@react-native-vector-icons/common/-/common-13.0.2.tgz#7d98b1dd6b378c0deeca7f0bce34f596241e08ea"
+  integrity sha512-gND3YBSB8MDAFJtc8kJs/HW6D9LfAmAhqblWVzqasm5cIVT/gS3+hFim4D85+4dycuskvwvMHhzUA92BiVPKTQ==
   dependencies:
     find-up "^8.0.0"
     picocolors "^1.1.1"
     plist "^3.1.0"
 
-"@react-native-vector-icons/evil-icons@^13.1.2":
-  version "13.1.2"
-  resolved "https://registry.npmjs.org/@react-native-vector-icons/evil-icons/-/evil-icons-13.1.2.tgz#379101432e2ffb4ab853ab88d8aefcdb2f381ee2"
-  integrity sha512-jw9nMulAzeJke6bqizzIJm2NVSajhEbyOxqx/UcY9GYFkr6RmUCuZ+TepGhltiik4MFk1N1Uq2b1zUMy07qI2Q==
+"@react-native-vector-icons/evil-icons@^13.1.3":
+  version "13.1.3"
+  resolved "https://registry.npmjs.org/@react-native-vector-icons/evil-icons/-/evil-icons-13.1.3.tgz#b82a762cd0d334e4136bcff16de73ab8bd4fc116"
+  integrity sha512-z4fQ+wfmPyN24/+f62aipnhliUGcGgKh7BBSIh154YIt98xgBB5d4p2oa2EJekmQav+4DnUYzDY0i3df+i8D9g==
   dependencies:
-    "@react-native-vector-icons/common" "^13.0.1"
+    "@react-native-vector-icons/common" "^13.0.2"
 
-"@react-native-vector-icons/feather@^13.1.2":
-  version "13.1.2"
-  resolved "https://registry.npmjs.org/@react-native-vector-icons/feather/-/feather-13.1.2.tgz#ab6d446e2c11963b9dd10029e378a9e0dff585cf"
-  integrity sha512-4wICYvJ+wF5ERKyVWpie+DFEZ6Jr2541T6E+EtVTEqdubxEjK2/RS9qtEU758BktlPlJUrAoZeW6Fl/iUKf0Vg==
+"@react-native-vector-icons/feather@^13.1.3":
+  version "13.1.3"
+  resolved "https://registry.npmjs.org/@react-native-vector-icons/feather/-/feather-13.1.3.tgz#d45328c56829db80afedeb3262474aed6e4362a3"
+  integrity sha512-lcDyyXH2mtqKcxSWhXs3x8Vey0J7vgkOFgKMFZ6CujbGC07aTZjybo0e3gS9r2xZsXGv8F6WSIq9g/YYXmXLIw==
   dependencies:
-    "@react-native-vector-icons/common" "^13.0.1"
+    "@react-native-vector-icons/common" "^13.0.2"
 
-"@react-native-vector-icons/fontawesome6@^13.1.2":
-  version "13.1.2"
-  resolved "https://registry.npmjs.org/@react-native-vector-icons/fontawesome6/-/fontawesome6-13.1.2.tgz#a15d34b7197948baeda200a6a294e0634ae313d4"
-  integrity sha512-oQvQeDE8kSXm3l+oRKQm/Jo4ewR9YdKW2gFDVVl3st1yY5Nml1ZS4m3lTp3a/KehT9w+Uiv2JNn3kG0VOo+AZw==
+"@react-native-vector-icons/fontawesome6@^13.1.3":
+  version "13.1.3"
+  resolved "https://registry.npmjs.org/@react-native-vector-icons/fontawesome6/-/fontawesome6-13.1.3.tgz#e8cbdbc2f75e3b7753a786a6eca590d37bb826b3"
+  integrity sha512-9NuB05Xc/faV7550pqB0ThtVOkrQzFLfaB84cgqFyf3qD3239fr/xVWseIuqqTaS9w9Zjl4op1kVwUzx9yAZew==
   dependencies:
-    "@react-native-vector-icons/common" "^13.0.1"
+    "@react-native-vector-icons/common" "^13.0.2"
 
-"@react-native-vector-icons/ionicons@^13.1.2":
-  version "13.1.2"
-  resolved "https://registry.npmjs.org/@react-native-vector-icons/ionicons/-/ionicons-13.1.2.tgz#89372a159c120d6711d4264875b0a1ee1f614776"
-  integrity sha512-8TaXKw41MgKADeesrrbUpA3FR81JNy96ogiGRjWgtE1djSEevDsOKMij7Jq/3TfiGaE0prEshU0TcW5qwsf0Ug==
+"@react-native-vector-icons/ionicons@^13.1.3":
+  version "13.1.3"
+  resolved "https://registry.npmjs.org/@react-native-vector-icons/ionicons/-/ionicons-13.1.3.tgz#ad8d21265314f7f0ecdd17e4a072af608324ac76"
+  integrity sha512-Y4d70YfUKWYeObmMHDYtoP2udXVG47v11/tX2NPVxz+z+osAjpflGwXSNEShmFvIZK5LYqSmOjnLhshaHRtRVg==
   dependencies:
-    "@react-native-vector-icons/common" "^13.0.1"
+    "@react-native-vector-icons/common" "^13.0.2"
 
-"@react-native-vector-icons/material-design-icons@^13.1.2":
-  version "13.1.2"
-  resolved "https://registry.npmjs.org/@react-native-vector-icons/material-design-icons/-/material-design-icons-13.1.2.tgz#911738dd273e98446f2a070e702bd9c562c29f38"
-  integrity sha512-Qc8IQCxbnHOk8CvTAb+dLzYgRMbJOLiZ8Up7TRsNixY6EqwPx9/W3DeK5niKtNQ4dIfbALeYz41yyvDM7w7mag==
+"@react-native-vector-icons/material-design-icons@^13.1.3":
+  version "13.1.3"
+  resolved "https://registry.npmjs.org/@react-native-vector-icons/material-design-icons/-/material-design-icons-13.1.3.tgz#e6d0525f1485a96cf7544d9fda20dc1043ac8cf5"
+  integrity sha512-frL9gs3ATkXoFrSWhC/SvfAV34OpoEemQfpWj6AUjjwBeb70ctw86m4oLHl3fUJ/mFzAmzHVvV/O5pBc5aTOTA==
   dependencies:
-    "@react-native-vector-icons/common" "^13.0.1"
+    "@react-native-vector-icons/common" "^13.0.2"
 
 "@react-native/assets-registry@0.86.2":
   version "0.86.2"
