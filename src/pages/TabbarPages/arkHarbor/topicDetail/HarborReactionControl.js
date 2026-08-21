@@ -171,6 +171,7 @@ const HarborReactionControl = ({
     onSelectReaction,
     pending,
     reactions,
+    stopPropagation = false,
     style,
 }) => {
     const { theme } = useTheme();
@@ -203,7 +204,13 @@ const HarborReactionControl = ({
         trigger();
         onSelectReaction?.(reaction);
     };
-    const handlePress = () => {
+    const stopPressPropagation = event => {
+        if (stopPropagation) {
+            event?.stopPropagation?.();
+        }
+    };
+    const handlePress = event => {
+        stopPressPropagation(event);
         if (longPressTriggeredRef.current) {
             longPressTriggeredRef.current = false;
             return;
@@ -223,7 +230,8 @@ const HarborReactionControl = ({
             normalizeHarborReactionName(currentReaction) || primaryReaction,
         );
     };
-    const handleLongPress = () => {
+    const handleLongPress = event => {
+        stopPressPropagation(event);
         longPressTriggeredRef.current = true;
         trigger();
         if (disabled) {
@@ -278,7 +286,8 @@ const HarborReactionControl = ({
                 disabled={pending}
                 hitSlop={hitSlop}
                 onPress={handlePress}
-                onPressIn={() => {
+                onPressIn={event => {
+                    stopPressPropagation(event);
                     longPressTriggeredRef.current = false;
                 }}
                 onLongPress={allowPicker ? handleLongPress : undefined}

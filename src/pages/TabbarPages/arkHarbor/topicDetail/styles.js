@@ -200,12 +200,15 @@ const styles = StyleSheet.create({
         marginLeft: scale(8),
         minWidth: 0,
     },
+    replyPressable: {
+        borderRadius: scale(10),
+    },
     replyHeader: {
         flexDirection: 'row',
         alignItems: 'center',
         marginBottom: verticalScale(2),
     },
-    replyAuthorPressable: {
+    replyAuthorArea: {
         flex: 1,
         minWidth: 0,
     },

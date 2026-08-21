@@ -149,6 +149,7 @@ const HarborPostCard = memo(
         const contentLongPressRef = useRef(false);
         const {
             black,
+            bg_color,
             disabled,
             themeColor,
             tonal,
@@ -341,11 +342,18 @@ const HarborPostCard = memo(
                         expanded: nestedRepliesExpanded,
                     }}
                     disabled={nestedRepliesLoading}
-                    onPress={() => {
+                    onLongPress={event => {
+                        event?.stopPropagation?.();
+                    }}
+                    onPress={event => {
+                        event?.stopPropagation?.();
                         trigger();
                         onToggleNestedReplies(
                             post.__harborNestedTogglePost || post,
                         );
+                    }}
+                    onPressIn={event => {
+                        event?.stopPropagation?.();
                     }}
                     style={({ pressed }) => [
                         styles.nestedRepliesButton,
@@ -443,7 +451,16 @@ const HarborPostCard = memo(
             <Pressable
                 accessibilityRole="button"
                 accessibilityLabel={t('更多')}
-                onPress={openMoreMenu}
+                onLongPress={event => {
+                    event?.stopPropagation?.();
+                }}
+                onPress={event => {
+                    event?.stopPropagation?.();
+                    openMoreMenu();
+                }}
+                onPressIn={event => {
+                    event?.stopPropagation?.();
+                }}
                 style={
                     isFirstPost
                         ? { flexShrink: 0 }
@@ -598,6 +615,7 @@ const HarborPostCard = memo(
                 }}
                 pending={Boolean(pendingLike || pendingReaction)}
                 reactions={reactions}
+                stopPropagation={!isFirstPost}
                 style={reactionControlStyle}>
                 {reactionButtonContent}
             </HarborReactionControl>
@@ -609,7 +627,11 @@ const HarborPostCard = memo(
                 }
                 disabled={pendingLike}
                 hitSlop={8}
-                onPress={() => {
+                onLongPress={event => {
+                    event?.stopPropagation?.();
+                }}
+                onPress={event => {
+                    event?.stopPropagation?.();
                     trigger();
                     logHarborPostCardAction('card.like_press', {
                         postId: post.id,
@@ -624,28 +646,38 @@ const HarborPostCard = memo(
                     }
                     onPressLike(post);
                 }}
+                onPressIn={event => {
+                    event?.stopPropagation?.();
+                }}
                 style={reactionControlStyle}>
                 {reactionButtonContent}
             </Pressable>
         );
 
-        const replyControl = canReply ? (
-            <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={t('回覆')}
-                hitSlop={8}
-                onPress={() => {
-                    trigger();
-                    onPressComposeReply(post);
-                }}
-                style={styles.postMetaIconButton}>
-                <MaterialCommunityIcons
-                    name="comment-outline"
-                    size={metaIconSize}
-                    color={black.third}
-                />
-            </Pressable>
-        ) : null;
+        const openReplyComposer = () => {
+            if (!canReply) {
+                return;
+            }
+            trigger();
+            onPressComposeReply(post);
+        };
+
+        const handleReplyAreaPress = () => {
+            if (contentLongPressRef.current) {
+                contentLongPressRef.current = false;
+                return;
+            }
+            openReplyComposer();
+        };
+
+        const handleReplyAreaLongPress = () => {
+            contentLongPressRef.current = true;
+            openMoreMenu();
+        };
+
+        const handleReplyAreaPressIn = () => {
+            contentLongPressRef.current = false;
+        };
 
         const postContentToggle = isPostLong ? (
             <Pressable
@@ -653,9 +685,16 @@ const HarborPostCard = memo(
                 accessibilityLabel={
                     isPostCollapsed ? t('展開正文') : t('收起正文')
                 }
-                onPress={() => {
+                onLongPress={event => {
+                    event?.stopPropagation?.();
+                }}
+                onPress={event => {
+                    event?.stopPropagation?.();
                     trigger();
                     onTogglePost?.();
+                }}
+                onPressIn={event => {
+                    event?.stopPropagation?.();
                 }}
                 style={({ pressed }) => [
                     styles.postContentToggle,
@@ -1004,13 +1043,38 @@ const HarborPostCard = memo(
                         />
                     </>
                 ) : (
-                    <View style={styles.replyLayout}>
+                    <Pressable
+                        accessibilityRole={
+                            canReply ? 'button' : undefined
+                        }
+                        accessibilityLabel={
+                            canReply ? t('回覆') : undefined
+                        }
+                        onLongPress={handleReplyAreaLongPress}
+                        onPress={handleReplyAreaPress}
+                        onPressIn={handleReplyAreaPressIn}
+                        style={({ pressed }) => [
+                            styles.replyLayout,
+                            styles.replyPressable,
+                            pressed
+                                ? {
+                                      backgroundColor: bg_color,
+                                  }
+                                : null,
+                        ]}>
                         <Pressable
                             accessibilityRole="link"
                             accessibilityLabel={displayName}
-                            onPress={() => {
+                            onLongPress={event => {
+                                event?.stopPropagation?.();
+                            }}
+                            onPress={event => {
+                                event?.stopPropagation?.();
                                 trigger();
                                 onPressAuthor(post.username);
+                            }}
+                            onPressIn={event => {
+                                event?.stopPropagation?.();
                             }}
                             style={({ pressed }) => [
                                 styles.replyAvatarPressable,
@@ -1031,175 +1095,148 @@ const HarborPostCard = memo(
                             />
                         </Pressable>
                         <View style={styles.replyMain}>
-                            <View style={styles.replyHeader}>
-                                <Pressable
-                                    accessibilityRole="link"
-                                    accessibilityLabel={displayName}
-                                    onPress={() => {
-                                        trigger();
-                                        onPressAuthor(post.username);
-                                    }}
-                                    style={({ pressed }) => [
-                                        styles.replyAuthorPressable,
-                                        pressed ? styles.pressedLink : null,
-                                    ]}>
-                                    <View style={styles.authorNameRow}>
-                                        <Text
-                                            style={[
-                                                styles.authorName,
-                                                styles.replyAuthorName,
-                                                {
-                                                    color: black.third,
-                                                    opacity: 0.72,
-                                                },
-                                            ]}
-                                            numberOfLines={1}>
-                                            {displayName}
-                                        </Text>
-                                        {post.user_title ? (
+                            <View>
+                                <View style={styles.replyHeader}>
+                                    <View style={styles.replyAuthorArea}>
+                                        <View style={styles.authorNameRow}>
                                             <Text
                                                 style={[
-                                                    styles.userTitle,
+                                                    styles.authorName,
+                                                    styles.replyAuthorName,
+                                                    {
+                                                        color: black.third,
+                                                        opacity: 0.72,
+                                                    },
+                                                ]}
+                                                numberOfLines={1}>
+                                                {displayName}
+                                            </Text>
+                                            {post.user_title ? (
+                                                <Text
+                                                    style={[
+                                                        styles.userTitle,
+                                                        { color: themeColor },
+                                                    ]}
+                                                    numberOfLines={1}>
+                                                    {post.user_title}
+                                                </Text>
+                                            ) : null}
+                                            {post.staff ? (
+                                                <Text
+                                                    style={[
+                                                        styles.staffBadge,
+                                                        {
+                                                            color: themeColor,
+                                                            backgroundColor:
+                                                                tonal.primary15,
+                                                        },
+                                                    ]}>
+                                                    Staff
+                                                </Text>
+                                            ) : null}
+                                        </View>
+                                    </View>
+                                    {isNestedReply &&
+                                    post.reply_to_post_number ? (
+                                        <Pressable
+                                            accessibilityRole="link"
+                                            onLongPress={event => {
+                                                event?.stopPropagation?.();
+                                            }}
+                                            onPress={event => {
+                                                event?.stopPropagation?.();
+                                                trigger();
+                                                onPressReply(
+                                                    post.reply_to_post_number,
+                                                );
+                                            }}
+                                            onPressIn={event => {
+                                                event?.stopPropagation?.();
+                                            }}
+                                            style={({ pressed }) => [
+                                                styles.replyTarget,
+                                                pressed
+                                                    ? styles.pressedLink
+                                                    : null,
+                                            ]}>
+                                            <MaterialCommunityIcons
+                                                name="reply-outline"
+                                                size={scale(12)}
+                                                color={themeColor}
+                                            />
+                                            <Text
+                                                style={[
+                                                    styles.replyTargetText,
                                                     { color: themeColor },
                                                 ]}
                                                 numberOfLines={1}>
-                                                {post.user_title}
+                                                {replyTargetLabel}
                                             </Text>
-                                        ) : null}
-                                        {post.staff ? (
-                                            <Text
-                                                style={[
-                                                    styles.staffBadge,
-                                                    {
-                                                        color: themeColor,
-                                                        backgroundColor:
-                                                            tonal.primary15,
-                                                    },
-                                                ]}>
-                                                Staff
-                                            </Text>
-                                        ) : null}
-                                    </View>
-                                </Pressable>
-                                {isNestedReply &&
-                                post.reply_to_post_number ? (
-                                    <Pressable
-                                        onPress={() => {
-                                            trigger();
-                                            onPressReply(
-                                                post.reply_to_post_number,
-                                            );
-                                        }}
-                                        style={({ pressed }) => [
-                                            styles.replyTarget,
-                                            pressed ? styles.pressedLink : null,
-                                        ]}>
-                                        <MaterialCommunityIcons
-                                            name="reply-outline"
-                                            size={scale(12)}
-                                            color={themeColor}
-                                        />
-                                        <Text
-                                            style={[
-                                                styles.replyTargetText,
-                                                { color: themeColor },
-                                            ]}
-                                            numberOfLines={1}>
-                                            {replyTargetLabel}
-                                        </Text>
-                                    </Pressable>
-                                ) : null}
-                            </View>
-
-                            <Pressable
-                                accessibilityRole={
-                                    canReply ? 'button' : undefined
-                                }
-                                accessibilityLabel={
-                                    canReply ? t('回覆') : undefined
-                                }
-                                onLongPress={() => {
-                                    contentLongPressRef.current = true;
-                                    openMoreMenu();
-                                }}
-                                onPress={() => {
-                                    if (contentLongPressRef.current) {
-                                        contentLongPressRef.current = false;
-                                        return;
-                                    }
-                                    if (!canReply) {
-                                        return;
-                                    }
-                                    trigger();
-                                    onPressComposeReply(post);
-                                }}
-                                onPressIn={() => {
-                                    contentLongPressRef.current = false;
-                                }}
-                                style={({ pressed }) => [
-                                    styles.replyBody,
-                                    isPostCollapsed
-                                        ? styles.postBodyCollapsed
-                                        : null,
-                                    pressed
-                                        ? {
-                                              backgroundColor:
-                                                  tonal.primary08,
-                                          }
-                                        : null,
-                                ]}>
-                                <View onLayout={onPostBodyLayout}>
-                                    <HarborPostContent
-                                        cooked={post.cooked}
-                                        contentWidth={
-                                            contentWidth -
-                                            (isNestedReply
-                                                ? scale(28)
-                                                : scale(38))
-                                        }
-                                        imageUrls={imageUrls}
-                                        onOpenImage={onOpenImage}
-                                        onPressLink={onPressLink}
-                                        postUrl={postUrl}
-                                        compact
-                                        forceInteractiveFallback={Boolean(
-                                            postEvent,
-                                        )}>
-                                        {postEvent ? (
-                                            <HarborPostEventCard
-                                                event={postEvent}
-                                                postUrl={postUrl}
-                                            />
-                                        ) : null}
-                                    </HarborPostContent>
+                                        </Pressable>
+                                    ) : null}
                                 </View>
-                            </Pressable>
 
-                            {postContentToggle}
-
-                            <View style={styles.postMetaRow}>
-                                <Text
+                                <View
                                     style={[
-                                        styles.postTime,
-                                        { color: black.third },
-                                    ]}
-                                    numberOfLines={1}>
-                                    {formatHarborPostTime(
-                                        post.created_at,
-                                        i18n.language,
-                                    )}
-                                    {wasEdited ? ` · ${t('已編輯')}` : ''}
-                                    {` · #${post.post_number}`}
-                                </Text>
-                                <View style={styles.postMetaActions}>
-                                    {reactionControl}
-                                    {replyControl}
-                                    {moreMenu}
+                                        styles.replyBody,
+                                        isPostCollapsed
+                                            ? styles.postBodyCollapsed
+                                            : null,
+                                    ]}>
+                                    <View onLayout={onPostBodyLayout}>
+                                        <HarborPostContent
+                                            cooked={post.cooked}
+                                            contentWidth={
+                                                contentWidth -
+                                                (isNestedReply
+                                                    ? scale(28)
+                                                    : scale(38))
+                                            }
+                                            imageUrls={imageUrls}
+                                            onOpenImage={onOpenImage}
+                                            onPressLink={onPressLink}
+                                            postUrl={postUrl}
+                                            compact
+                                            forceInteractiveFallback={Boolean(
+                                                postEvent,
+                                            )}>
+                                            {postEvent ? (
+                                                <HarborPostEventCard
+                                                    event={postEvent}
+                                                    postUrl={postUrl}
+                                                />
+                                            ) : null}
+                                        </HarborPostContent>
+                                    </View>
+                                </View>
+
+                                {postContentToggle}
+
+                                <View style={styles.postMetaRow}>
+                                    <Text
+                                        style={[
+                                            styles.postTime,
+                                            { color: black.third },
+                                        ]}
+                                        numberOfLines={1}>
+                                        {formatHarborPostTime(
+                                            post.created_at,
+                                            i18n.language,
+                                        )}
+                                        {wasEdited
+                                            ? ` · ${t('已編輯')}`
+                                            : ''}
+                                        {` · #${post.post_number}`}
+                                    </Text>
+                                    <View style={styles.postMetaActions}>
+                                        {reactionControl}
+                                        {/* 長按回覆卡片可開啟同一操作 Sheet，暫不顯示更多按鈕。 */}
+                                    </View>
                                 </View>
                             </View>
                             {nestedRepliesButton}
                         </View>
-                    </View>
+                    </Pressable>
                 )}
             </View>
         );
