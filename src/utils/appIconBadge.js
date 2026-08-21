@@ -1,7 +1,7 @@
 import { Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
 
-// null：尚未決定；true/false：本進程內快取結果，避免重複彈權限
+// 只快取已允許；系統設定可能隨時由使用者重新開啟。
 let badgePermissionGranted = null;
 
 export function normalizeAppIconBadgeCount(count) {
@@ -43,12 +43,12 @@ function evaluateBadgePermission(settings) {
 }
 
 /**
- * 確保具備寫入主畫面 App 角標的權限（iOS 需 allowBadge）。
+ * 被動檢查主畫面 App 角標權限；首次通知權限只可由明確推送 CTA 請求。
  * @returns {Promise<boolean>}
  */
 export async function ensureAppIconBadgePermission() {
-    if (badgePermissionGranted === true || badgePermissionGranted === false) {
-        return badgePermissionGranted;
+    if (badgePermissionGranted === true) {
+        return true;
     }
 
     try {
@@ -59,21 +59,10 @@ export async function ensureAppIconBadgePermission() {
             return true;
         }
         if (currentAllowed === false) {
-            badgePermissionGranted = false;
             return false;
         }
 
-        // 僅請求角標；之後若要推播再擴充 alert/sound
-        const next = await Notifications.requestPermissionsAsync({
-            ios: {
-                allowAlert: false,
-                allowBadge: true,
-                allowSound: false,
-            },
-        });
-        const nextAllowed = evaluateBadgePermission(next) === true;
-        badgePermissionGranted = nextAllowed;
-        return nextAllowed;
+        return false;
     } catch {
         // 原生模組未就緒等暫時錯誤：不快取，下次再試
         return false;

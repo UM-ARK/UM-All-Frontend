@@ -3,9 +3,7 @@ import { View, StyleSheet, Platform } from 'react-native';
 
 import Text from '../../../../../../components/AppText';
 import { useTheme, uiStyle } from '../../../../../../components/ThemeContext';
-import {
-    OFFICIAL_COURSE_SEARCH,
-} from '../../../../../../utils/pathMap';
+import { getOfficialCourseSearchUrl } from '../../../../../../utils/pathMap';
 import { useUmehHost } from '../../../../../../utils/umehHost';
 import { logToFirebase } from '../../../../../../utils/firebaseAnalytics';
 import { openLink } from '../../../../../../utils/browser';
@@ -136,20 +134,16 @@ const CourseCard = memo(
                 imageColor: black.third,
                 titleColor: black.third,
             },
-            ...(!isPostgraduate
-                ? [
-                    {
-                        id: 'official',
-                        title: t('官方', { ns: 'catalog' }),
-                        image: Platform.select({
-                            ios: 'graduationcap',
-                            android: 'ic_menu_info_details',
-                        }),
-                        imageColor: black.third,
-                        titleColor: black.third,
-                    },
-                ]
-                : []),
+            {
+                id: 'official',
+                title: t('官方', { ns: 'catalog' }),
+                image: Platform.select({
+                    ios: 'graduationcap',
+                    android: 'ic_menu_info_details',
+                }),
+                imageColor: black.third,
+                titleColor: black.third,
+            },
             ...(!isPreEnroll
                 ? [
                     {
@@ -234,7 +228,7 @@ const CourseCard = memo(
                     break;
                 }
                 case 'official': {
-                    const URI = OFFICIAL_COURSE_SEARCH + courseCode;
+                    const URI = getOfficialCourseSearchUrl(courseCode, isPostgraduate);
                     logToFirebase('checkCourse', {
                         courseCode: 'Official ' + courseCode,
                         action: 'official',

@@ -1,6 +1,8 @@
 import React from 'react';
 import {
+    ActivityIndicator,
     Alert,
+    Linking,
     Pressable,
     ScrollView,
     StyleSheet,
@@ -16,6 +18,7 @@ import {scale, verticalScale} from 'react-native-size-matters';
 import Text from '../../../../components/AppText';
 import {uiStyle, useTheme} from '../../../../components/ThemeContext';
 import {useHarborSession} from '../../../../contexts/HarborSessionContext';
+import {usePushRegistration} from '../../../../contexts/PushRegistrationContext';
 import {openLink} from '../../../../utils/browser';
 import {ARK_HARBOR} from '../../../../utils/pathMap';
 import {trigger} from '../../../../utils/trigger';
@@ -24,9 +27,20 @@ const HarborAccountSettingsPage = ({navigation}) => {
     const {theme} = useTheme();
     const {t} = useTranslation('my');
     const {user, login, logout} = useHarborSession();
+    const {
+        permission,
+        harborState,
+        harborDisplayStatus,
+        enableHarborPush,
+        disableHarborPush,
+        updatePermission,
+    } = usePushRegistration();
     const headerHeight = useHeaderHeight();
     const scrollTopInset = isLiquidGlassSupported ? headerHeight : 0;
     const username = user?.username || '';
+    const [isPushActionLoading, setIsPushActionLoading] =
+        React.useState(false);
+    const pushActionInFlightRef = React.useRef(false);
 
     React.useEffect(() => {
         navigation.setOptions({headerTitle: t('Harbor 帳號')});
@@ -42,6 +56,88 @@ const HarborAccountSettingsPage = ({navigation}) => {
             t('無法完成 Harbor 操作，請稍後再試。'),
             [{text: t('確定'), onPress: () => trigger()}],
         );
+    };
+
+    const pushStatusCopy = {
+        disabled: {
+            title: t('未開啟'),
+            description: t('在此裝置接收 Harbor 的中性通知。'),
+        },
+        needs_permission: {
+            title: t('需要系統權限'),
+            description:
+                permission?.canAskAgain === false
+                    ? t('請在系統設定允許通知，返回 App 後按「檢查並繼續」。')
+                    : t('請允許通知、聲音及 App 圖示角標。'),
+        },
+        needs_harbor_authorization: {
+            title: t('需要 Harbor 授權'),
+            description: t('需要重新確認 Harbor 的推送權限。'),
+        },
+        syncing: {
+            title: t('正在同步'),
+            description: t('正在安全地連接此裝置，失敗時會稍後重試。'),
+        },
+        enabled: {
+            title: t('已啟用'),
+            description: t('通知內容預設不顯示私人訊息或回覆內容。'),
+        },
+        silent: {
+            title: t('靜默通知'),
+            description: t('通知已啟用，但系統目前不允許提示聲音。'),
+        },
+    };
+    const currentPushCopy =
+        pushStatusCopy[harborDisplayStatus] || pushStatusCopy.disabled;
+    const pushActionLabel =
+        harborDisplayStatus === 'enabled' || harborDisplayStatus === 'silent'
+            ? t('關閉')
+            : harborDisplayStatus === 'syncing'
+                ? t('重試')
+                : harborDisplayStatus === 'needs_permission' &&
+                    permission?.canAskAgain === false
+                    ? t('檢查並繼續')
+                    : t('開啟');
+
+    const handlePushAction = async () => {
+        if (pushActionInFlightRef.current) {
+            return;
+        }
+        pushActionInFlightRef.current = true;
+        setIsPushActionLoading(true);
+        trigger();
+        try {
+            if (
+                harborDisplayStatus === 'needs_permission' &&
+                permission?.canAskAgain === false
+            ) {
+                const currentPermission = await updatePermission();
+                if (!currentPermission?.usable) {
+                    await Linking.openSettings();
+                    return;
+                }
+            }
+            if (harborState.pendingAction === 'disable') {
+                await disableHarborPush();
+            } else if (
+                harborDisplayStatus === 'enabled' ||
+                harborDisplayStatus === 'silent'
+            ) {
+                await disableHarborPush();
+            } else {
+                await enableHarborPush();
+            }
+        } catch (error) {
+            showOperationError();
+        } finally {
+            pushActionInFlightRef.current = false;
+            setIsPushActionLoading(false);
+        }
+    };
+
+    const handleOpenNotificationSettings = async () => {
+        trigger();
+        await Linking.openSettings();
     };
 
     const handleReauthorize = async () => {
@@ -87,8 +183,8 @@ const HarborAccountSettingsPage = ({navigation}) => {
     const sections = [
         {
             key: 'notifications',
-            title: t('Harbor 通知設定'),
-            description: t('調整電郵、推送及社群通知偏好'),
+            title: t('Harbor 站內及電郵通知偏好'),
+            description: t('調整 Harbor 網頁內的電郵及社群通知偏好'),
             icon: 'notifications-outline',
             onPress: () =>
                 openHarborPath(`/u/${username}/preferences/notifications`),
@@ -178,6 +274,112 @@ const HarborAccountSettingsPage = ({navigation}) => {
                             {backgroundColor: theme.success},
                         ]}
                     />
+                </View>
+
+                <View
+                    style={[
+                        styles.pushCard,
+                        {backgroundColor: theme.white},
+                    ]}>
+                    <View
+                        style={[
+                            styles.rowIcon,
+                            {backgroundColor: theme.tonal.primary15},
+                        ]}>
+                        <Ionicons
+                            name="notifications-outline"
+                            size={scale(19)}
+                            color={theme.themeColor}
+                        />
+                    </View>
+                    <View style={styles.rowText}>
+                        <Text
+                            style={[
+                                styles.rowTitle,
+                                {color: theme.black.main},
+                            ]}>
+                            {t('Harbor 推送通知')}
+                        </Text>
+                        <Text
+                            style={[
+                                styles.pushStatus,
+                                {color: theme.themeColor},
+                            ]}>
+                            {currentPushCopy.title}
+                        </Text>
+                        <Text
+                            style={[
+                                styles.rowDescription,
+                                {color: theme.black.third},
+                            ]}>
+                            {currentPushCopy.description}
+                        </Text>
+                    </View>
+                    <View style={styles.pushActions}>
+                        {harborDisplayStatus === 'silent' ? (
+                            <Pressable
+                                accessibilityRole="button"
+                                style={({pressed}) => [
+                                    styles.pushButton,
+                                    {
+                                        backgroundColor:
+                                            theme.tonal.primary15,
+                                    },
+                                    pressed && {opacity: 0.7},
+                                ]}
+                                onPress={handleOpenNotificationSettings}>
+                                <Text
+                                    style={[
+                                        styles.pushButtonText,
+                                        {color: theme.themeColor},
+                                    ]}>
+                                    {t('前往設定')}
+                                </Text>
+                            </Pressable>
+                        ) : null}
+                        <Pressable
+                            accessibilityRole="button"
+                            accessibilityState={{
+                                busy: isPushActionLoading,
+                                disabled: isPushActionLoading,
+                            }}
+                            disabled={isPushActionLoading}
+                            style={({pressed}) => [
+                                styles.pushButton,
+                                {
+                                    backgroundColor:
+                                        harborDisplayStatus === 'enabled' ||
+                                        harborDisplayStatus === 'silent'
+                                            ? theme.tonal.unread15
+                                            : theme.tonal.primary15,
+                                },
+                                pressed && {opacity: 0.7},
+                                isPushActionLoading && styles.disabled,
+                            ]}
+                            onPress={handlePushAction}>
+                            {isPushActionLoading ? (
+                                <ActivityIndicator
+                                    size="small"
+                                    color={theme.themeColor}
+                                />
+                            ) : null}
+                            <Text
+                                style={[
+                                    styles.pushButtonText,
+                                    {
+                                        color:
+                                            harborDisplayStatus === 'enabled' ||
+                                            harborDisplayStatus === 'silent'
+                                                ? theme.unread
+                                                : theme.themeColor,
+                                    },
+                                ]}>
+                                {isPushActionLoading
+                                    ? t('處理中…')
+                                    : pushActionLabel}
+                            </Text>
+                        </Pressable>
+                    </View>
                 </View>
 
                 <View
@@ -323,6 +525,40 @@ const styles = StyleSheet.create({
     settingsCard: {
         borderRadius: scale(20),
         overflow: 'hidden',
+    },
+    pushCard: {
+        borderRadius: scale(20),
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: scale(11),
+        paddingHorizontal: scale(15),
+        paddingVertical: verticalScale(14),
+    },
+    pushStatus: {
+        ...uiStyle.defaultText,
+        fontSize: scale(10),
+        fontWeight: '650',
+        marginTop: verticalScale(3),
+    },
+    pushActions: {
+        alignItems: 'flex-end',
+        gap: verticalScale(6),
+    },
+    pushButton: {
+        borderRadius: scale(12),
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: scale(5),
+        paddingHorizontal: scale(12),
+        paddingVertical: verticalScale(8),
+    },
+    disabled: {
+        opacity: 0.65,
+    },
+    pushButtonText: {
+        ...uiStyle.defaultText,
+        fontSize: scale(11),
+        fontWeight: '680',
     },
     row: {
         minHeight: verticalScale(78),

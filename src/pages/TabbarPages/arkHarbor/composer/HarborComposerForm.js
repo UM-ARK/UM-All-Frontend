@@ -237,7 +237,7 @@ const HarborComposerForm = ({
                             onChangeText={setRaw}
                             placeholder={t('分享你的想法…內容將自動儲存')}
                             placeholderTextColor={theme.black.third}
-                            scrollEnabled
+                            scrollEnabled={false}
                             style={[
                                 styles.bodyInput,
                                 {color: theme.black.main},
@@ -611,7 +611,7 @@ const styles = StyleSheet.create({
     },
     bodyInput: {
         fontSize: scale(15),
-        height: verticalScale(180),
+        minHeight: verticalScale(180),
         lineHeight: scale(22),
         paddingHorizontal: 0,
         paddingVertical: verticalScale(4),

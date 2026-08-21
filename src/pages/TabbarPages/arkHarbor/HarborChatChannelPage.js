@@ -15,7 +15,12 @@ import {FlashList} from '@shopify/flash-list';
 import {Image} from 'expo-image';
 import {useTranslation} from 'react-i18next';
 import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
-import {KeyboardStickyView} from 'react-native-keyboard-controller';
+import {
+    KeyboardAvoidingView,
+    KeyboardController,
+    KeyboardEvents,
+    useKeyboardState,
+} from 'react-native-keyboard-controller';
 import moment from 'moment-timezone';
 import {scale, verticalScale} from 'react-native-size-matters';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
@@ -39,10 +44,17 @@ import {
     readHarborChatMessagesCache,
     writeHarborChatMessagesCache,
 } from '../../../utils/harbor/harborChatQueries';
+import {
+    getLocalHarborChatDraft,
+    saveLocalHarborChatDraft,
+} from '../../../utils/harbor/harborChatDrafts';
+import {getHarborDraftAccountId} from '../../../utils/harbor/harborDrafts';
 import {trigger} from '../../../utils/trigger';
 import {HarborFullState} from './components/HarborListStates';
 
 const CHAT_POLL_INTERVAL_MS = 8000;
+const CHAT_DRAFT_SAVE_DELAY_MS = 250;
+const NEAR_END_THRESHOLD = verticalScale(64);
 
 const HarborChatProfileButton = ({
     accessibilityLabel,
@@ -359,11 +371,19 @@ const HarborChatChannelPage = ({navigation, route}) => {
     const {user} = useHarborSession();
     const headerHeight = useHeaderHeight();
     const insets = useSafeAreaInsets();
+    const isKeyboardVisible = useKeyboardState(state => state.isVisible);
     const listRef = useRef(null);
     const initialScrollRef = useRef(false);
+    const isNearEndRef = useRef(true);
+    const followKeyboardRef = useRef(true);
+    const isKeyboardAnimatingRef = useRef(false);
+    const listHeightRef = useRef(0);
     const initialTargetMessageRef = useRef(Number(route.params?.messageId) || null);
     const lastMarkedReadRef = useRef(0);
     const loadingRef = useRef(false);
+    const draftRef = useRef('');
+    const draftEditedRef = useRef(false);
+    const draftSaveTimerRef = useRef(null);
     const channelId = Number(route.params?.channelId);
     const isGroup = Boolean(route.params?.isGroup);
     const initialTargetMessageId = Number(route.params?.messageId) || null;
@@ -391,6 +411,7 @@ const HarborChatChannelPage = ({navigation, route}) => {
     const [isSending, setIsSending] = useState(false);
     const [error, setError] = useState(false);
     const username = user?.username || '';
+    const draftAccountId = getHarborDraftAccountId(user);
     const cacheIdentityRef = useRef(`${username}:${channelId}`);
     const peerUsername = useMemo(
         () =>
@@ -436,6 +457,72 @@ const HarborChatChannelPage = ({navigation, route}) => {
             });
         },
         [patchCachedMessages],
+    );
+
+    const persistDraft = useCallback(
+        value => {
+            if (!draftAccountId || !channelId) {
+                return Promise.resolve('');
+            }
+            return saveLocalHarborChatDraft(
+                draftAccountId,
+                channelId,
+                value,
+            ).catch(() => null);
+        },
+        [channelId, draftAccountId],
+    );
+
+    const flushDraft = useCallback(
+        value => {
+            if (draftSaveTimerRef.current) {
+                clearTimeout(draftSaveTimerRef.current);
+                draftSaveTimerRef.current = null;
+            }
+            return persistDraft(value);
+        },
+        [persistDraft],
+    );
+
+    const handleDraftChange = useCallback(
+        value => {
+            draftEditedRef.current = true;
+            draftRef.current = value;
+            setDraft(value);
+            if (draftSaveTimerRef.current) {
+                clearTimeout(draftSaveTimerRef.current);
+            }
+            draftSaveTimerRef.current = setTimeout(() => {
+                draftSaveTimerRef.current = null;
+                persistDraft(value);
+            }, CHAT_DRAFT_SAVE_DELAY_MS);
+        },
+        [persistDraft],
+    );
+
+    useEffect(() => {
+        let active = true;
+        draftEditedRef.current = false;
+        draftRef.current = '';
+        setDraft('');
+        getLocalHarborChatDraft(draftAccountId, channelId)
+            .then(value => {
+                if (active && !draftEditedRef.current) {
+                    draftRef.current = value;
+                    setDraft(value);
+                }
+            })
+            .catch(() => null);
+        return () => {
+            active = false;
+        };
+    }, [channelId, draftAccountId]);
+
+    useEffect(
+        () => () => {
+            flushDraft(draftRef.current);
+        },
+        [flushDraft],
     );
 
     useEffect(() => {
@@ -632,7 +719,9 @@ const HarborChatChannelPage = ({navigation, route}) => {
         setIsSending(true);
         try {
             const messageId = await sendHarborChatMessage(channelId, content);
+            draftRef.current = '';
             setDraft('');
+            flushDraft('');
             if (messageId) {
                 const optimisticMessage = {
                     id: messageId,
@@ -669,7 +758,63 @@ const HarborChatChannelPage = ({navigation, route}) => {
         } finally {
             setIsSending(false);
         }
-    }, [channelId, draft, isSending, loadLatest, t, updateMessages, user]);
+    }, [channelId, draft, flushDraft, isSending, loadLatest, t, updateMessages, user]);
+
+    const handleListScroll = useCallback(event => {
+        if (isKeyboardAnimatingRef.current) {
+            return;
+        }
+        const {contentOffset, contentSize, layoutMeasurement} =
+            event.nativeEvent;
+        isNearEndRef.current =
+            contentOffset.y + layoutMeasurement.height >=
+            contentSize.height - NEAR_END_THRESHOLD;
+    }, []);
+
+    const scrollToLatest = useCallback((animated = true) => {
+        requestAnimationFrame(() => {
+            listRef.current?.scrollToEnd({animated});
+        });
+    }, []);
+
+    const handleListLayout = useCallback(event => {
+        const height = event.nativeEvent.layout.height;
+        const previousHeight = listHeightRef.current;
+        listHeightRef.current = height;
+        if (
+            previousHeight > 0 &&
+            height < previousHeight - 8 &&
+            followKeyboardRef.current
+        ) {
+            scrollToLatest(false);
+        }
+    }, [scrollToLatest]);
+
+    const dismissKeyboard = useCallback(() => {
+        trigger();
+        KeyboardController.dismiss();
+    }, []);
+
+    useEffect(() => {
+        const willShow = KeyboardEvents.addListener('keyboardWillShow', () => {
+            followKeyboardRef.current = isNearEndRef.current;
+            isKeyboardAnimatingRef.current = true;
+        });
+        const didShow = KeyboardEvents.addListener('keyboardDidShow', () => {
+            if (followKeyboardRef.current) {
+                scrollToLatest(true);
+            }
+            isKeyboardAnimatingRef.current = false;
+        });
+        const didHide = KeyboardEvents.addListener('keyboardDidHide', () => {
+            isKeyboardAnimatingRef.current = false;
+        });
+        return () => {
+            willShow.remove();
+            didShow.remove();
+            didHide.remove();
+        };
+    }, [scrollToLatest]);
 
     const contentContainerStyle = useMemo(
         () => ({
@@ -690,89 +835,100 @@ const HarborChatChannelPage = ({navigation, route}) => {
 
     return (
         <View style={[styles.page, {backgroundColor: theme.bg_color}]}>
-            <FlashList
-                ref={listRef}
-                contentContainerStyle={contentContainerStyle}
-                data={messages}
-                keyExtractor={item => String(item.id)}
-                ListEmptyComponent={
-                    error ? (
-                        <HarborFullState
-                            actionLabel={t('重試')}
-                            description={t('暫時無法取得 Chat 訊息。')}
-                            icon="chat-alert-outline"
-                            onAction={loadLatest}
-                            title={t('無法載入對話')}
-                        />
-                    ) : (
-                        <HarborFullState
-                            description={t('傳送第一則訊息，開始這段 Chat。')}
-                            icon="message-text-outline"
-                            title={t('開始聊聊吧')}
-                        />
-                    )
-                }
-                ListHeaderComponent={
-                    canLoadMorePast ? (
-                        <Pressable
-                            accessibilityRole="button"
-                            disabled={isLoadingPast}
-                            onPress={() => {
-                                trigger();
-                                loadPast();
-                            }}
-                            style={styles.loadPastButton}>
-                            {isLoadingPast ? (
-                                <ActivityIndicator
-                                    color={theme.themeColor}
-                                    size="small"
-                                />
-                            ) : (
-                                <Text
-                                    style={[
-                                        styles.loadPastText,
-                                        {color: theme.themeColor},
-                                    ]}>
-                                    {t('載入較早訊息')}
-                                </Text>
-                            )}
-                        </Pressable>
-                    ) : null
-                }
-                onContentSizeChange={() => {
-                    if (!initialScrollRef.current && messages.length > 0) {
-                        initialScrollRef.current = true;
-                        listRef.current?.scrollToEnd({animated: false});
+            <KeyboardAvoidingView
+                automaticOffset
+                behavior="padding"
+                style={styles.page}>
+                <FlashList
+                    ref={listRef}
+                    contentContainerStyle={contentContainerStyle}
+                    data={messages}
+                    keyExtractor={item => String(item.id)}
+                    keyboardDismissMode="interactive"
+                    keyboardShouldPersistTaps="handled"
+                    ListEmptyComponent={
+                        error ? (
+                            <HarborFullState
+                                actionLabel={t('重試')}
+                                description={t('暫時無法取得 Chat 訊息。')}
+                                icon="chat-alert-outline"
+                                onAction={loadLatest}
+                                title={t('無法載入對話')}
+                            />
+                        ) : (
+                            <HarborFullState
+                                description={t('傳送第一則訊息，開始這段 Chat。')}
+                                icon="message-text-outline"
+                                title={t('開始聊聊吧')}
+                            />
+                        )
                     }
-                }}
-                renderItem={({item}) => (
-                    <HarborChatMessage
-                        isGroup={isGroup}
-                        isOwn={item.user.username === user?.username}
-                        language={i18n.language}
-                        message={item}
-                        navigation={navigation}
-                    />
-                )}
-            />
-            <KeyboardStickyView>
+                    ListHeaderComponent={
+                        canLoadMorePast ? (
+                            <Pressable
+                                accessibilityRole="button"
+                                disabled={isLoadingPast}
+                                onPress={() => {
+                                    trigger();
+                                    loadPast();
+                                }}
+                                style={styles.loadPastButton}>
+                                {isLoadingPast ? (
+                                    <ActivityIndicator
+                                        color={theme.themeColor}
+                                        size="small"
+                                    />
+                                ) : (
+                                    <Text
+                                        style={[
+                                            styles.loadPastText,
+                                            {color: theme.themeColor},
+                                        ]}>
+                                        {t('載入較早訊息')}
+                                    </Text>
+                                )}
+                            </Pressable>
+                        ) : null
+                    }
+                    onContentSizeChange={() => {
+                        if (!initialScrollRef.current && messages.length > 0) {
+                            initialScrollRef.current = true;
+                            listRef.current?.scrollToEnd({animated: false});
+                        }
+                    }}
+                    onLayout={handleListLayout}
+                    onScroll={handleListScroll}
+                    renderItem={({item}) => (
+                        <HarborChatMessage
+                            isGroup={isGroup}
+                            isOwn={item.user.username === user?.username}
+                            language={i18n.language}
+                            message={item}
+                            navigation={navigation}
+                        />
+                    )}
+                    scrollEventThrottle={16}
+                />
                 <View
                     style={[
                         styles.composer,
                         {
                             backgroundColor: theme.white,
                             borderTopColor: theme.disabled,
-                            paddingBottom: Math.max(
-                                insets.bottom,
-                                verticalScale(8),
-                            ),
+                            paddingBottom: isKeyboardVisible
+                                ? verticalScale(8)
+                                : Math.max(
+                                    insets.bottom,
+                                    verticalScale(8),
+                                ),
                         },
                     ]}>
                     <TextInput
                         accessibilityLabel={t('Chat 訊息')}
                         maxLength={6000}
                         multiline
-                        onChangeText={setDraft}
+                        onBlur={() => flushDraft(draftRef.current)}
+                        onChangeText={handleDraftChange}
                         placeholder={t('輸入訊息')}
                         placeholderTextColor={theme.black.third}
                         style={[
@@ -784,6 +940,25 @@ const HarborChatChannelPage = ({navigation, route}) => {
                         ]}
                         value={draft}
                     />
+                    {isKeyboardVisible ? (
+                        <Pressable
+                            accessibilityLabel={t('完成')}
+                            accessibilityRole="button"
+                            hitSlop={scale(8)}
+                            onPress={dismissKeyboard}
+                            style={({pressed}) => [
+                                styles.doneButton,
+                                pressed && {opacity: 0.7},
+                            ]}>
+                            <Text
+                                style={[
+                                    styles.doneText,
+                                    {color: theme.themeColor},
+                                ]}>
+                                {t('完成')}
+                            </Text>
+                        </Pressable>
+                    ) : null}
                     <Pressable
                         accessibilityLabel={t('傳送')}
                         accessibilityRole="button"
@@ -815,7 +990,7 @@ const HarborChatChannelPage = ({navigation, route}) => {
                         )}
                     </Pressable>
                 </View>
-            </KeyboardStickyView>
+            </KeyboardAvoidingView>
         </View>
     );
 };
@@ -888,6 +1063,16 @@ const styles = StyleSheet.create({
         gap: scale(8),
         paddingHorizontal: scale(10),
         paddingTop: verticalScale(8),
+    },
+    doneButton: {
+        height: scale(38),
+        justifyContent: 'center',
+        paddingHorizontal: scale(4),
+    },
+    doneText: {
+        ...uiStyle.defaultText,
+        fontSize: scale(13),
+        fontWeight: '700',
     },
     input: {
         ...uiStyle.defaultText,

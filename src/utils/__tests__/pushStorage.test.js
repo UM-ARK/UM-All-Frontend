@@ -1,0 +1,77 @@
+const mockValues = new Map();
+
+jest.mock('../storageKits', () => ({
+    getLocalStorage: jest.fn(async key => mockValues.get(key)),
+    setLocalStorageSilently: jest.fn(async (key, value) => {
+        mockValues.set(key, value);
+        return 'ok';
+    }),
+}));
+
+import {
+    createHarborPushAccountKey,
+    loadHarborPushState,
+    loadPushRegistrationState,
+    saveHarborPushState,
+} from '../pushStorage';
+
+describe('pushStorage', () => {
+    beforeEach(() => {
+        mockValues.clear();
+        jest.clearAllMocks();
+    });
+
+    it('舊版註冊狀態會標記語言尚未同步', async () => {
+        mockValues.set('push_registration_v1', {
+            status: 'registered',
+            endpointId: 'endpoint-id',
+        });
+
+        await expect(loadPushRegistrationState()).resolves.toMatchObject({
+            status: 'registered',
+            registeredLocale: null,
+            localeSyncPending: false,
+        });
+    });
+
+    it('Harbor intent 以帳號及 installation 隔離', async () => {
+        const installationId = '5d2b67a4-d4ca-4b8a-b409-466fcdab198d';
+        const accountA = createHarborPushAccountKey(
+            {id: 1, username: 'a'},
+            installationId,
+        );
+        const accountB = createHarborPushAccountKey(
+            {id: 2, username: 'b'},
+            installationId,
+        );
+
+        await saveHarborPushState(accountA, {desiredEnabled: true});
+
+        await expect(loadHarborPushState(accountA)).resolves.toMatchObject({
+            desiredEnabled: true,
+        });
+        await expect(loadHarborPushState(accountB)).resolves.toMatchObject({
+            desiredEnabled: false,
+            pendingAction: null,
+        });
+    });
+
+    it('不同帳號同時保存不會互相覆蓋', async () => {
+        await Promise.all([
+            saveHarborPushState('1:installation-id', {
+                desiredEnabled: true,
+            }),
+            saveHarborPushState('2:installation-id', {
+                desiredEnabled: false,
+                dismissedPrompt: true,
+            }),
+        ]);
+
+        await expect(
+            loadHarborPushState('1:installation-id'),
+        ).resolves.toMatchObject({desiredEnabled: true});
+        await expect(
+            loadHarborPushState('2:installation-id'),
+        ).resolves.toMatchObject({dismissedPrompt: true});
+    });
+});

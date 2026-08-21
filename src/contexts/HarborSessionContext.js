@@ -53,6 +53,7 @@ import { getLocalStorage, setLocalStorage } from '../utils/storageKits';
 const PROFILE_CACHE_KEY = 'harbor_profile_cache';
 const PROFILE_VALIDATION_INTERVAL = 5 * 60 * 1000;
 const CHAT_CHANNELS_FRESHNESS_INTERVAL = 60 * 1000;
+const UNREAD_FOREGROUND_REFRESH_INTERVAL = 5 * 60 * 1000;
 
 const HarborSessionContext = createContext(null);
 
@@ -83,6 +84,7 @@ function getCredentialCacheId(credentials) {
 
 export const HarborSessionProvider = ({ children }) => {
     const [status, setStatus] = useState('restoring');
+    const [authorizationPhase, setAuthorizationPhase] = useState(null);
     const [user, setUser] = useState(null);
     const [error, setError] = useState(null);
     const [inboxUnreadCount, setInboxUnreadCount] = useState(0);
@@ -104,6 +106,7 @@ export const HarborSessionProvider = ({ children }) => {
     const validationInFlightRef = useRef(null);
     const revocationInFlightRef = useRef(null);
     const sessionGenerationRef = useRef(0);
+    const unreadForegroundLastRefreshAtRef = useRef(0);
 
     useEffect(() => {
         userRef.current = user;
@@ -122,6 +125,7 @@ export const HarborSessionProvider = ({ children }) => {
         chatUnreadCountRef.current = 0;
         chatChannelsFetchedAtRef.current = 0;
         chatChannelsInFlightRef.current = null;
+        unreadForegroundLastRefreshAtRef.current = 0;
         setActiveHarborCredentials(null);
         if (mountedRef.current) {
             setUser(null);
@@ -146,6 +150,7 @@ export const HarborSessionProvider = ({ children }) => {
         chatUnreadCountRef.current = 0;
         chatChannelsFetchedAtRef.current = 0;
         chatChannelsInFlightRef.current = null;
+        unreadForegroundLastRefreshAtRef.current = 0;
         setActiveHarborCredentials(credentials);
         if (mountedRef.current) {
             setInboxUnreadCount(0);
@@ -542,6 +547,7 @@ export const HarborSessionProvider = ({ children }) => {
 
     useEffect(() => {
         if (status === 'signedIn' && user?.username) {
+            unreadForegroundLastRefreshAtRef.current = Date.now();
             Promise.allSettled([
                 refreshInboxUnreadCount(),
                 refreshChatUnreadCount(),
@@ -578,6 +584,11 @@ export const HarborSessionProvider = ({ children }) => {
                 credentials &&
                 !validationInFlightRef.current &&
                 Date.now() - lastValidationTime > PROFILE_VALIDATION_INTERVAL;
+            const shouldRefreshUnread =
+                nextState === 'active' &&
+                credentials &&
+                Date.now() - unreadForegroundLastRefreshAtRef.current >
+                    UNREAD_FOREGROUND_REFRESH_INTERVAL;
 
             if (shouldValidate) {
                 const validationRequest = refreshProfile(
@@ -591,7 +602,8 @@ export const HarborSessionProvider = ({ children }) => {
                     }
                 });
             }
-            if (nextState === 'active' && credentials) {
+            if (shouldRefreshUnread) {
+                unreadForegroundLastRefreshAtRef.current = Date.now();
                 Promise.allSettled([
                     refreshInboxUnreadCount(),
                     refreshChatUnreadCount(),
@@ -668,10 +680,11 @@ export const HarborSessionProvider = ({ children }) => {
         return () => subscription.remove();
     }, [activateCredentialsFromCallback]);
 
-    const login = useCallback(async intent => {
+    const login = useCallback(async (intent, authorizationOptions) => {
         const startedAt = Date.now();
         logHarborAuthEvent('login.start');
         setStatus('authorizing');
+        setAuthorizationPhase('preparing');
         setError(null);
 
         try {
@@ -689,7 +702,20 @@ export const HarborSessionProvider = ({ children }) => {
                 throw pendingError;
             }
 
-            const credentials = await startHarborAuthorization();
+            const credentials = await startHarborAuthorization({
+                ...authorizationOptions,
+                onBrowserOpen: () => {
+                    if (mountedRef.current) {
+                        setAuthorizationPhase('browser');
+                        return new Promise(resolve =>
+                            requestAnimationFrame(resolve),
+                        );
+                    }
+                },
+            });
+            if (mountedRef.current) {
+                setAuthorizationPhase('finishing');
+            }
             logHarborAuthEvent('login.credentials.ready');
             const generation = activateSession(credentials);
             await refreshProfile(credentials, generation);
@@ -720,6 +746,10 @@ export const HarborSessionProvider = ({ children }) => {
                 setStatus(credentialsRef.current ? 'signedIn' : 'signedOut');
             }
             throw authError;
+        } finally {
+            if (mountedRef.current) {
+                setAuthorizationPhase(null);
+            }
         }
     }, [activateSession, refreshProfile, retryPendingRevocation]);
 
@@ -760,6 +790,7 @@ export const HarborSessionProvider = ({ children }) => {
     const value = useMemo(
         () => ({
             status,
+            authorizationPhase,
             user,
             error,
             inboxUnreadCount,
@@ -784,6 +815,7 @@ export const HarborSessionProvider = ({ children }) => {
                     : Promise.resolve(null),
         }),
         [
+            authorizationPhase,
             consumeLoginIntent,
             chatUnreadCount,
             chatChannels,

@@ -13,6 +13,7 @@ jest.mock('../harborQueryCache', () => ({
 import {
     mergeHarborTopicListItem,
     publishHarborTopicUpdate,
+    reconcileHarborTopicListItems,
     subscribeHarborTopicUpdates,
 } from '../harborTopicUpdates';
 
@@ -129,6 +130,94 @@ describe('harborTopicUpdates', () => {
             isNew: false,
             newContentType: null,
         });
+    });
+
+    test('列表刷新時保留本地較新的已讀狀態', () => {
+        expect(
+            reconcileHarborTopicListItems(
+                [
+                    {
+                        id: 12,
+                        highestPostNumber: 8,
+                        lastReadPostNumber: 3,
+                        unreadCount: 5,
+                        isUnread: true,
+                        isNew: true,
+                    },
+                    {
+                        id: 13,
+                        highestPostNumber: 4,
+                        lastReadPostNumber: 4,
+                        unreadCount: 0,
+                        isUnread: false,
+                        isNew: false,
+                    },
+                ],
+                [
+                    {
+                        id: 12,
+                        highestPostNumber: 8,
+                        lastReadPostNumber: 8,
+                        unreadCount: 0,
+                        isUnread: false,
+                        isNew: false,
+                    },
+                ],
+            ),
+        ).toEqual([
+            {
+                id: 12,
+                highestPostNumber: 8,
+                lastReadPostNumber: 8,
+                unreadCount: 0,
+                isUnread: false,
+                isNew: false,
+            },
+            {
+                id: 13,
+                highestPostNumber: 4,
+                lastReadPostNumber: 4,
+                unreadCount: 0,
+                isUnread: false,
+                isNew: false,
+            },
+        ]);
+    });
+
+    test('伺服器已讀樓層較新時不覆蓋列表刷新結果', () => {
+        expect(
+            reconcileHarborTopicListItems(
+                [
+                    {
+                        id: 12,
+                        highestPostNumber: 8,
+                        lastReadPostNumber: 8,
+                        unreadCount: 0,
+                        isUnread: false,
+                        isNew: false,
+                    },
+                ],
+                [
+                    {
+                        id: 12,
+                        highestPostNumber: 8,
+                        lastReadPostNumber: 3,
+                        unreadCount: 5,
+                        isUnread: true,
+                        isNew: true,
+                    },
+                ],
+            ),
+        ).toEqual([
+            {
+                id: 12,
+                highestPostNumber: 8,
+                lastReadPostNumber: 8,
+                unreadCount: 0,
+                isUnread: false,
+                isNew: false,
+            },
+        ]);
     });
 
     test('需重排列表時失效列表 cache 並保留 listener 契約', () => {

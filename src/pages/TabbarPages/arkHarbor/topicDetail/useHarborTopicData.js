@@ -25,7 +25,9 @@ import {
     appendTopicPosts,
     collectNestedPosts,
     extractPostImages,
+    findNestedPostWithMissingChildren,
     flattenNestedPosts,
+    getLoadedNestedReplyCount,
     getNestedReplyCount,
     getNestedReplyPreviewLimit,
     isCanceledRequest,
@@ -287,7 +289,11 @@ const useHarborTopicData = ({
     );
 
     const loadTopic = useCallback(
-        async ({ refresh = false, force = refresh } = {}) => {
+        async ({
+            refresh = false,
+            force = refresh,
+            preserveReading = false,
+        } = {}) => {
             const requestGeneration = ++requestGenerationRef.current;
             const requestSessionStatus = sessionStatusRef.current;
 
@@ -404,7 +410,9 @@ const useHarborTopicData = ({
                 setUnreadAfterPostNumber(
                     serverUnreadCount > 0 ? serverLastReadPostNumber : -1,
                 );
-                onResetReading();
+                if (!preserveReading) {
+                    onResetReading();
+                }
                 latestTopicRef.current = nextTopic;
                 setTopic(nextTopic);
             } catch (error) {
@@ -685,8 +693,12 @@ const useHarborTopicData = ({
                     return next;
                 });
             };
+            const missingChildrenTarget =
+                findNestedPostWithMissingChildren(post);
+            const loadedReplyCount = getLoadedNestedReplyCount(post);
             if (
-                post.__harborNestedChildrenFetched ||
+                loadedReplyCount >= nextReplyLimit ||
+                !missingChildrenTarget ||
                 pendingNestedPostNumbers.includes(postNumber)
             ) {
                 revealReplies();
@@ -700,9 +712,12 @@ const useHarborTopicData = ({
             try {
                 const response = await fetchHarborNestedPostChildren(
                     topicId,
-                    postNumber,
+                    Number(missingChildrenTarget.post.post_number),
                     {
-                        depth: Number(post.__harborNestedDepth || 0) + 1,
+                        depth:
+                            Number(post.__harborNestedDepth || 0) +
+                            missingChildrenTarget.depth +
+                            1,
                         sort:
                             latestTopicRef.current?.nested_sort || 'old',
                     },
@@ -717,7 +732,7 @@ const useHarborTopicData = ({
                             ...current.post_stream,
                             posts: updateNestedPostTree(
                                 current.post_stream?.posts,
-                                post.id,
+                                missingChildrenTarget.post.id,
                                 currentPost => ({
                                     ...currentPost,
                                     __harborNestedChildrenFetched: true,
@@ -736,8 +751,7 @@ const useHarborTopicData = ({
                     return;
                 }
                 if (
-                    !Array.isArray(post.children) ||
-                    post.children.length === 0
+                    loadedReplyCount <= visibleReplyCount
                 ) {
                     Toast.show(t('回覆載入失敗，請稍後再試'));
                 } else {

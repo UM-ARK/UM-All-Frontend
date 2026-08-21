@@ -5,6 +5,7 @@ import {
     useState,
 } from 'react';
 
+import { useFocusEffect } from '@react-navigation/native';
 import { isLiquidGlassSupported } from '@callstack/liquid-glass';
 import Toast from 'react-native-simple-toast';
 import { verticalScale } from 'react-native-size-matters';
@@ -48,6 +49,19 @@ export const getReadingPostNumber = ({
     return Number(readingPost.item.post_number);
 };
 
+export const getHighestVisiblePostNumber = visiblePosts => {
+    if (!Array.isArray(visiblePosts) || visiblePosts.length === 0) {
+        return 0;
+    }
+    return visiblePosts.reduce((highest, viewableItem) => {
+        const postNumber = Number(viewableItem?.item?.post_number);
+        if (!Number.isInteger(postNumber) || postNumber <= 0) {
+            return highest;
+        }
+        return Math.max(highest, postNumber);
+    }, 0);
+};
+
 export const getTopicReadStateAfterVisit = ({
     highestPostNumber,
     lastReadPostNumber,
@@ -70,8 +84,20 @@ export const getTopicReadStateAfterVisit = ({
         ? Math.max(0, Number(serverUnread) || 0)
         : null;
     const isAtKnownEnd = highest != null && nextLastRead >= highest;
-    // 未讀數不是樓層差；部分閱讀先保留伺服器值，讀到結尾才安全清零
-    const unreadCount = isAtKnownEnd ? 0 : previousUnread;
+    const remainingByFloor =
+        highest != null ? Math.max(0, highest - nextLastRead) : null;
+    const lastReadAdvanced = nextLastRead > previousLastRead;
+    // 讀到結尾才清零；已往前讀時用樓層差下修未讀數，但不會憑空造出新回覆
+    let unreadCount = previousUnread;
+    if (isAtKnownEnd) {
+        unreadCount = 0;
+    } else if (
+        lastReadAdvanced &&
+        previousUnread != null &&
+        remainingByFloor != null
+    ) {
+        unreadCount = Math.min(previousUnread, remainingByFloor);
+    }
     return {
         highestPostNumber: highest,
         lastReadPostNumber: nextLastRead,
@@ -103,6 +129,7 @@ const useHarborTopicReading = ({
 }) => {
     const pendingScrollRef = useRef(null);
     const latestVisiblePostRef = useRef(0);
+    const maxVisiblePostRef = useRef(0);
     const viewablePostsRef = useRef([]);
     const isAtTopicEndRef = useRef(false);
     const lastTimingsAtRef = useRef(Date.now());
@@ -118,12 +145,29 @@ const useHarborTopicReading = ({
         });
         pendingScrollRef.current = null;
         latestVisiblePostRef.current = 1;
+        maxVisiblePostRef.current = 1;
         isAtTopicEndRef.current = false;
         setCurrentPostNumber(1);
     }, [listRef]);
 
     const disposeTopicReading = useCallback(() => {
-        const lastPostNumber = latestVisiblePostRef.current;
+        const latestTopic = latestTopicRef.current;
+        const highest = Number(
+            latestTopic?.highest_post_number ||
+            latestTopic?.posts_count ||
+            0,
+        );
+        // 列表已讀要用看過的最高樓，不是閱讀線所在樓；滑到底則視為讀完
+        const lastPostNumber = isAtTopicEndRef.current && highest > 0
+            ? Math.max(
+                latestVisiblePostRef.current,
+                maxVisiblePostRef.current,
+                highest,
+            )
+            : Math.max(
+                latestVisiblePostRef.current,
+                maxVisiblePostRef.current,
+            );
         if (
             lastPostNumber > 0 &&
             sessionStatusRef.current === 'signedIn'
@@ -136,7 +180,6 @@ const useHarborTopicReading = ({
             }).catch(() => { });
 
             // 返回列表時就地更新該帖已讀狀態，避免整表刷新
-            const latestTopic = latestTopicRef.current;
             const readState = getTopicReadStateAfterVisit({
                 highestPostNumber: latestTopic?.highest_post_number,
                 lastReadPostNumber: latestTopic?.last_read_post_number,
@@ -167,17 +210,26 @@ const useHarborTopicReading = ({
                 ...(readState.shouldReloadLists
                     ? {newContentType: null}
                     : {}),
-                // 僅在未讀／新帖真正讀完時重排列表，已讀帖返回不打列表 API
-                ...(readState.shouldReloadLists
-                    ? { reloadLists: true }
-                    : {}),
+                // 主頁沒有未讀／新帖分頁；讀完後失效 cache 會在 timings 尚未寫入時用舊列表蓋掉樂觀已讀
             });
+            if (latestTopic) {
+                latestTopicRef.current = {
+                    ...latestTopic,
+                    last_read_post_number: readState.lastReadPostNumber,
+                    unseen: false,
+                    ...(readState.unreadCount == null
+                        ? {}
+                        : {unread_posts: readState.unreadCount}),
+                };
+            }
         }
     }, [latestTopicRef, sessionStatusRef, topicId]);
 
-    useEffect(() => {
-        return () => disposeTopicReading();
-    }, [disposeTopicReading, topicId]);
+    useFocusEffect(
+        useCallback(() => {
+            return () => disposeTopicReading();
+        }, [disposeTopicReading]),
+    );
 
     const revealNewReplies = useCallback(latestPostNumber => {
         pendingScrollRef.current = latestPostNumber;
@@ -195,6 +247,9 @@ const useHarborTopicReading = ({
             }
 
             latestVisiblePostRef.current = normalizedPostNumber;
+            if (normalizedPostNumber > maxVisiblePostRef.current) {
+                maxVisiblePostRef.current = normalizedPostNumber;
+            }
             setCurrentPostNumber(normalizedPostNumber);
             const now = Date.now();
             if (
@@ -347,7 +402,7 @@ const useHarborTopicReading = ({
 
         const revealRequestedPost = async () => {
             if (composerRefreshAt) {
-                await loadTopic({force: true});
+                await loadTopic({force: true, preserveReading: true});
             }
             await scrollToPost(requestedPostNumber, { animated: false });
         };
@@ -414,6 +469,12 @@ const useHarborTopicReading = ({
                     (left, right) =>
                         Number(left.index) - Number(right.index),
                 );
+            const highestVisible = getHighestVisiblePostNumber(
+                viewablePostsRef.current,
+            );
+            if (highestVisible > maxVisiblePostRef.current) {
+                maxVisiblePostRef.current = highestVisible;
+            }
             updateReadingPostFromOffset(
                 Number(listRef.current?.getAbsoluteLastScrollOffset?.()) || 0,
             );
@@ -433,11 +494,21 @@ const useHarborTopicReading = ({
                 contentHeight > 0 &&
                 contentOffsetY + viewportHeight >=
                     contentHeight - TOPIC_END_TOLERANCE;
+            if (isAtTopicEndRef.current) {
+                const highest = Number(
+                    latestTopicRef.current?.highest_post_number ||
+                    latestTopicRef.current?.posts_count ||
+                    0,
+                );
+                if (highest > maxVisiblePostRef.current) {
+                    maxVisiblePostRef.current = highest;
+                }
+            }
             updateReadingPostFromOffset(
                 contentOffsetY,
             );
         },
-        [updateReadingPostFromOffset],
+        [latestTopicRef, updateReadingPostFromOffset],
     );
 
     const handleScrollBeginDrag = useCallback(() => {

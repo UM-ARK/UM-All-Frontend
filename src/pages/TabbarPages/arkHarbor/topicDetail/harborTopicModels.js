@@ -366,6 +366,21 @@ const getTagLabel = tag => {
     return tag?.name || tag?.id || '';
 };
 
+// 詳情頁展示用：與列表卡片相同的話題狀態
+const HARBOR_TOPIC_STATUS_CONFIG = [
+    { key: 'closed', icon: 'lock-outline', label: '已關閉' },
+    { key: 'archived', icon: 'archive-outline', label: '已封存' },
+];
+
+const getHarborTopicStatuses = topic => {
+    if (!topic) {
+        return [];
+    }
+    return HARBOR_TOPIC_STATUS_CONFIG.filter(status =>
+        Boolean(topic[status.key]),
+    );
+};
+
 const mergeTopicWindow = (currentTopic, nextTopic) => {
     if (!currentTopic) {
         return nextTopic;
@@ -426,6 +441,30 @@ const getNestedReplyCount = post => {
         Number(post?.direct_reply_count || 0),
         Array.isArray(post?.children) ? post.children.length : 0,
     );
+};
+
+const getLoadedNestedReplyCount = post => {
+    return (Array.isArray(post?.children) ? post.children : []).reduce(
+        (count, child) => count + 1 + getLoadedNestedReplyCount(child),
+        0,
+    );
+};
+
+const findNestedPostWithMissingChildren = (post, depth = 0) => {
+    const children = Array.isArray(post?.children) ? post.children : [];
+    if (Number(post?.direct_reply_count || 0) > children.length) {
+        return {depth, post};
+    }
+    for (const child of children) {
+        const target = findNestedPostWithMissingChildren(child, depth + 1);
+        if (target) {
+            return target;
+        }
+    }
+    return Number(post?.total_descendant_count || 0) >
+        getLoadedNestedReplyCount(post)
+        ? {depth, post}
+        : null;
 };
 
 const getNestedReplyPreviewLimit = postsCount => {
@@ -514,6 +553,16 @@ const flattenNestedPosts = (
                     : defaultPostReplyLimit;
         const descendants = [];
         collectDescendants(post.children, 1, descendants);
+        descendants.sort(
+            (left, right) =>
+                Number(left.post.post_number || 0) -
+                Number(right.post.post_number || 0),
+        );
+        const postsByNumber = new Map(
+            [post, ...descendants.map(descendant => descendant.post)].map(
+                nestedPost => [Number(nestedPost.post_number), nestedPost],
+            ),
+        );
         const visibleDescendants = descendants.slice(
             0,
             requestedReplyLimit,
@@ -546,6 +595,11 @@ const flattenNestedPosts = (
             flattened.push({
                 ...descendant.post,
                 __harborNestedDepth: descendant.depth,
+                __harborReplyToUsername:
+                    descendant.post.reply_to_user?.username ||
+                    postsByNumber.get(
+                        Number(descendant.post.reply_to_post_number),
+                    )?.username,
                 ...(isLastVisible
                     ? {
                         ...nestedMeta,
@@ -596,13 +650,16 @@ export {
     canUpdatePostReaction,
     collectNestedPosts,
     extractPostImages,
+    findNestedPostWithMissingChildren,
     findTopicPost,
     flattenNestedPosts,
     formatHarborFlagTypesForPost,
     getFlagActions,
     getHarborImagePressAction,
     getHarborMutationError,
+    getHarborTopicStatuses,
     getLikeAction,
+    getLoadedNestedReplyCount,
     getNestedReplyCount,
     getNestedReplyPreviewLimit,
     getNotificationLevelLabel,

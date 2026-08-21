@@ -6,6 +6,7 @@ export const BASE_URI = 'https://umall.one/api/';
 // TODO: 上線前修改 umall.one
 // export const SCHEDULING_BASE_URI = 'http://192.168.1.230:8000/api/v2';
 export const SCHEDULING_BASE_URI = 'https://umall.one/api/v2';
+export const HARBOR_PUSH_URL = SCHEDULING_BASE_URI + '/push/harbor';
 // 用適配API返回的圖片相對路徑
 export const BASE_HOST = 'https://umall.one';
 
@@ -172,6 +173,13 @@ export const ARK_WIKI_RANDOM_TITLE = ARK_WIKI + '/api.php?action=query&format=js
 export const ARK_WIKI_DONATE_RANK = ARK_WIKI + '/wiki/ARK%E6%8D%90%E8%B4%88%E6%A6%9C#%E6%8D%90%E8%B4%88%E6%A6%9C';
 
 export const OFFICIAL_COURSE_SEARCH = 'https://isw.um.edu.mo/siwci/faces/courseDetailUG?courseCode=';
+export const OFFICIAL_COURSE_SEARCH_PG = 'https://isw.um.edu.mo/siwci/faces/courseDetailPG?courseCode=';
+
+/** 官方課程詳情頁；本科 courseDetailUG，研究生 courseDetailPG。 */
+export function getOfficialCourseSearchUrl(courseCode, isPostgraduate = false) {
+    const base = isPostgraduate ? OFFICIAL_COURSE_SEARCH_PG : OFFICIAL_COURSE_SEARCH;
+    return base + courseCode;
+}
 
 export const COURSE_API_CF_WORKERS = 'https://course-api.umall.one';
 

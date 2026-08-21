@@ -52,6 +52,7 @@ jest.mock('expo-secure-store', () => ({
 
 jest.mock('../../pathMap', () => ({
     ARK_HARBOR: 'https://harbor.umall.one',
+    HARBOR_PUSH_URL: 'https://umall.one/api/v2/push/harbor',
 }));
 
 jest.mock('../harborAuthStorage', () => ({
@@ -153,9 +154,27 @@ describe('Harbor User API Key 授權工具', () => {
         );
         expect(parsedUrl.searchParams.get('application_name')).toBe('ARK ALL');
         expect(parsedUrl.searchParams.get('client_id')).toBe('installation-id');
-        expect(parsedUrl.searchParams.get('scopes')).toBe('read,write');
+        expect(parsedUrl.searchParams.get('scopes')).toBe('read,write,push');
+        expect(parsedUrl.searchParams.get('push_url')).toBe(
+            'https://umall.one/api/v2/push/harbor',
+        );
         expect(parsedUrl.searchParams.get('padding')).toBe('oaep');
         expect(parsedUrl.searchParams.get('nonce')).toBe('nonce-value');
+    });
+
+    it('未要求 push scope 時不附帶 push_url', () => {
+        const authUrl = buildHarborAuthUrl({
+            clientId: 'installation-id',
+            nonce: 'nonce-value',
+            publicKey:
+                '-----BEGIN PUBLIC KEY-----\nabc\n-----END PUBLIC KEY-----',
+            redirectUrl: 'https://umall.one/auth/discourse',
+            scopes: ['read', 'write'],
+        });
+        const parsedUrl = new URL(authUrl);
+
+        expect(parsedUrl.searchParams.get('scopes')).toBe('read,write');
+        expect(parsedUrl.searchParams.has('push_url')).toBe(false);
     });
 
     it('Android 使用已部署網站關聯檔的 HTTPS callback', () => {
@@ -355,6 +374,7 @@ describe('Harbor User API Key 授權工具', () => {
                     key: 'persisted-user-api-key',
                     nonce: 'pending-nonce',
                     api: 4,
+                    push: true,
                 }),
                 'utf8',
             ),
@@ -363,6 +383,7 @@ describe('Harbor User API Key 授權工具', () => {
             clientId: 'installation-id',
             nonce: 'pending-nonce',
             privateKey,
+            scopes: ['read', 'write', 'push'],
             createdAt: Date.now(),
         });
         const callbackUrl = new URL('https://umall.one/auth/discourse');
@@ -377,6 +398,8 @@ describe('Harbor User API Key 授權工具', () => {
                 userApiKey: 'persisted-user-api-key',
                 clientId: 'installation-id',
                 apiVersion: 4,
+                push: true,
+                scopes: ['read', 'write', 'push'],
             }),
         );
         expect(mockAuthStorage.saveHarborCredentials).toHaveBeenCalledWith(

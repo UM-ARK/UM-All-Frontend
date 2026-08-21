@@ -4,6 +4,7 @@ import {
     DEPARTMENT_ALL,
     DEPARTMENT_UNSPECIFIED,
     defaultTimeFilter,
+    getDefaultFacultyDepartment,
 } from '../constants/options';
 import { PROGRAMME_LEVELS } from '../../../../../../utils/courseProgramme';
 import {
@@ -29,7 +30,6 @@ export const getFacultyDepartmentOptions = courses => {
         course => !course['Offering Department'],
     );
     return [
-        DEPARTMENT_ALL,
         ...departments,
         ...(hasUnspecified ? [DEPARTMENT_UNSPECIFIED] : []),
     ];
@@ -156,7 +156,7 @@ const useCourseFiltering = ({
         if (nextOptions.option === 'CMRE') {
             const depaList = offerFacultyDepaListObj[nextOptions.facultyName] || [];
             if (!depaList.includes(nextOptions.depaName)) {
-                nextOptions.depaName = DEPARTMENT_ALL;
+                nextOptions.depaName = getDefaultFacultyDepartment(depaList);
             }
         }
 
@@ -164,7 +164,7 @@ const useCourseFiltering = ({
             nextOptions.option = 'CMRE';
             const depaList = offerFacultyDepaListObj[nextOptions.facultyName] || [];
             if (!depaList.includes(nextOptions.depaName)) {
-                nextOptions.depaName = DEPARTMENT_ALL;
+                nextOptions.depaName = getDefaultFacultyDepartment(depaList);
             }
         }
 

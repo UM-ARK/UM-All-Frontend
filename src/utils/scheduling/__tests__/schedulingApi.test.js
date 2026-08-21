@@ -7,6 +7,13 @@ jest.mock('../schedulingAuthStorage', () => ({
     saveSchedulingSession: jest.fn(async () => {}),
     clearSchedulingSessionStorage: jest.fn(async () => {}),
     getSchedulingDeviceId: jest.fn(async () => 'device-id'),
+    loadPendingSchedulingLogouts: jest.fn(async () => []),
+    savePendingSchedulingLogout: jest.fn(async () => {}),
+    clearPendingSchedulingLogout: jest.fn(async () => {}),
+}));
+
+jest.mock('../../pathMap', () => ({
+    SCHEDULING_BASE_URI: 'https://umall.one/api/v2',
 }));
 
 const mockAuthStorage = jest.requireMock('../../harbor/harborAuthStorage');
@@ -24,6 +31,7 @@ import {
     getTeamSharedTimetables,
     listMyTeamEvents,
     putMySharedTimetable,
+    requestSchedulingWithVerifiedSession,
     schedulingHttp,
 } from '../schedulingApi';
 
@@ -65,6 +73,23 @@ describe('schedulingApi 授權與重試', () => {
     function mockAuthResponse(accessToken = 'jwt-1') {
         return {data: makeSession({accessToken})};
     }
+
+    it('固定 session 請求不會改用全域 Bearer', async () => {
+        setSchedulingSession(makeSession({accessToken: 'global-jwt'}));
+        httpRequestSpy.mockResolvedValue({data: {ok: true}});
+
+        await requestSchedulingWithVerifiedSession(
+            {method: 'put', url: '/push/endpoints/current'},
+            {sessionId: 'verified-session', accessToken: 'verified-jwt'},
+        );
+
+        expect(httpRequestSpy).toHaveBeenCalledWith({
+            method: 'put',
+            url: '/push/endpoints/current',
+            headers: {Authorization: 'Bearer verified-jwt'},
+        });
+        expect(axiosPostSpy).not.toHaveBeenCalled();
+    });
 
     it('401 invalid_token 時 refresh 並只重試原請求一次', async () => {
         setSchedulingSession(makeSession({

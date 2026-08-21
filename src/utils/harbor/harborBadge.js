@@ -54,6 +54,17 @@ export function calculateHarborUnreadTotal(inboxUnreadCount, chatUnreadCount) {
     );
 }
 
+export function calculateHarborMyTabBadgeTotal(
+    inboxUnreadCount,
+    chatUnreadCount,
+    shouldShowPushPrompt,
+) {
+    return (
+        calculateHarborUnreadTotal(inboxUnreadCount, chatUnreadCount) +
+        (shouldShowPushPrompt ? 1 : 0)
+    );
+}
+
 export function createHarborForumBadgeState(username = '') {
     return {
         username,

@@ -5,6 +5,7 @@ const KEYCHAIN_SERVICE = 'one.umall.scheduling.auth';
 const LEGACY_SESSION_KEY = 'scheduling.auth.session.v1';
 const SESSION_KEY = 'scheduling.auth.session.v2';
 const DEVICE_ID_KEY = 'scheduling.auth.device-id.v1';
+const PENDING_LOGOUTS_KEY = 'scheduling.auth.pending-logouts.v1';
 
 const SECURE_STORE_OPTIONS = {
     keychainService: KEYCHAIN_SERVICE,
@@ -57,6 +58,21 @@ function normalizeSchedulingSession(session) {
         harborReverifyAfter: session.harborReverifyAfter,
         sessionId: session.sessionId,
         user: session.user,
+    };
+}
+
+function normalizePendingLogout(session) {
+    if (
+        !session ||
+        typeof session !== 'object' ||
+        !isNonEmptyString(session.sessionId) ||
+        !isNonEmptyString(session.refreshToken)
+    ) {
+        return null;
+    }
+    return {
+        sessionId: session.sessionId,
+        refreshToken: session.refreshToken,
     };
 }
 
@@ -154,4 +170,70 @@ export function clearSchedulingSessionStorage() {
         SecureStore.deleteItemAsync(SESSION_KEY, SECURE_STORE_OPTIONS),
         clearLegacySchedulingSession(),
     ]);
+}
+
+export async function loadPendingSchedulingLogouts() {
+    const value = await SecureStore.getItemAsync(
+        PENDING_LOGOUTS_KEY,
+        SECURE_STORE_OPTIONS,
+    );
+    if (!value) {
+        return [];
+    }
+    try {
+        const parsed = JSON.parse(value);
+        if (!Array.isArray(parsed)) {
+            throw new Error('Pending logout queue is invalid.');
+        }
+        return parsed.map(normalizePendingLogout).filter(Boolean);
+    } catch (_error) {
+        await SecureStore.deleteItemAsync(
+            PENDING_LOGOUTS_KEY,
+            SECURE_STORE_OPTIONS,
+        );
+        return [];
+    }
+}
+
+export async function savePendingSchedulingLogout(session) {
+    const normalized = normalizePendingLogout(session);
+    if (!normalized) {
+        return;
+    }
+    const queue = await loadPendingSchedulingLogouts();
+    const nextQueue = queue.filter(item => {
+        return item.sessionId !== normalized.sessionId;
+    });
+    nextQueue.push(normalized);
+    await SecureStore.setItemAsync(
+        PENDING_LOGOUTS_KEY,
+        JSON.stringify(nextQueue),
+        SECURE_STORE_OPTIONS,
+    );
+}
+
+export async function clearPendingSchedulingLogout(session) {
+    if (!session) {
+        await SecureStore.deleteItemAsync(
+            PENDING_LOGOUTS_KEY,
+            SECURE_STORE_OPTIONS,
+        );
+        return;
+    }
+    const queue = await loadPendingSchedulingLogouts();
+    const nextQueue = queue.filter(item => {
+        return item.sessionId !== session.sessionId;
+    });
+    if (nextQueue.length === 0) {
+        await SecureStore.deleteItemAsync(
+            PENDING_LOGOUTS_KEY,
+            SECURE_STORE_OPTIONS,
+        );
+        return;
+    }
+    await SecureStore.setItemAsync(
+        PENDING_LOGOUTS_KEY,
+        JSON.stringify(nextQueue),
+        SECURE_STORE_OPTIONS,
+    );
 }

@@ -4,11 +4,9 @@ import lodash from 'lodash';
 
 import {openLink} from '../../../../utils/browser';
 import {logToFirebase} from '../../../../utils/firebaseAnalytics';
-import {
-    ARK_WIKI_SEARCH,
-    OFFICIAL_COURSE_SEARCH,
-} from '../../../../utils/pathMap';
+import {OFFICIAL_COURSE_SEARCH} from '../../../../utils/pathMap';
 import {getCurrentUmehHost} from '../../../../utils/umehHost';
+import {navigateToWikiSearch} from '../../../../utils/wikiNavigation';
 
 /** 建立課程卡片共用的查詢選項。 */
 export function getCourseInfoMenuActions({
@@ -82,9 +80,9 @@ export function handleCourseInfoMenuAction({actionId, course, navigation}) {
 
     switch (actionId) {
         case 'wiki': {
-            let URL = ARK_WIKI_SEARCH + encodeURIComponent(courseCode);
+            let wikiQuery = courseCode;
             if (profName) {
-                URL = ARK_WIKI_SEARCH + encodeURIComponent(profName);
+                wikiQuery = profName;
                 logToFirebase('checkCourse', {
                     courseCode,
                     profName,
@@ -96,7 +94,7 @@ export function handleCourseInfoMenuAction({actionId, course, navigation}) {
                     action: 'ark-wiki',
                 });
             }
-            openLink(URL);
+            navigateToWikiSearch(navigation, wikiQuery, {autoOpenUnique: true});
             return true;
         }
         case 'harbor-discuss':

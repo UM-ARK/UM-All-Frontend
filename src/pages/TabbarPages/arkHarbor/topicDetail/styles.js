@@ -143,7 +143,7 @@ const styles = StyleSheet.create({
     },
     postCard: {
         paddingHorizontal: scale(16),
-        paddingTop: verticalScale(16),
+        paddingTop: verticalScale(8),
         overflow: 'hidden',
     },
     // 1 樓底部內縮分割線（相對貼文內容區，不貼螢幕邊）
@@ -200,12 +200,15 @@ const styles = StyleSheet.create({
         marginLeft: scale(8),
         minWidth: 0,
     },
+    replyPressable: {
+        borderRadius: scale(10),
+    },
     replyHeader: {
         flexDirection: 'row',
         alignItems: 'center',
         marginBottom: verticalScale(2),
     },
-    replyAuthorPressable: {
+    replyAuthorArea: {
         flex: 1,
         minWidth: 0,
     },
@@ -229,6 +232,27 @@ const styles = StyleSheet.create({
         lineHeight: scale(21),
         fontWeight: '700',
         marginTop: verticalScale(6),
+    },
+    topicStatusRow: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        alignItems: 'center',
+        marginTop: verticalScale(6),
+    },
+    topicStatusChip: {
+        borderRadius: scale(7),
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginRight: scale(6),
+        marginBottom: verticalScale(4),
+        paddingHorizontal: scale(7),
+        paddingVertical: verticalScale(3),
+    },
+    topicStatusText: {
+        ...uiStyle.defaultText,
+        fontSize: scale(10),
+        fontWeight: '600',
+        marginLeft: scale(3),
     },
     firstPostBody: {
         marginTop: verticalScale(4),
@@ -281,12 +305,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         minWidth: 0,
     },
-    headerMeta: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        flexShrink: 0,
-        marginLeft: scale(8),
-    },
     pressedLink: {
         opacity: 0.7,
     },
@@ -294,6 +312,28 @@ const styles = StyleSheet.create({
         width: scale(30),
         height: scale(30),
         borderRadius: scale(15),
+    },
+    staffAvatarBadge: {
+        position: 'absolute',
+        top: verticalScale(-1),
+        width: scale(10),
+        height: scale(10),
+        borderRadius: scale(5),
+        borderWidth: StyleSheet.hairlineWidth,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    firstPostStaffAvatarBadge: {
+        left: scale(21),
+    },
+    replyStaffAvatarBadge: {
+        right: scale(-1),
+    },
+    staffAvatarBadgeText: {
+        ...uiStyle.defaultText,
+        fontSize: scale(6),
+        lineHeight: scale(8),
+        fontWeight: '700',
     },
     // 展開回覆頭像：略小於頂層
     nestedAvatar: {
@@ -328,16 +368,6 @@ const styles = StyleSheet.create({
         fontSize: scale(10),
         lineHeight: scale(14),
         marginLeft: scale(6),
-    },
-    staffBadge: {
-        ...uiStyle.defaultText,
-        fontSize: scale(9),
-        fontWeight: '700',
-        borderRadius: scale(5),
-        marginLeft: scale(5),
-        paddingHorizontal: scale(5),
-        paddingVertical: verticalScale(1),
-        overflow: 'hidden',
     },
     postTime: {
         ...uiStyle.defaultText,
@@ -391,23 +421,19 @@ const styles = StyleSheet.create({
         marginRight: 0,
         marginLeft: scale(8),
     },
-    postNumber: {
-        ...uiStyle.defaultText,
-        fontSize: scale(11),
-        fontWeight: '600',
-        marginLeft: scale(6),
-    },
-    replyBadge: {
+    replyTarget: {
+        width: scale(120),
+        flexShrink: 0,
         flexDirection: 'row',
         alignItems: 'center',
-        borderRadius: scale(6),
-        paddingHorizontal: scale(6),
-        paddingVertical: verticalScale(3),
+        justifyContent: 'flex-end',
+        marginLeft: scale(8),
     },
-    replyText: {
+    replyTargetText: {
         ...uiStyle.defaultText,
-        fontSize: scale(9),
-        fontWeight: '600',
+        flexShrink: 1,
+        fontSize: scale(10),
+        fontWeight: '500',
         marginLeft: scale(3),
     },
     // 展開回覆：左右分割線與日期列同寬（在 replyMain / 1 樓內容區內）

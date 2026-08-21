@@ -11,11 +11,13 @@ import {
     canShowFlagMenu,
     canUpdatePostReaction,
     extractPostImages,
+    findNestedPostWithMissingChildren,
     findTopicPost,
     flattenNestedPosts,
     formatHarborFlagTypesForPost,
     getFlagActions,
     getHarborImagePressAction,
+    getHarborTopicStatuses,
     getNestedReplyPreviewLimit,
     interpolateHarborI18nTemplate,
     isHarborPostDeleted,
@@ -76,6 +78,24 @@ describe('getHarborImagePressAction', () => {
                 imageUrls: [],
             }),
         ).toBeNull();
+    });
+});
+
+describe('getHarborTopicStatuses', () => {
+    it('回傳已關閉與已封存狀態', () => {
+        expect(getHarborTopicStatuses(null)).toEqual([]);
+        expect(getHarborTopicStatuses({})).toEqual([]);
+        expect(getHarborTopicStatuses({ closed: true })).toEqual([
+            { key: 'closed', icon: 'lock-outline', label: '已關閉' },
+        ]);
+        expect(getHarborTopicStatuses({ archived: true })).toEqual([
+            { key: 'archived', icon: 'archive-outline', label: '已封存' },
+        ]);
+        expect(
+            getHarborTopicStatuses({ closed: true, archived: true }).map(
+                status => status.key,
+            ),
+        ).toEqual(['closed', 'archived']);
     });
 });
 
@@ -412,6 +432,115 @@ describe('Nested Replies 資料模型', () => {
                 new Map([[2, 10]]),
             ).map(post => post.id),
         ).toEqual([1, 2, 3, 4, 5, 6, 7, 8]);
+    });
+
+    it('同一評論群組按樓層排序並保留回覆對象', () => {
+        const threadedPosts = [
+            {
+                id: 2,
+                post_number: 2,
+                username: 'root',
+                total_descendant_count: 4,
+                children: [
+                    {
+                        id: 3,
+                        post_number: 3,
+                        username: 'first',
+                        reply_to_post_number: 2,
+                        children: [
+                            {
+                                id: 5,
+                                post_number: 5,
+                                username: 'third',
+                                reply_to_post_number: 3,
+                                children: [
+                                    {
+                                        id: 6,
+                                        post_number: 6,
+                                        username: 'fourth',
+                                        reply_to_post_number: 5,
+                                        children: [],
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                    {
+                        id: 4,
+                        post_number: 4,
+                        username: 'second',
+                        reply_to_post_number: 2,
+                        children: [],
+                    },
+                ],
+            },
+        ];
+
+        const flattened = flattenNestedPosts(
+            threadedPosts,
+            new Map([[2, 4]]),
+        );
+        expect(flattened.map(post => post.post_number)).toEqual([
+            2,
+            3,
+            4,
+            5,
+            6,
+        ]);
+        expect(flattened.map(post => post.__harborReplyToUsername)).toEqual([
+            undefined,
+            'root',
+            'root',
+            'first',
+            'third',
+        ]);
+    });
+
+    it('會定位到尚未載入直接子回覆的最深樓層', () => {
+        const partialTree = {
+            id: 2,
+            post_number: 2,
+            direct_reply_count: 1,
+            total_descendant_count: 4,
+            children: [
+                {
+                    id: 3,
+                    post_number: 3,
+                    direct_reply_count: 1,
+                    total_descendant_count: 3,
+                    children: [
+                        {
+                            id: 5,
+                            post_number: 5,
+                            direct_reply_count: 1,
+                            total_descendant_count: 2,
+                            children: [
+                                {
+                                    id: 8,
+                                    post_number: 8,
+                                    direct_reply_count: 1,
+                                    total_descendant_count: 1,
+                                    children: [],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        };
+
+        expect(findNestedPostWithMissingChildren(partialTree)).toEqual({
+            depth: 3,
+            post: partialTree.children[0].children[0].children[0],
+        });
+        partialTree.children[0].children[0].children[0].children.push({
+            id: 9,
+            post_number: 9,
+            direct_reply_count: 0,
+            total_descendant_count: 0,
+            children: [],
+        });
+        expect(findNestedPostWithMissingChildren(partialTree)).toBeNull();
     });
 
     it('少於十則評論時預設顯示最多兩則樓中樓回覆', () => {

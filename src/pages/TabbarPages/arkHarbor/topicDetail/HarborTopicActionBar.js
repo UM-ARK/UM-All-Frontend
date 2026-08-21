@@ -36,9 +36,11 @@ const formatCount = value => {
 
 const HarborTopicActionBar = memo(
     ({
+        archived,
         bookmarkPending,
         bookmarked,
         canReply,
+        closed,
         commentCount,
         currentReaction,
         likeCount,
@@ -65,6 +67,22 @@ const HarborTopicActionBar = memo(
             themeColor,
             white,
         } = theme;
+
+        const composePlaceholder = archived
+            ? t('已封存，無法回覆')
+            : closed
+                ? t('已關閉，無法回覆')
+                : t('說點什麼...');
+        const composeAccessibilityLabel = archived
+            ? t('此話題已封存，暫時無法發布回覆。')
+            : closed
+                ? t('此話題已關閉，暫時無法發布回覆。')
+                : t('回覆話題');
+        const composeIconName = archived
+            ? 'archive-outline'
+            : closed
+                ? 'lock-outline'
+                : 'pencil-outline';
 
         const likeIconName = reactionsEnabled
             ? currentReaction
@@ -131,7 +149,7 @@ const HarborTopicActionBar = memo(
                 ]}>
                 <Pressable
                     accessibilityRole="button"
-                    accessibilityLabel={t('回覆話題')}
+                    accessibilityLabel={composeAccessibilityLabel}
                     disabled={!canReply}
                     onPress={() => {
                         trigger();
@@ -149,7 +167,7 @@ const HarborTopicActionBar = memo(
                         },
                     ]}>
                     <MaterialCommunityIcons
-                        name="pencil-outline"
+                        name={composeIconName}
                         size={scale(14)}
                         color={black.third}
                     />
@@ -159,7 +177,7 @@ const HarborTopicActionBar = memo(
                             styles.topicActionComposeText,
                             { color: black.third },
                         ]}>
-                        {t('說點什麼...')}
+                        {composePlaceholder}
                     </Text>
                 </Pressable>
 

@@ -7,6 +7,9 @@ jest.mock('../schedulingAuthStorage', () => ({
     saveSchedulingSession: jest.fn(async () => {}),
     clearSchedulingSessionStorage: jest.fn(async () => {}),
     getSchedulingDeviceId: jest.fn(async () => 'device-id'),
+    loadPendingSchedulingLogouts: jest.fn(async () => []),
+    savePendingSchedulingLogout: jest.fn(async () => {}),
+    clearPendingSchedulingLogout: jest.fn(async () => {}),
 }));
 
 jest.mock('../../pathMap', () => ({
@@ -28,8 +31,10 @@ import {
     isSchedulingTokenExpired,
     logoutSchedulingSession,
     refreshSchedulingToken,
+    reverifyHarborBindingForPush,
     reverifyExistingSchedulingSession,
     reverifySchedulingSession,
+    retryPendingSchedulingLogouts,
     setSchedulingHarborAuthFailureHandler,
     setSchedulingSession,
 } from '../schedulingAuth';
@@ -45,6 +50,7 @@ describe('schedulingAuth', () => {
             clientId: 'harbor-client',
         });
         mockSessionStorage.loadSchedulingSession.mockResolvedValue(null);
+        mockSessionStorage.loadPendingSchedulingLogouts.mockResolvedValue([]);
         postSpy = jest.spyOn(axios, 'post');
     });
 
@@ -104,9 +110,7 @@ describe('schedulingAuth', () => {
         expect(first).toBe(second);
 
         // loadHarborCredentials 為 async，需等到後續 microtask 才會呼叫 axios.post
-        await Promise.resolve();
-        await Promise.resolve();
-        await Promise.resolve();
+        await new Promise(resolve => setImmediate(resolve));
         expect(postSpy).toHaveBeenCalledTimes(1);
 
         const expiresAt = new Date(Date.now() + 30 * 60 * 1000).toISOString();
@@ -381,6 +385,18 @@ describe('schedulingAuth', () => {
         );
     });
 
+    it('推送啟用即使 access token 未過期仍強制 reverify binding', async () => {
+        setSchedulingSession(makeSession(), {persist: false});
+        mockExchangeSuccess({accessToken: 'push-reverified-jwt'});
+
+        await reverifyHarborBindingForPush();
+
+        expect(postSpy).toHaveBeenCalledTimes(1);
+        expect(postSpy.mock.calls[0][0]).toBe(
+            `${SCHEDULING_BASE_URI}/auth/harbor/reverify`,
+        );
+    });
+
     it('沒有既有 Scheduling session 時同步身分不換票', async () => {
         await expect(reverifyExistingSchedulingSession()).resolves.toBeNull();
 
@@ -490,5 +506,35 @@ describe('schedulingAuth', () => {
         );
         expect(getSchedulingSession()).toBeNull();
         expect(mockSessionStorage.clearSchedulingSessionStorage).toHaveBeenCalled();
+        expect(
+            mockSessionStorage.savePendingSchedulingLogout,
+        ).toHaveBeenCalledWith(expect.objectContaining({
+            sessionId: 'session-id',
+            refreshToken: 'refresh-token',
+        }));
+        expect(
+            mockSessionStorage.clearPendingSchedulingLogout,
+        ).not.toHaveBeenCalled();
+    });
+
+    it('網絡恢復後重試 pending logout 並清除待辦', async () => {
+        mockSessionStorage.loadPendingSchedulingLogouts.mockResolvedValue([
+            makeSession(),
+        ]);
+        postSpy.mockResolvedValue({data: {ok: true}});
+
+        await expect(retryPendingSchedulingLogouts()).resolves.toEqual({
+            remainingCount: 0,
+        });
+        expect(postSpy).toHaveBeenCalledWith(
+            `${SCHEDULING_BASE_URI}/auth/logout`,
+            {refreshToken: 'refresh-token'},
+            expect.any(Object),
+        );
+        expect(
+            mockSessionStorage.clearPendingSchedulingLogout,
+        ).toHaveBeenCalledWith(expect.objectContaining({
+            sessionId: 'session-id',
+        }));
     });
 });

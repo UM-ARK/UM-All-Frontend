@@ -1,6 +1,6 @@
 // 專門存放路由，其他頁面可使用this.props.navigation.navigate("對應下方創建棧的路由名")進行跳轉
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import { Platform, TouchableOpacity } from 'react-native';
+import { Alert, Platform, TouchableOpacity } from 'react-native';
 import Ionicons from "@react-native-vector-icons/ionicons";
 import {
     NavigationContainer,
@@ -59,7 +59,10 @@ import UMOrg from './pages/Features/UMOrg';
 import SettingPage from './pages/Features/SettingPage';
 import { useTheme } from './components/ThemeContext';
 import { useHarborSession } from './contexts/HarborSessionContext';
+import { usePushRegistration } from './contexts/PushRegistrationContext';
 import { APP_LINKING } from './utils/appLinks';
+import { logPushEvent } from './utils/pushLogger';
+import { getHarborPushNavigationTarget } from './utils/pushNavigation';
 
 const Stack = createNativeStackNavigator();
 
@@ -70,7 +73,15 @@ const Nav = () => {
     const {
         consumeLoginIntent,
         pendingLoginIntent,
+        refreshChatUnreadCount,
+        refreshInboxUnreadCount,
+        status: harborStatus,
+        user: harborUser,
     } = useHarborSession();
+    const {
+        consumePendingNotificationResponse,
+        pendingNotificationResponse,
+    } = usePushRegistration();
     const navigationRef = useNavigationContainerRef();
     // 冷啟動：首 render 就暫存 initial，避免 onReady 早於 useEffect 而漏導航
     const pendingQuickActionRef = useRef(QuickActions.initial ?? null);
@@ -149,10 +160,102 @@ const Nav = () => {
         });
     }, [consumeLoginIntent, navigationRef, pendingLoginIntent]);
 
+    const flushPendingNotificationResponse = useCallback(() => {
+        if (
+            !pendingNotificationResponse ||
+            !navigationRef.isReady() ||
+            harborStatus === 'restoring' ||
+            harborStatus === 'authorizing'
+        ) {
+            return;
+        }
+
+        const data = pendingNotificationResponse.notification?.request?.content
+            ?.data;
+        const notificationHarborUserId = Number(data?.harborUserId);
+        const currentHarborUserId = Number(harborUser?.id);
+        const hasNotificationHarborUserId =
+            Number.isSafeInteger(notificationHarborUserId) &&
+            notificationHarborUserId > 0;
+        const hasCurrentHarborUserId =
+            Number.isSafeInteger(currentHarborUserId) &&
+            currentHarborUserId > 0;
+
+        if (
+            harborStatus === 'signedIn' &&
+            hasNotificationHarborUserId &&
+            !hasCurrentHarborUserId
+        ) {
+            return;
+        }
+
+        if (
+            harborStatus !== 'signedIn' ||
+            (hasNotificationHarborUserId &&
+                notificationHarborUserId !== currentHarborUserId)
+        ) {
+            logPushEvent('notification.response.handled', {
+                result:
+                    harborStatus === 'signedIn'
+                        ? 'account_mismatch'
+                        : 'sign_in_required',
+            });
+            requestAnimationFrame(() => {
+                navigationRef.navigate('Tabbar', {screen: 'MyTabbar'});
+                Alert.alert(
+                    t('需要 Harbor 登入'),
+                    t('請登入接收此通知的 Harbor 帳號。'),
+                    [{text: t('確定'), onPress: () => trigger()}],
+                );
+                consumePendingNotificationResponse();
+            });
+            return;
+        }
+
+        const target = hasNotificationHarborUserId
+            ? getHarborPushNavigationTarget(data)
+            : {
+                routeName: 'HarborInbox',
+                params: undefined,
+            };
+        if (!target) {
+            consumePendingNotificationResponse();
+            logPushEvent('notification.response.handled', {
+                result: 'unsupported_source',
+            });
+            return;
+        }
+        logPushEvent('notification.response.handled', {
+            result: target.kind || 'inbox_account_unverified',
+        });
+        Promise.allSettled([
+            refreshInboxUnreadCount(),
+            refreshChatUnreadCount(),
+        ]);
+        requestAnimationFrame(() => {
+            navigationRef.navigate(target.routeName, target.params);
+            consumePendingNotificationResponse();
+        });
+    }, [
+        consumePendingNotificationResponse,
+        harborStatus,
+        harborUser?.id,
+        navigationRef,
+        pendingNotificationResponse,
+        refreshChatUnreadCount,
+        refreshInboxUnreadCount,
+        t,
+    ]);
+
     const handleNavigationReady = useCallback(() => {
         flushPendingQuickAction();
         flushPendingLoginIntent();
-    }, [flushPendingLoginIntent, flushPendingQuickAction]);
+        flushPendingNotificationResponse();
+    }, [
+        flushPendingLoginIntent,
+        flushPendingNotificationResponse,
+        flushPendingQuickAction,
+    ]);
 
     useEffect(() => {
         const configureQuickActions = async () => {
@@ -196,6 +299,10 @@ const Nav = () => {
     useEffect(() => {
         flushPendingLoginIntent();
     }, [flushPendingLoginIntent]);
+
+    useEffect(() => {
+        flushPendingNotificationResponse();
+    }, [flushPendingNotificationResponse]);
 
     return (
         <NavigationContainer
