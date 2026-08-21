@@ -44,10 +44,16 @@ import {
     readHarborChatMessagesCache,
     writeHarborChatMessagesCache,
 } from '../../../utils/harbor/harborChatQueries';
+import {
+    getLocalHarborChatDraft,
+    saveLocalHarborChatDraft,
+} from '../../../utils/harbor/harborChatDrafts';
+import {getHarborDraftAccountId} from '../../../utils/harbor/harborDrafts';
 import {trigger} from '../../../utils/trigger';
 import {HarborFullState} from './components/HarborListStates';
 
 const CHAT_POLL_INTERVAL_MS = 8000;
+const CHAT_DRAFT_SAVE_DELAY_MS = 250;
 const NEAR_END_THRESHOLD = verticalScale(64);
 
 const HarborChatProfileButton = ({
@@ -375,6 +381,9 @@ const HarborChatChannelPage = ({navigation, route}) => {
     const initialTargetMessageRef = useRef(Number(route.params?.messageId) || null);
     const lastMarkedReadRef = useRef(0);
     const loadingRef = useRef(false);
+    const draftRef = useRef('');
+    const draftEditedRef = useRef(false);
+    const draftSaveTimerRef = useRef(null);
     const channelId = Number(route.params?.channelId);
     const isGroup = Boolean(route.params?.isGroup);
     const initialTargetMessageId = Number(route.params?.messageId) || null;
@@ -402,6 +411,7 @@ const HarborChatChannelPage = ({navigation, route}) => {
     const [isSending, setIsSending] = useState(false);
     const [error, setError] = useState(false);
     const username = user?.username || '';
+    const draftAccountId = getHarborDraftAccountId(user);
     const cacheIdentityRef = useRef(`${username}:${channelId}`);
     const peerUsername = useMemo(
         () =>
@@ -447,6 +457,72 @@ const HarborChatChannelPage = ({navigation, route}) => {
             });
         },
         [patchCachedMessages],
+    );
+
+    const persistDraft = useCallback(
+        value => {
+            if (!draftAccountId || !channelId) {
+                return Promise.resolve('');
+            }
+            return saveLocalHarborChatDraft(
+                draftAccountId,
+                channelId,
+                value,
+            ).catch(() => null);
+        },
+        [channelId, draftAccountId],
+    );
+
+    const flushDraft = useCallback(
+        value => {
+            if (draftSaveTimerRef.current) {
+                clearTimeout(draftSaveTimerRef.current);
+                draftSaveTimerRef.current = null;
+            }
+            return persistDraft(value);
+        },
+        [persistDraft],
+    );
+
+    const handleDraftChange = useCallback(
+        value => {
+            draftEditedRef.current = true;
+            draftRef.current = value;
+            setDraft(value);
+            if (draftSaveTimerRef.current) {
+                clearTimeout(draftSaveTimerRef.current);
+            }
+            draftSaveTimerRef.current = setTimeout(() => {
+                draftSaveTimerRef.current = null;
+                persistDraft(value);
+            }, CHAT_DRAFT_SAVE_DELAY_MS);
+        },
+        [persistDraft],
+    );
+
+    useEffect(() => {
+        let active = true;
+        draftEditedRef.current = false;
+        draftRef.current = '';
+        setDraft('');
+        getLocalHarborChatDraft(draftAccountId, channelId)
+            .then(value => {
+                if (active && !draftEditedRef.current) {
+                    draftRef.current = value;
+                    setDraft(value);
+                }
+            })
+            .catch(() => null);
+        return () => {
+            active = false;
+        };
+    }, [channelId, draftAccountId]);
+
+    useEffect(
+        () => () => {
+            flushDraft(draftRef.current);
+        },
+        [flushDraft],
     );
 
     useEffect(() => {
@@ -643,7 +719,9 @@ const HarborChatChannelPage = ({navigation, route}) => {
         setIsSending(true);
         try {
             const messageId = await sendHarborChatMessage(channelId, content);
+            draftRef.current = '';
             setDraft('');
+            flushDraft('');
             if (messageId) {
                 const optimisticMessage = {
                     id: messageId,
@@ -680,7 +758,7 @@ const HarborChatChannelPage = ({navigation, route}) => {
         } finally {
             setIsSending(false);
         }
-    }, [channelId, draft, isSending, loadLatest, t, updateMessages, user]);
+    }, [channelId, draft, flushDraft, isSending, loadLatest, t, updateMessages, user]);
 
     const handleListScroll = useCallback(event => {
         if (isKeyboardAnimatingRef.current) {
@@ -849,7 +927,8 @@ const HarborChatChannelPage = ({navigation, route}) => {
                         accessibilityLabel={t('Chat 訊息')}
                         maxLength={6000}
                         multiline
-                        onChangeText={setDraft}
+                        onBlur={() => flushDraft(draftRef.current)}
+                        onChangeText={handleDraftChange}
                         placeholder={t('輸入訊息')}
                         placeholderTextColor={theme.black.third}
                         style={[
