@@ -287,7 +287,11 @@ const useHarborTopicData = ({
     );
 
     const loadTopic = useCallback(
-        async ({ refresh = false, force = refresh } = {}) => {
+        async ({
+            refresh = false,
+            force = refresh,
+            preserveReading = false,
+        } = {}) => {
             const requestGeneration = ++requestGenerationRef.current;
             const requestSessionStatus = sessionStatusRef.current;
 
@@ -404,7 +408,9 @@ const useHarborTopicData = ({
                 setUnreadAfterPostNumber(
                     serverUnreadCount > 0 ? serverLastReadPostNumber : -1,
                 );
-                onResetReading();
+                if (!preserveReading) {
+                    onResetReading();
+                }
                 latestTopicRef.current = nextTopic;
                 setTopic(nextTopic);
             } catch (error) {

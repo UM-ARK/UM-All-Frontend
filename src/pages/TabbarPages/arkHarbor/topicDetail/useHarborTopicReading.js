@@ -402,7 +402,7 @@ const useHarborTopicReading = ({
 
         const revealRequestedPost = async () => {
             if (composerRefreshAt) {
-                await loadTopic({force: true});
+                await loadTopic({force: true, preserveReading: true});
             }
             await scrollToPost(requestedPostNumber, { animated: false });
         };
