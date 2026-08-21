@@ -443,6 +443,30 @@ const getNestedReplyCount = post => {
     );
 };
 
+const getLoadedNestedReplyCount = post => {
+    return (Array.isArray(post?.children) ? post.children : []).reduce(
+        (count, child) => count + 1 + getLoadedNestedReplyCount(child),
+        0,
+    );
+};
+
+const findNestedPostWithMissingChildren = (post, depth = 0) => {
+    const children = Array.isArray(post?.children) ? post.children : [];
+    if (Number(post?.direct_reply_count || 0) > children.length) {
+        return {depth, post};
+    }
+    for (const child of children) {
+        const target = findNestedPostWithMissingChildren(child, depth + 1);
+        if (target) {
+            return target;
+        }
+    }
+    return Number(post?.total_descendant_count || 0) >
+        getLoadedNestedReplyCount(post)
+        ? {depth, post}
+        : null;
+};
+
 const getNestedReplyPreviewLimit = postsCount => {
     const commentCount = Math.max(Number(postsCount || 1) - 1, 0);
     return commentCount < NESTED_REPLY_PREVIEW_COMMENT_THRESHOLD
@@ -611,6 +635,7 @@ export {
     canUpdatePostReaction,
     collectNestedPosts,
     extractPostImages,
+    findNestedPostWithMissingChildren,
     findTopicPost,
     flattenNestedPosts,
     formatHarborFlagTypesForPost,
@@ -619,6 +644,7 @@ export {
     getHarborMutationError,
     getHarborTopicStatuses,
     getLikeAction,
+    getLoadedNestedReplyCount,
     getNestedReplyCount,
     getNestedReplyPreviewLimit,
     getNotificationLevelLabel,

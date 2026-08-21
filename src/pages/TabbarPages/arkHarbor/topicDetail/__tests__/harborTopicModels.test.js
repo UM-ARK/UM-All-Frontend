@@ -11,6 +11,7 @@ import {
     canShowFlagMenu,
     canUpdatePostReaction,
     extractPostImages,
+    findNestedPostWithMissingChildren,
     findTopicPost,
     flattenNestedPosts,
     formatHarborFlagTypesForPost,
@@ -431,6 +432,53 @@ describe('Nested Replies 資料模型', () => {
                 new Map([[2, 10]]),
             ).map(post => post.id),
         ).toEqual([1, 2, 3, 4, 5, 6, 7, 8]);
+    });
+
+    it('會定位到尚未載入直接子回覆的最深樓層', () => {
+        const partialTree = {
+            id: 2,
+            post_number: 2,
+            direct_reply_count: 1,
+            total_descendant_count: 4,
+            children: [
+                {
+                    id: 3,
+                    post_number: 3,
+                    direct_reply_count: 1,
+                    total_descendant_count: 3,
+                    children: [
+                        {
+                            id: 5,
+                            post_number: 5,
+                            direct_reply_count: 1,
+                            total_descendant_count: 2,
+                            children: [
+                                {
+                                    id: 8,
+                                    post_number: 8,
+                                    direct_reply_count: 1,
+                                    total_descendant_count: 1,
+                                    children: [],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        };
+
+        expect(findNestedPostWithMissingChildren(partialTree)).toEqual({
+            depth: 3,
+            post: partialTree.children[0].children[0].children[0],
+        });
+        partialTree.children[0].children[0].children[0].children.push({
+            id: 9,
+            post_number: 9,
+            direct_reply_count: 0,
+            total_descendant_count: 0,
+            children: [],
+        });
+        expect(findNestedPostWithMissingChildren(partialTree)).toBeNull();
     });
 
     it('少於十則評論時預設顯示最多兩則樓中樓回覆', () => {
