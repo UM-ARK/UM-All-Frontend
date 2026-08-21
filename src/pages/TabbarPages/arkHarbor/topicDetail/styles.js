@@ -313,6 +313,28 @@ const styles = StyleSheet.create({
         height: scale(30),
         borderRadius: scale(15),
     },
+    staffAvatarBadge: {
+        position: 'absolute',
+        top: verticalScale(-1),
+        width: scale(10),
+        height: scale(10),
+        borderRadius: scale(5),
+        borderWidth: StyleSheet.hairlineWidth,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    firstPostStaffAvatarBadge: {
+        left: scale(21),
+    },
+    replyStaffAvatarBadge: {
+        right: scale(-1),
+    },
+    staffAvatarBadgeText: {
+        ...uiStyle.defaultText,
+        fontSize: scale(6),
+        lineHeight: scale(8),
+        fontWeight: '700',
+    },
     // 展開回覆頭像：略小於頂層
     nestedAvatar: {
         width: scale(20),
@@ -346,16 +368,6 @@ const styles = StyleSheet.create({
         fontSize: scale(10),
         lineHeight: scale(14),
         marginLeft: scale(6),
-    },
-    staffBadge: {
-        ...uiStyle.defaultText,
-        fontSize: scale(9),
-        fontWeight: '700',
-        borderRadius: scale(5),
-        marginLeft: scale(5),
-        paddingHorizontal: scale(5),
-        paddingVertical: verticalScale(1),
-        overflow: 'hidden',
     },
     postTime: {
         ...uiStyle.defaultText,

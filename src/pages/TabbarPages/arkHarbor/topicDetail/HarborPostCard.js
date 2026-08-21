@@ -153,6 +153,7 @@ const HarborPostCard = memo(
             disabled,
             themeColor,
             tonal,
+            trueWhite,
             white,
         } = theme;
         // 分割線／邊框統一用淺灰
@@ -219,6 +220,30 @@ const HarborPostCard = memo(
         const avatarUrl = ARK_HARBOR_AVATAR_TEMPLATE(post.avatar_template);
         const displayName =
             post.username || post.display_username || t('Harbor 會員');
+        const authorAccessibilityLabel = post.staff
+            ? `${displayName}, Staff`
+            : displayName;
+        const staffAvatarBadge = post.staff ? (
+            <View
+                style={[
+                    styles.staffAvatarBadge,
+                    isFirstPost
+                        ? styles.firstPostStaffAvatarBadge
+                        : styles.replyStaffAvatarBadge,
+                    {
+                        backgroundColor: themeColor,
+                        borderColor: white,
+                    },
+                ]}>
+                <Text
+                    style={[
+                        styles.staffAvatarBadgeText,
+                        { color: trueWhite },
+                    ]}>
+                    S
+                </Text>
+            </View>
+        ) : null;
         const replyTargetUsername =
             post.reply_to_user?.username ||
             post.__harborReplyToUsername;
@@ -823,7 +848,7 @@ const HarborPostCard = memo(
                         <View style={styles.firstPostHeader}>
                             <Pressable
                                 accessibilityRole="link"
-                                accessibilityLabel={displayName}
+                                accessibilityLabel={authorAccessibilityLabel}
                                 onPress={() => {
                                     trigger();
                                     onPressAuthor(post.username);
@@ -843,6 +868,7 @@ const HarborPostCard = memo(
                                     placeholderContentFit="cover"
                                     transition={200}
                                 />
+                                {staffAvatarBadge}
                                 <View style={styles.authorArea}>
                                     <View style={styles.authorNameRow}>
                                         <Text
@@ -861,19 +887,6 @@ const HarborPostCard = memo(
                                                 ]}
                                                 numberOfLines={1}>
                                                 {post.user_title}
-                                            </Text>
-                                        ) : null}
-                                        {post.staff ? (
-                                            <Text
-                                                style={[
-                                                    styles.staffBadge,
-                                                    {
-                                                        color: themeColor,
-                                                        backgroundColor:
-                                                            tonal.primary15,
-                                                    },
-                                                ]}>
-                                                Staff
                                             </Text>
                                         ) : null}
                                     </View>
@@ -1064,7 +1077,7 @@ const HarborPostCard = memo(
                         ]}>
                         <Pressable
                             accessibilityRole="link"
-                            accessibilityLabel={displayName}
+                            accessibilityLabel={authorAccessibilityLabel}
                             onLongPress={event => {
                                 event?.stopPropagation?.();
                             }}
@@ -1093,6 +1106,7 @@ const HarborPostCard = memo(
                                 placeholderContentFit="cover"
                                 transition={200}
                             />
+                            {staffAvatarBadge}
                         </Pressable>
                         <View style={styles.replyMain}>
                             <View>
@@ -1119,19 +1133,6 @@ const HarborPostCard = memo(
                                                     ]}
                                                     numberOfLines={1}>
                                                     {post.user_title}
-                                                </Text>
-                                            ) : null}
-                                            {post.staff ? (
-                                                <Text
-                                                    style={[
-                                                        styles.staffBadge,
-                                                        {
-                                                            color: themeColor,
-                                                            backgroundColor:
-                                                                tonal.primary15,
-                                                        },
-                                                    ]}>
-                                                    Staff
                                                 </Text>
                                             ) : null}
                                         </View>
