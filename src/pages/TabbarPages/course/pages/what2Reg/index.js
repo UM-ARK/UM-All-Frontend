@@ -21,7 +21,7 @@ import { trigger } from '../../../../../utils/trigger';
 import { logToFirebase } from '../../../../../utils/firebaseAnalytics';
 import { openLink } from '../../../../../utils/browser';
 import { getLocalStorage, setLocalStorage } from '../../../../../utils/storageKits';
-import { USER_AGREE, OFFICIAL_COURSE_SEARCH } from '../../../../../utils/pathMap';
+import { USER_AGREE, getOfficialCourseSearchUrl } from '../../../../../utils/pathMap';
 import { refreshUmehHost, useUmehHost } from '../../../../../utils/umehHost';
 import { COURSE_TIMETABLE_SEGMENT } from '../../../../../utils/courseNavigation';
 import { navigateToWikiSearch } from '../../../../../utils/wikiNavigation';
@@ -431,7 +431,7 @@ const What2Reg = () => {
             }
             case 'official': {
                 const courseCode = encodeURIComponent(inputText);
-                const uri = OFFICIAL_COURSE_SEARCH + courseCode;
+                const uri = getOfficialCourseSearchUrl(courseCode, isPostgraduate);
                 logToFirebase('checkCourse', { courseCode: `Official ${courseCode}` });
                 openLink(uri);
                 break;
@@ -439,7 +439,7 @@ const What2Reg = () => {
             default:
                 break;
         }
-    }, [inputText, navigation, searchHost]);
+    }, [inputText, isPostgraduate, navigation, searchHost]);
 
     const onClearInput = useCallback(() => {
         trigger();
@@ -548,7 +548,6 @@ const What2Reg = () => {
                     onChangeText={setInputText}
                     onClear={onClearInput}
                     onPressAction={onPressSearchAction}
-                    showOfficial={!isPostgraduate}
                     trigger={trigger}
                 />
 

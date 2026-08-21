@@ -173,6 +173,13 @@ export const ARK_WIKI_RANDOM_TITLE = ARK_WIKI + '/api.php?action=query&format=js
 export const ARK_WIKI_DONATE_RANK = ARK_WIKI + '/wiki/ARK%E6%8D%90%E8%B4%88%E6%A6%9C#%E6%8D%90%E8%B4%88%E6%A6%9C';
 
 export const OFFICIAL_COURSE_SEARCH = 'https://isw.um.edu.mo/siwci/faces/courseDetailUG?courseCode=';
+export const OFFICIAL_COURSE_SEARCH_PG = 'https://isw.um.edu.mo/siwci/faces/courseDetailPG?courseCode=';
+
+/** 官方課程詳情頁；本科 courseDetailUG，研究生 courseDetailPG。 */
+export function getOfficialCourseSearchUrl(courseCode, isPostgraduate = false) {
+    const base = isPostgraduate ? OFFICIAL_COURSE_SEARCH_PG : OFFICIAL_COURSE_SEARCH;
+    return base + courseCode;
+}
 
 export const COURSE_API_CF_WORKERS = 'https://course-api.umall.one';
 
