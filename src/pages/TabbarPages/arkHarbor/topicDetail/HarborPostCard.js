@@ -32,6 +32,7 @@ import HarborReactionControl, {
 } from './HarborReactionControl';
 import {
     canDeleteHarborPost,
+    getHarborTopicStatuses,
     getLikeAction,
     getReactionCount,
     getTagLabel,
@@ -205,6 +206,10 @@ const HarborPostCard = memo(
             isFirstPost &&
             ((Number.isInteger(topicCategoryId) && topicCategoryId > 0) ||
                 topicTags.length > 0);
+        const topicStatuses = useMemo(
+            () => (isFirstPost ? getHarborTopicStatuses(topic) : []),
+            [isFirstPost, topic],
+        );
         const postEvent = useMemo(() => parseHarborPostEvent(post), [post]);
         const postUrl = ARK_HARBOR_TOPIC_URL(
             post.topic_id,
@@ -838,6 +843,36 @@ const HarborPostCard = memo(
                                 ]}>
                                 {topic?.title || ''}
                             </Text>
+                            {topicStatuses.length > 0 ? (
+                                <View style={styles.topicStatusRow}>
+                                    {topicStatuses.map(status => (
+                                        <View
+                                            key={status.key}
+                                            accessible
+                                            accessibilityLabel={t(status.label)}
+                                            style={[
+                                                styles.topicStatusChip,
+                                                {
+                                                    backgroundColor:
+                                                        tonal.primary15,
+                                                },
+                                            ]}>
+                                            <MaterialCommunityIcons
+                                                name={status.icon}
+                                                size={scale(12)}
+                                                color={themeColor}
+                                            />
+                                            <Text
+                                                style={[
+                                                    styles.topicStatusText,
+                                                    { color: themeColor },
+                                                ]}>
+                                                {t(status.label)}
+                                            </Text>
+                                        </View>
+                                    ))}
+                                </View>
+                            ) : null}
                         </View>
 
                         <View

@@ -229,6 +229,8 @@
         "{{count}} going": "{{count}} going",
         "查看 Web 原文": "View original on the web",
         "說點什麼...": "Say something...",
+        "已關閉，無法回覆": "Closed, replies disabled",
+        "已封存，無法回覆": "Archived, replies disabled",
         "暫無回覆": "No replies yet",
         "收起正文": "Collapse post",
         "收起 {{postNumber}} 樓的正文": "Collapse post #{{postNumber}}",

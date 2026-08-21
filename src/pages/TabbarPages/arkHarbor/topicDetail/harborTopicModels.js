@@ -366,6 +366,21 @@ const getTagLabel = tag => {
     return tag?.name || tag?.id || '';
 };
 
+// 詳情頁展示用：與列表卡片相同的話題狀態
+const HARBOR_TOPIC_STATUS_CONFIG = [
+    { key: 'closed', icon: 'lock-outline', label: '已關閉' },
+    { key: 'archived', icon: 'archive-outline', label: '已封存' },
+];
+
+const getHarborTopicStatuses = topic => {
+    if (!topic) {
+        return [];
+    }
+    return HARBOR_TOPIC_STATUS_CONFIG.filter(status =>
+        Boolean(topic[status.key]),
+    );
+};
+
 const mergeTopicWindow = (currentTopic, nextTopic) => {
     if (!currentTopic) {
         return nextTopic;
@@ -602,6 +617,7 @@ export {
     getFlagActions,
     getHarborImagePressAction,
     getHarborMutationError,
+    getHarborTopicStatuses,
     getLikeAction,
     getNestedReplyCount,
     getNestedReplyPreviewLimit,

@@ -1038,6 +1038,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
             />
 
             <HarborTopicActionBar
+                archived={Boolean(topic?.archived)}
                 bookmarkPending={
                     firstPost
                         ? pendingMutations[`bookmark:${firstPost.id}`]
@@ -1045,6 +1046,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
                 }
                 bookmarked={firstPostBookmarked}
                 canReply={canReplyToTopic}
+                closed={Boolean(topic?.closed)}
                 commentCount={commentCount}
                 currentReaction={firstPost?.current_user_reaction?.id}
                 likeCount={firstPostReactionCount}

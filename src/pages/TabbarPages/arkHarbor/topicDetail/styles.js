@@ -230,6 +230,27 @@ const styles = StyleSheet.create({
         fontWeight: '700',
         marginTop: verticalScale(6),
     },
+    topicStatusRow: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        alignItems: 'center',
+        marginTop: verticalScale(6),
+    },
+    topicStatusChip: {
+        borderRadius: scale(7),
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginRight: scale(6),
+        marginBottom: verticalScale(4),
+        paddingHorizontal: scale(7),
+        paddingVertical: verticalScale(3),
+    },
+    topicStatusText: {
+        ...uiStyle.defaultText,
+        fontSize: scale(10),
+        fontWeight: '600',
+        marginLeft: scale(3),
+    },
     firstPostBody: {
         marginTop: verticalScale(4),
     },

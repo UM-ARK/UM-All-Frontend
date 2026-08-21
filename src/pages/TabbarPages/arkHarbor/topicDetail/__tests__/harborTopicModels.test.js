@@ -16,6 +16,7 @@ import {
     formatHarborFlagTypesForPost,
     getFlagActions,
     getHarborImagePressAction,
+    getHarborTopicStatuses,
     getNestedReplyPreviewLimit,
     interpolateHarborI18nTemplate,
     isHarborPostDeleted,
@@ -76,6 +77,24 @@ describe('getHarborImagePressAction', () => {
                 imageUrls: [],
             }),
         ).toBeNull();
+    });
+});
+
+describe('getHarborTopicStatuses', () => {
+    it('回傳已關閉與已封存狀態', () => {
+        expect(getHarborTopicStatuses(null)).toEqual([]);
+        expect(getHarborTopicStatuses({})).toEqual([]);
+        expect(getHarborTopicStatuses({ closed: true })).toEqual([
+            { key: 'closed', icon: 'lock-outline', label: '已關閉' },
+        ]);
+        expect(getHarborTopicStatuses({ archived: true })).toEqual([
+            { key: 'archived', icon: 'archive-outline', label: '已封存' },
+        ]);
+        expect(
+            getHarborTopicStatuses({ closed: true, archived: true }).map(
+                status => status.key,
+            ),
+        ).toEqual(['closed', 'archived']);
     });
 });
 
