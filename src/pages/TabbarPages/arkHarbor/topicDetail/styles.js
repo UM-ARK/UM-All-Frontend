@@ -143,7 +143,7 @@ const styles = StyleSheet.create({
     },
     postCard: {
         paddingHorizontal: scale(16),
-        paddingTop: verticalScale(16),
+        paddingTop: verticalScale(8),
         overflow: 'hidden',
     },
     // 1 樓底部內縮分割線（相對貼文內容區，不貼螢幕邊）
