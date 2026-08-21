@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
         marginBottom: verticalScale(2),
     },
     replyAuthorPressable: {
-        flexShrink: 1,
+        flex: 1,
         minWidth: 0,
     },
     replyAuthorName: {
@@ -407,10 +407,12 @@ const styles = StyleSheet.create({
         marginLeft: scale(8),
     },
     replyTarget: {
-        flexShrink: 1,
+        width: scale(120),
+        flexShrink: 0,
         flexDirection: 'row',
         alignItems: 'center',
-        marginLeft: scale(6),
+        justifyContent: 'flex-end',
+        marginLeft: scale(8),
     },
     replyTargetText: {
         ...uiStyle.defaultText,
