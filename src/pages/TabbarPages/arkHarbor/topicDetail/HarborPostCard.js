@@ -218,6 +218,11 @@ const HarborPostCard = memo(
         const avatarUrl = ARK_HARBOR_AVATAR_TEMPLATE(post.avatar_template);
         const displayName =
             post.username || post.display_username || t('Harbor 會員');
+        const replyTargetUsername =
+            post.reply_to_user?.username ||
+            post.__harborReplyToUsername;
+        const replyTargetLabel =
+            replyTargetUsername || `#${post.reply_to_post_number}`;
         const wasEdited =
             post.updated_at &&
             post.created_at &&
@@ -1076,48 +1081,34 @@ const HarborPostCard = memo(
                                         ) : null}
                                     </View>
                                 </Pressable>
-                                <View style={styles.headerMeta}>
-                                    {post.reply_to_post_number ? (
-                                        <Pressable
-                                            onPress={() => {
-                                                trigger();
-                                                onPressReply(
-                                                    post.reply_to_post_number,
-                                                );
-                                            }}
-                                            style={({ pressed }) => [
-                                                styles.replyBadge,
-                                                {
-                                                    backgroundColor: pressed
-                                                        ? tonal.primary30
-                                                        : tonal.primary15,
-                                                },
-                                            ]}>
-                                            <MaterialCommunityIcons
-                                                name="reply-outline"
-                                                size={scale(12)}
-                                                color={themeColor}
-                                            />
-                                            <Text
-                                                style={[
-                                                    styles.replyText,
-                                                    { color: themeColor },
-                                                ]}>
-                                                {t('回覆樓層', {
-                                                    postNumber:
-                                                        post.reply_to_post_number,
-                                                })}
-                                            </Text>
-                                        </Pressable>
-                                    ) : null}
-                                    <Text
-                                        style={[
-                                            styles.postNumber,
-                                            { color: black.third },
+                                {isNestedReply &&
+                                post.reply_to_post_number ? (
+                                    <Pressable
+                                        onPress={() => {
+                                            trigger();
+                                            onPressReply(
+                                                post.reply_to_post_number,
+                                            );
+                                        }}
+                                        style={({ pressed }) => [
+                                            styles.replyTarget,
+                                            pressed ? styles.pressedLink : null,
                                         ]}>
-                                        #{post.post_number}
-                                    </Text>
-                                </View>
+                                        <MaterialCommunityIcons
+                                            name="reply-outline"
+                                            size={scale(12)}
+                                            color={themeColor}
+                                        />
+                                        <Text
+                                            style={[
+                                                styles.replyTargetText,
+                                                { color: themeColor },
+                                            ]}
+                                            numberOfLines={1}>
+                                            {replyTargetLabel}
+                                        </Text>
+                                    </Pressable>
+                                ) : null}
                             </View>
 
                             <Pressable
@@ -1198,6 +1189,7 @@ const HarborPostCard = memo(
                                         i18n.language,
                                     )}
                                     {wasEdited ? ` · ${t('已編輯')}` : ''}
+                                    {` · #${post.post_number}`}
                                 </Text>
                                 <View style={styles.postMetaActions}>
                                     {reactionControl}

@@ -553,6 +553,16 @@ const flattenNestedPosts = (
                     : defaultPostReplyLimit;
         const descendants = [];
         collectDescendants(post.children, 1, descendants);
+        descendants.sort(
+            (left, right) =>
+                Number(left.post.post_number || 0) -
+                Number(right.post.post_number || 0),
+        );
+        const postsByNumber = new Map(
+            [post, ...descendants.map(descendant => descendant.post)].map(
+                nestedPost => [Number(nestedPost.post_number), nestedPost],
+            ),
+        );
         const visibleDescendants = descendants.slice(
             0,
             requestedReplyLimit,
@@ -585,6 +595,11 @@ const flattenNestedPosts = (
             flattened.push({
                 ...descendant.post,
                 __harborNestedDepth: descendant.depth,
+                __harborReplyToUsername:
+                    descendant.post.reply_to_user?.username ||
+                    postsByNumber.get(
+                        Number(descendant.post.reply_to_post_number),
+                    )?.username,
                 ...(isLastVisible
                     ? {
                         ...nestedMeta,

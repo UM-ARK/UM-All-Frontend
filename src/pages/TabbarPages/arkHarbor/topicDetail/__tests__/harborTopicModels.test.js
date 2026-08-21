@@ -434,6 +434,68 @@ describe('Nested Replies 資料模型', () => {
         ).toEqual([1, 2, 3, 4, 5, 6, 7, 8]);
     });
 
+    it('同一評論群組按樓層排序並保留回覆對象', () => {
+        const threadedPosts = [
+            {
+                id: 2,
+                post_number: 2,
+                username: 'root',
+                total_descendant_count: 4,
+                children: [
+                    {
+                        id: 3,
+                        post_number: 3,
+                        username: 'first',
+                        reply_to_post_number: 2,
+                        children: [
+                            {
+                                id: 5,
+                                post_number: 5,
+                                username: 'third',
+                                reply_to_post_number: 3,
+                                children: [
+                                    {
+                                        id: 6,
+                                        post_number: 6,
+                                        username: 'fourth',
+                                        reply_to_post_number: 5,
+                                        children: [],
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                    {
+                        id: 4,
+                        post_number: 4,
+                        username: 'second',
+                        reply_to_post_number: 2,
+                        children: [],
+                    },
+                ],
+            },
+        ];
+
+        const flattened = flattenNestedPosts(
+            threadedPosts,
+            new Map([[2, 4]]),
+        );
+        expect(flattened.map(post => post.post_number)).toEqual([
+            2,
+            3,
+            4,
+            5,
+            6,
+        ]);
+        expect(flattened.map(post => post.__harborReplyToUsername)).toEqual([
+            undefined,
+            'root',
+            'root',
+            'first',
+            'third',
+        ]);
+    });
+
     it('會定位到尚未載入直接子回覆的最深樓層', () => {
         const partialTree = {
             id: 2,

@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
         marginBottom: verticalScale(2),
     },
     replyAuthorPressable: {
-        flex: 1,
+        flexShrink: 1,
         minWidth: 0,
     },
     replyAuthorName: {
@@ -301,12 +301,6 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         minWidth: 0,
-    },
-    headerMeta: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        flexShrink: 0,
-        marginLeft: scale(8),
     },
     pressedLink: {
         opacity: 0.7,
@@ -412,23 +406,17 @@ const styles = StyleSheet.create({
         marginRight: 0,
         marginLeft: scale(8),
     },
-    postNumber: {
-        ...uiStyle.defaultText,
-        fontSize: scale(11),
-        fontWeight: '600',
-        marginLeft: scale(6),
-    },
-    replyBadge: {
+    replyTarget: {
+        flexShrink: 1,
         flexDirection: 'row',
         alignItems: 'center',
-        borderRadius: scale(6),
-        paddingHorizontal: scale(6),
-        paddingVertical: verticalScale(3),
+        marginLeft: scale(6),
     },
-    replyText: {
+    replyTargetText: {
         ...uiStyle.defaultText,
-        fontSize: scale(9),
-        fontWeight: '600',
+        flexShrink: 1,
+        fontSize: scale(10),
+        fontWeight: '500',
         marginLeft: scale(3),
     },
     // 展開回覆：左右分割線與日期列同寬（在 replyMain / 1 樓內容區內）
