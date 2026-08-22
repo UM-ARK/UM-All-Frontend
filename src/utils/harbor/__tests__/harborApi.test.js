@@ -261,6 +261,38 @@ describe('Harbor API 資料正規化', () => {
         });
     });
 
+    it('從 current_user 判斷自己是否已開啟 Chat', async () => {
+        getSpy
+            .mockResolvedValueOnce({
+                data: {
+                    current_user: {
+                        id: 7,
+                        username: 'ark-user',
+                        can_chat: true,
+                        has_chat_enabled: true,
+                        can_direct_message: false,
+                    },
+                },
+            })
+            .mockResolvedValueOnce({
+                data: {user: {username: 'ark-user', name: 'ARK User'}},
+            })
+            .mockResolvedValueOnce({data: {user_summary: {}}})
+            .mockResolvedValueOnce({data: {badges: [], user_badges: []}});
+
+        await expect(
+            fetchCurrentHarborUser({
+                userApiKey: 'key',
+                clientId: 'client',
+            }),
+        ).resolves.toEqual(
+            expect.objectContaining({
+                canChat: true,
+                canDirectMessage: false,
+            }),
+        );
+    });
+
     it('取得工作狀態欄位設定並更新個人資料', async () => {
         getSpy.mockResolvedValueOnce({
             data: {

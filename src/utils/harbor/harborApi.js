@@ -12,6 +12,7 @@ import {
     replaceHarborEmojiShortcodes,
 } from './harborHtml';
 import {
+    getHarborSessionChatCapability,
     normalizeHarborChatChannel,
     normalizeHarborChatMessages,
     normalizeHarborDirectMessageChannels,
@@ -3556,14 +3557,17 @@ export async function fetchCurrentHarborUser(credentials, previousUser = null) {
         badges: badgeResult.status === 'fulfilled',
     };
 
-    return normalizeProfile(
-        currentUser,
-        availability.profile ? profileResult.value.data : null,
-        availability.summary ? summaryResult.value.data : null,
-        availability.badges ? badgeResult.value.data : null,
-        availability,
-        previousUser,
-    );
+    return {
+        ...normalizeProfile(
+            currentUser,
+            availability.profile ? profileResult.value.data : null,
+            availability.summary ? summaryResult.value.data : null,
+            availability.badges ? badgeResult.value.data : null,
+            availability,
+            previousUser,
+        ),
+        ...getHarborSessionChatCapability(currentUser),
+    };
 }
 
 export function revokeHarborCredentials(credentials) {

@@ -42,6 +42,7 @@ import {
     updateHarborProfile,
     updateHarborUsername,
 } from '../../../../utils/harbor/harborApi';
+import {getHarborChatStartFailureReason} from '../../../../utils/harbor/harborChat';
 import {
     fetchHarborProfileMetadataQuery,
     fetchHarborProfileQuery,
@@ -79,6 +80,12 @@ const getHarborUsernameErrorMessage = error => {
         return errors;
     }
     return data?.error || data?.message || '';
+};
+
+const HARBOR_CHAT_START_ERROR_COPY = {
+    self: '你的帳號目前還不能使用 Chat。可能尚未開啟此功能，或暫時沒有發起聊天的權限。',
+    peer: '對方可能未開啟 Chat，或目前不接受新的聊天。',
+    generic: '暫時無法開始 Chat，請檢查網絡後再試。',
 };
 
 // 頭像右上角 UMer 角標：45° 傾斜並輕微浮動
@@ -771,6 +778,15 @@ const HarborProfilePage = ({ navigation, route }) => {
             return;
         }
         trigger();
+        const knownReason = getHarborChatStartFailureReason(null, user);
+        if (knownReason === 'self') {
+            Alert.alert(
+                t('無法開始 Chat'),
+                t(HARBOR_CHAT_START_ERROR_COPY.self),
+                [{text: t('確定'), onPress: () => trigger()}],
+            );
+            return;
+        }
         setIsOpeningChat(true);
         try {
             const channel = await createHarborDirectMessageChannel(username);
@@ -785,10 +801,15 @@ const HarborProfilePage = ({ navigation, route }) => {
                 channelUsers: channel.users,
                 isGroup: channel.isGroup,
             });
-        } catch {
+        } catch (error) {
+            const reason =
+                getHarborChatStartFailureReason(error, user) || 'generic';
             Alert.alert(
                 t('無法開始 Chat'),
-                t('對方可能未開啟 Chat，或目前不接受新的聊天。'),
+                t(
+                    HARBOR_CHAT_START_ERROR_COPY[reason] ||
+                        HARBOR_CHAT_START_ERROR_COPY.generic,
+                ),
                 [{text: t('確定'), onPress: () => trigger()}],
             );
         } finally {
