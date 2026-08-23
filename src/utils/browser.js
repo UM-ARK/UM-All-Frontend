@@ -3,6 +3,7 @@ import * as WebBrowser from 'expo-web-browser';
 import { themes } from '../components/ThemeContext';
 import { getBestBrowserPackage } from './browserPackage';
 import { ARK_WIKI } from './pathMap';
+import { UMEH_BACKUP_HOST, UMEH_PRIMARY_HOST } from './umehHost';
 
 export const openLink = async (input) => {
     let url, mode;
@@ -16,8 +17,12 @@ export const openLink = async (input) => {
         throw new Error('openLink: Invalid input');
     }
 
-    // Wiki 連結預設全螢幕（呼叫端可顯式傳 mode 覆寫）
-    if (!mode && typeof url === 'string' && url.startsWith(ARK_WIKI)) {
+    // Wiki、選咩課連結預設全螢幕（呼叫端可顯式傳 mode 覆寫）
+    if (!mode && typeof url === 'string' && (
+        url.startsWith(ARK_WIKI) ||
+        url.startsWith(UMEH_PRIMARY_HOST) ||
+        url.startsWith(UMEH_BACKUP_HOST)
+    )) {
         mode = 'fullScreen';
     }
 
