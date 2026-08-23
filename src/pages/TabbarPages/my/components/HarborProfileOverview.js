@@ -80,6 +80,13 @@ const HarborProfileOverview = ({
                             }),
                     };
                 }
+                if (item.key === 'topicsViewed') {
+                    return {
+                        ...item,
+                        onPress: () =>
+                            navigation.navigate('HarborRecentReads'),
+                    };
+                }
                 return item;
             });
     }, [navigation, t, user.contributions]);

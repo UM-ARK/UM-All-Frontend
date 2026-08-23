@@ -1004,7 +1004,7 @@ function normalizeSiteCapabilities(data) {
 }
 
 function getTopicListPath({ view, categoryId, categorySlug, tag }) {
-    if (!TOPIC_VIEWS.includes(view)) {
+    if (!TOPIC_VIEWS.includes(view) && view !== 'read') {
         throw new RangeError(`Unsupported Harbor topic view: ${view}`);
     }
 
@@ -1584,6 +1584,15 @@ function normalizeProfile(
                     summary.likes_received,
                 ),
                 label: '收到的讚',
+            },
+            {
+                key: 'topicsViewed',
+                value: summaryMetric(
+                    'contributions',
+                    'topicsViewed',
+                    summary.topics_entered,
+                ),
+                label: '瀏覽話題',
             },
             {
                 key: 'badges',

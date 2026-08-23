@@ -579,6 +579,10 @@ describe('Harbor API 資料正規化', () => {
                         key: 'topicsCreated',
                         value: '12',
                     }),
+                    expect.objectContaining({
+                        key: 'topicsViewed',
+                        value: '90',
+                    }),
                 ]),
                 badges: [
                     expect.objectContaining({
@@ -630,6 +634,7 @@ describe('Harbor API 資料正規化', () => {
                 {key: 'topicsCreated', value: '12'},
                 {key: 'postsCreated', value: '34'},
                 {key: 'likesReceived', value: '56'},
+                {key: 'topicsViewed', value: '90'},
                 {key: 'badges', value: '7'},
             ],
             stats: [
@@ -667,6 +672,7 @@ describe('Harbor API 資料正規化', () => {
             '12',
             '34',
             '56',
+            '90',
             '7',
         ]);
         expect(result.stats.map(item => item.value)).toEqual([
@@ -826,6 +832,7 @@ describe('Harbor API 資料正規化', () => {
         );
 
         expect(result.contributions.map(item => item.value)).toEqual([
+            '—',
             '—',
             '—',
             '—',
@@ -2600,6 +2607,7 @@ describe('Harbor API 資料正規化', () => {
         ['top', '/top.json'],
         ['new', '/new.json'],
         ['unread', '/unread.json'],
+        ['read', '/read.json'],
     ])('使用 %s 話題視圖端點', async (view, expectedPath) => {
         getSpy.mockResolvedValue({
             data: {

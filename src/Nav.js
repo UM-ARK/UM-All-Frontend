@@ -555,6 +555,10 @@ const Nav = () => {
                         component={HarborActivityPage}
                     />
                     <Stack.Screen
+                        name="HarborRecentReads"
+                        component={HarborTopicListPage}
+                    />
+                    <Stack.Screen
                         name="HarborInbox"
                         component={HarborInboxPage}
                     />
