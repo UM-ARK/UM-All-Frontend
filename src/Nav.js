@@ -575,6 +575,13 @@ const Nav = () => {
                         component={HarborReviewQueuePage}
                     />
                     <Stack.Screen
+                        name="HarborReviewDetail"
+                        component={HarborReviewQueuePage}
+                        options={{
+                            presentation: 'card',
+                        }}
+                    />
+                    <Stack.Screen
                         name="HarborBadges"
                         component={HarborBadgesPage}
                     />
