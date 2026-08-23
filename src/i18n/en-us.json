@@ -1545,6 +1545,9 @@
         "Student": "Student",
         "Organization": "Organization",
         "What2Reg Host": "What2Reg Node Selection",
+        "What2Reg Open": "What2Reg Open Method",
+        "In-App Browser": "In-App Browser",
+        "System Browser": "System Browser",
         "Auto": "Auto"
     }
 }

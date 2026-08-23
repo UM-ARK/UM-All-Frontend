@@ -3,7 +3,7 @@ import * as WebBrowser from 'expo-web-browser';
 import { themes } from '../components/ThemeContext';
 import { getBestBrowserPackage } from './browserPackage';
 import { ARK_WIKI } from './pathMap';
-import { UMEH_BACKUP_HOST, UMEH_PRIMARY_HOST } from './umehHost';
+import { getUmehOpenPref, isUmehUrl } from './umehHost';
 
 export const openLink = async (input) => {
     let url, mode;
@@ -20,8 +20,7 @@ export const openLink = async (input) => {
     // Wiki、選咩課連結預設全螢幕（呼叫端可顯式傳 mode 覆寫）
     if (!mode && typeof url === 'string' && (
         url.startsWith(ARK_WIKI) ||
-        url.startsWith(UMEH_PRIMARY_HOST) ||
-        url.startsWith(UMEH_BACKUP_HOST)
+        isUmehUrl(url)
     )) {
         mode = 'fullScreen';
     }
@@ -37,6 +36,11 @@ export const openLink = async (input) => {
                 return Linking.openURL(url);
             }
             throw new Error(`Invalid URL: ${url}`);
+        }
+
+        // 選咩課可改為系統瀏覽器；其餘維持內頁 WebBrowser
+        if (isUmehUrl(url) && (await getUmehOpenPref()) === 'system') {
+            return Linking.openURL(url);
         }
 
         // 2. 獲取 Android 瀏覽器包名

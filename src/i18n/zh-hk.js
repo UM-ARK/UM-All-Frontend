@@ -101,6 +101,9 @@ export default {
         Student: '學生',
         Organization: '組織',
         'What2Reg Host': '選咩課節點選擇',
+        'What2Reg Open': '選咩課跳轉方式',
+        'In-App Browser': '內頁瀏覽',
+        'System Browser': '系統瀏覽器',
         Auto: '自動',
     },
 
