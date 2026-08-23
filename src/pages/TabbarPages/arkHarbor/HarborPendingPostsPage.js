@@ -7,6 +7,7 @@ import React, {
 } from 'react';
 import {
     ActivityIndicator,
+    Pressable,
     StyleSheet,
     View,
 } from 'react-native';
@@ -100,6 +101,14 @@ const HarborPendingPostsPage = ({navigation}) => {
         }, [loadPendingPosts, navigation, t]),
     );
 
+    const openPendingPost = useCallback(
+        pendingPost => {
+            trigger();
+            navigation.navigate('HarborPendingPostDetail', {pendingPost});
+        },
+        [navigation],
+    );
+
     const renderPendingPost = useCallback(
         ({item}) => {
             const createdAt = new Date(item.createdAt);
@@ -107,11 +116,16 @@ const HarborPendingPostsPage = ({navigation}) => {
                 ? ''
                 : createdAt.toLocaleString();
             return (
-                <View
-                    style={[
+                <Pressable
+                    accessibilityLabel={t('查看待審內容詳情')}
+                    accessibilityRole="button"
+                    onPress={() => openPendingPost(item)}
+                    style={({pressed}) => [
                         styles.pendingCard,
                         {
-                            backgroundColor: theme.white,
+                            backgroundColor: pressed
+                                ? theme.tonal.primary08
+                                : theme.white,
                             borderColor: theme.themeColorUltraLight,
                         },
                     ]}>
@@ -144,6 +158,11 @@ const HarborPendingPostsPage = ({navigation}) => {
                                 {t('審核中')}
                             </Text>
                         </View>
+                        <MaterialCommunityIcons
+                            name="chevron-right"
+                            size={scale(20)}
+                            color={theme.black.third}
+                        />
                     </View>
                     <Text
                         numberOfLines={4}
@@ -162,10 +181,10 @@ const HarborPendingPostsPage = ({navigation}) => {
                             {timeLabel}
                         </Text>
                     ) : null}
-                </View>
+                </Pressable>
             );
         },
-        [t, theme],
+        [openPendingPost, t, theme],
     );
 
     if (isLoading) {

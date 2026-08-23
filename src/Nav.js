@@ -33,6 +33,7 @@ import HarborSearchPage from './pages/TabbarPages/arkHarbor/HarborSearchPage';
 import HarborTopicListPage from './pages/TabbarPages/arkHarbor/HarborTopicListPage';
 import HarborComposerPage from './pages/TabbarPages/arkHarbor/HarborComposerPage';
 import HarborDraftsPage from './pages/TabbarPages/arkHarbor/HarborDraftsPage';
+import HarborPendingPostDetailPage from './pages/TabbarPages/arkHarbor/HarborPendingPostDetailPage';
 import HarborPendingPostsPage from './pages/TabbarPages/arkHarbor/HarborPendingPostsPage';
 import HarborChatListPage from './pages/TabbarPages/arkHarbor/HarborChatListPage';
 import HarborChatChannelPage from './pages/TabbarPages/arkHarbor/HarborChatChannelPage';
@@ -502,6 +503,10 @@ const Nav = () => {
                     <Stack.Screen
                         name="HarborPendingPosts"
                         component={HarborPendingPostsPage}
+                    />
+                    <Stack.Screen
+                        name="HarborPendingPostDetail"
+                        component={HarborPendingPostDetailPage}
                     />
                     <Stack.Screen name="AllEvents" component={AllEvents} />
 
