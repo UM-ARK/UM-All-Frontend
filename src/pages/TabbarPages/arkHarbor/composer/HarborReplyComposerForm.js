@@ -113,6 +113,8 @@ const HarborReplyComposerForm = ({
     composer,
     imagesState,
     onClose,
+    onOpenPendingPosts,
+    pendingPostCount,
     route,
     submit,
 }) => {
@@ -268,6 +270,37 @@ const HarborReplyComposerForm = ({
                                 </Text>
                             ) : null}
                         </Pressable>
+                        {pendingPostCount > 0 ? (
+                            <Pressable
+                                accessibilityLabel={t('查看 {{count}} 項審核中的內容', {
+                                    count: pendingPostCount,
+                                })}
+                                accessibilityRole="button"
+                                onPress={onOpenPendingPosts}
+                                style={({pressed}) => [
+                                    styles.pendingButton,
+                                    {
+                                        backgroundColor: pressed
+                                            ? theme.tonal.secondary30
+                                            : theme.tonal.secondary15,
+                                    },
+                                ]}>
+                                <MaterialCommunityIcons
+                                    name="clock-outline"
+                                    size={scale(16)}
+                                    color={theme.secondThemeColor}
+                                />
+                                <Text
+                                    style={[
+                                        styles.pendingButtonText,
+                                        {color: theme.secondThemeColor},
+                                    ]}>
+                                    {t('{{count}} 項審核中', {
+                                        count: pendingPostCount,
+                                    })}
+                                </Text>
+                            </Pressable>
+                        ) : null}
                         {maximumPostLength != null &&
                         visibleTextLength > maximumPostLength ? (
                             <Text
@@ -368,6 +401,19 @@ const styles = StyleSheet.create({
     },
     page: {
         flex: 1,
+    },
+    pendingButton: {
+        alignItems: 'center',
+        borderRadius: scale(10),
+        flexDirection: 'row',
+        gap: scale(4),
+        marginLeft: scale(4),
+        minHeight: scale(32),
+        paddingHorizontal: scale(8),
+    },
+    pendingButtonText: {
+        fontSize: scale(10),
+        fontWeight: '700',
     },
     sendButton: {
         alignItems: 'center',

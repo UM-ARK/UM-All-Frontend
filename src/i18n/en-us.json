@@ -528,6 +528,7 @@
         "查看待審內容詳情": "View pending content details",
         "待審內容詳情": "Pending Content Details",
         "你有 {{count}} 項內容正在審核中": "You have {{count}} items under review",
+        "{{count}} 項審核中": "{{count}} under review",
         "點擊查看待審話題或回覆": "Tap to view pending topics or replies",
         "正在載入待審內容…": "Loading pending content…",
         "待審內容載入失敗，請稍後再試。": "Unable to load pending content. Try again later.",

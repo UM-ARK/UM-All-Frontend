@@ -119,7 +119,7 @@ const HarborComposerPage = ({route, navigation}) => {
         useCallback(() => {
             if (
                 sessionStatus !== 'signedIn' ||
-                !isNewTopic ||
+                (!isNewTopic && !isReply) ||
                 !user?.username
             ) {
                 setPendingPostCount(0);
@@ -138,7 +138,7 @@ const HarborComposerPage = ({route, navigation}) => {
             return () => {
                 controller.abort();
             };
-        }, [isNewTopic, sessionStatus, user?.username]),
+        }, [isNewTopic, isReply, sessionStatus, user?.username]),
     );
 
     useEffect(() => {
@@ -950,6 +950,8 @@ const HarborComposerPage = ({route, navigation}) => {
                     isUploadingImages,
                 }}
                 onClose={closeReplyComposer}
+                onOpenPendingPosts={handleOpenPendingPosts}
+                pendingPostCount={pendingPostCount}
                 route={route}
                 submit={{
                     handleSubmit,
