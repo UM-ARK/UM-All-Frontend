@@ -24,6 +24,7 @@ import {
     fetchHarborTopicList,
     fetchHarborTopicPosts,
     fetchHarborUnreadNotificationCount,
+    fetchHarborUploadUrls,
     fetchHarborForumBadgeSnapshot,
     fetchHarborPendingPosts,
     fetchHarborUserActions,
@@ -994,6 +995,31 @@ describe('Harbor API 資料正規化', () => {
                 topicId: 42,
                 topicUrl: '/t/topic/42',
                 username: 'ark-user',
+            },
+        ]);
+    });
+
+    it('將待審內容的上傳短網址解析為完整網址', async () => {
+        postSpy.mockResolvedValue({
+            data: [
+                {url: '/uploads/default/original/1X/image.jpeg'},
+            ],
+        });
+
+        const result = await fetchHarborUploadUrls([
+            'upload://abc123.jpeg',
+            'upload://abc123.jpeg',
+        ]);
+
+        expect(postSpy).toHaveBeenCalledWith(
+            '/uploads/lookup-urls.json',
+            {short_urls: ['upload://abc123.jpeg']},
+            {signal: undefined},
+        );
+        expect(result).toEqual([
+            {
+                shortUrl: 'upload://abc123.jpeg',
+                url: 'https://harbor.example.com/uploads/default/original/1X/image.jpeg',
             },
         ]);
     });

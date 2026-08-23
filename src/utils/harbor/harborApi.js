@@ -1743,6 +1743,29 @@ export async function fetchHarborPendingPosts(username, { signal } = {}) {
     }));
 }
 
+export async function fetchHarborUploadUrls(shortUrls, { signal } = {}) {
+    const normalizedShortUrls = Array.isArray(shortUrls)
+        ? [...new Set(shortUrls.filter(url =>
+            typeof url === 'string' && url.startsWith('upload://'),
+        ))]
+        : [];
+    if (normalizedShortUrls.length === 0) {
+        return [];
+    }
+    const response = await harborApi.post(
+        '/uploads/lookup-urls.json',
+        {short_urls: normalizedShortUrls},
+        {signal},
+    );
+    if (!Array.isArray(response.data)) {
+        throw new Error('Invalid Harbor upload lookup response');
+    }
+    return response.data.map((upload, index) => ({
+        shortUrl: normalizedShortUrls[index],
+        url: ARK_HARBOR_UPLOAD_URL(upload?.url),
+    }));
+}
+
 export async function fetchHarborSearch({
     query,
     userQuery = query,
