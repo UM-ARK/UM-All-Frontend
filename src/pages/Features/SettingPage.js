@@ -556,43 +556,6 @@ const SettingPage = ({ navigation }) => {
                             />
                         }
                     />
-                </SettingSectionCard>
-
-                {/* 應用設置分區 */}
-                <SettingSection title={t('setting:Application')} icon="apps" />
-
-                <SettingSectionCard>
-                    <SettingItem
-                        grouped
-                        icon="trash"
-                        iconColor="#FF3B30"
-                        title={t('setting:Clear Cache')}
-                        onPress={handleClearCache}
-                    />
-                    <SettingItem
-                        grouped
-                        icon="globe-outline"
-                        iconColor={themeColor}
-                        title={t('setting:Browser Cache Help')}
-                        subtitle={t('setting:Browser Cache Help Hint')}
-                        onPress={handleBrowserCacheHelp}
-                    />
-                    <SettingItem
-                        grouped
-                        icon="cloud-download"
-                        iconColor="#34C759"
-                        title={t('setting:Check Update')}
-                        subtitle={`v${getLocalAppVersion()}`}
-                        onPress={handleCheckUpdate}
-                    />
-                    <SettingItem
-                        grouped
-                        icon="settings-outline"
-                        iconColor="#5856D6"
-                        title={t('setting:App Settings')}
-                        subtitle={t('setting:App Settings Hint')}
-                        onPress={() => Linking.openSettings()}
-                    />
                     <SettingItem
                         grouped
                         icon="globe-outline"
@@ -649,6 +612,43 @@ const SettingPage = ({ navigation }) => {
                                 </View>
                             </MenuView>
                         }
+                    />
+                </SettingSectionCard>
+
+                {/* 應用設置分區 */}
+                <SettingSection title={t('setting:Application')} icon="apps" />
+
+                <SettingSectionCard>
+                    <SettingItem
+                        grouped
+                        icon="trash"
+                        iconColor="#FF3B30"
+                        title={t('setting:Clear Cache')}
+                        onPress={handleClearCache}
+                    />
+                    <SettingItem
+                        grouped
+                        icon="globe-outline"
+                        iconColor={themeColor}
+                        title={t('setting:Browser Cache Help')}
+                        subtitle={t('setting:Browser Cache Help Hint')}
+                        onPress={handleBrowserCacheHelp}
+                    />
+                    <SettingItem
+                        grouped
+                        icon="cloud-download"
+                        iconColor="#34C759"
+                        title={t('setting:Check Update')}
+                        subtitle={`v${getLocalAppVersion()}`}
+                        onPress={handleCheckUpdate}
+                    />
+                    <SettingItem
+                        grouped
+                        icon="settings-outline"
+                        iconColor="#5856D6"
+                        title={t('setting:App Settings')}
+                        subtitle={t('setting:App Settings Hint')}
+                        onPress={() => Linking.openSettings()}
                     />
                 </SettingSectionCard>
 
