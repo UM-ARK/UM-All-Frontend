@@ -338,6 +338,7 @@ const Tabbar = () => {
         user,
         inboxUnreadCount,
         chatUnreadCount,
+        reviewCount,
         refresh,
         refreshInboxUnreadCount,
         refreshChatUnreadCount,
@@ -378,6 +379,7 @@ const Tabbar = () => {
         ? calculateHarborMyTabBadgeTotal(
             inboxUnreadCount,
             chatUnreadCount,
+            reviewCount,
             shouldShowHarborPrompt,
         )
         : 0;

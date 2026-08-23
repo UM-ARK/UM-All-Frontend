@@ -41,10 +41,11 @@ describe('Harbor 論壇 Tab 角標', () => {
         expect(calculateHarborUnreadTotal(3, -1)).toBe(3);
     });
 
-    it('推送提示與消息未讀共用同一個數字角標', () => {
-        expect(calculateHarborMyTabBadgeTotal(3, 2, true)).toBe(6);
-        expect(calculateHarborMyTabBadgeTotal(3, 2, false)).toBe(5);
-        expect(calculateHarborMyTabBadgeTotal(0, 0, true)).toBe(1);
+    it('推送提示、消息未讀與待審核內容共用同一個數字角標', () => {
+        expect(calculateHarborMyTabBadgeTotal(3, 2, 4, true)).toBe(10);
+        expect(calculateHarborMyTabBadgeTotal(3, 2, 4, false)).toBe(9);
+        expect(calculateHarborMyTabBadgeTotal(0, 0, 0, true)).toBe(1);
+        expect(calculateHarborMyTabBadgeTotal(0, 0, -1, false)).toBe(0);
     });
 
     it('首次升級時以目前最新內容建立基準而不顯示歷史角標', () => {

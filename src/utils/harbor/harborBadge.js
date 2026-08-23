@@ -59,10 +59,12 @@ export function calculateHarborUnreadTotal(inboxUnreadCount, chatUnreadCount) {
 export function calculateHarborMyTabBadgeTotal(
     inboxUnreadCount,
     chatUnreadCount,
+    reviewCount,
     shouldShowPushPrompt,
 ) {
     return (
         calculateHarborUnreadTotal(inboxUnreadCount, chatUnreadCount) +
+        Math.max(0, Number(reviewCount) || 0) +
         (shouldShowPushPrompt ? 1 : 0)
     );
 }
