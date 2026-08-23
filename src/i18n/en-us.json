@@ -1544,7 +1544,7 @@
         "Guest": "Guest",
         "Student": "Student",
         "Organization": "Organization",
-        "What2Reg Host": "What2Reg Host",
+        "What2Reg Host": "What2Reg Node Selection",
         "Auto": "Auto"
     }
 }
