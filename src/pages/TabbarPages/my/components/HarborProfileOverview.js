@@ -33,12 +33,13 @@ const HarborProfileOverview = ({
     user,
     unreadCount,
     chatUnreadCount,
+    reviewCount = 0,
     navigation,
     onChatPress,
     onSettingsPress,
 }) => {
     const {theme} = useTheme();
-    const {t} = useTranslation('my');
+    const {t} = useTranslation(['my', 'harbor']);
 
     const openBadges = React.useCallback(() => {
         navigation.navigate('HarborBadges');
@@ -77,6 +78,13 @@ const HarborProfileOverview = ({
                                 kind: 'likesReceived',
                                 title: t('收到的讚'),
                             }),
+                    };
+                }
+                if (item.key === 'topicsViewed') {
+                    return {
+                        ...item,
+                        onPress: () =>
+                            navigation.navigate('HarborRecentReads'),
                     };
                 }
                 return item;
@@ -126,6 +134,83 @@ const HarborProfileOverview = ({
                 unreadCount={unreadCount}
                 onSelect={handleQuickAction}
             />
+
+            {user.isAdmin || user.isModerator ? (
+                <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={t('審核', {ns: 'harbor'})}
+                    style={({pressed}) => [
+                        styles.reviewCard,
+                        {backgroundColor: theme.white},
+                        pressed && {backgroundColor: theme.tonal.primary08},
+                    ]}
+                    onPress={() => {
+                        trigger();
+                        navigation.navigate('HarborReviewQueue');
+                    }}>
+                    <View
+                        style={[
+                            styles.reviewIcon,
+                            {backgroundColor: theme.tonal.primary15},
+                        ]}>
+                        <MaterialCommunityIcons
+                            name="shield-check-outline"
+                            size={scale(22)}
+                            color={theme.themeColor}
+                        />
+                    </View>
+                    <View style={styles.reviewContent}>
+                        <Text
+                            style={[
+                                styles.reviewTitle,
+                                {color: theme.black.main},
+                            ]}>
+                            {t('審核', {ns: 'harbor'})}
+                        </Text>
+                        <Text
+                            numberOfLines={1}
+                            style={[
+                                styles.reviewDescription,
+                                {color: theme.black.third},
+                            ]}>
+                            {reviewCount > 0
+                                ? t('{{count}} 項內容等待處理', {
+                                    ns: 'harbor',
+                                    count: reviewCount,
+                                })
+                                : t('目前沒有待審核內容', {ns: 'harbor'})}
+                        </Text>
+                    </View>
+                    <View
+                        style={[
+                            styles.reviewBadge,
+                            {
+                                backgroundColor:
+                                    reviewCount > 0
+                                        ? theme.unread
+                                        : theme.tonal.secondary15,
+                            },
+                        ]}>
+                        <Text
+                            style={[
+                                styles.reviewBadgeText,
+                                {
+                                    color:
+                                        reviewCount > 0
+                                            ? theme.trueWhite
+                                            : theme.black.third,
+                                },
+                            ]}>
+                            {reviewCount > 99 ? '99+' : reviewCount || 0}
+                        </Text>
+                    </View>
+                    <MaterialCommunityIcons
+                        name="chevron-right"
+                        size={scale(20)}
+                        color={theme.black.third}
+                    />
+                </Pressable>
+            ) : null}
 
             <HarborStatsCard items={contributionItems} />
 
@@ -198,6 +283,51 @@ const styles = StyleSheet.create({
         fontSize: scale(10),
         lineHeight: verticalScale(14),
         textAlign: 'center',
+    },
+    reviewCard: {
+        minHeight: verticalScale(64),
+        borderRadius: scale(10),
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: scale(14),
+        paddingVertical: verticalScale(10),
+    },
+    reviewIcon: {
+        width: scale(38),
+        height: scale(38),
+        borderRadius: scale(12),
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    reviewContent: {
+        flex: 1,
+        minWidth: 0,
+        marginLeft: scale(11),
+    },
+    reviewTitle: {
+        ...uiStyle.defaultText,
+        fontSize: scale(14),
+        fontWeight: '750',
+    },
+    reviewDescription: {
+        ...uiStyle.defaultText,
+        fontSize: scale(10),
+        lineHeight: verticalScale(14),
+        marginTop: verticalScale(2),
+    },
+    reviewBadge: {
+        minWidth: scale(24),
+        height: scale(24),
+        borderRadius: scale(12),
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingHorizontal: scale(6),
+        marginLeft: scale(8),
+    },
+    reviewBadgeText: {
+        ...uiStyle.defaultText,
+        fontSize: scale(9),
+        fontWeight: '800',
     },
     badgesCard: {
         borderRadius: scale(10),

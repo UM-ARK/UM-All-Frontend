@@ -31,6 +31,7 @@ import {
     createHarborForumBadgeState,
     formatHarborTabBadge,
     getHarborForumBadgeCount,
+    HARBOR_FORUM_BADGE_GUEST_SCOPE,
     loadHarborForumBadgeState,
     saveHarborForumBadgeState,
     updateHarborForumBadgeState,
@@ -337,6 +338,7 @@ const Tabbar = () => {
         user,
         inboxUnreadCount,
         chatUnreadCount,
+        reviewCount,
         refresh,
         refreshInboxUnreadCount,
         refreshChatUnreadCount,
@@ -350,11 +352,17 @@ const Tabbar = () => {
     const forumBadgeStateRef = useRef(forumBadgeState);
     const forumBadgeStorageReadyRef = useRef(false);
     const forumBadgeAcknowledgePendingRef = useRef(false);
-    const forumBadgeAcknowledgeUsernameRef = useRef('');
+    const forumBadgeAcknowledgeScopeRef = useRef('');
     const [forumBadgeStorageReady, setForumBadgeStorageReady] =
         useState(false);
     const isSignedIn = status === 'signedIn' && !!user;
     const signedInUsername = isSignedIn ? user.username : '';
+    const forumBadgeScope = signedInUsername ||
+        (status === 'signedOut' || status === 'expired'
+            ? HARBOR_FORUM_BADGE_GUEST_SCOPE
+            : '');
+    const isGuestForumBadge =
+        forumBadgeScope === HARBOR_FORUM_BADGE_GUEST_SCOPE;
 
     // 跟隨 iPad Stage Manager 與 Mac 視窗大小即時切換導覽模式
     const isLandscape = width > height;
@@ -371,17 +379,17 @@ const Tabbar = () => {
         ? calculateHarborMyTabBadgeTotal(
             inboxUnreadCount,
             chatUnreadCount,
+            reviewCount,
             shouldShowHarborPrompt,
         )
         : 0;
 
     const refreshForumBadge = useCallback(
         async ({ acknowledge = false } = {}) => {
-            if (!signedInUsername || !forumBadgeStorageReadyRef.current) {
+            if (!forumBadgeScope || !forumBadgeStorageReadyRef.current) {
                 if (acknowledge) {
                     forumBadgeAcknowledgePendingRef.current = true;
-                    forumBadgeAcknowledgeUsernameRef.current =
-                        signedInUsername;
+                    forumBadgeAcknowledgeScopeRef.current = forumBadgeScope;
                 }
                 return;
             }
@@ -389,8 +397,8 @@ const Tabbar = () => {
             const shouldAcknowledge =
                 acknowledge ||
                 (forumBadgeAcknowledgePendingRef.current &&
-                    forumBadgeAcknowledgeUsernameRef.current ===
-                        signedInUsername);
+                    forumBadgeAcknowledgeScopeRef.current ===
+                        forumBadgeScope);
             if (
                 !shouldAcknowledge &&
                 Date.now() - forumBadgeLastRefreshAtRef.current <
@@ -403,6 +411,7 @@ const Tabbar = () => {
             forumBadgeRequestRef.current = requestId;
             try {
                 const snapshot = await fetchHarborForumBadgeSnapshot({
+                    publicOnly: isGuestForumBadge,
                     since: shouldAcknowledge
                         ? undefined
                         : currentState.acknowledgedAt,
@@ -412,7 +421,7 @@ const Tabbar = () => {
                     setForumBadgeState(previousState => {
                         const nextState = updateHarborForumBadgeState(
                             previousState,
-                            signedInUsername,
+                            forumBadgeScope,
                             snapshot,
                             { acknowledge: shouldAcknowledge },
                         );
@@ -420,13 +429,13 @@ const Tabbar = () => {
                         return nextState;
                     });
                     forumBadgeAcknowledgePendingRef.current = false;
-                    forumBadgeAcknowledgeUsernameRef.current = '';
+                    forumBadgeAcknowledgeScopeRef.current = '';
                 }
             } catch {
                 // 角標失敗時保留上次數值，避免閃爍消失
             }
         },
-        [signedInUsername],
+        [forumBadgeScope, isGuestForumBadge],
     );
 
     useEffect(() => {
@@ -435,15 +444,14 @@ const Tabbar = () => {
         forumBadgeLastRefreshAtRef.current = 0;
         forumBadgeStorageReadyRef.current = false;
         if (
-            forumBadgeAcknowledgeUsernameRef.current !==
-            signedInUsername
+            forumBadgeAcknowledgeScopeRef.current !== forumBadgeScope
         ) {
             forumBadgeAcknowledgePendingRef.current = false;
-            forumBadgeAcknowledgeUsernameRef.current = '';
+            forumBadgeAcknowledgeScopeRef.current = '';
         }
         setForumBadgeStorageReady(false);
 
-        if (!signedInUsername) {
+        if (!forumBadgeScope) {
             const nextState = createHarborForumBadgeState();
             forumBadgeStateRef.current = nextState;
             setForumBadgeState(nextState);
@@ -452,17 +460,16 @@ const Tabbar = () => {
             };
         }
 
-        loadHarborForumBadgeState(signedInUsername).then(restoredState => {
+        loadHarborForumBadgeState(forumBadgeScope).then(restoredState => {
             if (!active) {
                 return;
             }
             const nextState =
                 forumBadgeAcknowledgePendingRef.current &&
-                forumBadgeAcknowledgeUsernameRef.current ===
-                    signedInUsername
+                forumBadgeAcknowledgeScopeRef.current === forumBadgeScope
                 ? acknowledgeHarborForumBadgeState(
                       restoredState,
-                      signedInUsername,
+                      forumBadgeScope,
                   )
                 : restoredState;
             forumBadgeStateRef.current = nextState;
@@ -474,10 +481,10 @@ const Tabbar = () => {
         return () => {
             active = false;
         };
-    }, [signedInUsername]);
+    }, [forumBadgeScope]);
 
     useEffect(() => {
-        if (!forumBadgeStorageReady || !signedInUsername) {
+        if (!forumBadgeStorageReady || !forumBadgeScope) {
             return undefined;
         }
 
@@ -494,62 +501,64 @@ const Tabbar = () => {
         };
     }, [
         forumBadgeStorageReady,
+        forumBadgeScope,
         refreshForumBadge,
-        signedInUsername,
     ]);
 
     useEffect(() => {
         forumBadgeStateRef.current = forumBadgeState;
         if (
             forumBadgeStorageReady &&
-            forumBadgeState.username === signedInUsername
+            forumBadgeState.username === forumBadgeScope
         ) {
             saveHarborForumBadgeState(forumBadgeState).catch(() => {});
         }
     }, [
         forumBadgeState,
         forumBadgeStorageReady,
-        signedInUsername,
+        forumBadgeScope,
     ]);
 
     const acknowledgeForumBadge = useCallback(() => {
-        if (!signedInUsername) {
+        if (!forumBadgeScope) {
             return;
         }
         forumBadgeRequestRef.current += 1;
         forumBadgeAcknowledgePendingRef.current = true;
-        forumBadgeAcknowledgeUsernameRef.current = signedInUsername;
+        forumBadgeAcknowledgeScopeRef.current = forumBadgeScope;
         setForumBadgeState(currentState => {
             const nextState = acknowledgeHarborForumBadgeState(
                 currentState,
-                signedInUsername,
+                forumBadgeScope,
             );
             forumBadgeStateRef.current = nextState;
             return nextState;
         });
-    }, [signedInUsername]);
+    }, [forumBadgeScope]);
 
     const forumNewTopicsSinceEntry = getHarborForumBadgeCount(
         forumBadgeState,
-        signedInUsername,
+        forumBadgeScope,
     );
 
     const badges = useMemo(
         () => ({
             ForumTabbar: formatHarborTabBadge(
-                isSignedIn ? forumNewTopicsSinceEntry : 0,
+                forumNewTopicsSinceEntry,
             ),
             MyTabbar: formatHarborTabBadge(myTabBadgeTotal),
         }),
         [
             forumNewTopicsSinceEntry,
-            isSignedIn,
             myTabBadgeTotal,
         ],
     );
 
     const badgeListeners = useMemo(
         () => ({
+            NewsTabbar: {
+                focus: refreshForumBadge,
+            },
             ForumTabbar: {
                 tabPress: acknowledgeForumBadge,
                 focus: () => {
@@ -557,8 +566,15 @@ const Tabbar = () => {
                     refreshForumBadge({ acknowledge: true });
                 },
             },
+            CourseTab: {
+                focus: refreshForumBadge,
+            },
+            FeaturesTabbar: {
+                focus: refreshForumBadge,
+            },
             MyTabbar: {
                 focus: () => {
+                    refreshForumBadge();
                     if (isSignedIn) {
                         Promise.allSettled([
                             refresh(),

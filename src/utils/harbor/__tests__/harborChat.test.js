@@ -1,6 +1,8 @@
 import {
     formatHarborChatListTime,
     getHarborChatPlainText,
+    getHarborChatStartFailureReason,
+    getHarborSessionChatCapability,
     mergeHarborChatMessages,
     normalizeHarborChatMessages,
     normalizeHarborDirectMessageChannels,
@@ -189,5 +191,75 @@ describe('Harbor Chat 資料', () => {
             .toBe('2025/12/31');
         expect(formatHarborChatListTime(new Date(2026, 7, 11, 20, 5), 'en', now))
             .toBe('Yesterday 20:05');
+    });
+
+    it('從 session 欄位判斷自己是否已開啟 Chat', () => {
+        expect(getHarborSessionChatCapability(null)).toEqual({});
+        expect(getHarborSessionChatCapability({username: 'ark'})).toEqual({});
+        expect(
+            getHarborSessionChatCapability({
+                can_chat: true,
+                has_chat_enabled: true,
+                can_direct_message: true,
+            }),
+        ).toEqual({canChat: true, canDirectMessage: true});
+        expect(
+            getHarborSessionChatCapability({
+                can_chat: true,
+            }),
+        ).toEqual({canChat: false});
+        expect(
+            getHarborSessionChatCapability({
+                can_chat: true,
+                has_chat_enabled: true,
+                can_direct_message: false,
+            }),
+        ).toEqual({canChat: true, canDirectMessage: false});
+    });
+
+    it('開始 Chat 時區分自己還不能用與對方不接受', () => {
+        expect(
+            getHarborChatStartFailureReason(null, {canChat: false}),
+        ).toBe('self');
+        expect(
+            getHarborChatStartFailureReason(null, {canDirectMessage: false}),
+        ).toBe('self');
+        expect(getHarborChatStartFailureReason(null, {canChat: true})).toBe(
+            null,
+        );
+        expect(
+            getHarborChatStartFailureReason({
+                response: {
+                    status: 422,
+                    data: {
+                        errors: ['對不起，uc624711 目前不接收訊息。'],
+                    },
+                },
+            }),
+        ).toBe('peer');
+        expect(
+            getHarborChatStartFailureReason({
+                response: {
+                    status: 422,
+                    data: {errors: ['抱歉，您無法傳送私訊。']},
+                },
+            }),
+        ).toBe('self');
+        expect(
+            getHarborChatStartFailureReason({
+                response: {
+                    status: 403,
+                    data: {error_type: 'invalid_access'},
+                },
+            }),
+        ).toBe('self');
+        expect(
+            getHarborChatStartFailureReason({
+                response: {status: 422, data: {}},
+            }),
+        ).toBe('peer');
+        expect(getHarborChatStartFailureReason({message: 'Network Error'})).toBe(
+            'generic',
+        );
     });
 });

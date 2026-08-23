@@ -15,13 +15,17 @@ import {
 
 import Toast from 'react-native-simple-toast';
 import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
+import {useFocusEffect} from '@react-navigation/native';
 import {scale, verticalScale} from 'react-native-size-matters';
 import {useTranslation} from 'react-i18next';
 
 import Text from '../../../components/AppText';
 import {useTheme} from '../../../components/ThemeContext';
 import {openLink} from '../../../utils/browser';
-import {deleteHarborPost} from '../../../utils/harbor/harborApi';
+import {
+    deleteHarborPost,
+    fetchHarborPendingPosts,
+} from '../../../utils/harbor/harborApi';
 import {publishHarborTopicUpdate} from '../../../utils/harbor/harborTopicUpdates';
 import {
     ARK_HARBOR_NEW_TOPIC,
@@ -46,6 +50,7 @@ const HarborComposerPage = ({route, navigation}) => {
     const deletingRef = useRef(false);
     const webImageAlertShownRef = useRef(false);
     const [isDeleting, setIsDeleting] = useState(false);
+    const [pendingPostCount, setPendingPostCount] = useState(0);
     const {
         allTags,
         areSelectedTagsAllowed,
@@ -109,6 +114,32 @@ const HarborComposerPage = ({route, navigation}) => {
         restoreDraftImages,
         uploadImages,
     } = useHarborComposerImages({composerSettings, isEdit, t});
+
+    useFocusEffect(
+        useCallback(() => {
+            if (
+                sessionStatus !== 'signedIn' ||
+                (!isNewTopic && !isReply) ||
+                !user?.username
+            ) {
+                setPendingPostCount(0);
+                return undefined;
+            }
+            const controller = new AbortController();
+            fetchHarborPendingPosts(user.username, {
+                signal: controller.signal,
+            })
+                .then(pendingPosts => {
+                    if (!controller.signal.aborted) {
+                        setPendingPostCount(pendingPosts.length);
+                    }
+                })
+                .catch(() => null);
+            return () => {
+                controller.abort();
+            };
+        }, [isNewTopic, isReply, sessionStatus, user?.username]),
+    );
 
     useEffect(() => {
         if (isEdit && !isLoading) {
@@ -258,6 +289,11 @@ const HarborComposerPage = ({route, navigation}) => {
             mode: 'fullScreen',
         });
     }, []);
+
+    const handleOpenPendingPosts = useCallback(() => {
+        trigger();
+        navigation.navigate('HarborPendingPosts');
+    }, [navigation]);
 
     // 點擊回覆／編輯上下文：從話題詳情進入則返回；從草稿箱進入則跳到對應樓層
     const handlePressContext = useCallback(() => {
@@ -914,6 +950,8 @@ const HarborComposerPage = ({route, navigation}) => {
                     isUploadingImages,
                 }}
                 onClose={closeReplyComposer}
+                onOpenPendingPosts={handleOpenPendingPosts}
+                pendingPostCount={pendingPostCount}
                 route={route}
                 submit={{
                     handleSubmit,
@@ -969,12 +1007,14 @@ const HarborComposerPage = ({route, navigation}) => {
             }}
             onOpenCategorySheet={openCategorySheet}
             onOpenMarkdownGuide={handleOpenMarkdownGuide}
+            onOpenPendingPosts={handleOpenPendingPosts}
             onOpenTagSheet={openTagSheet}
             onOpenWebComposer={handleOpenWebComposer}
             onPressContext={handlePressContext}
             onPressDelete={handleDeletePost}
             onSelectCategory={handleSelectCategory}
             route={route}
+            pendingPostCount={pendingPostCount}
             submit={{
                 isDeleting,
                 isSubmitting,

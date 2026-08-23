@@ -17,6 +17,8 @@ import {
     getUmehHostPref,
     setUmehHostPref,
     refreshUmehHost,
+    getUmehOpenPref,
+    setUmehOpenPref,
 } from '../../utils/umehHost';
 // @expo/ui MenuView 用 SwiftUI Host + matchContents 反向量測，無明確寬度會塌陷。
 import { MenuView } from '@expo/ui/community/menu';
@@ -243,9 +245,11 @@ const SettingPage = ({ navigation }) => {
     const { status, user, login } = useHarborSession();
     const { programmeLevel, setProgrammeLevel } = useProgrammeLevel();
     const [umehHostPref, setUmehHostPrefState] = useState('auto');
+    const [umehOpenPref, setUmehOpenPrefState] = useState('inApp');
 
     useEffect(() => {
         getUmehHostPref().then(setUmehHostPrefState);
+        getUmehOpenPref().then(setUmehOpenPrefState);
     }, []);
 
     /**
@@ -428,10 +432,19 @@ const SettingPage = ({ navigation }) => {
         refreshUmehHost();
     };
 
+    const handleUmehOpenPrefChange = async pref => {
+        await setUmehOpenPref(pref);
+        setUmehOpenPrefState(pref);
+    };
+
     const umehHostPrefLabels = {
         auto: t('setting:Auto'),
         primary: 'umeh',
         backup: 'cf',
+    };
+    const umehOpenPrefLabels = {
+        inApp: t('setting:In-App Browser'),
+        system: t('setting:System Browser'),
     };
 
     // 主題選項配置
@@ -556,43 +569,6 @@ const SettingPage = ({ navigation }) => {
                             />
                         }
                     />
-                </SettingSectionCard>
-
-                {/* 應用設置分區 */}
-                <SettingSection title={t('setting:Application')} icon="apps" />
-
-                <SettingSectionCard>
-                    <SettingItem
-                        grouped
-                        icon="trash"
-                        iconColor="#FF3B30"
-                        title={t('setting:Clear Cache')}
-                        onPress={handleClearCache}
-                    />
-                    <SettingItem
-                        grouped
-                        icon="globe-outline"
-                        iconColor={themeColor}
-                        title={t('setting:Browser Cache Help')}
-                        subtitle={t('setting:Browser Cache Help Hint')}
-                        onPress={handleBrowserCacheHelp}
-                    />
-                    <SettingItem
-                        grouped
-                        icon="cloud-download"
-                        iconColor="#34C759"
-                        title={t('setting:Check Update')}
-                        subtitle={`v${getLocalAppVersion()}`}
-                        onPress={handleCheckUpdate}
-                    />
-                    <SettingItem
-                        grouped
-                        icon="settings-outline"
-                        iconColor="#5856D6"
-                        title={t('setting:App Settings')}
-                        subtitle={t('setting:App Settings Hint')}
-                        onPress={() => Linking.openSettings()}
-                    />
                     <SettingItem
                         grouped
                         icon="globe-outline"
@@ -649,6 +625,98 @@ const SettingPage = ({ navigation }) => {
                                 </View>
                             </MenuView>
                         }
+                    />
+                    <SettingItem
+                        grouped
+                        icon="open-outline"
+                        iconColor="#007AFF"
+                        title={t('setting:What2Reg Open')}
+                        subtitle={`${umehOpenPrefLabels[umehOpenPref]}\n${t('選咩課和ARK是兩個獨立項目')}`}
+                        showArrow={false}
+                        rightElement={
+                            <MenuView
+                                actions={['inApp', 'system'].map(pref => ({
+                                    id: pref,
+                                    title: umehOpenPrefLabels[pref],
+                                    state:
+                                        umehOpenPref === pref
+                                            ? 'on'
+                                            : 'off',
+                                }))}
+                                onPressAction={event =>
+                                    handleUmehOpenPrefChange(
+                                        event.nativeEvent.event,
+                                    )
+                                }
+                                onOpenMenu={() => trigger()}
+                                shouldOpenOnLongPress={false}
+                                style={{ width: scale(108) }}>
+                                <View
+                                    style={{
+                                        width: scale(108),
+                                        flexDirection: 'row',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        backgroundColor: `${'#007AFF'}15`,
+                                        borderRadius: scale(8),
+                                        paddingHorizontal: scale(10),
+                                        paddingVertical: scale(5),
+                                    }}>
+                                    <Text
+                                        style={{
+                                            ...uiStyle.defaultText,
+                                            fontSize: scale(13),
+                                            color: '#007AFF',
+                                            fontWeight: '500',
+                                        }}>
+                                        {umehOpenPrefLabels[umehOpenPref]}
+                                    </Text>
+                                    <Ionicons
+                                        name="chevron-down"
+                                        size={scale(12)}
+                                        color="#007AFF"
+                                        style={{ marginLeft: scale(4) }}
+                                    />
+                                </View>
+                            </MenuView>
+                        }
+                    />
+                </SettingSectionCard>
+
+                {/* 應用設置分區 */}
+                <SettingSection title={t('setting:Application')} icon="apps" />
+
+                <SettingSectionCard>
+                    <SettingItem
+                        grouped
+                        icon="trash"
+                        iconColor="#FF3B30"
+                        title={t('setting:Clear Cache')}
+                        onPress={handleClearCache}
+                    />
+                    <SettingItem
+                        grouped
+                        icon="globe-outline"
+                        iconColor={themeColor}
+                        title={t('setting:Browser Cache Help')}
+                        subtitle={t('setting:Browser Cache Help Hint')}
+                        onPress={handleBrowserCacheHelp}
+                    />
+                    <SettingItem
+                        grouped
+                        icon="cloud-download"
+                        iconColor="#34C759"
+                        title={t('setting:Check Update')}
+                        subtitle={`v${getLocalAppVersion()}`}
+                        onPress={handleCheckUpdate}
+                    />
+                    <SettingItem
+                        grouped
+                        icon="settings-outline"
+                        iconColor="#5856D6"
+                        title={t('setting:App Settings')}
+                        subtitle={t('setting:App Settings Hint')}
+                        onPress={() => Linking.openSettings()}
                     />
                 </SettingSectionCard>
 

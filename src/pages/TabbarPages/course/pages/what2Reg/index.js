@@ -561,7 +561,7 @@ const What2Reg = () => {
                         {renderCourseCards(searchFilterCourse)}
                     </View>
                 ) : (
-                    <View>
+                    <View style={{ rowGap: COURSE_CARD_GAP }}>
                         <FilterPanel
                             theme={theme}
                             programmeLevel={programmeLevel}

@@ -39,13 +39,14 @@ const createHarborComposeButton = props => () => (
 
 const HarborTopicListPage = ({ route, navigation }) => {
     const { theme } = useTheme();
-    const { t } = useTranslation('harbor');
+    const { t } = useTranslation(['harbor', 'my']);
     const headerHeight = useHeaderHeight();
     const categoryId = Number(route.params?.categoryId);
     const categorySlug = route.params?.categorySlug;
     const categoryName = route.params?.categoryName;
     const tag = route.params?.tag;
     const isTagPage = Boolean(tag);
+    const isRecentReadsPage = route.name === 'HarborRecentReads';
     // 僅分類話題頁顯示發帖入口，並預選當前分類
     const canCompose =
         !isTagPage && Number.isFinite(categoryId) && categoryId > 0;
@@ -53,14 +54,16 @@ const HarborTopicListPage = ({ route, navigation }) => {
 
     const source = useMemo(
         () =>
-            isTagPage
+            isRecentReadsPage
+                ? { view: 'read' }
+                : isTagPage
                 ? { view: 'latest', tag }
                 : {
                     view: 'latest',
                     categoryId,
                     categorySlug,
                 },
-        [categoryId, categorySlug, isTagPage, tag],
+        [categoryId, categorySlug, isRecentReadsPage, isTagPage, tag],
     );
 
     const handleComposePress = useCallback(() => {
@@ -72,9 +75,11 @@ const HarborTopicListPage = ({ route, navigation }) => {
 
     useEffect(() => {
         navigation.setOptions({
-            headerTitle: isTagPage
-                ? `#${typeof tag === 'string' ? tag : tag?.name || ''}`
-                : categoryName || t('分類話題'),
+            headerTitle: isRecentReadsPage
+                ? t('最近閱讀', {ns: 'my'})
+                : isTagPage
+                    ? `#${typeof tag === 'string' ? tag : tag?.name || ''}`
+                    : categoryName || t('分類話題'),
             // iOS：原生 UIBarButtonItem，液態玻璃下才是標準圓形
             headerRight: canCompose
                 ? Platform.OS === 'ios'
@@ -109,6 +114,7 @@ const HarborTopicListPage = ({ route, navigation }) => {
         canCompose,
         categoryName,
         handleComposePress,
+        isRecentReadsPage,
         isTagPage,
         navigation,
         t,
@@ -174,7 +180,9 @@ const HarborTopicListPage = ({ route, navigation }) => {
                     isLiquidGlassSupported ? headerHeight + verticalScale(8) : 0
                 }
                 emptyTitle={
-                    isTagPage
+                    isRecentReadsPage
+                        ? t('暫時沒有閱讀紀錄', {ns: 'my'})
+                        : isTagPage
                         ? t('這個標籤暫時沒有話題')
                         : t('這個分類暫時沒有話題')
                 }

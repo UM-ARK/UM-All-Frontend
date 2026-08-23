@@ -33,6 +33,7 @@ import HarborTopicList from './components/HarborTopicList';
 const VIEW_CONFIG = {
     latest: { label: '最新', analytics: 'latest' },
     top: { label: '熱門', analytics: 'top' },
+    unread: { label: '未讀', analytics: 'unread' },
 };
 // 對齊資訊頁 Top Tab（~30），並預留搜尋列高度
 const STICKY_TOOLBAR_HEIGHT = verticalScale(36);
@@ -145,6 +146,8 @@ const HarborStickyToolbar = ({
     const { theme } = useTheme();
     const { t } = useTranslation('harbor');
     const isSignedIn = status === 'signedIn';
+    const showLoginPromptBadge =
+        status === 'signedOut' || status === 'expired';
 
     return (
         <View
@@ -214,6 +217,15 @@ const HarborStickyToolbar = ({
                                     ]}>
                                     {sessionLabel}
                                 </Text>
+                                {showLoginPromptBadge ? (
+                                    <View
+                                        pointerEvents="none"
+                                        style={[
+                                            styles.loginPromptBadge,
+                                            {backgroundColor: theme.unread},
+                                        ]}
+                                    />
+                                ) : null}
                             </Pressable>
                         )}
                         {isSignedIn && chatVisible ? (
@@ -323,7 +335,13 @@ const HarborFeedPane = ({
     refreshProgressViewOffset,
     isActive,
 }) => {
-    const source = useMemo(() => ({ view }), [view]);
+    const source = useMemo(
+        () =>
+            view === 'unread'
+                ? {view: 'latest', filter: 'unseen'}
+                : {view},
+        [view],
+    );
 
     return (
         <View style={styles.feedPage}>
@@ -360,6 +378,7 @@ const ForumPage = ({ navigation }) => {
     const blockTopicPressUntilRef = useRef(0);
     const capabilitiesRef = useRef(null);
     const capabilitiesControllerRef = useRef(null);
+    const hasLoggedHomeRef = useRef(false);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [toolbarHeight, setToolbarHeight] = useState(STICKY_TOOLBAR_HEIGHT);
     const [capabilities, setCapabilities] = useState(null);
@@ -367,12 +386,19 @@ const ForumPage = ({ navigation }) => {
     const [mountedViews, setMountedViews] = useState({
         latest: true,
         top: false,
+        unread: false,
     });
     const [consentVisible, setConsentVisible] = useState(false);
 
     useEffect(() => {
+        // 僅在首次聚焦時打點；iOS Native Tabs 會預先掛載，
+        // 且從詳情頁返回也會再次聚焦，兩者都不可重複計算。
+        if (!isFocused || hasLoggedHomeRef.current) {
+            return;
+        }
+        hasLoggedHomeRef.current = true;
         logToFirebase('openPage', { page: 'HarborNativeHome' });
-    }, []);
+    }, [isFocused]);
 
     const loadCapabilities = useCallback(() => {
         capabilitiesControllerRef.current?.abort();
@@ -425,10 +451,13 @@ const ForumPage = ({ navigation }) => {
             signedIn: status === 'signedIn',
             unavailable: capabilitiesUnavailable,
         });
-        // 不提供新話題／未讀分頁；錯過即略過，角標仍獨立計算
-        return availableViews.filter(
+        const publicViews = availableViews.filter(
             view => view !== 'new' && view !== 'unread',
         );
+        // 未讀分頁沿用最新列表的紅點判斷，只在登入後提供
+        return status === 'signedIn'
+            ? [...publicViews, 'unread']
+            : publicViews;
     }, [capabilities, capabilitiesUnavailable, status]);
 
     const segmentOptions = useMemo(
@@ -762,6 +791,14 @@ const styles = StyleSheet.create({
         fontSize: scale(10),
         fontWeight: '700',
         marginLeft: scale(4),
+    },
+    loginPromptBadge: {
+        position: 'absolute',
+        top: scale(2),
+        right: scale(1),
+        width: scale(6),
+        height: scale(6),
+        borderRadius: scale(3),
     },
     feedTabs: {
         height: verticalScale(22),

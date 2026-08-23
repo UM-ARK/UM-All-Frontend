@@ -6,6 +6,8 @@ const HARBOR_FORUM_BADGE_LEGACY_STORAGE_VERSION = 1;
 const HARBOR_FORUM_BADGE_MAX_COUNT = 100;
 const HARBOR_FORUM_BADGE_MAX_ACCOUNTS = 3;
 
+export const HARBOR_FORUM_BADGE_GUEST_SCOPE = '@guest';
+
 let harborForumBadgeStorageQueue = Promise.resolve();
 
 const normalizeUsername = username =>
@@ -57,10 +59,12 @@ export function calculateHarborUnreadTotal(inboxUnreadCount, chatUnreadCount) {
 export function calculateHarborMyTabBadgeTotal(
     inboxUnreadCount,
     chatUnreadCount,
+    reviewCount,
     shouldShowPushPrompt,
 ) {
     return (
         calculateHarborUnreadTotal(inboxUnreadCount, chatUnreadCount) +
+        Math.max(0, Number(reviewCount) || 0) +
         (shouldShowPushPrompt ? 1 : 0)
     );
 }
@@ -206,6 +210,7 @@ export function saveHarborForumBadgeState(state) {
                             : item,
                     )
                     : [];
+            let accountCount = 0;
             const accounts = [
                 account,
                 ...previousAccounts.filter(
@@ -213,7 +218,16 @@ export function saveHarborForumBadgeState(state) {
                         normalizeUsername(item?.username) !==
                         normalizedUsername,
                 ),
-            ].slice(0, HARBOR_FORUM_BADGE_MAX_ACCOUNTS);
+            ].filter(item => {
+                if (
+                    normalizeUsername(item?.username) ===
+                    HARBOR_FORUM_BADGE_GUEST_SCOPE
+                ) {
+                    return true;
+                }
+                accountCount += 1;
+                return accountCount <= HARBOR_FORUM_BADGE_MAX_ACCOUNTS;
+            });
 
             const result = await setLocalStorage(
                 HARBOR_FORUM_BADGE_STORAGE_KEY,

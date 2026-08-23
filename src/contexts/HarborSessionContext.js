@@ -29,6 +29,7 @@ import {
     setActiveHarborCredentials,
     setHarborCredentialRejectedHandler,
 } from '../utils/harbor/harborApi';
+import { fetchHarborReviewCount } from '../utils/harbor/harborReview';
 import {
     clearHarborCredentials,
     clearPendingHarborRevocation,
@@ -89,6 +90,7 @@ export const HarborSessionProvider = ({ children }) => {
     const [error, setError] = useState(null);
     const [inboxUnreadCount, setInboxUnreadCount] = useState(0);
     const [chatUnreadCount, setChatUnreadCount] = useState(0);
+    const [reviewCount, setReviewCount] = useState(0);
     const [chatChannels, setChatChannels] = useState([]);
     const [pendingLoginIntent, setPendingLoginIntent] = useState(null);
     const [sessionGeneration, setSessionGeneration] = useState(0);
@@ -97,6 +99,7 @@ export const HarborSessionProvider = ({ children }) => {
     const mountedRef = useRef(true);
     const inboxUnreadRequestRef = useRef(0);
     const chatUnreadRequestRef = useRef(0);
+    const reviewCountRequestRef = useRef(0);
     const chatChannelsRef = useRef([]);
     const chatUnreadCountRef = useRef(0);
     const chatChannelsFetchedAtRef = useRef(0);
@@ -121,6 +124,7 @@ export const HarborSessionProvider = ({ children }) => {
         validationInFlightRef.current = null;
         inboxUnreadRequestRef.current += 1;
         chatUnreadRequestRef.current += 1;
+        reviewCountRequestRef.current += 1;
         chatChannelsRef.current = [];
         chatUnreadCountRef.current = 0;
         chatChannelsFetchedAtRef.current = 0;
@@ -131,6 +135,7 @@ export const HarborSessionProvider = ({ children }) => {
             setUser(null);
             setInboxUnreadCount(0);
             setChatUnreadCount(0);
+            setReviewCount(0);
             setChatChannels([]);
             setSessionGeneration(nextSessionGeneration);
             setStatus(nextStatus);
@@ -146,6 +151,7 @@ export const HarborSessionProvider = ({ children }) => {
         validationInFlightRef.current = null;
         inboxUnreadRequestRef.current += 1;
         chatUnreadRequestRef.current += 1;
+        reviewCountRequestRef.current += 1;
         chatChannelsRef.current = [];
         chatUnreadCountRef.current = 0;
         chatChannelsFetchedAtRef.current = 0;
@@ -155,6 +161,7 @@ export const HarborSessionProvider = ({ children }) => {
         if (mountedRef.current) {
             setInboxUnreadCount(0);
             setChatUnreadCount(0);
+            setReviewCount(0);
             setChatChannels([]);
             setSessionGeneration(nextSessionGeneration);
         }
@@ -193,6 +200,49 @@ export const HarborSessionProvider = ({ children }) => {
             userRef.current?.username === username
         ) {
             setInboxUnreadCount(nextCount);
+        }
+        return nextCount;
+    }, []);
+
+    const patchReviewCount = useCallback((count, expectedUsername) => {
+        if (
+            !credentialsRef.current ||
+            (expectedUsername &&
+                userRef.current?.username !== expectedUsername)
+        ) {
+            return null;
+        }
+        const normalizedCount = Math.max(0, Number(count) || 0);
+        reviewCountRequestRef.current += 1;
+        if (mountedRef.current) {
+            setReviewCount(normalizedCount);
+        }
+        return normalizedCount;
+    }, []);
+
+    const refreshReviewCount = useCallback(async () => {
+        const currentUser = userRef.current;
+        const username = currentUser?.username;
+        const requestId = reviewCountRequestRef.current + 1;
+        reviewCountRequestRef.current = requestId;
+        if (
+            !username ||
+            !credentialsRef.current ||
+            (!currentUser.isAdmin && !currentUser.isModerator)
+        ) {
+            if (mountedRef.current) {
+                setReviewCount(0);
+            }
+            return 0;
+        }
+
+        const nextCount = await fetchHarborReviewCount();
+        if (
+            mountedRef.current &&
+            reviewCountRequestRef.current === requestId &&
+            userRef.current?.username === username
+        ) {
+            setReviewCount(nextCount);
         }
         return nextCount;
     }, []);
@@ -551,12 +601,16 @@ export const HarborSessionProvider = ({ children }) => {
             Promise.allSettled([
                 refreshInboxUnreadCount(),
                 refreshChatUnreadCount(),
+                refreshReviewCount(),
             ]);
         }
     }, [
         refreshChatUnreadCount,
         refreshInboxUnreadCount,
+        refreshReviewCount,
         status,
+        user?.isAdmin,
+        user?.isModerator,
         user?.username,
     ]);
 
@@ -607,12 +661,18 @@ export const HarborSessionProvider = ({ children }) => {
                 Promise.allSettled([
                     refreshInboxUnreadCount(),
                     refreshChatUnreadCount(),
+                    refreshReviewCount(),
                 ]);
             }
         });
 
         return () => subscription.remove();
-    }, [refreshChatUnreadCount, refreshInboxUnreadCount, refreshProfile]);
+    }, [
+        refreshChatUnreadCount,
+        refreshInboxUnreadCount,
+        refreshProfile,
+        refreshReviewCount,
+    ]);
 
     const activateCredentialsFromCallback = useCallback(
         async credentials => {
@@ -795,6 +855,7 @@ export const HarborSessionProvider = ({ children }) => {
             error,
             inboxUnreadCount,
             chatUnreadCount,
+            reviewCount,
             chatChannels,
             login,
             logout,
@@ -803,9 +864,11 @@ export const HarborSessionProvider = ({ children }) => {
             consumeLoginIntent,
             patchInboxUnreadCount,
             patchChatUnreadCount,
+            patchReviewCount,
             refreshInboxUnreadCount,
             refreshChatChannels,
             refreshChatUnreadCount,
+            refreshReviewCount,
             refresh: () =>
                 credentialsRef.current
                     ? refreshProfile(
@@ -825,11 +888,14 @@ export const HarborSessionProvider = ({ children }) => {
             logout,
             patchChatUnreadCount,
             patchInboxUnreadCount,
+            patchReviewCount,
             pendingLoginIntent,
             refreshChatUnreadCount,
             refreshChatChannels,
             refreshInboxUnreadCount,
             refreshProfile,
+            refreshReviewCount,
+            reviewCount,
             sessionGeneration,
             status,
             user,

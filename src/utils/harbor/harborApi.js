@@ -12,6 +12,7 @@ import {
     replaceHarborEmojiShortcodes,
 } from './harborHtml';
 import {
+    getHarborSessionChatCapability,
     normalizeHarborChatChannel,
     normalizeHarborChatMessages,
     normalizeHarborDirectMessageChannels,
@@ -1003,7 +1004,7 @@ function normalizeSiteCapabilities(data) {
 }
 
 function getTopicListPath({ view, categoryId, categorySlug, tag }) {
-    if (!TOPIC_VIEWS.includes(view)) {
+    if (!TOPIC_VIEWS.includes(view) && view !== 'read') {
         throw new RangeError(`Unsupported Harbor topic view: ${view}`);
     }
 
@@ -1416,14 +1417,22 @@ function normalizeProfile(
             ).padStart(2, '0')}`
             : matchingPreviousUser?.joinedAt || '';
 
+    // 權限以本次 session／profile 為準，不可 OR 舊快取，否則撤銷管理員後刷新仍會顯示審核入口
+    const isAdmin = Boolean(currentUser.admin || profile.admin);
+    const isModerator = Boolean(currentUser.moderator || profile.moderator);
+    const previousRole = matchingPreviousUser?.role;
+    const previousNonStaffRole =
+        previousRole && previousRole !== '管理員' && previousRole !== '版主'
+            ? previousRole
+            : '';
     let role =
         profile.title ||
         profile.primary_group_name ||
-        matchingPreviousUser?.role ||
+        previousNonStaffRole ||
         '';
-    if (currentUser.admin || profile.admin) {
+    if (isAdmin) {
         role = '管理員';
-    } else if (currentUser.moderator || profile.moderator) {
+    } else if (isModerator) {
         role = '版主';
     } else if (!role) {
         role = 'Harbor 會員';
@@ -1486,16 +1495,8 @@ function normalizeProfile(
             matchingPreviousUser?.trustLevel ??
             0,
         ),
-        isAdmin: Boolean(
-            currentUser.admin ||
-                profile.admin ||
-                matchingPreviousUser?.isAdmin,
-        ),
-        isModerator: Boolean(
-            currentUser.moderator ||
-                profile.moderator ||
-                matchingPreviousUser?.isModerator,
-        ),
+        isAdmin,
+        isModerator,
         // Discourse /session/current.json 的 can_upload_avatar（含 uploaded_avatars_allowed_groups）
         canUploadAvatar:
             typeof currentUser.can_upload_avatar === 'boolean'
@@ -1583,6 +1584,15 @@ function normalizeProfile(
                     summary.likes_received,
                 ),
                 label: '收到的讚',
+            },
+            {
+                key: 'topicsViewed',
+                value: summaryMetric(
+                    'contributions',
+                    'topicsViewed',
+                    summary.topics_entered,
+                ),
+                label: '瀏覽話題',
             },
             {
                 key: 'badges',
@@ -1706,6 +1716,54 @@ export async function fetchHarborUserCreatedTopics(
         },
     );
     return buildNormalizedTopicListResult(response.data, normalizedPage);
+}
+
+export async function fetchHarborPendingPosts(username, { signal } = {}) {
+    if (typeof username !== 'string' || !username.trim()) {
+        throw new TypeError('Harbor username is required');
+    }
+    const encodedUsername = encodeURIComponent(username.trim());
+    const response = await harborApi.get(
+        `/posts/${encodedUsername}/pending.json`,
+        { signal },
+    );
+    const pendingPosts = response.data?.pending_posts;
+    if (!Array.isArray(pendingPosts)) {
+        throw new Error('Invalid Harbor pending posts response');
+    }
+    return pendingPosts.map(post => ({
+        id: Number(post.id) || null,
+        categoryId: Number(post.category_id) || null,
+        createdAt: post.created_at || '',
+        raw: post.raw_text || '',
+        title: post.title || '',
+        topicId: Number(post.topic_id) || null,
+        topicUrl: post.topic_url || '',
+        username: post.username || username.trim(),
+    }));
+}
+
+export async function fetchHarborUploadUrls(shortUrls, { signal } = {}) {
+    const normalizedShortUrls = Array.isArray(shortUrls)
+        ? [...new Set(shortUrls.filter(url =>
+            typeof url === 'string' && url.startsWith('upload://'),
+        ))]
+        : [];
+    if (normalizedShortUrls.length === 0) {
+        return [];
+    }
+    const response = await harborApi.post(
+        '/uploads/lookup-urls.json',
+        {short_urls: normalizedShortUrls},
+        {signal},
+    );
+    if (!Array.isArray(response.data)) {
+        throw new Error('Invalid Harbor upload lookup response');
+    }
+    return response.data.map((upload, index) => ({
+        shortUrl: normalizedShortUrls[index],
+        url: ARK_HARBOR_UPLOAD_URL(upload?.url),
+    }));
 }
 
 export async function fetchHarborSearch({
@@ -2537,6 +2595,7 @@ export async function fetchHarborInboxUnreadCount(
  * 首次建立基準時只讀取第一頁；既有基準最多掃描 10 頁、計算 100 個新話題。
  */
 export async function fetchHarborForumBadgeSnapshot({
+    publicOnly = false,
     since,
     signal,
 } = {}) {
@@ -2553,6 +2612,7 @@ export async function fetchHarborForumBadgeSnapshot({
         const response = await harborApi.get('/latest.json', {
             params: {page},
             signal,
+            ...(publicOnly ? {skipHarborCredentials: true} : {}),
         });
         const topicList = response.data?.topic_list;
         const topics = topicList?.topics;
@@ -3556,14 +3616,17 @@ export async function fetchCurrentHarborUser(credentials, previousUser = null) {
         badges: badgeResult.status === 'fulfilled',
     };
 
-    return normalizeProfile(
-        currentUser,
-        availability.profile ? profileResult.value.data : null,
-        availability.summary ? summaryResult.value.data : null,
-        availability.badges ? badgeResult.value.data : null,
-        availability,
-        previousUser,
-    );
+    return {
+        ...normalizeProfile(
+            currentUser,
+            availability.profile ? profileResult.value.data : null,
+            availability.summary ? summaryResult.value.data : null,
+            availability.badges ? badgeResult.value.data : null,
+            availability,
+            previousUser,
+        ),
+        ...getHarborSessionChatCapability(currentUser),
+    };
 }
 
 export function revokeHarborCredentials(credentials) {

@@ -24,7 +24,9 @@ import {
     fetchHarborTopicList,
     fetchHarborTopicPosts,
     fetchHarborUnreadNotificationCount,
+    fetchHarborUploadUrls,
     fetchHarborForumBadgeSnapshot,
+    fetchHarborPendingPosts,
     fetchHarborUserActions,
     fetchHarborUserCreatedTopics,
     fetchCachedHarborFlagTypes,
@@ -259,6 +261,38 @@ describe('Harbor API 資料正規化', () => {
             canChangeLocation: true,
             canChangeWebsite: true,
         });
+    });
+
+    it('從 current_user 判斷自己是否已開啟 Chat', async () => {
+        getSpy
+            .mockResolvedValueOnce({
+                data: {
+                    current_user: {
+                        id: 7,
+                        username: 'ark-user',
+                        can_chat: true,
+                        has_chat_enabled: true,
+                        can_direct_message: false,
+                    },
+                },
+            })
+            .mockResolvedValueOnce({
+                data: {user: {username: 'ark-user', name: 'ARK User'}},
+            })
+            .mockResolvedValueOnce({data: {user_summary: {}}})
+            .mockResolvedValueOnce({data: {badges: [], user_badges: []}});
+
+        await expect(
+            fetchCurrentHarborUser({
+                userApiKey: 'key',
+                clientId: 'client',
+            }),
+        ).resolves.toEqual(
+            expect.objectContaining({
+                canChat: true,
+                canDirectMessage: false,
+            }),
+        );
     });
 
     it('取得工作狀態欄位設定並更新個人資料', async () => {
@@ -547,6 +581,10 @@ describe('Harbor API 資料正規化', () => {
                         key: 'topicsCreated',
                         value: '12',
                     }),
+                    expect.objectContaining({
+                        key: 'topicsViewed',
+                        value: '90',
+                    }),
                 ]),
                 badges: [
                     expect.objectContaining({
@@ -598,6 +636,7 @@ describe('Harbor API 資料正規化', () => {
                 {key: 'topicsCreated', value: '12'},
                 {key: 'postsCreated', value: '34'},
                 {key: 'likesReceived', value: '56'},
+                {key: 'topicsViewed', value: '90'},
                 {key: 'badges', value: '7'},
             ],
             stats: [
@@ -635,6 +674,7 @@ describe('Harbor API 資料正規化', () => {
             '12',
             '34',
             '56',
+            '90',
             '7',
         ]);
         expect(result.stats.map(item => item.value)).toEqual([
@@ -654,6 +694,120 @@ describe('Harbor API 資料正規化', () => {
         expect(getSpy.mock.calls.map(([path]) => path)).not.toContain(
             '/notifications.json',
         );
+    });
+
+    it('刷新後以本次 session 覆寫已撤銷的管理員權限，不沿用舊快取', async () => {
+        const previousUser = {
+            username: 'ark-user',
+            displayName: 'ARK User',
+            role: '管理員',
+            isAdmin: true,
+            isModerator: true,
+        };
+        getSpy
+            .mockResolvedValueOnce({
+                data: {
+                    current_user: {
+                        username: 'ark-user',
+                        admin: false,
+                        moderator: false,
+                    },
+                },
+            })
+            .mockResolvedValueOnce({
+                data: {
+                    user: {
+                        username: 'ark-user',
+                        name: 'ARK User',
+                        admin: false,
+                        moderator: false,
+                    },
+                },
+            })
+            .mockResolvedValueOnce({data: {user_summary: {}}})
+            .mockResolvedValueOnce({data: {badges: [], user_badges: []}});
+
+        const result = await fetchCurrentHarborUser(
+            {userApiKey: 'key', clientId: 'client'},
+            previousUser,
+        );
+
+        expect(result.isAdmin).toBe(false);
+        expect(result.isModerator).toBe(false);
+        expect(result.role).toBe('Harbor 會員');
+    });
+
+    it('session 未帶權限欄位時亦不沿用舊的管理員／版主狀態', async () => {
+        getSpy
+            .mockResolvedValueOnce({
+                data: {
+                    current_user: {
+                        username: 'ark-user',
+                    },
+                },
+            })
+            .mockResolvedValueOnce({
+                data: {
+                    user: {
+                        username: 'ark-user',
+                        name: 'ARK User',
+                    },
+                },
+            })
+            .mockResolvedValueOnce({data: {user_summary: {}}})
+            .mockResolvedValueOnce({data: {badges: [], user_badges: []}});
+
+        const result = await fetchCurrentHarborUser(
+            {userApiKey: 'key', clientId: 'client'},
+            {
+                username: 'ark-user',
+                role: '管理員',
+                isAdmin: true,
+                isModerator: true,
+            },
+        );
+
+        expect(result.isAdmin).toBe(false);
+        expect(result.isModerator).toBe(false);
+        expect(result.role).toBe('Harbor 會員');
+    });
+
+    it('本次 session 為管理員時仍可覆蓋舊的會員狀態', async () => {
+        getSpy
+            .mockResolvedValueOnce({
+                data: {
+                    current_user: {
+                        username: 'ark-user',
+                        admin: true,
+                        moderator: false,
+                    },
+                },
+            })
+            .mockResolvedValueOnce({
+                data: {
+                    user: {
+                        username: 'ark-user',
+                        name: 'ARK User',
+                        admin: true,
+                    },
+                },
+            })
+            .mockResolvedValueOnce({data: {user_summary: {}}})
+            .mockResolvedValueOnce({data: {badges: [], user_badges: []}});
+
+        const result = await fetchCurrentHarborUser(
+            {userApiKey: 'key', clientId: 'client'},
+            {
+                username: 'ark-user',
+                role: 'Harbor 會員',
+                isAdmin: false,
+                isModerator: false,
+            },
+        );
+
+        expect(result.isAdmin).toBe(true);
+        expect(result.isModerator).toBe(false);
+        expect(result.role).toBe('管理員');
     });
 
     it('沒有上次資料時以未知狀態取代 Secondary API 的假 0', async () => {
@@ -680,6 +834,7 @@ describe('Harbor API 資料正規化', () => {
         );
 
         expect(result.contributions.map(item => item.value)).toEqual([
+            '—',
             '—',
             '—',
             '—',
@@ -804,6 +959,69 @@ describe('Harbor API 資料正規化', () => {
                 }),
             }),
         );
+    });
+
+    it('取得目前使用者送交審核的內容', async () => {
+        getSpy.mockResolvedValue({
+            data: {
+                pending_posts: [
+                    {
+                        id: 123,
+                        category_id: 4,
+                        created_at: '2026-08-23T08:00:00Z',
+                        raw_text: '等待審核的正文',
+                        title: '等待審核的話題',
+                        topic_id: 42,
+                        topic_url: '/t/topic/42',
+                        username: 'ark-user',
+                    },
+                ],
+            },
+        });
+
+        const result = await fetchHarborPendingPosts('ark user');
+
+        expect(getSpy).toHaveBeenCalledWith(
+            '/posts/ark%20user/pending.json',
+            {signal: undefined},
+        );
+        expect(result).toEqual([
+            {
+                id: 123,
+                categoryId: 4,
+                createdAt: '2026-08-23T08:00:00Z',
+                raw: '等待審核的正文',
+                title: '等待審核的話題',
+                topicId: 42,
+                topicUrl: '/t/topic/42',
+                username: 'ark-user',
+            },
+        ]);
+    });
+
+    it('將待審內容的上傳短網址解析為完整網址', async () => {
+        postSpy.mockResolvedValue({
+            data: [
+                {url: '/uploads/default/original/1X/image.jpeg'},
+            ],
+        });
+
+        const result = await fetchHarborUploadUrls([
+            'upload://abc123.jpeg',
+            'upload://abc123.jpeg',
+        ]);
+
+        expect(postSpy).toHaveBeenCalledWith(
+            '/uploads/lookup-urls.json',
+            {short_urls: ['upload://abc123.jpeg']},
+            {signal: undefined},
+        );
+        expect(result).toEqual([
+            {
+                shortUrl: 'upload://abc123.jpeg',
+                url: 'https://harbor.example.com/uploads/default/original/1X/image.jpeg',
+            },
+        ]);
     });
 
     it('贊過列表優先使用 discourse-reactions，並合併 heart 影子讚', async () => {
@@ -1352,6 +1570,25 @@ describe('Harbor API 資料正規化', () => {
         expect(getSpy).toHaveBeenCalledWith('/latest.json', {
             params: {page: 0},
             signal: undefined,
+        });
+    });
+
+    it('訪客論壇角標請求明確不帶 Harbor 登入憑證', async () => {
+        getSpy.mockResolvedValueOnce({
+            data: {
+                topic_list: {
+                    topics: [],
+                    more_topics_url: null,
+                },
+            },
+        });
+
+        await fetchHarborForumBadgeSnapshot({publicOnly: true});
+
+        expect(getSpy).toHaveBeenCalledWith('/latest.json', {
+            params: {page: 0},
+            signal: undefined,
+            skipHarborCredentials: true,
         });
     });
 
@@ -2435,6 +2672,7 @@ describe('Harbor API 資料正規化', () => {
         ['top', '/top.json'],
         ['new', '/new.json'],
         ['unread', '/unread.json'],
+        ['read', '/read.json'],
     ])('使用 %s 話題視圖端點', async (view, expectedPath) => {
         getSpy.mockResolvedValue({
             data: {

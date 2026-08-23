@@ -89,3 +89,49 @@ describe('選咩課網站自動探測', () => {
         expect(getCurrentUmehHost()).toBe(UMEH_BACKUP_HOST);
     });
 });
+
+describe('選咩課跳轉方式', () => {
+    beforeEach(() => {
+        jest.clearAllMocks();
+        getLocalStorage.mockResolvedValue(undefined);
+    });
+
+    it('未設定時預設內頁瀏覽', async () => {
+        const {getUmehOpenPref} = loadUmehHost();
+
+        await expect(getUmehOpenPref()).resolves.toBe('inApp');
+    });
+
+    it('可改為系統瀏覽器並寫入緩存', async () => {
+        const {setLocalStorage} = require('../storageKits');
+        const {getUmehOpenPref, setUmehOpenPref} = loadUmehHost();
+
+        await setUmehOpenPref('system');
+
+        expect(setLocalStorage).toHaveBeenCalledWith(
+            'umeh_open_pref',
+            'system',
+        );
+        await expect(getUmehOpenPref()).resolves.toBe('system');
+    });
+
+    it('非法值回退為內頁瀏覽', async () => {
+        getLocalStorage.mockResolvedValue('chrome');
+        const {getUmehOpenPref} = loadUmehHost();
+
+        await expect(getUmehOpenPref()).resolves.toBe('inApp');
+    });
+
+    it('isUmehUrl 辨識主站與後備站', () => {
+        const {
+            isUmehUrl,
+            UMEH_PRIMARY_HOST,
+            UMEH_BACKUP_HOST,
+        } = loadUmehHost();
+
+        expect(isUmehUrl(`${UMEH_PRIMARY_HOST}/course/CISG1001`)).toBe(true);
+        expect(isUmehUrl(`${UMEH_BACKUP_HOST}/reviews/x`)).toBe(true);
+        expect(isUmehUrl('https://um.edu.mo')).toBe(false);
+        expect(isUmehUrl(null)).toBe(false);
+    });
+});

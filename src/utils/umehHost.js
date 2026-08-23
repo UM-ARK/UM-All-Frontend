@@ -5,8 +5,16 @@ export const UMEH_PRIMARY_HOST = 'https://umeh.top';
 export const UMEH_BACKUP_HOST = 'https://cf.umeh.top';
 
 const PREF_KEY = 'umeh_host_pref';
+const OPEN_PREF_KEY = 'umeh_open_pref';
 const PROBE_TIMEOUT_MS = 2500;
 const PROBE_CACHE_TTL_MS = 30 * 60 * 1000; // 30分鐘
+
+export function isUmehUrl(url) {
+    return (
+        typeof url === 'string' &&
+        (url.startsWith(UMEH_PRIMARY_HOST) || url.startsWith(UMEH_BACKUP_HOST))
+    );
+}
 
 export async function getUmehHostPref() {
     const v = await getLocalStorage(PREF_KEY);
@@ -15,6 +23,24 @@ export async function getUmehHostPref() {
 
 export async function setUmehHostPref(pref) {
     await setLocalStorage(PREF_KEY, pref);
+}
+
+// 選咩課跳轉：inApp 內頁瀏覽（openLink），system 系統瀏覽器（Linking）
+let _openPrefCache = null;
+
+export async function getUmehOpenPref() {
+    if (_openPrefCache !== null) {
+        return _openPrefCache;
+    }
+    const v = await getLocalStorage(OPEN_PREF_KEY);
+    _openPrefCache = v === 'system' ? 'system' : 'inApp';
+    return _openPrefCache;
+}
+
+export async function setUmehOpenPref(pref) {
+    const next = pref === 'system' ? 'system' : 'inApp';
+    await setLocalStorage(OPEN_PREF_KEY, next);
+    _openPrefCache = next;
 }
 
 // 探測緩存

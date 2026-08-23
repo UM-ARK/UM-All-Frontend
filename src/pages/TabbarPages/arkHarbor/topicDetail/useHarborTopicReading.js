@@ -210,7 +210,7 @@ const useHarborTopicReading = ({
                 ...(readState.shouldReloadLists
                     ? {newContentType: null}
                     : {}),
-                // 主頁沒有未讀／新帖分頁；讀完後失效 cache 會在 timings 尚未寫入時用舊列表蓋掉樂觀已讀
+                // 保留樂觀已讀狀態，讓最新與未讀分頁立即同步
             });
             if (latestTopic) {
                 latestTopicRef.current = {

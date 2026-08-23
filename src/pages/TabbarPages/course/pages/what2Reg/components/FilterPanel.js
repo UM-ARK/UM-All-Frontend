@@ -685,6 +685,7 @@ const FilterPanel = ({
             borderRadius: scale(10),
             margin: scale(5),
             marginHorizontal: scale(10),
+            marginBottom: 0,
             padding: scale(5),
         }}>
             <View style={{

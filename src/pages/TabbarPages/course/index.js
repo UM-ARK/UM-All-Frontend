@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Alert, View } from 'react-native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { SafeAreaView } from 'react-native-screens/experimental';
-import { useIsFocused } from '@react-navigation/native';
+import { useIsFocused, useNavigation } from '@react-navigation/native';
 import { Dialog } from '@rneui/themed';
 import { scale } from 'react-native-size-matters';
 import { useTranslation } from 'react-i18next';
@@ -127,6 +127,7 @@ const CourseTabContent = () => {
     const { bg_color, black, themeColor } = theme;
     const { t } = useTranslation(['common', 'catalog', 'timetable']);
     const isFocused = useIsFocused();
+    const navigation = useNavigation();
 
     const {
         programmeLevel,
@@ -190,6 +191,10 @@ const CourseTabContent = () => {
         openLink(UM_PRE_ENROLMENT_EXCEL);
     }, []);
 
+    const handleOpenWhat2RegSettings = useCallback(() => {
+        navigation.navigate('SettingPage');
+    }, [navigation]);
+
     const handleClearPlan = useCallback(() => {
         Alert.alert(
             '',
@@ -229,6 +234,7 @@ const CourseTabContent = () => {
                 catalogMetadata={catalogMetadata}
                 onManualUpdate={handleManualUpdate}
                 onOpenSharePoint={handleOpenSharePoint}
+                onOpenWhat2RegSettings={handleOpenWhat2RegSettings}
                 canClear={canClear}
                 onClearPress={handleClearPlan}
             />
@@ -239,6 +245,7 @@ const CourseTabContent = () => {
             handleClearPlan,
             handleManualUpdate,
             handleOpenSharePoint,
+            handleOpenWhat2RegSettings,
             canClear,
         ],
     );

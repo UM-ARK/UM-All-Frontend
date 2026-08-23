@@ -33,8 +33,11 @@ import HarborSearchPage from './pages/TabbarPages/arkHarbor/HarborSearchPage';
 import HarborTopicListPage from './pages/TabbarPages/arkHarbor/HarborTopicListPage';
 import HarborComposerPage from './pages/TabbarPages/arkHarbor/HarborComposerPage';
 import HarborDraftsPage from './pages/TabbarPages/arkHarbor/HarborDraftsPage';
+import HarborPendingPostDetailPage from './pages/TabbarPages/arkHarbor/HarborPendingPostDetailPage';
+import HarborPendingPostsPage from './pages/TabbarPages/arkHarbor/HarborPendingPostsPage';
 import HarborChatListPage from './pages/TabbarPages/arkHarbor/HarborChatListPage';
 import HarborChatChannelPage from './pages/TabbarPages/arkHarbor/HarborChatChannelPage';
+import HarborReviewQueuePage from './pages/TabbarPages/arkHarbor/review/HarborReviewQueuePage';
 import HarborAccountSettingsPage from './pages/TabbarPages/my/pages/HarborAccountSettingsPage';
 import HarborProfilePage from './pages/TabbarPages/my/pages/HarborProfilePage';
 import HarborActivityPage from './pages/TabbarPages/my/pages/HarborActivityPage';
@@ -497,6 +500,14 @@ const Nav = () => {
                             presentation: 'card',
                         }}
                     />
+                    <Stack.Screen
+                        name="HarborPendingPosts"
+                        component={HarborPendingPostsPage}
+                    />
+                    <Stack.Screen
+                        name="HarborPendingPostDetail"
+                        component={HarborPendingPostDetailPage}
+                    />
                     <Stack.Screen name="AllEvents" component={AllEvents} />
 
                     {/* ARK選課：改為 card，避免再進 Wiki 時被 Modal 蓋住（Wiki 出現在背後） */}
@@ -554,6 +565,10 @@ const Nav = () => {
                         component={HarborActivityPage}
                     />
                     <Stack.Screen
+                        name="HarborRecentReads"
+                        component={HarborTopicListPage}
+                    />
+                    <Stack.Screen
                         name="HarborInbox"
                         component={HarborInboxPage}
                     />
@@ -564,6 +579,17 @@ const Nav = () => {
                     <Stack.Screen
                         name="HarborChatChannel"
                         component={HarborChatChannelPage}
+                    />
+                    <Stack.Screen
+                        name="HarborReviewQueue"
+                        component={HarborReviewQueuePage}
+                    />
+                    <Stack.Screen
+                        name="HarborReviewDetail"
+                        component={HarborReviewQueuePage}
+                        options={{
+                            presentation: 'card',
+                        }}
                     />
                     <Stack.Screen
                         name="HarborBadges"

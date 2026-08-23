@@ -11,6 +11,7 @@ jest.mock('../harborQueryCache', () => ({
 }));
 
 import {
+    isHarborTopicUnseen,
     mergeHarborTopicListItem,
     publishHarborTopicUpdate,
     reconcileHarborTopicListItems,
@@ -42,6 +43,67 @@ describe('harborTopicUpdates', () => {
         expect(updateList({items: [{id: 12, muted: false}]}).items).toEqual([
             {id: 12, muted: true},
         ]);
+    });
+
+    test('紅點話題讀完後同步移出未讀列表 cache', () => {
+        publishHarborTopicUpdate(12, {
+            lastReadPostNumber: 8,
+            unreadCount: 0,
+            isUnread: false,
+            isNew: false,
+        });
+
+        const updateList = mockPatchHarborQueryCachePrefix.mock.calls[0][1];
+        const current = {
+            items: [
+                {id: 12, isNew: true, isUnread: true, unreadCount: 5},
+                {id: 13, isNew: true, isUnread: false, unreadCount: 0},
+            ],
+        };
+
+        expect(
+            updateList(current, ['topic-list', 'latest::::', 1]).items,
+        ).toEqual([
+            {
+                id: 12,
+                isNew: false,
+                isUnread: false,
+                lastReadPostNumber: 8,
+                unreadCount: 0,
+            },
+            {id: 13, isNew: true, isUnread: false, unreadCount: 0},
+        ]);
+        expect(
+            updateList(
+                current,
+                ['topic-list', 'latest::::unseen', 1],
+            ).items,
+        ).toEqual([
+            {id: 13, isNew: true, isUnread: false, unreadCount: 0},
+        ]);
+    });
+
+    test('未讀列表使用與最新列表紅點相同的判斷', () => {
+        expect(isHarborTopicUnseen({isNew: true})).toBe(true);
+        expect(
+            isHarborTopicUnseen({
+                isNew: false,
+                newContentType: 'topic',
+            }),
+        ).toBe(true);
+        expect(
+            isHarborTopicUnseen({
+                isNew: true,
+                newContentType: 'reply',
+            }),
+        ).toBe(false);
+        expect(
+            isHarborTopicUnseen({
+                isNew: true,
+                unreadCount: 2,
+            }),
+        ).toBe(false);
+        expect(isHarborTopicUnseen({isUnread: true})).toBe(false);
     });
 
     test('列表已讀樓層只前進，不因詳情缺欄位回退', () => {
