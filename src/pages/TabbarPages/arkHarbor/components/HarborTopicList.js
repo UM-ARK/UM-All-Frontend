@@ -34,6 +34,7 @@ import {
     isHarborRateLimited,
 } from '../../../../utils/harbor/harborRateLimit';
 import {
+    isHarborTopicUnseen,
     mergeHarborTopicListItem,
     reconcileHarborTopicListItems,
     subscribeHarborTopicUpdates,
@@ -63,9 +64,15 @@ const getSourceKey = source =>
         typeof source.tag === 'string'
             ? source.tag
             : source.tag?.name || source.tag?.slug || '',
+        source.filter || '',
     ].join(':');
 
-const fetchTopicListPage = source => fetchHarborTopicList(source);
+const fetchTopicListPage = async source => {
+    const result = await fetchHarborTopicList(source);
+    return source.filter === 'unseen'
+        ? {...result, items: result.items.filter(isHarborTopicUnseen)}
+        : result;
+};
 
 const resolveRecommendationRequest = request =>
     new Promise(resolve => {
@@ -135,7 +142,8 @@ const HarborTopicList = ({
         source.view === 'latest' &&
         source.categoryId == null &&
         !source.categorySlug &&
-        source.tag == null;
+        source.tag == null &&
+        source.filter == null;
     const cacheKey = useMemo(
         () => ['topic-list', sourceKey, sessionGeneration],
         [sessionGeneration, sourceKey],
@@ -397,21 +405,25 @@ const HarborTopicList = ({
     useEffect(() => {
         return subscribeHarborTopicUpdates((topicId, patch) => {
             const { reloadLists, removeFromLists, ...itemPatch } = patch;
-            const updateItems = currentItems =>
-                removeFromLists
+            const updateItems = currentItems => {
+                const nextItems = removeFromLists
                     ? currentItems.filter(item => item.id !== topicId)
                     : currentItems.map(item =>
                         item.id === topicId
                             ? mergeHarborTopicListItem(item, itemPatch)
                             : item,
                     );
+                return sourceRef.current.filter === 'unseen'
+                    ? nextItems.filter(isHarborTopicUnseen)
+                    : nextItems;
+            };
             replaceItems(updateItems(itemsRef.current));
             replaceRecommendationItems(
                 updateItems(recommendationItemsRef.current).filter(
                     isHarborRecommendationCandidate,
                 ),
             );
-            // 發帖／刪帖等需重排時刷新當前列表；主頁僅有 latest／top，不可再限死 new／unread
+            // 發帖／刪帖等需重排時刷新當前列表
             if (reloadLists && isVisible) {
                 loadFirstPage({ refresh: true, showIndicator: false });
             }
@@ -464,7 +476,8 @@ const HarborTopicList = ({
             }
             // 先確認確實能載入更多，再處理限流；避免空列表／首頁錯誤時被 onEndReached 誤設 loadMoreError
             if (
-                itemsRef.current.length === 0 ||
+                (itemsRef.current.length === 0 &&
+                    sourceRef.current.filter == null) ||
                 isLoading ||
                 !hasMore ||
                 nextPage == null ||

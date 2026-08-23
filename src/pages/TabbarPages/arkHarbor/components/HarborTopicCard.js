@@ -18,6 +18,7 @@ import {
     ARK_HARBOR_ABSOLUTE_URL,
     ARK_HARBOR_AVATAR_TEMPLATE,
 } from '../../../../utils/pathMap';
+import { isHarborTopicUnseen } from '../../../../utils/harbor/harborTopicUpdates';
 import { trigger } from '../../../../utils/trigger';
 import HarborCategoryIcon from './HarborCategoryIcon';
 
@@ -153,9 +154,7 @@ const HarborTopicCard = ({
     const isNewReply =
         unreadCount > 0 &&
         (topic.newContentType === 'reply' || !topic.newContentType);
-    const isNewTopic =
-        topic.newContentType === 'topic' ||
-        (!topic.newContentType && topic.isNew);
+    const isNewTopic = isHarborTopicUnseen(topic);
     const avatarStyle = {
         width: AVATAR_SIZE,
         height: AVATAR_SIZE,

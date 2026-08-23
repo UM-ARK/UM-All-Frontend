@@ -8,6 +8,20 @@ const topicUpdateListeners = new Set();
 const TOPIC_CACHE_NAMESPACE = 'topic';
 const TOPIC_LIST_CACHE_NAMESPACE = 'topic-list';
 
+const isUnseenTopicListKey = key =>
+    typeof key?.[1] === 'string' && key[1].endsWith(':unseen');
+
+export function isHarborTopicUnseen(topic) {
+    const isNewReply =
+        Number(topic?.unreadCount || 0) > 0 &&
+        (topic?.newContentType === 'reply' || !topic?.newContentType);
+    return (
+        (topic?.newContentType === 'topic' ||
+            (!topic?.newContentType && topic?.isNew === true)) &&
+        !isNewReply
+    );
+}
+
 export function mergeHarborTopicListItem(item, patch) {
     if (!item) {
         return item;
@@ -127,16 +141,21 @@ export function publishHarborTopicUpdate(topicId, patch) {
     } else if (removeFromLists || Object.keys(itemPatch).length > 0) {
         patchHarborQueryCachePrefix(
             ['topic-list'],
-            current => ({
-                ...current,
-                items: removeFromLists
+            (current, key) => {
+                const nextItems = removeFromLists
                     ? current.items.filter(item => item.id !== id)
                     : current.items.map(item =>
                         item.id === id
                             ? mergeHarborTopicListItem(item, itemPatch)
                             : item,
-                    ),
-            }),
+                    );
+                return {
+                    ...current,
+                    items: isUnseenTopicListKey(key)
+                        ? nextItems.filter(isHarborTopicUnseen)
+                        : nextItems,
+                };
+            },
             {
                 namespace: TOPIC_LIST_CACHE_NAMESPACE,
                 preserveUpdatedAt: true,

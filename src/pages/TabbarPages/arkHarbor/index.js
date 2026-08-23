@@ -33,6 +33,7 @@ import HarborTopicList from './components/HarborTopicList';
 const VIEW_CONFIG = {
     latest: { label: '最新', analytics: 'latest' },
     top: { label: '熱門', analytics: 'top' },
+    unread: { label: '未讀', analytics: 'unread' },
 };
 // 對齊資訊頁 Top Tab（~30），並預留搜尋列高度
 const STICKY_TOOLBAR_HEIGHT = verticalScale(36);
@@ -334,7 +335,13 @@ const HarborFeedPane = ({
     refreshProgressViewOffset,
     isActive,
 }) => {
-    const source = useMemo(() => ({ view }), [view]);
+    const source = useMemo(
+        () =>
+            view === 'unread'
+                ? {view: 'latest', filter: 'unseen'}
+                : {view},
+        [view],
+    );
 
     return (
         <View style={styles.feedPage}>
@@ -379,6 +386,7 @@ const ForumPage = ({ navigation }) => {
     const [mountedViews, setMountedViews] = useState({
         latest: true,
         top: false,
+        unread: false,
     });
     const [consentVisible, setConsentVisible] = useState(false);
 
@@ -443,10 +451,13 @@ const ForumPage = ({ navigation }) => {
             signedIn: status === 'signedIn',
             unavailable: capabilitiesUnavailable,
         });
-        // 不提供新話題／未讀分頁；錯過即略過，角標仍獨立計算
-        return availableViews.filter(
+        const publicViews = availableViews.filter(
             view => view !== 'new' && view !== 'unread',
         );
+        // 未讀分頁沿用最新列表的紅點判斷，只在登入後提供
+        return status === 'signedIn'
+            ? [...publicViews, 'unread']
+            : publicViews;
     }, [capabilities, capabilitiesUnavailable, status]);
 
     const segmentOptions = useMemo(
