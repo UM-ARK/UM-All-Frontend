@@ -371,6 +371,7 @@ const ForumPage = ({ navigation }) => {
     const blockTopicPressUntilRef = useRef(0);
     const capabilitiesRef = useRef(null);
     const capabilitiesControllerRef = useRef(null);
+    const hasLoggedHomeRef = useRef(false);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [toolbarHeight, setToolbarHeight] = useState(STICKY_TOOLBAR_HEIGHT);
     const [capabilities, setCapabilities] = useState(null);
@@ -382,8 +383,14 @@ const ForumPage = ({ navigation }) => {
     const [consentVisible, setConsentVisible] = useState(false);
 
     useEffect(() => {
+        // 僅在首次聚焦時打點；iOS Native Tabs 會預先掛載，
+        // 且從詳情頁返回也會再次聚焦，兩者都不可重複計算。
+        if (!isFocused || hasLoggedHomeRef.current) {
+            return;
+        }
+        hasLoggedHomeRef.current = true;
         logToFirebase('openPage', { page: 'HarborNativeHome' });
-    }, []);
+    }, [isFocused]);
 
     const loadCapabilities = useCallback(() => {
         capabilitiesControllerRef.current?.abort();
