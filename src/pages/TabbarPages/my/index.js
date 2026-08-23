@@ -34,9 +34,11 @@ const MyScreen = ({ navigation }) => {
         error,
         inboxUnreadCount,
         chatUnreadCount,
+        reviewCount,
         refresh,
         refreshInboxUnreadCount,
         refreshChatUnreadCount,
+        refreshReviewCount,
     } = useHarborSession();
     const {
         dismissHarborPushPrompt,
@@ -112,6 +114,7 @@ const MyScreen = ({ navigation }) => {
                 refresh(),
                 refreshInboxUnreadCount(),
                 refreshChatUnreadCount(),
+                refreshReviewCount(),
                 (async () => {
                     if (
                         typeof teamSchedulePreviewRef.current?.refresh ===
@@ -127,7 +130,7 @@ const MyScreen = ({ navigation }) => {
             if (results[0].status === 'rejected') {
                 presentHarborError(results[0].reason);
             }
-            // results[3] Scheduling 失敗：由 PreviewSection 自行顯示錯誤 UI
+            // results[4] Scheduling 失敗：由 PreviewSection 自行顯示錯誤 UI
         } finally {
             setIsRefreshing(false);
         }
@@ -309,6 +312,7 @@ const MyScreen = ({ navigation }) => {
                                 user={user}
                                 unreadCount={inboxUnreadCount}
                                 chatUnreadCount={chatUnreadCount}
+                                reviewCount={reviewCount}
                                 navigation={navigation}
                                 onChatPress={() =>
                                     navigation.navigate('HarborChatList')

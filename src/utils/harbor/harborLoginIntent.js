@@ -12,6 +12,7 @@ const HARBOR_LOGIN_INTENT_ROUTES = new Set([
     'HarborChatList',
     'HarborComposer',
     'HarborDrafts',
+    'HarborReviewQueue',
     'HarborTopicDetail',
     'Tabbar',
     'TeamScheduleDetail',
