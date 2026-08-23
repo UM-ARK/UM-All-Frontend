@@ -22,6 +22,7 @@ import { PROGRAMME_LEVELS } from '../../../../utils/courseProgramme';
  * @param {object} catalogMetadata 兩份課程 catalog 的 metadata
  * @param {Function} onManualUpdate 手動檢查課表數據更新
  * @param {Function} onOpenSharePoint 開啟官方 SharePoint 課表 Excel
+ * @param {Function} onOpenWhat2RegSettings 開啟設置頁的選咩課跳轉方式
  * @param {boolean} canClear 是否已有模擬課表
  * @param {Function} onClearPress 清空模擬課表
  */
@@ -30,6 +31,7 @@ const CourseMoreMenu = ({
     catalogMetadata,
     onManualUpdate,
     onOpenSharePoint,
+    onOpenWhat2RegSettings,
     canClear,
     onClearPress,
 }) => {
@@ -241,6 +243,19 @@ const CourseMoreMenu = ({
                             </Text>
                         </TouchableScale>
                     )}
+
+                    <TouchableScale
+                        style={styles.actionButton(tonal.primary15)}
+                        onPress={() => runAction(onOpenWhat2RegSettings)}>
+                        <Ionicons
+                            name="open-outline"
+                            size={scale(18)}
+                            color={themeColor}
+                        />
+                        <Text style={styles.actionButtonText(themeColor)}>
+                            {t('設置選咩課跳轉方式', { ns: 'catalog' })}
+                        </Text>
+                    </TouchableScale>
 
                     <TouchableScale
                         style={styles.actionButton(tonal.primary08)}
