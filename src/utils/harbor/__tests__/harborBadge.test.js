@@ -15,6 +15,7 @@ import {
     createHarborForumBadgeState,
     formatHarborTabBadge,
     getHarborForumBadgeCount,
+    HARBOR_FORUM_BADGE_GUEST_SCOPE,
     loadHarborForumBadgeState,
     saveHarborForumBadgeState,
     updateHarborForumBadgeState,
@@ -128,6 +129,51 @@ describe('Harbor 論壇 Tab 角標', () => {
         expect(getHarborForumBadgeCount(nextState, 'ark-user')).toBe(0);
     });
 
+    it('訪客與登入帳號各自保存角標狀態', async () => {
+        let guestState = updateHarborForumBadgeState(
+            createHarborForumBadgeState(HARBOR_FORUM_BADGE_GUEST_SCOPE),
+            HARBOR_FORUM_BADGE_GUEST_SCOPE,
+            {
+                latestAt: '2026-07-31T08:00:00Z',
+                topicCount: 0,
+            },
+        );
+        guestState = updateHarborForumBadgeState(
+            guestState,
+            HARBOR_FORUM_BADGE_GUEST_SCOPE,
+            {
+                latestAt: '2026-07-31T09:00:00Z',
+                topicCount: 2,
+            },
+        );
+        const accountState = updateHarborForumBadgeState(
+            createHarborForumBadgeState('ark-user'),
+            'ark-user',
+            {
+                latestAt: '2026-07-31T10:00:00Z',
+                topicCount: 0,
+            },
+        );
+
+        await saveHarborForumBadgeState(guestState);
+        await saveHarborForumBadgeState(accountState);
+
+        const restoredGuestState = await loadHarborForumBadgeState(
+            HARBOR_FORUM_BADGE_GUEST_SCOPE,
+        );
+        const restoredAccountState = await loadHarborForumBadgeState(
+            'ark-user',
+        );
+        expect(
+            getHarborForumBadgeCount(
+                restoredGuestState,
+                HARBOR_FORUM_BADGE_GUEST_SCOPE,
+            ),
+        ).toBe(2);
+        expect(getHarborForumBadgeCount(restoredAccountState, 'ark-user'))
+            .toBe(0);
+    });
+
     it('APP 重啟後恢復尚未進入論壇的角標', async () => {
         mockStoredBadgeState = {
             version: 2,
@@ -238,5 +284,33 @@ describe('Harbor 論壇 Tab 角標', () => {
                 ],
             }),
         );
+    });
+
+    it('Storage 在三個登入帳號之外保留訪客狀態', async () => {
+        mockStoredBadgeState = {
+            version: 2,
+            accounts: [
+                {username: HARBOR_FORUM_BADGE_GUEST_SCOPE, badgeCount: 1},
+                {username: 'user-b', badgeCount: 2},
+                {username: 'user-c', badgeCount: 3},
+                {username: 'user-d', badgeCount: 4},
+            ],
+        };
+        const state = {
+            ...createHarborForumBadgeState('user-a'),
+            badgeCount: 5,
+            loaded: true,
+        };
+
+        await saveHarborForumBadgeState(state);
+
+        expect(mockStoredBadgeState.accounts).toEqual([
+            expect.objectContaining({username: 'user-a'}),
+            expect.objectContaining({
+                username: HARBOR_FORUM_BADGE_GUEST_SCOPE,
+            }),
+            expect.objectContaining({username: 'user-b'}),
+            expect.objectContaining({username: 'user-c'}),
+        ]);
     });
 });

@@ -2538,6 +2538,7 @@ export async function fetchHarborInboxUnreadCount(
  * 首次建立基準時只讀取第一頁；既有基準最多掃描 10 頁、計算 100 個新話題。
  */
 export async function fetchHarborForumBadgeSnapshot({
+    publicOnly = false,
     since,
     signal,
 } = {}) {
@@ -2554,6 +2555,7 @@ export async function fetchHarborForumBadgeSnapshot({
         const response = await harborApi.get('/latest.json', {
             params: {page},
             signal,
+            ...(publicOnly ? {skipHarborCredentials: true} : {}),
         });
         const topicList = response.data?.topic_list;
         const topics = topicList?.topics;

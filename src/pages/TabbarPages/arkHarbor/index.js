@@ -145,6 +145,8 @@ const HarborStickyToolbar = ({
     const { theme } = useTheme();
     const { t } = useTranslation('harbor');
     const isSignedIn = status === 'signedIn';
+    const showLoginPromptBadge =
+        status === 'signedOut' || status === 'expired';
 
     return (
         <View
@@ -214,6 +216,15 @@ const HarborStickyToolbar = ({
                                     ]}>
                                     {sessionLabel}
                                 </Text>
+                                {showLoginPromptBadge ? (
+                                    <View
+                                        pointerEvents="none"
+                                        style={[
+                                            styles.loginPromptBadge,
+                                            {backgroundColor: theme.unread},
+                                        ]}
+                                    />
+                                ) : null}
                             </Pressable>
                         )}
                         {isSignedIn && chatVisible ? (
@@ -762,6 +773,14 @@ const styles = StyleSheet.create({
         fontSize: scale(10),
         fontWeight: '700',
         marginLeft: scale(4),
+    },
+    loginPromptBadge: {
+        position: 'absolute',
+        top: scale(2),
+        right: scale(1),
+        width: scale(6),
+        height: scale(6),
+        borderRadius: scale(3),
     },
     feedTabs: {
         height: verticalScale(22),

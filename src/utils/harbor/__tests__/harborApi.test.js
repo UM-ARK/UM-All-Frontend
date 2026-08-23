@@ -1387,6 +1387,25 @@ describe('Harbor API 資料正規化', () => {
         });
     });
 
+    it('訪客論壇角標請求明確不帶 Harbor 登入憑證', async () => {
+        getSpy.mockResolvedValueOnce({
+            data: {
+                topic_list: {
+                    topics: [],
+                    more_topics_url: null,
+                },
+            },
+        });
+
+        await fetchHarborForumBadgeSnapshot({publicOnly: true});
+
+        expect(getSpy).toHaveBeenCalledWith('/latest.json', {
+            params: {page: 0},
+            signal: undefined,
+            skipHarborCredentials: true,
+        });
+    });
+
     it('只按新建立話題去重，普通回覆不計入論壇角標', async () => {
         getSpy
             .mockResolvedValueOnce({
