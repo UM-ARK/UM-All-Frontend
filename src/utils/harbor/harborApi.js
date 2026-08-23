@@ -1718,6 +1718,31 @@ export async function fetchHarborUserCreatedTopics(
     return buildNormalizedTopicListResult(response.data, normalizedPage);
 }
 
+export async function fetchHarborPendingPosts(username, { signal } = {}) {
+    if (typeof username !== 'string' || !username.trim()) {
+        throw new TypeError('Harbor username is required');
+    }
+    const encodedUsername = encodeURIComponent(username.trim());
+    const response = await harborApi.get(
+        `/posts/${encodedUsername}/pending.json`,
+        { signal },
+    );
+    const pendingPosts = response.data?.pending_posts;
+    if (!Array.isArray(pendingPosts)) {
+        throw new Error('Invalid Harbor pending posts response');
+    }
+    return pendingPosts.map(post => ({
+        id: Number(post.id) || null,
+        categoryId: Number(post.category_id) || null,
+        createdAt: post.created_at || '',
+        raw: post.raw_text || '',
+        title: post.title || '',
+        topicId: Number(post.topic_id) || null,
+        topicUrl: post.topic_url || '',
+        username: post.username || username.trim(),
+    }));
+}
+
 export async function fetchHarborSearch({
     query,
     userQuery = query,

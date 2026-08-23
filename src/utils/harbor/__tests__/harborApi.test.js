@@ -25,6 +25,7 @@ import {
     fetchHarborTopicPosts,
     fetchHarborUnreadNotificationCount,
     fetchHarborForumBadgeSnapshot,
+    fetchHarborPendingPosts,
     fetchHarborUserActions,
     fetchHarborUserCreatedTopics,
     fetchCachedHarborFlagTypes,
@@ -957,6 +958,44 @@ describe('Harbor API 資料正規化', () => {
                 }),
             }),
         );
+    });
+
+    it('取得目前使用者送交審核的內容', async () => {
+        getSpy.mockResolvedValue({
+            data: {
+                pending_posts: [
+                    {
+                        id: 123,
+                        category_id: 4,
+                        created_at: '2026-08-23T08:00:00Z',
+                        raw_text: '等待審核的正文',
+                        title: '等待審核的話題',
+                        topic_id: 42,
+                        topic_url: '/t/topic/42',
+                        username: 'ark-user',
+                    },
+                ],
+            },
+        });
+
+        const result = await fetchHarborPendingPosts('ark user');
+
+        expect(getSpy).toHaveBeenCalledWith(
+            '/posts/ark%20user/pending.json',
+            {signal: undefined},
+        );
+        expect(result).toEqual([
+            {
+                id: 123,
+                categoryId: 4,
+                createdAt: '2026-08-23T08:00:00Z',
+                raw: '等待審核的正文',
+                title: '等待審核的話題',
+                topicId: 42,
+                topicUrl: '/t/topic/42',
+                username: 'ark-user',
+            },
+        ]);
     });
 
     it('贊過列表優先使用 discourse-reactions，並合併 heart 影子讚', async () => {

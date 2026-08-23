@@ -31,11 +31,13 @@ const HarborComposerForm = ({
     imagesState,
     onOpenCategorySheet,
     onOpenMarkdownGuide,
+    onOpenPendingPosts,
     onOpenTagSheet,
     onOpenWebComposer,
     onPressContext,
     onPressDelete,
     onSelectCategory,
+    pendingPostCount,
     route,
     submit,
     tagSheetRef,
@@ -167,6 +169,53 @@ const HarborComposerForm = ({
                             name="chevron-right"
                             size={scale(20)}
                             color={theme.black.third}
+                        />
+                    </Pressable>
+                ) : null}
+
+                {isNewTopic && pendingPostCount > 0 ? (
+                    <Pressable
+                        accessibilityLabel={t(
+                            '查看 {{count}} 項審核中的內容',
+                            {count: pendingPostCount},
+                        )}
+                        accessibilityRole="button"
+                        onPress={onOpenPendingPosts}
+                        style={({pressed}) => [
+                            styles.pendingNotice,
+                            {
+                                backgroundColor: pressed
+                                    ? theme.tonal.secondary30
+                                    : theme.tonal.secondary15,
+                            },
+                        ]}>
+                        <MaterialCommunityIcons
+                            name="clock-outline"
+                            size={scale(20)}
+                            color={theme.secondThemeColor}
+                        />
+                        <View style={styles.pendingNoticeContent}>
+                            <Text
+                                style={[
+                                    styles.pendingNoticeTitle,
+                                    {color: theme.black.main},
+                                ]}>
+                                {t('你有 {{count}} 項內容正在審核中', {
+                                    count: pendingPostCount,
+                                })}
+                            </Text>
+                            <Text
+                                style={[
+                                    styles.pendingNoticeDescription,
+                                    {color: theme.black.third},
+                                ]}>
+                                {t('點擊查看待審話題或回覆')}
+                            </Text>
+                        </View>
+                        <MaterialCommunityIcons
+                            name="chevron-right"
+                            size={scale(20)}
+                            color={theme.secondThemeColor}
                         />
                     </Pressable>
                 ) : null}
@@ -681,6 +730,25 @@ const styles = StyleSheet.create({
     },
     markdownHelpText: {
         fontSize: scale(11),
+    },
+    pendingNotice: {
+        alignItems: 'center',
+        borderRadius: scale(12),
+        flexDirection: 'row',
+        gap: scale(10),
+        paddingHorizontal: scale(13),
+        paddingVertical: verticalScale(11),
+    },
+    pendingNoticeContent: {
+        flex: 1,
+        gap: verticalScale(2),
+    },
+    pendingNoticeDescription: {
+        fontSize: scale(11),
+    },
+    pendingNoticeTitle: {
+        fontSize: scale(13),
+        fontWeight: '700',
     },
     requirementCounter: {
         fontSize: scale(11),
