@@ -631,7 +631,7 @@ const SettingPage = ({ navigation }) => {
                         icon="open-outline"
                         iconColor="#007AFF"
                         title={t('setting:What2Reg Open')}
-                        subtitle={umehOpenPrefLabels[umehOpenPref]}
+                        subtitle={`${umehOpenPrefLabels[umehOpenPref]}\n${t('選咩課和ARK是兩個獨立項目')}`}
                         showArrow={false}
                         rightElement={
                             <MenuView
