@@ -1417,14 +1417,22 @@ function normalizeProfile(
             ).padStart(2, '0')}`
             : matchingPreviousUser?.joinedAt || '';
 
+    // 權限以本次 session／profile 為準，不可 OR 舊快取，否則撤銷管理員後刷新仍會顯示審核入口
+    const isAdmin = Boolean(currentUser.admin || profile.admin);
+    const isModerator = Boolean(currentUser.moderator || profile.moderator);
+    const previousRole = matchingPreviousUser?.role;
+    const previousNonStaffRole =
+        previousRole && previousRole !== '管理員' && previousRole !== '版主'
+            ? previousRole
+            : '';
     let role =
         profile.title ||
         profile.primary_group_name ||
-        matchingPreviousUser?.role ||
+        previousNonStaffRole ||
         '';
-    if (currentUser.admin || profile.admin) {
+    if (isAdmin) {
         role = '管理員';
-    } else if (currentUser.moderator || profile.moderator) {
+    } else if (isModerator) {
         role = '版主';
     } else if (!role) {
         role = 'Harbor 會員';
@@ -1487,16 +1495,8 @@ function normalizeProfile(
             matchingPreviousUser?.trustLevel ??
             0,
         ),
-        isAdmin: Boolean(
-            currentUser.admin ||
-                profile.admin ||
-                matchingPreviousUser?.isAdmin,
-        ),
-        isModerator: Boolean(
-            currentUser.moderator ||
-                profile.moderator ||
-                matchingPreviousUser?.isModerator,
-        ),
+        isAdmin,
+        isModerator,
         // Discourse /session/current.json 的 can_upload_avatar（含 uploaded_avatars_allowed_groups）
         canUploadAvatar:
             typeof currentUser.can_upload_avatar === 'boolean'

@@ -688,6 +688,120 @@ describe('Harbor API 資料正規化', () => {
         );
     });
 
+    it('刷新後以本次 session 覆寫已撤銷的管理員權限，不沿用舊快取', async () => {
+        const previousUser = {
+            username: 'ark-user',
+            displayName: 'ARK User',
+            role: '管理員',
+            isAdmin: true,
+            isModerator: true,
+        };
+        getSpy
+            .mockResolvedValueOnce({
+                data: {
+                    current_user: {
+                        username: 'ark-user',
+                        admin: false,
+                        moderator: false,
+                    },
+                },
+            })
+            .mockResolvedValueOnce({
+                data: {
+                    user: {
+                        username: 'ark-user',
+                        name: 'ARK User',
+                        admin: false,
+                        moderator: false,
+                    },
+                },
+            })
+            .mockResolvedValueOnce({data: {user_summary: {}}})
+            .mockResolvedValueOnce({data: {badges: [], user_badges: []}});
+
+        const result = await fetchCurrentHarborUser(
+            {userApiKey: 'key', clientId: 'client'},
+            previousUser,
+        );
+
+        expect(result.isAdmin).toBe(false);
+        expect(result.isModerator).toBe(false);
+        expect(result.role).toBe('Harbor 會員');
+    });
+
+    it('session 未帶權限欄位時亦不沿用舊的管理員／版主狀態', async () => {
+        getSpy
+            .mockResolvedValueOnce({
+                data: {
+                    current_user: {
+                        username: 'ark-user',
+                    },
+                },
+            })
+            .mockResolvedValueOnce({
+                data: {
+                    user: {
+                        username: 'ark-user',
+                        name: 'ARK User',
+                    },
+                },
+            })
+            .mockResolvedValueOnce({data: {user_summary: {}}})
+            .mockResolvedValueOnce({data: {badges: [], user_badges: []}});
+
+        const result = await fetchCurrentHarborUser(
+            {userApiKey: 'key', clientId: 'client'},
+            {
+                username: 'ark-user',
+                role: '管理員',
+                isAdmin: true,
+                isModerator: true,
+            },
+        );
+
+        expect(result.isAdmin).toBe(false);
+        expect(result.isModerator).toBe(false);
+        expect(result.role).toBe('Harbor 會員');
+    });
+
+    it('本次 session 為管理員時仍可覆蓋舊的會員狀態', async () => {
+        getSpy
+            .mockResolvedValueOnce({
+                data: {
+                    current_user: {
+                        username: 'ark-user',
+                        admin: true,
+                        moderator: false,
+                    },
+                },
+            })
+            .mockResolvedValueOnce({
+                data: {
+                    user: {
+                        username: 'ark-user',
+                        name: 'ARK User',
+                        admin: true,
+                    },
+                },
+            })
+            .mockResolvedValueOnce({data: {user_summary: {}}})
+            .mockResolvedValueOnce({data: {badges: [], user_badges: []}});
+
+        const result = await fetchCurrentHarborUser(
+            {userApiKey: 'key', clientId: 'client'},
+            {
+                username: 'ark-user',
+                role: 'Harbor 會員',
+                isAdmin: false,
+                isModerator: false,
+            },
+        );
+
+        expect(result.isAdmin).toBe(true);
+        expect(result.isModerator).toBe(false);
+        expect(result.role).toBe('管理員');
+    });
+
     it('沒有上次資料時以未知狀態取代 Secondary API 的假 0', async () => {
         getSpy
             .mockResolvedValueOnce({
