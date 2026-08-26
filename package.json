@@ -67,7 +67,7 @@
     "expo-status-bar": "~57.0.1",
     "expo-system-ui": "~57.0.2",
     "expo-web-browser": "~57.0.2",
-    "i18next": "^23.16.8",
+    "i18next": "^26.4.0",
     "intl-pluralrules": "^2.0.1",
     "lodash": "^4.18.1",
     "moment": "^2.30.1",

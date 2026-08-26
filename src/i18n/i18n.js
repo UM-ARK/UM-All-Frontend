@@ -1,20 +1,20 @@
-import { Alert } from 'react-native';
 import 'intl-pluralrules';
-import i18n, { changeLanguage } from 'i18next';
+import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as RNLocalize from 'react-native-localize';
 
 import EN_US from './en-us';
 import ZH_HK from './zh-hk';
+import { getLocalStorage, setLocalStorageSilently } from '../utils/storageKits';
 
 // 參考 IETF 語言標籤
 // https://en.wikipedia.org/wiki/IETF_language_tag
-// 但這裡的key無法使用 - ，故沒有使用 zh-hk
+// 目前沿用 tc，以保持舊版儲存值與現有語言判斷相容
 const resources = {
     en: EN_US,
     tc: ZH_HK,
 };
+const SUPPORTED_LANGUAGES = ['tc', 'en'];
 
 
 // 簡單的語言映射邏輯
@@ -40,9 +40,9 @@ const languageDetector = {
     async: true,
     detect: async (callback) => {
         try {
-            const storedLanguage = await AsyncStorage.getItem('language');
+            const storedLanguage = await getLocalStorage('language');
             // 如果有用戶設置，用設置的；否則用系統的
-            const selectLanguage = storedLanguage ? JSON.parse(storedLanguage) : defaultLanguage;
+            const selectLanguage = SUPPORTED_LANGUAGES.includes(storedLanguage) ? storedLanguage : defaultLanguage;
             callback(selectLanguage);
         } catch (error) {
             console.log('Error reading language', error);
@@ -51,7 +51,9 @@ const languageDetector = {
     },
     init: () => { },
     cacheUserLanguage: (language) => {
-        AsyncStorage.setItem('language', JSON.stringify(language));
+        if (SUPPORTED_LANGUAGES.includes(language)) {
+            setLocalStorageSilently('language', language);
+        }
     },
 };
 
@@ -61,6 +63,7 @@ i18n
     .init({
         resources,
         fallbackLng: 'tc',
+        supportedLngs: SUPPORTED_LANGUAGES,
         interpolation: {
             escapeValue: false, // React 已經默認防 XSS
         },
@@ -75,7 +78,7 @@ i18n
 
 // 用法：
 // import { useTranslation } from 'react-i18next';
-// 組件內 const { t, i18n } = useTranslation(['common', 'about']);  // 注意namespace，順序搜索
+// 組件內 const { t, i18n } = useTranslation(['common', 'about']);  // 第一個 namespace 為預設，其他 namespace 需明確指定
 // 需要翻譯的地方使用 t('key')
 // 這裡的 key 需要對應 resources 內多語言的 key，t函數會返回該key的value
 

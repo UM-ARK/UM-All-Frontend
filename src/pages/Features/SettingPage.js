@@ -12,7 +12,6 @@ import { useTheme, uiStyle } from '../../components/ThemeContext';
 import { useHarborSession } from '../../contexts/HarborSessionContext';
 import { openLink } from '../../utils/browser';
 import { trigger } from '../../utils/trigger';
-import { setLocalStorage } from '../../utils/storageKits';
 import {
     getUmehHostPref,
     setUmehHostPref,
@@ -362,7 +361,6 @@ const SettingPage = ({ navigation }) => {
      */
     const handleLanguageChange = lang => {
         i18n.changeLanguage(lang);
-        setLocalStorage('language', lang);
     };
 
     /**
