@@ -5,7 +5,7 @@ alwaysApply: true
 
 # Jest 與 Watchman
 
-在 Cursor Agent／sandbox 或本機 Watchman socket 權限異常時，直接跑 `yarn jest` 可能失敗，常見錯誤類似：
+在 Cursor Agent／sandbox 或本機 Watchman socket 權限異常時，直接跑 `pnpm exec jest` 可能失敗，常見錯誤類似：
 
 ```text
 fchmod(.../watchman/...-state, 2700): Operation not permitted
@@ -18,10 +18,10 @@ watchman --no-pretty get-sockname returned with exit code=1
 
 ```bash
 # ✅ 推薦（單檔或路徑）
-yarn jest src/utils/harbor/__tests__/harborRateLimit.test.js --watchman=false
+pnpm exec jest src/utils/harbor/__tests__/harborRateLimit.test.js --watchman=false
 
 # ✅ 亦可搭配其他旗標
-yarn jest src/utils/harbor/__tests__/harborRateLimit.test.js --no-coverage --watchman=false
+pnpm exec jest src/utils/harbor/__tests__/harborRateLimit.test.js --no-coverage --watchman=false
 ```
 
 ## 注意

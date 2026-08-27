@@ -62,18 +62,20 @@
 
 ## 🎉 首次運行該項目
 
+本專案使用 **pnpm** 作為套件管理器。請先執行 `corepack enable` 啟用 pnpm，再於根目錄執行 `pnpm install`。
+
 在此查看[已知 BUG](./README/debugging_doc.md#android%E9%96%8B%E7%99%BC%E7%92%B0%E5%A2%83)，現在可以參考`./AGENTS.md`文件看項目說明了~~AI萬歲~~。
 
 ### 🤖 Android 環境 [Setup](https://reactnative.dev/docs/environment-setup)
 
 1. 確保自己是 `Android API 33` 或 `API 31` 的模擬器環境，下載安裝 JDK、SDK
-2. 在項目根目錄(`package.json`所在的目錄)打開命令行運行 `yarn install` 安裝依賴
+2. 在項目根目錄(`package.json`所在的目錄)打開命令行運行 `pnpm install` 安裝依賴
 3. 執行 `npx expo prebuild --clean` 生成 Android 原生項目
    - 僅生成 Android：`npx expo prebuild --clean --platform android`
    - 僅生成 iOS：`npx expo prebuild --clean --platform ios`
    - 如安裝了跨平台庫，直接使用 `npx expo prebuild --clean` 生成兩個平台
 4. 前往 `Android Studio` 啟動所需的模擬器
-5. 敲入 `yarn android` 運行本項目吧!
+5. 敲入 `pnpm android` 運行本項目吧!
 
 ---
 
@@ -81,15 +83,16 @@
 
 > 基於 Expo SDK 57 + React Native 0.86，iOS APP 目前只能在 Mac 開發調試
 
-1. 先安裝`node`包（Node ≥18），方便之後使用指令
+1. 先安裝 Node（≥18）並啟用 pnpm，方便之後使用指令
 
 ```console
 brew install node
 brew install watchman
+corepack enable
 ```
 
 2. 確保安裝了 `Xcode` (版本 15 或以上)，建議在[官網](https://developer.apple.com/download/all/?q=Xcode)下載
-3. 在項目根目錄(`package.json`所在的目錄)打開命令行運行 `yarn install` 安裝依賴
+3. 在項目根目錄(`package.json`所在的目錄)打開命令行運行 `pnpm install` 安裝依賴
 4. 執行 `npx expo prebuild --clean` 生成 iOS 原生項目
    - 僅生成 iOS：`npx expo prebuild --clean --platform ios`
    - 僅生成 Android：`npx expo prebuild --clean --platform android`
@@ -98,13 +101,13 @@ brew install watchman
 5. 使用 Expo 運行 iOS（**不需要手動管理 CocoaPods**）
 
 ```console
-yarn ios          # 運行 iPhone 16 Pro 模擬器
-yarn iosNew       # 運行 iPhone 17 Pro 模擬器
-yarn iosTrue      # 運行到真實設備
-yarn iosBig       # 運行 iPad Pro 13-inch 模擬器
+pnpm ios          # 運行 iPhone 16 Pro 模擬器
+pnpm iosNew       # 運行 iPhone 17 Pro 模擬器
+pnpm iosTrue      # 運行到真實設備
+pnpm iosBig       # 運行 iPad Pro 13-inch 模擬器
 ```
 
-> **注意**：Expo CNG 會自動處理 iOS 原生代碼生成和 CocoaPods 依賴，無需手動運行 `pod install` 或 `prebuild`。首次運行 `yarn ios` 時會自動生成原生項目文件。
+> **注意**：Expo CNG 會自動處理 iOS 原生代碼生成和 CocoaPods 依賴，無需手動運行 `pod install` 或 `prebuild`。首次運行 `pnpm ios` 時會自動生成原生項目文件。
 
 #### React Native 預編譯依賴下載失敗
 
@@ -125,7 +128,7 @@ rg -n "React-Core-prebuilt \(|ReactNativeDependencies \(" ios/Podfile.lock
 然後在同一 mirror 設定下運行 iOS：
 
 ```console
-env ENTERPRISE_REPOSITORY=https://maven.aliyun.com/repository/central yarn iosNew
+env ENTERPRISE_REPOSITORY=https://maven.aliyun.com/repository/central pnpm iosNew
 ```
 
 此方案只適用於預編譯依賴探測或下載受阻的情況，無需修改 `node_modules`、Pod header search paths 或 `useFrameworks` 設定。
@@ -138,11 +141,11 @@ env ENTERPRISE_REPOSITORY=https://maven.aliyun.com/repository/central yarn iosNe
 
 | 操作         | 命令                             | 說明                                                           |
 | ------------ | -------------------------------- | -------------------------------------------------------------- |
-| 安裝依賴     | `yarn install` 或 `expo install` | 推薦使用 yarn                                                  |
+| 安裝依賴     | `pnpm install` 或 `pnpm expo install` | 推薦使用 pnpm                                             |
 | 生成原生項目 | `npx expo prebuild --clean`      | **首次運行前必須執行**，可加 `--platform ios/android` 指定平台 |
 | ------       | ------                           | ------                                                         |
-| 運行 iOS     | `yarn ios`                       | 運行 iOS 模擬器或真機                                          |
-| 運行 Android | `yarn android`                   | 運行 Android 模擬器                                            |
+| 運行 iOS     | `pnpm ios`                       | 運行 iOS 模擬器或真機                                          |
+| 運行 Android | `pnpm android`                   | 運行 Android 模擬器                                            |
 
 **重要**：
 - **首次運行前必須先執行 `npx expo prebuild --clean`** 生成原生項目文件
@@ -165,9 +168,9 @@ git clone https://github.com/UM-ARK/UM-All-Frontend.git
 2. 在項目根目錄下(`./package.json`所在的目錄)啟動 Terminal/命令行安裝依賴包
 
 ```console
-yarn install
+pnpm install
 # 或使用 expo install（自動處理依賴兼容性）
-expo install
+pnpm expo install
 ```
 
 3. 執行 `npx expo prebuild --clean` 生成 iOS/Android 原生項目
@@ -190,7 +193,7 @@ expo install
 EXPO_PUBLIC_UM_API_TOKEN=你的_UM_Open_Data_Token
 ```
 
-3. 修改環境變數後請**重新啟動 Metro**；若仍讀不到，可嘗試 `yarn start --clear` 清快取再啟動。
+3. 修改環境變數後請**重新啟動 Metro**；若仍讀不到，可嘗試 `pnpm start` 清快取再啟動。
 
 **版控與安全**
 
@@ -303,13 +306,13 @@ EXPO_PUBLIC_UM_API_TOKEN=你的_UM_Open_Data_Token
 1. 在 Android 上運行 App
 
 ```console
-yarn android
+pnpm android
 ```
 
 **說明：**
 - Expo CNG 會在首次運行時自動生成 Android 原生項目文件
 - 首次運行前需先執行 `npx expo prebuild --clean` 生成原生項目
-- 運行 `yarn android` 前不需要手動執行 `prebuild`
+- 運行 `pnpm android` 前不需要手動執行 `prebuild`
 
 #### 🍎 iOS 運行
 
@@ -318,16 +321,16 @@ yarn android
 1. 確保已安裝依賴
 
 ```console
-yarn install
+pnpm install
 ```
 
 2. 使用 Expo 運行 iOS
 
 ```console
-yarn ios          # 運行 iPhone 16 Pro 模擬器
-yarn iosNew       # 運行 iPhone 17 Pro 模擬器
-yarn iosTrue      # 運行到真實設備
-yarn iosBig       # 運行 iPad Pro 13-inch 模擬器
+pnpm ios          # 運行 iPhone 16 Pro 模擬器
+pnpm iosNew       # 運行 iPhone 17 Pro 模擬器
+pnpm iosTrue      # 運行到真實設備
+pnpm iosBig       # 運行 iPad Pro 13-inch 模擬器
 ```
 
 **說明：**
@@ -335,7 +338,7 @@ yarn iosBig       # 運行 iPad Pro 13-inch 模擬器
 - **首次運行前需先執行 `npx expo prebuild --clean` 生成原生項目**
 - **無需手動運行 `pod install`**
 - **無需手動打開 Xcode** 進行編譯
-- 如需在 Xcode 中調試，可打開 `./ios` 目錄下的項目文件（首次運行 `yarn ios` 後會生成）
+- 如需在 Xcode 中調試，可打開 `./ios` 目錄下的項目文件（首次運行 `pnpm ios` 後會生成）
 
 ##### 模擬器截圖（狀態列）
 
@@ -437,7 +440,7 @@ iOS和Android平台：打開 [偵錯事件](https://firebase.google.com/docs/ana
 1. 確保已安裝 EAS CLI
 
 ```console
-yarn global add eas-cli
+pnpm add -g eas-cli
 # 或
 npm install -g eas-cli
 ```
