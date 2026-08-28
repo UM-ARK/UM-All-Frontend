@@ -695,7 +695,7 @@ export const getFunctionArr = (t) => [
                 },
                 describe: t('進入澳大的預選表格、開課時間表的發佈頁', { ns: 'features' }),
                 key_name: '預選表格',
-                keywords: 'Pre-Enrolment Excel, Course Table, Timetable, 表格, 開課, 時間表, Excel',
+                keywords: 'Pre-Enrolment Excel, Course Table, Timetable, AddDrop, SharePoint, 預選課, 表格, 開課, 時間表, Excel',
             },
             {
                 icon_type: iconTypes.materialCommunityIcons,
