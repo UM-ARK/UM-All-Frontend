@@ -88,7 +88,7 @@ describe('pushRegistration', () => {
         });
     });
 
-    it('推送尚未完成時持續顯示提示，成功後才隱藏', () => {
+    it('狀態尚未靜默恢復時不顯示提示，確認異常後才顯示', () => {
         const baseState = {
             desiredEnabled: true,
             pendingAction: 'enable',
@@ -98,24 +98,35 @@ describe('pushRegistration', () => {
         expect(shouldShowHarborPushPrompt({
             sessionStatus: 'signedIn',
             accountKey: '2893:installation-id',
+            stateReady: false,
+            harborState: {...baseState, pendingAction: null},
+            harborDisplayStatus: 'needs_permission',
+        })).toBe(false);
+        expect(shouldShowHarborPushPrompt({
+            sessionStatus: 'signedIn',
+            accountKey: '2893:installation-id',
+            stateReady: true,
             harborState: baseState,
             harborDisplayStatus: 'needs_permission',
         })).toBe(true);
         expect(shouldShowHarborPushPrompt({
             sessionStatus: 'signedIn',
             accountKey: '2893:installation-id',
+            stateReady: true,
             harborState: {...baseState, dismissedPrompt: true},
             harborDisplayStatus: 'syncing',
         })).toBe(true);
         expect(shouldShowHarborPushPrompt({
             sessionStatus: 'signedIn',
             accountKey: '2893:installation-id',
+            stateReady: true,
             harborState: baseState,
             harborDisplayStatus: 'enabled',
         })).toBe(false);
         expect(shouldShowHarborPushPrompt({
             sessionStatus: 'signedIn',
             accountKey: '2893:installation-id',
+            stateReady: true,
             harborState: {
                 desiredEnabled: false,
                 pendingAction: null,

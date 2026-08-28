@@ -135,10 +135,11 @@ export function canAutomaticallyRetryHarborDisable(
 export function shouldShowHarborPushPrompt({
     sessionStatus,
     accountKey,
+    stateReady,
     harborState,
     harborDisplayStatus,
 }) {
-    if (sessionStatus !== 'signedIn' || !accountKey) {
+    if (sessionStatus !== 'signedIn' || !accountKey || stateReady !== true) {
         return false;
     }
     if (harborState?.desiredEnabled === true) {

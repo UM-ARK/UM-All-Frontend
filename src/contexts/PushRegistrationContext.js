@@ -153,6 +153,7 @@ export const PushRegistrationProvider = ({children}) => {
     const [registration, setRegistration] = useState(
         DEFAULT_PUSH_REGISTRATION_STATE,
     );
+    const [registrationRestored, setRegistrationRestored] = useState(false);
     const [harborState, setHarborState] = useState(
         DEFAULT_HARBOR_PUSH_STATE,
     );
@@ -289,6 +290,7 @@ export const PushRegistrationProvider = ({children}) => {
             registrationRef.current = storedRegistration;
             if (mountedRef.current) {
                 setRegistration(storedRegistration);
+                setRegistrationRestored(true);
             }
         }).catch(error => {
             logPushError('state.restore.failed', error);
@@ -1110,6 +1112,10 @@ export const PushRegistrationProvider = ({children}) => {
             shouldShowHarborPrompt: shouldShowHarborPushPrompt({
                 sessionStatus: harborSessionStatus,
                 accountKey,
+                stateReady:
+                    registrationRestored &&
+                    permission !== null &&
+                    harborCredentialPush !== null,
                 harborState,
                 harborDisplayStatus,
             }),
@@ -1126,12 +1132,14 @@ export const PushRegistrationProvider = ({children}) => {
             dismissHarborPushPrompt,
             enableHarborPush,
             harborDisplayStatus,
+            harborCredentialPush,
             harborSessionStatus,
             harborState,
             accountKey,
             pendingNotificationResponse,
             permission,
             registration,
+            registrationRestored,
             updatePermission,
         ],
     );
