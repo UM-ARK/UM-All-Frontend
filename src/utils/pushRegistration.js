@@ -10,6 +10,8 @@ import {putCurrentPushEndpoint} from './pushApi';
 const PROJECT_ID = appConfig.expo?.extra?.eas?.projectId;
 const TOKEN_REQUEST_TIMEOUT_MS = 15000;
 const DEFAULT_NOTIFICATION_LOCALE = 'zh-Hant';
+export const PUSH_SERVICE_UNAVAILABLE_ERROR_CODE =
+    'push_service_unavailable';
 const registrationInFlight = new Map();
 let schedulingOperationQueue = Promise.resolve();
 
@@ -29,6 +31,41 @@ function createPushError(code, message, retryable = false) {
     error.code = code;
     error.retryable = retryable;
     return error;
+}
+
+export function normalizePushTokenError(
+    error,
+    platform = Platform.OS,
+    platformConstants = Platform.constants,
+) {
+    const huaweiLike = ['Brand', 'Manufacturer', 'Model'].some(key =>
+        /huawei|honor|harmony/.test(
+            String(platformConstants?.[key] || '').toLowerCase(),
+        ),
+    );
+    if (
+        platform === 'android' &&
+        (
+            [
+                'E_REGISTRATION_FAILED',
+                'ERR_NOTIFICATIONS_PUSH_REGISTRATION_FAILED',
+            ].includes(error?.code) ||
+            (huaweiLike && error?.code === 'expo_push_token_timeout')
+        )
+    ) {
+        return createPushError(
+            PUSH_SERVICE_UNAVAILABLE_ERROR_CODE,
+            '此裝置目前無法使用 Google 推送服務。',
+        );
+    }
+    if (error?.code === 'expo_push_token_timeout') {
+        return error;
+    }
+    return createPushError(
+        'expo_push_token_unavailable',
+        '暫時無法取得推送 token。',
+        true,
+    );
 }
 
 function withTimeout(request, timeoutMs) {
@@ -98,10 +135,11 @@ export function canAutomaticallyRetryHarborDisable(
 export function shouldShowHarborPushPrompt({
     sessionStatus,
     accountKey,
+    stateReady,
     harborState,
     harborDisplayStatus,
 }) {
-    if (sessionStatus !== 'signedIn' || !accountKey) {
+    if (sessionStatus !== 'signedIn' || !accountKey || stateReady !== true) {
         return false;
     }
     if (harborState?.desiredEnabled === true) {
@@ -111,6 +149,45 @@ export function shouldShowHarborPushPrompt({
         !harborState?.pendingAction &&
         harborState?.dismissedPrompt !== true
     );
+}
+
+export function getHarborPushDisplayStatus({
+    harborState,
+    registration,
+    permission,
+    harborCredentialPush,
+}) {
+    if (harborState?.pendingAction === 'disable') {
+        return 'syncing';
+    }
+    if (
+        harborState?.errorCode === PUSH_SERVICE_UNAVAILABLE_ERROR_CODE ||
+        registration?.errorCode === PUSH_SERVICE_UNAVAILABLE_ERROR_CODE
+    ) {
+        return PUSH_SERVICE_UNAVAILABLE_ERROR_CODE;
+    }
+    if (!harborState?.desiredEnabled) {
+        return 'disabled';
+    }
+    if (!permission?.usable) {
+        return 'needs_permission';
+    }
+    if (harborCredentialPush !== true) {
+        return 'needs_harbor_authorization';
+    }
+    if (
+        harborState?.pendingAction ||
+        registration?.status !== 'registered'
+    ) {
+        return 'syncing';
+    }
+    if (
+        permission.status === 'provisional' ||
+        permission.allowsSound === false
+    ) {
+        return 'silent';
+    }
+    return 'enabled';
 }
 
 export function runPushSchedulingOperation(operation) {
@@ -249,7 +326,6 @@ async function performVisiblePushRegistration({
     }
 
     onStateChange?.({status: 'registering'});
-    const authorizationContext = await prepareAuthorization?.();
     await ensureAndroidPushChannel();
     if (!PROJECT_ID) {
         throw createPushError(
@@ -268,14 +344,7 @@ async function performVisiblePushRegistration({
             TOKEN_REQUEST_TIMEOUT_MS,
         );
     } catch (error) {
-        if (error?.code === 'expo_push_token_timeout') {
-            throw error;
-        }
-        throw createPushError(
-            'expo_push_token_unavailable',
-            '暫時無法取得推送 token。',
-            true,
-        );
+        throw normalizePushTokenError(error);
     }
     const expoPushToken = tokenResult?.data;
     if (!expoPushToken) {
@@ -285,6 +354,8 @@ async function performVisiblePushRegistration({
             true,
         );
     }
+
+    const authorizationContext = await prepareAuthorization?.();
 
     const endpointPayload = {
         installationId,

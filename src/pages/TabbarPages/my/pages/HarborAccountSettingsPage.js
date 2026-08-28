@@ -21,6 +21,7 @@ import {useHarborSession} from '../../../../contexts/HarborSessionContext';
 import {usePushRegistration} from '../../../../contexts/PushRegistrationContext';
 import {openLink} from '../../../../utils/browser';
 import {ARK_HARBOR} from '../../../../utils/pathMap';
+import {PUSH_SERVICE_UNAVAILABLE_ERROR_CODE} from '../../../../utils/pushRegistration';
 import {trigger} from '../../../../utils/trigger';
 
 const HarborAccountSettingsPage = ({navigation}) => {
@@ -50,10 +51,20 @@ const HarborAccountSettingsPage = ({navigation}) => {
         openLink({URL: `${ARK_HARBOR}${path}`, mode: 'fullScreen'});
     };
 
-    const showOperationError = () => {
+    const showOperationError = error => {
+        const pushServiceUnavailable =
+            error?.code === PUSH_SERVICE_UNAVAILABLE_ERROR_CODE;
         Alert.alert(
-            t('Harbor 操作失敗'),
-            t('無法完成 Harbor 操作，請稍後再試。'),
+            t(
+                pushServiceUnavailable
+                    ? '推送服務暫不可用'
+                    : 'Harbor 操作失敗',
+            ),
+            t(
+                pushServiceUnavailable
+                    ? '此 Android 裝置無法使用 ARK ALL 目前的 Google 推送服務。Harbor 帳號、站內及電郵通知不受影響。'
+                    : '無法完成 Harbor 操作，請稍後再試。',
+            ),
             [{text: t('確定'), onPress: () => trigger()}],
         );
     };
@@ -78,6 +89,12 @@ const HarborAccountSettingsPage = ({navigation}) => {
             title: t('正在同步'),
             description: t('正在安全地連接此裝置，失敗時會稍後重試。'),
         },
+        [PUSH_SERVICE_UNAVAILABLE_ERROR_CODE]: {
+            title: t('推送服務暫不可用'),
+            description: t(
+                '此 Android 裝置無法使用 ARK ALL 目前的 Google 推送服務。Harbor 帳號、站內及電郵通知不受影響。',
+            ),
+        },
         enabled: {
             title: t('已啟用'),
             description: t('通知內容預設不顯示私人訊息或回覆內容。'),
@@ -92,12 +109,14 @@ const HarborAccountSettingsPage = ({navigation}) => {
     const pushActionLabel =
         harborDisplayStatus === 'enabled' || harborDisplayStatus === 'silent'
             ? t('關閉')
-            : harborDisplayStatus === 'syncing'
-                ? t('重試')
-                : harborDisplayStatus === 'needs_permission' &&
-                    permission?.canAskAgain === false
-                    ? t('檢查並繼續')
-                    : t('開啟');
+            : harborDisplayStatus === PUSH_SERVICE_UNAVAILABLE_ERROR_CODE
+                ? t('重新檢查')
+                : harborDisplayStatus === 'syncing'
+                    ? t('重試')
+                    : harborDisplayStatus === 'needs_permission' &&
+                        permission?.canAskAgain === false
+                        ? t('檢查並繼續')
+                        : t('開啟');
 
     const handlePushAction = async () => {
         if (pushActionInFlightRef.current) {
@@ -128,7 +147,7 @@ const HarborAccountSettingsPage = ({navigation}) => {
                 await enableHarborPush();
             }
         } catch (error) {
-            showOperationError();
+            showOperationError(error);
         } finally {
             pushActionInFlightRef.current = false;
             setIsPushActionLoading(false);
@@ -147,7 +166,7 @@ const HarborAccountSettingsPage = ({navigation}) => {
                 routeName: 'HarborAccountSettings',
             });
         } catch (error) {
-            showOperationError();
+            showOperationError(error);
         }
     };
 

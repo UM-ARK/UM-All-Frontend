@@ -50,6 +50,10 @@ package-lock.json
 # Yarn cache files
 .yarn/cache
 
+# pnpm
+.pnpm-store/
+.pnpm-debug.log*
+
 # fastlane
 #
 # It is recommended to not store the screenshots in the git repo. Instead, use fastlane to re-generate the

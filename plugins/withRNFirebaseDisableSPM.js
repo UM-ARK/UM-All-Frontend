@@ -1,4 +1,4 @@
-const { withPodfile } = require('@expo/config-plugins');
+const { withPodfile } = require('expo/config-plugins');
 
 module.exports = function withRNFirebaseDisableSPM(config) {
     return withPodfile(config, mod => {

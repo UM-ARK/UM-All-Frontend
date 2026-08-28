@@ -10,13 +10,13 @@ alwaysApply: true
 ## 絕對禁止（未經使用者明確同意）
 
 - ❌ 直接修改 `node_modules/**` 內任何檔案
-- ❌ 新增 / 更新 / 提交 patch（如 `patch-package`、`patches/`、yarn patch 產物）
+- ❌ 新增 / 更新 / 提交 patch（如 `patch-package`、`patches/`、pnpm patch 產物）
 - ❌ 為「先改 node_modules 再打 patch」而執行相關命令
 
 ```bash
 # ❌ 禁止自行執行
 npx patch-package some-package
-yarn patch some-package
+pnpm patch some-package
 # 直接編輯 node_modules/...
 ```
 
@@ -40,4 +40,4 @@ yarn patch some-package
 ## 原則
 
 > **可復現性優先於本機捷徑。**  
-> 任何無法透過 `yarn install` + prebuild 還原的改動，都必須先問過使用者。
+> 任何無法透過 `pnpm install` + prebuild 還原的改動，都必須先問過使用者。

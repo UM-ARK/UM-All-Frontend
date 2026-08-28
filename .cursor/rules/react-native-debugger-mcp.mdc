@@ -16,7 +16,7 @@ alwaysApply: false
 
 ## 使用前提
 
-- Metro 開發伺服器正在執行 (`yarn start`)
+- Metro 開發伺服器正在執行 (`pnpm start`)
 - React Native 應用程式已啟動並連線到 Metro
 
 ## 使用方法

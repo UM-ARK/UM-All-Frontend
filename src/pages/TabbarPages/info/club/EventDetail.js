@@ -135,7 +135,7 @@ const EventDetail = (props) => {
             if (json.message === 'success') {
                 let clubData = json.content;
                 clubData.logo_url = BASE_HOST + clubData.logo_url;
-                updateState({ clubData });
+                return clubData;
             }
         } catch (err) {
             console.log('err', err);
@@ -155,7 +155,7 @@ const EventDetail = (props) => {
                     let addHostArr = eventData.relate_image_url.map((itm) => BASE_HOST + itm);
                     eventData.relate_image_url = addHostArr;
                 }
-                getClubData(eventData.created_by);
+                const clubData = await getClubData(eventData.created_by);
                 updateState({
                     coverImgUrl: eventData.cover_image_url,
                     title: eventData.title,
@@ -166,6 +166,7 @@ const EventDetail = (props) => {
                     imageUrls: eventData.cover_image_url,
                     relateImgUrl: eventData.relate_image_url && eventData.relate_image_url.length > 0 ? eventData.relate_image_url : [],
                     location: eventData.location,
+                    clubData,
                     eventData,
                     isFollow: eventData.isFollow,
                     isLoading: false,
@@ -303,7 +304,7 @@ const EventDetail = (props) => {
                         ...uiStyle.defaultText,
                         color: black.third,
                     }}>
-                        {moment(state.startTimeStamp).format('YYYY/MM/DD, HH:mm')} - {moment(state.finishTimeStamp).format('HH:mm')}
+                        {moment(state.startTimeStamp).format('YYYY/MM/DD, HH:mm')} - {moment(state.finishTimeStamp).format('YYYY/MM/DD, HH:mm')}
                     </Text>
                 </View>
 

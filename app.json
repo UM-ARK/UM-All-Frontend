@@ -3,7 +3,7 @@
     "name": "ARK ALL",
     "slug": "arkall",
     "scheme": "one.umall",
-    "version": "26.9.1",
+    "version": "26.9.2",
     "icon": "./src/static/img/logo.png",
     "userInterfaceStyle": "automatic",
     "ios": {
@@ -13,7 +13,7 @@
       "googleServicesFile": "./GoogleService-Info.plist",
       "bundleIdentifier": "one.umall",
       "appleTeamId": "UVSHNJYJWU",
-      "buildNumber": "26.9.1",
+      "buildNumber": "26.9.2",
       "associatedDomains": [
         "applinks:umall.one",
         "webcredentials:umall.one"
@@ -28,7 +28,7 @@
       "userInterfaceStyle": "automatic",
       "googleServicesFile": "./google-services.json",
       "package": "one.umall",
-      "versionCode": 92,
+      "versionCode": 93,
       "adaptiveIcon": {
         "foregroundImage": "./src/static/img/ic_launcher_foreground.png",
         "backgroundColor": "#E6AB52"

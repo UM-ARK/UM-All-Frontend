@@ -571,6 +571,33 @@ describe('Nested Replies 資料模型', () => {
         expect(collapsed[1].__harborNestedTogglePost).toBeUndefined();
     });
 
+    it('只有一則樓中樓回覆時不受評論總數限制並預設展開', () => {
+        const singleReplyPosts = [
+            {
+                id: 2,
+                post_number: 2,
+                direct_reply_count: 1,
+                total_descendant_count: 1,
+                children: [
+                    {
+                        id: 3,
+                        post_number: 3,
+                        children: [],
+                    },
+                ],
+            },
+        ];
+
+        expect(getNestedReplyPreviewLimit(11, 1)).toBe(1);
+        expect(
+            flattenNestedPosts(
+                singleReplyPosts,
+                new Map(),
+                getNestedReplyPreviewLimit(11),
+            ).map(post => post.id),
+        ).toEqual([2, 3]);
+    });
+
     it('可在巢狀子樹中更新指定貼文而不改動其他分支', () => {
         const updated = updateNestedPostTree(posts, 3, post => ({
             ...post,

@@ -9,23 +9,24 @@ alwaysApply: true
 - **名稱**: ARK ALL (澳門大學學生應用)
 - **版本**: 26.5.0
 - **平台**: iOS, Android
+- **套件管理器**: pnpm
 
 ## 建構命令
 
 ```bash
-yarn install          # 安裝相依 (Node ≥18)
-yarn ios              # iPhone 16 Pro 模擬器
-yarn iosNew           # iPhone 17 Pro 模擬器
-yarn iosBig           # iPad Pro 模擬器
-yarn iosTrue          # 實體裝置
-yarn android          # Android (API 31/33)
-yarn lint             # ESLint 檢查
-yarn start            # 啟動 Metro
+pnpm install          # 安裝相依 (Node ≥18)
+pnpm ios              # iPhone 16 Pro 模擬器
+pnpm iosNew           # iPhone 17 Pro 模擬器
+pnpm iosBig           # iPad Pro 模擬器
+pnpm iosTrue          # 實體裝置
+pnpm android          # Android (API 31/33)
+pnpm lint             # ESLint 檢查
+pnpm start            # 啟動 Metro
 ```
 
 ## 開發工作流程
 
-- **熱重載**: Metro 自動熱重載 JS 變更，無需重新執行 `yarn ios`
+- **熱重載**: Metro 自動熱重載 JS 變更，無需重新執行 `pnpm ios`
 - **僅需重啟 Metro**: 遇到 Metro 錯誤或需清理快取時
 - **僅需重新建構**: 新增/刪除原生相依、修改 `app.json` 或 `package.json`
 

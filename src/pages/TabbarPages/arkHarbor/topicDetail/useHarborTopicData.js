@@ -44,11 +44,9 @@ const TOPIC_CACHE_STALE_MS = 10 * 60 * 1000;
 setHarborQueryNamespaceLimit(TOPIC_CACHE_NAMESPACE, 20);
 
 const loadNestedReplyPreviews = async ({signal, topic, topicId}) => {
-    const previewLimit = getNestedReplyPreviewLimit(topic?.posts_count);
     const topicPosts = topic?.post_stream?.posts;
     if (
         !topic?.is_nested_view ||
-        previewLimit <= 0 ||
         !Array.isArray(topicPosts)
     ) {
         return topic;
@@ -56,11 +54,16 @@ const loadNestedReplyPreviews = async ({signal, topic, topicId}) => {
 
     const previewRoots = topicPosts.filter(post => {
         const replyCount = getNestedReplyCount(post);
+        const postPreviewLimit = getNestedReplyPreviewLimit(
+            topic?.posts_count,
+            replyCount,
+        );
         return (
             Number(post?.post_number) > 1 &&
-            replyCount > 0 &&
+            postPreviewLimit > 0 &&
             (!Array.isArray(post.children) ||
-                post.children.length < Math.min(previewLimit, replyCount))
+                post.children.length <
+                    Math.min(postPreviewLimit, replyCount))
         );
     });
     if (previewRoots.length === 0) {
