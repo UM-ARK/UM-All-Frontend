@@ -467,11 +467,14 @@ const findNestedPostWithMissingChildren = (post, depth = 0) => {
         : null;
 };
 
-const getNestedReplyPreviewLimit = postsCount => {
+const getNestedReplyPreviewLimit = (postsCount, nestedReplyCount = 0) => {
     const commentCount = Math.max(Number(postsCount || 1) - 1, 0);
-    return commentCount < NESTED_REPLY_PREVIEW_COMMENT_THRESHOLD
-        ? NESTED_REPLY_PREVIEW_SIZE
-        : 0;
+    return Math.max(
+        Number(nestedReplyCount) === 1 ? 1 : 0,
+        commentCount < NESTED_REPLY_PREVIEW_COMMENT_THRESHOLD
+            ? NESTED_REPLY_PREVIEW_SIZE
+            : 0,
+    );
 };
 
 const collectNestedPosts = posts => {
@@ -535,7 +538,10 @@ const flattenNestedPosts = (
             Number(post.post_number) === 1
                 ? 0
                 : Math.min(
-                    Math.max(Number(defaultReplyLimit || 0), 0),
+                    Math.max(
+                        Number(defaultReplyLimit || 0),
+                        nestedReplyCount === 1 ? 1 : 0,
+                    ),
                     nestedReplyCount,
                 );
         const requestedReplyLimit =
