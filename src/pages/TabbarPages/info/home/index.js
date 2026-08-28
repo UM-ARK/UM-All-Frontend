@@ -12,6 +12,7 @@ import {
     FlatList,
     useWindowDimensions,
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 
 // 本地工具
 import Text from '../../../../components/AppText';
@@ -200,6 +201,7 @@ const HomeScreen = ({ navigation }) => {
     const appStateListener = useRef(null);
     const bottomSheetRef = useRef(null);
     const refreshingRef = useRef(false);
+    const upcomingCourseRequestRef = useRef(0);
 
     // 生命週期
     useEffect(() => {
@@ -209,8 +211,6 @@ const HomeScreen = ({ navigation }) => {
         }, 1000);
 
         appStateListener.current = AppState.addEventListener('change', handleAppStateChange);
-
-        getUpcomingCourse();
 
         return () => {
             // componentWillUnmount
@@ -296,6 +296,40 @@ const HomeScreen = ({ navigation }) => {
         }
     };
 
+    /**
+     * 從緩存讀取一個星期的列表，跟現在的時間作比較，找到即將到來的課程。
+     */
+    const getUpcomingCourse = useCallback(async () => {
+        const requestId = ++upcomingCourseRequestRef.current;
+
+        try {
+            const now = moment(new Date());
+            const s_allCourseAllTime = await getLocalStorage(
+                getCourseWeekPlanStorageKey(programmeLevel),
+            );
+            const curTime = moment().format('HH:mm');
+            const curDay = now.format('ddd').toUpperCase();
+
+            const todayCourses = lodash.get(s_allCourseAllTime, curDay, []);
+            const upComing = todayCourses.filter(course => moment(course['Time From'], 'HH:mm').isAfter(moment(curTime, 'HH:mm')));
+            if (requestId === upcomingCourseRequestRef.current) {
+                setUpcomingCourse(upComing[0]);
+            }
+        } catch (error) {
+            console.log('error', error);
+        }
+    }, [programmeLevel]);
+
+    useFocusEffect(
+        useCallback(() => {
+            getUpcomingCourse();
+
+            return () => {
+                upcomingCourseRequestRef.current += 1;
+            };
+        }, [getUpcomingCourse]),
+    );
+
     // 刷新主頁時展示隨機Toast
     const onRefresh = useCallback(() => {
         setCalRefreshKey((prev) => prev + 1);
@@ -310,7 +344,7 @@ const HomeScreen = ({ navigation }) => {
         // });
 
         getUpcomingCourse();
-    }, []);
+    }, [getUpcomingCourse]);
 
     const handleRefresh = async () => {
         if (refreshingRef.current) {
@@ -330,26 +364,6 @@ const HomeScreen = ({ navigation }) => {
         } finally {
             refreshingRef.current = false;
             setIsRefreshing(false);
-        }
-    };
-
-    /**
-     * 從緩存讀取一個星期的列表，跟現在的時間作比較，找到即將到來的課程。
-     */
-    const getUpcomingCourse = async () => {
-        try {
-            const now = moment(new Date());
-            const s_allCourseAllTime = await getLocalStorage(
-                getCourseWeekPlanStorageKey(programmeLevel),
-            );
-            const curTime = moment().format('HH:mm');
-            const curDay = now.format('ddd').toUpperCase();
-
-            const todayCourses = lodash.get(s_allCourseAllTime, curDay, []);
-            const upComing = todayCourses.filter(course => moment(course['Time From'], 'HH:mm').isAfter(moment(curTime, 'HH:mm')));
-            setUpcomingCourse(upComing[0]);
-        } catch (error) {
-            console.log('error', error);
         }
     };
 
@@ -532,7 +546,7 @@ const HomeScreen = ({ navigation }) => {
                         }}>
                         {upcomingCourse ? (
                             <View style={{
-                                flexDirection: 'row', flex: 1,
+                                flexDirection: 'column', flex: 1,
                                 alignItems: 'center', justifyContent: 'center',
                                 gap: scale(3),
                                 backgroundColor: `${themeColor}15`,
@@ -540,9 +554,18 @@ const HomeScreen = ({ navigation }) => {
                                 paddingVertical: verticalScale(6),
                                 borderRadius: scale(10),
                             }}>
-                                <Text style={{ ...uiStyle.defaultText, color: black.main, opacity: 0.7, fontWeight: 'bold' }}>{`⏰${t('下節課：', { ns: 'timetable' })}`}</Text>
-                                <Text style={{ ...uiStyle.defaultText, color: black.main, opacity: 0.7 }}>{upcomingCourse['Course Code']}</Text>
-                                <Text style={{ ...uiStyle.defaultText, color: black.main, opacity: 0.7 }}>{upcomingCourse['Time From']}</Text>
+                                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: scale(3) }}>
+                                    <Text style={{ ...uiStyle.defaultText, color: black.main, opacity: 0.7, fontWeight: 'bold' }}>{`⏰${t('下節課：', { ns: 'timetable' })}`}</Text>
+                                    <Text style={{ ...uiStyle.defaultText, color: black.main, opacity: 0.7 }}>{upcomingCourse['Course Code']}</Text>
+                                    <Text style={{ ...uiStyle.defaultText, color: black.main, opacity: 0.7 }}>{upcomingCourse['Time From']}</Text>
+                                </View>
+                                {upcomingCourse.Classroom?.trim?.() ? (
+                                    <Text
+                                        style={{ ...uiStyle.defaultText, color: black.main, opacity: 0.7 }}
+                                        numberOfLines={1}>
+                                        {`📍${upcomingCourse.Classroom.trim()}`}
+                                    </Text>
+                                ) : null}
                             </View>
                         ) : (
                             <View style={{

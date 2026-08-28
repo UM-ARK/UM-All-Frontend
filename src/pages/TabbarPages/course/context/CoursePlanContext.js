@@ -66,6 +66,7 @@ const buildWeekPlan = planSlots =>
                     'Course Code': courseTime['Course Code'],
                     Section: courseTime.Section,
                     'Time From': courseTime['Time From'],
+                    Classroom: courseTime.Classroom,
                     // 課程 JSON 並無 color 欄位，此處實際寫入 undefined。
                     // 首頁讀取端已依賴這個格式，補上顏色會改變既有儲存結構，故照原樣保留。
                     color: courseTime.color,
