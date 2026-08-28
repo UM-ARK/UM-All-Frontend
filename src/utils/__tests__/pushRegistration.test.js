@@ -50,8 +50,11 @@ import {
     canAutomaticallyRetryPushRegistration,
     ensureVisiblePushRegistration,
     evaluateVisiblePushPermission,
+    getHarborPushDisplayStatus,
     getPushNotificationLocale,
     isPushAuthorizationCurrent,
+    normalizePushTokenError,
+    PUSH_SERVICE_UNAVAILABLE_ERROR_CODE,
     shouldShowHarborPushPrompt,
 } from '../pushRegistration';
 
@@ -122,6 +125,48 @@ describe('pushRegistration', () => {
         })).toBe(false);
     });
 
+    it('Android 無法註冊 FCM 時標記推送服務不可用且不自動重試', () => {
+        expect(normalizePushTokenError({
+            code: 'E_REGISTRATION_FAILED',
+        }, 'android')).toMatchObject({
+            code: PUSH_SERVICE_UNAVAILABLE_ERROR_CODE,
+            retryable: false,
+        });
+        expect(normalizePushTokenError({
+            code: 'ERR_NOTIFICATIONS_NETWORK_ERROR',
+        }, 'android')).toMatchObject({
+            code: 'expo_push_token_unavailable',
+            retryable: true,
+        });
+        expect(normalizePushTokenError({
+            code: 'expo_push_token_timeout',
+            retryable: true,
+        }, 'android', {Brand: 'HUAWEI'})).toMatchObject({
+            code: PUSH_SERVICE_UNAVAILABLE_ERROR_CODE,
+            retryable: false,
+        });
+        expect(normalizePushTokenError({
+            code: 'expo_push_token_timeout',
+            retryable: true,
+        }, 'android', {Brand: 'Google'})).toMatchObject({
+            code: 'expo_push_token_timeout',
+            retryable: true,
+        });
+    });
+
+    it('推送服務不可用時顯示明確狀態，不顯示為一般未開啟', () => {
+        expect(getHarborPushDisplayStatus({
+            harborState: {
+                desiredEnabled: false,
+                pendingAction: null,
+                errorCode: PUSH_SERVICE_UNAVAILABLE_ERROR_CODE,
+            },
+            registration: {status: 'idle'},
+            permission: {usable: true},
+            harborCredentialPush: true,
+        })).toBe(PUSH_SERVICE_UNAVAILABLE_ERROR_CODE);
+    });
+
     it('已授權時按正確順序準備身份及註冊 endpoint', async () => {
         const prepareAuthorization = jest.fn(async () => {});
 
@@ -146,6 +191,32 @@ describe('pushRegistration', () => {
             buildNumber: '90',
             notificationLocale: 'zh-Hant',
         });
+    });
+
+    it('Android FCM 不可用時不啟動 Harbor 重新授權', async () => {
+        mockReactNative.Platform.OS = 'android';
+        mockGetPermissionsAsync.mockResolvedValue({
+            status: 'granted',
+            granted: true,
+        });
+        mockNotifications.getNotificationChannelAsync.mockResolvedValue({
+            importance: 3,
+            sound: 'default',
+        });
+        mockGetExpoPushTokenAsync.mockRejectedValue({
+            code: 'E_REGISTRATION_FAILED',
+        });
+        const prepareAuthorization = jest.fn();
+
+        await expect(ensureVisiblePushRegistration({
+            requestPermission: false,
+            prepareAuthorization,
+        })).rejects.toMatchObject({
+            code: PUSH_SERVICE_UNAVAILABLE_ERROR_CODE,
+            retryable: false,
+        });
+        expect(prepareAuthorization).not.toHaveBeenCalled();
+        expect(mockPushApi.putCurrentPushEndpoint).not.toHaveBeenCalled();
     });
 
     it('把 App 語言映射成後端通知語言', async () => {

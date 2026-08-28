@@ -30,8 +30,10 @@ import {
     canAutomaticallyRetryHarborDisable,
     canAutomaticallyRetryPushRegistration,
     ensureVisiblePushRegistration,
+    getHarborPushDisplayStatus,
     getPushNotificationLocale,
     isPushAuthorizationCurrent,
+    PUSH_SERVICE_UNAVAILABLE_ERROR_CODE,
     readVisiblePushPermission,
     runPushSchedulingOperation,
     shouldShowHarborPushPrompt,
@@ -539,6 +541,8 @@ export const PushRegistrationProvider = ({children}) => {
                 }
                 const permissionRequired =
                     error?.code === 'push_permission_required';
+                const pushServiceUnavailable =
+                    error?.code === PUSH_SERVICE_UNAVAILABLE_ERROR_CODE;
                 if (!permissionRequired && error?.retryable === true) {
                     await updateRegistration(
                         nextRetryState(registrationRef.current, error),
@@ -552,8 +556,11 @@ export const PushRegistrationProvider = ({children}) => {
                     });
                 }
                 await updateHarborState({
-                    desiredEnabled: true,
-                    pendingAction: 'enable',
+                    desiredEnabled: !pushServiceUnavailable,
+                    pendingAction: pushServiceUnavailable ? null : 'enable',
+                    ...(pushServiceUnavailable
+                        ? {dismissedPrompt: true}
+                        : {}),
                     errorCode: error?.code || 'push_registration_failed',
                 }, operationAccountKey);
                 logPushError('harbor.registration.failed', error);
@@ -1053,39 +1060,20 @@ export const PushRegistrationProvider = ({children}) => {
         Notifications.clearLastNotificationResponseAsync().catch(() => {});
     }, []);
 
-    const harborDisplayStatus = useMemo(() => {
-        if (harborState.pendingAction === 'disable') {
-            return 'syncing';
-        }
-        if (!harborState.desiredEnabled) {
-            return 'disabled';
-        }
-        if (!permission?.usable) {
-            return 'needs_permission';
-        }
-        if (harborCredentialPush !== true) {
-            return 'needs_harbor_authorization';
-        }
-        if (
-            harborState.pendingAction ||
-            registration.status !== 'registered'
-        ) {
-            return 'syncing';
-        }
-        if (
-            permission.status === 'provisional' ||
-            permission.allowsSound === false
-        ) {
-            return 'silent';
-        }
-        return 'enabled';
-    }, [
-        harborCredentialPush,
-        harborState.desiredEnabled,
-        harborState.pendingAction,
-        permission,
-        registration.status,
-    ]);
+    const harborDisplayStatus = useMemo(
+        () => getHarborPushDisplayStatus({
+            harborState,
+            registration,
+            permission,
+            harborCredentialPush,
+        }),
+        [
+            harborCredentialPush,
+            harborState,
+            permission,
+            registration,
+        ],
+    );
 
     useEffect(() => {
         if (!permission) {
