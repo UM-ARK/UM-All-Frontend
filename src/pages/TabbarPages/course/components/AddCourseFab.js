@@ -4,9 +4,9 @@ import Ionicons from "@react-native-vector-icons/ionicons";
 import { scale, verticalScale } from 'react-native-size-matters';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import {
+    GlassView,
     isLiquidGlassSupported,
-    LiquidGlassView,
-} from '@callstack/liquid-glass';
+} from '../../../../utils/glassEffect';
 import Animated, {
     useAnimatedStyle,
     useSharedValue,
@@ -243,21 +243,16 @@ const AddCourseFab = ({
                         accessibilityRole="button"
                         accessibilityLabel={t('加課', { ns: 'timetable' })}
                         hitSlop={scale(8)}>
-                        <LiquidGlassView
+                        <GlassView
                             key={`add-${glassKey}`}
-                            interactive
-                            hover={
-                                isLiquidGlassSupported
-                                    ? { effect: 'highlight' }
-                                    : null
-                            }
+                            isInteractive
                             style={styles.pill}>
                             <Ionicons
                                 name="add"
                                 size={scale(24)}
                                 color={themeColor}
                             />
-                        </LiquidGlassView>
+                        </GlassView>
                     </TouchableScale>
 
                     <TouchableScale
@@ -268,21 +263,16 @@ const AddCourseFab = ({
                         accessibilityRole="button"
                         accessibilityLabel={t('搵課')}
                         hitSlop={scale(8)}>
-                        <LiquidGlassView
+                        <GlassView
                             key={`search-${glassKey}`}
-                            interactive
-                            hover={
-                                isLiquidGlassSupported
-                                    ? { effect: 'highlight' }
-                                    : null
-                            }
+                            isInteractive
                             style={styles.pill}>
                             <Ionicons
                                 name="library-outline"
                                 size={scale(21)}
                                 color={themeColor}
                             />
-                        </LiquidGlassView>
+                        </GlassView>
                     </TouchableScale>
                 </Animated.View>
             </GestureDetector>

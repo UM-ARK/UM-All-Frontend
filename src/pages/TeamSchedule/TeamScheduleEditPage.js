@@ -10,7 +10,7 @@ import {
     View,
 } from 'react-native';
 
-import {isLiquidGlassSupported} from '@callstack/liquid-glass';
+import {isLiquidGlassSupported} from '../../utils/glassEffect';
 import {useHeaderHeight} from '@react-navigation/elements';
 import {usePreventRemove} from '@react-navigation/native';
 import moment from 'moment-timezone';

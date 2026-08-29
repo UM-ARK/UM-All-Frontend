@@ -3,9 +3,9 @@ import { View } from 'react-native';
 import Ionicons from "@react-native-vector-icons/ionicons";
 import { scale, verticalScale } from 'react-native-size-matters';
 import {
+    GlassView,
     isLiquidGlassSupported,
-    LiquidGlassView,
-} from '@callstack/liquid-glass';
+} from '../../../../utils/glassEffect';
 import { t } from 'i18next';
 
 import Text from '../../../../components/AppText';
@@ -45,9 +45,8 @@ const PlanCapsule = ({ bottom, onPress }) => {
                     trigger();
                     onPress?.();
                 }}>
-                <LiquidGlassView
-                    interactive
-                    hover={isLiquidGlassSupported ? { effect: 'highlight' } : null}
+                <GlassView
+                    isInteractive
                     style={{
                         flexDirection: 'row',
                         alignItems: 'center',
@@ -97,7 +96,7 @@ const PlanCapsule = ({ bottom, onPress }) => {
                             {`· ${t('衝突數', { ns: 'timetable', num: conflictCount })}`}
                         </Text>
                     ) : null}
-                </LiquidGlassView>
+                </GlassView>
             </TouchableScale>
         </View>
     );

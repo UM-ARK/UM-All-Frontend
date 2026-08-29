@@ -1,6 +1,6 @@
 import React, {useState, useEffect, useCallback, useMemo, useRef, useLayoutEffect} from 'react';
 import {AppState, Image, Platform, Pressable, RefreshControl, ScrollView, StyleSheet, View} from 'react-native';
-import {isLiquidGlassSupported} from '@callstack/liquid-glass';
+import {isLiquidGlassSupported} from '../../utils/glassEffect';
 import {useHeaderHeight} from '@react-navigation/elements';
 import {useIsFocused} from '@react-navigation/native';
 import {useTranslation} from 'react-i18next';

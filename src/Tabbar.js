@@ -21,7 +21,7 @@ import MyScreen from './pages/TabbarPages/my';
 import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import { trigger } from './utils/trigger';
 import { uiStyle } from './components/ThemeContext';
-import { isLiquidGlassSupported } from '@callstack/liquid-glass';
+import { isLiquidGlassSupported } from './utils/glassEffect';
 import { useHarborSession } from './contexts/HarborSessionContext';
 import { usePushRegistration } from './contexts/PushRegistrationContext';
 import { fetchHarborForumBadgeSnapshot } from './utils/harbor/harborApi';

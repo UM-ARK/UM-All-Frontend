@@ -18,7 +18,7 @@ import {
 
 import * as Clipboard from 'expo-clipboard';
 import { FlashList } from '@shopify/flash-list';
-import { isLiquidGlassSupported } from '@callstack/liquid-glass';
+import { isLiquidGlassSupported } from '../../../utils/glassEffect';
 import { useHeaderHeight } from '@react-navigation/elements';
 import Toast from 'react-native-simple-toast';
 import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";

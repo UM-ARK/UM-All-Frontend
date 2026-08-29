@@ -6,7 +6,7 @@ import {
 } from 'react';
 
 import { useFocusEffect } from '@react-navigation/native';
-import { isLiquidGlassSupported } from '@callstack/liquid-glass';
+import { isLiquidGlassSupported } from '../../../../utils/glassEffect';
 import Toast from 'react-native-simple-toast';
 import { verticalScale } from 'react-native-size-matters';
 

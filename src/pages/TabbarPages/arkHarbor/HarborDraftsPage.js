@@ -14,7 +14,7 @@ import {
     View,
 } from 'react-native';
 
-import {isLiquidGlassSupported} from '@callstack/liquid-glass';
+import {isLiquidGlassSupported} from '../../../utils/glassEffect';
 import {HeaderHeightContext} from '@react-navigation/elements';
 import {FlashList} from '@shopify/flash-list';
 import {useFocusEffect} from '@react-navigation/native';

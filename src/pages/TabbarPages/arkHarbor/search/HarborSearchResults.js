@@ -9,7 +9,7 @@ import {
     View,
 } from 'react-native';
 
-import {isLiquidGlassSupported} from '@callstack/liquid-glass';
+import {isLiquidGlassSupported} from '../../../../utils/glassEffect';
 import {FlashList} from '@shopify/flash-list';
 import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import {scale, verticalScale} from 'react-native-size-matters';

@@ -9,7 +9,7 @@ import {
 
 import { useHeaderHeight } from '@react-navigation/elements';
 import { useFocusEffect } from '@react-navigation/native';
-import { isLiquidGlassSupported } from '@callstack/liquid-glass';
+import { isLiquidGlassSupported } from '../../../../../utils/glassEffect';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { scale, verticalScale } from 'react-native-size-matters';
 import Ionicons from "@react-native-vector-icons/ionicons";

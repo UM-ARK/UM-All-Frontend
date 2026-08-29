@@ -11,7 +11,7 @@ import { ThemeContext } from './ThemeContext';
 import { trigger } from '../utils/trigger';
 import Ionicons from "@react-native-vector-icons/ionicons";
 import { scale, verticalScale } from 'react-native-size-matters';
-import { isLiquidGlassSupported, LiquidGlassView } from '@callstack/liquid-glass';
+import { GlassView, isLiquidGlassSupported } from '../utils/glassEffect';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -156,8 +156,8 @@ const ScrollToTopButton = ({ visible = true, onScrollToTop, virtualizedListRef, 
                 ]}
             >
                 <Pressable onPress={handleScrollToTop}>
-                    <LiquidGlassView
-                        interactive={true}
+                    <GlassView
+                        isInteractive={true}
                         style={{
                             backgroundColor: isLiquidGlassSupported ? null : theme.white,
                             borderRadius: scale(50),
@@ -168,7 +168,7 @@ const ScrollToTopButton = ({ visible = true, onScrollToTop, virtualizedListRef, 
                         }}
                     >
                         <Ionicons name="arrow-up" size={scale(24)} color={theme.themeColor} />
-                    </LiquidGlassView>
+                    </GlassView>
                 </Pressable>
             </Animated.View>
         </GestureDetector>

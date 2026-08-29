@@ -9,7 +9,7 @@ import {
 import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 import { MenuView } from '@react-native-menu/menu';
 import { useHeaderHeight } from '@react-navigation/elements';
-import { isLiquidGlassSupported } from '@callstack/liquid-glass';
+import { isLiquidGlassSupported } from '../../../utils/glassEffect';
 import moment from 'moment';
 import { useTranslation } from 'react-i18next';
 import { scale, verticalScale } from 'react-native-size-matters';

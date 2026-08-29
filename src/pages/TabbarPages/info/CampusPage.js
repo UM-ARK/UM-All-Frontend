@@ -11,9 +11,9 @@ import { scale, verticalScale } from 'react-native-size-matters';
 import Ionicons from "@react-native-vector-icons/ionicons";
 import { useTranslation } from 'react-i18next';
 import {
+    GlassView,
     isLiquidGlassSupported,
-    LiquidGlassView,
-} from '@callstack/liquid-glass';
+} from '../../../utils/glassEffect';
 
 import Text from '../../../components/AppText';
 import { useTheme, uiStyle } from '../../../components/ThemeContext';
@@ -283,11 +283,8 @@ const CampusPage = () => {
                 onLayout={onHeaderLayout}
                 pointerEvents={isHeaderInteractive ? 'auto' : 'none'}
                 style={[styles.floatingHeader, floatingHeaderStyle]}>
-                <LiquidGlassView
-                    interactive={true}
-                    hover={
-                        isLiquidGlassSupported ? { effect: 'highlight' } : null
-                    }
+                <GlassView
+                    isInteractive={true}
                     style={[
                         styles.headerSurface,
                         {
@@ -325,12 +322,9 @@ const CampusPage = () => {
                             style={styles.sourceIcon}
                         />
                     </Pressable>
-                </LiquidGlassView>
-                <LiquidGlassView
-                    interactive={true}
-                    hover={
-                        isLiquidGlassSupported ? { effect: 'highlight' } : null
-                    }
+                </GlassView>
+                <GlassView
+                    isInteractive={true}
                     style={[
                         styles.scrollTopSurface,
                         {
@@ -355,7 +349,7 @@ const CampusPage = () => {
                             color={themeColor}
                         />
                     </Pressable>
-                </LiquidGlassView>
+                </GlassView>
             </Animated.View>
         </View>
     );

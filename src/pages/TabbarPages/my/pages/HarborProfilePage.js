@@ -7,7 +7,7 @@ import {
     View,
 } from 'react-native';
 
-import { isLiquidGlassSupported } from '@callstack/liquid-glass';
+import { isLiquidGlassSupported } from '../../../../utils/glassEffect';
 import { useHeaderHeight } from '@react-navigation/elements';
 import { MenuView } from '@react-native-menu/menu';
 import { Image } from 'expo-image';
