@@ -346,7 +346,7 @@ const HarborDirectMessageSettingsModal = ({onClose, username, visible}) => {
                                     disabled={isSaving}
                                     ios_backgroundColor={theme.disabled}
                                     onValueChange={value => {
-                                        trigger();
+                                        trigger(value ? 'toggleOn' : 'toggleOff');
                                         setPendingPreference(value);
                                         setSaveError(false);
                                     }}

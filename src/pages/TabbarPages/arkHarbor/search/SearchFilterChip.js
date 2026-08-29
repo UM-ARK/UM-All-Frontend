@@ -18,7 +18,7 @@ const SearchFilterChip = memo(({label, selected, onPress}) => {
             accessibilityRole="button"
             accessibilityState={{selected}}
             onPress={() => {
-                trigger();
+                trigger('selection');
                 onPress();
             }}
             style={({pressed}) => [

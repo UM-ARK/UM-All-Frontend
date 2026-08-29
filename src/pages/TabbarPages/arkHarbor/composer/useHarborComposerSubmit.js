@@ -275,6 +275,7 @@ export function useHarborComposerSubmit({
             const composerResult = getHarborComposerResult(result);
             if (composerResult.pending) {
                 await onPublished();
+                trigger('success');
                 Toast.show(
                     t('內容已送交審核，通過後會顯示在 Harbor。'),
                 );
@@ -315,6 +316,7 @@ export function useHarborComposerSubmit({
                 reloadLists: true,
             });
             await onPublished();
+            trigger('success');
             Toast.show(
                 isEdit
                     ? t('貼文已更新。')
@@ -349,6 +351,7 @@ export function useHarborComposerSubmit({
                     reloadLists: true,
                 });
                 await onPublished();
+                trigger('warning');
                 Toast.show(
                     t('貼文正文已更新，但部分話題資料更新失敗，請重新載入確認。'),
                 );
@@ -356,6 +359,7 @@ export function useHarborComposerSubmit({
                 return;
             }
             const message = getComposerErrorMessage(error, t);
+            trigger('error');
             setSubmitError(message);
             Toast.show(message);
         } finally {

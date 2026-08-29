@@ -32,7 +32,7 @@ const FilterTag = ({ tag, active, onPress, count }) => {
     }));
 
     const handlePress = () => {
-        trigger();
+        trigger('selection');
         onPress();
     };
 

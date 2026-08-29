@@ -207,7 +207,7 @@ const FilterPanel = ({
                     trigger();
                     onSelectCoursePeriod(event.nativeEvent.event);
                 }}
-                onOpenMenu={() => trigger('rigid')}
+                onOpenMenu={() => trigger('context')}
                 shouldOpenOnLongPress={false}
                 accessibilityLabel={t('切換學年及學期', { ns: 'catalog' })}>
                 {chip}

@@ -125,6 +125,9 @@ importers:
       expo-glass-effect:
         specifier: ~57.0.1
         version: 57.0.1(expo@57.0.17)(react-native@0.86.3(@babel/core@7.29.7(supports-color@8.1.1))(@react-native/jest-preset@0.86.0(@babel/core@7.29.7(supports-color@8.1.1))(react@19.2.3)(supports-color@8.1.1))(@react-native/metro-config@0.83.4(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.2.18)(react@19.2.3)(supports-color@8.1.1))(react@19.2.3)
+      expo-haptics:
+        specifier: ~57.0.2
+        version: 57.0.2(expo@57.0.17)
       expo-image:
         specifier: ~57.0.3
         version: 57.0.3(expo@57.0.17)(react-native@0.86.3(@babel/core@7.29.7(supports-color@8.1.1))(@react-native/jest-preset@0.86.0(@babel/core@7.29.7(supports-color@8.1.1))(react@19.2.3)(supports-color@8.1.1))(@react-native/metro-config@0.83.4(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.2.18)(react@19.2.3)(supports-color@8.1.1))(react@19.2.3)
@@ -218,9 +221,6 @@ importers:
       react-native-gesture-handler:
         specifier: ~2.32.0
         version: 2.32.0(react-native@0.86.3(@babel/core@7.29.7(supports-color@8.1.1))(@react-native/jest-preset@0.86.0(@babel/core@7.29.7(supports-color@8.1.1))(react@19.2.3)(supports-color@8.1.1))(@react-native/metro-config@0.83.4(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.2.18)(react@19.2.3)(supports-color@8.1.1))(react@19.2.3)
-      react-native-haptic-feedback:
-        specifier: ^3.0.0
-        version: 3.0.0(react-native@0.86.3(@babel/core@7.29.7(supports-color@8.1.1))(@react-native/jest-preset@0.86.0(@babel/core@7.29.7(supports-color@8.1.1))(react@19.2.3)(supports-color@8.1.1))(@react-native/metro-config@0.83.4(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.2.18)(react@19.2.3)(supports-color@8.1.1))(react@19.2.3)
       react-native-html-parser:
         specifier: ^0.1.0
         version: 0.1.0
@@ -3541,6 +3541,11 @@ packages:
       react: '*'
       react-native: '*'
 
+  expo-haptics@57.0.2:
+    resolution: {integrity: sha512-vPths6zTxxaGaemC7D1GKbw1iOnOAAL5oAcCFVSgVNWnuLCBefL1LkhRBaJsepiMXRh2y3vwPiXkPaf6d16blA==}
+    peerDependencies:
+      expo: '*'
+
   expo-image-loader@57.0.1:
     resolution: {integrity: sha512-uhrZKLT/cTl2mXyR28kPpVkS5O+PK9N1QA/07IFM4f5T4g0lTW1JHT3NEWwEEsGFldPmVX4j7LwUVVZxE+woug==}
     peerDependencies:
@@ -5176,15 +5181,6 @@ packages:
     peerDependencies:
       react: '*'
       react-native: '*'
-
-  react-native-haptic-feedback@3.0.0:
-    resolution: {integrity: sha512-yxBQFHhXU8S0xupGtzDRToGw5yMWezUdLzxtlx2Oi9YpjPwprWZWCw8foPt0S2t84B0ZikzZYyOHiMSXIelUxg==}
-    peerDependencies:
-      react: '>=18.0.0'
-      react-native: '>=0.71.0'
-    peerDependenciesMeta:
-      react:
-        optional: true
 
   react-native-html-parser@0.1.0:
     resolution: {integrity: sha512-G5d0pk7TA9YgjVJhLRf2zMOOf1HXd8ItM9JYsTS2pXoEfSRfMfRU5iTj03LGwvHU2NT9kc18NDJeLgZY6+Bbvg==}
@@ -10291,6 +10287,10 @@ snapshots:
       react: 19.2.3
       react-native: 0.86.3(@babel/core@7.29.7(supports-color@8.1.1))(@react-native/jest-preset@0.86.0(@babel/core@7.29.7(supports-color@8.1.1))(react@19.2.3)(supports-color@8.1.1))(@react-native/metro-config@0.83.4(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.2.18)(react@19.2.3)(supports-color@8.1.1)
 
+  expo-haptics@57.0.2(expo@57.0.17):
+    dependencies:
+      expo: 57.0.17(a95f9ff1bdb27c3a488f71c84ce9ddb6)
+
   expo-image-loader@57.0.1(expo@57.0.17):
     dependencies:
       expo: 57.0.17(a95f9ff1bdb27c3a488f71c84ce9ddb6)
@@ -12355,12 +12355,6 @@ snapshots:
       invariant: 2.2.4
       react: 19.2.3
       react-native: 0.86.3(@babel/core@7.29.7(supports-color@8.1.1))(@react-native/jest-preset@0.86.0(@babel/core@7.29.7(supports-color@8.1.1))(react@19.2.3)(supports-color@8.1.1))(@react-native/metro-config@0.83.4(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.2.18)(react@19.2.3)(supports-color@8.1.1)
-
-  react-native-haptic-feedback@3.0.0(react-native@0.86.3(@babel/core@7.29.7(supports-color@8.1.1))(@react-native/jest-preset@0.86.0(@babel/core@7.29.7(supports-color@8.1.1))(react@19.2.3)(supports-color@8.1.1))(@react-native/metro-config@0.83.4(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.2.18)(react@19.2.3)(supports-color@8.1.1))(react@19.2.3):
-    dependencies:
-      react-native: 0.86.3(@babel/core@7.29.7(supports-color@8.1.1))(@react-native/jest-preset@0.86.0(@babel/core@7.29.7(supports-color@8.1.1))(react@19.2.3)(supports-color@8.1.1))(@react-native/metro-config@0.83.4(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.2.18)(react@19.2.3)(supports-color@8.1.1)
-    optionalDependencies:
-      react: 19.2.3
 
   react-native-html-parser@0.1.0: {}
 

@@ -68,7 +68,7 @@ const SegmentControl = ({
                     <TouchableScale
                         key={option.key}
                         onPress={() => {
-                            trigger();
+                            trigger('selection');
                             onChange(index);
                         }}
                         style={[

@@ -186,7 +186,7 @@ const TeamScheduleCreatePage = ({navigation}) => {
 
     const handleCoursePrefillChange = useCallback(
         enabled => {
-            trigger();
+            trigger(enabled ? 'toggleOn' : 'toggleOff');
             if (enabled) {
                 setCoursePrefillEnabled(true);
                 loadCoursePrefill();
@@ -311,12 +311,14 @@ const TeamScheduleCreatePage = ({navigation}) => {
             });
             clearTeamEventsCache();
             allowLeaveRef.current = true;
+            trigger('success');
             if (eventId) {
                 navigation.replace('TeamScheduleDetail', {eventId});
             } else {
                 navigation.goBack();
             }
         } catch (error) {
+            trigger('error');
             const normalized = normalizeSchedulingError(error);
             Alert.alert(
                 t('無法建立'),

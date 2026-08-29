@@ -703,7 +703,7 @@ function CourseSim({ route, navigation }) {
         return {
             actions,
             onOpen: () => {
-                trigger('rigid');
+                trigger('context');
                 if (hasOpenCourseSearch) {
                     bottomSheetRef?.current?.snapToIndex(0);
                 }
@@ -1875,7 +1875,7 @@ E11-0000
                 <CourseActionMenuCard
                     accessibilityLabel={`${selectedCourse['Course Code']}-${item.section}`}
                     actions={replacementMenuActions}
-                    onOpen={() => trigger('rigid')}
+                    onOpen={() => trigger('context')}
                     onPressAction={event => {
                         trigger();
                         const actionId = event.nativeEvent.event;

@@ -704,7 +704,7 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
 
     const handleCoursePrefillChange = useCallback(
         enabled => {
-            trigger();
+            trigger(enabled ? 'toggleOn' : 'toggleOff');
             if (enabled) {
                 applyCoursePrefill();
                 return;

@@ -57,6 +57,7 @@
     - [本機 Release 簽名設定](#本機-release-簽名設定)
   - [🐛 故障排除](#-故障排除)
 - [⛵ 維護須知](#-維護須知)
+  - [觸覺回饋標準](#觸覺回饋標準)
 
 ---
 
@@ -568,3 +569,31 @@ MYAPP_RELEASE_KEY_PASSWORD=你的_key_密碼
 2. 澳大課程更新。使用預選課 Excel，使用 Excel to JSON 工具獲得 JSON 數據，放入`src/static/UMCourses/offer courses.json`。
     - 按照程序注釋增加開設課程的繁體中文翻譯內容。
 3. icon 更新。使用 `https://www.appicon.co/` 生成 iOS icon 文件，使用 `Android Studio` 生成 Android icon 文件（Studio 生成的文件最全面，適配各個廠商的 UI）。
+
+### 觸覺回饋標準
+
+APP 使用 `expo-haptics`，所有功能統一透過 `src/utils/trigger.js` 的 `trigger()` 呼叫。頁面與元件不可直接 import `expo-haptics`，避免各處自行決定平台 enum 或 fallback。
+
+| 語意 | 使用時機 | iOS／Web | Android |
+| ---- | -------- | -------- | ------- |
+| `trigger()`／`tap` | 一般按鈕、卡片、返回、重試 | Soft impact | Virtual key |
+| `selection` | 分段控制、篩選條件、單次選項變更 | Selection | Segment tick |
+| `tick` | 滑桿、時間格等連續且高頻的刻度變更 | Selection | Segment frequent tick |
+| `context` | 選單、操作表或其他上下文操作正式開啟 | Rigid impact | Context click |
+| `longPress` | 長按手勢達到觸發門檻 | Rigid impact | Long press |
+| `dragStart` | 可拖曳項目被拾起或開始批量拖選 | Medium impact | Drag start |
+| `gestureStart`／`gestureEnd` | 有明確開始與結束狀態的手勢 | Light／Soft impact | Gesture start／end |
+| `toggleOn`／`toggleOff` | Switch 或二態功能完成切換 | Selection | Toggle on／off |
+| `success` | 後端或本地操作已確認成功 | Success notification | Confirm |
+| `warning` | 操作完成但需注意，或只完成部分內容 | Warning notification | Warning notification |
+| `error` | 操作實際失敗且需要使用者處理 | Error notification | Reject |
+
+使用規則：
+
+- 所有可互動元件仍須有觸覺回饋；一般操作使用 `trigger()`，只有語意明確時才傳入分類。
+- `success`、`warning`、`error` 必須在結果確定後觸發，不可因為按鈕文字是「儲存」或「刪除」就在送出前使用結果震感。
+- 破壞性操作本身不是 `error`；確認按鈕使用一般 `tap`，刪除成功後才使用 `success`，請求失敗才使用 `error`。
+- 高頻互動只使用 `tick`，並避免每一幀觸發。部分 Android 裝置可能主動省略過密或不支援的震感，屬正常行為。
+- `soft` 與 `rigid` 只保留給舊呼叫相容；新程式碼應使用 `tap` 或對應的語意名稱。
+- 震感失敗不得阻斷原本操作，也不能取代畫面、文字、Toast 或無障礙狀態提示。
+- 尊重使用者的系統觸覺設定，不得加入忽略 Android 系統設定的旗標。

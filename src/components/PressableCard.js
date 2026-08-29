@@ -19,7 +19,7 @@ const PressableCard = ({
     }, [onPress]);
 
     const handleLongPress = useCallback(event => {
-        trigger();
+        trigger('longPress');
         if (onLongPress) {
             onLongPress(event);
         }

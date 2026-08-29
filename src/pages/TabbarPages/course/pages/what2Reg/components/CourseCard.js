@@ -270,7 +270,7 @@ const CourseCard = memo(
                 onPressAction={handleMenuAction}
                 shouldOpenOnLongPress={false}
                 onOpenMenu={() => {
-                    trigger('rigid');
+                    trigger('context');
                     cardScale.value = withSpring(0.96, COURSE_CARD_SPRING);
                 }}
                 onCloseMenu={() => {

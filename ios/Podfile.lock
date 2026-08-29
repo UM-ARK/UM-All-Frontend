@@ -203,6 +203,8 @@ PODS:
     - ExpoModulesCore
   - ExpoGlassEffect (57.0.1):
     - ExpoModulesCore
+  - ExpoHaptics (57.0.2):
+    - ExpoModulesCore
   - ExpoImage (57.0.3):
     - ExpoModulesCore
   - ExpoImageManipulator (57.0.14):
@@ -2681,28 +2683,6 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
-  - RNReactNativeHapticFeedback (3.0.0):
-    - hermes-engine
-    - RCTRequired
-    - RCTTypeSafety
-    - React-Core
-    - React-Core-prebuilt
-    - React-debug
-    - React-Fabric
-    - React-featureflags
-    - React-graphics
-    - React-ImageManager
-    - React-jsi
-    - React-NativeModulesApple
-    - React-RCTFabric
-    - React-renderercss
-    - React-rendererdebug
-    - React-utils
-    - ReactCodegen
-    - ReactCommon/turbomodule/bridging
-    - ReactCommon/turbomodule/core
-    - ReactNativeDependencies
-    - Yoga
   - RNReanimated (4.5.1):
     - hermes-engine
     - RCTRequired
@@ -3012,6 +2992,7 @@ DEPENDENCIES:
   - "ExpoFileSystem (from `../node_modules/.pnpm/expo-file-system@57.0.6_expo@57.0.17_react-native@0.86.3_@babel+core@7.29.7_supports-co_3eaed667a4c4617549f534fe746a43b5/node_modules/expo-file-system/ios/ExpoFileSystem.podspec`)"
   - "ExpoFont (from `../node_modules/.pnpm/expo-font@57.0.1_expo@57.0.17_react-native@0.86.3_@babel+core@7.29.7_supports-color@8.1_56de6cd05463fa027e1f9890091a514f/node_modules/expo-font/ios/ExpoFont.podspec`)"
   - "ExpoGlassEffect (from `../node_modules/.pnpm/expo-glass-effect@57.0.1_expo@57.0.17_react-native@0.86.3_@babel+core@7.29.7_supports-c_274ee61f44805df45de3488a6bec1c88/node_modules/expo-glass-effect/ios`)"
+  - "ExpoHaptics (from `../node_modules/.pnpm/expo-haptics@57.0.2_expo@57.0.17/node_modules/expo-haptics/ios`)"
   - "ExpoImage (from `../node_modules/.pnpm/expo-image@57.0.3_expo@57.0.17_react-native@0.86.3_@babel+core@7.29.7_supports-color@8._62168cfe8abc55204b9a9335575c0d31/node_modules/expo-image/ios/ExpoImage.podspec`)"
   - "ExpoImageManipulator (from `../node_modules/.pnpm/expo-image-manipulator@57.0.14_expo@57.0.17/node_modules/expo-image-manipulator/ios/ExpoImageManipulator.podspec`)"
   - "ExpoImagePicker (from `../node_modules/.pnpm/expo-image-picker@57.0.14_expo@57.0.17/node_modules/expo-image-picker/ios`)"
@@ -3132,7 +3113,6 @@ DEPENDENCIES:
   - "RNFBApp (from `../node_modules/.pnpm/@react-native-firebase+app@26.3.2_@react-native-async-storage+async-storage@2.2.0_react_61fd9127925587dda6ec793b799081cd/node_modules/@react-native-firebase/app`)"
   - "RNGestureHandler (from `../node_modules/.pnpm/react-native-gesture-handler@2.32.0_react-native@0.86.3_@babel+core@7.29.7_supports-col_3e811ef801562b2a1aabaaf30bbb264b/node_modules/react-native-gesture-handler`)"
   - "RNLocalize (from `../node_modules/.pnpm/react-native-localize@3.7.0_@expo+config-plugins@57.0.9_supports-color@8.1.1_typescript_c902a46fd8d69397606f36be31ea6eee/node_modules/react-native-localize`)"
-  - "RNReactNativeHapticFeedback (from `../node_modules/.pnpm/react-native-haptic-feedback@3.0.0_react-native@0.86.3_@babel+core@7.29.7_supports-colo_a4d6d53b7d8d29c029ec80ba416ca126/node_modules/react-native-haptic-feedback`)"
   - "RNReanimated (from `../node_modules/.pnpm/react-native-reanimated@4.5.1_react-native-worklets@0.10.1_@babel+core@7.29.7_supports-_3cbf0bcc826eb2ca2e5b008cab1b9d86/node_modules/react-native-reanimated`)"
   - "RNScreens (from `../node_modules/.pnpm/react-native-screens@4.26.2_react-native@0.86.3_@babel+core@7.29.7_supports-color@8.1.1_9131283fc6cf8641c2ab89b083c42a9d/node_modules/react-native-screens`)"
   - "RNShare (from `../node_modules/.pnpm/react-native-share@12.3.1/node_modules/react-native-share`)"
@@ -3195,6 +3175,8 @@ EXTERNAL SOURCES:
     :podspec: "../node_modules/.pnpm/expo-font@57.0.1_expo@57.0.17_react-native@0.86.3_@babel+core@7.29.7_supports-color@8.1_56de6cd05463fa027e1f9890091a514f/node_modules/expo-font/ios/ExpoFont.podspec"
   ExpoGlassEffect:
     :path: "../node_modules/.pnpm/expo-glass-effect@57.0.1_expo@57.0.17_react-native@0.86.3_@babel+core@7.29.7_supports-c_274ee61f44805df45de3488a6bec1c88/node_modules/expo-glass-effect/ios"
+  ExpoHaptics:
+    :path: "../node_modules/.pnpm/expo-haptics@57.0.2_expo@57.0.17/node_modules/expo-haptics/ios"
   ExpoImage:
     :podspec: "../node_modules/.pnpm/expo-image@57.0.3_expo@57.0.17_react-native@0.86.3_@babel+core@7.29.7_supports-color@8._62168cfe8abc55204b9a9335575c0d31/node_modules/expo-image/ios/ExpoImage.podspec"
   ExpoImageManipulator:
@@ -3434,8 +3416,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/.pnpm/react-native-gesture-handler@2.32.0_react-native@0.86.3_@babel+core@7.29.7_supports-col_3e811ef801562b2a1aabaaf30bbb264b/node_modules/react-native-gesture-handler"
   RNLocalize:
     :path: "../node_modules/.pnpm/react-native-localize@3.7.0_@expo+config-plugins@57.0.9_supports-color@8.1.1_typescript_c902a46fd8d69397606f36be31ea6eee/node_modules/react-native-localize"
-  RNReactNativeHapticFeedback:
-    :path: "../node_modules/.pnpm/react-native-haptic-feedback@3.0.0_react-native@0.86.3_@babel+core@7.29.7_supports-colo_a4d6d53b7d8d29c029ec80ba416ca126/node_modules/react-native-haptic-feedback"
   RNReanimated:
     :path: "../node_modules/.pnpm/react-native-reanimated@4.5.1_react-native-worklets@0.10.1_@babel+core@7.29.7_supports-_3cbf0bcc826eb2ca2e5b008cab1b9d86/node_modules/react-native-reanimated"
   RNScreens:
@@ -3470,6 +3450,7 @@ SPEC CHECKSUMS:
   ExpoFileSystem: cc500f33804065aacc7b3366007267b84deca8c8
   ExpoFont: 59e1faf66ba9bcd232ae1e2ce58d202a48b6f65e
   ExpoGlassEffect: 4b62afb489e6b84357701737ce002137c9d5fdbc
+  ExpoHaptics: bc5461002fc97e53c213a1af6c88c8f95965b734
   ExpoImage: b37accc4b12647e5cf939b2335eea2bdb874ad7f
   ExpoImageManipulator: 777c68e56abb4fb62c28fb774d3287b417077d1d
   ExpoImagePicker: 850f80e4ebdf8d542aed910bae3f50142110ba43
@@ -3598,7 +3579,6 @@ SPEC CHECKSUMS:
   RNFBApp: 498c580856af715c690cafa45057924c4486bc63
   RNGestureHandler: 7b07d9192bc65c6883fb37fdecc05dc6b61c814f
   RNLocalize: 17bce0556e2d33fe1201c8cef53b3b7786e07612
-  RNReactNativeHapticFeedback: 9dc72312c12cb53ee240b5b7aae1e167f3d940a6
   RNReanimated: b5a314dff668793de4b86aefcdb7eb885e681403
   RNScreens: 5b4b260e28d8263d97fddcb53e59649515797bcc
   RNShare: 26c9524aee8cc3eedbab6d6b98cacce2f5247893

@@ -226,7 +226,7 @@ const ScheduleWeekGrid = ({
         if (!isSlotEditable(slotItem)) {
             return;
         }
-        trigger();
+        trigger('dragStart');
         setPainting(true);
         const modeGesture = resolveGestureMode(draftRef.current, slotItem);
         gestureModeRef.current = modeGesture;
@@ -267,7 +267,7 @@ const ScheduleWeekGrid = ({
         if (!interactive || !isSlotEditable(slotItem)) {
             return;
         }
-        trigger();
+        trigger('selection');
         onDraftChange?.(toggleDraftSlot(
             draftRef.current || createEmptyDraft({
                 mode: isCandidateMode ? 'candidate' : 'availability',
