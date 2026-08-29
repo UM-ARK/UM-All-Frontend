@@ -586,8 +586,8 @@ const What2Reg = () => {
                             historicalCatalogStatus={historicalCatalogStatus}
                             onUpdateFilterOptions={updateFilterOptions}
                             onUpdateTimeFilter={updateTimeFilter}
-                            onToggleRecommendation={() => {
-                                setRecommendationOnly(currentValue => !currentValue);
+                            onToggleRecommendation={value => {
+                                setRecommendationOnly(value);
                             }}
                             onSetCourseMode={setCourseMode}
                             onSelectCoursePeriod={handleSelectCoursePeriod}

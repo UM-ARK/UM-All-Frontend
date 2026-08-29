@@ -639,7 +639,7 @@ const FilterPanel = ({
                 }}
                 onPress={() => {
                     trigger();
-                    onToggleRecommendation();
+                    onToggleRecommendation(!recommendationOnly);
                 }}
                 accessibilityRole="switch"
                 accessibilityState={{ checked: recommendationOnly }}
@@ -654,7 +654,7 @@ const FilterPanel = ({
                 }}>
                     {t('只看不衝突', { ns: 'catalog' })}
                 </Text>
-                {/* Switch 僅作狀態指示；縮小後用固定尺寸容器吃掉原生佔位 */}
+                {/* 縮小後用固定尺寸容器吃掉原生佔位 */}
                 <View
                     style={{
                         width: scale(36),
@@ -665,8 +665,11 @@ const FilterPanel = ({
                     <Switch
                         accessibilityElementsHidden
                         importantForAccessibility="no"
-                        pointerEvents="none"
                         ios_backgroundColor={tonal.primary15}
+                        onValueChange={value => {
+                            trigger();
+                            onToggleRecommendation(value);
+                        }}
                         trackColor={{
                             false: tonal.primary15,
                             true: themeColor,
