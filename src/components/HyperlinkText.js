@@ -6,7 +6,7 @@ import { trigger } from '../utils/trigger';
 import { openLink } from '../utils/browser';
 
 import Hyperlink from 'react-native-hyperlink';
-import Clipboard from '@react-native-clipboard/clipboard';
+import * as Clipboard from 'expo-clipboard';
 import Toast from 'react-native-toast-message';
 import { scale } from 'react-native-size-matters';
 
@@ -44,7 +44,7 @@ const HyperlinkText = ({ children, title, linkStyle, style, navigation, beforeJu
 
     const copyToClipboard = (url, text) => {
         trigger();
-        Clipboard.setString(text);
+        Clipboard.setStringAsync(text);
         Toast.show({
             type: 'arkToast',
             text1: '已複製Link到粘貼板！',

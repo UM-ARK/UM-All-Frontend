@@ -19,7 +19,7 @@ import {
 
 import ActionSheet, { ScrollView } from 'react-native-actions-sheet';
 import Ionicons from "@react-native-vector-icons/ionicons";
-import Clipboard from '@react-native-clipboard/clipboard';
+import * as Clipboard from 'expo-clipboard';
 import { scale, verticalScale } from 'react-native-size-matters';
 import { useTranslation } from 'react-i18next';
 import lodash from 'lodash';
@@ -922,7 +922,7 @@ const TimetableShareSheet = forwardRef(({ catalogMetadata }, ref) => {
             );
             return;
         }
-        Clipboard.setString(text);
+        Clipboard.setStringAsync(text);
         logToFirebase('course_timetable_export', {
             method: 'copy_text',
             mode: shareMode,

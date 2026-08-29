@@ -29,7 +29,7 @@ import WikiHome from '../arkwiki';
 
 import { FlatGrid } from 'react-native-super-grid';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
-import Clipboard from '@react-native-clipboard/clipboard';
+import * as Clipboard from 'expo-clipboard';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import { moderateScale, scale, verticalScale } from 'react-native-size-matters';
 import Toast from 'react-native-simple-toast';
@@ -319,7 +319,7 @@ function FeatureListPage({ navigation }) {
                         })}
                         onPress={() => {
                             trigger();
-                            Clipboard.setString(webview_param.url);
+                            Clipboard.setStringAsync(webview_param.url);
                             Toast.show(t('已複製Link到剪貼板！'));
                         }}>
                         <Ionicons

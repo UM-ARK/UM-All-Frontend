@@ -8,7 +8,7 @@ import {
     View,
 } from 'react-native';
 
-import Clipboard from '@react-native-clipboard/clipboard';
+import * as Clipboard from 'expo-clipboard';
 import {FlashList} from '@shopify/flash-list';
 import {Image} from 'expo-image';
 import Ionicons from '@react-native-vector-icons/ionicons';
@@ -165,7 +165,7 @@ const AppShareSheet = ({visible, payload, onClose}) => {
             return;
         }
         trigger();
-        Clipboard.setString(payload.url);
+        Clipboard.setStringAsync(payload.url);
         Toast.show(t('已複製連結'));
         hideSheet();
     }, [hideSheet, payload?.url, t]);

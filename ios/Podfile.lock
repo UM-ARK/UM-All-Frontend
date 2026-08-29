@@ -189,6 +189,8 @@ PODS:
     - ExpoModulesCore
   - ExpoCameraBarcodeScanning (57.0.4):
     - ExpoCamera
+  - ExpoClipboard (57.0.1):
+    - ExpoModulesCore
   - ExpoCrypto (57.0.2):
     - ExpoModulesCore
   - ExpoDevice (57.0.1):
@@ -198,6 +200,8 @@ PODS:
   - ExpoFileSystem (57.0.6):
     - ExpoModulesCore
   - ExpoFont (57.0.1):
+    - ExpoModulesCore
+  - ExpoGlassEffect (57.0.1):
     - ExpoModulesCore
   - ExpoImage (57.0.3):
     - ExpoModulesCore
@@ -2562,28 +2566,6 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
-  - RNCClipboard (1.16.3):
-    - hermes-engine
-    - RCTRequired
-    - RCTTypeSafety
-    - React-Core
-    - React-Core-prebuilt
-    - React-debug
-    - React-Fabric
-    - React-featureflags
-    - React-graphics
-    - React-ImageManager
-    - React-jsi
-    - React-NativeModulesApple
-    - React-RCTFabric
-    - React-renderercss
-    - React-rendererdebug
-    - React-utils
-    - ReactCodegen
-    - ReactCommon/turbomodule/bridging
-    - ReactCommon/turbomodule/core
-    - ReactNativeDependencies
-    - Yoga
   - RNDateTimePicker (9.1.0):
     - hermes-engine
     - RCTRequired
@@ -3023,11 +3005,13 @@ DEPENDENCIES:
   - "ExpoBlur (from `../node_modules/.pnpm/expo-blur@57.0.2_expo@57.0.17_react-native@0.86.3_@babel+core@7.29.7_supports-color@8.1_33e0f60b44b411350c0d64e35385323e/node_modules/expo-blur/ios`)"
   - "ExpoCamera (from `../node_modules/.pnpm/expo-camera@57.0.4_@types+emscripten@1.41.5_expo@57.0.17_react-native@0.86.3_@babel+cor_f82d2285acb89f815901707f0286be27/node_modules/expo-camera/ios/ExpoCamera.podspec`)"
   - "ExpoCameraBarcodeScanning (from `../node_modules/.pnpm/expo-camera@57.0.4_@types+emscripten@1.41.5_expo@57.0.17_react-native@0.86.3_@babel+cor_f82d2285acb89f815901707f0286be27/node_modules/expo-camera/ios/ExpoCameraBarcodeScanning.podspec`)"
+  - "ExpoClipboard (from `../node_modules/.pnpm/expo-clipboard@57.0.1_expo@57.0.17_react-native@0.86.3_@babel+core@7.29.7_supports-colo_0fa84bf62560c6413c4a76f7c9d46601/node_modules/expo-clipboard/ios`)"
   - "ExpoCrypto (from `../node_modules/.pnpm/expo-crypto@57.0.2_expo@57.0.17/node_modules/expo-crypto/ios`)"
   - "ExpoDevice (from `../node_modules/.pnpm/expo-device@57.0.1_expo@57.0.17/node_modules/expo-device/ios`)"
   - "ExpoDomWebView (from `../node_modules/.pnpm/@expo+dom-webview@57.0.1_expo@57.0.17_react-native@0.86.3_@babel+core@7.29.7_supports-c_205575739820055451fc973ba431d124/node_modules/@expo/dom-webview/ios`)"
   - "ExpoFileSystem (from `../node_modules/.pnpm/expo-file-system@57.0.6_expo@57.0.17_react-native@0.86.3_@babel+core@7.29.7_supports-co_3eaed667a4c4617549f534fe746a43b5/node_modules/expo-file-system/ios/ExpoFileSystem.podspec`)"
   - "ExpoFont (from `../node_modules/.pnpm/expo-font@57.0.1_expo@57.0.17_react-native@0.86.3_@babel+core@7.29.7_supports-color@8.1_56de6cd05463fa027e1f9890091a514f/node_modules/expo-font/ios/ExpoFont.podspec`)"
+  - "ExpoGlassEffect (from `../node_modules/.pnpm/expo-glass-effect@57.0.1_expo@57.0.17_react-native@0.86.3_@babel+core@7.29.7_supports-c_274ee61f44805df45de3488a6bec1c88/node_modules/expo-glass-effect/ios`)"
   - "ExpoImage (from `../node_modules/.pnpm/expo-image@57.0.3_expo@57.0.17_react-native@0.86.3_@babel+core@7.29.7_supports-color@8._62168cfe8abc55204b9a9335575c0d31/node_modules/expo-image/ios/ExpoImage.podspec`)"
   - "ExpoImageManipulator (from `../node_modules/.pnpm/expo-image-manipulator@57.0.14_expo@57.0.17/node_modules/expo-image-manipulator/ios/ExpoImageManipulator.podspec`)"
   - "ExpoImagePicker (from `../node_modules/.pnpm/expo-image-picker@57.0.14_expo@57.0.17/node_modules/expo-image-picker/ios`)"
@@ -3143,7 +3127,6 @@ DEPENDENCIES:
   - "ReactCommon/turbomodule/core (from `../node_modules/.pnpm/react-native@0.86.3_@babel+core@7.29.7_supports-color@8.1.1__@react-native+jest-preset@_309316be75fe7b769e6d1d4c82d54927/node_modules/react-native/ReactCommon`)"
   - "ReactNativeDependencies (from `../node_modules/.pnpm/react-native@0.86.3_@babel+core@7.29.7_supports-color@8.1.1__@react-native+jest-preset@_309316be75fe7b769e6d1d4c82d54927/node_modules/react-native/third-party-podspecs/ReactNativeDependencies.podspec`)"
   - "RNCAsyncStorage (from `../node_modules/.pnpm/@react-native-async-storage+async-storage@2.2.0_react-native@0.86.3_@babel+core@7.29.7__523da50b23e5b5b57f588fdc65b5ae9c/node_modules/@react-native-async-storage/async-storage`)"
-  - "RNCClipboard (from `../node_modules/.pnpm/@react-native-clipboard+clipboard@1.16.3_react-native@0.86.3_@babel+core@7.29.7_support_c8ca64dfed53223068c05c572c93c366/node_modules/@react-native-clipboard/clipboard`)"
   - "RNDateTimePicker (from `../node_modules/.pnpm/@react-native-community+datetimepicker@9.1.0_expo@57.0.17_react-native@0.86.3_@babel+co_03efe6b8f99b52fe189d37df1f2b2b8a/node_modules/@react-native-community/datetimepicker`)"
   - "RNFBAnalytics (from `../node_modules/.pnpm/@react-native-firebase+analytics@26.3.2_@react-native-firebase+app@26.3.2_@react-native_f43fcf64a6a32472be5cd7e43f937677/node_modules/@react-native-firebase/analytics`)"
   - "RNFBApp (from `../node_modules/.pnpm/@react-native-firebase+app@26.3.2_@react-native-async-storage+async-storage@2.2.0_react_61fd9127925587dda6ec793b799081cd/node_modules/@react-native-firebase/app`)"
@@ -3198,6 +3181,8 @@ EXTERNAL SOURCES:
     :podspec: "../node_modules/.pnpm/expo-camera@57.0.4_@types+emscripten@1.41.5_expo@57.0.17_react-native@0.86.3_@babel+cor_f82d2285acb89f815901707f0286be27/node_modules/expo-camera/ios/ExpoCamera.podspec"
   ExpoCameraBarcodeScanning:
     :podspec: "../node_modules/.pnpm/expo-camera@57.0.4_@types+emscripten@1.41.5_expo@57.0.17_react-native@0.86.3_@babel+cor_f82d2285acb89f815901707f0286be27/node_modules/expo-camera/ios/ExpoCameraBarcodeScanning.podspec"
+  ExpoClipboard:
+    :path: "../node_modules/.pnpm/expo-clipboard@57.0.1_expo@57.0.17_react-native@0.86.3_@babel+core@7.29.7_supports-colo_0fa84bf62560c6413c4a76f7c9d46601/node_modules/expo-clipboard/ios"
   ExpoCrypto:
     :path: "../node_modules/.pnpm/expo-crypto@57.0.2_expo@57.0.17/node_modules/expo-crypto/ios"
   ExpoDevice:
@@ -3208,6 +3193,8 @@ EXTERNAL SOURCES:
     :podspec: "../node_modules/.pnpm/expo-file-system@57.0.6_expo@57.0.17_react-native@0.86.3_@babel+core@7.29.7_supports-co_3eaed667a4c4617549f534fe746a43b5/node_modules/expo-file-system/ios/ExpoFileSystem.podspec"
   ExpoFont:
     :podspec: "../node_modules/.pnpm/expo-font@57.0.1_expo@57.0.17_react-native@0.86.3_@babel+core@7.29.7_supports-color@8.1_56de6cd05463fa027e1f9890091a514f/node_modules/expo-font/ios/ExpoFont.podspec"
+  ExpoGlassEffect:
+    :path: "../node_modules/.pnpm/expo-glass-effect@57.0.1_expo@57.0.17_react-native@0.86.3_@babel+core@7.29.7_supports-c_274ee61f44805df45de3488a6bec1c88/node_modules/expo-glass-effect/ios"
   ExpoImage:
     :podspec: "../node_modules/.pnpm/expo-image@57.0.3_expo@57.0.17_react-native@0.86.3_@babel+core@7.29.7_supports-color@8._62168cfe8abc55204b9a9335575c0d31/node_modules/expo-image/ios/ExpoImage.podspec"
   ExpoImageManipulator:
@@ -3437,8 +3424,6 @@ EXTERNAL SOURCES:
     :podspec: "../node_modules/.pnpm/react-native@0.86.3_@babel+core@7.29.7_supports-color@8.1.1__@react-native+jest-preset@_309316be75fe7b769e6d1d4c82d54927/node_modules/react-native/third-party-podspecs/ReactNativeDependencies.podspec"
   RNCAsyncStorage:
     :path: "../node_modules/.pnpm/@react-native-async-storage+async-storage@2.2.0_react-native@0.86.3_@babel+core@7.29.7__523da50b23e5b5b57f588fdc65b5ae9c/node_modules/@react-native-async-storage/async-storage"
-  RNCClipboard:
-    :path: "../node_modules/.pnpm/@react-native-clipboard+clipboard@1.16.3_react-native@0.86.3_@babel+core@7.29.7_support_c8ca64dfed53223068c05c572c93c366/node_modules/@react-native-clipboard/clipboard"
   RNDateTimePicker:
     :path: "../node_modules/.pnpm/@react-native-community+datetimepicker@9.1.0_expo@57.0.17_react-native@0.86.3_@babel+co_03efe6b8f99b52fe189d37df1f2b2b8a/node_modules/@react-native-community/datetimepicker"
   RNFBAnalytics:
@@ -3478,11 +3463,13 @@ SPEC CHECKSUMS:
   ExpoBlur: 69e67b4fbfed6f7325377af2aefa8aa4f00cd2af
   ExpoCamera: 00a098da25adbc6013f051b5db47279cb10a716c
   ExpoCameraBarcodeScanning: 14c72e1f522eb69f7a672d757eb294c096756faa
+  ExpoClipboard: 95055b11758f339b61d4d8064dd799df1cf03b7f
   ExpoCrypto: f392e5f076a4c11dbfa1a6046449747acec82711
   ExpoDevice: 93a72d7c2bd656a4f0c0d580523e390e9ee7fba5
   ExpoDomWebView: beaec034e51bd028428b98bb1f2633ab79c6d095
   ExpoFileSystem: cc500f33804065aacc7b3366007267b84deca8c8
   ExpoFont: 59e1faf66ba9bcd232ae1e2ce58d202a48b6f65e
+  ExpoGlassEffect: 4b62afb489e6b84357701737ce002137c9d5fdbc
   ExpoImage: b37accc4b12647e5cf939b2335eea2bdb874ad7f
   ExpoImageManipulator: 777c68e56abb4fb62c28fb774d3287b417077d1d
   ExpoImagePicker: 850f80e4ebdf8d542aed910bae3f50142110ba43
@@ -3606,7 +3593,6 @@ SPEC CHECKSUMS:
   ReactCommon: 02f6a489d5eb4ab79d7deba5cd4434e0ba351a07
   ReactNativeDependencies: 6738e602b46fd24aa453cd58267ec3bb8bf29d27
   RNCAsyncStorage: d90e523830fa7705f8c61632479abde871bc792f
-  RNCClipboard: 7a7d4557bfd3370b35c99dfecd92ae7b9fc4948a
   RNDateTimePicker: afe0288e6c7855994f7f2617b7b2c05799fea7f3
   RNFBAnalytics: cbc3d69bfdae8f2f74b47520cff71b5b9576fcad
   RNFBApp: 498c580856af715c690cafa45057924c4486bc63

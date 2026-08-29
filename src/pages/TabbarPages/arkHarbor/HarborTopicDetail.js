@@ -16,7 +16,7 @@ import {
     useWindowDimensions,
 } from 'react-native';
 
-import Clipboard from '@react-native-clipboard/clipboard';
+import * as Clipboard from 'expo-clipboard';
 import { FlashList } from '@shopify/flash-list';
 import { isLiquidGlassSupported } from '@callstack/liquid-glass';
 import { useHeaderHeight } from '@react-navigation/elements';
@@ -400,7 +400,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
 
     const copyPostPermalink = useCallback(
         post => {
-            Clipboard.setString(
+            Clipboard.setStringAsync(
                 ARK_HARBOR_TOPIC_URL(topicId, post?.post_number),
             );
             Toast.show(t('永久連結已複製'));
@@ -410,7 +410,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
 
     const copyPostContent = useCallback(
         post => {
-            Clipboard.setString(stripHtml(post?.cooked));
+            Clipboard.setStringAsync(stripHtml(post?.cooked));
             Toast.show(t('內容已複製'));
         },
         [t],

@@ -20,7 +20,7 @@ import {
 
 import { scale, verticalScale } from 'react-native-size-matters';
 import Ionicons from "@react-native-vector-icons/ionicons";
-import Clipboard from '@react-native-clipboard/clipboard';
+import * as Clipboard from 'expo-clipboard';
 import moment from 'moment';
 import Toast from 'react-native-simple-toast';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -1139,7 +1139,7 @@ function CourseSim({ route, navigation }) {
         let text = normalizeImportText(importTimeTableText || '').trim();
         if (!text) {
             text = normalizeImportText(
-                (await Clipboard.getString()) || '',
+                (await Clipboard.getStringAsync()) || '',
             ).trim();
         }
 
