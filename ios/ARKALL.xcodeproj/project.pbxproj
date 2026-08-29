@@ -368,14 +368,14 @@
 				"${PODS_CONFIGURATION_BUILD_DIR}/expo-dev-launcher/EXDevLauncher.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/expo-dev-menu/EXDevMenu.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/nanopb/nanopb_Privacy.bundle",
-				"${PODS_ROOT}/../../node_modules/.pnpm/@react-native-vector-icons+ant-design@13.1.3_@expo+config-plugins@57.0.9_supports-color_2744bee90f085dfca816b807e4ececc5/node_modules/@react-native-vector-icons/ant-design/fonts/AntDesign.ttf",
-				"${PODS_ROOT}/../../node_modules/.pnpm/@react-native-vector-icons+evil-icons@13.1.3_@expo+config-plugins@57.0.9_supports-color_bf6f96177bd449e0bcf1747f611a4403/node_modules/@react-native-vector-icons/evil-icons/fonts/EvilIcons.ttf",
-				"${PODS_ROOT}/../../node_modules/.pnpm/@react-native-vector-icons+feather@13.1.3_@expo+config-plugins@57.0.9_supports-color@8._5bbb965543094a378a7f19e7811d0953/node_modules/@react-native-vector-icons/feather/fonts/Feather.ttf",
-				"${PODS_ROOT}/../../node_modules/.pnpm/@react-native-vector-icons+fontawesome6@13.1.3_@expo+config-plugins@57.0.9_supports-col_76a4a6acd1162166a0c8a9892b368f9e/node_modules/@react-native-vector-icons/fontawesome6/fonts/FontAwesome6_Brands.ttf",
-				"${PODS_ROOT}/../../node_modules/.pnpm/@react-native-vector-icons+fontawesome6@13.1.3_@expo+config-plugins@57.0.9_supports-col_76a4a6acd1162166a0c8a9892b368f9e/node_modules/@react-native-vector-icons/fontawesome6/fonts/FontAwesome6_Regular.ttf",
-				"${PODS_ROOT}/../../node_modules/.pnpm/@react-native-vector-icons+fontawesome6@13.1.3_@expo+config-plugins@57.0.9_supports-col_76a4a6acd1162166a0c8a9892b368f9e/node_modules/@react-native-vector-icons/fontawesome6/fonts/FontAwesome6_Solid.ttf",
-				"${PODS_ROOT}/../../node_modules/.pnpm/@react-native-vector-icons+ionicons@13.1.3_@expo+config-plugins@57.0.9_supports-color@8_6f08d70fedc9de335482906e766864f0/node_modules/@react-native-vector-icons/ionicons/fonts/Ionicons.ttf",
-				"${PODS_ROOT}/../../node_modules/.pnpm/@react-native-vector-icons+material-design-icons@13.1.3_@expo+config-plugins@57.0.9_sup_5996683bec4c671827e6b8f4ea88c766/node_modules/@react-native-vector-icons/material-design-icons/fonts/MaterialDesignIcons.ttf",
+				"${PODS_ROOT}/../../node_modules/.pnpm/@react-native-vector-icons+ant-design@13.1.3_@expo+config-plugins@57.0.9_supports-color_3d1805f1e8654ea61b34b5d46ea57ba3/node_modules/@react-native-vector-icons/ant-design/fonts/AntDesign.ttf",
+				"${PODS_ROOT}/../../node_modules/.pnpm/@react-native-vector-icons+evil-icons@13.1.3_@expo+config-plugins@57.0.9_supports-color_4de8eb897c671103b1a2934653a24a27/node_modules/@react-native-vector-icons/evil-icons/fonts/EvilIcons.ttf",
+				"${PODS_ROOT}/../../node_modules/.pnpm/@react-native-vector-icons+feather@13.1.3_@expo+config-plugins@57.0.9_supports-color@8._87656230f3baf02e17ef4bc8627dcd4c/node_modules/@react-native-vector-icons/feather/fonts/Feather.ttf",
+				"${PODS_ROOT}/../../node_modules/.pnpm/@react-native-vector-icons+fontawesome6@13.1.3_@expo+config-plugins@57.0.9_supports-col_0a1fb928671b7da51a65410128e89959/node_modules/@react-native-vector-icons/fontawesome6/fonts/FontAwesome6_Brands.ttf",
+				"${PODS_ROOT}/../../node_modules/.pnpm/@react-native-vector-icons+fontawesome6@13.1.3_@expo+config-plugins@57.0.9_supports-col_0a1fb928671b7da51a65410128e89959/node_modules/@react-native-vector-icons/fontawesome6/fonts/FontAwesome6_Regular.ttf",
+				"${PODS_ROOT}/../../node_modules/.pnpm/@react-native-vector-icons+fontawesome6@13.1.3_@expo+config-plugins@57.0.9_supports-col_0a1fb928671b7da51a65410128e89959/node_modules/@react-native-vector-icons/fontawesome6/fonts/FontAwesome6_Solid.ttf",
+				"${PODS_ROOT}/../../node_modules/.pnpm/@react-native-vector-icons+ionicons@13.1.3_@expo+config-plugins@57.0.9_supports-color@8_e37ac7d550fc8b9482b65bf373a89526/node_modules/@react-native-vector-icons/ionicons/fonts/Ionicons.ttf",
+				"${PODS_ROOT}/../../node_modules/.pnpm/@react-native-vector-icons+material-design-icons@13.1.3_@expo+config-plugins@57.0.9_sup_f3cf2346b4304bdfebd1d205c277535c/node_modules/@react-native-vector-icons/material-design-icons/fonts/MaterialDesignIcons.ttf",
 				"${PODS_CONFIGURATION_BUILD_DIR}/react-native-view-shot/RNViewShotPrivacyInfo.bundle",
 			);
 			name = "[CP] Copy Pods Resources";
@@ -595,7 +595,7 @@
 					"-DRCT_REMOVE_LEGACY_ARCH=1",
 				);
 				PODFILE_DIR = "$(SRCROOT)";
-				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/.pnpm/react-native@0.86.3_@babel+core@7.29.7_supports-color@8.1.1__@react-native+jest-preset@_309316be75fe7b769e6d1d4c82d54927/node_modules/react-native";
+				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/.pnpm/react-native@0.86.3_@babel+core@7.29.7_supports-color@8.1.1__@react-native+jest-preset@_292478378266a36e55b1f2262faf1c24/node_modules/react-native";
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG";
 				SWIFT_ENABLE_EXPLICIT_MODULES = NO;
@@ -674,7 +674,7 @@
 					"-DRCT_REMOVE_LEGACY_ARCH=1",
 				);
 				PODFILE_DIR = "$(SRCROOT)";
-				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/.pnpm/react-native@0.86.3_@babel+core@7.29.7_supports-color@8.1.1__@react-native+jest-preset@_309316be75fe7b769e6d1d4c82d54927/node_modules/react-native";
+				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/.pnpm/react-native@0.86.3_@babel+core@7.29.7_supports-color@8.1.1__@react-native+jest-preset@_292478378266a36e55b1f2262faf1c24/node_modules/react-native";
 				SDKROOT = iphoneos;
 				SWIFT_ENABLE_EXPLICIT_MODULES = NO;
 				USE_HERMES = true;
