@@ -2,14 +2,14 @@ allowBuilds:
   '@firebase/util': true
   protobufjs: false
 minimumReleaseAgeExclude:
-  - '@expo/cli@57.0.19'
+  - '@expo/cli@57.0.19 || 57.0.22'
   - '@expo/inline-modules@0.1.7'
   - '@expo/local-build-cache-provider@57.0.8'
   - '@expo/log-box@57.0.4'
   - '@expo/metro-config@57.0.11'
   - '@expo/prebuild-config@57.0.15'
   - '@expo/router-server@57.0.8'
-  - '@expo/ui@57.0.14'
+  - '@expo/ui@57.0.14 || 57.0.16'
   - '@react-navigation/bottom-tabs@7.18.18'
   - '@react-navigation/drawer@7.13.10'
   - '@react-navigation/elements@2.9.40'
@@ -19,19 +19,19 @@ minimumReleaseAgeExclude:
   - axios@1.20.0
   - babel-preset-expo@57.0.9
   - expo-asset@57.0.15
-  - expo-build-properties@57.0.15
+  - expo-build-properties@57.0.15 || 57.0.17
   - expo-constants@57.0.15
   - expo-dev-client@57.0.16
   - expo-dev-launcher@57.0.16
   - expo-dev-menu@57.0.16
   - expo-file-system@57.0.6
-  - expo-image-manipulator@57.0.14
-  - expo-image-picker@57.0.14
+  - expo-image-manipulator@57.0.14 || 57.0.16
+  - expo-image-picker@57.0.14 || 57.0.16
   - expo-modules-autolinking@57.0.12
-  - expo-modules-core@57.0.14
-  - expo-modules-jsi@57.0.6
-  - expo-notifications@57.0.15
+  - expo-modules-core@57.0.14 || 57.0.16
+  - expo-modules-jsi@57.0.6 || 57.0.8
+  - expo-notifications@57.0.15 || 57.0.17
   - expo-secure-store@57.0.2
-  - expo-sharing@57.0.16
+  - expo-sharing@57.0.16 || 57.0.18
   - expo-system-ui@57.0.3
-  - expo@57.0.17
+  - expo@57.0.17 || 57.0.20
