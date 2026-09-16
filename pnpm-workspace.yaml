@@ -19,7 +19,7 @@ minimumReleaseAgeExclude:
   - axios@1.20.0
   - babel-preset-expo@57.0.9
   - expo-asset@57.0.15
-  - expo-build-properties@57.0.15 || 57.0.17
+  - expo-build-properties@57.0.15 || 57.0.17 || 57.0.20
   - expo-constants@57.0.15
   - expo-dev-client@57.0.16
   - expo-dev-launcher@57.0.16
