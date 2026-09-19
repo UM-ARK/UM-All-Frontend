@@ -20,8 +20,14 @@ const WEB_STUBS = {
     'expo-media-library': 'media-library.js',
     'react-native-quick-crypto': 'quick-crypto.js',
 };
+// 全平台：把 react-native-size-matters 指向本地替身，寬屏（iPad／桌面）下把縮放係數封頂，
+// 手機行為不變；3000 多處 scale() 調用無需逐一修改。替身本身不得再 import 該包，否則自我循環
+const SCALING_SHIM = path.resolve(__dirname, 'src/utils/scaling.js');
 const defaultResolveRequest = config.resolver.resolveRequest;
 config.resolver.resolveRequest = (context, moduleName, platform) => {
+    if (moduleName === 'react-native-size-matters') {
+        return { type: 'sourceFile', filePath: SCALING_SHIM };
+    }
     if (platform === 'web' && WEB_STUBS[moduleName]) {
         return {
             type: 'sourceFile',
