@@ -113,3 +113,6 @@ web-build/
 # Apple Distribution Certificate
 *.cer
 *.p12
+
+# Claude Code 本地預覽配置
+.claude/
