@@ -2954,15 +2954,15 @@ DEPENDENCIES:
   - "EXConstants (from `../node_modules/.pnpm/expo-constants@57.0.18_expo@57.0.23_react-native@0.86.3_@babel+core@7.29.7_supports-col_540e0ea6800854a29fcfcda35208c479/node_modules/expo-constants/ios`)"
   - "EXJSONUtils (from `../node_modules/.pnpm/expo-json-utils@57.0.2/node_modules/expo-json-utils/ios`)"
   - "EXManifests (from `../node_modules/.pnpm/expo-manifests@57.0.2_expo@57.0.23/node_modules/expo-manifests/ios`)"
-  - "Expo (from `../node_modules/.pnpm/expo@57.0.23_4b45ebfe82357add97f3b33d7ef18f5c/node_modules/expo`)"
+  - "Expo (from `../node_modules/.pnpm/expo@57.0.23_386863633021909c4f9c7691742a0748/node_modules/expo`)"
   - "expo-dev-client (from `../node_modules/.pnpm/expo-dev-client@57.0.19_expo@57.0.23_react-native@0.86.3_@babel+core@7.29.7_supports-co_8a31871d6a09997cbbc4fa121387e86b/node_modules/expo-dev-client/ios`)"
   - "expo-dev-launcher (from `../node_modules/.pnpm/expo-dev-launcher@57.0.20_expo@57.0.23_react-native@0.86.3_@babel+core@7.29.7_supports-_785fe828eb78e021918e5c48bf4900d8/node_modules/expo-dev-launcher`)"
   - "expo-dev-menu (from `../node_modules/.pnpm/expo-dev-menu@57.0.18_expo@57.0.23_react-native@0.86.3_@babel+core@7.29.7_supports-colo_4e44f4fac3e17f480210705529978c7f/node_modules/expo-dev-menu`)"
   - "expo-dev-menu-interface (from `../node_modules/.pnpm/expo-dev-menu-interface@57.0.0_expo@57.0.23/node_modules/expo-dev-menu-interface/ios`)"
   - "ExpoAsset (from `../node_modules/.pnpm/expo-asset@57.0.17_expo@57.0.23_react-native@0.86.3_@babel+core@7.29.7_supports-color@8_925d3ddae00b8e438df61f4fea460a9a/node_modules/expo-asset/ios`)"
   - "ExpoBlur (from `../node_modules/.pnpm/expo-blur@57.0.3_expo@57.0.23_react-native@0.86.3_@babel+core@7.29.7_supports-color@8.1_6a58520cd31e3ea0d67a5797b3ee0b4c/node_modules/expo-blur/ios`)"
-  - "ExpoCamera (from `../node_modules/.pnpm/expo-camera@57.0.5_@types+emscripten@1.41.5_expo@57.0.23_react-native@0.86.3_@babel+cor_b182db3cd5c23665b17a6ebe5275e67d/node_modules/expo-camera/ios/ExpoCamera.podspec`)"
-  - "ExpoCameraBarcodeScanning (from `../node_modules/.pnpm/expo-camera@57.0.5_@types+emscripten@1.41.5_expo@57.0.23_react-native@0.86.3_@babel+cor_b182db3cd5c23665b17a6ebe5275e67d/node_modules/expo-camera/ios/ExpoCameraBarcodeScanning.podspec`)"
+  - "ExpoCamera (from `../node_modules/.pnpm/expo-camera@57.0.5_@types+emscripten@1.41.5_expo@57.0.23_react-native-web@0.21.2_react-_d2c8b34578ed160f9b8f400e0332c91a/node_modules/expo-camera/ios/ExpoCamera.podspec`)"
+  - "ExpoCameraBarcodeScanning (from `../node_modules/.pnpm/expo-camera@57.0.5_@types+emscripten@1.41.5_expo@57.0.23_react-native-web@0.21.2_react-_d2c8b34578ed160f9b8f400e0332c91a/node_modules/expo-camera/ios/ExpoCameraBarcodeScanning.podspec`)"
   - "ExpoClipboard (from `../node_modules/.pnpm/expo-clipboard@57.0.2_expo@57.0.23_react-native@0.86.3_@babel+core@7.29.7_supports-colo_377fb68bbae78eee2f2df0a01aed6818/node_modules/expo-clipboard/ios`)"
   - "ExpoCrypto (from `../node_modules/.pnpm/expo-crypto@57.0.3_expo@57.0.23/node_modules/expo-crypto/ios`)"
   - "ExpoDevice (from `../node_modules/.pnpm/expo-device@57.0.2_expo@57.0.23/node_modules/expo-device/ios`)"
@@ -2971,7 +2971,7 @@ DEPENDENCIES:
   - "ExpoFont (from `../node_modules/.pnpm/expo-font@57.0.4_expo@57.0.23_react-native@0.86.3_@babel+core@7.29.7_supports-color@8.1_32ad577912038d9bda2a9164548c4955/node_modules/expo-font/ios/ExpoFont.podspec`)"
   - "ExpoGlassEffect (from `../node_modules/.pnpm/expo-glass-effect@57.0.3_expo@57.0.23_react-native@0.86.3_@babel+core@7.29.7_supports-c_39c95d8d046fd61c7c2e77703580b3c6/node_modules/expo-glass-effect/ios`)"
   - "ExpoHaptics (from `../node_modules/.pnpm/expo-haptics@57.0.3_expo@57.0.23/node_modules/expo-haptics/ios`)"
-  - "ExpoImage (from `../node_modules/.pnpm/expo-image@57.0.5_expo@57.0.23_react-native@0.86.3_@babel+core@7.29.7_supports-color@8._e7267b0f89f4dc78c7e1c460ae3355d9/node_modules/expo-image/ios/ExpoImage.podspec`)"
+  - "ExpoImage (from `../node_modules/.pnpm/expo-image@57.0.5_expo@57.0.23_react-native-web@0.21.2_react-dom@19.2.3_react@19.2.3__r_265199edf07af670b59e31bedd759470/node_modules/expo-image/ios/ExpoImage.podspec`)"
   - "ExpoImageManipulator (from `../node_modules/.pnpm/expo-image-manipulator@57.0.18_expo@57.0.23/node_modules/expo-image-manipulator/ios/ExpoImageManipulator.podspec`)"
   - "ExpoImagePicker (from `../node_modules/.pnpm/expo-image-picker@57.0.18_expo@57.0.23/node_modules/expo-image-picker/ios`)"
   - "ExpoKeepAwake (from `../node_modules/.pnpm/expo-keep-awake@57.0.2_expo@57.0.23_react@19.2.3/node_modules/expo-keep-awake/ios`)"
@@ -2987,7 +2987,7 @@ DEPENDENCIES:
   - "ExpoSecureStore (from `../node_modules/.pnpm/expo-secure-store@57.0.4_expo@57.0.23/node_modules/expo-secure-store/ios`)"
   - "ExpoSharing (from `../node_modules/.pnpm/expo-sharing@57.0.20_expo@57.0.23_react-native@0.86.3_@babel+core@7.29.7_supports-color_42c25bb2eb15bd8651671a445e56b478/node_modules/expo-sharing/ios`)"
   - "ExpoSplashScreen (from `../node_modules/.pnpm/expo-splash-screen@57.0.9_expo@57.0.23_supports-color@8.1.1_typescript@6.0.3/node_modules/expo-splash-screen/ios`)"
-  - "ExpoSystemUI (from `../node_modules/.pnpm/expo-system-ui@57.0.4_expo@57.0.23_react-native@0.86.3_@babel+core@7.29.7_supports-colo_6bc0e304b700d16a37bac4946ff964db/node_modules/expo-system-ui/ios`)"
+  - "ExpoSystemUI (from `../node_modules/.pnpm/expo-system-ui@57.0.4_expo@57.0.23_react-native-web@0.21.2_react-dom@19.2.3_react@19.2._fbc7012ee9240e927effcc4b3b00d196/node_modules/expo-system-ui/ios`)"
   - "ExpoUI (from `../node_modules/.pnpm/@expo+ui@57.0.18_@babel+core@7.29.7_supports-color@8.1.1__@types+react@19.2.18_expo@57._9f8328575af31495ecc6068fd08747cb/node_modules/@expo/ui/ios`)"
   - "ExpoWebBrowser (from `../node_modules/.pnpm/expo-web-browser@57.0.3_expo@57.0.23_react-native@0.86.3_@babel+core@7.29.7_supports-co_d6ce81bd68f084ebcefc366d525f40b6/node_modules/expo-web-browser/ios`)"
   - "EXUpdatesInterface (from `../node_modules/.pnpm/expo-updates-interface@57.0.2_expo@57.0.23/node_modules/expo-updates-interface/ios`)"
@@ -3121,7 +3121,7 @@ EXTERNAL SOURCES:
   EXManifests:
     :path: "../node_modules/.pnpm/expo-manifests@57.0.2_expo@57.0.23/node_modules/expo-manifests/ios"
   Expo:
-    :path: "../node_modules/.pnpm/expo@57.0.23_4b45ebfe82357add97f3b33d7ef18f5c/node_modules/expo"
+    :path: "../node_modules/.pnpm/expo@57.0.23_386863633021909c4f9c7691742a0748/node_modules/expo"
   expo-dev-client:
     :path: "../node_modules/.pnpm/expo-dev-client@57.0.19_expo@57.0.23_react-native@0.86.3_@babel+core@7.29.7_supports-co_8a31871d6a09997cbbc4fa121387e86b/node_modules/expo-dev-client/ios"
   expo-dev-launcher:
@@ -3135,9 +3135,9 @@ EXTERNAL SOURCES:
   ExpoBlur:
     :path: "../node_modules/.pnpm/expo-blur@57.0.3_expo@57.0.23_react-native@0.86.3_@babel+core@7.29.7_supports-color@8.1_6a58520cd31e3ea0d67a5797b3ee0b4c/node_modules/expo-blur/ios"
   ExpoCamera:
-    :podspec: "../node_modules/.pnpm/expo-camera@57.0.5_@types+emscripten@1.41.5_expo@57.0.23_react-native@0.86.3_@babel+cor_b182db3cd5c23665b17a6ebe5275e67d/node_modules/expo-camera/ios/ExpoCamera.podspec"
+    :podspec: "../node_modules/.pnpm/expo-camera@57.0.5_@types+emscripten@1.41.5_expo@57.0.23_react-native-web@0.21.2_react-_d2c8b34578ed160f9b8f400e0332c91a/node_modules/expo-camera/ios/ExpoCamera.podspec"
   ExpoCameraBarcodeScanning:
-    :podspec: "../node_modules/.pnpm/expo-camera@57.0.5_@types+emscripten@1.41.5_expo@57.0.23_react-native@0.86.3_@babel+cor_b182db3cd5c23665b17a6ebe5275e67d/node_modules/expo-camera/ios/ExpoCameraBarcodeScanning.podspec"
+    :podspec: "../node_modules/.pnpm/expo-camera@57.0.5_@types+emscripten@1.41.5_expo@57.0.23_react-native-web@0.21.2_react-_d2c8b34578ed160f9b8f400e0332c91a/node_modules/expo-camera/ios/ExpoCameraBarcodeScanning.podspec"
   ExpoClipboard:
     :path: "../node_modules/.pnpm/expo-clipboard@57.0.2_expo@57.0.23_react-native@0.86.3_@babel+core@7.29.7_supports-colo_377fb68bbae78eee2f2df0a01aed6818/node_modules/expo-clipboard/ios"
   ExpoCrypto:
@@ -3155,7 +3155,7 @@ EXTERNAL SOURCES:
   ExpoHaptics:
     :path: "../node_modules/.pnpm/expo-haptics@57.0.3_expo@57.0.23/node_modules/expo-haptics/ios"
   ExpoImage:
-    :podspec: "../node_modules/.pnpm/expo-image@57.0.5_expo@57.0.23_react-native@0.86.3_@babel+core@7.29.7_supports-color@8._e7267b0f89f4dc78c7e1c460ae3355d9/node_modules/expo-image/ios/ExpoImage.podspec"
+    :podspec: "../node_modules/.pnpm/expo-image@57.0.5_expo@57.0.23_react-native-web@0.21.2_react-dom@19.2.3_react@19.2.3__r_265199edf07af670b59e31bedd759470/node_modules/expo-image/ios/ExpoImage.podspec"
   ExpoImageManipulator:
     :podspec: "../node_modules/.pnpm/expo-image-manipulator@57.0.18_expo@57.0.23/node_modules/expo-image-manipulator/ios/ExpoImageManipulator.podspec"
   ExpoImagePicker:
@@ -3187,7 +3187,7 @@ EXTERNAL SOURCES:
   ExpoSplashScreen:
     :path: "../node_modules/.pnpm/expo-splash-screen@57.0.9_expo@57.0.23_supports-color@8.1.1_typescript@6.0.3/node_modules/expo-splash-screen/ios"
   ExpoSystemUI:
-    :path: "../node_modules/.pnpm/expo-system-ui@57.0.4_expo@57.0.23_react-native@0.86.3_@babel+core@7.29.7_supports-colo_6bc0e304b700d16a37bac4946ff964db/node_modules/expo-system-ui/ios"
+    :path: "../node_modules/.pnpm/expo-system-ui@57.0.4_expo@57.0.23_react-native-web@0.21.2_react-dom@19.2.3_react@19.2._fbc7012ee9240e927effcc4b3b00d196/node_modules/expo-system-ui/ios"
   ExpoUI:
     :path: "../node_modules/.pnpm/@expo+ui@57.0.18_@babel+core@7.29.7_supports-color@8.1.1__@types+react@19.2.18_expo@57._9f8328575af31495ecc6068fd08747cb/node_modules/@expo/ui/ios"
   ExpoWebBrowser:
