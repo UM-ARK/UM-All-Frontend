@@ -20,6 +20,12 @@ export const WINDOW_BREAKPOINTS = {
     large: 1200,
 };
 
+/** 頂部段落 Tab 條（搵課／課表、服務／百科）最大寬度：寬屏時不再把兩個 Tab 拉到左右兩端 */
+export const TOP_TAB_STRIP_MAX_WIDTH = 480;
+
+/** 列表型頁面內容最大寬度：超寬屏（外接顯示器）居中，避免卡片欄無限變寬 */
+export const WIDE_CONTENT_MAX_WIDTH = 1440;
+
 export const getWindowSizeClass = width => {
     if (width >= WINDOW_BREAKPOINTS.large) {
         return WINDOW_SIZE_CLASS.large;
@@ -36,8 +42,10 @@ export const getWindowSizeClass = width => {
 /**
  * 隨窗口尺寸（旋轉、iPad 分屏、瀏覽器拖動）即時更新的尺寸等級。
  *
- * @returns {{ width: number, height: number, sizeClass: string, isExpanded: boolean }}
+ * @returns {{ width: number, height: number, sizeClass: string, isCompact: boolean, isExpanded: boolean, isLarge: boolean }}
+ *   isCompact：手機寬度，維持現有單欄排版
  *   isExpanded：達到 expanded 及以上，適合左右分欄
+ *   isLarge：達到 large 及以上，可再多開一欄
  */
 export const useWindowSizeClass = () => {
     const { width, height } = useWindowDimensions();
@@ -46,6 +54,8 @@ export const useWindowSizeClass = () => {
         width,
         height,
         sizeClass,
+        isCompact: sizeClass === WINDOW_SIZE_CLASS.compact,
         isExpanded: width >= WINDOW_BREAKPOINTS.expanded,
+        isLarge: width >= WINDOW_BREAKPOINTS.large,
     };
 };

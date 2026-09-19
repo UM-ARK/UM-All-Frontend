@@ -3,11 +3,9 @@ import { View } from 'react-native';
 import { MaterialTopTabBar } from '@react-navigation/material-top-tabs';
 
 import { useTheme } from '../../../../components/ThemeContext';
+import { TOP_TAB_STRIP_MAX_WIDTH } from '../../../../utils/windowSizeClass';
 import { COURSE_TOP_BAR_HEIGHT } from '../constants';
 import CourseMoreMenu from './CourseMoreMenu';
-
-/** 段落 Tab 條最大寬度：寬屏時兩個 Tab 不再被拉到左右兩端，手機寬度小於此值不受影響 */
-const TAB_STRIP_MAX_WIDTH = 480;
 
 /**
  * 選課頁頂欄：段落 Tab（搵課／課表）+ 右側 ⋯。
@@ -44,7 +42,8 @@ const CourseTabBar = ({
             },
             tabStrip: {
                 width: '100%',
-                maxWidth: TAB_STRIP_MAX_WIDTH,
+                // 寬屏時兩個 Tab 不再被拉到左右兩端，手機寬度小於此值不受影響
+                maxWidth: TOP_TAB_STRIP_MAX_WIDTH,
                 alignSelf: 'center',
             },
         }),
