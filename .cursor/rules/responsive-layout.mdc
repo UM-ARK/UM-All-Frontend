@@ -51,6 +51,10 @@ const { isExpanded } = useWindowSizeClass(); // ≥ 840 即分欄
 頁面只問「是否達到某個等級」，不要自己寫 `width > 900` 之類的判斷。
 用 `useWindowDimensions`（官方 hook）而非模塊頂層 `Dimensions.get`，旋轉、分屏、拖窗口都能即時響應。
 
+同檔案還提供兩個共用佈局常量：
+- `TOP_TAB_STRIP_MAX_WIDTH`（480）：頂部段落 Tab 條封頂居中，手機寬度小於此值自然不受影響。
+- `WIDE_CONTENT_MAX_WIDTH`（1440）：列表型頁面內容封頂居中，超寬屏不再無限拉伸。
+
 ### 3. 寬屏是「殼子」的差異，不是「內容」的差異
 
 同一組子組件（搜索欄、篩選面板、卡片網格、頁腳）只寫一次，賦給變量；
@@ -104,6 +108,34 @@ return isExpanded ? (
 - 行尾剩餘欄位「只增不減」補給最窄的卡片，單張最多撐到一條車道寬 —— 寬屏上不會出現橫跨整個桌面的長條。
 - 單車道下與原本手機規則完全等價（`courseGrid.test.js` 保證）。
 
+## 多欄卡片流：`balanceColumns()`
+
+`src/utils/balanceColumns.js`（純函數，有單元測試）。適用於「一串分類卡／區塊」型頁面（服務頁）：
+
+- 欄數由尺寸等級決定：compact／medium 1 欄、expanded 2 欄、large 3 欄。
+- 每個區塊依序放進**當前累計權重最小的一欄**，權重用估算行數（`ceil(條目數 ÷ 每行圖標數) + 標題半行`），
+  各欄結尾盡量齊平；權重相同取最左欄，保持閱讀順序。
+- 單欄時就是原本的順序，手機零改動。
+- 卡片內的 `FlatGrid` 靠自身 `onLayout` 決定每行圖標數；`maxItemsPerRow` 手機 5、寬屏 8，
+  避免 5 個圖標被拉開成大間距。少量固定條目（常用服務 4 個）在寬屏用 `maxDimension` 限寬，不再拉到整行。
+
+```jsx
+const cardColumns = useMemo(
+    () => balanceColumns(sections, cardColumnCount, section => estimateRows(section) + 0.5),
+    [...],
+);
+
+<View style={{ width: '100%', maxWidth: WIDE_CONTENT_MAX_WIDTH, alignSelf: 'center' }}>
+    <View style={{ flexDirection: 'row', alignItems: 'flex-start' }}>
+        {cardColumns.map((sections, columnIndex) => (
+            <View key={columnIndex} style={{ flex: 1 }}>
+                {sections.map(renderCard)}
+            </View>
+        ))}
+    </View>
+</View>
+```
+
 ## `.web.js` 的用途邊界
 
 只在**平台 API 不同**時用 `.web.js`：路由殼子（`Nav.web.js`、`Tabbar.web.js`）、原生模塊替身（`src/web-stubs/`）。
@@ -113,9 +145,10 @@ return isExpanded ? (
 
 - ✅ 搵課段落（`course/pages/what2Reg`）：左欄篩選 + 右欄多車道網格，頂部 Tab 條居中。
 - ✅ 全局縮放封頂（影響 iPad 原生所有頁面）。
+- ✅ 服務頁（`features/index.js`）：內容封頂 1440 居中，分類卡 2／3 欄平衡分佈，圖標行上限放寬。
 - ⬜ 課表段落（`course/pages/courseSim`）：寬屏時時間表加 `maxWidth` 居中，或左側課表 + 右側已選清單。
 - ⬜ 課程詳情 `LocalCourse`、活動詳情：加「閱讀寬度」約束（正文 `maxWidth` 約 680–720）。
-- ⬜ 組織活動、服務兩個 Tab：列表改多欄。
+- ⬜ 組織活動 Tab、百科：列表改多欄或封頂閱讀寬度。
 
 ## 參考
 
