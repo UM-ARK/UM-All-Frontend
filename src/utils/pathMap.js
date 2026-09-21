@@ -1,17 +1,24 @@
 // 網站地址映射
+import { Platform } from 'react-native';
+
+// 用適配API返回的圖片相對路徑
+export const BASE_HOST = 'https://umall.one';
+// API 請求的主機：web 本地調試時 umall.one 不回 Access-Control-Allow-Origin，瀏覽器會被 CORS 擋下，
+// 所以改走空主機（同源相對路徑），由 metro.config.js 的代理轉發到線上；手機端與正式構建仍直連
+const API_HOST = Platform.OS === 'web' && typeof __DEV__ !== 'undefined' && __DEV__
+    ? ''
+    : BASE_HOST;
 
 // 服務器基地址，其他分地址可以直接寫'/bus'、'/login'
-export const BASE_URI = 'https://umall.one/api/';
+export const BASE_URI = API_HOST + '/api/';
 // Scheduling API 專用 base（不可拼接以 /api/ 結尾的 BASE_URI）
 // TODO: 上線前修改 umall.one
 // export const SCHEDULING_BASE_URI = 'http://192.168.1.230:8000/api/v2';
-export const SCHEDULING_BASE_URI = 'https://umall.one/api/v2';
+export const SCHEDULING_BASE_URI = API_HOST + '/api/v2';
 export const HARBOR_PUSH_URL = SCHEDULING_BASE_URI + '/push/harbor';
-// 用適配API返回的圖片相對路徑
-export const BASE_HOST = 'https://umall.one';
 
-export const UM_BUS_LIVE = BASE_HOST + '/api/v2/bus/live';
-export const UM_BUS_STATS = BASE_HOST + '/api/v2/bus/stats';
+export const UM_BUS_LIVE = API_HOST + '/api/v2/bus/live';
+export const UM_BUS_STATS = API_HOST + '/api/v2/bus/stats';
 
 export const ARK_APP_LINK = BASE_HOST + '/app';
 
