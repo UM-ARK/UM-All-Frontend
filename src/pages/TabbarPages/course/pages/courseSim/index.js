@@ -189,7 +189,8 @@ function CourseSim({ route, navigation }) {
 
     // state
     const [importTimeTableText, setImportTimeTableText] = useState(''); // 空課表引導的貼上導入
-    const [searchText, setSearchText] = useState(initialCheckCode);
+    // 必須是字串：web 的 <input> 收到 value={null} 會報錯並退化成非受控
+    const [searchText, setSearchText] = useState(initialCheckCode ?? '');
     const [perSearchText, setPerSearchText] = useState(null);
 
     const [dayFilterChoice, setDayFilterChoice] = useState(null);
@@ -1686,7 +1687,7 @@ E11-0000
                             paddingVertical: scale(6),
                         }}
                         onChangeText={onChangeText}
-                        value={value}
+                        value={value ?? ''}
                         selectTextOnFocus
                         placeholder={placeholder}
                         placeholderTextColor={black.third}
@@ -2149,7 +2150,9 @@ E11-0000
         const filterCourseList = searchText
             ? handleSearchFilterCourse(searchText)
             : [];
-        const haveSearchResult = searchText && filterCourseList.length > 0;
+        // 必須是布林：'' && ... 會把空字串當文字節點塞進 View，web 會報錯
+        const haveSearchResult =
+            Boolean(searchText) && filterCourseList.length > 0;
         const activeTimeFilter = {
             day: dayFilterChoice,
             from: timeFilterFrom,
@@ -2204,7 +2207,7 @@ E11-0000
                     }),
                     showBack: Boolean(perSearchText),
                     onBackPress: () => {
-                        setSearchText(perSearchText);
+                        setSearchText(perSearchText ?? '');
                         setPerSearchText(null);
                     },
                 })}
