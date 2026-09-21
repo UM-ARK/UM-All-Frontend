@@ -23,6 +23,12 @@ import { APP_LINKING } from './utils/appLinks';
 
 const Stack = createNativeStackNavigator();
 
+// 正式 web 版部署在 umall.one/webAPP/ 子路徑下，須與 app.json 的 experiments.baseUrl 保持一致。
+// 前綴直接寫進路由路徑，讓刷新頁面和分享出去的鏈接都留在 /webAPP/ 之下，
+// 不會落到同域名官網（Next.js）的路由裡
+const WEB_BASE_PATH = 'webAPP';
+const withBasePath = path => `${WEB_BASE_PATH}/${path}`;
+
 // 只保留 web 端存在的路由，避免瀏覽器地址欄解析到未掛載的頁面
 const WEB_LINKING = {
     prefixes: APP_LINKING.prefixes,
@@ -30,18 +36,18 @@ const WEB_LINKING = {
         initialRouteName: 'Tabbar',
         screens: {
             Tabbar: {
-                path: '',
+                path: WEB_BASE_PATH,
                 screens: {
                     CourseTab: 'course',
                     FeaturesTabbar: 'features',
                     SettingPage: 'settings',
                 },
             },
-            LocalCourse: APP_LINKING.config.screens.LocalCourse,
-            ClubDetail: APP_LINKING.config.screens.ClubDetail,
-            EventDetail: APP_LINKING.config.screens.EventDetail,
-            AllEvents: 'events',
-            UMOrg: 'org',
+            LocalCourse: withBasePath(APP_LINKING.config.screens.LocalCourse),
+            ClubDetail: withBasePath(APP_LINKING.config.screens.ClubDetail),
+            EventDetail: withBasePath(APP_LINKING.config.screens.EventDetail),
+            AllEvents: withBasePath('events'),
+            UMOrg: withBasePath('org'),
         },
     },
 };
