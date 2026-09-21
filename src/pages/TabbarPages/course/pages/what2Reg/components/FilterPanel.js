@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ActivityIndicator, FlatList, LayoutAnimation, Switch, View } from 'react-native';
+import { ActivityIndicator, FlatList, LayoutAnimation, Platform, Switch, View } from 'react-native';
 import { scale, verticalScale } from 'react-native-size-matters';
 import { t } from 'i18next';
 import Ionicons from "@react-native-vector-icons/ionicons";
@@ -373,43 +373,60 @@ const FilterPanel = ({
         />
     );
 
+    const renderDepaItem = item => (
+        <TouchableScale
+            key={item}
+            style={{
+                ...classItmStyle,
+                paddingHorizontal: scale(5),
+                paddingVertical: scale(2),
+                backgroundColor: filterOptions.depaName === item ? activeBackgroundColor : null,
+            }}
+            onPress={() => {
+                trigger();
+                onUpdateFilterOptions({ ...filterOptions, depaName: item });
+            }}
+        >
+            <Text style={{
+                ...uiStyle.defaultText,
+                alignSelf: 'center',
+                color: filterOptions.depaName === item ? activeColor : black.third,
+                fontWeight: filterOptions.depaName === item ? '900' : 'normal',
+                fontSize: scale(12),
+            }}>
+                {item === DEPARTMENT_ALL
+                    ? t('全部', { ns: 'catalog' })
+                    : item === DEPARTMENT_UNSPECIFIED
+                        ? t('未指定學系', { ns: 'catalog' })
+                        : item}
+            </Text>
+        </TouchableScale>
+    );
+
+    // 學系列表：原生端橫向滾動；web 端鼠標難以橫向滾動，改為與學院列表一致的換行居中排版
     const renderDepaSwitch = offerDepaList => (
-        <FlatList
-            data={offerDepaList}
-            keyExtractor={item => item}
-            horizontal
-            scrollEnabled
-            style={{ ...FLAT_LIST_STYLE, marginTop: scale(5) }}
-            contentContainerStyle={{ alignItems: 'center' }}
-            renderItem={({ item }) => (
-                <TouchableScale
-                    style={{
-                        ...classItmStyle,
-                        paddingHorizontal: scale(5),
-                        paddingVertical: scale(2),
-                        backgroundColor: filterOptions.depaName === item ? activeBackgroundColor : null,
-                    }}
-                    onPress={() => {
-                        trigger();
-                        onUpdateFilterOptions({ ...filterOptions, depaName: item });
-                    }}
-                >
-                    <Text style={{
-                        ...uiStyle.defaultText,
-                        alignSelf: 'center',
-                        color: filterOptions.depaName === item ? activeColor : black.third,
-                        fontWeight: filterOptions.depaName === item ? '900' : 'normal',
-                        fontSize: scale(12),
-                    }}>
-                        {item === DEPARTMENT_ALL
-                            ? t('全部', { ns: 'catalog' })
-                            : item === DEPARTMENT_UNSPECIFIED
-                                ? t('未指定學系', { ns: 'catalog' })
-                                : item}
-                    </Text>
-                </TouchableScale>
-            )}
-        />
+        Platform.OS === 'web' ? (
+            <View style={{
+                flexDirection: 'row',
+                flexWrap: 'wrap',
+                justifyContent: 'center',
+                alignItems: 'center',
+                width: '100%',
+                marginTop: scale(5),
+            }}>
+                {offerDepaList.map(renderDepaItem)}
+            </View>
+        ) : (
+            <FlatList
+                data={offerDepaList}
+                keyExtractor={item => item}
+                horizontal
+                scrollEnabled
+                style={{ ...FLAT_LIST_STYLE, marginTop: scale(5) }}
+                contentContainerStyle={{ alignItems: 'center' }}
+                renderItem={({ item }) => renderDepaItem(item)}
+            />
+        )
     );
 
     const isTimeRangeDefault = timeFilter.from === DEFAULT_TIME_FROM && timeFilter.to === DEFAULT_TIME_TO;
