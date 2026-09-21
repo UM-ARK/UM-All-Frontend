@@ -42,7 +42,7 @@ config.resolver.resolveRequest = (context, moduleName, platform) => {
 
 // web 本地調試：umall.one/api 不回 CORS 頭，瀏覽器直連會被擋，於是讓 Metro 開發服務器把
 // /api/* 原樣轉發到線上後端（頁面側在 src/utils/pathMap.js 裡改走同源相對路徑）。
-// 手機端直接請求 umall.one，不會經過這裡；正式 web 構建也不走 Metro，需部署在同源或後端補 CORS
+// 手機端直接請求 umall.one，不會經過這裡；正式 web 構建也不走 Metro，部署在 umall.one/webAPP/ 與 /api/ 同源
 const API_PROXY_HOST = 'umall.one';
 const API_PROXY_PREFIX = '/api/';
 const defaultEnhanceMiddleware = config.server.enhanceMiddleware;

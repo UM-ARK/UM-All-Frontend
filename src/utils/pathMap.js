@@ -3,11 +3,10 @@ import { Platform } from 'react-native';
 
 // 用適配API返回的圖片相對路徑
 export const BASE_HOST = 'https://umall.one';
-// API 請求的主機：web 本地調試時 umall.one 不回 Access-Control-Allow-Origin，瀏覽器會被 CORS 擋下，
-// 所以改走空主機（同源相對路徑），由 metro.config.js 的代理轉發到線上；手機端與正式構建仍直連
-const API_HOST = Platform.OS === 'web' && typeof __DEV__ !== 'undefined' && __DEV__
-    ? ''
-    : BASE_HOST;
+// API 請求的主機：web 端一律走空主機（同源相對路徑）。本地調試時由 metro.config.js 的代理把
+// /api/* 轉發到線上；正式構建部署在 umall.one/webAPP/，與 /api/ 同源，瀏覽器不會觸發 CORS。
+// 手機端仍直連 umall.one
+const API_HOST = Platform.OS === 'web' ? '' : BASE_HOST;
 
 // 服務器基地址，其他分地址可以直接寫'/bus'、'/login'
 export const BASE_URI = API_HOST + '/api/';

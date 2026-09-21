@@ -66,6 +66,14 @@
         "android.permission.READ_MEDIA_VIDEO"
       ]
     },
+    "web": {
+      "name": "ARK ALL",
+      "favicon": "./src/static/img/logo.png",
+      "bundler": "metro"
+    },
+    "experiments": {
+      "baseUrl": "/webAPP"
+    },
     "plugins": [
       "./plugins/withAndroidSigning",
       "./plugins/withRNFirebaseDisableSPM",
