@@ -1,14 +1,22 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, {
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from 'react';
 import { Alert, View } from 'react-native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { SafeAreaView } from 'react-native-screens/experimental';
-import { useIsFocused, useNavigation } from '@react-navigation/native';
+import {
+    useIsFocused,
+    useNavigation,
+    useRoute,
+} from '@react-navigation/native';
 import { Dialog } from '@rneui/themed';
-import { scale } from 'react-native-size-matters';
 import { useTranslation } from 'react-i18next';
 
-import Text from '../../../components/AppText';
-import { useTheme, uiStyle } from '../../../components/ThemeContext';
+import { useTheme } from '../../../components/ThemeContext';
 import { trigger } from '../../../utils/trigger';
 import { openLink } from '../../../utils/browser';
 import { UM_PRE_ENROLMENT_EXCEL } from '../../../utils/pathMap';
@@ -19,103 +27,25 @@ import {
     isCourseSegment,
 } from '../../../utils/courseNavigation';
 import { getLocalStorage, setLocalStorage } from '../../../utils/storageKits';
+import { useWindowSizeClass } from '../../../utils/windowSizeClass';
 import What2Reg from './pages/what2Reg';
 import CourseSim from './pages/courseSim';
 import CourseTabBar from './components/CourseTabBar';
+import CoursePaneHeader from './components/CoursePaneHeader';
+import SplitPaneDivider from './components/SplitPaneDivider';
+import TimetableTabLabel from './components/TimetableTabLabel';
 import { CoursePlanProvider, useCoursePlan } from './context/CoursePlanContext';
 import {
     TAB_BAR_HEIGHT,
     TAB_INDICATOR_WIDTH,
     TAB_LABEL_FONT_SIZE,
+    SEARCH_PANE_DEFAULT_WIDTH,
+    SEARCH_PANE_MIN_WIDTH,
+    TIMETABLE_PANE_MIN_WIDTH,
+    SPLIT_PANE_WIDTH_STORAGE_KEY,
 } from './constants';
 
 const Tab = createMaterialTopTabNavigator();
-
-/**
- * 課表段落 Tab 角標：
- * - 有衝突 → 顯示衝突數
- * - 尚未選課 → 小紅點提示去排課
- *
- * 必須嵌在 tabBarLabel 上並用 absolute 疊加，不可用 tabBarBadge（會貼到 ⋯），
- * 也不可佔 flex 寬度（會擠開「課表」與底線）。
- */
-const TimetableTabBadge = () => {
-    const { theme } = useTheme();
-    const { unread, trueWhite } = theme;
-    const { conflictCount, planList } = useCoursePlan();
-
-    if (conflictCount > 0) {
-        return (
-            <View
-                pointerEvents="none"
-                style={{
-                    position: 'absolute',
-                    top: scale(-4),
-                    right: scale(-10),
-                    minWidth: scale(13),
-                    paddingHorizontal: scale(3),
-                    borderRadius: scale(7),
-                    backgroundColor: unread,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                }}>
-                <Text
-                    style={{
-                        ...uiStyle.defaultText,
-                        color: trueWhite,
-                        fontSize: scale(8),
-                        fontWeight: 'bold',
-                    }}>
-                    {conflictCount}
-                </Text>
-            </View>
-        );
-    }
-
-    if (planList.length === 0) {
-        return (
-            <View
-                pointerEvents="none"
-                style={{
-                    position: 'absolute',
-                    top: scale(-2),
-                    right: scale(-6),
-                    width: scale(7),
-                    height: scale(7),
-                    borderRadius: scale(4),
-                    backgroundColor: unread,
-                }}
-            />
-        );
-    }
-
-    return null;
-};
-
-/**
- * 「課表」標籤 + 角標（衝突數／空課表紅點）。
- *
- * @param {{ color: string }} props React Navigation 傳入的標籤色
- * @returns {React.ReactElement}
- */
-const TimetableTabLabel = ({ color }) => {
-    const { t } = useTranslation('common');
-
-    return (
-        <View>
-            <Text
-                style={{
-                    ...uiStyle.defaultText,
-                    color,
-                    fontSize: TAB_LABEL_FONT_SIZE,
-                    fontWeight: 'bold',
-                }}>
-                {t('課表')}
-            </Text>
-            <TimetableTabBadge />
-        </View>
-    );
-};
 
 /**
  * 選課頁內容：頂欄（段落 Tab + ⋯）+ 兩個段落。
@@ -128,6 +58,17 @@ const CourseTabContent = () => {
     const { t } = useTranslation(['common', 'catalog', 'timetable']);
     const isFocused = useIsFocused();
     const navigation = useNavigation();
+    const route = useRoute();
+    // 達到 large（≥ 1200）才分屏：搵課自己在 ≥ 840 已會左右分欄，再窄就是三欄擠在一起
+    const { isLarge } = useWindowSizeClass();
+    // 分屏左欄寬度：用戶可拖分隔線調整並持久化；右欄吃剩下的空間
+    const [searchPaneWidth, setSearchPaneWidth] = useState(
+        SEARCH_PANE_DEFAULT_WIDTH,
+    );
+    const [splitContainerWidth, setSplitContainerWidth] = useState(0);
+    const dragStartWidthRef = useRef(SEARCH_PANE_DEFAULT_WIDTH);
+    // 拖動中最新寬度；放手時持久化用，避免 useCallback 閉包裡的 state 落後一幀
+    const dragLatestWidthRef = useRef(SEARCH_PANE_DEFAULT_WIDTH);
 
     const {
         programmeLevel,
@@ -174,6 +115,64 @@ const CourseTabContent = () => {
         return () => {
             cancelled = true;
         };
+    }, []);
+
+    // 還原上次拖出的分屏左欄寬度
+    useEffect(() => {
+        let cancelled = false;
+
+        getLocalStorage(SPLIT_PANE_WIDTH_STORAGE_KEY).then(stored => {
+            if (!cancelled && typeof stored === 'number' && stored > 0) {
+                setSearchPaneWidth(stored);
+            }
+        });
+
+        return () => {
+            cancelled = true;
+        };
+    }, []);
+
+    // 左欄寬度上下限：左欄不小於 SEARCH_PANE_MIN_WIDTH，右欄不小於 TIMETABLE_PANE_MIN_WIDTH；
+    // 容器未量到寬度前只卡下限
+    const clampSearchPaneWidth = useCallback(
+        width => {
+            const maxWidth =
+                splitContainerWidth > 0
+                    ? Math.max(
+                        SEARCH_PANE_MIN_WIDTH,
+                        splitContainerWidth - TIMETABLE_PANE_MIN_WIDTH,
+                    )
+                    : Infinity;
+            return Math.min(maxWidth, Math.max(SEARCH_PANE_MIN_WIDTH, width));
+        },
+        [splitContainerWidth],
+    );
+
+    const handleDividerDragStart = useCallback(() => {
+        dragStartWidthRef.current = searchPaneWidth;
+        dragLatestWidthRef.current = searchPaneWidth;
+    }, [searchPaneWidth]);
+
+    const handleDividerDrag = useCallback(
+        translationX => {
+            const width = clampSearchPaneWidth(
+                dragStartWidthRef.current + translationX,
+            );
+            dragLatestWidthRef.current = width;
+            setSearchPaneWidth(width);
+        },
+        [clampSearchPaneWidth],
+    );
+
+    const handleDividerDragEnd = useCallback(() => {
+        setLocalStorage(SPLIT_PANE_WIDTH_STORAGE_KEY, dragLatestWidthRef.current);
+    }, []);
+
+    // 雙擊分隔線恢復默認寬度
+    const handleDividerReset = useCallback(() => {
+        trigger();
+        setSearchPaneWidth(SEARCH_PANE_DEFAULT_WIDTH);
+        setLocalStorage(SPLIT_PANE_WIDTH_STORAGE_KEY, SEARCH_PANE_DEFAULT_WIDTH);
     }, []);
 
     const handleManualUpdate = useCallback(async () => {
@@ -226,6 +225,16 @@ const CourseTabContent = () => {
         }
     }, []);
 
+    const menuProps = {
+        programmeLevel,
+        catalogMetadata,
+        onManualUpdate: handleManualUpdate,
+        onOpenSharePoint: handleOpenSharePoint,
+        onOpenWhat2RegSettings: handleOpenWhat2RegSettings,
+        canClear,
+        onClearPress: handleClearPlan,
+    };
+
     const renderTabBar = useCallback(
         props => (
             <CourseTabBar
@@ -250,11 +259,63 @@ const CourseTabContent = () => {
         ],
     );
 
+    // 分屏時課表不在導航器裡，navigateToCourseTab 的嵌套參數會原樣落在本頁：
+    // route.params = { screen: 段落名, params: { add, check } }。
+    // 這裡拆出段落層的 params 交給課表，讓它與手機版讀同一個 route.params 形狀。
+    const timetableRoute = useMemo(
+        () => ({ ...route, params: route.params?.params }),
+        [route],
+    );
+    const timetableNavigation = useMemo(
+        () => ({
+            ...navigation,
+            // 課表在同一次 focus 回呼裡依序消費 add 與 check，故直接清空整個段落參數；
+            // 若逐鍵合併，第二次 setParams 會用同一份舊 closure 把第一次清掉的鍵寫回來
+            setParams: () => navigation.setParams({ params: undefined }),
+        }),
+        [navigation],
+    );
+
     return (
         <SafeAreaView
             style={{ backgroundColor: bg_color, flex: 1 }}
             edges={{ top: true }}>
-            {initialSegment ? (
+            {isLarge ? (
+                // 寬屏：左挑右看。兩個段落同時掛載，共用 CoursePlanProvider，
+                // 左邊加課右邊課表即時重繪，不需要另外的同步機制。
+                // 左欄寬度由用戶拖分隔線決定，課表吃剩下的；頂欄各自放在欄內，標題自然對齊所在欄
+                <View
+                    style={{ flex: 1, flexDirection: 'row' }}
+                    onLayout={({ nativeEvent }) =>
+                        setSplitContainerWidth(nativeEvent.layout.width)
+                    }>
+                    <View style={{ width: clampSearchPaneWidth(searchPaneWidth) }}>
+                        <CoursePaneHeader segment="search" />
+                        <What2Reg isSplitPane />
+                    </View>
+                    <SplitPaneDivider
+                        onDragStart={handleDividerDragStart}
+                        onDrag={handleDividerDrag}
+                        onDragEnd={handleDividerDragEnd}
+                        onReset={handleDividerReset}
+                    />
+                    <View
+                        style={{
+                            flex: 1,
+                            minWidth: TIMETABLE_PANE_MIN_WIDTH,
+                        }}>
+                        <CoursePaneHeader
+                            segment="timetable"
+                            menuProps={menuProps}
+                        />
+                        <CourseSim
+                            isSplitPane
+                            route={timetableRoute}
+                            navigation={timetableNavigation}
+                        />
+                    </View>
+                </View>
+            ) : initialSegment ? (
                 <Tab.Navigator
                     tabBar={renderTabBar}
                     screenListeners={{

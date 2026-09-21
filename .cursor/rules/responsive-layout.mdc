@@ -146,7 +146,9 @@ const cardColumns = useMemo(
 - ✅ 搵課段落（`course/pages/what2Reg`）：左欄篩選 + 右欄多車道網格，頂部 Tab 條居中。
 - ✅ 全局縮放封頂（影響 iPad 原生所有頁面）。
 - ✅ 服務頁（`features/index.js`）：內容封頂 1440 居中，分類卡 2／3 欄平衡分佈，圖標行上限放寬。
-- ⬜ 課表段落（`course/pages/courseSim`）：寬屏時時間表加 `maxWidth` 居中，或左側課表 + 右側已選清單。
+- ✅ 選課頁分屏（`course/index.js`）：達到 large（≥ 1200）不掛 top tabs，改為左欄搵課 + 右欄課表；左欄默認 `SEARCH_PANE_DEFAULT_WIDTH`，可拖 `SplitPaneDivider` 調整並持久化，兩欄各有最小寬度。
+  兩段落共用 `CoursePlanProvider`，左邊加課右邊即時重繪；`navigateToCourseTab` 的嵌套參數會落在本頁 `route.params.params`，由容器拆給課表。
+  段落用 `isSplitPane` prop 收掉互跳入口（排課膠囊、FAB 的搵課鍵）；搵課與課表概覽都改量自身寬度，不再讀窗口寬度。
 - ⬜ 課程詳情 `LocalCourse`、活動詳情：加「閱讀寬度」約束（正文 `maxWidth` 約 680–720）。
 - ⬜ 組織活動 Tab、百科：列表改多欄或封頂閱讀寬度。
 

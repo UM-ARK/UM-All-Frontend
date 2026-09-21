@@ -160,7 +160,14 @@ function TimetableCourseMenuCard({
     );
 }
 
-function CourseSim({ route, navigation }) {
+/**
+ * 課表段落。
+ *
+ * @param {object} route 段落路由；分屏時由 course/index.js 拆出嵌套參數後傳入，形狀相同
+ * @param {object} navigation 段落導航；分屏時 setParams 由容器代理
+ * @param {boolean} [isSplitPane] 是否與搵課左右分屏：搵課就在左欄，FAB 不再提供「切到搵課」
+ */
+function CourseSim({ route, navigation, isSplitPane = false }) {
     // 課程資料與排課狀態一律來自 CoursePlanProvider，本段落不再自行持有
     const {
         catalogMetadata,
@@ -216,6 +223,8 @@ function CourseSim({ route, navigation }) {
     const [replacementCourseCode, setReplacementCourseCode] = useState(null);
     const [replacementSearchText, setReplacementSearchText] = useState('');
     const [overviewViewportHeight, setOverviewViewportHeight] = useState(0);
+    // 量自身寬度而非窗口：分屏時本段落只佔右欄，概覽的星期欄要按欄寬均分
+    const [overviewViewportWidth, setOverviewViewportWidth] = useState(0);
     const [overviewWeekdayHeight, setOverviewWeekdayHeight] = useState(0);
     const [overviewReminderHeight, setOverviewReminderHeight] = useState(0);
     const [viewSwitcherHeight, setViewSwitcherHeight] = useState(0);
@@ -470,7 +479,8 @@ function CourseSim({ route, navigation }) {
         );
         return dayList.slice(0, Math.max(lastCourseDayIndex ?? 4, 4) + 1);
     }, [planSlots]);
-    const overviewDayColumnWidth = windowWidth / overviewDays.length;
+    const overviewDayColumnWidth =
+        (overviewViewportWidth || windowWidth) / overviewDays.length;
     const overviewStart = overviewRows[0]?.start ?? 0;
     const overviewEnd =
         lodash.max(planSlots.map(course => toMinutes(course['Time To']))) ??
@@ -2828,9 +2838,10 @@ E11-0000
     return (
         // 頂欄由 course/index.js 容器統一提供；頂部 insets 亦在容器處理，此處不可重複扣一次
         <View
-            onLayout={({ nativeEvent }) =>
-                setOverviewViewportHeight(nativeEvent.layout.height)
-            }
+            onLayout={({ nativeEvent }) => {
+                setOverviewViewportHeight(nativeEvent.layout.height);
+                setOverviewViewportWidth(nativeEvent.layout.width);
+            }}
             style={{
                 flex: 1,
                 backgroundColor: bg_color,
@@ -2881,8 +2892,10 @@ E11-0000
                 bottom={floatingBottom}
                 visible={!hasOpenCourseSearch}
                 onAddPress={openCourseSearch}
-                onSearchPress={() =>
-                    navigation.navigate(COURSE_SEARCH_SEGMENT)
+                onSearchPress={
+                    isSplitPane
+                        ? undefined
+                        : () => navigation.navigate(COURSE_SEARCH_SEGMENT)
                 }
             />
 

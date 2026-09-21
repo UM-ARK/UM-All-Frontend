@@ -25,7 +25,10 @@ import { USER_AGREE, getOfficialCourseSearchUrl } from '../../../../../utils/pat
 import { refreshUmehHost, useUmehHost } from '../../../../../utils/umehHost';
 import { COURSE_TIMETABLE_SEGMENT } from '../../../../../utils/courseNavigation';
 import { navigateToWikiSearch } from '../../../../../utils/wikiNavigation';
-import { useWindowSizeClass } from '../../../../../utils/windowSizeClass';
+import {
+    WINDOW_BREAKPOINTS,
+    useWindowSizeClass,
+} from '../../../../../utils/windowSizeClass';
 import { useCoursePlan } from '../../context/CoursePlanContext';
 import PlanCapsule from '../../components/PlanCapsule';
 
@@ -106,13 +109,25 @@ const CourseCardRow = ({
     );
 };
 
-const What2Reg = () => {
+/**
+ * 搵課段落。
+ *
+ * @param {boolean} [isSplitPane] 是否與課表左右分屏（course/index.js 寬屏殼子）：
+ *   課表就在旁邊，不再顯示「切到課表」的排課膠囊
+ */
+const What2Reg = ({ isSplitPane = false }) => {
     const { theme } = useTheme();
     const { searchHost } = useUmehHost();
     const { themeColor, black, bg_color } = theme;
     const navigation = useNavigation();
-    // 達到 Material 3 expanded（≥ 840）即左右分欄；內容組件兩種殼子共用
-    const { isExpanded } = useWindowSizeClass();
+    // 達到 Material 3 expanded（≥ 840）即左右分欄；內容組件兩種殼子共用。
+    // 量自身寬度而非窗口：與課表分屏時本段落只佔左欄，窗口寬度會誤判
+    const { isExpanded: isWindowExpanded } = useWindowSizeClass();
+    const [paneWidth, setPaneWidth] = useState(0);
+    const isExpanded =
+        paneWidth > 0
+            ? paneWidth >= WINDOW_BREAKPOINTS.expanded
+            : isWindowExpanded;
 
     const [filterOptions, setFilterOptions] = useState(defaultFilterOptions);
     // 星期／時段篩選不持久化：若寫入 ARK_Courses_filterOptions，下次開 APP 會殘留看不見的條件而顯示空列表
@@ -584,6 +599,7 @@ const What2Reg = () => {
 
     return (
         <View
+            onLayout={({ nativeEvent }) => setPaneWidth(nativeEvent.layout.width)}
             style={{
                 flex: 1,
                 backgroundColor: bg_color,
@@ -650,11 +666,13 @@ const What2Reg = () => {
                 onScrollTo={onScrollToLetter}
             />
 
-            {/* 已排課程數與衝突提示，點擊切到課表段落 */}
-            <PlanCapsule
-                bottom={floatingBottom}
-                onPress={handleOpenTimetable}
-            />
+            {/* 已排課程數與衝突提示，點擊切到課表段落；分屏時課表就在右欄，不需要 */}
+            {isSplitPane ? null : (
+                <PlanCapsule
+                    bottom={floatingBottom}
+                    onPress={handleOpenTimetable}
+                />
+            )}
 
         </View>
     );
