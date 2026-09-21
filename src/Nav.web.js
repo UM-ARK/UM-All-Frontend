@@ -1,4 +1,4 @@
-// Web / 桌面版路由：只掛四個功能區（組織活動、服務功能大全、課程查詢、模擬選課）
+// Web / 桌面版路由：只掛三個功能區（服務功能大全、課程查詢、模擬選課）；組織活動 Tab 暫不掛，僅保留活動／組織詳情深鏈接
 // Metro 在 web 平台自動優先選用 .web.js，手機端仍走 Nav.js；
 // 論壇、Wiki、推送、快捷操作等純手機能力不進 web 包
 import React, { useMemo } from 'react';
@@ -32,7 +32,6 @@ const WEB_LINKING = {
             Tabbar: {
                 path: '',
                 screens: {
-                    ClubTabbar: 'club',
                     CourseTab: 'course',
                     FeaturesTabbar: 'features',
                 },

@@ -46,10 +46,10 @@ const show = (message, duration = SHORT, gravity = 'bottom') => {
     document.body.appendChild(element);
     activeToast = element;
 
-    // 下一幀再淡入，避免 transition 不生效
-    requestAnimationFrame(() => {
-        element.style.opacity = '1';
-    });
+    // 先強制一次同步排版讓 opacity: 0 落地，再改成 1 才會觸發 transition；
+    // 不用 requestAnimationFrame：頁面重渲染繁忙時它會被推遲一秒以上，吐司會遲遲不出現
+    element.getBoundingClientRect();
+    element.style.opacity = '1';
 
     const visibleMs = typeof duration === 'number' && duration > 100 ? duration : SHORT;
     hideTimer = setTimeout(() => {

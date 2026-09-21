@@ -1,4 +1,5 @@
-// Web / 桌面版底部 Tab：只掛「組織活動」「選課」「服務」三個分頁
+// Web / 桌面版底部 Tab：只掛「選課」「服務」兩個分頁
+// 組織活動頁 web 端暫不需要，先不掛 Tab（ClubDetail／EventDetail 深鏈接仍由 Nav.web.js 承接）
 // Metro 在 web 平台自動優先選用 .web.js，手機端仍走 Tabbar.js
 import React from 'react';
 import { View } from 'react-native';
@@ -7,7 +8,6 @@ import MaterialCommunityIcons from '@react-native-vector-icons/material-design-i
 import { useTranslation } from 'react-i18next';
 
 import { useTheme, uiStyle } from './components/ThemeContext';
-import ClubPage from './pages/TabbarPages/info/ClubPage';
 import CourseTab from './pages/TabbarPages/course';
 import FeaturesScreen from './pages/TabbarPages/features';
 
@@ -19,11 +19,6 @@ const TAB_LABEL_FONT_SIZE = 11;
 
 // 分頁配置（插入順序決定由左至右排列）；名稱與手機端保持一致，方便頁面內 navigate
 const tabConfig = {
-    ClubTabbar: {
-        component: ClubPage,
-        title: '組織活動',
-        icon: 'account-group',
-    },
     CourseTab: {
         component: CourseTab,
         title: '選課',

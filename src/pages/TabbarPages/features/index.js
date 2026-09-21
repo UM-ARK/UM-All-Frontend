@@ -16,6 +16,7 @@ import {
     COURSE_TAB_ROUTE,
     navigateToCourseTab,
 } from '../../../utils/courseNavigation';
+import { canNavigateTo } from '../../../utils/routeAvailability';
 import {
     FREQUENT_FEATURES_DISPLAY_LIMIT,
     buildFrequentFeatures,
@@ -137,6 +138,23 @@ function FeatureListPage({ navigation }) {
             );
 
             const { go_where, webview_param, needLogin, loginRoute } = item;
+            // web 端只掛了部分頁面（見 Nav.web.js），站內路由未註冊時提示改用 APP；
+            // Webview／Linking 走瀏覽器新開分頁，不受影響
+            const isInAppRoute =
+                go_where !== 'Webview' && go_where !== 'Linking';
+            if (
+                Platform.OS === 'web' &&
+                isInAppRoute &&
+                !canNavigateTo(navigation, go_where)
+            ) {
+                Toast.show(
+                    t('此功能網頁版暫未支持，請在 ARK ALL APP 中打開', {
+                        ns: 'features',
+                    }),
+                    Toast.LONG,
+                );
+                return;
+            }
             if (needLogin) {
                 if (harborStatus === 'signedIn' && harborUser) {
                     navigation.navigate(go_where);
@@ -170,7 +188,7 @@ function FeatureListPage({ navigation }) {
                 }
             }, 50);
         },
-        [harborStatus, harborUser, login, navigation],
+        [harborStatus, harborUser, login, navigation, t],
     );
 
     // 預留兩行標題高度（英文如 Canteen Queue 會換行），避免同列單／雙行把圖標頂歪
