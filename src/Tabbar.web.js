@@ -1,4 +1,4 @@
-// Web / 桌面版底部 Tab：只掛「選課」「服務」兩個分頁
+// Web / 桌面版底部 Tab：掛「選課」「服務」「設置」三個分頁
 // 組織活動頁 web 端暫不需要，先不掛 Tab（ClubDetail／EventDetail 深鏈接仍由 Nav.web.js 承接）
 // Metro 在 web 平台自動優先選用 .web.js，手機端仍走 Tabbar.js
 import React from 'react';
@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 import { useTheme, uiStyle } from './components/ThemeContext';
 import CourseTab from './pages/TabbarPages/course';
 import FeaturesScreen from './pages/TabbarPages/features';
+import SettingPage from './pages/Features/SettingPage';
 
 const Tabs = createBottomTabNavigator();
 
@@ -29,11 +30,19 @@ const tabConfig = {
         title: '服務',
         icon: 'view-grid',
     },
+    // 手機端設置頁是 Stack 頁（從「我的」進入），web 沒有「我的」Tab，直接掛成分頁；
+    // 路由名沿用 SettingPage，選課頁裡 navigate('SettingPage') 的既有入口在 web 端照常可用
+    SettingPage: {
+        component: SettingPage,
+        // 文案在 setting 命名空間，t() 支持「命名空間:鍵」寫法
+        title: 'setting:Settings',
+        icon: 'cog',
+    },
 };
 
 const Tabbar = () => {
     const { theme } = useTheme();
-    const { t } = useTranslation(['common', 'home']);
+    const { t } = useTranslation(['common', 'home', 'setting']);
 
     return (
         <View style={{ flex: 1, backgroundColor: theme.bg_color }}>

@@ -105,6 +105,12 @@ export default {
         'In-App Browser': '內頁瀏覽',
         'System Browser': '系統瀏覽器',
         Auto: '自動',
+        'Open What2Reg': '打開選咩課',
+        '選咩課和ARK是兩個獨立項目': '選咩課和 ARK 是兩個獨立項目',
+        'Get the App': '下載 ARK ALL APP',
+        'Get the App Hint': '論壇、Wiki、推送等功能需在 APP 中使用',
+        'Clear Cache Web Message':
+            '這會刪除瀏覽器中保存的 ARK ALL 數據，包括模擬課表與偏好設定，然後重新載入頁面。確定要繼續嗎？',
     },
 
     // 關於頁
