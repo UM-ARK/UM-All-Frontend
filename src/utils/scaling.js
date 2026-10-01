@@ -19,10 +19,20 @@ const guidelineBaseHeight = 680;
 const LARGE_WINDOW_SHORT_DIMENSION = 600;
 /** 寬屏統一縮放係數，約等於 iPhone 16 Pro（393 / 350） */
 const LARGE_WINDOW_SCALE_FACTOR = 1.15;
+/**
+ * 最大手機（iPhone Pro Max）的窗口尺寸。窄窗口（Mac 上的 iPad 應用、iPad 分屏）短邊落在 440–600，
+ * 按原算法會放大到 1.5 倍以上，比任何手機都大，故按此封頂；真機手機不受影響。
+ */
+const MAX_PHONE_SHORT_DIMENSION = 440;
+const MAX_PHONE_LONG_DIMENSION = 956;
 
 const isLargeWindow = shortDimension >= LARGE_WINDOW_SHORT_DIMENSION;
-const widthFactor = isLargeWindow ? LARGE_WINDOW_SCALE_FACTOR : shortDimension / guidelineBaseWidth;
-const heightFactor = isLargeWindow ? LARGE_WINDOW_SCALE_FACTOR : longDimension / guidelineBaseHeight;
+const widthFactor = isLargeWindow
+    ? LARGE_WINDOW_SCALE_FACTOR
+    : Math.min(shortDimension, MAX_PHONE_SHORT_DIMENSION) / guidelineBaseWidth;
+const heightFactor = isLargeWindow
+    ? LARGE_WINDOW_SCALE_FACTOR
+    : Math.min(longDimension, MAX_PHONE_LONG_DIMENSION) / guidelineBaseHeight;
 
 export const scale = size => widthFactor * size;
 export const verticalScale = size => heightFactor * size;

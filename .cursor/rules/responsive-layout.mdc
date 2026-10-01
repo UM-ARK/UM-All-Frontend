@@ -21,7 +21,8 @@ alwaysApply: false
 
 `metro.config.js` 在**全平台**把 `react-native-size-matters` 指向 `src/utils/scaling.js`：
 
-- 短邊 < 600（手機）：與原庫完全一致。
+- 短邊 < 600（手機）：與原庫一致，但窗口尺寸封頂在最大手機（440 × 956），
+  Mac 上的 iPad 應用、iPad 分屏等窄窗口不會放大得比 Pro Max 還大。
 - 短邊 ≥ 600（平板／桌面）：`scale` / `verticalScale` 係數固定 **1.15**（約等於 iPhone 16 Pro），
   寬屏看起來像一台大手機，多出來的空間交給頁面自己的寬屏佈局消化。
 
