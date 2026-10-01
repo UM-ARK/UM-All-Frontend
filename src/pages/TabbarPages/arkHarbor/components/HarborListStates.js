@@ -35,13 +35,6 @@ export const HarborTopicSkeleton = () => {
                             { backgroundColor: theme.tonal.primary15 },
                         ]}
                     />
-                    <View
-                        style={[
-                            styles.skeletonLine,
-                            styles.skeletonShortLine,
-                            { backgroundColor: theme.tonal.primary08 },
-                        ]}
-                    />
                 </View>
             </View>
             <View
@@ -215,9 +208,9 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     skeletonAvatar: {
-        width: scale(34),
-        height: scale(34),
-        borderRadius: scale(17),
+        width: scale(20),
+        height: scale(20),
+        borderRadius: scale(10),
     },
     skeletonAuthor: {
         flex: 1,
@@ -227,13 +220,8 @@ const styles = StyleSheet.create({
         borderRadius: scale(6),
     },
     skeletonAuthorLine: {
-        width: '34%',
+        width: '48%',
         height: verticalScale(8),
-    },
-    skeletonShortLine: {
-        width: '22%',
-        height: verticalScale(6),
-        marginTop: verticalScale(6),
     },
     skeletonTitleLine: {
         width: '88%',

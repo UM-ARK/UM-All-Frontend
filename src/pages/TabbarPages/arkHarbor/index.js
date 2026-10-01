@@ -35,9 +35,8 @@ const VIEW_CONFIG = {
     top: { label: '熱門', analytics: 'top' },
     unread: { label: '未讀', analytics: 'unread' },
 };
-// 對齊資訊頁 Top Tab（~30），並預留搜尋列高度
+// 對齊資訊頁 Top Tab（~30）；搜尋入口收進工具列，不再單獨佔一行
 const STICKY_TOOLBAR_HEIGHT = verticalScale(36);
-const SEARCH_BAR_ROW_HEIGHT = verticalScale(38);
 const HARBOR_TAB_INDICATOR_WIDTH = moderateScale(25, 0.1);
 const Drawer = createDrawerNavigator();
 const AnimatedPagerView = Animated.createAnimatedComponent(PagerView);
@@ -153,7 +152,7 @@ const HarborStickyToolbar = ({
         <View
             style={[styles.stickyHeader, { backgroundColor: theme.bg_color }]}>
             <View onLayout={onToolbarLayout} style={styles.stickyToolbar}>
-                <View style={styles.toolbarSide}>
+                <View style={[styles.toolbarSide, styles.toolbarLeft]}>
                     <Pressable
                         accessibilityRole="button"
                         accessibilityLabel={t('開啟選單')}
@@ -170,6 +169,27 @@ const HarborStickyToolbar = ({
                         ]}>
                         <MaterialCommunityIcons
                             name="menu"
+                            size={scale(20)}
+                            color={theme.themeColor}
+                        />
+                    </Pressable>
+                    {/* 搜尋放左側與選單並排，右側未登入時已有「登入」文字按鈕 */}
+                    <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel={t('搜尋 Harbor')}
+                        hitSlop={scale(8)}
+                        onPress={() => {
+                            trigger();
+                            onSearchPress();
+                        }}
+                        style={({ pressed }) => [
+                            styles.toolbarIconButton,
+                            pressed && {
+                                backgroundColor: theme.tonal.primary15,
+                            },
+                        ]}>
+                        <MaterialCommunityIcons
+                            name="magnify"
                             size={scale(20)}
                             color={theme.themeColor}
                         />
@@ -290,37 +310,6 @@ const HarborStickyToolbar = ({
                         </Pressable>
                     </View>
                 </View>
-            </View>
-            <View style={styles.searchBarRow}>
-                <Pressable
-                    accessibilityRole="button"
-                    accessibilityLabel={t('搜尋 Harbor')}
-                    onPress={() => {
-                        trigger();
-                        onSearchPress();
-                    }}
-                    style={({ pressed }) => [
-                        styles.searchBar,
-                        {
-                            backgroundColor: theme.white,
-                            borderColor: theme.themeColorUltraLight,
-                        },
-                        pressed && { opacity: 0.85 },
-                    ]}>
-                    <MaterialCommunityIcons
-                        name="magnify"
-                        size={scale(16)}
-                        color={theme.black.third}
-                    />
-                    <Text
-                        numberOfLines={1}
-                        style={[
-                            styles.searchBarText,
-                            { color: theme.black.third },
-                        ]}>
-                        {t('搜尋 Harbor')}
-                    </Text>
-                </Pressable>
             </View>
         </View>
     );
@@ -597,7 +586,7 @@ const ForumPage = ({ navigation }) => {
                 ? t('登入中…')
                 : t('登入');
 
-    const stickyHeaderHeight = toolbarHeight + SEARCH_BAR_ROW_HEIGHT;
+    const stickyHeaderHeight = toolbarHeight;
     const contentContainerStyle = useMemo(
         () => ({
             paddingTop: stickyHeaderHeight + verticalScale(4),
@@ -745,6 +734,11 @@ const styles = StyleSheet.create({
     toolbarRight: {
         alignItems: 'flex-end',
     },
+    toolbarLeft: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: scale(2),
+    },
     toolbarRightActions: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -833,25 +827,6 @@ const styles = StyleSheet.create({
     },
     feedTabIndicatorHidden: {
         opacity: 0,
-    },
-    searchBarRow: {
-        height: SEARCH_BAR_ROW_HEIGHT,
-        justifyContent: 'center',
-        paddingHorizontal: scale(6),
-    },
-    searchBar: {
-        minHeight: verticalScale(30),
-        borderWidth: StyleSheet.hairlineWidth,
-        borderRadius: scale(9),
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: scale(10),
-    },
-    searchBarText: {
-        ...uiStyle.defaultText,
-        flex: 1,
-        fontSize: scale(12),
-        marginLeft: scale(6),
     },
     sharedHeader: {
         position: 'absolute',
