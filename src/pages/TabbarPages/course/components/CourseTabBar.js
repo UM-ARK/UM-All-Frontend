@@ -18,7 +18,6 @@ const CourseTabBar = ({
     catalogMetadata,
     onManualUpdate,
     onOpenSharePoint,
-    onOpenWhat2RegSettings,
     canClear,
     onClearPress,
     ...tabBarProps
@@ -63,7 +62,6 @@ const CourseTabBar = ({
                     catalogMetadata={catalogMetadata}
                     onManualUpdate={onManualUpdate}
                     onOpenSharePoint={onOpenSharePoint}
-                    onOpenWhat2RegSettings={onOpenWhat2RegSettings}
                     canClear={canClear}
                     onClearPress={onClearPress}
                 />

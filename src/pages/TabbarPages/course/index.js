@@ -190,10 +190,6 @@ const CourseTabContent = () => {
         openLink(UM_PRE_ENROLMENT_EXCEL);
     }, []);
 
-    const handleOpenWhat2RegSettings = useCallback(() => {
-        navigation.navigate('SettingPage');
-    }, [navigation]);
-
     const handleClearPlan = useCallback(() => {
         Alert.alert(
             '',
@@ -230,7 +226,6 @@ const CourseTabContent = () => {
         catalogMetadata,
         onManualUpdate: handleManualUpdate,
         onOpenSharePoint: handleOpenSharePoint,
-        onOpenWhat2RegSettings: handleOpenWhat2RegSettings,
         canClear,
         onClearPress: handleClearPlan,
     };
@@ -243,7 +238,6 @@ const CourseTabContent = () => {
                 catalogMetadata={catalogMetadata}
                 onManualUpdate={handleManualUpdate}
                 onOpenSharePoint={handleOpenSharePoint}
-                onOpenWhat2RegSettings={handleOpenWhat2RegSettings}
                 canClear={canClear}
                 onClearPress={handleClearPlan}
             />
@@ -254,7 +248,6 @@ const CourseTabContent = () => {
             handleClearPlan,
             handleManualUpdate,
             handleOpenSharePoint,
-            handleOpenWhat2RegSettings,
             canClear,
         ],
     );

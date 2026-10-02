@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import {
     View,
     ScrollView,
@@ -6,18 +6,10 @@ import {
     Alert,
     Platform,
 } from 'react-native';
-import Text from '../../components/AppText';
-import { useTheme, uiStyle } from '../../components/ThemeContext';
+import { useTheme } from '../../components/ThemeContext';
 import { useHarborSession } from '../../contexts/HarborSessionContext';
 import { openLink } from '../../utils/browser';
 import { trigger } from '../../utils/trigger';
-import {
-    getUmehHostPref,
-    setUmehHostPref,
-    refreshUmehHost,
-    getUmehOpenPref,
-    setUmehOpenPref,
-} from '../../utils/umehHost';
 // @expo/ui MenuView 用 SwiftUI Host + matchContents 反向量測，無明確寬度會塌陷。
 import { MenuView } from '@expo/ui/community/menu';
 import {
@@ -33,11 +25,10 @@ import {
     ARK_HARBOR_FEEDBACK_CATEGORY_ID,
     ARK_HARBOR_FEEDBACK_CATEGORY_SLUG,
 } from '../../utils/pathMap';
-import { scale, verticalScale } from 'react-native-size-matters';
+import { verticalScale } from 'react-native-size-matters';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { reloadAppAsync } from 'expo';
 import { useTranslation } from 'react-i18next';
-import Ionicons from "@react-native-vector-icons/ionicons";
 import SegmentControl from '../../components/SegmentControl';
 import { useProgrammeLevel } from '../../contexts/ProgrammeLevelContext';
 import { PROGRAMME_LEVELS } from '../../utils/courseProgramme';
@@ -63,13 +54,6 @@ const SettingPage = ({ navigation }) => {
     const { t, i18n } = useTranslation(['setting', 'about', 'common', 'my']);
     const { status, user, login } = useHarborSession();
     const { programmeLevel, setProgrammeLevel } = useProgrammeLevel();
-    const [umehHostPref, setUmehHostPrefState] = useState('auto');
-    const [umehOpenPref, setUmehOpenPrefState] = useState('inApp');
-
-    useEffect(() => {
-        getUmehHostPref().then(setUmehHostPrefState);
-        getUmehOpenPref().then(setUmehOpenPrefState);
-    }, []);
 
     /**
      * 處理主題變更
@@ -244,27 +228,6 @@ const SettingPage = ({ navigation }) => {
         }
     }, [t]);
 
-    const handleUmehHostPrefChange = async pref => {
-        await setUmehHostPref(pref);
-        setUmehHostPrefState(pref);
-        refreshUmehHost();
-    };
-
-    const handleUmehOpenPrefChange = async pref => {
-        await setUmehOpenPref(pref);
-        setUmehOpenPrefState(pref);
-    };
-
-    const umehHostPrefLabels = {
-        auto: t('setting:Auto'),
-        primary: 'umeh',
-        backup: 'cf',
-    };
-    const umehOpenPrefLabels = {
-        inApp: t('setting:In-App Browser'),
-        system: t('setting:System Browser'),
-    };
-
     // 主題選項配置
     const themeOptions = [
         { key: 'system', label: t('setting:System') },
@@ -385,118 +348,6 @@ const SettingPage = ({ navigation }) => {
                                 }
                                 compact
                             />
-                        }
-                    />
-                    <SettingItem
-                        grouped
-                        icon="globe-outline"
-                        iconColor="#007AFF"
-                        title={t('setting:What2Reg Host')}
-                        subtitle={umehHostPrefLabels[umehHostPref]}
-                        showArrow={false}
-                        rightElement={
-                            <MenuView
-                                actions={['auto', 'primary', 'backup'].map(
-                                    pref => ({
-                                        id: pref,
-                                        title: umehHostPrefLabels[pref],
-                                        state:
-                                            umehHostPref === pref
-                                                ? 'on'
-                                                : 'off',
-                                    }),
-                                )}
-                                onPressAction={event =>
-                                    handleUmehHostPrefChange(
-                                        event.nativeEvent.event,
-                                    )
-                                }
-                                onOpenMenu={() => trigger()}
-                                shouldOpenOnLongPress={false}
-                                style={{ width: scale(72) }}>
-                                <View
-                                    style={{
-                                        width: scale(72),
-                                        flexDirection: 'row',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        backgroundColor: `${'#007AFF'}15`,
-                                        borderRadius: scale(8),
-                                        paddingHorizontal: scale(10),
-                                        paddingVertical: scale(5),
-                                    }}>
-                                    <Text
-                                        style={{
-                                            ...uiStyle.defaultText,
-                                            fontSize: scale(13),
-                                            color: '#007AFF',
-                                            fontWeight: '500',
-                                        }}>
-                                        {umehHostPrefLabels[umehHostPref]}
-                                    </Text>
-                                    <Ionicons
-                                        name="chevron-down"
-                                        size={scale(12)}
-                                        color="#007AFF"
-                                        style={{ marginLeft: scale(4) }}
-                                    />
-                                </View>
-                            </MenuView>
-                        }
-                    />
-                    <SettingItem
-                        grouped
-                        icon="open-outline"
-                        iconColor="#007AFF"
-                        title={t('setting:What2Reg Open')}
-                        subtitle={`${umehOpenPrefLabels[umehOpenPref]}\n${t('選咩課和ARK是兩個獨立項目')}`}
-                        showArrow={false}
-                        rightElement={
-                            <MenuView
-                                actions={['inApp', 'system'].map(pref => ({
-                                    id: pref,
-                                    title: umehOpenPrefLabels[pref],
-                                    state:
-                                        umehOpenPref === pref
-                                            ? 'on'
-                                            : 'off',
-                                }))}
-                                onPressAction={event =>
-                                    handleUmehOpenPrefChange(
-                                        event.nativeEvent.event,
-                                    )
-                                }
-                                onOpenMenu={() => trigger()}
-                                shouldOpenOnLongPress={false}
-                                style={{ width: scale(108) }}>
-                                <View
-                                    style={{
-                                        width: scale(108),
-                                        flexDirection: 'row',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        backgroundColor: `${'#007AFF'}15`,
-                                        borderRadius: scale(8),
-                                        paddingHorizontal: scale(10),
-                                        paddingVertical: scale(5),
-                                    }}>
-                                    <Text
-                                        style={{
-                                            ...uiStyle.defaultText,
-                                            fontSize: scale(13),
-                                            color: '#007AFF',
-                                            fontWeight: '500',
-                                        }}>
-                                        {umehOpenPrefLabels[umehOpenPref]}
-                                    </Text>
-                                    <Ionicons
-                                        name="chevron-down"
-                                        size={scale(12)}
-                                        color="#007AFF"
-                                        style={{ marginLeft: scale(4) }}
-                                    />
-                                </View>
-                            </MenuView>
                         }
                     />
                 </SettingSectionCard>

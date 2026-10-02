@@ -3,8 +3,7 @@ import { View, StyleSheet, Platform } from 'react-native';
 
 import Text from '../../../../../../components/AppText';
 import { useTheme, uiStyle } from '../../../../../../components/ThemeContext';
-import { getOfficialCourseSearchUrl } from '../../../../../../utils/pathMap';
-import { useUmehHost } from '../../../../../../utils/umehHost';
+import { getOfficialCourseSearchUrl, WHAT_2_REG } from '../../../../../../utils/pathMap';
 import { logToFirebase } from '../../../../../../utils/firebaseAnalytics';
 import { openLink } from '../../../../../../utils/browser';
 import { trigger } from '../../../../../../utils/trigger';
@@ -45,7 +44,6 @@ const CourseCard = memo(
         // const { item, mode, prof_info, courseMode = 'ad' } = props;
         const navigation = useContext(NavigationContext);
         const { theme } = useTheme();
-        const { baseHost } = useUmehHost();
         const { themeColor, black, secondThemeColor, white } = theme;
         const isPostgraduate = programmeLevel === PROGRAMME_LEVELS.postgraduate;
         const isPreEnroll = !isPostgraduate && courseMode === 'preEnroll';
@@ -206,7 +204,7 @@ const CourseCard = memo(
                 case 'what2reg': {
                     if (prof_info) {
                         const URI =
-                            baseHost +
+                            WHAT_2_REG +
                             '/reviews/' +
                             encodeURIComponent(courseCode) +
                             '/' +
@@ -218,7 +216,7 @@ const CourseCard = memo(
                         });
                         openLink(URI);
                     } else {
-                        const URI = `${baseHost}/course/${encodeURIComponent(courseCode)}`;
+                        const URI = `${WHAT_2_REG}/course/${encodeURIComponent(courseCode)}`;
                         logToFirebase('checkCourse', {
                             courseCode: courseCode,
                             action: 'what2reg',

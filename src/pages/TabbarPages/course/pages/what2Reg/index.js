@@ -21,8 +21,7 @@ import { trigger } from '../../../../../utils/trigger';
 import { logToFirebase } from '../../../../../utils/firebaseAnalytics';
 import { openLink } from '../../../../../utils/browser';
 import { getLocalStorage, setLocalStorage } from '../../../../../utils/storageKits';
-import { USER_AGREE, getOfficialCourseSearchUrl } from '../../../../../utils/pathMap';
-import { refreshUmehHost, useUmehHost } from '../../../../../utils/umehHost';
+import { USER_AGREE, getOfficialCourseSearchUrl, WHAT_2_REG } from '../../../../../utils/pathMap';
 import { COURSE_TIMETABLE_SEGMENT } from '../../../../../utils/courseNavigation';
 import { navigateToWikiSearch } from '../../../../../utils/wikiNavigation';
 import {
@@ -117,7 +116,8 @@ const CourseCardRow = ({
  */
 const What2Reg = ({ isSplitPane = false }) => {
     const { theme } = useTheme();
-    const { searchHost } = useUmehHost();
+    // 選咩課搜尋網址
+    const searchHost = WHAT_2_REG + '/search/course/';
     const { themeColor, black, bg_color } = theme;
     const navigation = useNavigation();
     // 達到 Material 3 expanded（≥ 840）即左右分欄；內容組件兩種殼子共用。
@@ -296,8 +296,6 @@ const What2Reg = ({ isSplitPane = false }) => {
     // 課程資料的載入與版本同步已上移到容器，此處只還原本段落自己的篩選條件
     useEffect(() => {
         logToFirebase('openPage', { page: 'chooseCourses' });
-        refreshUmehHost(); // 不 await，背景探測 host
-
     }, []);
 
     useEffect(() => {
