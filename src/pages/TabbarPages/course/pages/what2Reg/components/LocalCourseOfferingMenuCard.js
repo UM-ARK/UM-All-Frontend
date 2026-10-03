@@ -17,7 +17,7 @@ import { t } from 'i18next';
 import Text from '../../../../../../components/AppText';
 import { useTheme, uiStyle } from '../../../../../../components/ThemeContext';
 import { trigger } from '../../../../../../utils/trigger';
-import { useUmehHost } from '../../../../../../utils/umehHost';
+import { WHAT_2_REG } from '../../../../../../utils/pathMap';
 import { openLink } from '../../../../../../utils/browser';
 import { logToFirebase } from '../../../../../../utils/firebaseAnalytics';
 import { navigateToCourseTab } from '../../../../../../utils/courseNavigation';
@@ -61,7 +61,6 @@ const LocalCourseOfferingMenuCard = ({
             ? windowWidth - scale(40)
             : Math.max(TEACHER_CARD_MIN_WIDTH, teacherCardWidth);
     const { theme } = useTheme();
-    const { baseHost } = useUmehHost();
     const { themeColor, black, white, tonal, warning } = theme;
     const isHighlighted = Boolean(highlightStatus);
     const isConflict = highlightStatus === 'conflict';
@@ -182,7 +181,7 @@ const LocalCourseOfferingMenuCard = ({
                 const profName = courseRow['Teacher Information'];
                 if (profName) {
                     const URI =
-                        baseHost +
+                        WHAT_2_REG +
                         '/reviews/' +
                         encodeURIComponent(courseCode_) +
                         '/' +
@@ -194,7 +193,7 @@ const LocalCourseOfferingMenuCard = ({
                     });
                     openLink(URI);
                 } else {
-                    const URI = `${baseHost}/course/${encodeURIComponent(courseCode_)}`;
+                    const URI = `${WHAT_2_REG}/course/${encodeURIComponent(courseCode_)}`;
                     logToFirebase('checkCourse', {
                         courseCode: courseCode_,
                         action: 'what2reg',
