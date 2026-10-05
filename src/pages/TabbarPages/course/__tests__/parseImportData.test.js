@@ -110,10 +110,10 @@ describe('buildImportText', () => {
             {'Course Code': 'ECEN1000', Section: '001'},
             {'Course Code': 'CISC2000', Section: '2'},
         ]);
-        expect(text).toBe('ECEN1000(001)\nCISC2000(002)');
+        expect(text).toBe('CISC2000(002)\nECEN1000(001)');
         expect(parseImportData(text)).toEqual([
-            {'Course Code': 'ECEN1000', Section: '001'},
             {'Course Code': 'CISC2000', Section: '002'},
+            {'Course Code': 'ECEN1000', Section: '001'},
         ]);
     });
 
