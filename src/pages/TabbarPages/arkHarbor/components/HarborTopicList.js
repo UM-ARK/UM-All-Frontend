@@ -951,8 +951,8 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         marginHorizontal: scale(14),
-        marginBottom: verticalScale(6),
-        marginTop: verticalScale(4),
+        marginBottom: verticalScale(2),
+        marginTop: verticalScale(1),
     },
     recommendationLine: {
         flex: 1,

@@ -415,7 +415,7 @@ const styles = StyleSheet.create({
         borderWidth: StyleSheet.hairlineWidth,
         borderRadius: scale(12),
         marginHorizontal: CARD_MARGIN_HORIZONTAL,
-        marginBottom: verticalScale(4),
+        marginBottom: verticalScale(2),
         paddingHorizontal: CARD_PADDING_HORIZONTAL,
         paddingTop: verticalScale(11),
         overflow: 'hidden',
