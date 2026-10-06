@@ -406,16 +406,14 @@ const HarborTopicList = ({
         return subscribeHarborTopicUpdates((topicId, patch) => {
             const { reloadLists, removeFromLists, ...itemPatch } = patch;
             const updateItems = currentItems => {
-                const nextItems = removeFromLists
+                // 已讀後先原地保留，等下次重新拉取列表再移出未讀分頁，避免返回時帖子突然消失
+                return removeFromLists
                     ? currentItems.filter(item => item.id !== topicId)
                     : currentItems.map(item =>
                         item.id === topicId
                             ? mergeHarborTopicListItem(item, itemPatch)
                             : item,
                     );
-                return sourceRef.current.filter === 'unseen'
-                    ? nextItems.filter(isHarborTopicUnseen)
-                    : nextItems;
             };
             replaceItems(updateItems(itemsRef.current));
             replaceRecommendationItems(

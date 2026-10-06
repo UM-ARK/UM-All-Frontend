@@ -8,9 +8,6 @@ const topicUpdateListeners = new Set();
 const TOPIC_CACHE_NAMESPACE = 'topic';
 const TOPIC_LIST_CACHE_NAMESPACE = 'topic-list';
 
-const isUnseenTopicListKey = key =>
-    typeof key?.[1] === 'string' && key[1].endsWith(':unseen');
-
 export function isHarborTopicUnseen(topic) {
     const isNewReply =
         Number(topic?.unreadCount || 0) > 0 &&
@@ -141,7 +138,7 @@ export function publishHarborTopicUpdate(topicId, patch) {
     } else if (removeFromLists || Object.keys(itemPatch).length > 0) {
         patchHarborQueryCachePrefix(
             ['topic-list'],
-            (current, key) => {
+            current => {
                 const nextItems = removeFromLists
                     ? current.items.filter(item => item.id !== id)
                     : current.items.map(item =>
@@ -149,12 +146,8 @@ export function publishHarborTopicUpdate(topicId, patch) {
                             ? mergeHarborTopicListItem(item, itemPatch)
                             : item,
                     );
-                return {
-                    ...current,
-                    items: isUnseenTopicListKey(key)
-                        ? nextItems.filter(isHarborTopicUnseen)
-                        : nextItems,
-                };
+                // 未讀列表 cache 不即時剔除已讀帖，待下次拉取再由伺服器結果決定
+                return {...current, items: nextItems};
             },
             {
                 namespace: TOPIC_LIST_CACHE_NAMESPACE,
