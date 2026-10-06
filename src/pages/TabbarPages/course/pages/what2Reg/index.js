@@ -6,7 +6,7 @@ import React, {
     useRef,
     useState,
 } from 'react';
-import { Alert, Platform, View } from 'react-native';
+import { Alert, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { KeyboardAwareScrollView, KeyboardToolbar } from 'react-native-keyboard-controller';
 import { useNavigation } from '@react-navigation/native';
 import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
@@ -21,10 +21,13 @@ import { trigger } from '../../../../../utils/trigger';
 import { logToFirebase } from '../../../../../utils/firebaseAnalytics';
 import { openLink } from '../../../../../utils/browser';
 import { getLocalStorage, setLocalStorage } from '../../../../../utils/storageKits';
-import { USER_AGREE, getOfficialCourseSearchUrl } from '../../../../../utils/pathMap';
-import { refreshUmehHost, useUmehHost } from '../../../../../utils/umehHost';
+import { USER_AGREE, getOfficialCourseSearchUrl, WHAT_2_REG } from '../../../../../utils/pathMap';
 import { COURSE_TIMETABLE_SEGMENT } from '../../../../../utils/courseNavigation';
 import { navigateToWikiSearch } from '../../../../../utils/wikiNavigation';
+import {
+    WINDOW_BREAKPOINTS,
+    useWindowSizeClass,
+} from '../../../../../utils/windowSizeClass';
 import { useCoursePlan } from '../../context/CoursePlanContext';
 import PlanCapsule from '../../components/PlanCapsule';
 
@@ -39,7 +42,12 @@ import SearchBarSection from './components/SearchBarSection';
 import FirstLetterNav from './components/FirstLetterNav';
 import { unitMap, depaMap, geClassMap } from './constants/maps';
 import { adpeMap, CMGEList, dayList, defaultFilterOptions, defaultTimeFilter, modeENStr } from './constants/options';
-import { getCourseDisplayTitle } from './utils/courseTitle';
+import {
+    LANE_COLUMN_COUNT,
+    getCourseCardWidth,
+    getLaneCount,
+    groupCourseCardsByRow,
+} from './utils/courseGrid';
 import TouchableScale from '../../../../../components/TouchableScale';
 import {
     getCourseFilterStorageKey,
@@ -49,100 +57,13 @@ import {
 const itemHeight = scale(75);
 const COURSE_CARD_GAP = scale(10);
 const COURSE_GRID_HORIZONTAL_PADDING = scale(10);
-const COURSE_GRID_COLUMN_COUNT = 6;
-const SHORT_COURSE_TITLE_MAX_LENGTH = 20;
-const MEDIUM_COURSE_TITLE_MAX_LENGTH = 36;
-
-/**
- * 計算課名的視覺長度；漢字按兩個拉丁字元計算。
- * 此數值只用來選擇三種離散欄寬，實際換行仍交由原生文字排版。
- */
-const getVisualTextLength = text => Array.from(String(text || '')).reduce((length, character) => {
-    return length + (/\p{Script=Han}/u.test(character) ? 2 : 1);
-}, 0);
-
-const getCourseCardSpan = item => {
-    const courseCode = item['Course Code'] || item.New_code;
-    const titleCandidates = [
-        item['Course Title'],
-        item['Course Title Chi'],
-        item.courseTitleEng,
-        item.courseTitleChi,
-    ].map(title => getCourseDisplayTitle(courseCode, title)).filter(Boolean);
-    const titleLength = Math.max(
-        ...titleCandidates.map(getVisualTextLength),
-        0,
-    );
-
-    if (titleLength <= SHORT_COURSE_TITLE_MAX_LENGTH) {
-        return 2;
-    }
-    if (titleLength <= MEDIUM_COURSE_TITLE_MAX_LENGTH) {
-        return 3;
-    }
-    return COURSE_GRID_COLUMN_COUNT;
-};
-
-const getCourseCardWidth = (span, availableWidth) => {
-    if (span === 2) {
-        return Math.floor((availableWidth - COURSE_CARD_GAP * 2) / 3);
-    }
-    if (span === 3) {
-        return Math.floor((availableWidth - COURSE_CARD_GAP) / 2);
-    }
-    return Math.floor(availableWidth);
-};
-
-/**
- * 只使用三種欄寬填滿一行：單張升為全寬，兩張升為各 1/2，三張維持各 1/3。
- * 課名長度仍決定初始分組，這裡只利用分組後確定無法再放卡片的剩餘空間。
- */
-const fillCourseCardRow = row => {
-    if (row.length === 1) {
-        return row.map(entry => ({ ...entry, span: COURSE_GRID_COLUMN_COUNT }));
-    }
-    if (row.length === 2 && row.every(entry => entry.span < COURSE_GRID_COLUMN_COUNT)) {
-        return row.map(entry => ({ ...entry, span: COURSE_GRID_COLUMN_COUNT / 2 }));
-    }
-    return row;
-};
-
-const groupCourseCardsByRow = list => {
-    const rows = [];
-    let currentRow = [];
-    let occupiedColumns = 0;
-
-    list.forEach((item, index) => {
-        const span = getCourseCardSpan(item);
-        if (occupiedColumns > 0 && occupiedColumns + span > COURSE_GRID_COLUMN_COUNT) {
-            rows.push(currentRow);
-            currentRow = [];
-            occupiedColumns = 0;
-        }
-
-        currentRow.push({
-            item,
-            span,
-            key: `${item['Course Code'] || item.New_code || 'course'}-${index}`,
-        });
-        occupiedColumns += span;
-
-        if (occupiedColumns === COURSE_GRID_COLUMN_COUNT) {
-            rows.push(currentRow);
-            currentRow = [];
-            occupiedColumns = 0;
-        }
-    });
-
-    if (currentRow.length > 0) {
-        rows.push(currentRow);
-    }
-    return rows.map(fillCourseCardRow);
-};
+/** 寬屏左欄寬度：固定一台手機的寬度，讓篩選面板沿用手機排版 */
+const FILTER_PANE_WIDTH = 360;
 
 const CourseCardRow = ({
     entries,
     availableWidth,
+    columnCount,
     programmeLevel,
     courseMode,
     isHistoricalPeriod,
@@ -173,7 +94,7 @@ const CourseCardRow = ({
                     programmeLevel={programmeLevel}
                     courseMode={courseMode}
                     isHistoricalPeriod={isHistoricalPeriod}
-                    cardWidth={getCourseCardWidth(entry.span, availableWidth)}
+                    cardWidth={getCourseCardWidth(entry.span, availableWidth, COURSE_CARD_GAP, columnCount)}
                     cardHeight={rowHeight}
                     onMeasureHeight={height => handleMeasureHeight(entry.key, height)}
                     sectionStatuses={
@@ -187,17 +108,34 @@ const CourseCardRow = ({
     );
 };
 
-const What2Reg = () => {
+/**
+ * 搵課段落。
+ *
+ * @param {boolean} [isSplitPane] 是否與課表左右分屏（course/index.js 寬屏殼子）：
+ *   課表就在旁邊，不再顯示「切到課表」的排課膠囊
+ */
+const What2Reg = ({ isSplitPane = false }) => {
     const { theme } = useTheme();
-    const { searchHost } = useUmehHost();
+    // 選咩課搜尋網址
+    const searchHost = WHAT_2_REG + '/search/course/';
     const { themeColor, black, bg_color } = theme;
     const navigation = useNavigation();
+    // 達到 Material 3 expanded（≥ 840）即左右分欄；內容組件兩種殼子共用。
+    // 量自身寬度而非窗口：與課表分屏時本段落只佔左欄，窗口寬度會誤判
+    const { isExpanded: isWindowExpanded } = useWindowSizeClass();
+    const [paneWidth, setPaneWidth] = useState(0);
+    const isExpanded =
+        paneWidth > 0
+            ? paneWidth >= WINDOW_BREAKPOINTS.expanded
+            : isWindowExpanded;
 
     const [filterOptions, setFilterOptions] = useState(defaultFilterOptions);
     // 星期／時段篩選不持久化：若寫入 ARK_Courses_filterOptions，下次開 APP 會殘留看不見的條件而顯示空列表
     const [timeFilter, setTimeFilter] = useState(defaultTimeFilter);
     const [recommendationOnly, setRecommendationOnly] = useState(false);
     const [courseGridWidth, setCourseGridWidth] = useState(0);
+    // 可用寬度每 440px 開一條「車道」，卡片仍維持手機上的 1/3、1/2、全寬三檔
+    const courseGridColumnCount = getLaneCount(courseGridWidth) * LANE_COLUMN_COUNT;
     const [loadedFilterStorageKey, setLoadedFilterStorageKey] = useState(null);
 
     const textInputRef = useRef(null);
@@ -358,8 +296,6 @@ const What2Reg = () => {
     // 課程資料的載入與版本同步已上移到容器，此處只還原本段落自己的篩選條件
     useEffect(() => {
         logToFirebase('openPage', { page: 'chooseCourses' });
-        refreshUmehHost(); // 不 await，背景探測 host
-
     }, []);
 
     useEffect(() => {
@@ -489,13 +425,23 @@ const What2Reg = () => {
             style={{
                 rowGap: COURSE_CARD_GAP,
                 paddingHorizontal: COURSE_GRID_HORIZONTAL_PADDING,
+            }}
+            // 量測網格自身而非整頁：寬屏時網格只佔右欄，iPad 側欄／分屏也不必另外扣寬度
+            onLayout={({ nativeEvent }) => {
+                const availableWidth = nativeEvent.layout.width - COURSE_GRID_HORIZONTAL_PADDING * 2;
+                setCourseGridWidth(currentWidth => (
+                    Math.abs(currentWidth - availableWidth) > 0.5
+                        ? availableWidth
+                        : currentWidth
+                ));
             }}>
             {courseGridWidth > 0
-                ? groupCourseCardsByRow(list).map(entries => (
+                ? groupCourseCardsByRow(list, courseGridColumnCount).map(entries => (
                     <CourseCardRow
                         key={`${programmeLevel}-${courseMode}-${activeCoursePeriod?.id}-${Math.round(courseGridWidth)}-${entries.map(entry => `${entry.key}:${entry.span}`).join('_')}`}
                         entries={entries}
                         availableWidth={courseGridWidth}
+                        columnCount={courseGridColumnCount}
                         programmeLevel={programmeLevel}
                         courseMode={courseMode}
                         isHistoricalPeriod={isHistoricalPeriod}
@@ -508,160 +454,206 @@ const What2Reg = () => {
                 ))
                 : null}
         </View>
-    ), [activeCoursePeriod?.id, courseGridWidth, courseMode, isHistoricalPeriod, programmeLevel, sectionStatusesByCourseCode]);
+    ), [activeCoursePeriod?.id, courseGridColumnCount, courseGridWidth, courseMode, isHistoricalPeriod, programmeLevel, sectionStatusesByCourseCode]);
 
     // 搜尋結果不套用星期／時段篩選：此時 FilterPanel 不渲染，使用者既看不到也無法清除該篩選
     const hasSearchResult = searchFilterCourse?.length > 0;
 
+    // 以下內容在緊湊（單欄滾動）與寬屏（左右分欄）兩種殼子之間共用，不因佈局分叉
+    const searchBar = (
+        <SearchBarSection
+            theme={theme}
+            inputText={inputText}
+            inputOK={inputOK}
+            textInputRef={textInputRef}
+            onChangeText={setInputText}
+            onClear={onClearInput}
+            onPressAction={onPressSearchAction}
+            trigger={trigger}
+        />
+    );
+
+    const filterOrHint = hasSearchResult ? (
+        <View style={{ alignSelf: 'center' }}>
+            <Text style={{ ...uiStyle.defaultText, fontSize: verticalScale(10), color: black.third }}>
+                燕子，答應我，要好好上課
+            </Text>
+        </View>
+    ) : (
+        <FilterPanel
+            theme={theme}
+            programmeLevel={programmeLevel}
+            courseMode={courseMode}
+            filterOptions={filterOptions}
+            offerFacultyList={offerFacultyList}
+            offerGEList={offerGEList}
+            offerFacultyDepaListObj={offerFacultyDepaListObj}
+            unitMap={unitMap}
+            depaMap={depaMap}
+            geClassMap={geClassMap}
+            adpeMap={adpeMap}
+            modeENStr={modeENStr}
+            CMGEList={CMGEList}
+            dayList={dayList}
+            timeFilter={timeFilter}
+            recommendationOnly={recommendationOnly}
+            coursePeriodOptions={coursePeriodOptions}
+            activeCoursePeriod={activeCoursePeriod}
+            catalogMetadata={catalogMetadata}
+            isHistoricalPeriod={isHistoricalPeriod}
+            historicalCatalogStatus={historicalCatalogStatus}
+            onUpdateFilterOptions={updateFilterOptions}
+            onUpdateTimeFilter={updateTimeFilter}
+            onToggleRecommendation={value => {
+                setRecommendationOnly(value);
+            }}
+            onSetCourseMode={setCourseMode}
+            onSelectCoursePeriod={handleSelectCoursePeriod}
+            onPressProgrammeLevel={() => {
+                navigation.navigate('SettingPage');
+            }}
+            trigger={trigger}
+        />
+    );
+
+    const courseGrid = hasSearchResult ? renderCourseCards(searchFilterCourse) : (
+        <>
+            {filterCourseList?.length > 0
+                ? renderCourseCards(
+                    filterCourseList,
+                    isTimeFilterActive ||
+                    isRecommendationFilterActive,
+                )
+                : null}
+
+            {(isTimeFilterActive || isRecommendationFilterActive) &&
+                filterCourseList?.length === 0 ? (
+                <View style={{ paddingHorizontal: scale(20), paddingVertical: scale(20) }}>
+                    <Text style={{
+                        ...uiStyle.defaultText,
+                        fontSize: scale(12),
+                        color: black.third,
+                        textAlign: 'center',
+                    }}>
+                        {isRecommendationFilterActive
+                            ? t('目前沒有可排入且不衝突的課程，可調整篩選或已排課表。', { ns: 'catalog' })
+                            : t('該時段沒有符合的課程，可調整或清除星期與時段篩選。', { ns: 'catalog' })}
+                    </Text>
+                </View>
+            ) : null}
+        </>
+    );
+
+    const footer = (
+        <>
+            <View style={{ marginTop: scale(10), alignItems: 'center' }}>
+                <Text style={{ ...uiStyle.defaultText, fontSize: scale(10), color: black.third }}>
+                    {`${isPostgraduate
+                        ? '研究生'
+                        : courseMode === 'ad'
+                            ? '開設'
+                            : '預選'}課程:`}
+                </Text>
+                <Text style={{ ...uiStyle.defaultText, fontSize: scale(9), color: black.third }}>
+                    {isHistoricalPeriod
+                        ? `${activeCoursePeriodLabel} · ${t('歷史課表', { ns: 'catalog' })}`
+                        : `數據日期版本: ${isPostgraduate
+                            ? catalogMetadata.postgraduate.updateTime
+                            : courseMode === 'ad'
+                                ? catalogMetadata.adddrop.updateTime
+                                : catalogMetadata.pre.updateTime}`}
+                </Text>
+                {isHistoricalPeriod ? (
+                    <Text style={{ ...uiStyle.defaultText, fontSize: scale(9), color: theme.warning, textAlign: 'center' }}>
+                        {t('歷史開課資料按最新課程目錄辨認本科／研究生，僅供規劃參考。', { ns: 'catalog' })}
+                    </Text>
+                ) : null}
+            </View>
+
+            <View style={{ margin: scale(10), padding: scale(10), alignItems: 'center' }}>
+                <Text style={{ ...uiStyle.defaultText, color: black.third, fontSize: scale(12) }}>
+                    知識無價，評論只供參考
+                </Text>
+                <Text style={{ ...uiStyle.defaultText, color: black.third, fontSize: scale(12) }}>
+                    選咩課與ARK ALL是兩個獨立項目
+                </Text>
+            </View>
+
+            <TouchableScale style={{ marginTop: scale(10), alignItems: 'center' }} onPress={handleUserAgreePress}>
+                <Text style={{ ...uiStyle.defaultText, color: themeColor, fontSize: scale(10) }}>
+                    ARK ALL 隱私政策 & 用戶協議
+                </Text>
+            </TouchableScale>
+        </>
+    );
+
+    // 兩種殼子共用的滾動行為；scrollViewRef 必須掛在承載網格的那個滾動視圖上，字母索引才跳得到
+    const courseScrollProps = {
+        scrollIndicatorInsets: { bottom: floatingBottom },
+        keyboardDismissMode: 'on-drag',
+        contentInsetAdjustmentBehavior: 'never',
+        bottomOffset: 50,
+    };
+
     return (
         <View
+            onLayout={({ nativeEvent }) => setPaneWidth(nativeEvent.layout.width)}
             style={{
                 flex: 1,
                 backgroundColor: bg_color,
                 alignItems: 'center',
                 justifyContent: 'center',
             }}
-            onLayout={({ nativeEvent }) => {
-                const availableWidth = nativeEvent.layout.width - COURSE_GRID_HORIZONTAL_PADDING * 2;
-                setCourseGridWidth(currentWidth => (
-                    Math.abs(currentWidth - availableWidth) > 0.5
-                        ? availableWidth
-                        : currentWidth
-                ));
-            }}
         >
-            <KeyboardAwareScrollView
-                ref={scrollViewRef}
-                style={{ width: '100%', flex: 1 }}
-                scrollIndicatorInsets={{ bottom: floatingBottom }}
-                contentContainerStyle={{ paddingBottom: floatingBottom + verticalScale(50) }}
-                stickyHeaderIndices={[0]}
-                keyboardDismissMode="on-drag"
-                contentInsetAdjustmentBehavior="never"
-                bottomOffset={50}
-            >
-                <SearchBarSection
-                    theme={theme}
-                    inputText={inputText}
-                    inputOK={inputOK}
-                    textInputRef={textInputRef}
-                    onChangeText={setInputText}
-                    onClear={onClearInput}
-                    onPressAction={onPressSearchAction}
-                    trigger={trigger}
-                />
-
-                {hasSearchResult ? (
-                    <View style={{ width: '100%' }}>
-                        <View style={{ alignSelf: 'center' }}>
-                            <Text style={{ ...uiStyle.defaultText, fontSize: verticalScale(10), color: black.third }}>
-                                燕子，答應我，要好好上課
-                            </Text>
-                        </View>
-                        {renderCourseCards(searchFilterCourse)}
+            {isExpanded ? (
+                // 寬屏：左欄固定手機寬度放搜尋與篩選；右欄結果網格隨寬度增加車道
+                <View style={{ flex: 1, flexDirection: 'row', width: '100%' }}>
+                    <View
+                        style={{
+                            width: FILTER_PANE_WIDTH,
+                            borderRightWidth: StyleSheet.hairlineWidth,
+                            borderRightColor: black.third + '33',
+                        }}>
+                        {searchBar}
+                        <ScrollView
+                            style={{ flex: 1 }}
+                            contentContainerStyle={{
+                                paddingTop: COURSE_CARD_GAP,
+                                paddingBottom: floatingBottom + verticalScale(20),
+                            }}
+                            keyboardDismissMode="on-drag">
+                            {filterOrHint}
+                        </ScrollView>
                     </View>
-                ) : (
+                    <KeyboardAwareScrollView
+                        {...courseScrollProps}
+                        ref={scrollViewRef}
+                        style={{ flex: 1 }}
+                        contentContainerStyle={{
+                            paddingTop: COURSE_CARD_GAP,
+                            paddingBottom: floatingBottom + verticalScale(50),
+                        }}
+                    >
+                        {courseGrid}
+                        {footer}
+                    </KeyboardAwareScrollView>
+                </View>
+            ) : (
+                <KeyboardAwareScrollView
+                    {...courseScrollProps}
+                    ref={scrollViewRef}
+                    style={{ width: '100%', flex: 1 }}
+                    contentContainerStyle={{ paddingBottom: floatingBottom + verticalScale(50) }}
+                    stickyHeaderIndices={[0]}
+                >
+                    {searchBar}
                     <View style={{ rowGap: COURSE_CARD_GAP }}>
-                        <FilterPanel
-                            theme={theme}
-                            programmeLevel={programmeLevel}
-                            courseMode={courseMode}
-                            filterOptions={filterOptions}
-                            offerFacultyList={offerFacultyList}
-                            offerGEList={offerGEList}
-                            offerFacultyDepaListObj={offerFacultyDepaListObj}
-                            unitMap={unitMap}
-                            depaMap={depaMap}
-                            geClassMap={geClassMap}
-                            adpeMap={adpeMap}
-                            modeENStr={modeENStr}
-                            CMGEList={CMGEList}
-                            dayList={dayList}
-                            timeFilter={timeFilter}
-                            recommendationOnly={recommendationOnly}
-                            coursePeriodOptions={coursePeriodOptions}
-                            activeCoursePeriod={activeCoursePeriod}
-                            catalogMetadata={catalogMetadata}
-                            isHistoricalPeriod={isHistoricalPeriod}
-                            historicalCatalogStatus={historicalCatalogStatus}
-                            onUpdateFilterOptions={updateFilterOptions}
-                            onUpdateTimeFilter={updateTimeFilter}
-                            onToggleRecommendation={() => {
-                                setRecommendationOnly(currentValue => !currentValue);
-                            }}
-                            onSetCourseMode={setCourseMode}
-                            onSelectCoursePeriod={handleSelectCoursePeriod}
-                            onPressProgrammeLevel={() => {
-                                navigation.navigate('SettingPage');
-                            }}
-                            trigger={trigger}
-                        />
-
-                        {filterCourseList?.length > 0
-                            ? renderCourseCards(
-                                filterCourseList,
-                                isTimeFilterActive ||
-                                isRecommendationFilterActive,
-                            )
-                            : null}
-
-                        {(isTimeFilterActive || isRecommendationFilterActive) &&
-                            filterCourseList?.length === 0 ? (
-                            <View style={{ paddingHorizontal: scale(20), paddingVertical: scale(20) }}>
-                                <Text style={{
-                                    ...uiStyle.defaultText,
-                                    fontSize: scale(12),
-                                    color: black.third,
-                                    textAlign: 'center',
-                                }}>
-                                    {isRecommendationFilterActive
-                                        ? t('目前沒有可排入且不衝突的課程，可調整篩選或已排課表。', { ns: 'catalog' })
-                                        : t('該時段沒有符合的課程，可調整或清除星期與時段篩選。', { ns: 'catalog' })}
-                                </Text>
-                            </View>
-                        ) : null}
+                        {filterOrHint}
+                        {courseGrid}
                     </View>
-                )}
-
-                <View style={{ marginTop: scale(10), alignItems: 'center' }}>
-                    <Text style={{ ...uiStyle.defaultText, fontSize: scale(10), color: black.third }}>
-                        {`${isPostgraduate
-                            ? '研究生'
-                            : courseMode === 'ad'
-                                ? '開設'
-                                : '預選'}課程:`}
-                    </Text>
-                    <Text style={{ ...uiStyle.defaultText, fontSize: scale(9), color: black.third }}>
-                        {isHistoricalPeriod
-                            ? `${activeCoursePeriodLabel} · ${t('歷史課表', { ns: 'catalog' })}`
-                            : `數據日期版本: ${isPostgraduate
-                                ? catalogMetadata.postgraduate.updateTime
-                                : courseMode === 'ad'
-                                    ? catalogMetadata.adddrop.updateTime
-                                    : catalogMetadata.pre.updateTime}`}
-                    </Text>
-                    {isHistoricalPeriod ? (
-                        <Text style={{ ...uiStyle.defaultText, fontSize: scale(9), color: theme.warning, textAlign: 'center' }}>
-                            {t('歷史開課資料按最新課程目錄辨認本科／研究生，僅供規劃參考。', { ns: 'catalog' })}
-                        </Text>
-                    ) : null}
-                </View>
-
-                <View style={{ margin: scale(10), padding: scale(10), alignItems: 'center' }}>
-                    <Text style={{ ...uiStyle.defaultText, color: black.third, fontSize: scale(12) }}>
-                        知識無價，評論只供參考
-                    </Text>
-                    <Text style={{ ...uiStyle.defaultText, color: black.third, fontSize: scale(12) }}>
-                        選咩課與ARK ALL是兩個獨立項目
-                    </Text>
-                </View>
-
-                <TouchableScale style={{ marginTop: scale(10), alignItems: 'center' }} onPress={handleUserAgreePress}>
-                    <Text style={{ ...uiStyle.defaultText, color: themeColor, fontSize: scale(10) }}>
-                        ARK ALL 隱私政策 & 用戶協議
-                    </Text>
-                </TouchableScale>
-            </KeyboardAwareScrollView>
+                    {footer}
+                </KeyboardAwareScrollView>
+            )}
 
             <KeyboardToolbar />
 
@@ -672,11 +664,13 @@ const What2Reg = () => {
                 onScrollTo={onScrollToLetter}
             />
 
-            {/* 已排課程數與衝突提示，點擊切到課表段落 */}
-            <PlanCapsule
-                bottom={floatingBottom}
-                onPress={handleOpenTimetable}
-            />
+            {/* 已排課程數與衝突提示，點擊切到課表段落；分屏時課表就在右欄，不需要 */}
+            {isSplitPane ? null : (
+                <PlanCapsule
+                    bottom={floatingBottom}
+                    onPress={handleOpenTimetable}
+                />
+            )}
 
         </View>
     );

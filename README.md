@@ -57,6 +57,7 @@
     - [本機 Release 簽名設定](#本機-release-簽名設定)
   - [🐛 故障排除](#-故障排除)
 - [⛵ 維護須知](#-維護須知)
+  - [觸覺回饋標準](#觸覺回饋標準)
 
 ---
 
@@ -553,6 +554,110 @@ MYAPP_RELEASE_KEY_PASSWORD=你的_key_密碼
 
 ---
 
+### 🌐 Web 版部署
+
+Web 版是 `react-native-web` 打出來的純靜態單頁應用（入口 `App.web.js`、路由 `src/Nav.web.js`），部署在 **https://umall.one/webAPP/**，與 `/api/` 同源，所以瀏覽器不會觸發 CORS。服務器不需要 Node，只需要 nginx 把靜態文件端出來。
+
+#### 關鍵配置（三處要保持一致）
+
+| 位置 | 內容 | 作用 |
+| --- | --- | --- |
+| `app.json` → `experiments.baseUrl` | `"/webAPP"` | 讓 `index.html` 和 bundle 裡的資源路徑帶上子路徑前綴 |
+| `src/Nav.web.js` → `WEB_BASE_PATH` | `'webAPP'` | 讓 React Navigation 生成和解析的瀏覽器地址帶上前綴，刷新不會掉進官網的路由 |
+| 服務器 nginx `location /webAPP/` | `alias /data/umall/webAPP/` | 靜態文件目錄，見下方 |
+
+`src/utils/pathMap.js` 裡 web 端的 `API_HOST` 為空字符串（同源相對路徑），本地調試時由 `metro.config.js` 的代理把 `/api/*` 轉發到線上。
+
+#### 本地調試
+
+```console
+npx expo start --web
+```
+
+#### 導出靜態文件
+
+```console
+npx expo export --platform web
+```
+
+產物在 `dist/`（已 gitignore），每次導出會先清空再生成：
+
+```
+dist/
+├── index.html          唯一沒有 hash 的文件
+├── favicon.ico
+├── metadata.json
+├── _expo/static/js/web/index-<hash>.js
+└── assets/             字體、圖片，文件名帶 hash
+```
+
+本地檢查產物時**不要**用 Live Server 直接打開 `dist/index.html`，因為資源路徑是 `/webAPP/...` 的絕對路徑，根目錄對不上會白屏。要看效果直接部署到服務器，或者用 `npx serve dist` 後手動把地址改成 `/webAPP/`。
+
+#### 同步到服務器
+
+服務器是 `ARK_ALL_Server_OVH`（`~/.ssh/config` 裡的別名，`ubuntu` 用戶），目標目錄 `/data/umall/webAPP/`：
+
+```console
+rsync -avz --delete dist/ ARK_ALL_Server_OVH:/data/umall/webAPP/
+```
+
+`--delete` 會把上一版的舊 hash 文件清掉，目錄裡永遠是最新一次導出的完整快照。nginx 不需要重啟，文件落地即生效。
+
+一條命令完成導出加同步：
+
+```console
+npx expo export --platform web && rsync -avz --delete dist/ ARK_ALL_Server_OVH:/data/umall/webAPP/
+```
+
+#### 服務器 nginx 配置
+
+在 `/etc/nginx/sites-available/umall.one.conf` 的 443 server 塊裡、`location /`（反代官網 Next.js）**之前**：
+
+```nginx
+# ARK ALL web 版（React Native Web 靜態產物，由前端 repo 的 expo export 生成）
+# 帶內容 hash 的 _expo/ 長緩存；index.html 不緩存，保證發版後拿到新入口
+# 不帶結尾斜槓的 /webAPP 匹配不到下面的前綴 location，會落到官網反代拿到 404，這裡補上跳轉
+location = /webAPP {
+    return 301 /webAPP/;
+}
+
+location /webAPP/_expo/ {
+    alias /data/umall/webAPP/_expo/;
+    add_header Cache-Control "public, max-age=31536000, immutable";
+}
+
+location = /webAPP/index.html {
+    alias /data/umall/webAPP/index.html;
+    add_header Cache-Control "no-cache";
+}
+
+location /webAPP/ {
+    alias /data/umall/webAPP/;
+    try_files $uri $uri/ /webAPP/index.html;
+}
+```
+
+改完後：
+
+```console
+sudo nginx -t && sudo systemctl reload nginx
+```
+
+驗證各路徑是否正常（單頁回退、緩存頭）：
+
+```console
+for u in /webAPP /webAPP/ /webAPP/course/CISC1001 /webAPP/favicon.ico; do curl -s -o /dev/null -w "$u %{http_code} cache=%header{cache-control}\n" "https://umall.one$u"; done
+```
+
+#### 已知限制
+
+- 網站前面有 Cloudflare，`index.html` 會被注入一段 `/cdn-cgi/` 腳本，屬正常現象；bundle 由 Cloudflare 做 brotli 壓縮。
+- `umall.one/app/*` 是官網（ARK-ALL-Web，Next.js）的分享落地頁，web 版不要佔用這個前綴。
+- 課程目錄另一數據源 `umeh.top` 不回 CORS 頭，web 端請求會被攔，待補反代或後端加頭。
+- `src/Nav.web.js` 的 linking 只聲明了頂層路徑，嵌套頁面（如 `/webAPP/features/FeatureList`）刷新會回到默認 Tab。
+
+---
+
 ### 🐛 故障排除
 
 在此查看[Android 解決方案](./README/debugging_doc.md#android)與[iOS 解決方案](./README/debugging_doc.md#ios)
@@ -568,3 +673,31 @@ MYAPP_RELEASE_KEY_PASSWORD=你的_key_密碼
 2. 澳大課程更新。使用預選課 Excel，使用 Excel to JSON 工具獲得 JSON 數據，放入`src/static/UMCourses/offer courses.json`。
     - 按照程序注釋增加開設課程的繁體中文翻譯內容。
 3. icon 更新。使用 `https://www.appicon.co/` 生成 iOS icon 文件，使用 `Android Studio` 生成 Android icon 文件（Studio 生成的文件最全面，適配各個廠商的 UI）。
+
+### 觸覺回饋標準
+
+APP 使用 `expo-haptics`，所有功能統一透過 `src/utils/trigger.js` 的 `trigger()` 呼叫。頁面與元件不可直接 import `expo-haptics`，避免各處自行決定平台 enum 或 fallback。
+
+| 語意 | 使用時機 | iOS／Web | Android |
+| ---- | -------- | -------- | ------- |
+| `trigger()`／`tap` | 一般按鈕、卡片、返回、重試 | Soft impact | Virtual key |
+| `selection` | 分段控制、篩選條件、單次選項變更 | Selection | Segment tick |
+| `tick` | 滑桿、時間格等連續且高頻的刻度變更 | Selection | Segment frequent tick |
+| `context` | 選單、操作表或其他上下文操作正式開啟 | Rigid impact | Context click |
+| `longPress` | 長按手勢達到觸發門檻 | Rigid impact | Long press |
+| `dragStart` | 可拖曳項目被拾起或開始批量拖選 | Medium impact | Drag start |
+| `gestureStart`／`gestureEnd` | 有明確開始與結束狀態的手勢 | Light／Soft impact | Gesture start／end |
+| `toggleOn`／`toggleOff` | Switch 或二態功能完成切換 | Selection | Toggle on／off |
+| `success` | 後端或本地操作已確認成功 | Success notification | Confirm |
+| `warning` | 操作完成但需注意，或只完成部分內容 | Warning notification | Warning notification |
+| `error` | 操作實際失敗且需要使用者處理 | Error notification | Reject |
+
+使用規則：
+
+- 所有可互動元件仍須有觸覺回饋；一般操作使用 `trigger()`，只有語意明確時才傳入分類。
+- `success`、`warning`、`error` 必須在結果確定後觸發，不可因為按鈕文字是「儲存」或「刪除」就在送出前使用結果震感。
+- 破壞性操作本身不是 `error`；確認按鈕使用一般 `tap`，刪除成功後才使用 `success`，請求失敗才使用 `error`。
+- 高頻互動只使用 `tick`，並避免每一幀觸發。部分 Android 裝置可能主動省略過密或不支援的震感，屬正常行為。
+- `soft` 與 `rigid` 只保留給舊呼叫相容；新程式碼應使用 `tap` 或對應的語意名稱。
+- 震感失敗不得阻斷原本操作，也不能取代畫面、文字、Toast 或無障礙狀態提示。
+- 尊重使用者的系統觸覺設定，不得加入忽略 Android 系統設定的旗標。

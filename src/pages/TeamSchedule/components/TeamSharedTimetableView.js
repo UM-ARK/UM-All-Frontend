@@ -347,7 +347,7 @@ const WeeklyOverview = ({meetings, aggregate = false, aggregateMemberCount = 0, 
                                         accessibilityLabel={`${courseCode}-${slot.identity.section}`}
                                         cardStyle={styles.overviewMeetingFill}
                                         menuStyle={[styles.overviewMeetingFrame, {height: frame.height, left: frame.left, top: frame.top, width: frame.width}]}
-                                        onOpen={() => trigger('rigid')}
+                                        onOpen={() => trigger('context')}
                                         onPressAction={event => {
                                             trigger();
                                             handleCourseInfoMenuAction({

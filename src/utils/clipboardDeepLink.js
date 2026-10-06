@@ -23,9 +23,8 @@ import {AppState} from 'react-native';
 async function defaultReadClipboard() {
     try {
         // 延遲載入，避免 Jest 環境強制綁定原生 Clipboard 模組
-        const Clipboard =
-            require('@react-native-clipboard/clipboard').default;
-        return (await Clipboard.getString()) || '';
+        const Clipboard = require('expo-clipboard');
+        return (await Clipboard.getStringAsync()) || '';
     } catch (_error) {
         return '';
     }

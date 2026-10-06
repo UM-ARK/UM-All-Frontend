@@ -7,7 +7,7 @@ import { scale } from 'react-native-size-matters';
 import { Image } from 'expo-image';
 import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import Ionicons from "@react-native-vector-icons/ionicons";
-import Clipboard from '@react-native-clipboard/clipboard';
+import * as Clipboard from 'expo-clipboard';
 import Toast from 'react-native-toast-message';
 import Text from '../../../components/AppText';
 import SimpleProgressBar from '../../../components/SimpleProgressBar';
@@ -264,7 +264,7 @@ const ARKWiki = (props) => {
                         }}
                         onPress={() => {
                             trigger();
-                            Clipboard.setString(currentURLRef.current);
+                            Clipboard.setStringAsync(currentURLRef.current);
                             Toast.show({
                                 type: 'arkToast',
                                 text1: '已複製當前頁面鏈接到粘貼板！',

@@ -1,7 +1,7 @@
 jest.mock('@react-navigation/native', () => ({
     useFocusEffect: jest.fn(),
 }));
-jest.mock('@callstack/liquid-glass', () => ({
+jest.mock('../../../../../utils/glassEffect', () => ({
     isLiquidGlassSupported: false,
 }));
 jest.mock('react-native-simple-toast', () => ({

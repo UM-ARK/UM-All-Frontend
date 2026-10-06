@@ -3,7 +3,7 @@ import {
     View,
 } from 'react-native';
 
-import { isLiquidGlassSupported } from '@callstack/liquid-glass';
+import { isLiquidGlassSupported } from '../../../../utils/glassEffect';
 
 import styles from './styles';
 

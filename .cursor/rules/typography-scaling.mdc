@@ -32,3 +32,12 @@ width: scale(100),         // 水平縮放
 height: verticalScale(50), // 垂直縮放
 fontSize: moderateScale(16) // 字型縮放
 ```
+
+## 寬屏封頂（iPad／Web）
+
+`metro.config.js` 全平台把該包指向 `src/utils/scaling.js`：手機行為不變，窗口短邊 ≥ 600 時
+係數固定 1.15，字號與間距不再隨屏幕等比放大。組件照常從 `react-native-size-matters` import，
+不要直接引用 `scaling.js`。
+
+`scale()` 只負責「尺寸」，不要拿它做佈局判斷；寬屏分欄、欄數請用 `useWindowSizeClass()`，
+詳見 `responsive-layout.mdc`。

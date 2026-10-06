@@ -1,0 +1,135 @@
+// Web / 桌面版路由：只掛三個功能區（服務功能大全、課程查詢、模擬選課）與設置頁；組織活動 Tab 暫不掛，僅保留活動／組織詳情深鏈接
+// Metro 在 web 平台自動優先選用 .web.js，手機端仍走 Nav.js；
+// 論壇、Wiki、推送、快捷操作等純手機能力不進 web 包
+import React, { useMemo } from 'react';
+import { TouchableOpacity } from 'react-native';
+import Ionicons from '@react-native-vector-icons/ionicons';
+import {
+    NavigationContainer,
+    DefaultTheme,
+    DarkTheme,
+} from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { useTranslation } from 'react-i18next';
+
+import Tabbar from './Tabbar';
+import ClubDetail from './pages/TabbarPages/info/club/ClubDetail';
+import EventDetail from './pages/TabbarPages/info/club/EventDetail';
+import AllEvents from './pages/TabbarPages/info/club/AllEvents';
+import LocalCourse from './pages/TabbarPages/course/pages/what2Reg/pages/LocalCourse';
+import UMOrg from './pages/Features/UMOrg';
+import { useTheme } from './components/ThemeContext';
+import { APP_LINKING } from './utils/appLinks';
+
+const Stack = createNativeStackNavigator();
+
+// 正式 web 版部署在 umall.one/webAPP/ 子路徑下，須與 app.json 的 experiments.baseUrl 保持一致。
+// 前綴直接寫進路由路徑，讓刷新頁面和分享出去的鏈接都留在 /webAPP/ 之下，
+// 不會落到同域名官網（Next.js）的路由裡
+const WEB_BASE_PATH = 'webAPP';
+const withBasePath = path => `${WEB_BASE_PATH}/${path}`;
+
+// 只保留 web 端存在的路由，避免瀏覽器地址欄解析到未掛載的頁面
+const WEB_LINKING = {
+    prefixes: APP_LINKING.prefixes,
+    config: {
+        initialRouteName: 'Tabbar',
+        screens: {
+            Tabbar: {
+                path: WEB_BASE_PATH,
+                screens: {
+                    CourseTab: 'course',
+                    FeaturesTabbar: 'features',
+                    SettingPage: 'settings',
+                },
+            },
+            LocalCourse: withBasePath(APP_LINKING.config.screens.LocalCourse),
+            ClubDetail: withBasePath(APP_LINKING.config.screens.ClubDetail),
+            EventDetail: withBasePath(APP_LINKING.config.screens.EventDetail),
+            AllEvents: withBasePath('events'),
+            UMOrg: withBasePath('org'),
+        },
+    },
+};
+
+const Nav = () => {
+    const { theme } = useTheme();
+    const { black } = theme;
+    const { t } = useTranslation(['common', 'features', 'event', 'home', 'my']);
+
+    // 與 ThemeContext 對齊，避免透出 Navigation 預設底色
+    const navigationTheme = useMemo(() => {
+        const base = theme.isLight ? DefaultTheme : DarkTheme;
+        return {
+            ...base,
+            colors: {
+                ...base.colors,
+                primary: theme.themeColor,
+                background: theme.bg_color,
+                card: theme.white,
+                text: theme.black.main,
+                notification: theme.unread,
+            },
+        };
+    }, [theme]);
+
+    return (
+        <NavigationContainer theme={navigationTheme} linking={WEB_LINKING}>
+            <Stack.Navigator
+                initialRouteName="Tabbar"
+                screenOptions={({ navigation }) => ({
+                    freezeOnBlur: true,
+                    headerTitle: '',
+                    headerStyle: {
+                        backgroundColor: theme.bg_color,
+                    },
+                    headerShadowVisible: false,
+                    contentStyle: { backgroundColor: theme.bg_color },
+                    headerTitleAlign: 'center',
+                    headerTintColor: black.main,
+                    // 桌面端統一用圓形返回鈕（與 Android 樣式一致）
+                    headerLeft: () => (
+                        <TouchableOpacity
+                            onPress={() => navigation.goBack()}
+                            style={{
+                                width: 36,
+                                height: 36,
+                                borderRadius: 18,
+                                backgroundColor: theme.black.main + '14',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                            }}>
+                            <Ionicons
+                                name="chevron-back"
+                                size={22}
+                                color={black.main}
+                            />
+                        </TouchableOpacity>
+                    ),
+                })}>
+                <Stack.Screen
+                    name="Tabbar"
+                    component={Tabbar}
+                    options={{ headerShown: false }}
+                />
+
+                {/* 服務頁 */}
+                <Stack.Screen
+                    name="UMOrg"
+                    component={UMOrg}
+                    options={{ headerTitle: t('澳大部門') }}
+                />
+
+                {/* 組織活動 */}
+                <Stack.Screen name="ClubDetail" component={ClubDetail} />
+                <Stack.Screen name="EventDetail" component={EventDetail} />
+                <Stack.Screen name="AllEvents" component={AllEvents} />
+
+                {/* 課程詳情 */}
+                <Stack.Screen name="LocalCourse" component={LocalCourse} />
+            </Stack.Navigator>
+        </NavigationContainer>
+    );
+};
+
+export default Nav;

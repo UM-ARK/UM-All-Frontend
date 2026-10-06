@@ -103,6 +103,27 @@ describe('ARK ALL 深度連結', () => {
         ]);
     });
 
+    it('分享面板的「標題換行連結」把標題併入卡片', () => {
+        expect(splitArkAppLinkContent(
+            '26-27會計學會招新啦!!\nhttps://umall.one/app/event/1',
+        )).toEqual([
+            {
+                type: 'appLink',
+                title: '26-27會計學會招新啦!!',
+                appLink: expect.objectContaining({type: 'event'}),
+            },
+        ]);
+        expect(splitArkAppLinkContent(
+            '第一行\n第二行\nhttps://umall.one/app/event/1',
+        )).toEqual([
+            {type: 'text', content: '第一行\n第二行'},
+            {
+                type: 'appLink',
+                appLink: expect.objectContaining({type: 'event'}),
+            },
+        ]);
+    });
+
     it('拒絕未註冊或非 ARK 的連結', () => {
         expect(parseArkAppLink('https://example.com/app/course/COMP1000'))
             .toBeNull();

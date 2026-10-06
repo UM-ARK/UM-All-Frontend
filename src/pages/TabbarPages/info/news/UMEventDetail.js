@@ -28,7 +28,7 @@ import {
     scale,
     verticalScale,
 } from 'react-native-size-matters';
-import { isLiquidGlassSupported } from '@callstack/liquid-glass';
+import { isLiquidGlassSupported } from '../../../../utils/glassEffect';
 
 import Text from '../../../../components/AppText';
 import ARKImageView from '../../../../components/ARKImageView';

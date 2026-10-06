@@ -20,7 +20,7 @@ import {
 
 import { scale, verticalScale } from 'react-native-size-matters';
 import Ionicons from "@react-native-vector-icons/ionicons";
-import Clipboard from '@react-native-clipboard/clipboard';
+import * as Clipboard from 'expo-clipboard';
 import moment from 'moment';
 import Toast from 'react-native-simple-toast';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -160,7 +160,14 @@ function TimetableCourseMenuCard({
     );
 }
 
-function CourseSim({ route, navigation }) {
+/**
+ * 課表段落。
+ *
+ * @param {object} route 段落路由；分屏時由 course/index.js 拆出嵌套參數後傳入，形狀相同
+ * @param {object} navigation 段落導航；分屏時 setParams 由容器代理
+ * @param {boolean} [isSplitPane] 是否與搵課左右分屏：搵課就在左欄，FAB 不再提供「切到搵課」
+ */
+function CourseSim({ route, navigation, isSplitPane = false }) {
     // 課程資料與排課狀態一律來自 CoursePlanProvider，本段落不再自行持有
     const {
         catalogMetadata,
@@ -189,7 +196,8 @@ function CourseSim({ route, navigation }) {
 
     // state
     const [importTimeTableText, setImportTimeTableText] = useState(''); // 空課表引導的貼上導入
-    const [searchText, setSearchText] = useState(initialCheckCode);
+    // 必須是字串：web 的 <input> 收到 value={null} 會報錯並退化成非受控
+    const [searchText, setSearchText] = useState(initialCheckCode ?? '');
     const [perSearchText, setPerSearchText] = useState(null);
 
     const [dayFilterChoice, setDayFilterChoice] = useState(null);
@@ -215,6 +223,8 @@ function CourseSim({ route, navigation }) {
     const [replacementCourseCode, setReplacementCourseCode] = useState(null);
     const [replacementSearchText, setReplacementSearchText] = useState('');
     const [overviewViewportHeight, setOverviewViewportHeight] = useState(0);
+    // 量自身寬度而非窗口：分屏時本段落只佔右欄，概覽的星期欄要按欄寬均分
+    const [overviewViewportWidth, setOverviewViewportWidth] = useState(0);
     const [overviewWeekdayHeight, setOverviewWeekdayHeight] = useState(0);
     const [overviewReminderHeight, setOverviewReminderHeight] = useState(0);
     const [viewSwitcherHeight, setViewSwitcherHeight] = useState(0);
@@ -469,7 +479,8 @@ function CourseSim({ route, navigation }) {
         );
         return dayList.slice(0, Math.max(lastCourseDayIndex ?? 4, 4) + 1);
     }, [planSlots]);
-    const overviewDayColumnWidth = windowWidth / overviewDays.length;
+    const overviewDayColumnWidth =
+        (overviewViewportWidth || windowWidth) / overviewDays.length;
     const overviewStart = overviewRows[0]?.start ?? 0;
     const overviewEnd =
         lodash.max(planSlots.map(course => toMinutes(course['Time To']))) ??
@@ -703,7 +714,7 @@ function CourseSim({ route, navigation }) {
         return {
             actions,
             onOpen: () => {
-                trigger('rigid');
+                trigger('context');
                 if (hasOpenCourseSearch) {
                     bottomSheetRef?.current?.snapToIndex(0);
                 }
@@ -1139,7 +1150,7 @@ function CourseSim({ route, navigation }) {
         let text = normalizeImportText(importTimeTableText || '').trim();
         if (!text) {
             text = normalizeImportText(
-                (await Clipboard.getString()) || '',
+                (await Clipboard.getStringAsync()) || '',
             ).trim();
         }
 
@@ -1686,7 +1697,7 @@ E11-0000
                             paddingVertical: scale(6),
                         }}
                         onChangeText={onChangeText}
-                        value={value}
+                        value={value ?? ''}
                         selectTextOnFocus
                         placeholder={placeholder}
                         placeholderTextColor={black.third}
@@ -1875,7 +1886,7 @@ E11-0000
                 <CourseActionMenuCard
                     accessibilityLabel={`${selectedCourse['Course Code']}-${item.section}`}
                     actions={replacementMenuActions}
-                    onOpen={() => trigger('rigid')}
+                    onOpen={() => trigger('context')}
                     onPressAction={event => {
                         trigger();
                         const actionId = event.nativeEvent.event;
@@ -2149,7 +2160,9 @@ E11-0000
         const filterCourseList = searchText
             ? handleSearchFilterCourse(searchText)
             : [];
-        const haveSearchResult = searchText && filterCourseList.length > 0;
+        // 必須是布林：'' && ... 會把空字串當文字節點塞進 View，web 會報錯
+        const haveSearchResult =
+            Boolean(searchText) && filterCourseList.length > 0;
         const activeTimeFilter = {
             day: dayFilterChoice,
             from: timeFilterFrom,
@@ -2204,7 +2217,7 @@ E11-0000
                     }),
                     showBack: Boolean(perSearchText),
                     onBackPress: () => {
-                        setSearchText(perSearchText);
+                        setSearchText(perSearchText ?? '');
                         setPerSearchText(null);
                     },
                 })}
@@ -2825,9 +2838,10 @@ E11-0000
     return (
         // 頂欄由 course/index.js 容器統一提供；頂部 insets 亦在容器處理，此處不可重複扣一次
         <View
-            onLayout={({ nativeEvent }) =>
-                setOverviewViewportHeight(nativeEvent.layout.height)
-            }
+            onLayout={({ nativeEvent }) => {
+                setOverviewViewportHeight(nativeEvent.layout.height);
+                setOverviewViewportWidth(nativeEvent.layout.width);
+            }}
             style={{
                 flex: 1,
                 backgroundColor: bg_color,
@@ -2878,8 +2892,10 @@ E11-0000
                 bottom={floatingBottom}
                 visible={!hasOpenCourseSearch}
                 onAddPress={openCourseSearch}
-                onSearchPress={() =>
-                    navigation.navigate(COURSE_SEARCH_SEGMENT)
+                onSearchPress={
+                    isSplitPane
+                        ? undefined
+                        : () => navigation.navigate(COURSE_SEARCH_SEGMENT)
                 }
             />
 

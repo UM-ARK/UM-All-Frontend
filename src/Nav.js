@@ -10,7 +10,7 @@ import {
 } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { HeaderBackButton } from '@react-navigation/elements';
-import { isLiquidGlassSupported } from '@callstack/liquid-glass';
+import { isLiquidGlassSupported } from './utils/glassEffect';
 import * as QuickActions from 'expo-quick-actions';
 import { trigger } from './utils/trigger';
 import { useTranslation } from 'react-i18next';

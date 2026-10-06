@@ -2,8 +2,27 @@ import { Linking, Platform, Appearance, Alert } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
 import { themes } from '../components/ThemeContext';
 import { getBestBrowserPackage } from './browserPackage';
-import { ARK_WIKI } from './pathMap';
-import { getUmehOpenPref, isUmehUrl } from './umehHost';
+import { ARK_WIKI, WHAT_2_REG } from './pathMap';
+
+// 選咩課連結統一的來源標記，於內頁瀏覽時帶上
+const UMEH_UTM_QUERY =
+    'utm_source=umall&utm_medium=app&utm_campaign=inapp_browser';
+
+// 是否為選咩課網站連結
+const isUmehUrl = url =>
+    typeof url === 'string' && url.startsWith(WHAT_2_REG);
+
+// 選咩課連結補上 UTM；已帶 utm_source 或非選咩課連結則原樣返回
+const withUmehUtm = url => {
+    if (!isUmehUrl(url) || url.includes('utm_source=')) {
+        return url;
+    }
+    const hashIndex = url.indexOf('#');
+    const base = hashIndex === -1 ? url : url.slice(0, hashIndex);
+    const hash = hashIndex === -1 ? '' : url.slice(hashIndex);
+    const separator = base.includes('?') ? '&' : '?';
+    return `${base}${separator}${UMEH_UTM_QUERY}${hash}`;
+};
 
 export const openLink = async (input) => {
     let url, mode;
@@ -15,6 +34,10 @@ export const openLink = async (input) => {
         mode = input.mode;
     } else {
         throw new Error('openLink: Invalid input');
+    }
+
+    if (typeof url === 'string') {
+        url = withUmehUtm(url);
     }
 
     // Wiki、選咩課連結預設全螢幕（呼叫端可顯式傳 mode 覆寫）
@@ -36,11 +59,6 @@ export const openLink = async (input) => {
                 return Linking.openURL(url);
             }
             throw new Error(`Invalid URL: ${url}`);
-        }
-
-        // 選咩課可改為系統瀏覽器；其餘維持內頁 WebBrowser
-        if (isUmehUrl(url) && (await getUmehOpenPref()) === 'system') {
-            return Linking.openURL(url);
         }
 
         // 2. 獲取 Android 瀏覽器包名

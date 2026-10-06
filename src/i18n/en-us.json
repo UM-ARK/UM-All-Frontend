@@ -1202,7 +1202,6 @@
         "更新Pre Enroll數據": "Update Pre Enroll data",
         "手動檢查課表數據更新": "Check Course Data Update",
         "檢查官方SharePoint版本": "Check Official SharePoint Version",
-        "設置選咩課跳轉方式": "What2Reg Open Method Settings",
         "查": "Search",
         "寫": "Write",
         "選咩課": "What2Reg",
@@ -1459,6 +1458,7 @@
         "提問：關於澳大的一切...": "Ask: Anything about UM...",
         "關於澳大的一切...": "Anything about UM...",
         "複製功能Link": "Copy this function link",
+        "此功能網頁版暫未支持，請在 ARK ALL APP 中打開": "This feature is not available on the web version yet. Please open it in the ARK ALL app.",
         "查看校巴到站情況": "Check the bus arrival status",
         "查看澳大校曆發佈頁": "Check the UM calendar release page",
         "查看澳大校園地圖": "Check the UM campus map",
@@ -1538,7 +1538,7 @@
         "Browser Cache Help": "Clear Browser Cache",
         "Browser Cache Help Hint": "When a website will not open or shows old content",
         "Android Browser Cache Message": "Clear Local Data does not clear data stored by your system browser.\n\nFor Chrome:\n1. Open Chrome.\n2. Tap the menu in the top-right corner.\n3. Select Delete browsing data.\n4. Select Cached images and files. If a website's sign-in state is not working, also select Cookies and site data.\n\nIf the app opens links in another browser, clear the data in that browser instead. This may sign you out of some websites and cannot fix DNS or website server outages.",
-        "iOS Browser Cache Message": "iOS does not allow UM All to clear system browser data directly.\n\nGo to:\nSettings → Apps → Safari → Clear History and Website Data\n\nThis may sign you out of some websites. Some in-app browser data is stored separately from Safari, so this may not clear everything and cannot fix DNS or website server outages.",
+        "iOS Browser Cache Message": "iOS does not allow ARK ALL to clear system browser data directly.\n\nGo to:\nSettings → Apps → Safari → Clear History and Website Data\n\nThis may sign you out of some websites. Some in-app browser data is stored separately from Safari, so this may not clear everything and cannot fix DNS or website server outages.",
         "Check Update": "Check Update",
         "App Settings": "System Settings",
         "App Settings Hint": "Permissions, open links by default, etc.",
@@ -1566,11 +1566,10 @@
         "Guest": "Guest",
         "Student": "Student",
         "Organization": "Organization",
-        "What2Reg Host": "What2Reg Node Selection",
-        "What2Reg Open": "What2Reg Open Method",
-        "In-App Browser": "In-App Browser",
-        "System Browser": "System Browser",
         "選咩課和ARK是兩個獨立項目": "What2Reg and ARK are independent projects",
-        "Auto": "Auto"
+        "Open What2Reg": "Open What2Reg",
+        "Get the App": "Get the ARK ALL App",
+        "Get the App Hint": "Forum, Wiki, push notifications and more are app-only",
+        "Clear Cache Web Message": "This will delete ARK ALL data stored in this browser, including your simulated timetable and preferences, then reload the page. Continue?"
     }
 }

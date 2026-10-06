@@ -10,7 +10,7 @@ import {
     View,
 } from 'react-native';
 
-import {isLiquidGlassSupported} from '@callstack/liquid-glass';
+import {isLiquidGlassSupported} from '../../utils/glassEffect';
 import {useHeaderHeight} from '@react-navigation/elements';
 import {usePreventRemove} from '@react-navigation/native';
 import moment from 'moment-timezone';
@@ -182,6 +182,7 @@ const TeamScheduleEditPage = ({navigation, route}) => {
             };
             clearTeamEventsCache();
             allowLeaveRef.current = true;
+            trigger('success');
             navigation.navigate({
                 name: 'TeamScheduleDetail',
                 params: {
@@ -191,6 +192,7 @@ const TeamScheduleEditPage = ({navigation, route}) => {
                 merge: true,
             });
         } catch (requestError) {
+            trigger('error');
             const normalized = normalizeSchedulingError(requestError);
             Alert.alert(
                 t('無法儲存'),

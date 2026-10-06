@@ -40,7 +40,6 @@ import axios from 'axios';
 import Toast from 'react-native-easy-toast';
 import { scale, verticalScale } from 'react-native-size-matters';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { isLiquidGlassSupported } from '@callstack/liquid-glass';
 
 const { width: PAGE_WIDTH } = Dimensions.get('window');
 const { height: PAGE_HEIGHT } = Dimensions.get('window');

@@ -10,6 +10,10 @@ import {scale, verticalScale} from 'react-native-size-matters';
 import Text from '../../../../components/AppText';
 import {uiStyle, useTheme} from '../../../../components/ThemeContext';
 import TouchableScale from '../../../../components/TouchableScale';
+import {
+    GlassView,
+    isLiquidGlassSupported,
+} from '../../../../utils/glassEffect';
 import {trigger} from '../../../../utils/trigger';
 import {formatJoinedAt} from '../utils/harborUi';
 
@@ -128,11 +132,30 @@ const HarborProfileCard = ({
             </Pressable>
 
             {onChatPress || onSettingsPress ? (
-                <View style={styles.actions}>
+                <GlassView
+                    isInteractive
+                    style={[
+                        styles.actions,
+                        {
+                            backgroundColor: isLiquidGlassSupported
+                                ? null
+                                : theme.white,
+                        },
+                        isLiquidGlassSupported
+                            ? null
+                            : {
+                                shadowColor: theme.black.main,
+                                shadowOffset: {width: 0, height: 2},
+                                shadowOpacity: 0.1,
+                                shadowRadius: 4,
+                                elevation: 3,
+                            },
+                    ]}>
                     {onChatPress ? (
                         <TouchableScale
                             accessibilityRole="button"
                             accessibilityLabel={t('Chat')}
+                            activeScale={0.92}
                             hitSlop={scale(8)}
                             style={styles.actionButton}
                             onPress={() => {
@@ -141,8 +164,8 @@ const HarborProfileCard = ({
                             }}>
                             <MaterialCommunityIcons
                                 name="chat-outline"
-                                size={verticalScale(18)}
-                                color={theme.black.third}
+                                size={scale(18)}
+                                color={theme.themeColor}
                             />
                             {chatUnreadCount > 0 ? (
                                 <View
@@ -167,6 +190,7 @@ const HarborProfileCard = ({
                         <TouchableScale
                             accessibilityRole="button"
                             accessibilityLabel={t('設置')}
+                            activeScale={0.92}
                             hitSlop={scale(8)}
                             style={styles.actionButton}
                             onPress={() => {
@@ -175,12 +199,12 @@ const HarborProfileCard = ({
                             }}>
                             <Ionicons
                                 name="settings-outline"
-                                size={verticalScale(18)}
-                                color={theme.black.third}
+                                size={scale(18)}
+                                color={theme.themeColor}
                             />
                         </TouchableScale>
                     ) : null}
-                </View>
+                </GlassView>
             ) : null}
         </View>
     );
@@ -206,19 +230,22 @@ const styles = StyleSheet.create({
     actions: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginLeft: scale(4),
-        gap: scale(2),
+        marginLeft: scale(6),
+        height: scale(34),
+        borderRadius: scale(17),
+        overflow: 'hidden',
+        paddingHorizontal: scale(2),
     },
     actionButton: {
-        width: scale(28),
-        height: scale(28),
+        width: scale(32),
+        height: scale(34),
         alignItems: 'center',
         justifyContent: 'center',
     },
     chatUnreadBadge: {
         position: 'absolute',
-        top: scale(-2),
-        right: scale(-3),
+        top: scale(3),
+        right: scale(2),
         minWidth: scale(13),
         height: scale(13),
         borderRadius: scale(7),

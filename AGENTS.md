@@ -31,4 +31,5 @@
 - 修改 JavaScript 前讀取 `.cursor/rules/code-style.mdc`。
 - 所有任務都遵守 `.cursor/rules/critical-donts.mdc` 與 `.cursor/rules/language-requirements.mdc`。
 - 新增或修改翻譯字串時讀取 `.cursor/rules/i18n-patterns.mdc`；預設不要改 `src/i18n/zh-hk.js`。
+- 涉及 iPad／Web／寬屏佈局時讀取 `.cursor/rules/responsive-layout.mdc`；頁面不分 `.web.js`，用 `useWindowSizeClass()` 切殼子。
 - 其他 `.cursor/rules/*.mdc` 依任務內容按需讀取。

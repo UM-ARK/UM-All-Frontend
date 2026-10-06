@@ -233,7 +233,7 @@ const HarborReactionControl = ({
     const handleLongPress = event => {
         stopPressPropagation(event);
         longPressTriggeredRef.current = true;
-        trigger();
+        trigger('longPress');
         if (disabled) {
             onPressDisabled?.();
             return;

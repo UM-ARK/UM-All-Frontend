@@ -45,7 +45,7 @@ describe('harborTopicUpdates', () => {
         ]);
     });
 
-    test('紅點話題讀完後同步移出未讀列表 cache', () => {
+    test('紅點話題讀完後未讀列表 cache 原地更新，不立即移出', () => {
         publishHarborTopicUpdate(12, {
             lastReadPostNumber: 8,
             unreadCount: 0,
@@ -79,6 +79,13 @@ describe('harborTopicUpdates', () => {
                 ['topic-list', 'latest::::unseen', 1],
             ).items,
         ).toEqual([
+            {
+                id: 12,
+                isNew: false,
+                isUnread: false,
+                lastReadPostNumber: 8,
+                unreadCount: 0,
+            },
             {id: 13, isNew: true, isUnread: false, unreadCount: 0},
         ]);
     });

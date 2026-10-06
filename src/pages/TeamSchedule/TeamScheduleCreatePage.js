@@ -11,7 +11,7 @@ import {
     View,
 } from 'react-native';
 
-import {isLiquidGlassSupported} from '@callstack/liquid-glass';
+import {isLiquidGlassSupported} from '../../utils/glassEffect';
 import {useHeaderHeight} from '@react-navigation/elements';
 import {usePreventRemove} from '@react-navigation/native';
 import moment from 'moment-timezone';
@@ -186,7 +186,7 @@ const TeamScheduleCreatePage = ({navigation}) => {
 
     const handleCoursePrefillChange = useCallback(
         enabled => {
-            trigger();
+            trigger(enabled ? 'toggleOn' : 'toggleOff');
             if (enabled) {
                 setCoursePrefillEnabled(true);
                 loadCoursePrefill();
@@ -311,12 +311,14 @@ const TeamScheduleCreatePage = ({navigation}) => {
             });
             clearTeamEventsCache();
             allowLeaveRef.current = true;
+            trigger('success');
             if (eventId) {
                 navigation.replace('TeamScheduleDetail', {eventId});
             } else {
                 navigation.goBack();
             }
         } catch (error) {
+            trigger('error');
             const normalized = normalizeSchedulingError(error);
             Alert.alert(
                 t('無法建立'),

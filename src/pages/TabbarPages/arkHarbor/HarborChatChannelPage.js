@@ -8,7 +8,7 @@ import {
     View,
 } from 'react-native';
 
-import {isLiquidGlassSupported} from '@callstack/liquid-glass';
+import {isLiquidGlassSupported} from '../../../utils/glassEffect';
 import {useFocusEffect} from '@react-navigation/native';
 import {useHeaderHeight} from '@react-navigation/elements';
 import {FlashList} from '@shopify/flash-list';
@@ -207,7 +207,7 @@ const getArkAppLinkCardContent = (appLink, t) => {
     }
 };
 
-const ArkAppLinkCard = ({appLink, navigation}) => {
+const ArkAppLinkCard = ({appLink, navigation, title}) => {
     const {theme} = useTheme();
     const {t} = useTranslation('harbor');
     const content = getArkAppLinkCardContent(appLink, t);
@@ -216,10 +216,13 @@ const ArkAppLinkCard = ({appLink, navigation}) => {
         return null;
     }
 
+    // 分享時附帶的標題（如活動名稱）優先顯示，沒有才用類型默認標題
+    const cardTitle = title || content.title;
+
     return (
         <Pressable
             accessibilityHint={t('在 ARK ALL 內開啟')}
-            accessibilityLabel={`${content.label}，${content.title}`}
+            accessibilityLabel={`${content.label}，${cardTitle}`}
             accessibilityRole="link"
             onPress={() => {
                 trigger();
@@ -251,9 +254,9 @@ const ArkAppLinkCard = ({appLink, navigation}) => {
                     {content.label}
                 </Text>
                 <Text
-                    numberOfLines={1}
+                    numberOfLines={3}
                     style={[styles.appLinkTitle, {color: theme.black.main}]}>
-                    {content.title}
+                    {cardTitle}
                 </Text>
                 <Text
                     numberOfLines={2}
@@ -312,6 +315,7 @@ const HarborChatMessage = ({isGroup, isOwn, language, message, navigation}) => {
                             appLink={part.appLink}
                             key={`${part.type}-${index}`}
                             navigation={navigation}
+                            title={part.title}
                         />
                     ) : (
                         <View

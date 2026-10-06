@@ -270,7 +270,7 @@ const HarborProfileOverview = ({
 
 const styles = StyleSheet.create({
     container: {
-        gap: verticalScale(8),
+        gap: verticalScale(4),
     },
     partialProfile: {
         borderRadius: scale(10),

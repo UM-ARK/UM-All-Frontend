@@ -10,7 +10,7 @@ import {
 
 import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 import { FlashList } from '@shopify/flash-list';
-import { isLiquidGlassSupported } from '@callstack/liquid-glass';
+import { isLiquidGlassSupported } from '../../../utils/glassEffect';
 import { useHeaderHeight } from '@react-navigation/elements';
 import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
 import moment from 'moment';

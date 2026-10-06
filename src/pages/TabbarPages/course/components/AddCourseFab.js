@@ -4,9 +4,9 @@ import Ionicons from "@react-native-vector-icons/ionicons";
 import { scale, verticalScale } from 'react-native-size-matters';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import {
+    GlassView,
     isLiquidGlassSupported,
-    LiquidGlassView,
-} from '@callstack/liquid-glass';
+} from '../../../../utils/glassEffect';
 import Animated, {
     useAnimatedStyle,
     useSharedValue,
@@ -24,7 +24,6 @@ const FAB_SIZE = scale(44);
 const FAB_GAP = verticalScale(4);
 const FAB_SIDE_MARGIN = scale(16);
 const FAB_TOP_MARGIN = verticalScale(16);
-const FAB_STACK_HEIGHT = FAB_SIZE * 2 + FAB_GAP;
 // iOS 26 UIVisualEffectView：父層 opacity 到 0 後液態玻璃會永久失效，隱藏時需留極低透明度
 const FAB_HIDDEN_OPACITY = isLiquidGlassSupported ? 0.02 : 0;
 const FAB_SPRING = {
@@ -44,7 +43,7 @@ const FAB_SPRING = {
  *
  * @param {number} bottom 距底部距離（呼叫端需扣掉 Tab Bar 高度）
  * @param {Function} onAddPress 開啟加課 sheet
- * @param {Function} [onSearchPress] 跳轉到搵課段落
+ * @param {Function} [onSearchPress] 跳轉到搵課段落；未提供時（寬屏分屏，搵課就在旁邊）不渲染該按鈕
  * @param {boolean} [visible] 是否可見（關閉時淡出，不卸載以保留動畫）
  */
 const AddCourseFab = ({
@@ -65,6 +64,8 @@ const AddCourseFab = ({
     const startY = useSharedValue(0);
     const containerWidth = useSharedValue(0);
     const containerHeight = useSharedValue(0);
+    const hasSearchButton = typeof onSearchPress === 'function';
+    const stackHeight = hasSearchButton ? FAB_SIZE * 2 + FAB_GAP : FAB_SIZE;
 
     useEffect(() => {
         if (
@@ -108,7 +109,7 @@ const AddCourseFab = ({
                         containerHeight.value -
                         bottom -
                         FAB_TOP_MARGIN -
-                        FAB_STACK_HEIGHT,
+                        stackHeight,
                     );
 
                     translateX.value = Math.max(
@@ -132,7 +133,7 @@ const AddCourseFab = ({
                         containerHeight.value -
                         bottom -
                         FAB_TOP_MARGIN -
-                        FAB_STACK_HEIGHT,
+                        stackHeight,
                     );
                     const horizontalPoints = [-maxLeftOffset, 0];
                     const verticalPoints = [
@@ -168,6 +169,7 @@ const AddCourseFab = ({
             bottom,
             containerHeight,
             containerWidth,
+            stackHeight,
             startX,
             startY,
             translateX,
@@ -222,7 +224,7 @@ const AddCourseFab = ({
                 );
                 const maxUpOffset = Math.max(
                     0,
-                    height - bottom - FAB_TOP_MARGIN - FAB_STACK_HEIGHT,
+                    height - bottom - FAB_TOP_MARGIN - stackHeight,
                 );
                 translateX.value = Math.max(
                     -maxLeftOffset,
@@ -243,47 +245,39 @@ const AddCourseFab = ({
                         accessibilityRole="button"
                         accessibilityLabel={t('加課', { ns: 'timetable' })}
                         hitSlop={scale(8)}>
-                        <LiquidGlassView
+                        <GlassView
                             key={`add-${glassKey}`}
-                            interactive
-                            hover={
-                                isLiquidGlassSupported
-                                    ? { effect: 'highlight' }
-                                    : null
-                            }
+                            isInteractive
                             style={styles.pill}>
                             <Ionicons
                                 name="add"
                                 size={scale(24)}
                                 color={themeColor}
                             />
-                        </LiquidGlassView>
+                        </GlassView>
                     </TouchableScale>
 
-                    <TouchableScale
-                        onPress={() => {
-                            trigger();
-                            onSearchPress?.();
-                        }}
-                        accessibilityRole="button"
-                        accessibilityLabel={t('搵課')}
-                        hitSlop={scale(8)}>
-                        <LiquidGlassView
-                            key={`search-${glassKey}`}
-                            interactive
-                            hover={
-                                isLiquidGlassSupported
-                                    ? { effect: 'highlight' }
-                                    : null
-                            }
-                            style={styles.pill}>
-                            <Ionicons
-                                name="library-outline"
-                                size={scale(21)}
-                                color={themeColor}
-                            />
-                        </LiquidGlassView>
-                    </TouchableScale>
+                    {hasSearchButton ? (
+                        <TouchableScale
+                            onPress={() => {
+                                trigger();
+                                onSearchPress();
+                            }}
+                            accessibilityRole="button"
+                            accessibilityLabel={t('搵課')}
+                            hitSlop={scale(8)}>
+                            <GlassView
+                                key={`search-${glassKey}`}
+                                isInteractive
+                                style={styles.pill}>
+                                <Ionicons
+                                    name="library-outline"
+                                    size={scale(21)}
+                                    color={themeColor}
+                                />
+                            </GlassView>
+                        </TouchableScale>
+                    ) : null}
                 </Animated.View>
             </GestureDetector>
         </View>

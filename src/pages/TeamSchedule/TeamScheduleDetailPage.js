@@ -14,7 +14,7 @@ import {
     View,
 } from 'react-native';
 
-import {isLiquidGlassSupported} from '@callstack/liquid-glass';
+import {isLiquidGlassSupported} from '../../utils/glassEffect';
 import {MenuView} from '@react-native-menu/menu';
 import {useHeaderHeight} from '@react-navigation/elements';
 import {usePreventRemove} from '@react-navigation/native';
@@ -704,7 +704,7 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
 
     const handleCoursePrefillChange = useCallback(
         enabled => {
-            trigger();
+            trigger(enabled ? 'toggleOn' : 'toggleOff');
             if (enabled) {
                 applyCoursePrefill();
                 return;

@@ -3,6 +3,7 @@ import { View } from 'react-native';
 import { MaterialTopTabBar } from '@react-navigation/material-top-tabs';
 
 import { useTheme } from '../../../../components/ThemeContext';
+import { TOP_TAB_STRIP_MAX_WIDTH } from '../../../../utils/windowSizeClass';
 import { COURSE_TOP_BAR_HEIGHT } from '../constants';
 import CourseMoreMenu from './CourseMoreMenu';
 
@@ -17,7 +18,6 @@ const CourseTabBar = ({
     catalogMetadata,
     onManualUpdate,
     onOpenSharePoint,
-    onOpenWhat2RegSettings,
     canClear,
     onClearPress,
     ...tabBarProps
@@ -39,6 +39,12 @@ const CourseTabBar = ({
             tabs: {
                 flex: 1,
             },
+            tabStrip: {
+                width: '100%',
+                // 寬屏時兩個 Tab 不再被拉到左右兩端，手機寬度小於此值不受影響
+                maxWidth: TOP_TAB_STRIP_MAX_WIDTH,
+                alignSelf: 'center',
+            },
         }),
         [bg_color],
     );
@@ -47,14 +53,15 @@ const CourseTabBar = ({
         <View style={styles.wrapper}>
             <View style={styles.row}>
                 <View style={styles.tabs}>
-                    <MaterialTopTabBar {...tabBarProps} />
+                    <View style={styles.tabStrip}>
+                        <MaterialTopTabBar {...tabBarProps} />
+                    </View>
                 </View>
                 <CourseMoreMenu
                     programmeLevel={programmeLevel}
                     catalogMetadata={catalogMetadata}
                     onManualUpdate={onManualUpdate}
                     onOpenSharePoint={onOpenSharePoint}
-                    onOpenWhat2RegSettings={onOpenWhat2RegSettings}
                     canClear={canClear}
                     onClearPress={onClearPress}
                 />

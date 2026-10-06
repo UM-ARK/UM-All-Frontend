@@ -16,11 +16,19 @@ import {
     COURSE_TAB_ROUTE,
     navigateToCourseTab,
 } from '../../../utils/courseNavigation';
+import { canNavigateTo } from '../../../utils/routeAvailability';
 import {
+    FREQUENT_FEATURES_DISPLAY_LIMIT,
     buildFrequentFeatures,
     getFeatureRecentUsage,
     recordFeatureUsage,
 } from '../../../utils/featureRecentUsage';
+import {
+    TOP_TAB_STRIP_MAX_WIDTH,
+    WIDE_CONTENT_MAX_WIDTH,
+    useWindowSizeClass,
+} from '../../../utils/windowSizeClass';
+import { balanceColumns } from '../../../utils/balanceColumns';
 import CustomBottomSheet from '../../../utils/BottomSheet';
 import { getFunctionArr } from './FeatureList';
 import SearchBar from '../info/home/components/SearchBar';
@@ -29,7 +37,7 @@ import WikiHome from '../arkwiki';
 
 import { FlatGrid } from 'react-native-super-grid';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
-import Clipboard from '@react-native-clipboard/clipboard';
+import * as Clipboard from 'expo-clipboard';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import { moderateScale, scale, verticalScale } from 'react-native-size-matters';
 import Toast from 'react-native-simple-toast';
@@ -48,6 +56,16 @@ const TAB_BAR_HEIGHT = moderateScale(30, TOP_TAB_SCALE_FACTOR);
 const TAB_LABEL_FONT_SIZE = moderateScale(11, 0.3);
 // 功能詳情內容精簡；最高檔供長按一次彈滿
 const FEATURE_SHEET_SNAP_POINTS = ['32%', '48%'];
+/** 分類卡欄數：expanded 兩欄、large 三欄；手機與 medium 維持單欄 */
+const CARD_COLUMN_COUNT = {
+    compact: 1,
+    medium: 1,
+    expanded: 2,
+    large: 3,
+};
+/** 每行圖標上限：手機 5 個剛好填滿；寬屏放寬到 8 個，避免 5 個圖標被拉開成大間距 */
+const COMPACT_GRID_MAX_ITEMS_PER_ROW = 5;
+const WIDE_GRID_MAX_ITEMS_PER_ROW = 8;
 
 function FeatureListPage({ navigation }) {
     const { theme } = useTheme();
@@ -55,6 +73,7 @@ function FeatureListPage({ navigation }) {
     const { status: harborStatus, user: harborUser, login } = useHarborSession();
     const { t, i18n } = useTranslation(['common', 'home', 'features']);
     const functionArr = useMemo(() => getFunctionArr(t), [t]);
+    const { width: windowWidth, sizeClass, isCompact } = useWindowSizeClass();
     const isTc = i18n.language === 'tc';
     const fontSize = isTc ? verticalScale(10) : verticalScale(8);
     const [bottomSheetInfo, setBottomSheetInfo] = useState(null);
@@ -119,6 +138,23 @@ function FeatureListPage({ navigation }) {
             );
 
             const { go_where, webview_param, needLogin, loginRoute } = item;
+            // web 端只掛了部分頁面（見 Nav.web.js），站內路由未註冊時提示改用 APP；
+            // Webview／Linking 走瀏覽器新開分頁，不受影響
+            const isInAppRoute =
+                go_where !== 'Webview' && go_where !== 'Linking';
+            if (
+                Platform.OS === 'web' &&
+                isInAppRoute &&
+                !canNavigateTo(navigation, go_where)
+            ) {
+                Toast.show(
+                    t('此功能網頁版暫未支持，請在 ARK ALL APP 中打開', {
+                        ns: 'features',
+                    }),
+                    Toast.LONG,
+                );
+                return;
+            }
             if (needLogin) {
                 if (harborStatus === 'signedIn' && harborUser) {
                     navigation.navigate(go_where);
@@ -152,7 +188,7 @@ function FeatureListPage({ navigation }) {
                 }
             }, 50);
         },
-        [harborStatus, harborUser, login, navigation],
+        [harborStatus, harborUser, login, navigation, t],
     );
 
     // 預留兩行標題高度（英文如 Canteen Queue 會換行），避免同列單／雙行把圖標頂歪
@@ -161,6 +197,30 @@ function FeatureListPage({ navigation }) {
     // FlatGrid 末列會再加 marginBottom: spacing，與 row paddingBottom 重疊，需抵銷
     const gridSpacing = scale(10);
     const gridBottomTrim = -gridSpacing;
+    const gridItemDimension = scale(50);
+    const gridMaxItemsPerRow = isCompact
+        ? COMPACT_GRID_MAX_ITEMS_PER_ROW
+        : WIDE_GRID_MAX_ITEMS_PER_ROW;
+    // 寬屏時常用服務只佔「4 個圖標 + 左右各一個間距」的寬度，不再被拉到整行
+    const frequentGridMaxWidth = isCompact
+        ? undefined
+        : FREQUENT_FEATURES_DISPLAY_LIMIT * (gridItemDimension + gridSpacing * 2) + gridSpacing;
+    const cardColumnCount = CARD_COLUMN_COUNT[sizeClass] || 1;
+
+    // 分類卡分欄：用估算的每行圖標數換算行數作平衡權重（標題約半行），
+    // 只決定卡片落在哪一欄；實際每行圖標數仍由 FlatGrid 量測後自行決定
+    const cardColumns = useMemo(() => {
+        const columnWidth = Math.min(windowWidth, WIDE_CONTENT_MAX_WIDTH) / cardColumnCount - gridSpacing * 2;
+        const itemsPerRow = Math.max(1, Math.min(
+            gridMaxItemsPerRow,
+            Math.floor((columnWidth - gridSpacing) / (gridItemDimension + gridSpacing)),
+        ));
+        return balanceColumns(
+            functionArr,
+            cardColumnCount,
+            section => Math.ceil(section.fn.length / itemsPerRow) + 0.5,
+        );
+    }, [cardColumnCount, functionArr, gridItemDimension, gridMaxItemsPerRow, gridSpacing, windowWidth]);
 
     const renderFeatureItem = useCallback(
         item => (
@@ -241,8 +301,8 @@ function FeatureListPage({ navigation }) {
                 </View>
 
                 <FlatGrid
-                    maxItemsPerRow={5}
-                    itemDimension={scale(50)}
+                    maxItemsPerRow={gridMaxItemsPerRow}
+                    itemDimension={gridItemDimension}
                     spacing={gridSpacing}
                     style={{ marginBottom: gridBottomTrim }}
                     itemContainerStyle={{
@@ -257,7 +317,7 @@ function FeatureListPage({ navigation }) {
             </View>
             );
         },
-        [white, bg_color, black.main, renderFeatureItem, gridSpacing, gridBottomTrim],
+        [white, bg_color, black.main, renderFeatureItem, gridSpacing, gridBottomTrim, gridItemDimension, gridMaxItemsPerRow],
     );
 
     // BottomSheet內容渲染
@@ -319,7 +379,7 @@ function FeatureListPage({ navigation }) {
                         })}
                         onPress={() => {
                             trigger();
-                            Clipboard.setString(webview_param.url);
+                            Clipboard.setStringAsync(webview_param.url);
                             Toast.show(t('已複製Link到剪貼板！'));
                         }}>
                         <Ionicons
@@ -354,6 +414,13 @@ function FeatureListPage({ navigation }) {
                 contentInsetAdjustmentBehavior="automatic"
                 keyboardShouldPersistTaps="handled"
                 contentContainerStyle={{ paddingBottom: listBottomPad }}>
+                {/* 超寬屏內容居中封頂，分類卡再按尺寸等級分成 1／2／3 欄 */}
+                <View
+                    style={{
+                        width: '100%',
+                        maxWidth: WIDE_CONTENT_MAX_WIDTH,
+                        alignSelf: 'center',
+                    }}>
                 <SearchBar
                     navigation={navigation}
                     entryFuncName="features_search_entry"
@@ -382,8 +449,9 @@ function FeatureListPage({ navigation }) {
                             {t('常用服務', { ns: 'features' })}
                         </Text>
                         <FlatGrid
-                            maxItemsPerRow={4}
-                            itemDimension={scale(50)}
+                            maxItemsPerRow={FREQUENT_FEATURES_DISPLAY_LIMIT}
+                            maxDimension={frequentGridMaxWidth}
+                            itemDimension={gridItemDimension}
                             spacing={gridSpacing}
                             style={{ marginBottom: gridBottomTrim }}
                             itemContainerStyle={{
@@ -398,18 +466,25 @@ function FeatureListPage({ navigation }) {
                     </View>
                 ) : null}
 
-                {functionArr.map((fn_card, index) =>
-                    GetFunctionCard(fn_card.title, fn_card.fn, {
-                        // 第一張分類卡貼近上方常用服務
-                        marginTop: index === 0 ? verticalScale(2) : verticalScale(10),
-                    }),
-                )}
+                <View style={{ flexDirection: 'row', alignItems: 'flex-start' }}>
+                    {cardColumns.map((sections, columnIndex) => (
+                        <View key={columnIndex} style={{ flex: 1 }}>
+                            {sections.map((fn_card, index) =>
+                                GetFunctionCard(fn_card.title, fn_card.fn, {
+                                    // 每欄第一張分類卡貼近上方常用服務
+                                    marginTop: index === 0 ? verticalScale(2) : verticalScale(10),
+                                }),
+                            )}
+                        </View>
+                    ))}
+                </View>
                 <View
                     style={{
                         marginHorizontal: scale(20),
                         marginVertical: scale(10),
                     }}
                 />
+                </View>
             </ScrollView>
 
             <CustomBottomSheet
@@ -443,6 +518,10 @@ export default function Index() {
                         backgroundColor: bg_color,
                         height: TAB_BAR_HEIGHT,
                         overflow: 'hidden',
+                        // 寬屏時兩個 Tab 不再被拉到左右兩端，手機寬度小於此值不受影響
+                        width: '100%',
+                        maxWidth: TOP_TAB_STRIP_MAX_WIDTH,
+                        alignSelf: 'center',
                     },
                     tabBarItemStyle: {
                         minHeight: TAB_BAR_HEIGHT,

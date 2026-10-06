@@ -43,8 +43,8 @@ import {
     UM_ALUMNI,
     ARK_HARBOR,
     CANTEEN_QUEUE,
+    WHAT_2_REG,
 } from '../../../utils/pathMap';
-import { getCurrentUmehHost } from '../../../utils/umehHost';
 
 const iconTypes = {
     ionicons: 'ionicons',
@@ -629,7 +629,7 @@ export const getFunctionArr = (t) => [
                 go_where: 'Webview',
                 webview_param: {
                     // import pathMap的鏈接進行跳轉
-                    url: getCurrentUmehHost(),
+                    url: WHAT_2_REG,
                     title: '澳大選咩課',
                     // 標題顏色，默認為black.main
                     text_color: '#fff',

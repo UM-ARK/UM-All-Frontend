@@ -9,7 +9,7 @@ import {
     View,
 } from 'react-native';
 
-import {isLiquidGlassSupported} from '@callstack/liquid-glass';
+import {isLiquidGlassSupported} from '../../../utils/glassEffect';
 import {useFocusEffect} from '@react-navigation/native';
 import {useHeaderHeight} from '@react-navigation/elements';
 import {FlashList} from '@shopify/flash-list';
@@ -346,7 +346,7 @@ const HarborDirectMessageSettingsModal = ({onClose, username, visible}) => {
                                     disabled={isSaving}
                                     ios_backgroundColor={theme.disabled}
                                     onValueChange={value => {
-                                        trigger();
+                                        trigger(value ? 'toggleOn' : 'toggleOff');
                                         setPendingPreference(value);
                                         setSaveError(false);
                                     }}

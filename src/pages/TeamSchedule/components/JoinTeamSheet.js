@@ -9,7 +9,7 @@ import {
     View,
 } from 'react-native';
 
-import Clipboard from '@react-native-clipboard/clipboard';
+import * as Clipboard from 'expo-clipboard';
 import {useTranslation} from 'react-i18next';
 import ActionSheet from 'react-native-actions-sheet';
 import {scale, verticalScale} from 'react-native-size-matters';
@@ -41,7 +41,7 @@ const JoinTeamSheet = ({visible, onClose, onSubmit}) => {
             // 開啟時嘗試帶入剪貼板中的邀請連結
             (async () => {
                 try {
-                    const clip = (await Clipboard.getString()) || '';
+                    const clip = (await Clipboard.getStringAsync()) || '';
                     const parsed = parseTeamInviteLink(clip);
                     if (parsed) {
                         setLinkText(clip.trim());
@@ -59,7 +59,7 @@ const JoinTeamSheet = ({visible, onClose, onSubmit}) => {
     const handlePaste = async () => {
         trigger();
         try {
-            const clip = (await Clipboard.getString()) || '';
+            const clip = (await Clipboard.getStringAsync()) || '';
             if (!clip.trim()) {
                 Alert.alert(t('加入隊伍'), t('剪貼板是空的。'));
                 return;

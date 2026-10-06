@@ -25,6 +25,9 @@ src/
 │   ├── pathMap.js       # API 端點常數
 │   ├── (uiMap.js 已刪除，顏色統一管理於 ThemeContext.js)
 │   ├── trigger.js       # 觸覺回饋
+│   ├── scaling.js       # react-native-size-matters 替身（Metro 別名），寬屏縮放封頂
+│   ├── windowSizeClass.js # useWindowSizeClass()：M3 斷點，寬屏分欄判斷
+│   ├── balanceColumns.js  # 區塊依權重平衡分配到多欄（寬屏卡片流）
 │   ├── firebaseAnalytics.js
 │   └── checkCoursesKits.js
 ├── static/

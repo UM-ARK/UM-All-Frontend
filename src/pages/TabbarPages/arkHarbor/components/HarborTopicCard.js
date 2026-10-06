@@ -38,11 +38,9 @@ const STATUS_CONFIG = {
     solved: { icon: 'check-decagram-outline', label: '已解決' },
 };
 
-// 頭像高度對齊「ID + 第二行」兩行文字
+// ID、時間、分類併成一行，頭像略高於文字行
 const AUTHOR_NAME_LINE_HEIGHT = scale(14);
-const META_LINE_HEIGHT = scale(11);
-const META_GAP = verticalScale(1);
-const AVATAR_SIZE = AUTHOR_NAME_LINE_HEIGHT + META_GAP + META_LINE_HEIGHT;
+const AVATAR_SIZE = scale(20);
 
 const stopAndRun = (event, callback, isPressAllowed) => {
     event.stopPropagation?.();
@@ -239,17 +237,61 @@ const HarborTopicCard = ({
                         {authorId}
                     </Text>
                     <Text
+                        style={[
+                            styles.metaSeparator,
+                            { color: theme.black.third },
+                        ]}>
+                        ·
+                    </Text>
+                    <Text
                         numberOfLines={1}
                         style={[
                             styles.activityTime,
                             {
                                 color: theme.black.third,
-                                lineHeight: META_LINE_HEIGHT,
-                                marginTop: META_GAP,
+                                lineHeight: AUTHOR_NAME_LINE_HEIGHT,
                             },
                         ]}>
                         {dateLabel}
                     </Text>
+                    {category ? (
+                        <>
+                            <Text
+                                style={[
+                                    styles.metaSeparator,
+                                    { color: theme.black.third },
+                                ]}>
+                                ·
+                            </Text>
+                            <Pressable
+                                accessibilityRole="button"
+                                onPress={event =>
+                                    stopAndRun(
+                                        event,
+                                        () => onCategoryPress(category),
+                                        isPressAllowed,
+                                    )
+                                }
+                                style={({ pressed }) => [
+                                    styles.categoryChip,
+                                    pressed && styles.categoryChipPressed,
+                                ]}>
+                                <HarborCategoryIcon
+                                    category={category}
+                                    color={theme.themeColor}
+                                    size={scale(12)}
+                                />
+                                <Text
+                                    numberOfLines={1}
+                                    style={[
+                                        styles.categoryText,
+                                        { color: theme.themeColor },
+                                    ]}>
+                                    {category.name}
+                                </Text>
+                            </Pressable>
+                        </>
+                    ) : null}
                 </View>
                 {isNewReply ? (
                     <View
@@ -330,11 +372,7 @@ const HarborTopicCard = ({
                 </View>
             ) : null}
 
-            <View
-                style={[
-                    styles.footer,
-                    { borderTopColor: theme.disabled },
-                ]}>
+            <View style={styles.footer}>
                 <View style={styles.metrics}>
                     <Metric
                         icon="comment-outline"
@@ -355,36 +393,6 @@ const HarborTopicCard = ({
                                 : theme.black.third
                         }
                     />
-                    {category ? (
-                        <Pressable
-                            accessibilityRole="button"
-                            onPress={event =>
-                                stopAndRun(
-                                    event,
-                                    () => onCategoryPress(category),
-                                    isPressAllowed,
-                                )
-                            }
-                            style={({ pressed }) => [
-                                styles.categoryChip,
-                                styles.footerCategoryChip,
-                                pressed && styles.categoryChipPressed,
-                            ]}>
-                            <HarborCategoryIcon
-                                category={category}
-                                color={theme.themeColor}
-                                size={scale(12)}
-                            />
-                            <Text
-                                numberOfLines={1}
-                                style={[
-                                    styles.categoryText,
-                                    { color: theme.themeColor },
-                                ]}>
-                                {category.name}
-                            </Text>
-                        </Pressable>
-                    ) : null}
                 </View>
                 {lastReadPostNumber > 0 ? (
                     <Text
@@ -396,13 +404,7 @@ const HarborTopicCard = ({
                             postNumber: lastReadPostNumber,
                         })}
                     </Text>
-                ) : (
-                    <MaterialCommunityIcons
-                        name="chevron-right"
-                        size={scale(18)}
-                        color={theme.black.third}
-                    />
-                )}
+                ) : null}
             </View>
         </Pressable>
     );
@@ -413,7 +415,7 @@ const styles = StyleSheet.create({
         borderWidth: StyleSheet.hairlineWidth,
         borderRadius: scale(12),
         marginHorizontal: CARD_MARGIN_HORIZONTAL,
-        marginBottom: verticalScale(4),
+        marginBottom: verticalScale(2),
         paddingHorizontal: CARD_PADDING_HORIZONTAL,
         paddingTop: verticalScale(11),
         overflow: 'hidden',
@@ -432,17 +434,25 @@ const styles = StyleSheet.create({
     authorText: {
         flex: 1,
         minWidth: 0,
-        marginLeft: scale(8),
-        justifyContent: 'center',
+        marginLeft: scale(6),
+        flexDirection: 'row',
+        alignItems: 'center',
     },
     authorName: {
         ...uiStyle.defaultText,
+        flexShrink: 1,
         fontSize: scale(11),
         fontWeight: '600',
     },
     activityTime: {
         ...uiStyle.defaultText,
-        fontSize: scale(9),
+        flexShrink: 0,
+        fontSize: scale(10),
+    },
+    metaSeparator: {
+        ...uiStyle.defaultText,
+        fontSize: scale(10),
+        marginHorizontal: scale(4),
     },
     unreadChip: {
         borderRadius: scale(8),
@@ -487,27 +497,17 @@ const styles = StyleSheet.create({
         height: '100%',
     },
     categoryChip: {
+        flexShrink: 1,
         maxWidth: scale(150),
-        borderRadius: scale(7),
         flexDirection: 'row',
         alignItems: 'center',
         gap: scale(4),
-        marginRight: scale(6),
-        marginBottom: verticalScale(5),
-        paddingHorizontal: scale(7),
-        paddingVertical: verticalScale(4),
     },
     categoryText: {
         ...uiStyle.defaultText,
         flexShrink: 1,
         fontSize: scale(10),
         fontWeight: '600',
-    },
-    footerCategoryChip: {
-        flexShrink: 1,
-        marginBottom: 0,
-        paddingHorizontal: 0,
-        paddingVertical: 0,
     },
     categoryChipPressed: {
         opacity: 0.6,
@@ -533,8 +533,7 @@ const styles = StyleSheet.create({
         marginLeft: scale(3),
     },
     footer: {
-        paddingVertical: verticalScale(6),
-        borderTopWidth: StyleSheet.hairlineWidth,
+        paddingBottom: verticalScale(10),
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',

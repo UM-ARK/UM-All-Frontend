@@ -9,7 +9,7 @@ import {
     View,
 } from 'react-native';
 
-import {isLiquidGlassSupported} from '@callstack/liquid-glass';
+import {isLiquidGlassSupported} from '../../../../utils/glassEffect';
 import {HeaderHeightContext} from '@react-navigation/elements';
 import {FlashList} from '@shopify/flash-list';
 import {Image} from 'expo-image';
@@ -1023,7 +1023,7 @@ const styles = StyleSheet.create({
         borderRadius: scale(4),
     },
     separator: {
-        height: verticalScale(8),
+        height: verticalScale(4),
     },
     loadingMore: {
         paddingVertical: verticalScale(16),

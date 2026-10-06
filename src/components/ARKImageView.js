@@ -1,6 +1,6 @@
 import React, { useState, forwardRef, useImperativeHandle, useCallback, useMemo, useRef } from 'react';
 import { View, StyleSheet, Pressable, Image as RNImage, ActivityIndicator, Alert, Platform } from 'react-native';
-import Clipboard from '@react-native-clipboard/clipboard';
+import * as Clipboard from 'expo-clipboard';
 import { Camera } from 'expo-camera';
 import GalleryPreview from 'react-native-gallery-preview';
 import ActionSheet, { ScrollView } from 'react-native-actions-sheet';
@@ -103,7 +103,7 @@ const ImageQrResultSheet = ({
 }) => {
     const handleCopy = value => {
         trigger();
-        Clipboard.setString(value);
+        Clipboard.setStringAsync(value);
         Toast.show(t('已複製二維碼內容'));
     };
 

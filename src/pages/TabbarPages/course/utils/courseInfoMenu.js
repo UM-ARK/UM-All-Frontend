@@ -4,8 +4,7 @@ import lodash from 'lodash';
 
 import {openLink} from '../../../../utils/browser';
 import {logToFirebase} from '../../../../utils/firebaseAnalytics';
-import {OFFICIAL_COURSE_SEARCH} from '../../../../utils/pathMap';
-import {getCurrentUmehHost} from '../../../../utils/umehHost';
+import {OFFICIAL_COURSE_SEARCH, WHAT_2_REG} from '../../../../utils/pathMap';
 import {navigateToWikiSearch} from '../../../../utils/wikiNavigation';
 
 /** 建立課程卡片共用的查詢選項。 */
@@ -106,7 +105,7 @@ export function handleCourseInfoMenuAction({actionId, course, navigation}) {
             return true;
         case 'what2reg': {
             const URI =
-                getCurrentUmehHost() +
+                WHAT_2_REG +
                 '/reviews/' +
                 encodeURIComponent(courseCode) +
                 '/' +

@@ -330,7 +330,7 @@ TeamSchedulePreviewSection.displayName = 'TeamSchedulePreviewSection';
 const styles = StyleSheet.create({
     container: {
         borderRadius: scale(10),
-        marginTop: verticalScale(8),
+        marginTop: verticalScale(4),
         marginBottom: verticalScale(6),
         paddingBottom: verticalScale(4),
         overflow: 'hidden',
