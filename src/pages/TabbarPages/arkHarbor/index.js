@@ -35,8 +35,9 @@ const VIEW_CONFIG = {
     top: { label: '熱門', analytics: 'top' },
     unread: { label: '未讀', analytics: 'unread' },
 };
-// 對齊資訊頁 Top Tab（~30）；搜尋入口收進工具列，不再單獨佔一行
+// 對齊資訊頁 Top Tab（~30）；搜尋列在列表頂部展開，往下滑時收進工具列圖標
 const STICKY_TOOLBAR_HEIGHT = verticalScale(36);
+const SEARCH_BAR_ROW_HEIGHT = verticalScale(38);
 const HARBOR_TAB_INDICATOR_WIDTH = moderateScale(25, 0.1);
 const Drawer = createDrawerNavigator();
 const AnimatedPagerView = Animated.createAnimatedComponent(PagerView);
@@ -141,17 +142,39 @@ const HarborStickyToolbar = ({
     chatUnreadCount,
     chatVisible,
     onToolbarLayout,
+    searchScrollY,
+    searchCollapsed,
 }) => {
     const { theme } = useTheme();
     const { t } = useTranslation('harbor');
     const isSignedIn = status === 'signedIn';
     const showLoginPromptBadge =
         status === 'signedOut' || status === 'expired';
+    // 搜尋列隨列表往下滑而上移淡出，工具列圖標則反向淡入
+    const searchBarTranslateY = searchScrollY.interpolate({
+        inputRange: [0, SEARCH_BAR_ROW_HEIGHT],
+        outputRange: [0, -SEARCH_BAR_ROW_HEIGHT],
+        extrapolate: 'clamp',
+    });
+    const searchBarOpacity = searchScrollY.interpolate({
+        inputRange: [0, SEARCH_BAR_ROW_HEIGHT * 0.6],
+        outputRange: [1, 0],
+        extrapolate: 'clamp',
+    });
+    const searchIconOpacity = searchScrollY.interpolate({
+        inputRange: [SEARCH_BAR_ROW_HEIGHT * 0.4, SEARCH_BAR_ROW_HEIGHT],
+        outputRange: [0, 1],
+        extrapolate: 'clamp',
+    });
 
     return (
-        <View
-            style={[styles.stickyHeader, { backgroundColor: theme.bg_color }]}>
-            <View onLayout={onToolbarLayout} style={styles.stickyToolbar}>
+        <View style={styles.stickyHeader}>
+            <View
+                onLayout={onToolbarLayout}
+                style={[
+                    styles.stickyToolbar,
+                    { backgroundColor: theme.bg_color },
+                ]}>
                 <View style={[styles.toolbarSide, styles.toolbarLeft]}>
                     <Pressable
                         accessibilityRole="button"
@@ -173,27 +196,36 @@ const HarborStickyToolbar = ({
                             color={theme.themeColor}
                         />
                     </Pressable>
-                    {/* 搜尋放左側與選單並排，右側未登入時已有「登入」文字按鈕 */}
-                    <Pressable
-                        accessibilityRole="button"
-                        accessibilityLabel={t('搜尋 Harbor')}
-                        hitSlop={scale(8)}
-                        onPress={() => {
-                            trigger();
-                            onSearchPress();
-                        }}
-                        style={({ pressed }) => [
-                            styles.toolbarIconButton,
-                            pressed && {
-                                backgroundColor: theme.tonal.primary15,
-                            },
-                        ]}>
-                        <MaterialCommunityIcons
-                            name="magnify"
-                            size={scale(20)}
-                            color={theme.themeColor}
-                        />
-                    </Pressable>
+                    {/* 搜尋放左側與選單並排，右側未登入時已有「登入」文字按鈕；
+                        搜尋列展開時圖標隱藏且不可點 */}
+                    <Animated.View
+                        pointerEvents={searchCollapsed ? 'auto' : 'none'}
+                        accessibilityElementsHidden={!searchCollapsed}
+                        importantForAccessibility={
+                            searchCollapsed ? 'auto' : 'no-hide-descendants'
+                        }
+                        style={{ opacity: searchIconOpacity }}>
+                        <Pressable
+                            accessibilityRole="button"
+                            accessibilityLabel={t('搜尋 Harbor')}
+                            hitSlop={scale(8)}
+                            onPress={() => {
+                                trigger();
+                                onSearchPress();
+                            }}
+                            style={({ pressed }) => [
+                                styles.toolbarIconButton,
+                                pressed && {
+                                    backgroundColor: theme.tonal.primary15,
+                                },
+                            ]}>
+                            <MaterialCommunityIcons
+                                name="magnify"
+                                size={scale(20)}
+                                color={theme.themeColor}
+                            />
+                        </Pressable>
+                    </Animated.View>
                 </View>
 
                 <HarborFeedTabs
@@ -311,6 +343,50 @@ const HarborStickyToolbar = ({
                     </View>
                 </View>
             </View>
+            <Animated.View
+                pointerEvents={searchCollapsed ? 'none' : 'auto'}
+                accessibilityElementsHidden={searchCollapsed}
+                importantForAccessibility={
+                    searchCollapsed ? 'no-hide-descendants' : 'auto'
+                }
+                style={[
+                    styles.searchBarRow,
+                    {
+                        backgroundColor: theme.bg_color,
+                        opacity: searchBarOpacity,
+                        transform: [{ translateY: searchBarTranslateY }],
+                    },
+                ]}>
+                <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={t('搜尋 Harbor')}
+                    onPress={() => {
+                        trigger();
+                        onSearchPress();
+                    }}
+                    style={({ pressed }) => [
+                        styles.searchBar,
+                        {
+                            backgroundColor: theme.white,
+                            borderColor: theme.themeColorUltraLight,
+                        },
+                        pressed && { opacity: 0.85 },
+                    ]}>
+                    <MaterialCommunityIcons
+                        name="magnify"
+                        size={scale(16)}
+                        color={theme.black.third}
+                    />
+                    <Text
+                        numberOfLines={1}
+                        style={[
+                            styles.searchBarText,
+                            { color: theme.black.third },
+                        ]}>
+                        {t('搜尋 Harbor')}
+                    </Text>
+                </Pressable>
+            </Animated.View>
         </View>
     );
 };
@@ -323,6 +399,8 @@ const HarborFeedPane = ({
     contentContainerStyle,
     refreshProgressViewOffset,
     isActive,
+    searchScrollY,
+    onScrollOffset,
 }) => {
     const source = useMemo(
         () =>
@@ -330,6 +408,19 @@ const HarborFeedPane = ({
                 ? {view: 'latest', filter: 'unseen'}
                 : {view},
         [view],
+    );
+    // 滾動偏移以原生驅動寫入共用的 searchScrollY，JS 端只記錄各分頁位置
+    const handleScroll = useMemo(
+        () =>
+            Animated.event(
+                [{ nativeEvent: { contentOffset: { y: searchScrollY } } }],
+                {
+                    useNativeDriver: true,
+                    listener: event =>
+                        onScrollOffset(view, event.nativeEvent.contentOffset.y),
+                },
+            ),
+        [onScrollOffset, searchScrollY, view],
     );
 
     return (
@@ -341,6 +432,7 @@ const HarborFeedPane = ({
                 isTopicPressAllowed={isTopicPressAllowed}
                 contentContainerStyle={contentContainerStyle}
                 refreshProgressViewOffset={refreshProgressViewOffset}
+                onScroll={handleScroll}
                 isActive={isActive}
             />
         </View>
@@ -363,6 +455,8 @@ const ForumPage = ({ navigation }) => {
     const pagerRef = useRef(null);
     const pageScrollOffset = useRef(new Animated.Value(0)).current;
     const pageScrollPosition = useRef(new Animated.Value(0)).current;
+    const searchScrollY = useRef(new Animated.Value(0)).current;
+    const scrollOffsetsRef = useRef({});
     const currentViewRef = useRef('latest');
     const blockTopicPressUntilRef = useRef(0);
     const capabilitiesRef = useRef(null);
@@ -378,6 +472,7 @@ const ForumPage = ({ navigation }) => {
         unread: false,
     });
     const [consentVisible, setConsentVisible] = useState(false);
+    const [searchCollapsed, setSearchCollapsed] = useState(false);
 
     useEffect(() => {
         // 僅在首次聚焦時打點；iOS Native Tabs 會預先掛載，
@@ -481,6 +576,25 @@ const ForumPage = ({ navigation }) => {
             current[view] ? current : { ...current, [view]: true },
         );
     }, []);
+    // 各分頁各自記住滾動位置；切頁時把搜尋列狀態同步到目標分頁
+    const syncSearchScroll = useCallback(
+        view => {
+            const offset = scrollOffsetsRef.current[view] ?? 0;
+            searchScrollY.setValue(offset);
+            setSearchCollapsed(offset > SEARCH_BAR_ROW_HEIGHT / 2);
+        },
+        [searchScrollY],
+    );
+    const handleScrollOffset = useCallback((view, offset) => {
+        scrollOffsetsRef.current[view] = offset;
+        if (view !== currentViewRef.current) {
+            return;
+        }
+        const collapsed = offset > SEARCH_BAR_ROW_HEIGHT / 2;
+        setSearchCollapsed(current =>
+            current === collapsed ? current : collapsed,
+        );
+    }, []);
 
     const handleCapabilities = useCallback(
         nextCapabilities => {
@@ -503,13 +617,14 @@ const ForumPage = ({ navigation }) => {
             }
             ensureMounted(view);
             currentViewRef.current = view;
+            syncSearchScroll(view);
             setCurrentIndex(index);
             pagerRef.current?.setPage(index);
             logToFirebase('harbor_feed_view', {
                 view: VIEW_CONFIG[view].analytics,
             });
         },
-        [enabledViews, ensureMounted],
+        [enabledViews, ensureMounted, syncSearchScroll],
     );
 
     const handlePageSelected = useCallback(
@@ -521,12 +636,13 @@ const ForumPage = ({ navigation }) => {
             }
             ensureMounted(view);
             currentViewRef.current = view;
+            syncSearchScroll(view);
             setCurrentIndex(index);
             logToFirebase('harbor_feed_view', {
                 view: VIEW_CONFIG[view].analytics,
             });
         },
-        [enabledViews, ensureMounted],
+        [enabledViews, ensureMounted, syncSearchScroll],
     );
 
     useEffect(() => {
@@ -586,7 +702,7 @@ const ForumPage = ({ navigation }) => {
                 ? t('登入中…')
                 : t('登入');
 
-    const stickyHeaderHeight = toolbarHeight;
+    const stickyHeaderHeight = toolbarHeight + SEARCH_BAR_ROW_HEIGHT;
     const contentContainerStyle = useMemo(
         () => ({
             paddingTop: stickyHeaderHeight + verticalScale(4),
@@ -671,6 +787,8 @@ const ForumPage = ({ navigation }) => {
                                     isActive={
                                         enabledViews[currentIndex] === view
                                     }
+                                    searchScrollY={searchScrollY}
+                                    onScrollOffset={handleScrollOffset}
                                 />
                             ) : null}
                         </View>
@@ -696,6 +814,8 @@ const ForumPage = ({ navigation }) => {
                         chatUnreadCount={chatUnreadCount}
                         chatVisible={capabilities?.chat !== false}
                         onToolbarLayout={handleToolbarLayout}
+                        searchScrollY={searchScrollY}
+                        searchCollapsed={searchCollapsed}
                     />
                 </View>
             </View>
@@ -720,6 +840,8 @@ const styles = StyleSheet.create({
         zIndex: 2,
     },
     stickyToolbar: {
+        // 蓋在上移中的搜尋列之上
+        zIndex: 1,
         minHeight: STICKY_TOOLBAR_HEIGHT,
         flexDirection: 'row',
         alignItems: 'center',
@@ -827,6 +949,25 @@ const styles = StyleSheet.create({
     },
     feedTabIndicatorHidden: {
         opacity: 0,
+    },
+    searchBarRow: {
+        height: SEARCH_BAR_ROW_HEIGHT,
+        justifyContent: 'center',
+        paddingHorizontal: scale(6),
+    },
+    searchBar: {
+        minHeight: verticalScale(30),
+        borderWidth: StyleSheet.hairlineWidth,
+        borderRadius: scale(9),
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: scale(10),
+    },
+    searchBarText: {
+        ...uiStyle.defaultText,
+        flex: 1,
+        fontSize: scale(12),
+        marginLeft: scale(6),
     },
     sharedHeader: {
         position: 'absolute',

@@ -7,7 +7,8 @@ import {
 } from 'react-native';
 
 import { useIsFocused } from '@react-navigation/native';
-import { FlashList } from '@shopify/flash-list';
+// 用 AnimatedFlashList 讓外層能以原生驅動的 Animated.event 接收滾動偏移
+import { AnimatedFlashList } from '@shopify/flash-list';
 import { useTranslation } from 'react-i18next';
 import { scale, verticalScale } from 'react-native-size-matters';
 import Toast from 'react-native-toast-message';
@@ -892,7 +893,7 @@ const HarborTopicList = ({
 
     if (isLoading && items.length === 0) {
         return (
-            <FlashList
+            <AnimatedFlashList
                 data={SKELETON_ITEMS}
                 keyExtractor={item => `harbor-skeleton-${item}`}
                 renderItem={() => <HarborTopicSkeleton />}
@@ -910,7 +911,7 @@ const HarborTopicList = ({
     }
 
     return (
-        <FlashList
+        <AnimatedFlashList
             data={displayItems}
             keyExtractor={item =>
                 item.isHarborRecommendation
