@@ -1023,7 +1023,7 @@ const styles = StyleSheet.create({
         borderRadius: scale(4),
     },
     separator: {
-        height: verticalScale(8),
+        height: verticalScale(4),
     },
     loadingMore: {
         paddingVertical: verticalScale(16),
