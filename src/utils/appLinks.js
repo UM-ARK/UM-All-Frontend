@@ -144,11 +144,17 @@ export const splitArkAppLinkContent = value => {
         if (!appLink) {
             continue;
         }
-        const text = value.slice(lastIndex, match.index).trim();
-        if (text) {
-            parts.push({type: 'text', content: text});
+        const leading = value.slice(lastIndex, match.index);
+        const text = leading.trim();
+        // 分享面板送出的格式是「標題\n連結」：單行標題直接併入卡片，不另開文字氣泡
+        if (text && !text.includes('\n') && /\n\s*$/.test(leading)) {
+            parts.push({type: 'appLink', appLink, title: text});
+        } else {
+            if (text) {
+                parts.push({type: 'text', content: text});
+            }
+            parts.push({type: 'appLink', appLink});
         }
-        parts.push({type: 'appLink', appLink});
         lastIndex = match.index + match[0].length;
     }
 
