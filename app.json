@@ -78,6 +78,7 @@
       "./plugins/withAndroidSigning",
       "./plugins/withQuickActionsKotlin",
       "./plugins/withRNMenuHeaders",
+      "./plugins/withRNScreensGamma",
       [
         "expo-dev-client",
         {

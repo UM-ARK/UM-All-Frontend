@@ -16,6 +16,7 @@ import { useFocusEffect } from '@react-navigation/native';
 
 // 本地工具
 import Text from '../../../../components/AppText';
+import NativeTabScrollView from '../../../../components/NativeTabScrollView';
 import { useTheme, uiStyle } from '../../../../components/ThemeContext';
 import {
     GITHUB_DONATE,
@@ -502,7 +503,7 @@ const HomeScreen = ({ navigation }) => {
     // 主渲染
     return (
         <View style={{ flex: 1, backgroundColor: bg_color, alignItems: 'center', justifyContent: 'center' }}>
-            <ScrollView
+            <NativeTabScrollView
                 style={{ width: windowWidth }}
                 contentInsetAdjustmentBehavior="automatic"
                 refreshControl={
@@ -751,7 +752,7 @@ const HomeScreen = ({ navigation }) => {
                 ) : null}
                 {/* 活動瀑布流，預留間距避免遮擋上方快捷入口 */}
                 <EventPage ref={eventPage} style={{ marginTop: verticalScale(3) }} />
-            </ScrollView>
+            </NativeTabScrollView>
 
             {/* Modal */}
             {isShowModal && (

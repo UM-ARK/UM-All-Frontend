@@ -19,6 +19,7 @@ import { scale, verticalScale } from 'react-native-size-matters';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import Text from '../../../components/AppText';
+import NativeTabScrollView from '../../../components/NativeTabScrollView';
 import { uiStyle, useTheme } from '../../../components/ThemeContext';
 import { openLink } from '../../../utils/browser';
 import { logToFirebase } from '../../../utils/firebaseAnalytics';
@@ -341,6 +342,8 @@ const WikiHome = ({navigation}) => {
     return (
         <View style={pageStyle}>
             <FlashList
+                renderScrollComponent={NativeTabScrollView}
+                contentInsetAdjustmentBehavior="automatic"
                 data={items}
                 extraData={collapsedCategoryKeys}
                 renderItem={renderItem}

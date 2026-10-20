@@ -2,6 +2,7 @@ import React, { memo, useCallback, useContext, useEffect, useMemo, useRef, useSt
 import { View, RefreshControl, TouchableOpacity, Alert, SectionList, Dimensions, FlatList, Platform, } from 'react-native';
 
 import Text from '../../../components/AppText';
+import NativeTabScrollView from '../../../components/NativeTabScrollView';
 import { uiStyle, ThemeContext, } from '../../../components/ThemeContext';
 import { BASE_URI, BASE_HOST, GET, USUAL_Q } from '../../../utils/pathMap';
 import { clubTagList, clubTagMap } from '../../../utils/clubMap';
@@ -359,6 +360,7 @@ function ClubPage() {
             ) : null}
 
             <SectionList
+                renderScrollComponent={props => <NativeTabScrollView {...props} />}
                 ref={sectionListRef}
                 style={{ flex: 1, width: '100%' }}
                 contentInsetAdjustmentBehavior="automatic"
