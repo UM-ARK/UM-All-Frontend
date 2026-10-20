@@ -9,7 +9,6 @@ import React, {
 import {
     ActivityIndicator,
     Alert,
-    InteractionManager,
     Pressable,
     RefreshControl,
     View,
@@ -561,7 +560,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
             return undefined;
         }
 
-        const interaction = InteractionManager.runAfterInteractions(() => {
+        const idleCallback = requestIdleCallback(() => {
             if (targetPostNumber > 0) {
                 scrollToPost(targetPostNumber, {
                     allowFetch: false,
@@ -598,7 +597,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
         });
 
         return () => {
-            interaction.cancel();
+            cancelIdleCallback(idleCallback);
             if (pendingReplyDraftFrameRef.current != null) {
                 cancelAnimationFrame(
                     pendingReplyDraftFrameRef.current,

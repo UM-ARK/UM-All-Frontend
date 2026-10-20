@@ -76,7 +76,8 @@
     },
     "plugins": [
       "./plugins/withAndroidSigning",
-      "./plugins/withRNFirebaseDisableSPM",
+      "./plugins/withQuickActionsKotlin",
+      "./plugins/withRNMenuHeaders",
       [
         "expo-dev-client",
         {
@@ -121,6 +122,7 @@
         "expo-build-properties",
         {
           "android": {
+            "kotlinVersion": "2.4.0",
             "buildArchs": [
               "armeabi-v7a",
               "arm64-v8a"
@@ -129,11 +131,7 @@
             "enableShrinkResourcesInReleaseBuilds": true
           },
           "ios": {
-            "useFrameworks": "static",
-            "forceStaticLinking": [
-              "RNFBApp",
-              "RNFBAnalytics"
-            ]
+            "useFrameworks": "dynamic"
           }
         }
       ],
