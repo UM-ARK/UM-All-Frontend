@@ -29,6 +29,7 @@ import { useTheme } from '../../../components/ThemeContext';
 import { getDeepLinkShareHeaderOptions } from '../../../components/DeepLinkShareButton';
 import { useAppShare } from '../../../contexts/AppShareContext';
 import { useHarborSession } from '../../../contexts/HarborSessionContext';
+import { parseArkAppLink } from '../../../utils/appLinks';
 import { openLink } from '../../../utils/browser';
 import {
     HARBOR_TOPIC_NOTIFICATION_LEVELS,
@@ -315,6 +316,12 @@ const HarborTopicDetail = ({ route, navigation }) => {
 
     const openHarborLink = useCallback(
         url => {
+            const appLink = parseArkAppLink(url);
+            if (appLink) {
+                navigation.navigate(appLink.routeName, appLink.params);
+                return;
+            }
+
             const target = parseHarborUrl(url, ARK_HARBOR);
 
             if (target?.type === 'topic') {
