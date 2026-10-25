@@ -7,7 +7,6 @@ import { t } from 'i18next';
 
 import Text from '../../../../../components/AppText';
 import { useTheme, themes, uiStyle, ThemeContext } from '../../../../../components/ThemeContext';
-import { screenWidth } from '../../../../../utils/stylesKits';
 
 const HomeCard = (props) => {
     const { theme } = useTheme();
@@ -17,7 +16,7 @@ const HomeCard = (props) => {
             backgroundColor: white,
             marginTop: verticalScale(10),
             borderRadius: 10,
-            width: screenWidth * 0.95,
+            width: '95%',
         },
         userInformation: {
             flexDirection: 'row',

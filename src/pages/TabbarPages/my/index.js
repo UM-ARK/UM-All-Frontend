@@ -48,7 +48,10 @@ const MyScreen = ({ navigation }) => {
     } = usePushRegistration();
     const insets = useSafeAreaInsets();
     const { width } = useWindowDimensions();
-    const contentWidth = Math.min(width - scale(20), scale(680));
+    const contentWidth = Math.min(
+        width - insets.left - insets.right - scale(20),
+        scale(680),
+    );
     const contentTopInset = insets.top + verticalScale(8);
     const [isRefreshing, setIsRefreshing] = React.useState(false);
     const teamSchedulePreviewRef = React.useRef(null);

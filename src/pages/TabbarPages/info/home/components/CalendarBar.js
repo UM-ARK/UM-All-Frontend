@@ -6,7 +6,6 @@ import { moderateScale, scale, verticalScale } from 'react-native-size-matters';
 import Text from '../../../../../components/AppText';
 import { useTheme } from '../../../../../components/ThemeContext';
 import { uiStyle, VERSION_EMOJI } from '../../../../../components/ThemeContext';
-import { screenWidth } from '../../../../../utils/stylesKits';
 import { getWeek } from '../../../../../static/UMCalendar/CalendarConst';
 import { UMCalendar } from '../../../../../static/UMCalendar/UMCalendar';
 import { trigger } from '../../../../../utils/trigger';
@@ -212,7 +211,7 @@ const CalendarBar = ({ refreshTrigger = 0 }) => {
                         style={{
                             paddingVertical: verticalScale(6),
                             paddingHorizontal: scale(8),
-                            width: screenWidth * 0.8,
+                            width: '80%',
                             backgroundColor: `${themeColor}15`,
                             borderRadius: scale(10),
                             borderWidth: 1,
