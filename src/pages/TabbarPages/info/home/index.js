@@ -814,7 +814,7 @@ const HomeScreen = ({ navigation }) => {
                 </ModalBottom>
             )}
 
-            <ScrollToTopButton virtualizedListRef={scrollView} />
+            {/* <ScrollToTopButton virtualizedListRef={scrollView} /> */}
 
             <CustomBottomSheet ref={bottomSheetRef} page={'home'} onSheetIndexChange={(idx) => setSheetIndex(idx)}>
                 {renderBottomSheet()}
