@@ -1,4 +1,10 @@
-import React, { createContext, forwardRef, useContext } from 'react';
+import React, {
+    createContext,
+    forwardRef,
+    useContext,
+    useEffect,
+    useState,
+} from 'react';
 import { Platform, ScrollView, StyleSheet } from 'react-native';
 import { useIsFocused } from '@react-navigation/native';
 import { Screen, ScreenContainer } from 'react-native-screens';
@@ -11,7 +17,12 @@ export const NativeTabScrollActiveContext = createContext(true);
 const NativeTabScrollView = forwardRef(function NativeTabScrollView(props, ref) {
     const isFocused = useIsFocused();
     const isActive = useContext(NativeTabScrollActiveContext);
+    const [isMarkerReady, setIsMarkerReady] = useState(false);
     const scrollView = <ScrollView {...props} ref={ref} />;
+
+    useEffect(() => {
+        setIsMarkerReady(true);
+    }, []);
 
     if (Platform.OS !== 'ios' || !isLiquidGlassSupported) {
         return scrollView;
@@ -25,9 +36,11 @@ const NativeTabScrollView = forwardRef(function NativeTabScrollView(props, ref) 
                 activityState={isFocused && isActive ? 2 : 0}
                 freezeOnBlur={false}
                 style={StyleSheet.absoluteFill}>
-                <ScrollViewMarker style={styles.container}>
-                    {scrollView}
-                </ScrollViewMarker>
+                {isMarkerReady ? (
+                    <ScrollViewMarker key={`${isFocused}-${isActive}`} style={styles.container}>
+                        {scrollView}
+                    </ScrollViewMarker>
+                ) : scrollView}
             </Screen>
         </ScreenContainer>
     );

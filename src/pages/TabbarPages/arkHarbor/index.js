@@ -21,6 +21,7 @@ import Text from '../../../components/AppText';
 import { uiStyle, useTheme } from '../../../components/ThemeContext';
 import { useHarborSession } from '../../../contexts/HarborSessionContext';
 import { logToFirebase } from '../../../utils/firebaseAnalytics';
+import { useWindowSizeClass } from '../../../utils/windowSizeClass';
 import {
     fetchHarborSiteCapabilities,
     getHarborTopicViews,
@@ -29,6 +30,7 @@ import { trigger } from '../../../utils/trigger';
 import HarborLoginConsentModal from '../my/components/HarborLoginConsentModal';
 import HarborDrawerContent from './components/HarborDrawerContent';
 import HarborTopicList from './components/HarborTopicList';
+import HarborTopicDetail from './HarborTopicDetail';
 
 const VIEW_CONFIG = {
     latest: { label: '最新', analytics: 'latest' },
@@ -398,6 +400,7 @@ const HarborFeedPane = ({
     isTopicPressAllowed,
     contentContainerStyle,
     refreshProgressViewOffset,
+    onTopicPress,
     isActive,
     searchScrollY,
     onScrollOffset,
@@ -432,6 +435,7 @@ const HarborFeedPane = ({
                 isTopicPressAllowed={isTopicPressAllowed}
                 contentContainerStyle={contentContainerStyle}
                 refreshProgressViewOffset={refreshProgressViewOffset}
+                onTopicPress={onTopicPress}
                 onScroll={handleScroll}
                 isActive={isActive}
             />
@@ -444,6 +448,7 @@ const HarborFeedPane = ({
  */
 const ForumPage = ({ navigation }) => {
     const { theme } = useTheme();
+    const { isExpanded } = useWindowSizeClass();
     const { t } = useTranslation('harbor');
     const {
         status,
@@ -463,6 +468,8 @@ const ForumPage = ({ navigation }) => {
     const capabilitiesControllerRef = useRef(null);
     const hasLoggedHomeRef = useRef(false);
     const [currentIndex, setCurrentIndex] = useState(0);
+    const [selectedTopic, setSelectedTopic] = useState(null);
+    const [detailPaneWidth, setDetailPaneWidth] = useState(0);
     const [toolbarHeight, setToolbarHeight] = useState(STICKY_TOOLBAR_HEIGHT);
     const [capabilities, setCapabilities] = useState(null);
     const [capabilitiesUnavailable, setCapabilitiesUnavailable] = useState(false);
@@ -756,15 +763,29 @@ const ForumPage = ({ navigation }) => {
         () => Date.now() >= blockTopicPressUntilRef.current,
         [],
     );
+    const handleSplitTopicPress = useCallback(topic => {
+        setSelectedTopic(topic);
+    }, []);
+    const detailNavigation =
+        navigation.getParent()?.getParent() ||
+        navigation.getParent() ||
+        navigation;
 
     return (
         <SafeAreaView
             style={[styles.page, { backgroundColor: theme.bg_color }]}
             edges={{ top: true }}>
-            <View style={styles.contentClip}>
+            <View
+                style={[
+                    styles.contentClip,
+                    isExpanded ? styles.splitContentClip : null,
+                ]}>
                 <AnimatedPagerView
                     ref={pagerRef}
-                    style={styles.pager}
+                    style={[
+                        styles.pager,
+                        isExpanded ? styles.splitPager : null,
+                    ]}
                     initialPage={0}
                     onPageScroll={handlePageScroll}
                     onPageSelected={handlePageSelected}
@@ -784,6 +805,11 @@ const ForumPage = ({ navigation }) => {
                                     refreshProgressViewOffset={
                                         refreshProgressViewOffset
                                     }
+                                    onTopicPress={
+                                        isExpanded
+                                            ? handleSplitTopicPress
+                                            : undefined
+                                    }
                                     isActive={
                                         enabledViews[currentIndex] === view
                                     }
@@ -794,7 +820,12 @@ const ForumPage = ({ navigation }) => {
                         </View>
                     ))}
                 </AnimatedPagerView>
-                <View pointerEvents="box-none" style={styles.sharedHeader}>
+                <View
+                    pointerEvents="box-none"
+                    style={[
+                        styles.sharedHeader,
+                        isExpanded ? styles.splitSharedHeader : null,
+                    ]}>
                     <HarborStickyToolbar
                         segmentOptions={segmentOptions}
                         currentIndex={currentIndex}
@@ -818,6 +849,27 @@ const ForumPage = ({ navigation }) => {
                         searchCollapsed={searchCollapsed}
                     />
                 </View>
+                {isExpanded ? (
+                    <View
+                        style={styles.detailPane}
+                        onLayout={event =>
+                            setDetailPaneWidth(event.nativeEvent.layout.width)
+                        }>
+                        {selectedTopic ? (
+                            <HarborTopicDetail
+                                route={{
+                                    params: {
+                                        topicId: selectedTopic.id,
+                                        topicTitle: selectedTopic.title,
+                                    },
+                                }}
+                                navigation={detailNavigation}
+                                isSplitPane
+                                availableWidth={detailPaneWidth}
+                            />
+                        ) : null}
+                    </View>
+                ) : null}
             </View>
             <HarborLoginConsentModal
                 visible={consentVisible}
@@ -835,6 +887,17 @@ const styles = StyleSheet.create({
     contentClip: {
         flex: 1,
         overflow: 'hidden',
+    },
+    splitContentClip: {
+        flexDirection: 'row',
+    },
+    splitPager: {
+        width: '40%',
+        flex: 0,
+    },
+    detailPane: {
+        flex: 1,
+        borderLeftWidth: StyleSheet.hairlineWidth,
     },
     stickyHeader: {
         zIndex: 2,
@@ -975,6 +1038,9 @@ const styles = StyleSheet.create({
         right: 0,
         left: 0,
         zIndex: 10,
+    },
+    splitSharedHeader: {
+        right: '60%',
     },
     pager: {
         flex: 1,

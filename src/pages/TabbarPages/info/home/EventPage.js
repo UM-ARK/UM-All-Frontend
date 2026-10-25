@@ -400,6 +400,7 @@ const EventPage = forwardRef((props, ref) => {
     const [noMoreData, setNoMoreData] = useState(true);
     const [numColumns, setNumColumns] = useState(2);
     const [cardWidth, setCardWidth] = useState(scale(160));
+    const [containerWidth, setContainerWidth] = useState(0);
     const windowLayout = useWindowDimensions();
     const pageRef = useRef(1);
     const requestGenerationRef = useRef(0);
@@ -420,12 +421,12 @@ const EventPage = forwardRef((props, ref) => {
         const isLandscape = windowLayout.width > windowLayout.height;
         const targetColumns = isLandscape ? 3 : 2; // 橫屏擴充三列，豎屏維持兩列
         const gap = scale(10); // 欄間距，留白避免擁擠
-        const safeWidth = Math.max(windowLayout.width, 320);
+        const safeWidth = Math.max(containerWidth || windowLayout.width, 320);
         const computedWidth = (safeWidth - gap * (targetColumns + 1)) / targetColumns;
         setNumColumns(targetColumns);
         // 卡片寬度加上上下限，避免極端螢幕尺寸過窄/過寬
         setCardWidth(Math.min(Math.max(computedWidth, scale(140)), scale(220)));
-    }, [windowLayout.height, windowLayout.width]);
+    }, [containerWidth, windowLayout.height, windowLayout.width]);
 
     const loadFirstPage = useCallback(async () => {
         const requestGeneration = ++requestGenerationRef.current;
@@ -804,7 +805,9 @@ const EventPage = forwardRef((props, ref) => {
     // };
 
     return (
-        <View style={{ ...props.style }}>
+        <View
+            onLayout={({ nativeEvent }) => setContainerWidth(nativeEvent.layout.width)}
+            style={{ ...props.style, width: '100%' }}>
             {isLoading ? (
                 renderSkeletonPage()
             ) : columnsData.some(col => col.length > 0) ? (

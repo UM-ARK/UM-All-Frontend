@@ -230,7 +230,7 @@ function ClubPage() {
         </View>
     ), [allClubs.length, black.third, tabBarHeight, themeColor]);
 
-    const windowWidth = Dimensions.get('window').width;
+    const windowWidth = Dimensions.get('window').width - insets.left - insets.right;
     const rawCellWidth =
         (windowWidth -
             CLUB_GRID_HORIZONTAL_PADDING * 2 -

@@ -133,6 +133,7 @@ const HarborTopicCard = ({
     const coverUrl = topic.imageUrl
         ? ARK_HARBOR_ABSOLUTE_URL(topic.imageUrl)
         : '';
+    const [cardWidth, setCardWidth] = useState(0);
     const [coverFailed, setCoverFailed] = useState(false);
     // null：尚未得知比例，先用豎圖尺寸佔位
     const [isLandscape, setIsLandscape] = useState(null);
@@ -159,10 +160,17 @@ const HarborTopicCard = ({
         borderRadius: AVATAR_SIZE / 2,
         backgroundColor: theme.tonal.primary15,
     };
-    // 豎圖：半屏左右寬 × 約 1/3.5 屏高；橫圖：貼齊內容區寬、高度更矮
+    const cardContentWidth = Math.max(
+        (cardWidth || windowWidth) -
+            CARD_MARGIN_HORIZONTAL * 2 -
+            CARD_PADDING_HORIZONTAL * 2 -
+            StyleSheet.hairlineWidth * 2,
+        0,
+    );
+    // 圖片寬度依卡片內容區計算，避免雙欄時仍按整個窗口放大
     const coverWidth = isLandscape
-        ? windowWidth / 1.5
-        : windowWidth * COVER_PORTRAIT_WIDTH_RATIO;
+        ? cardContentWidth / 1.5
+        : cardContentWidth * COVER_PORTRAIT_WIDTH_RATIO;
     const coverHeight = isLandscape
         ? windowHeight * COVER_LANDSCAPE_HEIGHT_RATIO
         : windowHeight * COVER_PORTRAIT_HEIGHT_RATIO;
@@ -176,6 +184,9 @@ const HarborTopicCard = ({
         <Pressable
             accessibilityRole="button"
             accessibilityLabel={topic.title}
+            onLayout={event =>
+                setCardWidth(event.nativeEvent.layout.width)
+            }
             onPress={() => {
                 if (isPressAllowed && !isPressAllowed()) {
                     return;

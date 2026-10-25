@@ -5,6 +5,7 @@ import { useTheme } from './components/ThemeContext';
 
 import { scale, verticalScale } from 'react-native-size-matters';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-screens/experimental';
 
 import { useTranslation } from 'react-i18next';
 
@@ -54,6 +55,16 @@ const tabScreen = {
     CourseTab: CourseTab,
     FeaturesTabbar: FeaturesScreen,
     MyTabbar: MyScreen,
+};
+
+const IOSNativeTabScreen = props => {
+    const Screen = tabScreen[props.route.name];
+
+    return (
+        <SafeAreaView style={{ flex: 1 }} edges={{ left: true, right: true }}>
+            <Screen {...props} />
+        </SafeAreaView>
+    );
 };
 
 // iOS SF Symbols 設定
@@ -150,7 +161,7 @@ class IOSTabbar {
             return (
                 <this.Tabs.Screen
                     name={name}
-                    component={tabScreen[name]}
+                    component={IOSNativeTabScreen}
                     options={{
                         title: t(tabIconDescription[name]),
                         tabBarBadge,
@@ -183,9 +194,7 @@ class IOSTabbar {
                         tabBarControllerMode: useSidebar
                             ? 'tabSidebar'
                             : 'tabBar',
-                        tabBarMinimizeBehavior: useSidebar
-                            ? undefined
-                            : 'onScrollDown',
+                        tabBarMinimizeBehavior: useSidebar ? undefined : 'onScrollDown',
                     })}
                     hapticFeedbackEnabled={true}>
                     {Object.keys(tabScreen).map(name =>

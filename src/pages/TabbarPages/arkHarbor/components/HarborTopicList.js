@@ -106,6 +106,8 @@ const HarborTopicList = ({
     onMomentumScrollEnd,
     emptyTitle,
     emptyDescription,
+    onTopicPress,
+    isTwoColumn = false,
     isActive = true,
 }) => {
     const { theme } = useTheme();
@@ -610,12 +612,16 @@ const HarborTopicList = ({
 
     const handleTopicPress = useCallback(
         topic => {
+            if (onTopicPress) {
+                onTopicPress(topic);
+                return;
+            }
             navigation.navigate('HarborTopicDetail', {
                 topicId: topic.id,
                 topicTitle: topic.title,
             });
         },
-        [navigation],
+        [navigation, onTopicPress],
     );
 
     const handleCategoryPress = useCallback(
@@ -895,6 +901,8 @@ const HarborTopicList = ({
         return (
             <AnimatedFlashList
                 data={SKELETON_ITEMS}
+                numColumns={isTwoColumn ? 2 : 1}
+                masonry={isTwoColumn}
                 keyExtractor={item => `harbor-skeleton-${item}`}
                 renderItem={() => <HarborTopicSkeleton />}
                 ListHeaderComponent={ListHeaderComponent}
@@ -913,6 +921,8 @@ const HarborTopicList = ({
     return (
         <AnimatedFlashList
             data={displayItems}
+            numColumns={isTwoColumn ? 2 : 1}
+            masonry={isTwoColumn}
             keyExtractor={item =>
                 item.isHarborRecommendation
                     ? `harbor-recommendation-${item.id}`
