@@ -103,7 +103,12 @@ const TOPIC_NOTIFICATION_OPTIONS = [
     },
 ];
 
-const HarborTopicDetail = ({ route, navigation }) => {
+const HarborTopicDetail = ({
+    route,
+    navigation,
+    isSplitPane = false,
+    availableWidth,
+}) => {
     const { theme } = useTheme();
     const { openShare } = useAppShare();
     const { t } = useTranslation('harbor');
@@ -236,7 +241,10 @@ const HarborTopicDetail = ({ route, navigation }) => {
         updateTopicPost,
     });
 
-    const contentWidth = Math.max(width - scale(32), scale(220));
+    const contentWidth = Math.max(
+        (availableWidth || width) - scale(32),
+        scale(220),
+    );
     const [topicActionBarHeight, setTopicActionBarHeight] = useState(
         verticalScale(48),
     );
@@ -448,6 +456,9 @@ const HarborTopicDetail = ({ route, navigation }) => {
     }, [currentPostNumber, openShare, topic?.title, topicId]);
 
     useLayoutEffect(() => {
+        if (isSplitPane) {
+            return;
+        }
         navigation.setOptions({
             headerTitle: '',
             ...getDeepLinkShareHeaderOptions({
@@ -456,7 +467,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
                 themeColor,
             }),
         });
-    }, [navigation, shareCurrentPost, t, themeColor]);
+    }, [isSplitPane, navigation, shareCurrentPost, t, themeColor]);
 
     const openTopicReplyComposer = useCallback(() => {
         openHarborComposer(navigation, {
