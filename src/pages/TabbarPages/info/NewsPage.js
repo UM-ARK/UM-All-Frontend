@@ -17,7 +17,6 @@ import {
 } from 'react-native';
 
 import Text from '../../../components/AppText';
-import NativeTabScrollView from '../../../components/NativeTabScrollView';
 import ClubSearchBar from './components/ClubSearchBar';
 import NewsCard from './components/NewsCard';
 import NewsListSkeleton from './components/NewsListSkeleton';
@@ -376,7 +375,6 @@ const NewsPage = forwardRef(function NewsPage(
             ) : (
                 <View style={{ flex: 1, width: '100%' }}>
                     <VirtualizedList
-                        renderScrollComponent={props => <NativeTabScrollView {...props} />}
                         data={newsList}
                         ref={virtualizedList}
                         style={{ flex: 1, width: '100%' }}

@@ -194,7 +194,7 @@ class IOSTabbar {
                         tabBarControllerMode: useSidebar
                             ? 'tabSidebar'
                             : 'tabBar',
-                        tabBarMinimizeBehavior: useSidebar ? undefined : 'onScrollDown',
+                        tabBarMinimizeBehavior: 'none',
                     })}
                     hapticFeedbackEnabled={true}>
                     {Object.keys(tabScreen).map(name =>

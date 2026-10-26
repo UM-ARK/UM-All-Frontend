@@ -12,7 +12,6 @@ import { View, RefreshControl } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 
 import Text from '../../../components/AppText';
-import NativeTabScrollView from '../../../components/NativeTabScrollView';
 import { uiStyle, ThemeContext } from '../../../components/ThemeContext';
 import { UM_API_EVENT, UM_API_TOKEN } from '../../../utils/pathMap';
 import { trigger } from '../../../utils/trigger';
@@ -256,7 +255,6 @@ const UMEventPage = forwardRef(function UMEventPage(
         return (
             <View style={{ flex: 1, width: '100%' }}>
                 <FlashList
-                    renderScrollComponent={NativeTabScrollView}
                     ref={scrollViewRef}
                     data={filteredData}
                     contentInsetAdjustmentBehavior="automatic"

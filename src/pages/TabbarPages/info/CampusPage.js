@@ -16,7 +16,6 @@ import {
 } from '../../../utils/glassEffect';
 
 import Text from '../../../components/AppText';
-import { NativeTabScrollActiveContext } from '../../../components/NativeTabScrollView';
 import { useTheme, uiStyle } from '../../../components/ThemeContext';
 import SegmentControl from '../../../components/SegmentControl';
 import { trigger } from '../../../utils/trigger';
@@ -255,7 +254,6 @@ const CampusPage = () => {
                 overdrag={false}
                 offscreenPageLimit={1}>
                 <View key="event" style={styles.page} collapsable={false}>
-                    <NativeTabScrollActiveContext.Provider value={pageIndex === 0}>
                     {mountedPages[0] ? (
                         <UMEventPage
                             ref={eventPageRef}
@@ -266,10 +264,8 @@ const CampusPage = () => {
                             }
                         />
                     ) : null}
-                    </NativeTabScrollActiveContext.Provider>
                 </View>
                 <View key="news" style={styles.page} collapsable={false}>
-                    <NativeTabScrollActiveContext.Provider value={pageIndex === 1}>
                     {mountedPages[1] ? (
                         <NewsPage
                             ref={newsPageRef}
@@ -280,7 +276,6 @@ const CampusPage = () => {
                             }
                         />
                     ) : null}
-                    </NativeTabScrollActiveContext.Provider>
                 </View>
             </PagerView>
 

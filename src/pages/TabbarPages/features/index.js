@@ -2,11 +2,11 @@ import React, { useState, useRef, useCallback, useContext, useMemo, useEffect } 
 import {
     Platform,
     Pressable,
+    ScrollView,
     View,
 } from 'react-native';
 
 import Text from '../../../components/AppText';
-import NativeTabScrollView from '../../../components/NativeTabScrollView';
 import { useTheme, uiStyle } from '../../../components/ThemeContext';
 import { useHarborSession } from '../../../contexts/HarborSessionContext';
 import { logToFirebase } from '../../../utils/firebaseAnalytics';
@@ -409,7 +409,7 @@ function FeatureListPage({ navigation }) {
                 flex: 1,
                 backgroundColor: bg_color,
             }}>
-            <NativeTabScrollView
+            <ScrollView
                 showsVerticalScrollIndicator={true}
                 contentInsetAdjustmentBehavior="automatic"
                 keyboardShouldPersistTaps="handled"
@@ -485,7 +485,7 @@ function FeatureListPage({ navigation }) {
                     }}
                 />
                 </View>
-            </NativeTabScrollView>
+            </ScrollView>
 
             <CustomBottomSheet
                 ref={bottomSheetRef}
