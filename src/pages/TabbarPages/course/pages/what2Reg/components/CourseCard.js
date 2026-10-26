@@ -11,6 +11,7 @@ import { navigateToCourseTab } from '../../../../../../utils/courseNavigation';
 import { navigateToWikiSearch } from '../../../../../../utils/wikiNavigation';
 import { getCourseDisplayTitle } from '../utils/courseTitle';
 import { splitCourseCode } from '../utils/courseCode';
+import { getSearchMatchRanges } from '../utils/search';
 
 import { scale } from 'react-native-size-matters';
 import { NavigationContext } from '@react-navigation/native';
@@ -68,31 +69,58 @@ const CourseCard = memo(
                 : 'Offering Department'
             ];
         const credit = item[mode === 'what2Reg' ? 'Credits' : 'Credit Units'];
+        const searchMatch = item.searchMatch;
+
+        const renderHighlightedText = (value, offset = 0, fullText = value) => {
+            if (!searchMatch) {
+                return value;
+            }
+
+            const text = String(value || '');
+            const fragments = [];
+            let position = 0;
+            getSearchMatchRanges(fullText, searchMatch.query).forEach(range => {
+                const start = Math.max(0, range.start - offset);
+                const end = Math.min(text.length, range.end - offset);
+                if (end <= start) {
+                    return;
+                }
+                fragments.push(text.slice(position, start));
+                fragments.push(
+                    <Text key={start} style={{ color: themeColor, fontWeight: '800' }}>
+                        {text.slice(start, end)}
+                    </Text>,
+                );
+                position = end;
+            });
+            fragments.push(text.slice(position));
+            return fragments;
+        };
 
         // 渲染課程代號
         const renderCourseCode = code => {
             const { prefix, suffix } = splitCourseCode(code);
             const renderItm = prefix ? (
                 <>
-                    {prefix + ' '}
+                    {renderHighlightedText(prefix, 0, code)}{' '}
                     <Text
                         style={{
                             ...uiStyle.defaultText,
-                            color: themeColor,
-                            fontWeight: '700',
+                            color: searchMatch ? black.main : themeColor,
+                            fontWeight: searchMatch ? '400' : '700',
                             fontSize: scale(16),
                         }}>
-                        {suffix}
+                        {renderHighlightedText(suffix, prefix.length, code)}
                     </Text>
                 </>
-            ) : code;
+            ) : renderHighlightedText(code);
 
             return (
                 <Text
                     style={{
                         ...uiStyle.defaultText,
                         fontSize: scale(13),
-                        fontWeight: '600',
+                        fontWeight: searchMatch ? '400' : '600',
                         color: black.main,
                     }}>
                     {renderItm}
@@ -324,7 +352,7 @@ const CourseCard = memo(
                                 fontSize: scale(11),
                                 color: black.second,
                             }}>
-                            {getCourseDisplayTitle(courseCode, title)}
+                            {renderHighlightedText(searchMatch?.title || getCourseDisplayTitle(courseCode, title))}
                         </Text>
                         {'courseTitleChi' in item &&
                             item.courseTitleChi.length > 0 ? (
@@ -334,18 +362,28 @@ const CourseCard = memo(
                                     fontSize: scale(11),
                                     color: black.second,
                                 }}>
-                                {getCourseDisplayTitle(courseCode, item.courseTitleChi)}
+                                {renderHighlightedText(searchMatch?.titleChi || getCourseDisplayTitle(courseCode, item.courseTitleChi))}
                             </Text>
                         ) : null}
-                        {'Course Title Chi' in item &&
-                            item['Course Title Chi'].length > 0 ? (
+                        {('Course Title Chi' in item &&
+                            item['Course Title Chi'].length > 0) || searchMatch?.titleChi ? (
                             <Text
                                 style={{
                                     ...uiStyle.defaultText,
                                     fontSize: scale(11),
                                     color: black.second,
                                 }}>
-                                {getCourseDisplayTitle(courseCode, item['Course Title Chi'])}
+                                {renderHighlightedText(searchMatch?.titleChi || getCourseDisplayTitle(courseCode, item['Course Title Chi']))}
+                            </Text>
+                        ) : null}
+                        {searchMatch?.teacher ? (
+                            <Text
+                                style={{
+                                    ...uiStyle.defaultText,
+                                    fontSize: scale(10),
+                                    color: black.second,
+                                }}>
+                                {renderHighlightedText(searchMatch.teacher)}
                             </Text>
                         ) : null}
                     </View>

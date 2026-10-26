@@ -438,7 +438,7 @@ const What2Reg = ({ isSplitPane = false }) => {
             {courseGridWidth > 0
                 ? groupCourseCardsByRow(list, courseGridColumnCount).map(entries => (
                     <CourseCardRow
-                        key={`${programmeLevel}-${courseMode}-${activeCoursePeriod?.id}-${Math.round(courseGridWidth)}-${entries.map(entry => `${entry.key}:${entry.span}`).join('_')}`}
+                        key={`${programmeLevel}-${courseMode}-${activeCoursePeriod?.id}-${entries[0]?.item.searchMatch?.query || ''}-${Math.round(courseGridWidth)}-${entries.map(entry => `${entry.key}:${entry.span}`).join('_')}`}
                         entries={entries}
                         availableWidth={courseGridWidth}
                         columnCount={courseGridColumnCount}
