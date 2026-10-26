@@ -101,6 +101,8 @@ umAPIToken.json
 .expo
 dist/
 web-build/
+/ios/
+/android/
 
 # Local env files
 .env
