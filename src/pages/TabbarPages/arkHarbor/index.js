@@ -431,6 +431,7 @@ const HarborFeedPane = ({
             <HarborTopicList
                 source={source}
                 navigation={navigation}
+                preserveItemsUntilRefresh
                 onCapabilities={onCapabilities}
                 isTopicPressAllowed={isTopicPressAllowed}
                 contentContainerStyle={contentContainerStyle}
