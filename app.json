@@ -181,7 +181,8 @@
       "@react-native-vector-icons/feather",
       "@react-native-vector-icons/fontawesome6",
       "@react-native-vector-icons/ionicons",
-      "@react-native-vector-icons/material-design-icons"
+      "@react-native-vector-icons/material-design-icons",
+      "react-native-localize"
     ],
     "extra": {
       "eas": {
