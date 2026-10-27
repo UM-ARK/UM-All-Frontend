@@ -3,7 +3,7 @@
     "name": "ARK ALL",
     "slug": "arkall",
     "scheme": "one.umall",
-    "version": "26.10.1",
+    "version": "26.11.1",
     "icon": "./src/static/img/logo.png",
     "userInterfaceStyle": "automatic",
     "ios": {
@@ -13,7 +13,7 @@
       "googleServicesFile": "./GoogleService-Info.plist",
       "bundleIdentifier": "one.umall",
       "appleTeamId": "UVSHNJYJWU",
-      "buildNumber": "26.10.1",
+      "buildNumber": "26.11.1",
       "associatedDomains": [
         "applinks:umall.one",
         "webcredentials:umall.one"
@@ -28,7 +28,7 @@
       "userInterfaceStyle": "automatic",
       "googleServicesFile": "./google-services.json",
       "package": "one.umall",
-      "versionCode": 94,
+      "versionCode": 95,
       "adaptiveIcon": {
         "foregroundImage": "./src/static/img/ic_launcher_foreground.png",
         "backgroundColor": "#E6AB52"
@@ -76,7 +76,9 @@
     },
     "plugins": [
       "./plugins/withAndroidSigning",
-      "./plugins/withRNFirebaseDisableSPM",
+      "./plugins/withQuickActionsKotlin",
+      "./plugins/withRNMenuHeaders",
+      "./plugins/withRNScreensGamma",
       [
         "expo-dev-client",
         {
@@ -121,6 +123,7 @@
         "expo-build-properties",
         {
           "android": {
+            "kotlinVersion": "2.4.0",
             "buildArchs": [
               "armeabi-v7a",
               "arm64-v8a"
@@ -129,11 +132,7 @@
             "enableShrinkResourcesInReleaseBuilds": true
           },
           "ios": {
-            "useFrameworks": "static",
-            "forceStaticLinking": [
-              "RNFBApp",
-              "RNFBAnalytics"
-            ]
+            "useFrameworks": "dynamic"
           }
         }
       ],
@@ -182,7 +181,8 @@
       "@react-native-vector-icons/feather",
       "@react-native-vector-icons/fontawesome6",
       "@react-native-vector-icons/ionicons",
-      "@react-native-vector-icons/material-design-icons"
+      "@react-native-vector-icons/material-design-icons",
+      "react-native-localize"
     ],
     "extra": {
       "eas": {

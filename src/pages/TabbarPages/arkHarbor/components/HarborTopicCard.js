@@ -7,7 +7,6 @@ import {
 } from 'react-native';
 
 import { Image } from 'expo-image';
-import moment from 'moment-timezone';
 import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import { scale, verticalScale } from 'react-native-size-matters';
 import { useTranslation } from 'react-i18next';
@@ -38,7 +37,7 @@ const STATUS_CONFIG = {
     solved: { icon: 'check-decagram-outline', label: '已解決' },
 };
 
-// ID、時間、分類併成一行，頭像略高於文字行
+// ID、分類併成一行，頭像略高於文字行
 const AUTHOR_NAME_LINE_HEIGHT = scale(14);
 const AVATAR_SIZE = scale(20);
 
@@ -49,32 +48,6 @@ const stopAndRun = (event, callback, isPressAllowed) => {
     }
     trigger();
     callback();
-};
-
-const formatTopicDateLabel = (iso, t) => {
-    if (!iso) {
-        return '';
-    }
-    const activity = moment.tz(iso, 'Asia/Macau');
-    if (!activity.isValid()) {
-        return '';
-    }
-    const today = moment.tz('Asia/Macau').startOf('day');
-    const activityDay = activity.clone().startOf('day');
-    const dayDiff = today.diff(activityDay, 'days');
-    if (dayDiff === 0) {
-        return t('今天');
-    }
-    if (dayDiff === 1) {
-        return t('昨天');
-    }
-    if (dayDiff === 2) {
-        return t('前天');
-    }
-    if (activity.year() === today.year()) {
-        return activity.format('MM-DD');
-    }
-    return activity.format('YYYY-MM-DD');
 };
 
 const resolveUserId = (user, fallback) => user?.username || fallback || '';
@@ -133,6 +106,7 @@ const HarborTopicCard = ({
     const coverUrl = topic.imageUrl
         ? ARK_HARBOR_ABSOLUTE_URL(topic.imageUrl)
         : '';
+    const [cardWidth, setCardWidth] = useState(0);
     const [coverFailed, setCoverFailed] = useState(false);
     // null：尚未得知比例，先用豎圖尺寸佔位
     const [isLandscape, setIsLandscape] = useState(null);
@@ -143,9 +117,6 @@ const HarborTopicCard = ({
         }
         return Boolean(topic[status]);
     });
-    const activityAt =
-        topic.activityAt || topic.lastPostedAt || topic.createdAt;
-    const dateLabel = formatTopicDateLabel(activityAt, t) || t('Harbor 話題');
     const unreadCount = Number(topic.unreadCount || 0);
     const lastReadPostNumber = Number(topic.lastReadPostNumber || 0);
     const replyCount = Number(topic.replyCount || 0);
@@ -159,10 +130,17 @@ const HarborTopicCard = ({
         borderRadius: AVATAR_SIZE / 2,
         backgroundColor: theme.tonal.primary15,
     };
-    // 豎圖：半屏左右寬 × 約 1/3.5 屏高；橫圖：貼齊內容區寬、高度更矮
+    const cardContentWidth = Math.max(
+        (cardWidth || windowWidth) -
+            CARD_MARGIN_HORIZONTAL * 2 -
+            CARD_PADDING_HORIZONTAL * 2 -
+            StyleSheet.hairlineWidth * 2,
+        0,
+    );
+    // 圖片寬度依卡片內容區計算，避免雙欄時仍按整個窗口放大
     const coverWidth = isLandscape
-        ? windowWidth / 1.5
-        : windowWidth * COVER_PORTRAIT_WIDTH_RATIO;
+        ? cardContentWidth / 1.5
+        : cardContentWidth * COVER_PORTRAIT_WIDTH_RATIO;
     const coverHeight = isLandscape
         ? windowHeight * COVER_LANDSCAPE_HEIGHT_RATIO
         : windowHeight * COVER_PORTRAIT_HEIGHT_RATIO;
@@ -176,6 +154,9 @@ const HarborTopicCard = ({
         <Pressable
             accessibilityRole="button"
             accessibilityLabel={topic.title}
+            onLayout={event =>
+                setCardWidth(event.nativeEvent.layout.width)
+            }
             onPress={() => {
                 if (isPressAllowed && !isPressAllowed()) {
                     return;
@@ -235,24 +216,6 @@ const HarborTopicCard = ({
                             },
                         ]}>
                         {authorId}
-                    </Text>
-                    <Text
-                        style={[
-                            styles.metaSeparator,
-                            { color: theme.black.third },
-                        ]}>
-                        ·
-                    </Text>
-                    <Text
-                        numberOfLines={1}
-                        style={[
-                            styles.activityTime,
-                            {
-                                color: theme.black.third,
-                                lineHeight: AUTHOR_NAME_LINE_HEIGHT,
-                            },
-                        ]}>
-                        {dateLabel}
                     </Text>
                     {category ? (
                         <>
@@ -443,11 +406,6 @@ const styles = StyleSheet.create({
         flexShrink: 1,
         fontSize: scale(11),
         fontWeight: '600',
-    },
-    activityTime: {
-        ...uiStyle.defaultText,
-        flexShrink: 0,
-        fontSize: scale(10),
     },
     metaSeparator: {
         ...uiStyle.defaultText,

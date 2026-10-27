@@ -168,6 +168,7 @@ const HarborTopicListPage = ({ route, navigation }) => {
             <HarborTopicList
                 source={source}
                 navigation={navigation}
+                preserveItemsUntilRefresh
                 isTopicPressAllowed={isTopicPressAllowed}
                 contentContainerStyle={contentStyle}
                 contentInsetAdjustmentBehavior={

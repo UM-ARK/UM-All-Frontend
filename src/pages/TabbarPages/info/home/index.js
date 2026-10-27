@@ -10,7 +10,6 @@ import {
     AppState,
     Keyboard,
     FlatList,
-    useWindowDimensions,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 
@@ -107,7 +106,6 @@ const HomeScreen = ({ navigation }) => {
     const { white, bg_color, black, themeColor, themeColorLight, themeColorUltraLight, viewShadow, TIME_TABLE_COLOR } = theme;
     const { t, i18n } = useTranslation(['common', 'home']);
     const { programmeLevel } = useProgrammeLevel();
-    const { width: windowWidth } = useWindowDimensions();
     const isTc = i18n.language === 'tc';
     const featureFontSize = isTc ? verticalScale(8) : verticalScale(7);
 
@@ -503,7 +501,7 @@ const HomeScreen = ({ navigation }) => {
     return (
         <View style={{ flex: 1, backgroundColor: bg_color, alignItems: 'center', justifyContent: 'center' }}>
             <ScrollView
-                style={{ width: windowWidth }}
+                style={{ width: '100%' }}
                 contentInsetAdjustmentBehavior="automatic"
                 refreshControl={
                     <RefreshControl
@@ -533,7 +531,7 @@ const HomeScreen = ({ navigation }) => {
                     flexDirection: 'row',
                     alignItems: 'center', justifyContent: 'center',
                     alignSelf: 'center',
-                    width: windowWidth * 0.8,
+                    width: '80%',
                     marginTop: verticalScale(6),
                 }}>
                     <TouchableScale
@@ -592,7 +590,7 @@ const HomeScreen = ({ navigation }) => {
                 {/* 快捷功能圖標（固定寬與間距，整組置中聚攏） */}
                 <View
                     style={{
-                        width: windowWidth,
+                        width: '100%',
                         alignSelf: 'center',
                         marginTop: verticalScale(6),
                         flexDirection: 'row',

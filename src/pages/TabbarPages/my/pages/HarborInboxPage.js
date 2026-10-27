@@ -202,10 +202,10 @@ const HarborInboxPage = ({
         count => {
             const normalizedCount = Math.max(0, Number(count) || 0);
             unreadCountRef.current = normalizedCount;
-            patchInboxUnreadCount(normalizedCount);
+            patchInboxUnreadCount(normalizedCount, username);
             onUnreadCountChange?.(normalizedCount);
         },
-        [onUnreadCountChange, patchInboxUnreadCount],
+        [onUnreadCountChange, patchInboxUnreadCount, username],
     );
 
     React.useEffect(() => {

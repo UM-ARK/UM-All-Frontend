@@ -9,7 +9,6 @@ import React, {
 import {
     ActivityIndicator,
     Alert,
-    InteractionManager,
     Pressable,
     RefreshControl,
     View,
@@ -30,6 +29,7 @@ import { useTheme } from '../../../components/ThemeContext';
 import { getDeepLinkShareHeaderOptions } from '../../../components/DeepLinkShareButton';
 import { useAppShare } from '../../../contexts/AppShareContext';
 import { useHarborSession } from '../../../contexts/HarborSessionContext';
+import { parseArkAppLink } from '../../../utils/appLinks';
 import { openLink } from '../../../utils/browser';
 import {
     HARBOR_TOPIC_NOTIFICATION_LEVELS,
@@ -103,7 +103,12 @@ const TOPIC_NOTIFICATION_OPTIONS = [
     },
 ];
 
-const HarborTopicDetail = ({ route, navigation }) => {
+const HarborTopicDetail = ({
+    route,
+    navigation,
+    isSplitPane = false,
+    availableWidth,
+}) => {
     const { theme } = useTheme();
     const { openShare } = useAppShare();
     const { t } = useTranslation('harbor');
@@ -236,7 +241,10 @@ const HarborTopicDetail = ({ route, navigation }) => {
         updateTopicPost,
     });
 
-    const contentWidth = Math.max(width - scale(32), scale(220));
+    const contentWidth = Math.max(
+        (availableWidth || width) - scale(32),
+        scale(220),
+    );
     const [topicActionBarHeight, setTopicActionBarHeight] = useState(
         verticalScale(48),
     );
@@ -316,6 +324,12 @@ const HarborTopicDetail = ({ route, navigation }) => {
 
     const openHarborLink = useCallback(
         url => {
+            const appLink = parseArkAppLink(url);
+            if (appLink) {
+                navigation.navigate(appLink.routeName, appLink.params);
+                return;
+            }
+
             const target = parseHarborUrl(url, ARK_HARBOR);
 
             if (target?.type === 'topic') {
@@ -442,6 +456,9 @@ const HarborTopicDetail = ({ route, navigation }) => {
     }, [currentPostNumber, openShare, topic?.title, topicId]);
 
     useLayoutEffect(() => {
+        if (isSplitPane) {
+            return;
+        }
         navigation.setOptions({
             headerTitle: '',
             ...getDeepLinkShareHeaderOptions({
@@ -450,7 +467,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
                 themeColor,
             }),
         });
-    }, [navigation, shareCurrentPost, t, themeColor]);
+    }, [isSplitPane, navigation, shareCurrentPost, t, themeColor]);
 
     const openTopicReplyComposer = useCallback(() => {
         openHarborComposer(navigation, {
@@ -561,7 +578,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
             return undefined;
         }
 
-        const interaction = InteractionManager.runAfterInteractions(() => {
+        const idleCallback = requestIdleCallback(() => {
             if (targetPostNumber > 0) {
                 scrollToPost(targetPostNumber, {
                     allowFetch: false,
@@ -598,7 +615,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
         });
 
         return () => {
-            interaction.cancel();
+            cancelIdleCallback(idleCallback);
             if (pendingReplyDraftFrameRef.current != null) {
                 cancelAnimationFrame(
                     pendingReplyDraftFrameRef.current,

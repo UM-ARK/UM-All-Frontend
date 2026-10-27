@@ -90,6 +90,8 @@ export const HarborSessionProvider = ({ children }) => {
     const [error, setError] = useState(null);
     const [inboxUnreadCount, setInboxUnreadCount] = useState(0);
     const [chatUnreadCount, setChatUnreadCount] = useState(0);
+    const [inboxUnreadGeneration, setInboxUnreadGeneration] = useState(null);
+    const [chatUnreadGeneration, setChatUnreadGeneration] = useState(null);
     const [reviewCount, setReviewCount] = useState(0);
     const [chatChannels, setChatChannels] = useState([]);
     const [pendingLoginIntent, setPendingLoginIntent] = useState(null);
@@ -110,14 +112,17 @@ export const HarborSessionProvider = ({ children }) => {
     const revocationInFlightRef = useRef(null);
     const sessionGenerationRef = useRef(0);
     const unreadForegroundLastRefreshAtRef = useRef(0);
+    const badgeSyncQueueRef = useRef(Promise.resolve());
+    const canClearBadgeRef = useRef(true);
 
     useEffect(() => {
         userRef.current = user;
     }, [user]);
 
-    const applySignedOutState = useCallback((nextStatus = 'signedOut') => {
+    const applySignedOutState = useCallback((nextStatus = 'signedOut', canClearBadge = true) => {
         sessionGenerationRef.current += 1;
         const nextSessionGeneration = sessionGenerationRef.current;
+        canClearBadgeRef.current = canClearBadge;
         credentialsRef.current = null;
         lastValidationRef.current = 0;
         lastValidationAttemptRef.current = 0;
@@ -135,6 +140,8 @@ export const HarborSessionProvider = ({ children }) => {
             setUser(null);
             setInboxUnreadCount(0);
             setChatUnreadCount(0);
+            setInboxUnreadGeneration(null);
+            setChatUnreadGeneration(null);
             setReviewCount(0);
             setChatChannels([]);
             setSessionGeneration(nextSessionGeneration);
@@ -146,6 +153,7 @@ export const HarborSessionProvider = ({ children }) => {
         sessionGenerationRef.current += 1;
         const nextSessionGeneration = sessionGenerationRef.current;
         credentialsRef.current = credentials;
+        canClearBadgeRef.current = true;
         lastValidationRef.current = 0;
         lastValidationAttemptRef.current = 0;
         validationInFlightRef.current = null;
@@ -161,6 +169,8 @@ export const HarborSessionProvider = ({ children }) => {
         if (mountedRef.current) {
             setInboxUnreadCount(0);
             setChatUnreadCount(0);
+            setInboxUnreadGeneration(null);
+            setChatUnreadGeneration(null);
             setReviewCount(0);
             setChatChannels([]);
             setSessionGeneration(nextSessionGeneration);
@@ -176,7 +186,13 @@ export const HarborSessionProvider = ({ children }) => {
         );
     }, []);
 
-    const patchInboxUnreadCount = useCallback(count => {
+    const patchInboxUnreadCount = useCallback((count, expectedUsername) => {
+        if (
+            !credentialsRef.current ||
+            (expectedUsername && userRef.current?.username !== expectedUsername)
+        ) {
+            return null;
+        }
         const normalizedCount = Math.max(0, Number(count) || 0);
         inboxUnreadRequestRef.current += 1;
         if (mountedRef.current) {
@@ -193,13 +209,19 @@ export const HarborSessionProvider = ({ children }) => {
 
         const requestId = inboxUnreadRequestRef.current + 1;
         inboxUnreadRequestRef.current = requestId;
+        const generation = sessionGenerationRef.current;
+        const credentialKey = credentialsRef.current.userApiKey;
         const nextCount = await fetchHarborInboxUnreadCount(username);
         if (
             mountedRef.current &&
+            sessionGenerationRef.current === generation &&
+            credentialsRef.current?.userApiKey === credentialKey &&
             inboxUnreadRequestRef.current === requestId &&
-            userRef.current?.username === username
+            userRef.current?.username === username &&
+            Number.isFinite(nextCount) && nextCount >= 0
         ) {
             setInboxUnreadCount(nextCount);
+            setInboxUnreadGeneration(generation);
         }
         return nextCount;
     }, []);
@@ -295,6 +317,9 @@ export const HarborSessionProvider = ({ children }) => {
         chatUnreadRequestRef.current = requestId;
         const request = fetchHarborChatChannels()
             .then(result => {
+                if (!Number.isFinite(result.unreadCount) || result.unreadCount < 0) {
+                    throw new Error('Invalid Harbor Chat unread count');
+                }
                 const nextCount = Math.max(
                     0,
                     Number(result.unreadCount) || 0,
@@ -311,6 +336,7 @@ export const HarborSessionProvider = ({ children }) => {
                     if (chatUnreadRequestRef.current === requestId) {
                         chatUnreadCountRef.current = nextCount;
                         setChatUnreadCount(nextCount);
+                        setChatUnreadGeneration(generation);
                     }
                     return {
                         items: result.items,
@@ -576,7 +602,7 @@ export const HarborSessionProvider = ({ children }) => {
                 }
                 if (mountedRef.current) {
                     setError(restoreError);
-                    applySignedOutState();
+                    applySignedOutState('signedOut', false);
                 }
             }
         };
@@ -616,15 +642,34 @@ export const HarborSessionProvider = ({ children }) => {
 
     // 將 Harbor 收件匣及 Chat 未讀同步到主畫面 App 角標；登出時清零
     useEffect(() => {
-        const badgeCount =
-            status === 'signedIn'
-                ? calculateHarborUnreadTotal(
-                    inboxUnreadCount,
-                    chatUnreadCount,
-                )
-                : 0;
-        syncAppIconBadgeCount(badgeCount).catch(() => {});
-    }, [chatUnreadCount, inboxUnreadCount, status]);
+        const generation = sessionGeneration;
+        const signedOut = status === 'signedOut' || status === 'expired';
+        if (generation !== sessionGenerationRef.current) {
+            return;
+        }
+        if (signedOut && !canClearBadgeRef.current) {
+            return;
+        }
+        if (!signedOut && (
+            status !== 'signedIn' ||
+            inboxUnreadGeneration !== generation ||
+            chatUnreadGeneration !== generation
+        )) {
+            return;
+        }
+        const badgeCount = signedOut
+            ? 0
+            : calculateHarborUnreadTotal(inboxUnreadCount, chatUnreadCount);
+        badgeSyncQueueRef.current = badgeSyncQueueRef.current.then(() => {
+            if (
+                sessionGenerationRef.current !== generation ||
+                (signedOut ? Boolean(credentialsRef.current) : !credentialsRef.current)
+            ) {
+                return;
+            }
+            return syncAppIconBadgeCount(badgeCount);
+        }).catch(() => {});
+    }, [chatUnreadCount, chatUnreadGeneration, inboxUnreadCount, inboxUnreadGeneration, sessionGeneration, status]);
 
     useEffect(() => {
         const subscription = AppState.addEventListener('change', nextState => {

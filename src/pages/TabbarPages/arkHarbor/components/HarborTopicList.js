@@ -106,7 +106,10 @@ const HarborTopicList = ({
     onMomentumScrollEnd,
     emptyTitle,
     emptyDescription,
+    onTopicPress,
+    isTwoColumn = false,
     isActive = true,
+    preserveItemsUntilRefresh = false,
 }) => {
     const { theme } = useTheme();
     const { t } = useTranslation('harbor');
@@ -122,6 +125,7 @@ const HarborTopicList = ({
     const itemsRef = useRef([]);
     const recommendationItemsRef = useRef([]);
     const activeCacheKeyRef = useRef(null);
+    const lastListLoadAtRef = useRef(0);
     const rateLimitRef = useRef(null);
     const sourceRef = useRef(source);
     sourceRef.current = source;
@@ -269,6 +273,7 @@ const HarborTopicList = ({
                     localReadItems,
                 );
                 replaceItems(nextItems);
+                lastListLoadAtRef.current = Date.now();
                 replaceRecommendationItems(
                     supportsRecommendations
                         ? reconcileHarborTopicListItems(
@@ -350,6 +355,7 @@ const HarborTopicList = ({
             ? readCachedHarborRecommendationCandidates(sessionGeneration)
             : null;
         activeCacheKeyRef.current = cacheKey;
+        lastListLoadAtRef.current = cachedResult ? Date.now() : 0;
         firstPageErrorRef.current = null;
         setFirstPageError(null);
         loadMoreErrorRef.current = null;
@@ -408,7 +414,7 @@ const HarborTopicList = ({
             const { reloadLists, removeFromLists, ...itemPatch } = patch;
             const updateItems = currentItems => {
                 // 已讀後先原地保留，等下次重新拉取列表再移出未讀分頁，避免返回時帖子突然消失
-                return removeFromLists
+                return removeFromLists && !preserveItemsUntilRefresh
                     ? currentItems.filter(item => item.id !== topicId)
                     : currentItems.map(item =>
                         item.id === topicId
@@ -417,19 +423,21 @@ const HarborTopicList = ({
                     );
             };
             replaceItems(updateItems(itemsRef.current));
+            const updatedRecommendations = updateItems(recommendationItemsRef.current);
             replaceRecommendationItems(
-                updateItems(recommendationItemsRef.current).filter(
-                    isHarborRecommendationCandidate,
-                ),
+                preserveItemsUntilRefresh
+                    ? updatedRecommendations
+                    : updatedRecommendations.filter(isHarborRecommendationCandidate),
             );
-            // 發帖／刪帖等需重排時刷新當前列表
-            if (reloadLists && isVisible) {
+            // 發帖／刪帖等需重排時刷新當前列表；指定保留列表的頁面則等待手動刷新或超時
+            if (reloadLists && isVisible && !preserveItemsUntilRefresh) {
                 loadFirstPage({ refresh: true, showIndicator: false });
             }
         });
     }, [
         isVisible,
         loadFirstPage,
+        preserveItemsUntilRefresh,
         replaceItems,
         replaceRecommendationItems,
     ]);
@@ -438,6 +446,9 @@ const HarborTopicList = ({
         if (
             isVisible &&
             isSessionReady &&
+            (!preserveItemsUntilRefresh ||
+                !lastListLoadAtRef.current ||
+                Date.now() - lastListLoadAtRef.current >= TOPIC_LIST_CACHE_STALE_MS) &&
             !readHarborQueryCache(cacheKey, {
                 namespace: TOPIC_LIST_CACHE_NAMESPACE,
                 maxAgeMs: TOPIC_LIST_CACHE_STALE_MS,
@@ -448,7 +459,13 @@ const HarborTopicList = ({
                 showIndicator: false,
             });
         }
-    }, [cacheKey, isSessionReady, isVisible, loadFirstPage]);
+    }, [
+        cacheKey,
+        isSessionReady,
+        isVisible,
+        loadFirstPage,
+        preserveItemsUntilRefresh,
+    ]);
 
     useEffect(() => {
         if (!rateLimit?.until) {
@@ -610,12 +627,16 @@ const HarborTopicList = ({
 
     const handleTopicPress = useCallback(
         topic => {
+            if (onTopicPress) {
+                onTopicPress(topic);
+                return;
+            }
             navigation.navigate('HarborTopicDetail', {
                 topicId: topic.id,
                 topicTitle: topic.title,
             });
         },
-        [navigation],
+        [navigation, onTopicPress],
     );
 
     const handleCategoryPress = useCallback(
@@ -895,6 +916,8 @@ const HarborTopicList = ({
         return (
             <AnimatedFlashList
                 data={SKELETON_ITEMS}
+                numColumns={isTwoColumn ? 2 : 1}
+                masonry={isTwoColumn}
                 keyExtractor={item => `harbor-skeleton-${item}`}
                 renderItem={() => <HarborTopicSkeleton />}
                 ListHeaderComponent={ListHeaderComponent}
@@ -913,6 +936,8 @@ const HarborTopicList = ({
     return (
         <AnimatedFlashList
             data={displayItems}
+            numColumns={isTwoColumn ? 2 : 1}
+            masonry={isTwoColumn}
             keyExtractor={item =>
                 item.isHarborRecommendation
                     ? `harbor-recommendation-${item.id}`
