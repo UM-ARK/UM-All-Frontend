@@ -180,51 +180,51 @@ const TeamSchedulePreviewSection = forwardRef(
                 </Pressable>
 
                 <View style={[styles.actionRow, !expanded && styles.collapsed]}>
-                    <Pressable
-                        accessibilityRole="button"
-                        accessibilityLabel={t('新建組隊')}
-                        onPress={openCreate}
-                        style={({pressed}) => [
-                            styles.actionButton,
-                            styles.leadingAction,
-                            pressed && styles.actionPressed,
-                        ]}>
-                        <View style={myCardStyles.iconColumn}>
+                    <View style={myCardStyles.column} />
+                    <View style={styles.primaryActions}>
+                        <Pressable
+                            accessibilityRole="button"
+                            accessibilityLabel={t('新建組隊')}
+                            onPress={openCreate}
+                            style={({pressed}) => [
+                                styles.actionButton,
+                                pressed && styles.actionPressed,
+                            ]}>
                             <Ionicons
                                 name="add-circle-outline"
                                 size={scale(16)}
                                 color={theme.themeColor}
                             />
-                        </View>
-                        <Text
-                            style={[
-                                styles.actionButtonText,
-                                {color: theme.accentForeground},
+                            <Text
+                                style={[
+                                    styles.actionButtonText,
+                                    {color: theme.accentForeground},
+                                ]}>
+                                {t('新建組隊')}
+                            </Text>
+                        </Pressable>
+                        <Pressable
+                            accessibilityRole="button"
+                            accessibilityLabel={t('加入隊伍')}
+                            onPress={openJoin}
+                            style={({pressed}) => [
+                                styles.actionButton,
+                                pressed && styles.actionPressed,
                             ]}>
-                            {t('新建組隊')}
-                        </Text>
-                    </Pressable>
-                    <Pressable
-                        accessibilityRole="button"
-                        accessibilityLabel={t('加入隊伍')}
-                        onPress={openJoin}
-                        style={({pressed}) => [
-                            styles.actionButton,
-                            pressed && styles.actionPressed,
-                        ]}>
-                        <Ionicons
-                            name="enter-outline"
-                            size={scale(16)}
-                            color={theme.themeColor}
-                        />
-                        <Text
-                            style={[
-                                styles.actionButtonText,
-                                {color: theme.accentForeground},
-                            ]}>
-                            {t('加入隊伍')}
-                        </Text>
-                    </Pressable>
+                            <Ionicons
+                                name="enter-outline"
+                                size={scale(16)}
+                                color={theme.themeColor}
+                            />
+                            <Text
+                                style={[
+                                    styles.actionButtonText,
+                                    {color: theme.accentForeground},
+                                ]}>
+                                {t('加入隊伍')}
+                            </Text>
+                        </Pressable>
+                    </View>
                     <Pressable
                         accessibilityRole="button"
                         accessibilityLabel={t('了解組隊約時間')}
@@ -346,13 +346,19 @@ const styles = StyleSheet.create({
     },
     infoButton: {
         minHeight: 44,
-        marginStart: 'auto',
     },
     actionRow: {
         flexDirection: 'row',
+        alignItems: 'center',
+    },
+    primaryActions: {
+        flex: 1,
+        minWidth: 0,
+        flexDirection: 'row',
         flexWrap: 'wrap',
         alignItems: 'center',
-        gap: scale(12),
+        justifyContent: 'center',
+        columnGap: scale(12),
     },
     actionButton: {
         flexDirection: 'row',
@@ -360,9 +366,6 @@ const styles = StyleSheet.create({
         minHeight: 44,
         flexShrink: 1,
         gap: scale(4),
-    },
-    leadingAction: {
-        gap: 0,
     },
     actionPressed: {
         opacity: 0.65,
