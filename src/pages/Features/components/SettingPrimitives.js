@@ -1,7 +1,7 @@
 // 設置頁基礎組件：分區標題、分區卡片、設置項。
-// 手機端 SettingPage.js 與 web 端 SettingPage.web.js 共用，兩端只在「掛哪些項」上有差別
+// 主設置頁與各設置子頁共用
 import React from 'react';
-import { View, TouchableOpacity } from 'react-native';
+import { View, Pressable } from 'react-native';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import { scale, verticalScale } from 'react-native-size-matters';
 import Text from '../../../components/AppText';
@@ -108,34 +108,37 @@ export const SettingItem = ({
 }) => {
     const { theme } = useTheme();
     const { white, black } = theme;
-    // 無 onPress 時用 View，供 MenuView 作為觸發錨點（避免內層 Touchable 搶手勢）
-    const Container = onPress ? TouchableOpacity : View;
+    // 無 onPress 時用 View，供 MenuView 作為觸發錨點（避免內層 Pressable 搶手勢）
+    const Container = onPress ? Pressable : View;
+    const itemStyle = {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: white,
+        paddingHorizontal: scale(15),
+        paddingVertical: verticalScale(12),
+        ...(grouped
+            ? {}
+            : {
+                borderRadius: scale(16),
+                marginHorizontal: scale(15),
+                marginBottom: verticalScale(8),
+            }),
+    };
 
     return (
         <Container
             {...(onPress
                 ? {
+                    accessibilityRole: 'button',
                     onPress: () => {
                         trigger();
                         onPress();
                     },
-                    activeOpacity: 0.7,
                 }
                 : {})}
-            style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                backgroundColor: white,
-                paddingHorizontal: scale(15),
-                paddingVertical: verticalScale(12),
-                ...(grouped
-                    ? {}
-                    : {
-                        borderRadius: scale(16),
-                        marginHorizontal: scale(15),
-                        marginBottom: verticalScale(8),
-                    }),
-            }}>
+            style={onPress
+                ? ({ pressed }) => [itemStyle, pressed && { opacity: 0.7 }]
+                : itemStyle}>
             {/* 圖標 */}
             {icon && (
                 <View
