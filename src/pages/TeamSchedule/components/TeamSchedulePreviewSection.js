@@ -1,5 +1,5 @@
 /**
- * 「我的」頁組隊約時間預覽：最多五筆、查看全部、新建／加入組隊
+ * 「我的」頁組隊約時間預覽：最多五筆、全部、新建／加入組隊
  */
 import React, {
     forwardRef,
@@ -167,7 +167,7 @@ const TeamSchedulePreviewSection = forwardRef(
                     </View>
                     <Pressable
                         accessibilityRole="button"
-                        accessibilityLabel={t('查看全部')}
+                        accessibilityLabel={t('全部')}
                         hitSlop={scale(8)}
                         onPress={openList}
                         style={({pressed}) => [
@@ -179,7 +179,7 @@ const TeamSchedulePreviewSection = forwardRef(
                                 styles.headerActionText,
                                 {color: theme.themeColor},
                             ]}>
-                            {t('查看全部')}
+                            {t('全部')}
                         </Text>
                         <Ionicons
                             name="chevron-forward"
