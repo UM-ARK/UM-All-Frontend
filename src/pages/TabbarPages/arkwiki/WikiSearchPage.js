@@ -137,8 +137,13 @@ const WikiSearchPage = ({route, navigation}) => {
             ]}>
             <View style={styles.resultText}>
                 <Text style={[styles.resultTitle, {color: theme.black.main}]}>{item.title}</Text>
+                {item.aliases.length > 0 ? (
+                    <Text style={[styles.resultDetail, {color: theme.black.third}]}>
+                        {t('亦稱 {{titles}}', {titles: item.aliases.join(' · ')})}
+                    </Text>
+                ) : null}
                 {item.snippet ? (
-                    <Text numberOfLines={2} style={[styles.snippet, {color: theme.black.third}]}>
+                    <Text numberOfLines={2} style={[styles.resultDetail, {color: theme.black.third}]}>
                         {item.snippet}
                     </Text>
                 ) : null}
@@ -204,7 +209,7 @@ const WikiSearchPage = ({route, navigation}) => {
             <FlashList
                 data={results}
                 renderItem={renderResult}
-                keyExtractor={item => item.title}
+                keyExtractor={item => String(item.pageId)}
                 ListEmptyComponent={emptyState}
                 contentContainerStyle={styles.listContent}
                 keyboardShouldPersistTaps="handled"
@@ -251,16 +256,16 @@ const styles = StyleSheet.create({
     },
     resultText: {
         flex: 1,
+        gap: verticalScale(3),
     },
     resultTitle: {
         ...uiStyle.defaultText,
         fontSize: scale(15),
         fontWeight: '600',
     },
-    snippet: {
+    resultDetail: {
         ...uiStyle.defaultText,
         fontSize: scale(12),
-        marginTop: verticalScale(3),
     },
     empty: {
         alignItems: 'center',
