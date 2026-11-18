@@ -7,7 +7,7 @@ import {
 const RECOMMENDATION_CACHE_NAMESPACE = 'topic-list';
 const RECOMMENDATION_CACHE_FRESH_MS = 10 * 60 * 1000;
 const RECOMMENDATION_CACHE_STALE_MS = 30 * 60 * 1000;
-const RECOMMENDATION_INSERT_AFTER = [3, 8];
+const RECOMMENDATION_INSERT_AFTER = [3];
 const RECOMMENDATION_LIMIT = RECOMMENDATION_INSERT_AFTER.length;
 
 const getRecommendationCacheKey = sessionGeneration => [
