@@ -8,6 +8,7 @@ import {
     View,
 } from 'react-native';
 
+import Ionicons from '@react-native-vector-icons/ionicons';
 import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 import { FlashList } from '@shopify/flash-list';
 import { isLiquidGlassSupported } from '../../../utils/glassEffect';
@@ -19,6 +20,7 @@ import { scale, verticalScale } from 'react-native-size-matters';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import Text from '../../../components/AppText';
+import searchFieldStyles, { SEARCH_FIELD_ICON_SIZE } from '../../../components/searchFieldStyles';
 import { uiStyle, useTheme } from '../../../components/ThemeContext';
 import { openLink } from '../../../utils/browser';
 import { logToFirebase } from '../../../utils/firebaseAnalytics';
@@ -307,16 +309,19 @@ const WikiHome = ({navigation}) => {
                 {t('探索澳大資訊、攻略與學習經驗')}
             </Text>
             <Pressable
+                accessibilityRole="button"
                 onPress={() => {
                     trigger();
                     navigation.navigate('WikiSearch');
                 }}
                 style={({pressed}) => [
-                    styles.searchButton,
-                    {backgroundColor: pressed ? theme.tonal.primary30 : theme.white, borderColor: theme.disabled},
+                    searchFieldStyles.field,
+                    {backgroundColor: pressed ? theme.tonal.primary30 : theme.white, borderColor: theme.white},
                 ]}>
-                <MaterialCommunityIcons name="magnify" size={scale(22)} color={theme.black.third} />
-                <Text style={[styles.searchText, {color: theme.black.third}]}>{t('搜尋 ARK Wiki')}</Text>
+                <Text numberOfLines={1} style={[searchFieldStyles.text, {color: theme.black.third}]}>{t('搜尋 ARK Wiki')}</Text>
+                <View pointerEvents="none" style={searchFieldStyles.icon}>
+                    <Ionicons name="search" size={SEARCH_FIELD_ICON_SIZE} color={theme.black.third} />
+                </View>
             </Pressable>
             <View style={styles.quickActions}>
                 <Pressable
@@ -370,19 +375,6 @@ const styles = StyleSheet.create({
         lineHeight: scale(21),
         marginTop: verticalScale(12),
         marginBottom: verticalScale(10),
-    },
-    searchButton: {
-        height: verticalScale(46),
-        borderWidth: StyleSheet.hairlineWidth,
-        borderRadius: scale(15),
-        paddingHorizontal: scale(14),
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: scale(9),
-    },
-    searchText: {
-        ...uiStyle.defaultText,
-        fontSize: scale(15),
     },
     quickActions: {
         flexDirection: 'row',

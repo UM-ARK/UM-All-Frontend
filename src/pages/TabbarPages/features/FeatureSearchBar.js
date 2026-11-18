@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 
 import Text from '../../../components/AppText';
 import TextInput from '../../../components/AppTextInput';
+import searchFieldStyles, { SEARCH_FIELD_ICON_SIZE } from '../../../components/searchFieldStyles';
 import { useTheme, uiStyle } from '../../../components/ThemeContext';
 import { logToFirebase } from '../../../utils/firebaseAnalytics';
 import { trigger } from '../../../utils/trigger';
@@ -28,7 +29,7 @@ export default function FeatureSearchBar({
     return (
         <View style={styles.root}>
             <View style={[
-                styles.field,
+                searchFieldStyles.field,
                 { backgroundColor: white, borderColor: isFocused ? themeColor : white },
             ]}>
                 <TextInput
@@ -48,10 +49,10 @@ export default function FeatureSearchBar({
                     autoCapitalize="none"
                     autoCorrect={false}
                     accessibilityLabel={searchLabel}
-                    style={[uiStyle.defaultText, styles.input, { color: black.main }]}
+                    style={[searchFieldStyles.text, searchFieldStyles.input, { color: black.main }]}
                 />
-                <View pointerEvents="none" style={styles.searchIcon}>
-                    <Ionicons name="search" size={scale(15)} color={isFocused ? themeColor : black.third} />
+                <View pointerEvents="none" style={searchFieldStyles.icon}>
+                    <Ionicons name="search" size={SEARCH_FIELD_ICON_SIZE} color={isFocused ? themeColor : black.third} />
                 </View>
                 {query.length > 0 ? (
                     <Pressable
@@ -97,24 +98,6 @@ const styles = StyleSheet.create({
         alignSelf: 'center',
         marginTop: verticalScale(10),
         paddingHorizontal: scale(10),
-    },
-    field: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        borderWidth: 1,
-        borderRadius: verticalScale(8),
-    },
-    input: {
-        flex: 1,
-        minWidth: 0,
-        minHeight: 44,
-        paddingLeft: scale(30),
-        paddingRight: scale(8),
-        fontSize: verticalScale(13),
-    },
-    searchIcon: {
-        position: 'absolute',
-        left: scale(8),
     },
     statusRow: {
         flexDirection: 'row',

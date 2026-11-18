@@ -44,6 +44,7 @@ import WikiHome from '../arkwiki';
 import { FlatGrid } from 'react-native-super-grid';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import * as Clipboard from 'expo-clipboard';
+import { LinearGradient } from 'expo-linear-gradient';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import { moderateScale, scale, verticalScale } from 'react-native-size-matters';
 import Toast from 'react-native-simple-toast';
@@ -73,6 +74,7 @@ const CARD_COLUMN_COUNT = {
 /** 每行圖標上限：手機 5 個剛好填滿；寬屏放寬到 8 個，避免 5 個圖標被拉開成大間距 */
 const COMPACT_GRID_MAX_ITEMS_PER_ROW = 5;
 const WIDE_GRID_MAX_ITEMS_PER_ROW = 8;
+const SEARCH_HEADER_FADE_HEIGHT = verticalScale(12);
 const SEARCH_HIGHLIGHT_ANIMATION = {
     animationName: { from: { opacity: 0 }, to: { opacity: 1 } },
     animationDuration: 180,
@@ -537,21 +539,37 @@ function FeatureListPage({ navigation }) {
                 flex: 1,
                 backgroundColor: bg_color,
             }}>
-            <FeatureSearchBar
-                inputRef={searchInputRef}
-                query={searchQuery}
-                onChangeQuery={handleChangeSearchQuery}
-                onWebSearch={handleWebSearch}
-                hasQuery={isSearching}
-                matchCount={matchedFeatures?.size ?? 0}
-            />
+            <View style={{ zIndex: 1 }}>
+                <FeatureSearchBar
+                    inputRef={searchInputRef}
+                    query={searchQuery}
+                    onChangeQuery={handleChangeSearchQuery}
+                    onWebSearch={handleWebSearch}
+                    hasQuery={isSearching}
+                    matchCount={matchedFeatures?.size ?? 0}
+                />
+                <LinearGradient
+                    pointerEvents="none"
+                    colors={[bg_color, `${bg_color}00`]}
+                    style={{
+                        position: 'absolute',
+                        top: '100%',
+                        left: 0,
+                        right: 0,
+                        height: SEARCH_HEADER_FADE_HEIGHT,
+                    }}
+                />
+            </View>
             <ScrollView
                 ref={listRef}
                 showsVerticalScrollIndicator={true}
                 contentInsetAdjustmentBehavior="automatic"
                 automaticallyAdjustKeyboardInsets
                 keyboardShouldPersistTaps="handled"
-                contentContainerStyle={{ paddingBottom: listBottomPad }}>
+                contentContainerStyle={{
+                    paddingTop: SEARCH_HEADER_FADE_HEIGHT,
+                    paddingBottom: listBottomPad,
+                }}>
                 {/* 超寬屏內容居中封頂，分類卡再按尺寸等級分成 1／2／3 欄 */}
                 <View
                     style={{
