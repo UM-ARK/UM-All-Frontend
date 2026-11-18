@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
     ActivityIndicator,
     Pressable,
@@ -13,6 +13,7 @@ import {
     KeyboardToolbar,
 } from 'react-native-keyboard-controller';
 import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
+import { useAnimatedRef, useSharedValue } from 'react-native-reanimated';
 import { scale, verticalScale } from 'react-native-size-matters';
 import { useTranslation } from 'react-i18next';
 
@@ -21,11 +22,13 @@ import TextInput from '../../../../components/AppTextInput';
 import { useTheme } from '../../../../components/ThemeContext';
 import HarborCategoryIcon from '../components/HarborCategoryIcon';
 import HarborCategoryPickerSheet from './HarborCategoryPickerSheet';
+import { HarborComposerImageDragOverlay } from './HarborComposerImageDrag';
 import HarborComposerImageGrid from './HarborComposerImageGrid';
 import HarborTagPickerSheet from './HarborTagPickerSheet';
 import { MAX_IMAGES_PER_POST } from './harborComposerImages';
 
 const HarborComposerForm = ({
+    autoOpenCategoryPicker,
     categorySheetRef,
     composer,
     imagesState,
@@ -45,6 +48,11 @@ const HarborComposerForm = ({
     const { theme } = useTheme();
     const { t } = useTranslation('harbor');
     const headerHeight = useHeaderHeight();
+    const dragState = useSharedValue(null);
+    const dragOverlayRef = useAnimatedRef();
+    const deleteTargetRef = useAnimatedRef();
+    const [draggedImage, setDraggedImage] = useState(null);
+    const isDraggingImage = draggedImage != null;
     const {
         categories,
         categoryId,
@@ -112,6 +120,7 @@ const HarborComposerForm = ({
                 }
                 keyboardDismissMode="interactive"
                 keyboardShouldPersistTaps="handled"
+                scrollEnabled={!isDraggingImage}
                 scrollIndicatorInsets={
                     isLiquidGlassSupported ? { top: headerHeight } : undefined
                 }>
@@ -289,12 +298,33 @@ const HarborComposerForm = ({
                             scrollEnabled={false}
                             style={[
                                 styles.bodyInput,
+                                isNewTopic && styles.newTopicBodyInput,
                                 {color: theme.black.main},
                             ]}
                             textAlignVertical="top"
                             value={raw}
                         />
                     </View>
+
+                    {isNewTopic && supportsImages ? (
+                        <HarborComposerImageGrid
+                            deleteTargetRef={deleteTargetRef}
+                            dragOverlayRef={dragOverlayRef}
+                            dragState={dragState}
+                            handleAddImages={
+                                hasReachedImageLimit ? undefined : handleAddImages
+                            }
+                            handleMoveImage={handleMoveImage}
+                            handleRemoveImage={handleRemoveImage}
+                            handleRetryImage={handleRetryImage}
+                            images={images}
+                            isDraggingImage={isDraggingImage}
+                            isPreparingImages={isPreparingImages}
+                            isSubmitting={isSubmitting}
+                            isUploadingImages={isUploadingImages}
+                            onDraggedImageChange={setDraggedImage}
+                        />
+                    ) : null}
 
                     <Pressable
                         accessibilityLabel={t('查看 Markdown 基本語法')}
@@ -435,7 +465,7 @@ const HarborComposerForm = ({
 
                 {supportsImages || isEdit ? (
                     <View style={styles.fieldGroup}>
-                        {supportsImages ? (
+                        {supportsImages && !isNewTopic ? (
                             <>
                                 <View style={styles.bodyLabelRow}>
                                     <Text
@@ -614,6 +644,7 @@ const HarborComposerForm = ({
                 ref={categorySheetRef}
                 categories={categories}
                 onSelect={onSelectCategory}
+                openOnMount={autoOpenCategoryPicker}
                 selectedCategoryId={categoryId}
             />
 
@@ -624,6 +655,15 @@ const HarborComposerForm = ({
                 selectedTags={selectedTags}
                 tags={tags}
             />
+
+            {isNewTopic && supportsImages ? (
+                <HarborComposerImageDragOverlay
+                    dragState={dragState}
+                    image={draggedImage}
+                    overlayRef={dragOverlayRef}
+                    targetRef={deleteTargetRef}
+                />
+            ) : null}
         </View>
     );
 };
@@ -664,6 +704,9 @@ const styles = StyleSheet.create({
         lineHeight: scale(22),
         paddingHorizontal: 0,
         paddingVertical: verticalScale(4),
+    },
+    newTopicBodyInput: {
+        minHeight: verticalScale(82),
     },
     bodyLabelRow: {
         alignItems: 'center',

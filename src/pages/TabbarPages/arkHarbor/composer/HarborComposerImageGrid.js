@@ -1,4 +1,4 @@
-import React, {useMemo, useRef, useState} from 'react';
+import React, {useCallback, useLayoutEffect, useMemo, useRef, useState} from 'react';
 import {
     ActivityIndicator,
     Pressable,
@@ -8,6 +8,7 @@ import {
 
 import {Image} from 'expo-image';
 import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
+import Animated, {useAnimatedRef} from 'react-native-reanimated';
 import {scale} from 'react-native-size-matters';
 import {useTranslation} from 'react-i18next';
 
@@ -15,20 +16,34 @@ import Text from '../../../../components/AppText';
 import ARKImageView from '../../../../components/ARKImageView';
 import {useTheme} from '../../../../components/ThemeContext';
 import {trigger} from '../../../../utils/trigger';
+import {HarborComposerDraggableImage} from './HarborComposerImageDrag';
 
 const GRID_COLUMNS = 3;
 const GRID_GAP = scale(7);
 
 const HarborComposerImageGrid = ({
+    deleteTargetRef,
+    dragOverlayRef,
+    dragState,
+    handleAddImages,
     handleMoveImage,
     handleRemoveImage,
     handleRetryImage,
     images,
+    isDraggingImage,
+    isPreparingImages,
+    isSubmitting,
+    isUploadingImages,
+    onDraggedImageChange,
 }) => {
     const {theme} = useTheme();
     const {t} = useTranslation('harbor');
     const imageViewerRef = useRef(null);
+    const gridRef = useAnimatedRef();
     const [gridWidth, setGridWidth] = useState(0);
+    const isInlineGrid = dragState != null;
+    const imageActionsDisabled = isSubmitting || isDraggingImage;
+    const addImageDisabled = imageActionsDisabled || isPreparingImages || isUploadingImages;
     const itemSize = gridWidth > 0
         ? Math.floor(
             (gridWidth - GRID_GAP * (GRID_COLUMNS - 1)) /
@@ -41,6 +56,28 @@ const HarborComposerImageGrid = ({
             : null,
         [itemSize],
     );
+    const stride = itemSize + GRID_GAP;
+    const tileCount = images.length + (handleAddImages ? 1 : 0);
+    const imageOrder = JSON.stringify(images.map(image => image.id));
+    useLayoutEffect(() => {
+        dragState?.set(null);
+        onDraggedImageChange?.(null);
+    }, [dragState, imageOrder, itemSize, onDraggedImageChange]);
+
+    const handleDragStart = useCallback((id, uri, size) => {
+        trigger('dragStart');
+        onDraggedImageChange({id, uri, size});
+    }, [onDraggedImageChange]);
+
+    const handleDragFinish = useCallback((imageId, offset, remove) => {
+        if (remove) {
+            handleRemoveImage(imageId);
+        } else if (offset !== 0) {
+            handleMoveImage(imageId, offset);
+        }
+        onDraggedImageChange(null);
+    }, [handleMoveImage, handleRemoveImage, onDraggedImageChange]);
+
     const previewItems = useMemo(
         () => images
             .map(image => ({
@@ -61,28 +98,37 @@ const HarborComposerImageGrid = ({
         [previewItems],
     );
 
-    if (images.length === 0) {
+    if (tileCount === 0) {
         return null;
     }
 
     return (
         <>
-            <View
+            <Animated.View
+                collapsable={false}
+                ref={gridRef}
                 onLayout={event => {
                     const nextWidth = event.nativeEvent.layout.width;
                     if (nextWidth > 0 && nextWidth !== gridWidth) {
                         setGridWidth(nextWidth);
                     }
                 }}
-                style={styles.grid}>
+                style={[
+                    styles.grid,
+                    isInlineGrid && styles.inlineGrid,
+                    isInlineGrid && itemSize > 0 && {
+                        height: Math.ceil(tileCount / GRID_COLUMNS) * stride - GRID_GAP,
+                    },
+                ]}>
                 {images.map((image, index) => {
                     const isBusy =
                         image.status === 'pending' ||
                         image.status === 'uploading';
                     const isFailed = image.status === 'failed';
                     const isNew = image.isNew === true;
+                    const imageUri = image.localUri || image.remoteUrl;
                     const previewIndex = previewIndexById.get(image.id);
-                    return (
+                    const tile = (
                         <View
                             key={image.id}
                             style={[
@@ -106,9 +152,9 @@ const HarborComposerImageGrid = ({
                                 })}
                                 accessibilityRole="button"
                                 accessibilityState={{
-                                    disabled: previewIndex == null,
+                                    disabled: previewIndex == null || isDraggingImage,
                                 }}
-                                disabled={previewIndex == null}
+                                disabled={previewIndex == null || isDraggingImage}
                                 onPress={() => {
                                     trigger();
                                     imageViewerRef.current?.handleOpenImage(
@@ -117,30 +163,29 @@ const HarborComposerImageGrid = ({
                                 }}
                                 style={StyleSheet.absoluteFill}>
                                 <Image
+                                    draggable={false}
                                     contentFit="cover"
                                     placeholder={theme.imagePlaceholder}
-                                    source={{
-                                        uri:
-                                            image.localUri ||
-                                            image.remoteUrl,
-                                    }}
+                                    source={{uri: imageUri}}
                                     style={styles.image}
                                 />
                             </Pressable>
 
-                            <View
-                                style={[
-                                    styles.indexBadge,
-                                    {backgroundColor: theme.trueBlack},
-                                ]}>
-                                <Text
+                            {!isInlineGrid ? (
+                                <View
                                     style={[
-                                        styles.indexText,
-                                        {color: theme.trueWhite},
+                                        styles.indexBadge,
+                                        {backgroundColor: theme.trueBlack},
                                     ]}>
-                                    {index + 1}
-                                </Text>
-                            </View>
+                                    <Text
+                                        style={[
+                                            styles.indexText,
+                                            {color: theme.trueWhite},
+                                        ]}>
+                                        {index + 1}
+                                    </Text>
+                                </View>
+                            ) : null}
 
                             {isNew ? (
                                 <View
@@ -158,23 +203,26 @@ const HarborComposerImageGrid = ({
                                 </View>
                             ) : null}
 
-                            <Pressable
-                                accessibilityLabel={t('移除第 {{count}} 張圖片', {
-                                    count: index + 1,
-                                })}
-                                accessibilityRole="button"
-                                hitSlop={scale(5)}
-                                onPress={() => handleRemoveImage(image.id)}
-                                style={[
-                                    styles.removeButton,
-                                    {backgroundColor: theme.trueBlack},
-                                ]}>
-                                <MaterialCommunityIcons
-                                    name="close"
-                                    size={scale(14)}
-                                    color={theme.trueWhite}
-                                />
-                            </Pressable>
+                            {!isInlineGrid ? (
+                                <Pressable
+                                    accessibilityLabel={t('移除第 {{count}} 張圖片', {
+                                        count: index + 1,
+                                    })}
+                                    accessibilityRole="button"
+                                    disabled={imageActionsDisabled}
+                                    hitSlop={scale(5)}
+                                    onPress={() => handleRemoveImage(image.id)}
+                                    style={[
+                                        styles.removeButton,
+                                        {backgroundColor: theme.trueBlack},
+                                    ]}>
+                                    <MaterialCommunityIcons
+                                        name="close"
+                                        size={scale(14)}
+                                        color={theme.trueWhite}
+                                    />
+                                </Pressable>
+                            ) : null}
 
                             {isBusy || isFailed ? (
                                 <Pressable
@@ -184,7 +232,7 @@ const HarborComposerImageGrid = ({
                                     accessibilityRole={
                                         isFailed ? 'button' : undefined
                                     }
-                                    disabled={!isFailed}
+                                    disabled={!isFailed || imageActionsDisabled}
                                     onPress={() => handleRetryImage(image)}
                                     style={[
                                         StyleSheet.absoluteFill,
@@ -206,67 +254,126 @@ const HarborComposerImageGrid = ({
                                 </Pressable>
                             ) : null}
 
-                            <View style={styles.orderControls}>
-                                <Pressable
-                                    accessibilityLabel={t('圖片向前移')}
-                                    accessibilityRole="button"
-                                    accessibilityState={{disabled: index === 0}}
-                                    disabled={index === 0}
-                                    onPress={() => handleMoveImage(image.id, -1)}
-                                    style={[
-                                        styles.orderButton,
-                                        index === 0
-                                            ? styles.orderButtonDisabled
-                                            : styles.orderButtonEnabled,
-                                        {
-                                            backgroundColor: theme.trueBlack,
-                                        },
-                                    ]}>
-                                    <MaterialCommunityIcons
-                                        name="chevron-left"
-                                        size={scale(18)}
-                                        color={theme.trueWhite}
-                                    />
-                                </Pressable>
-                                <Pressable
-                                    accessibilityLabel={t('圖片向後移')}
-                                    accessibilityRole="button"
-                                    accessibilityState={{
-                                        disabled: index === images.length - 1,
-                                    }}
-                                    disabled={index === images.length - 1}
-                                    onPress={() => handleMoveImage(image.id, 1)}
-                                    style={[
-                                        styles.orderButton,
-                                        index === images.length - 1
-                                            ? styles.orderButtonDisabled
-                                            : styles.orderButtonEnabled,
-                                        {
-                                            backgroundColor: theme.trueBlack,
-                                        },
-                                    ]}>
-                                    <MaterialCommunityIcons
-                                        name="chevron-right"
-                                        size={scale(18)}
-                                        color={theme.trueWhite}
-                                    />
-                                </Pressable>
-                            </View>
+                            {!isInlineGrid ? (
+                                <View style={styles.orderControls}>
+                                    <Pressable
+                                        accessibilityLabel={t('圖片向前移')}
+                                        accessibilityRole="button"
+                                        accessibilityState={{
+                                            disabled: index === 0 || imageActionsDisabled,
+                                        }}
+                                        disabled={index === 0 || imageActionsDisabled}
+                                        onPress={() => handleMoveImage(image.id, -1)}
+                                        style={[
+                                            styles.orderButton,
+                                            index === 0
+                                                ? styles.orderButtonDisabled
+                                                : styles.orderButtonEnabled,
+                                            {
+                                                backgroundColor: theme.trueBlack,
+                                            },
+                                        ]}>
+                                        <MaterialCommunityIcons
+                                            name="chevron-left"
+                                            size={scale(18)}
+                                            color={theme.trueWhite}
+                                        />
+                                    </Pressable>
+                                    <Pressable
+                                        accessibilityLabel={t('圖片向後移')}
+                                        accessibilityRole="button"
+                                        accessibilityState={{
+                                            disabled: index === images.length - 1 || imageActionsDisabled,
+                                        }}
+                                        disabled={index === images.length - 1 || imageActionsDisabled}
+                                        onPress={() => handleMoveImage(image.id, 1)}
+                                        style={[
+                                            styles.orderButton,
+                                            index === images.length - 1
+                                                ? styles.orderButtonDisabled
+                                                : styles.orderButtonEnabled,
+                                            {
+                                                backgroundColor: theme.trueBlack,
+                                            },
+                                        ]}>
+                                        <MaterialCommunityIcons
+                                            name="chevron-right"
+                                            size={scale(18)}
+                                            color={theme.trueWhite}
+                                        />
+                                    </Pressable>
+                                </View>
+                            ) : null}
                         </View>
                     );
+                    return isInlineGrid ? (
+                        <HarborComposerDraggableImage
+                            key={image.id}
+                            columns={GRID_COLUMNS}
+                            count={images.length}
+                            deleteTargetRef={deleteTargetRef}
+                            disabled={isPreparingImages || isSubmitting}
+                            dragOverlayRef={dragOverlayRef}
+                            dragState={dragState}
+                            gridRef={gridRef}
+                            imageId={image.id}
+                            imageUri={imageUri}
+                            index={index}
+                            itemSize={itemSize}
+                            onDragStart={handleDragStart}
+                            onDragFinish={handleDragFinish}
+                            stride={stride}>
+                            {tile}
+                        </HarborComposerDraggableImage>
+                    ) : tile;
                 })}
-            </View>
+                {handleAddImages && itemSize > 0 ? (
+                    <Pressable
+                        accessibilityLabel={t(isPreparingImages ? '正在處理圖片…' : '新增圖片')}
+                        accessibilityRole="button"
+                        accessibilityState={{busy: isPreparingImages, disabled: addImageDisabled}}
+                        disabled={addImageDisabled}
+                        onPress={handleAddImages}
+                        style={({pressed}) => [
+                            styles.item,
+                            styles.addTile,
+                            itemSizeStyle,
+                            {
+                                left: (images.length % GRID_COLUMNS) * stride,
+                                top: Math.floor(images.length / GRID_COLUMNS) * stride,
+                                backgroundColor: pressed ? theme.tonal.primary15 : theme.tonal.primary08,
+                                borderColor: theme.themeColorUltraLight,
+                                opacity: addImageDisabled && !isPreparingImages ? 0.55 : 1,
+                            },
+                        ]}>
+                        {isPreparingImages ? (
+                            <ActivityIndicator color={theme.themeColor} />
+                        ) : (
+                            <MaterialCommunityIcons name="plus" size={scale(29)} color={theme.themeColor} />
+                        )}
+                    </Pressable>
+                ) : null}
+            </Animated.View>
             <ARKImageView ref={imageViewerRef} imageUrls={imageUrls} />
         </>
     );
 };
 
 const styles = StyleSheet.create({
+    addTile: {
+        alignItems: 'center',
+        borderWidth: StyleSheet.hairlineWidth,
+        justifyContent: 'center',
+        position: 'absolute',
+    },
     grid: {
         flexDirection: 'row',
         flexWrap: 'wrap',
         gap: GRID_GAP,
         width: '100%',
+    },
+    inlineGrid: {
+        maxWidth: scale(350),
     },
     image: {
         borderRadius: scale(9),

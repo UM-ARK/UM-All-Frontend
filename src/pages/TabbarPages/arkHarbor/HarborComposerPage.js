@@ -151,6 +151,7 @@ const HarborComposerPage = ({route, navigation}) => {
         clearDraftAfterPublish,
         discardDraftAndExit,
         hasDraftContent,
+        hasRestoredDraft,
         isDraftLoading,
     } = useHarborDraft({
         categories,
@@ -966,6 +967,9 @@ const HarborComposerPage = ({route, navigation}) => {
 
     return (
         <HarborComposerForm
+            autoOpenCategoryPicker={
+                isNewTopic && !hasRestoredDraft && !route.params?.fromDraftBox
+            }
             categorySheetRef={categorySheetRef}
             composer={{
                 categories,

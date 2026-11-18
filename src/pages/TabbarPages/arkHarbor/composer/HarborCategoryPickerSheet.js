@@ -32,6 +32,7 @@ const HarborCategoryPickerSheet = React.forwardRef(
         {
             categories,
             onSelect,
+            openOnMount = false,
             selectedCategoryId,
         },
         ref,
@@ -188,6 +189,7 @@ const HarborCategoryPickerSheet = React.forwardRef(
                 // Stack 頁無 Tab Bar；bottomInset>0 會讓 sheet 懸空並露出下方表單
                 bottomInset={0}
                 enablePanDownToClose
+                index={openOnMount ? 3 : -1}
                 page="harborComposer">
                 <View
                     style={[
