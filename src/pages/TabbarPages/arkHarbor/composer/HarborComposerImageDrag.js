@@ -9,7 +9,6 @@ import Animated, {
     ReduceMotion,
     useAnimatedRef,
     useAnimatedStyle,
-    useReducedMotion,
     withSpring,
 } from 'react-native-reanimated';
 import {scheduleOnRN} from 'react-native-worklets';
@@ -20,6 +19,7 @@ import MaterialCommunityIcons from "@react-native-vector-icons/material-design-i
 
 import Text from '../../../../components/AppText';
 import {useTheme} from '../../../../components/ThemeContext';
+import {useAppReducedMotion} from '../../../../contexts/ReducedMotionContext';
 
 const SNAP_SPRING = {duration: 400, dampingRatio: 1, reduceMotion: ReduceMotion.System};
 
@@ -81,7 +81,7 @@ export function HarborComposerDraggableImage({
     onDragFinish,
     stride,
 }) {
-    const reduceMotion = useReducedMotion();
+    const reduceMotion = useAppReducedMotion();
     const tileRef = useAnimatedRef();
     const pan = useMemo(() => Gesture.Pan()
         .enabled(!disabled && itemSize > 0)
@@ -180,7 +180,7 @@ export function HarborComposerImageDragOverlay({dragState, image, overlayRef, ta
     const {theme} = useTheme();
     const {t} = useTranslation('harbor');
     const insets = useSafeAreaInsets();
-    const reduceMotion = useReducedMotion();
+    const reduceMotion = useAppReducedMotion();
     const imageId = image?.id;
     const targetStyle = useAnimatedStyle(() => {
         const drag = dragState.get();

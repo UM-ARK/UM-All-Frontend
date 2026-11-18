@@ -54,7 +54,8 @@ import { useFocusEffect } from '@react-navigation/native';
 import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SafeAreaView } from 'react-native-screens/experimental';
-import Animated, { cubicBezier, useReducedMotion } from 'react-native-reanimated';
+import Animated, { cubicBezier } from 'react-native-reanimated';
+import { useAppReducedMotion } from '../../../contexts/ReducedMotionContext';
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -132,7 +133,7 @@ function FeatureListPage({ navigation }) {
     const bottomSheetRef = useRef(null);
     const searchInputRef = useRef(null);
     const listRef = useRef(null);
-    const reducedMotion = useReducedMotion();
+    const reducedMotion = useAppReducedMotion();
     const insets = useSafeAreaInsets();
     const tabBarHeight =
         useContext(BottomTabBarHeightContext) ?? insets.bottom + 49;

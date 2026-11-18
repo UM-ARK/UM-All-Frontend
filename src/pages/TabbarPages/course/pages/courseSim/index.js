@@ -41,7 +41,6 @@ import {
     cancelAnimation,
     Easing,
     ReduceMotion,
-    useReducedMotion,
     useSharedValue,
     withDelay,
     withTiming,
@@ -52,6 +51,7 @@ import Text from '../../../../../components/AppText';
 import ScalePressable from '../../../../../components/ScalePressable';
 import TextInput from '../../../../../components/AppTextInput';
 import { useTheme, uiStyle } from '../../../../../components/ThemeContext';
+import { useAppReducedMotion } from '../../../../../contexts/ReducedMotionContext';
 import { openLink } from '../../../../../utils/browser';
 import { UM_ISW } from '../../../../../utils/pathMap';
 import { logToFirebase } from '../../../../../utils/firebaseAnalytics';
@@ -227,7 +227,7 @@ function CourseSim({ route, navigation, isSplitPane = false }) {
     const [timetableView, setTimetableView] = useState(null);
     const [courseRemoval, setCourseRemoval] = useState(null);
     const removalProgress = useSharedValue(0);
-    const reducedMotion = useReducedMotion();
+    const reducedMotion = useAppReducedMotion();
     const timetableScope = `${programmeLevel}-${activeCoursePeriod?.id}`;
     const courseChange = useTimetableCourseChange({
         scope: timetableScope,

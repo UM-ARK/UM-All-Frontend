@@ -1,14 +1,14 @@
 import React from 'react';
 import {Pressable, StyleSheet} from 'react-native';
-import {useReducedMotion} from 'react-native-reanimated';
 
+import {useAppReducedMotion} from '../contexts/ReducedMotionContext';
 import TouchableScale from './TouchableScale';
 
 const ACTIVE_SCALE = 0.98;
 const ACTIVE_OPACITY = 0.84;
 
 export default function ScalePressable({style, ...props}) {
-    const reducedMotion = useReducedMotion();
+    const reducedMotion = useAppReducedMotion();
 
     if (reducedMotion) {
         const opacity = StyleSheet.flatten(style)?.opacity ?? 1;

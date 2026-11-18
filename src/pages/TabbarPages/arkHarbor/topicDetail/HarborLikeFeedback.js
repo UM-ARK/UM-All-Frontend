@@ -5,7 +5,6 @@ import Animated, {
     Easing,
     interpolate,
     useAnimatedStyle,
-    useReducedMotion,
     useSharedValue,
     withDelay,
     withSequence,
@@ -13,6 +12,8 @@ import Animated, {
     withTiming,
 } from 'react-native-reanimated';
 import { scale } from 'react-native-size-matters';
+
+import { useAppReducedMotion } from '../../../../contexts/ReducedMotionContext';
 
 const EASE_OUT = Easing.bezier(0.23, 1, 0.32, 1);
 const PRESSED_SCALE = 0.84;
@@ -44,7 +45,7 @@ const PARTICLE_STYLES = [
 });
 
 const useHarborLikeFeedback = (postId, hearted) => {
-    const reducedMotion = useReducedMotion();
+    const reducedMotion = useAppReducedMotion();
     const pressedRef = useRef(false);
     const heartScale = useSharedValue(1);
     const burstProgress = useSharedValue(1);

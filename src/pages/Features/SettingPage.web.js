@@ -33,6 +33,7 @@ import {
     SettingSectionCard,
     SettingItem,
 } from './components/SettingPrimitives';
+import SettingReduceMotionItem from './components/SettingReduceMotionItem';
 import appConfig from '../../../app.json';
 
 /** 設置列表在寬屏下的最大寬度：單欄列表拉太寬會讓左側圖標與右側控件離得太遠 */
@@ -147,6 +148,7 @@ const SettingPage = () => {
                             />
                         }
                     />
+                    <SettingReduceMotionItem />
                 </SettingSectionCard>
 
                 {/* 課程 */}
