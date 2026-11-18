@@ -25,11 +25,13 @@ import {HarborInlineRetry} from '../../arkHarbor/components/HarborListStates';
 import HarborBadgeIcon from '../components/HarborBadgeIcon';
 import HarborEmptyState from '../components/HarborEmptyState';
 
+const LIST_TOP_PADDING = verticalScale(8);
 const ListSeparator = () => <View style={styles.separator} />;
 
 const HarborBadgesPage = ({navigation}) => {
     const {theme} = useTheme();
     const {t, i18n} = useTranslation('my');
+    const dateLocale = i18n.language === 'en' ? 'en' : 'zh-HK';
     const {user} = useHarborSession();
     const headerHeight = useHeaderHeight();
     const username = user?.username || '';
@@ -105,6 +107,37 @@ const HarborBadgesPage = ({navigation}) => {
         return () => controllerRef.current?.abort();
     }, [loadBadges, navigation, user?.badges, username]);
 
+    const badgeRows = React.useMemo(() => {
+        const yearFormatter = new Intl.DateTimeFormat(dateLocale, {year: 'numeric'});
+        const dateFormatter = new Intl.DateTimeFormat(dateLocale, {
+            month: 'short',
+            day: 'numeric',
+        });
+        const badgesByYear = new Map();
+
+        for (const badge of badges) {
+            const date = badge.grantedAt ? new Date(badge.grantedAt) : null;
+            const hasDate = date !== null && Number.isFinite(date.getTime());
+            const year = hasDate ? date.getFullYear() : null;
+            let rows = badgesByYear.get(year);
+            if (!rows) {
+                rows = [];
+                badgesByYear.set(year, rows);
+            }
+            rows.push({
+                ...badge,
+                sectionTitle: rows.length === 0
+                    ? hasDate ? yearFormatter.format(date) : t('日期不詳')
+                    : null,
+                grantedDateLabel: hasDate ? dateFormatter.format(date) : null,
+            });
+        }
+
+        return [...badgesByYear.keys()]
+            .sort((left, right) => (right ?? 0) - (left ?? 0))
+            .flatMap(year => badgesByYear.get(year));
+    }, [badges, dateLocale, t]);
+
     if (isLoading) {
         return (
             <View style={[styles.loading, {backgroundColor: theme.bg_color}]}>
@@ -116,7 +149,7 @@ const HarborBadgesPage = ({navigation}) => {
     return (
         <View style={[styles.container, {backgroundColor: theme.bg_color}]}>
             <FlashList
-                data={badges}
+                data={badgeRows}
                 keyExtractor={item => item.id}
                 scrollIndicatorInsets={
                     isLiquidGlassSupported ? {top: headerHeight} : undefined
@@ -127,65 +160,70 @@ const HarborBadgesPage = ({navigation}) => {
                 contentContainerStyle={[
                     styles.content,
                     isLiquidGlassSupported && {
-                        paddingTop: headerHeight + verticalScale(12),
+                        paddingTop: headerHeight + LIST_TOP_PADDING,
                     },
                 ]}
                 showsVerticalScrollIndicator={false}
                 renderItem={({item}) => (
-                    <View
-                        style={[
-                            styles.badgeCard,
-                            {backgroundColor: theme.white},
-                        ]}>
-                        <HarborBadgeIcon badge={item} />
-                        <View style={styles.badgeContent}>
-                            <View style={styles.badgeTitleRow}>
+                    <>
+                        {item.sectionTitle ? (
+                            <View style={styles.sectionHeader}>
                                 <Text
-                                    numberOfLines={1}
+                                    accessibilityRole="header"
                                     style={[
-                                        styles.badgeName,
-                                        {color: theme.black.main},
+                                        styles.sectionTitle,
+                                        {color: theme.black.second},
                                     ]}>
-                                    {item.name}
+                                    {item.sectionTitle}
                                 </Text>
-                                {item.isFavorite ? (
-                                    <Ionicons
-                                        name="star"
-                                        size={scale(14)}
-                                        color={theme.secondThemeColor}
-                                    />
+                            </View>
+                        ) : null}
+                        <View
+                            style={[
+                                styles.badgeCard,
+                                {backgroundColor: theme.white},
+                            ]}>
+                            <HarborBadgeIcon badge={item} />
+                            <View style={styles.badgeContent}>
+                                <View style={styles.badgeTitleRow}>
+                                    <Text
+                                        numberOfLines={1}
+                                        style={[
+                                            styles.badgeName,
+                                            {color: theme.black.main},
+                                        ]}>
+                                        {item.name}
+                                    </Text>
+                                    {item.isFavorite ? (
+                                        <Ionicons
+                                            name="star"
+                                            size={scale(14)}
+                                            color={theme.secondThemeColor}
+                                        />
+                                    ) : null}
+                                </View>
+                                <Text
+                                    numberOfLines={3}
+                                    style={[
+                                        styles.badgeDescription,
+                                        {color: theme.black.third},
+                                    ]}>
+                                    {item.description || t('Harbor 社群徽章')}
+                                </Text>
+                                {item.grantedDateLabel ? (
+                                    <Text
+                                        style={[
+                                            styles.grantedAt,
+                                            {color: theme.themeColor},
+                                        ]}>
+                                        {t('獲得於 {{date}}', {
+                                            date: item.grantedDateLabel,
+                                        })}
+                                    </Text>
                                 ) : null}
                             </View>
-                            <Text
-                                numberOfLines={3}
-                                style={[
-                                    styles.badgeDescription,
-                                    {color: theme.black.third},
-                                ]}>
-                                {item.description || t('Harbor 社群徽章')}
-                            </Text>
-                            {item.grantedAt ? (
-                                <Text
-                                    style={[
-                                        styles.grantedAt,
-                                        {color: theme.themeColor},
-                                    ]}>
-                                    {t('獲得於 {{date}}', {
-                                        date: new Intl.DateTimeFormat(
-                                            i18n.language === 'en'
-                                                ? 'en'
-                                                : 'zh-HK',
-                                            {
-                                                year: 'numeric',
-                                                month: 'short',
-                                                day: 'numeric',
-                                            },
-                                        ).format(new Date(item.grantedAt)),
-                                    })}
-                                </Text>
-                            ) : null}
                         </View>
-                    </View>
+                    </>
                 )}
                 ItemSeparatorComponent={ListSeparator}
                 ListHeaderComponent={
@@ -253,17 +291,26 @@ const styles = StyleSheet.create({
     },
     content: {
         paddingHorizontal: scale(14),
-        paddingTop: verticalScale(12),
+        paddingTop: LIST_TOP_PADDING,
         paddingBottom: verticalScale(32),
     },
+    sectionHeader: {
+        paddingHorizontal: scale(12),
+        paddingTop: verticalScale(4),
+        paddingBottom: verticalScale(6),
+    },
+    sectionTitle: {
+        ...uiStyle.defaultText,
+        fontSize: scale(13),
+        fontWeight: '700',
+    },
     badgeCard: {
-        minHeight: verticalScale(104),
         borderRadius: scale(20),
         flexDirection: 'row',
         alignItems: 'center',
-        gap: scale(13),
-        paddingHorizontal: scale(16),
-        paddingVertical: verticalScale(14),
+        gap: scale(10),
+        paddingHorizontal: scale(12),
+        paddingVertical: verticalScale(8),
     },
     badgeContent: {
         flex: 1,
@@ -284,16 +331,16 @@ const styles = StyleSheet.create({
         ...uiStyle.defaultText,
         fontSize: scale(11),
         lineHeight: verticalScale(16),
-        marginTop: verticalScale(5),
+        marginTop: verticalScale(3),
     },
     grantedAt: {
         ...uiStyle.defaultText,
         fontSize: scale(9),
         fontWeight: '600',
-        marginTop: verticalScale(6),
+        marginTop: verticalScale(3),
     },
     separator: {
-        height: verticalScale(10),
+        height: verticalScale(6),
     },
 });
 

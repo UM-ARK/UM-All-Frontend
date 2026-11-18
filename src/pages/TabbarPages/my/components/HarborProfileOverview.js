@@ -8,10 +8,8 @@ import {scale, verticalScale} from 'react-native-size-matters';
 import Text from '../../../../components/AppText';
 import {uiStyle, useTheme} from '../../../../components/ThemeContext';
 import {trigger} from '../../../../utils/trigger';
-import HarborBadgeIcon from './HarborBadgeIcon';
 import HarborProfileCard from './HarborProfileCard';
 import HarborQuickActions from './HarborQuickActions';
-import HarborSectionHeader from './HarborSectionHeader';
 import HarborStatsCard from './HarborStatsCard';
 
 const QUICK_ACTION_ROUTES = {
@@ -27,6 +25,7 @@ const QUICK_ACTION_ROUTES = {
             title: t('贊過'),
         }),
     drafts: navigation => navigation.navigate('HarborDrafts'),
+    badges: navigation => navigation.navigate('HarborBadges'),
 };
 
 const HarborProfileOverview = ({
@@ -40,10 +39,6 @@ const HarborProfileOverview = ({
 }) => {
     const {theme} = useTheme();
     const {t} = useTranslation(['my', 'harbor']);
-
-    const openBadges = React.useCallback(() => {
-        navigation.navigate('HarborBadges');
-    }, [navigation]);
 
     const contributionItems = React.useMemo(() => {
         return (user.contributions || [])
@@ -213,57 +208,6 @@ const HarborProfileOverview = ({
             ) : null}
 
             <HarborStatsCard items={contributionItems} />
-
-            <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={t('論壇成就')}
-                style={[
-                    styles.badgesCard,
-                    {backgroundColor: theme.white},
-                ]}
-                onPress={() => {
-                    trigger();
-                    openBadges();
-                }}>
-                <HarborSectionHeader
-                    title={t('論壇成就')}
-                    showAction
-                />
-                <View style={styles.badgesRow}>
-                    {user.badges?.length ? (
-                        user.badges.slice(0, 3).map(badge => (
-                            <View
-                                key={badge.id}
-                                style={styles.badgeItem}>
-                                <HarborBadgeIcon badge={badge} compact />
-                                <Text
-                                    numberOfLines={2}
-                                    style={[
-                                        styles.badgeName,
-                                        {color: theme.black.second},
-                                    ]}>
-                                    {badge.name}
-                                </Text>
-                            </View>
-                        ))
-                    ) : (
-                        <View style={styles.badgeEmpty}>
-                            <MaterialCommunityIcons
-                                name="medal-outline"
-                                size={scale(22)}
-                                color={theme.black.third}
-                            />
-                            <Text
-                                style={[
-                                    styles.compactEmptyText,
-                                    {color: theme.black.third},
-                                ]}>
-                                {t('繼續參與社群即可解鎖徽章')}
-                            </Text>
-                        </View>
-                    )}
-                </View>
-            </Pressable>
         </View>
     );
 };
@@ -328,41 +272,6 @@ const styles = StyleSheet.create({
         ...uiStyle.defaultText,
         fontSize: scale(9),
         fontWeight: '800',
-    },
-    badgesCard: {
-        borderRadius: scale(10),
-        paddingBottom: verticalScale(10),
-    },
-    badgesRow: {
-        flexDirection: 'row',
-        alignItems: 'flex-start',
-        paddingHorizontal: scale(12),
-        paddingTop: verticalScale(4),
-    },
-    badgeItem: {
-        flex: 1,
-        alignItems: 'center',
-        paddingHorizontal: scale(4),
-    },
-    badgeName: {
-        ...uiStyle.defaultText,
-        fontSize: scale(10),
-        fontWeight: '600',
-        lineHeight: verticalScale(13),
-        textAlign: 'center',
-    },
-    badgeEmpty: {
-        flex: 1,
-        minHeight: verticalScale(56),
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: verticalScale(6),
-        paddingVertical: verticalScale(8),
-    },
-    compactEmptyText: {
-        ...uiStyle.defaultText,
-        fontSize: scale(11),
-        textAlign: 'center',
     },
 });
 

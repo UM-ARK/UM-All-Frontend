@@ -36,6 +36,12 @@ const QUICK_ACTIONS = [
         icon_type: 'ionicons',
         icon_name: 'document-text-outline',
     },
+    {
+        key: 'badges',
+        label: '成就',
+        icon_type: 'ionicons',
+        icon_name: 'ribbon-outline',
+    },
 ];
 
 const HarborQuickActions = ({unreadCount = 0, onSelect}) => {
@@ -51,9 +57,9 @@ const HarborQuickActions = ({unreadCount = 0, onSelect}) => {
             <FlatGrid
                 style={styles.grid}
                 itemContainerStyle={styles.itemContainer}
-                maxItemsPerRow={4}
+                maxItemsPerRow={5}
                 itemDimension={scale(50)}
-                spacing={scale(8)}
+                spacing={scale(6)}
                 data={QUICK_ACTIONS}
                 scrollEnabled={false}
                 keyExtractor={item => item.key}
