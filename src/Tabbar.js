@@ -24,7 +24,6 @@ import { trigger } from './utils/trigger';
 import { uiStyle } from './components/ThemeContext';
 import { isLiquidGlassSupported } from './utils/glassEffect';
 import { useHarborSession } from './contexts/HarborSessionContext';
-import { usePushRegistration } from './contexts/PushRegistrationContext';
 import { fetchHarborForumBadgeSnapshot } from './utils/harbor/harborApi';
 import {
     acknowledgeHarborForumBadgeState,
@@ -352,7 +351,6 @@ const Tabbar = () => {
         refreshInboxUnreadCount,
         refreshChatUnreadCount,
     } = useHarborSession();
-    const { shouldShowHarborPrompt } = usePushRegistration();
     const [forumBadgeState, setForumBadgeState] = useState(() =>
         createHarborForumBadgeState(),
     );
@@ -389,7 +387,6 @@ const Tabbar = () => {
             inboxUnreadCount,
             chatUnreadCount,
             reviewCount,
-            shouldShowHarborPrompt,
         )
         : 0;
 

@@ -96,6 +96,7 @@ export const HarborSessionProvider = ({ children }) => {
     const [chatChannels, setChatChannels] = useState([]);
     const [pendingLoginIntent, setPendingLoginIntent] = useState(null);
     const [sessionGeneration, setSessionGeneration] = useState(0);
+    const [sessionFromLogin, setSessionFromLogin] = useState(false);
     const credentialsRef = useRef(null);
     const userRef = useRef(null);
     const mountedRef = useRef(true);
@@ -149,7 +150,7 @@ export const HarborSessionProvider = ({ children }) => {
         }
     }, []);
 
-    const activateSession = useCallback(credentials => {
+    const activateSession = useCallback((credentials, fromLogin) => {
         sessionGenerationRef.current += 1;
         const nextSessionGeneration = sessionGenerationRef.current;
         credentialsRef.current = credentials;
@@ -174,6 +175,7 @@ export const HarborSessionProvider = ({ children }) => {
             setReviewCount(0);
             setChatChannels([]);
             setSessionGeneration(nextSessionGeneration);
+            setSessionFromLogin(fromLogin);
         }
         return sessionGenerationRef.current;
     }, []);
@@ -537,6 +539,7 @@ export const HarborSessionProvider = ({ children }) => {
                         setError(authError);
                     }
                 }
+                const fromLogin = Boolean(credentials);
                 credentials ||= await loadHarborCredentials();
 
                 if (!credentials) {
@@ -561,7 +564,7 @@ export const HarborSessionProvider = ({ children }) => {
                     cachedProfile?.credentialCacheId === credentialCacheId
                         ? cachedProfile.user
                         : null;
-                const generation = activateSession(credentials);
+                const generation = activateSession(credentials, fromLogin);
                 if (isCurrentSession(credentials, generation)) {
                     // 先用同一組憑證的快取進頁，再於背景向 Harbor 驗證。
                     setUser(cachedUser || createFallbackUser());
@@ -728,7 +731,7 @@ export const HarborSessionProvider = ({ children }) => {
                 source: 'deeplink',
             });
             const loginIntent = await loadHarborLoginIntent();
-            const generation = activateSession(credentials);
+            const generation = activateSession(credentials, true);
             await refreshProfile(credentials, generation);
             await clearHarborLoginIntent();
             if (mountedRef.current) {
@@ -822,7 +825,7 @@ export const HarborSessionProvider = ({ children }) => {
                 setAuthorizationPhase('finishing');
             }
             logHarborAuthEvent('login.credentials.ready');
-            const generation = activateSession(credentials);
+            const generation = activateSession(credentials, true);
             await refreshProfile(credentials, generation);
             logHarborAuthEvent('login.success', {
                 durationMs: Date.now() - startedAt,
@@ -906,6 +909,7 @@ export const HarborSessionProvider = ({ children }) => {
             logout,
             pendingLoginIntent,
             sessionGeneration,
+            sessionFromLogin,
             consumeLoginIntent,
             patchInboxUnreadCount,
             patchChatUnreadCount,
@@ -942,6 +946,7 @@ export const HarborSessionProvider = ({ children }) => {
             refreshReviewCount,
             reviewCount,
             sessionGeneration,
+            sessionFromLogin,
             status,
             user,
         ],

@@ -132,25 +132,6 @@ export function canAutomaticallyRetryHarborDisable(
     );
 }
 
-export function shouldShowHarborPushPrompt({
-    sessionStatus,
-    accountKey,
-    stateReady,
-    harborState,
-    harborDisplayStatus,
-}) {
-    if (sessionStatus !== 'signedIn' || !accountKey || stateReady !== true) {
-        return false;
-    }
-    if (harborState?.desiredEnabled === true) {
-        return !['enabled', 'silent'].includes(harborDisplayStatus);
-    }
-    return (
-        !harborState?.pendingAction &&
-        harborState?.dismissedPrompt !== true
-    );
-}
-
 export function getHarborPushDisplayStatus({
     harborState,
     registration,
@@ -304,15 +285,23 @@ export async function requestVisiblePushPermission() {
 
 async function performVisiblePushRegistration({
     requestPermission,
+    upgradeProvisional = true,
+    isCurrent,
     prepareAuthorization,
     registerEndpoint = putCurrentPushEndpoint,
     notificationLocale = DEFAULT_NOTIFICATION_LOCALE,
     onStateChange,
 }) {
     let permission = await readVisiblePushPermission();
+    if (isCurrent && !isCurrent()) {
+        throw createPushError(
+            'harbor_push_operation_stale',
+            'Harbor 推送帳號已改變。',
+        );
+    }
     if (
         requestPermission &&
-        (permission.status === 'provisional' ||
+        ((permission.status === 'provisional' && upgradeProvisional) ||
             (!permission.usable && permission.canAskAgain))
     ) {
         permission = await requestVisiblePushPermission();

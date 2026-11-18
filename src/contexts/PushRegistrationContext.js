@@ -7,7 +7,7 @@ import React, {
     useRef,
     useState,
 } from 'react';
-import {AppState} from 'react-native';
+import {AppState, Platform} from 'react-native';
 
 import * as Notifications from 'expo-notifications';
 
@@ -36,7 +36,6 @@ import {
     PUSH_SERVICE_UNAVAILABLE_ERROR_CODE,
     readVisiblePushPermission,
     runPushSchedulingOperation,
-    shouldShowHarborPushPrompt,
 } from '../utils/pushRegistration';
 import {
     createHarborPushAccountKey,
@@ -144,6 +143,8 @@ function nextDisableRetryState(current, error) {
 export const PushRegistrationProvider = ({children}) => {
     const {
         status: harborSessionStatus,
+        authorizationPhase,
+        sessionFromLogin,
         user,
         login,
         refreshInboxUnreadCount,
@@ -165,6 +166,8 @@ export const PushRegistrationProvider = ({children}) => {
     const harborStateRef = useRef(harborState);
     const registrationRef = useRef(registration);
     const accountKeyRef = useRef(accountKey);
+    const restoredUserRef = useRef(null);
+    const autoEnableAccountRef = useRef(null);
     const handledResponseIdsRef = useRef(new Set());
     const reconcileRef = useRef(null);
     const localeSyncRef = useRef(null);
@@ -316,6 +319,8 @@ export const PushRegistrationProvider = ({children}) => {
         }
         if (harborSessionStatus !== 'signedIn' || !user) {
             accountKeyRef.current = null;
+            restoredUserRef.current = null;
+            autoEnableAccountRef.current = null;
             setAccountKey(null);
             setHarborState({...DEFAULT_HARBOR_PUSH_STATE});
             setHarborCredentialPush(null);
@@ -337,6 +342,7 @@ export const PushRegistrationProvider = ({children}) => {
                 return;
             }
             accountKeyRef.current = nextAccountKey;
+            restoredUserRef.current = user;
             harborStateRef.current = nextHarborState;
             setAccountKey(nextAccountKey);
             setHarborState(nextHarborState);
@@ -411,6 +417,7 @@ export const PushRegistrationProvider = ({children}) => {
     const reconcileHarborPush = useCallback(
         async ({
             requestPermission = false,
+            upgradeProvisional = true,
             allowReauthorization = false,
             expectedAccountKey = null,
         } = {}) => {
@@ -442,6 +449,8 @@ export const PushRegistrationProvider = ({children}) => {
                 const result = await ensureVisiblePushRegistration({
                     reason: 'harbor',
                     requestPermission,
+                    upgradeProvisional,
+                    isCurrent: () => accountKeyRef.current === operationAccountKey,
                     singleFlightKey:
                         `${operationAccountKey}:${initialSchedulingSessionId}:` +
                         notificationLocale,
@@ -543,6 +552,9 @@ export const PushRegistrationProvider = ({children}) => {
                 }
                 const permissionRequired =
                     error?.code === 'push_permission_required';
+                if (permissionRequired) {
+                    await updatePermission();
+                }
                 const pushServiceUnavailable =
                     error?.code === PUSH_SERVICE_UNAVAILABLE_ERROR_CODE;
                 if (!permissionRequired && error?.retryable === true) {
@@ -756,8 +768,9 @@ export const PushRegistrationProvider = ({children}) => {
         reconcileHarborPush,
     ]);
 
-    const enableHarborPush = useCallback(async () => {
-        const operationAccountKey = await ensureCurrentHarborAccountState();
+    const enableHarborPush = useCallback(async ({automaticAccountKey} = {}) => {
+        const operationAccountKey =
+            automaticAccountKey || await ensureCurrentHarborAccountState();
         await updateRegistration({
             status: 'idle',
             retryCount: 0,
@@ -774,7 +787,8 @@ export const PushRegistrationProvider = ({children}) => {
         }
         return reconcileHarborPush({
             requestPermission: true,
-            allowReauthorization: true,
+            upgradeProvisional: !automaticAccountKey,
+            allowReauthorization: !automaticAccountKey,
             expectedAccountKey: operationAccountKey,
         });
     }, [
@@ -782,6 +796,52 @@ export const PushRegistrationProvider = ({children}) => {
         reconcileHarborPush,
         updateHarborState,
         updateRegistration,
+    ]);
+
+    useEffect(() => {
+        if (
+            (Platform.OS !== 'ios' && Platform.OS !== 'android') ||
+            !sessionFromLogin || authorizationPhase ||
+            harborSessionStatus !== 'signedIn' || !registrationRestored ||
+            !accountKey || restoredUserRef.current !== user ||
+            !harborCredentialPush || harborState.updatedAt != null ||
+            harborState.desiredEnabled || harborState.pendingAction ||
+            harborState.dismissedPrompt
+        ) {
+            return;
+        }
+        const attempt = () => {
+            if (
+                accountKeyRef.current !== accountKey ||
+                autoEnableAccountRef.current === accountKey
+            ) {
+                return;
+            }
+            autoEnableAccountRef.current = accountKey;
+            enableHarborPush({automaticAccountKey: accountKey}).catch(error => {
+                logPushError('harbor.auto_enable.failed', error);
+            });
+        };
+        if (AppState.currentState === 'active') {
+            attempt();
+            return;
+        }
+        const subscription = AppState.addEventListener('change', state => {
+            if (state === 'active') {
+                attempt();
+            }
+        });
+        return () => subscription.remove();
+    }, [
+        accountKey,
+        authorizationPhase,
+        enableHarborPush,
+        harborCredentialPush,
+        harborSessionStatus,
+        harborState,
+        registrationRestored,
+        sessionFromLogin,
+        user,
     ]);
 
     const disableHarborPush = useCallback(async ({automatic = false} = {}) => {
@@ -893,10 +953,6 @@ export const PushRegistrationProvider = ({children}) => {
         prepareHarborAuthorization,
         updateHarborState,
     ]);
-
-    const dismissHarborPushPrompt = useCallback(() => {
-        return updateHarborState({dismissedPrompt: true});
-    }, [updateHarborState]);
 
     useEffect(() => {
         if (
@@ -1109,37 +1165,21 @@ export const PushRegistrationProvider = ({children}) => {
             registration,
             harborState,
             harborDisplayStatus,
-            shouldShowHarborPrompt: shouldShowHarborPushPrompt({
-                sessionStatus: harborSessionStatus,
-                accountKey,
-                stateReady:
-                    registrationRestored &&
-                    permission !== null &&
-                    harborCredentialPush !== null,
-                harborState,
-                harborDisplayStatus,
-            }),
             pendingNotificationResponse,
             enableHarborPush,
             disableHarborPush,
-            dismissHarborPushPrompt,
             updatePermission,
             consumePendingNotificationResponse,
         }),
         [
             consumePendingNotificationResponse,
             disableHarborPush,
-            dismissHarborPushPrompt,
             enableHarborPush,
             harborDisplayStatus,
-            harborCredentialPush,
-            harborSessionStatus,
             harborState,
-            accountKey,
             pendingNotificationResponse,
             permission,
             registration,
-            registrationRestored,
             updatePermission,
         ],
     );
