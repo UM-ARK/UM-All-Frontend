@@ -297,9 +297,9 @@ function FeatureListPage({ navigation }) {
         [harborStatus, harborUser, login, navigation, t],
     );
 
-    // 預留兩行標題高度（英文如 Canteen Queue 會換行），避免同列單／雙行把圖標頂歪
+    // 繁中標籤按單行高度排版，英文預留兩行讓每列圖標對齊
     const featureLabelLineHeight = fontSize * 1.25;
-    const featureLabelHeight = featureLabelLineHeight * 2;
+    const featureLabelHeight = isTc ? undefined : featureLabelLineHeight * 2;
     // FlatGrid 末列會再加 marginBottom: spacing，與 row paddingBottom 重疊，需抵銷
     const gridSpacing = scale(10);
     const gridBottomTrim = -gridSpacing;
@@ -367,7 +367,7 @@ function FeatureListPage({ navigation }) {
                 ) : null}
                 <FeatureIcon item={item} size={scale(22)} muted={isMuted} />
                 <Text
-                    numberOfLines={2}
+                    numberOfLines={isTc ? 1 : 2}
                     style={{
                         ...uiStyle.defaultText,
                         fontSize: fontSize,
@@ -388,6 +388,7 @@ function FeatureListPage({ navigation }) {
             featureLabelLineHeight,
             fontSize,
             handleFeaturePress,
+            isTc,
             matchedFeatures,
             reducedMotion,
             themeColor,
