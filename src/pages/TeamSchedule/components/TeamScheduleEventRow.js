@@ -2,7 +2,7 @@
  * 組隊約時間列表列：標題、建立時間、角色、狀態／截止、chevron
  */
 import React from 'react';
-import {Pressable, StyleSheet, View} from 'react-native';
+import {StyleSheet, View} from 'react-native';
 
 import {useTranslation} from 'react-i18next';
 import Ionicons from '@react-native-vector-icons/ionicons';
@@ -10,6 +10,7 @@ import moment from 'moment-timezone';
 import {scale, verticalScale} from 'react-native-size-matters';
 
 import Text from '../../../components/AppText';
+import ScalePressable from '../../../components/ScalePressable';
 import {uiStyle, useTheme} from '../../../components/ThemeContext';
 import {trigger} from '../../../utils/trigger';
 
@@ -105,13 +106,12 @@ const TeamScheduleEventRow = ({
 
     return (
         <>
-            <Pressable
+            <ScalePressable
                 accessibilityRole="button"
                 accessibilityLabel={event.title || t('組隊約時間')}
-                style={({pressed}) => [
+                style={[
                     styles.container,
                     compact && styles.compactContainer,
-                    pressed && {backgroundColor: theme.tonal.primary08},
                 ]}
                 onPress={() => {
                     trigger();
@@ -173,7 +173,7 @@ const TeamScheduleEventRow = ({
                         />
                     </View>
                 </View>
-            </Pressable>
+            </ScalePressable>
             {showDivider ? (
                 <View
                     style={[

@@ -4,7 +4,6 @@
 import React, {memo, useEffect, useRef, useState} from 'react';
 import {
     Alert,
-    Pressable,
     StyleSheet,
     View,
 } from 'react-native';
@@ -17,6 +16,7 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-controller';
 
 import Text from '../../../components/AppText';
+import ScalePressable from '../../../components/ScalePressable';
 import TextInput from '../../../components/AppTextInput';
 import {uiStyle, useTheme} from '../../../components/ThemeContext';
 import {parseTeamInviteLink} from '../../../utils/scheduling/teamInviteLink';
@@ -141,15 +141,13 @@ const JoinTeamSheet = ({visible, onClose, onSubmit}) => {
                         ]}
                     />
 
-                    <Pressable
+                    <ScalePressable
                         accessibilityRole="button"
                         onPress={handlePaste}
-                        style={({pressed}) => [
+                        style={[
                             styles.secondary,
                             {
-                                backgroundColor: pressed
-                                    ? theme.tonal.primary30
-                                    : theme.tonal.primary15,
+                                backgroundColor: theme.tonal.primary15,
                             },
                         ]}>
                         <Text
@@ -159,17 +157,15 @@ const JoinTeamSheet = ({visible, onClose, onSubmit}) => {
                             ]}>
                             {t('從剪貼板貼上')}
                         </Text>
-                    </Pressable>
+                    </ScalePressable>
 
-                    <Pressable
+                    <ScalePressable
                         accessibilityRole="button"
                         onPress={handleJoin}
-                        style={({pressed}) => [
+                        style={[
                             styles.primary,
                             {
-                                backgroundColor: pressed
-                                    ? theme.tonal.primary50
-                                    : theme.themeColor,
+                                backgroundColor: theme.themeColor,
                             },
                         ]}>
                         <Text
@@ -179,20 +175,18 @@ const JoinTeamSheet = ({visible, onClose, onSubmit}) => {
                             ]}>
                             {t('加入')}
                         </Text>
-                    </Pressable>
+                    </ScalePressable>
 
-                    <Pressable
+                    <ScalePressable
                         accessibilityRole="button"
                         onPress={() => {
                             trigger();
                             sheetRef.current?.hide();
                         }}
-                        style={({pressed}) => [
+                        style={[
                             styles.cancel,
                             {
-                                backgroundColor: pressed
-                                    ? theme.tonal.primary15
-                                    : theme.white,
+                                backgroundColor: theme.white,
                                 borderColor: theme.themeColorUltraLight,
                             },
                         ]}>
@@ -203,7 +197,7 @@ const JoinTeamSheet = ({visible, onClose, onSubmit}) => {
                             ]}>
                             {t('取消')}
                         </Text>
-                    </Pressable>
+                    </ScalePressable>
                 </View>
             </KeyboardAwareScrollView>
         </ActionSheet>

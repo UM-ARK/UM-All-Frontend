@@ -2,12 +2,13 @@
  * 組隊約時間共用狀態：skeleton／空狀態／區塊內錯誤重試
  */
 import React from 'react';
-import {Pressable, StyleSheet, View} from 'react-native';
+import {StyleSheet, View} from 'react-native';
 
 import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 import {scale, verticalScale} from 'react-native-size-matters';
 
 import Text from '../../../components/AppText';
+import ScalePressable from '../../../components/ScalePressable';
 import {uiStyle, useTheme} from '../../../components/ThemeContext';
 import {trigger} from '../../../utils/trigger';
 
@@ -111,7 +112,7 @@ export const TeamScheduleFullState = ({
                 </Text>
             ) : null}
             {actionLabel && onAction ? (
-                <Pressable
+                <ScalePressable
                     accessibilityRole="button"
                     accessibilityState={{disabled: actionDisabled}}
                     disabled={actionDisabled}
@@ -119,14 +120,12 @@ export const TeamScheduleFullState = ({
                         trigger();
                         onAction();
                     }}
-                    style={({pressed}) => [
+                    style={[
                         styles.stateButton,
                         {
                             backgroundColor: actionDisabled
                                 ? theme.tonal.primary30
-                                : pressed
-                                  ? theme.tonal.primary50
-                                  : theme.themeColor,
+                                : theme.themeColor,
                         },
                     ]}>
                     <Text
@@ -140,7 +139,7 @@ export const TeamScheduleFullState = ({
                         ]}>
                         {actionLabel}
                     </Text>
-                </Pressable>
+                </ScalePressable>
             ) : null}
         </View>
     );
@@ -176,7 +175,7 @@ export const TeamScheduleInlineError = ({
                 style={[styles.inlineRetryText, {color: theme.black.second}]}>
                 {message}
             </Text>
-            <Pressable
+            <ScalePressable
                 accessibilityRole="button"
                 accessibilityState={{disabled}}
                 disabled={disabled}
@@ -185,14 +184,12 @@ export const TeamScheduleInlineError = ({
                     trigger();
                     onRetry();
                 }}
-                style={({pressed}) => [
+                style={[
                     styles.inlineRetryButton,
                     {
-                        backgroundColor: pressed
-                            ? theme.tonal.primary30
-                            : disabled
-                              ? theme.tonal.primary08
-                              : theme.tonal.primary15,
+                        backgroundColor: disabled
+                          ? theme.tonal.primary08
+                          : theme.tonal.primary15,
                     },
                 ]}>
                 <Text
@@ -206,7 +203,7 @@ export const TeamScheduleInlineError = ({
                     ]}>
                     {actionLabel}
                 </Text>
-            </Pressable>
+            </ScalePressable>
         </View>
     );
 };

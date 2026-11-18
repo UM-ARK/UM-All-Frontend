@@ -3,7 +3,6 @@ import React, {
     useMemo,
 } from 'react';
 import {
-    Pressable,
     View,
 } from 'react-native';
 
@@ -13,6 +12,7 @@ import { scale } from 'react-native-size-matters';
 import { useTranslation } from 'react-i18next';
 
 import Text from '../../../../components/AppText';
+import ScalePressable from '../../../../components/ScalePressable';
 import { useTheme } from '../../../../components/ThemeContext';
 import { openLink } from '../../../../utils/browser';
 import { trigger } from '../../../../utils/trigger';
@@ -96,7 +96,7 @@ const HarborPostEventCard = memo(({ event, postUrl }) => {
     }
 
     return (
-        <Pressable
+        <ScalePressable
             accessibilityRole="link"
             accessibilityLabel={event.name || t('活動')}
             onPress={() => {
@@ -105,10 +105,10 @@ const HarborPostEventCard = memo(({ event, postUrl }) => {
                     openLink({ URL: postUrl, mode: 'fullScreen' });
                 }
             }}
-            style={({ pressed }) => [
+            style={[
                 styles.eventCard,
                 {
-                    backgroundColor: pressed ? tonal.primary15 : white,
+                    backgroundColor: white,
                     borderColor: disabled,
                 },
             ]}>
@@ -190,7 +190,7 @@ const HarborPostEventCard = memo(({ event, postUrl }) => {
                     {t('{{count}} going', { count: event.goingCount || 0 })}
                 </Text>
             </View>
-        </Pressable>
+        </ScalePressable>
     );
 });
 

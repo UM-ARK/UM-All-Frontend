@@ -25,6 +25,7 @@ import { scale, verticalScale } from 'react-native-size-matters';
 import { useTranslation } from 'react-i18next';
 
 import Text from '../../../components/AppText';
+import ScalePressable from '../../../components/ScalePressable';
 import { useTheme } from '../../../components/ThemeContext';
 import { getDeepLinkShareHeaderOptions } from '../../../components/DeepLinkShareButton';
 import { useAppShare } from '../../../contexts/AppShareContext';
@@ -943,33 +944,29 @@ const HarborTopicDetail = ({
                 <Text style={[styles.errorDescription, { color: black.third }]}>
                     {errorMessage || t('請稍後再試')}
                 </Text>
-                <Pressable
+                <ScalePressable
                     onPress={() => {
                         trigger();
                         loadTopic();
                     }}
-                    style={({ pressed }) => [
+                    style={[
                         styles.primaryButton,
                         {
-                            backgroundColor: pressed
-                                ? tonal.primary50
-                                : themeColor,
+                            backgroundColor: themeColor,
                         },
                     ]}>
                     <Text
                         style={[styles.primaryButtonText, { color: trueWhite }]}>
                         {t('重新載入')}
                     </Text>
-                </Pressable>
+                </ScalePressable>
                 {Number.isInteger(topicId) && topicId > 0 ? (
-                    <Pressable
+                    <ScalePressable
                         onPress={openOriginalTopic}
-                        style={({ pressed }) => [
+                        style={[
                             styles.secondaryButton,
                             {
-                                backgroundColor: pressed
-                                    ? tonal.primary30
-                                    : tonal.primary15,
+                                backgroundColor: tonal.primary15,
                             },
                         ]}>
                         <Text
@@ -979,7 +976,7 @@ const HarborTopicDetail = ({
                             ]}>
                             {t('在 Harbor 開啟')}
                         </Text>
-                    </Pressable>
+                    </ScalePressable>
                 ) : null}
             </View>
         );
@@ -1129,12 +1126,12 @@ const HarborTopicDetail = ({
             ) : null}
 
             {pendingNewPostIds.length > 0 ? (
-                <Pressable
+                <ScalePressable
                     onPress={() => {
                         trigger();
                         loadNewReplies();
                     }}
-                    style={({ pressed }) => [
+                    style={[
                         styles.newRepliesButton,
                         {
                             bottom:
@@ -1142,9 +1139,7 @@ const HarborTopicDetail = ({
                                 verticalScale(
                                     showPostNavigation ? 48 : 10,
                                 ),
-                            backgroundColor: pressed
-                                ? tonal.primary50
-                                : themeColor,
+                            backgroundColor: themeColor,
                         },
                     ]}>
                     {isLoadingNext ? (
@@ -1168,7 +1163,7 @@ const HarborTopicDetail = ({
                             count: pendingNewPostIds.length,
                         })}
                     </Text>
-                </Pressable>
+                </ScalePressable>
             ) : null}
 
             <HarborPostMoreSheet

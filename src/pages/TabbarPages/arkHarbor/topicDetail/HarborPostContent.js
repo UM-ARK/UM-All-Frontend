@@ -29,6 +29,7 @@ import { scale, verticalScale } from 'react-native-size-matters';
 import { useTranslation } from 'react-i18next';
 
 import Text from '../../../../components/AppText';
+import ScalePressable from '../../../../components/ScalePressable';
 import { uiStyle, useTheme } from '../../../../components/ThemeContext';
 import { openLink } from '../../../../utils/browser';
 import {
@@ -596,7 +597,7 @@ const HarborPostContent = memo(
                 />
                 {children}
                 {requiresInteractiveFallback ? (
-                    <Pressable
+                    <ScalePressable
                         onPress={() => {
                             trigger();
                             console.warn(
@@ -605,12 +606,10 @@ const HarborPostContent = memo(
                             );
                             openLink({ URL: postUrl, mode: 'fullScreen' });
                         }}
-                        style={({ pressed }) => [
+                        style={[
                             styles.interactiveFallback,
                             {
-                                backgroundColor: pressed
-                                    ? tonal.primary30
-                                    : tonal.primary15,
+                                backgroundColor: tonal.primary15,
                             },
                         ]}>
                         <MaterialCommunityIcons
@@ -625,7 +624,7 @@ const HarborPostContent = memo(
                             ]}>
                             {t('在 Web 查看完整詳情')}
                         </Text>
-                    </Pressable>
+                    </ScalePressable>
                 ) : null}
             </View>
         );

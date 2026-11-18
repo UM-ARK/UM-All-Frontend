@@ -1,12 +1,12 @@
 import React, { useState, useRef, useCallback, useContext, useMemo, useEffect } from 'react';
 import {
     Platform,
-    Pressable,
     ScrollView,
     View,
 } from 'react-native';
 
 import Text from '../../../components/AppText';
+import ScalePressable from '../../../components/ScalePressable';
 import { useTheme, uiStyle } from '../../../components/ThemeContext';
 import { useHarborSession } from '../../../contexts/HarborSessionContext';
 import { logToFirebase } from '../../../utils/firebaseAnalytics';
@@ -494,8 +494,8 @@ function FeatureListPage({ navigation }) {
                     </Text>
                 ) : null}
                 {haveLink ? (
-                    <Pressable
-                        style={({ pressed }) => ({
+                    <ScalePressable
+                        style={{
                             flexDirection: 'row',
                             alignItems: 'center',
                             justifyContent: 'center',
@@ -504,10 +504,8 @@ function FeatureListPage({ navigation }) {
                             paddingVertical: verticalScale(11),
                             paddingHorizontal: scale(14),
                             borderRadius: scale(12),
-                            backgroundColor: pressed
-                                ? tonal.primary50
-                                : themeColor,
-                        })}
+                            backgroundColor: themeColor,
+                        }}
                         onPress={() => {
                             trigger();
                             Clipboard.setStringAsync(webview_param.url);
@@ -528,7 +526,7 @@ function FeatureListPage({ navigation }) {
                             }}>
                             {t('複製功能Link', { ns: 'features' })}
                         </Text>
-                    </Pressable>
+                    </ScalePressable>
                 ) : null}
             </View>
         );

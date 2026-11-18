@@ -55,7 +55,7 @@ const getColorDiy = (isLight) => {
             primary08: `${themeColorValue}08`,   // ~3%  極淺底：大面積輸入區域
             primary15: `${themeColorValue}15`,   // ~8%  淺色底：普通按鈕、標籤
             primary30: `${themeColorValue}30`,   // ~19% 中等底：重點按鈕
-            primary50: `${themeColorValue}50`,   // ~31% 較深底：強調容器、pressed態
+            primary50: `${themeColorValue}50`,   // ~31% 較深底：強調容器
             // 副主題色 (secondThemeColor) 背景分級
             secondary08: `${secondThemeColorValue}08`,
             secondary15: `${secondThemeColorValue}15`,
@@ -127,7 +127,6 @@ const getColorDiy = (isLight) => {
         harbor_bg_color: isLight ? '#fbfdff' : '#111111',
         harborSearch: {
             background: isLight ? '#EDF0F2' : whiteColor,
-            pressedBackground: isLight ? '#E3E7EA' : '#343436',
             foreground: isLight ? '#666666' : '#A8A8AC',
         },
 

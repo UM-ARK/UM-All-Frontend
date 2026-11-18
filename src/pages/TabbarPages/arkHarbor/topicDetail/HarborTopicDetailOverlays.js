@@ -15,6 +15,7 @@ import { scale } from 'react-native-size-matters';
 import { useTranslation } from 'react-i18next';
 
 import Text from '../../../../components/AppText';
+import ScalePressable from '../../../../components/ScalePressable';
 import TextInput from '../../../../components/AppTextInput';
 import ARKImageView from '../../../../components/ARKImageView';
 import { useTheme } from '../../../../components/ThemeContext';
@@ -233,17 +234,15 @@ const HarborTopicDetailOverlays = ({
                         */}
                         <View style={styles.actionDialogActions}>
                             {bookmarkEditor?.bookmarkId ? (
-                                <Pressable
+                                <ScalePressable
                                     onPress={() => {
                                         trigger();
                                         removePostBookmark();
                                     }}
-                                    style={({ pressed }) => [
+                                    style={[
                                         styles.actionDialogButton,
                                         {
-                                            backgroundColor: pressed
-                                                ? tonal.primary30
-                                                : tonal.primary15,
+                                            backgroundColor: tonal.primary15,
                                         },
                                     ]}>
                                     <Text
@@ -253,19 +252,17 @@ const HarborTopicDetailOverlays = ({
                                         ]}>
                                         {t('取消收藏')}
                                     </Text>
-                                </Pressable>
+                                </ScalePressable>
                             ) : null}
-                            <Pressable
+                            <ScalePressable
                                 onPress={() => {
                                     trigger();
                                     setBookmarkEditor(null);
                                 }}
-                                style={({ pressed }) => [
+                                style={[
                                     styles.actionDialogButton,
                                     {
-                                        backgroundColor: pressed
-                                            ? tonal.primary30
-                                            : tonal.primary15,
+                                        backgroundColor: tonal.primary15,
                                     },
                                 ]}>
                                 <Text
@@ -275,18 +272,16 @@ const HarborTopicDetailOverlays = ({
                                     ]}>
                                     {t('取消')}
                                 </Text>
-                            </Pressable>
-                            <Pressable
+                            </ScalePressable>
+                            <ScalePressable
                                 onPress={() => {
                                     trigger();
                                     savePostBookmark();
                                 }}
-                                style={({ pressed }) => [
+                                style={[
                                     styles.actionDialogButton,
                                     {
-                                        backgroundColor: pressed
-                                            ? tonal.primary50
-                                            : themeColor,
+                                        backgroundColor: themeColor,
                                     },
                                 ]}>
                                 <Text
@@ -296,7 +291,7 @@ const HarborTopicDetailOverlays = ({
                                     ]}>
                                     {t('儲存')}
                                 </Text>
-                            </Pressable>
+                            </ScalePressable>
                         </View>
                     </View>
                 </View>
@@ -351,18 +346,18 @@ const HarborTopicDetailOverlays = ({
                                     type.description,
                                 );
                                 return (
-                                    <Pressable
+                                    <ScalePressable
                                         key={type.id}
                                         disabled={Boolean(pendingFlag)}
                                         onPress={() => {
                                             trigger();
                                             setSelectedFlagTypeId(type.id);
                                         }}
-                                        style={({ pressed }) => [
+                                        style={[
                                             styles.notificationOption,
                                             {
                                                 backgroundColor:
-                                                    selected || pressed
+                                                    selected
                                                         ? tonal.primary15
                                                         : theme.white,
                                                 borderTopColor: disabled,
@@ -400,7 +395,7 @@ const HarborTopicDetailOverlays = ({
                                                 color={themeColor}
                                             />
                                         ) : null}
-                                    </Pressable>
+                                    </ScalePressable>
                                 );
                             })}
                         </ScrollView>
@@ -436,18 +431,16 @@ const HarborTopicDetailOverlays = ({
                             </>
                         ) : null}
                         <View style={styles.actionDialogActions}>
-                            <Pressable
+                            <ScalePressable
                                 disabled={Boolean(pendingFlag)}
                                 onPress={() => {
                                     trigger();
                                     setFlagEditor(null);
                                 }}
-                                style={({ pressed }) => [
+                                style={[
                                     styles.actionDialogButton,
                                     {
-                                        backgroundColor: pressed
-                                            ? tonal.primary15
-                                            : tonal.primary08,
+                                        backgroundColor: tonal.primary08,
                                     },
                                 ]}>
                                 <Text
@@ -457,8 +450,8 @@ const HarborTopicDetailOverlays = ({
                                     ]}>
                                     {t('取消')}
                                 </Text>
-                            </Pressable>
-                            <Pressable
+                            </ScalePressable>
+                            <ScalePressable
                                 disabled={!canSubmitFlag}
                                 onPress={() => {
                                     trigger();
@@ -467,14 +460,12 @@ const HarborTopicDetailOverlays = ({
                                         message: flagMessage,
                                     });
                                 }}
-                                style={({ pressed }) => [
+                                style={[
                                     styles.actionDialogButton,
                                     {
                                         backgroundColor: !canSubmitFlag
                                             ? disabled
-                                            : pressed
-                                                ? tonal.primary50
-                                                : unread,
+                                            : unread,
                                     },
                                 ]}>
                                 <Text
@@ -484,7 +475,7 @@ const HarborTopicDetailOverlays = ({
                                     ]}>
                                     {pendingFlag ? t('送出中…') : t('發送')}
                                 </Text>
-                            </Pressable>
+                            </ScalePressable>
                         </View>
                     </View>
                 </View>
@@ -524,17 +515,17 @@ const HarborTopicDetailOverlays = ({
                                 Number(topic.details?.notification_level) ===
                                 option.level;
                             return (
-                                <Pressable
+                                <ScalePressable
                                     key={option.level}
                                     onPress={() => {
                                         trigger();
                                         changeNotificationLevel(option.level);
                                     }}
-                                    style={({ pressed }) => [
+                                    style={[
                                         styles.notificationOption,
                                         {
                                             backgroundColor:
-                                                selected || pressed
+                                                selected
                                                     ? tonal.primary15
                                                     : theme.white,
                                             borderTopColor: disabled,
@@ -568,7 +559,7 @@ const HarborTopicDetailOverlays = ({
                                             color={themeColor}
                                         />
                                     ) : null}
-                                </Pressable>
+                                </ScalePressable>
                             );
                         })}
                     </View>

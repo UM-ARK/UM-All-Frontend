@@ -2,7 +2,7 @@
  * 組隊約時間功能介紹 Sheet：向首次使用者說明約時間、共享課表與使用情境
  */
 import React, {memo, useEffect, useRef} from 'react';
-import {Pressable, StyleSheet, View} from 'react-native';
+import {StyleSheet, View} from 'react-native';
 
 import {useTranslation} from 'react-i18next';
 import Ionicons from '@react-native-vector-icons/ionicons';
@@ -11,6 +11,7 @@ import {scale, verticalScale} from 'react-native-size-matters';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 import Text from '../../../components/AppText';
+import ScalePressable from '../../../components/ScalePressable';
 import {uiStyle, useTheme} from '../../../components/ThemeContext';
 import {trigger} from '../../../utils/trigger';
 
@@ -129,18 +130,16 @@ const TeamScheduleIntroSheet = ({visible, onClose}) => {
                     </Text>
                 </View>
 
-                <Pressable
+                <ScalePressable
                     accessibilityRole="button"
                     onPress={() => {
                         trigger();
                         sheetRef.current?.hide();
                     }}
-                    style={({pressed}) => [
+                    style={[
                         styles.action,
                         {
-                            backgroundColor: pressed
-                                ? theme.tonal.primary50
-                                : theme.themeColor,
+                            backgroundColor: theme.themeColor,
                         },
                     ]}>
                     <Text
@@ -150,7 +149,7 @@ const TeamScheduleIntroSheet = ({visible, onClose}) => {
                         ]}>
                         {t('知道了')}
                     </Text>
-                </Pressable>
+                </ScalePressable>
             </View>
         </ActionSheet>
     );

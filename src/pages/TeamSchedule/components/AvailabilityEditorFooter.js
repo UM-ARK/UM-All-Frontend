@@ -2,13 +2,14 @@
  * 可用時間編輯底部：取消／確定
  */
 import React, {memo} from 'react';
-import {ActivityIndicator, Pressable, StyleSheet, View} from 'react-native';
+import {ActivityIndicator, StyleSheet, View} from 'react-native';
 
 import {useTranslation} from 'react-i18next';
 import {scale, verticalScale} from 'react-native-size-matters';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 import Text from '../../../components/AppText';
+import ScalePressable from '../../../components/ScalePressable';
 import {uiStyle, useTheme} from '../../../components/ThemeContext';
 import {trigger} from '../../../utils/trigger';
 
@@ -32,27 +33,25 @@ const AvailabilityEditorFooter = ({
                     paddingBottom: Math.max(insets.bottom, verticalScale(8)),
                 },
             ]}>
-            <Pressable
+            <ScalePressable
                 accessibilityRole="button"
                 disabled={confirming}
                 onPress={() => {
                     trigger();
                     onCancel?.();
                 }}
-                style={({pressed}) => [
+                style={[
                     styles.button,
                     {
-                        backgroundColor: pressed
-                            ? theme.tonal.primary30
-                            : theme.tonal.primary15,
+                        backgroundColor: theme.tonal.primary15,
                         opacity: confirming ? 0.5 : 1,
                     },
                 ]}>
                 <Text style={[styles.buttonText, {color: theme.themeColor}]}>
                     {t('取消')}
                 </Text>
-            </Pressable>
-            <Pressable
+            </ScalePressable>
+            <ScalePressable
                 accessibilityRole="button"
                 disabled={confirming || disabled}
                 onPress={() => {
@@ -62,16 +61,14 @@ const AvailabilityEditorFooter = ({
                     trigger();
                     onConfirm?.();
                 }}
-                style={({pressed}) => [
+                style={[
                     styles.button,
                     styles.confirm,
                     {
                         backgroundColor:
                             confirming || disabled
                                 ? theme.tonal.primary30
-                                : pressed
-                                  ? theme.tonal.primary50
-                                  : theme.themeColor,
+                                : theme.themeColor,
                     },
                 ]}>
                 {confirming ? (
@@ -85,7 +82,7 @@ const AvailabilityEditorFooter = ({
                         {t('確定')}
                     </Text>
                 )}
-            </Pressable>
+            </ScalePressable>
         </View>
     );
 };

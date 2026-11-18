@@ -10,7 +10,6 @@ import React, {
 import {
     View,
     TouchableOpacity,
-    Pressable,
     Alert,
     StyleSheet,
     Keyboard,
@@ -50,6 +49,7 @@ import {
 import { scheduleOnRN } from 'react-native-worklets';
 
 import Text from '../../../../../components/AppText';
+import ScalePressable from '../../../../../components/ScalePressable';
 import TextInput from '../../../../../components/AppTextInput';
 import { useTheme, uiStyle } from '../../../../../components/ThemeContext';
 import { openLink } from '../../../../../utils/browser';
@@ -1965,20 +1965,18 @@ E11-0000
         const renderReplacementItem = ({ item }) => {
             if (!selectedCourse) {
                 return (
-                    <Pressable
+                    <ScalePressable
                         accessibilityRole="button"
                         accessibilityLabel={`${item['Course Code']} ${t('個可選Section', {
                             ns: 'timetable',
                             count: item.sections.length,
                         })}`}
-                        style={({ pressed }) => [
+                        style={[
                             s.courseCard,
                             {
                                 marginHorizontal: scale(10),
                                 padding: scale(12),
-                                backgroundColor: pressed
-                                    ? tonal.primary30
-                                    : tonal.primary15,
+                                backgroundColor: tonal.primary15,
                             },
                         ]}
                         onPress={() => {
@@ -2043,7 +2041,7 @@ E11-0000
                                 size={scale(18)}
                             />
                         </View>
-                    </Pressable>
+                    </ScalePressable>
                 );
             }
 
@@ -2199,19 +2197,17 @@ E11-0000
                         paddingBottom: verticalScale(8),
                     }}>
                     {selectedCourse ? (
-                        <Pressable
+                        <ScalePressable
                             accessibilityRole="button"
                             accessibilityLabel={t('返回平替課程', {
                                 ns: 'timetable',
                             })}
                             hitSlop={scale(8)}
-                            style={({ pressed }) => ({
-                                backgroundColor: pressed
-                                    ? tonal.primary30
-                                    : tonal.primary15,
+                            style={{
+                                backgroundColor: tonal.primary15,
                                 borderRadius: scale(8),
                                 padding: scale(7),
-                            })}
+                            }}
                             onPress={() => {
                                 trigger();
                                 setReplacementCourseCode(null);
@@ -2221,7 +2217,7 @@ E11-0000
                                 size={scale(18)}
                                 color={themeColor}
                             />
-                        </Pressable>
+                        </ScalePressable>
                     ) : null}
 
                     <View
@@ -2255,26 +2251,24 @@ E11-0000
                         ) : null}
                     </View>
 
-                    <Pressable
+                    <ScalePressable
                         accessibilityRole="button"
                         accessibilityLabel={t('取消', {
                             ns: 'timetable',
                         })}
                         hitSlop={scale(8)}
-                        style={({ pressed }) => ({
-                            backgroundColor: pressed
-                                ? tonal.primary30
-                                : tonal.primary15,
+                        style={{
+                            backgroundColor: tonal.primary15,
                             borderRadius: scale(8),
                             padding: scale(7),
-                        })}
+                        }}
                         onPress={closeCourseSearch}>
                         <Ionicons
                             name="close"
                             size={scale(18)}
                             color={themeColor}
                         />
-                    </Pressable>
+                    </ScalePressable>
                 </View>
 
                 {!selectedCourse ? (

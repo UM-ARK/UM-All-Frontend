@@ -6,6 +6,7 @@ import MaterialCommunityIcons from "@react-native-vector-icons/material-design-i
 import { scale, verticalScale } from 'react-native-size-matters';
 
 import Text from '../../../../components/AppText';
+import ScalePressable from '../../../../components/ScalePressable';
 import { uiStyle, useTheme } from '../../../../components/ThemeContext';
 import { trigger } from '../../../../utils/trigger';
 
@@ -154,13 +155,13 @@ const HarborPostMoreSheet = ({ menu, onClose }) => {
                                 action.attributes?.destructive,
                             );
                             return (
-                                <Pressable
+                                <ScalePressable
                                     key={action.id}
                                     accessibilityRole="button"
                                     accessibilityState={{ disabled }}
                                     disabled={disabled}
                                     onPress={() => selectAction(action)}
-                                    style={({ pressed }) => [
+                                    style={[
                                         styles.secondaryAction,
                                         index > 0
                                             ? {
@@ -171,9 +172,7 @@ const HarborPostMoreSheet = ({ menu, onClose }) => {
                                             }
                                             : null,
                                         {
-                                            backgroundColor: pressed
-                                                ? theme.tonal.primary08
-                                                : theme.white,
+                                            backgroundColor: theme.white,
                                             opacity: disabled ? 0.4 : 1,
                                         },
                                     ]}>
@@ -205,7 +204,7 @@ const HarborPostMoreSheet = ({ menu, onClose }) => {
                                         size={scale(20)}
                                         color={theme.black.third}
                                     />
-                                </Pressable>
+                                </ScalePressable>
                             );
                         })}
                     </View>

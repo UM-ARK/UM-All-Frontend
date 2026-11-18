@@ -11,6 +11,7 @@ import {scale, verticalScale} from 'react-native-size-matters';
 import {useTranslation} from 'react-i18next';
 
 import Text from '../../../../components/AppText';
+import ScalePressable from '../../../../components/ScalePressable';
 import {uiStyle, useTheme} from '../../../../components/ThemeContext';
 import {trigger} from '../../../../utils/trigger';
 
@@ -20,19 +21,17 @@ const HarborSearchResultCard = memo(({user, onPress, onAvatarPress}) => {
     const {t} = useTranslation('harbor');
 
     return (
-        <Pressable
+        <ScalePressable
             accessibilityRole="button"
             accessibilityLabel={user.username || t('Harbor 會員')}
             onPress={() => {
                 trigger();
                 onPress(user);
             }}
-            style={({pressed}) => [
+            style={[
                 styles.userResultCard,
                 {
-                    backgroundColor: pressed
-                        ? theme.tonal.primary08
-                        : theme.white,
+                    backgroundColor: theme.white,
                     borderColor: theme.themeColorUltraLight,
                 },
             ]}>
@@ -95,7 +94,7 @@ const HarborSearchResultCard = memo(({user, onPress, onAvatarPress}) => {
                 size={scale(20)}
                 color={theme.black.third}
             />
-        </Pressable>
+        </ScalePressable>
     );
 });
 

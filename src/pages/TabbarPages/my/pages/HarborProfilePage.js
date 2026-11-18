@@ -27,6 +27,7 @@ import Animated, {
 import { scale, verticalScale } from 'react-native-size-matters';
 
 import Text from '../../../../components/AppText';
+import ScalePressable from '../../../../components/ScalePressable';
 import TextInput from '../../../../components/AppTextInput';
 import { uiStyle, useTheme } from '../../../../components/ThemeContext';
 import { useHarborSession } from '../../../../contexts/HarborSessionContext';
@@ -953,16 +954,14 @@ const HarborProfilePage = ({ navigation, route }) => {
                             {sessionUsername &&
                             !isOwnProfile &&
                             viewedUser?.canChat !== false ? (
-                                <Pressable
+                                <ScalePressable
                                     accessibilityRole="button"
                                     disabled={isOpeningChat}
                                     onPress={openHarborChat}
-                                    style={({pressed}) => [
+                                    style={[
                                         styles.chatButton,
                                         {
-                                            backgroundColor: pressed
-                                                ? theme.tonal.primary30
-                                                : theme.tonal.primary15,
+                                            backgroundColor: theme.tonal.primary15,
                                             borderColor:
                                                 theme.themeColorUltraLight,
                                         },
@@ -989,7 +988,7 @@ const HarborProfilePage = ({ navigation, route }) => {
                                             ? t('正在開啟…')
                                             : t('開始 Chat')}
                                     </Text>
-                                </Pressable>
+                                </ScalePressable>
                             ) : null}
                         </View>
 
@@ -1210,7 +1209,7 @@ const HarborProfilePage = ({ navigation, route }) => {
                                             );
                                             if (item.onPress) {
                                                 return (
-                                                    <Pressable
+                                                    <ScalePressable
                                                         key={item.key}
                                                         accessibilityRole="button"
                                                         accessibilityLabel={`${
@@ -1222,18 +1221,9 @@ const HarborProfilePage = ({ navigation, route }) => {
                                                             trigger();
                                                             item.onPress();
                                                         }}
-                                                        style={({
-                                                            pressed,
-                                                        }) => [
-                                                            styles.metric,
-                                                            pressed && {
-                                                                backgroundColor:
-                                                                    theme.tonal
-                                                                        .primary08,
-                                                            },
-                                                        ]}>
+                                                        style={styles.metric}>
                                                         {content}
-                                                    </Pressable>
+                                                    </ScalePressable>
                                                 );
                                             }
                                             return (
@@ -1605,7 +1595,7 @@ const HarborProfilePage = ({ navigation, route }) => {
                     </>
                 )}
 
-                <Pressable
+                <ScalePressable
                     accessibilityRole="link"
                     disabled={isLoadingProfile || profileError}
                     onPress={
@@ -1613,10 +1603,9 @@ const HarborProfilePage = ({ navigation, route }) => {
                             ? openHarborProfileSettings
                             : openHarborProfile
                     }
-                    style={({ pressed }) => [
+                    style={[
                         styles.webButton,
                         { borderColor: theme.themeColorUltraLight },
-                        pressed && { backgroundColor: theme.tonal.primary08 },
                     ]}>
                     <Ionicons
                         name="open-outline"
@@ -1632,7 +1621,7 @@ const HarborProfilePage = ({ navigation, route }) => {
                             ? t('在 Harbor Web 編輯更多資料')
                             : t('在 Harbor Web 查看個人資料')}
                     </Text>
-                </Pressable>
+                </ScalePressable>
             </KeyboardAwareScrollView>
             {isEditing ? <KeyboardToolbar /> : null}
             <HarborUsernameEditorModal

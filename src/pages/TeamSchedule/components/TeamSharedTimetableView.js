@@ -10,6 +10,7 @@ import {scale, verticalScale} from 'react-native-size-matters';
 import Ionicons from '@react-native-vector-icons/ionicons';
 
 import Text from '../../../components/AppText';
+import ScalePressable from '../../../components/ScalePressable';
 import {uiStyle, useTheme} from '../../../components/ThemeContext';
 import {trigger} from '../../../utils/trigger';
 import CourseActionMenuCard from '../../TabbarPages/course/components/CourseActionMenuCard';
@@ -108,7 +109,7 @@ const TeamSharedTimetableView = ({
         return (
             <View style={styles.state}>
                 <Text style={[styles.message, {color: theme.unread}]}>{t('暫時無法載入小組課表。')}</Text>
-                <Pressable accessibilityRole="button" onPress={() => { trigger(); onRetry?.(); }} style={({pressed}) => [styles.retry, {backgroundColor: pressed ? theme.tonal.primary30 : theme.tonal.primary15}]}><Text style={[styles.retryText, {color: theme.themeColor}]}>{t('重試')}</Text></Pressable>
+                <ScalePressable accessibilityRole="button" onPress={() => { trigger(); onRetry?.(); }} style={[styles.retry, {backgroundColor: theme.tonal.primary15}]}><Text style={[styles.retryText, {color: theme.themeColor}]}>{t('重試')}</Text></ScalePressable>
             </View>
         );
     }

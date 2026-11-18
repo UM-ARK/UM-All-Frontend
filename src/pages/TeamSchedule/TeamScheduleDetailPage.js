@@ -29,6 +29,7 @@ import {useAppShare} from '../../contexts/AppShareContext';
 import {useHarborSession} from '../../contexts/HarborSessionContext';
 import {useSchedulingSession} from '../../contexts/SchedulingSessionContext';
 import Text from '../../components/AppText';
+import ScalePressable from '../../components/ScalePressable';
 import {uiStyle, useTheme} from '../../components/ThemeContext';
 import SegmentControl from '../../components/SegmentControl';
 import {
@@ -1515,15 +1516,13 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                             ) : null}
                         </View>
                         {heatmapBundle.suggestions.map((item, index) => (
-                            <Pressable
+                            <ScalePressable
                                 key={`suggest-${item.weekday}-${item.startMinute}-${index}`}
                                 onPress={() => handleSuggestionPress(item)}
-                                style={({pressed}) => [
+                                style={[
                                     styles.suggestRow,
                                     {
-                                        backgroundColor: pressed
-                                            ? theme.tonal.primary30
-                                            : theme.tonal.primary15,
+                                        backgroundColor: theme.tonal.primary15,
                                     },
                                 ]}>
                                 <Text
@@ -1550,7 +1549,7 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                                     ]}>
                                     {item.availableCount}/{item.memberCount}
                                 </Text>
-                            </Pressable>
+                            </ScalePressable>
                         ))}
                     </View>
                 ) : null}
@@ -1571,7 +1570,7 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                                         const selected =
                                             value === displaySlotMinutes;
                                         return (
-                                            <Pressable
+                                            <ScalePressable
                                                 key={value}
                                                 accessibilityRole="radio"
                                                 accessibilityState={{selected}}
@@ -1580,14 +1579,12 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                                                         value,
                                                     )
                                                 }
-                                                style={({pressed}) => [
+                                                style={[
                                                     styles.displaySlotOption,
                                                     {
                                                         backgroundColor: selected
                                                             ? theme.themeColor
-                                                            : pressed
-                                                              ? theme.tonal.primary30
-                                                              : theme.tonal.primary15,
+                                                            : theme.tonal.primary15,
                                                     },
                                                 ]}>
                                                 <Text
@@ -1602,7 +1599,7 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                                                     {value}
                                                     {t('分鐘')}
                                                 </Text>
-                                            </Pressable>
+                                            </ScalePressable>
                                         );
                                     })}
                                 </View>
@@ -1693,22 +1690,18 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
 
                 {scheduleMode === 'shared' ? (
                     <View style={styles.section}>
-                        <Pressable
+                        <ScalePressable
                             accessibilityRole="button"
                             onPress={() => {
                                 trigger();
                                 setSharedTimetableSheetVisible(true);
                             }}
-                            style={({pressed}) => [
+                            style={[
                                 styles.sharedTimetableCta,
                                 {
-                                    backgroundColor: pressed
-                                        ? isSharedTimetableOutdated
-                                            ? theme.tonal.unread30
-                                            : theme.tonal.primary30
-                                        : isSharedTimetableOutdated
-                                          ? theme.tonal.unread15
-                                          : theme.tonal.primary15,
+                                    backgroundColor: isSharedTimetableOutdated
+                                      ? theme.tonal.unread15
+                                      : theme.tonal.primary15,
                                 },
                             ]}>
                             <View
@@ -1762,7 +1755,7 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                                 }
                                 size={scale(17)}
                             />
-                        </Pressable>
+                        </ScalePressable>
                         <TeamSharedTimetableView
                             members={sharedTimetables.members}
                             courseSlots={courseCatalogSlots}
@@ -1888,18 +1881,16 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                             ),
                         },
                     ]}>
-                    <Pressable
+                    <ScalePressable
                         accessibilityRole="button"
                         onPress={() => {
                             trigger();
                             editor.enterEdit();
                         }}
-                        style={({pressed}) => [
+                        style={[
                             styles.editCta,
                             {
-                                backgroundColor: pressed
-                                    ? theme.tonal.primary50
-                                    : theme.themeColor,
+                                backgroundColor: theme.themeColor,
                             },
                         ]}>
                         <Text
@@ -1911,7 +1902,7 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                                 ? t('修改我的時間')
                                 : t('填寫我的時間')}
                         </Text>
-                    </Pressable>
+                    </ScalePressable>
                 </View>
             ) : null}
 

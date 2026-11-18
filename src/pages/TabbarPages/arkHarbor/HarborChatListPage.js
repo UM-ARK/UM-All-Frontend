@@ -19,6 +19,7 @@ import {scale, verticalScale} from 'react-native-size-matters';
 import {useTranslation} from 'react-i18next';
 
 import Text from '../../../components/AppText';
+import ScalePressable from '../../../components/ScalePressable';
 import {uiStyle, useTheme} from '../../../components/ThemeContext';
 import {useHarborSession} from '../../../contexts/HarborSessionContext';
 import {
@@ -73,19 +74,17 @@ const HarborChatRow = ({channel, onPress}) => {
     const unreadLabel = channel.unreadCount > 99 ? '99+' : String(channel.unreadCount);
 
     return (
-        <Pressable
+        <ScalePressable
             accessibilityLabel={channel.title}
             accessibilityRole="button"
             onPress={() => {
                 trigger();
                 onPress(channel);
             }}
-            style={({pressed}) => [
+            style={[
                 styles.row,
                 {
-                    backgroundColor: pressed
-                        ? theme.tonal.primary08
-                        : theme.white,
+                    backgroundColor: theme.white,
                 },
             ]}>
             <ChatAvatar channel={channel} />
@@ -132,7 +131,7 @@ const HarborChatRow = ({channel, onPress}) => {
                     ) : null}
                 </View>
             </View>
-        </Pressable>
+        </ScalePressable>
     );
 };
 
@@ -454,7 +453,7 @@ const HarborChatListPage = ({navigation}) => {
             // eslint-disable-next-line react/no-unstable-nested-components
             headerRight: () => (
                 <View style={styles.headerActions}>
-                    <Pressable
+                    <ScalePressable
                         accessibilityLabel={t('私訊設定')}
                         accessibilityRole="button"
                         hitSlop={scale(8)}
@@ -462,19 +461,14 @@ const HarborChatListPage = ({navigation}) => {
                             trigger();
                             setIsSettingsVisible(true);
                         }}
-                        style={({pressed}) => [
-                            styles.headerButton,
-                            pressed && {
-                                backgroundColor: theme.tonal.primary15,
-                            },
-                        ]}>
+                        style={styles.headerButton}>
                         <MaterialCommunityIcons
                             color={theme.themeColor}
                             name="cog-outline"
                             size={scale(22)}
                         />
-                    </Pressable>
-                    <Pressable
+                    </ScalePressable>
+                    <ScalePressable
                         accessibilityLabel={t('找人聊天')}
                         accessibilityRole="button"
                         hitSlop={scale(8)}
@@ -482,18 +476,13 @@ const HarborChatListPage = ({navigation}) => {
                             trigger();
                             findSomeone();
                         }}
-                        style={({pressed}) => [
-                            styles.headerButton,
-                            pressed && {
-                                backgroundColor: theme.tonal.primary15,
-                            },
-                        ]}>
+                        style={styles.headerButton}>
                         <MaterialCommunityIcons
                             color={theme.themeColor}
                             name="plus-circle-outline"
                             size={scale(23)}
                         />
-                    </Pressable>
+                    </ScalePressable>
                 </View>
             ),
         });

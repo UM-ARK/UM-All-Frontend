@@ -26,6 +26,7 @@ import {scale, verticalScale} from 'react-native-size-matters';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 import Text from '../../../components/AppText';
+import ScalePressable from '../../../components/ScalePressable';
 import TextInput from '../../../components/AppTextInput';
 import HyperlinkText from '../../../components/HyperlinkText';
 import {uiStyle, useTheme} from '../../../components/ThemeContext';
@@ -963,21 +964,19 @@ const HarborChatChannelPage = ({navigation, route}) => {
                             </Text>
                         </Pressable>
                     ) : null}
-                    <Pressable
+                    <ScalePressable
                         accessibilityLabel={t('傳送')}
                         accessibilityRole="button"
                         accessibilityState={{disabled: !draft.trim() || isSending}}
                         disabled={!draft.trim() || isSending}
                         onPress={sendMessage}
-                        style={({pressed}) => [
+                        style={[
                             styles.sendButton,
                             {
                                 backgroundColor:
                                     !draft.trim() || isSending
                                         ? theme.disabled
-                                        : pressed
-                                            ? theme.themeColorLight
-                                            : theme.themeColor,
+                                        : theme.themeColor,
                             },
                         ]}>
                         {isSending ? (
@@ -992,7 +991,7 @@ const HarborChatChannelPage = ({navigation, route}) => {
                                 size={scale(17)}
                             />
                         )}
-                    </Pressable>
+                    </ScalePressable>
                 </View>
             </KeyboardAvoidingView>
         </View>

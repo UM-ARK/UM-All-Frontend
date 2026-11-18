@@ -15,6 +15,7 @@ import {scale, verticalScale} from 'react-native-size-matters';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 import Text from '../../../components/AppText';
+import ScalePressable from '../../../components/ScalePressable';
 import {uiStyle, useTheme} from '../../../components/ThemeContext';
 import {useAppShare} from '../../../contexts/AppShareContext';
 import {logToFirebase} from '../../../utils/firebaseAnalytics';
@@ -280,16 +281,14 @@ const InviteManagementSheet = ({
                     </>
                 )}
 
-                <Pressable
+                <ScalePressable
                     accessibilityRole="button"
                     disabled={actionsDisabled}
                     onPress={handleShare}
-                    style={({pressed}) => [
+                    style={[
                         styles.action,
                         {
-                            backgroundColor: pressed
-                                ? theme.tonal.primary50
-                                : theme.themeColor,
+                            backgroundColor: theme.themeColor,
                             opacity: actionsDisabled ? 0.6 : 1,
                         },
                     ]}>
@@ -300,18 +299,16 @@ const InviteManagementSheet = ({
                         ]}>
                         {t('分享邀請')}
                     </Text>
-                </Pressable>
+                </ScalePressable>
 
-                <Pressable
+                <ScalePressable
                     accessibilityRole="button"
                     disabled={actionsDisabled || !inviteStatus}
                     onPress={handleToggleStatus}
-                    style={({pressed}) => [
+                    style={[
                         styles.action,
                         {
-                            backgroundColor: pressed
-                                ? theme.tonal.primary30
-                                : theme.tonal.primary15,
+                            backgroundColor: theme.tonal.primary15,
                             opacity:
                                 actionsDisabled || !inviteStatus ? 0.6 : 1,
                         },
@@ -323,7 +320,7 @@ const InviteManagementSheet = ({
                         ]}>
                         {isOpen ? t('關閉邀請') : t('開啟邀請')}
                     </Text>
-                </Pressable>
+                </ScalePressable>
 
                 <Pressable
                     accessibilityRole="button"
@@ -347,18 +344,16 @@ const InviteManagementSheet = ({
                     </Text>
                 </Pressable>
 
-                <Pressable
+                <ScalePressable
                     accessibilityRole="button"
                     onPress={() => {
                         trigger();
                         sheetRef.current?.hide();
                     }}
-                    style={({pressed}) => [
+                    style={[
                         styles.cancel,
                         {
-                            backgroundColor: pressed
-                                ? theme.tonal.primary15
-                                : theme.white,
+                            backgroundColor: theme.white,
                             borderColor: theme.themeColorUltraLight,
                         },
                     ]}>
@@ -369,7 +364,7 @@ const InviteManagementSheet = ({
                         ]}>
                         {t('關閉')}
                     </Text>
-                </Pressable>
+                </ScalePressable>
             </View>
         </ActionSheet>
     );

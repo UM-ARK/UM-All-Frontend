@@ -1,5 +1,5 @@
 import React from 'react';
-import {Pressable, StyleSheet, View} from 'react-native';
+import {StyleSheet, View} from 'react-native';
 
 import {useTranslation} from 'react-i18next';
 import Ionicons from '@react-native-vector-icons/ionicons';
@@ -7,6 +7,7 @@ import MaterialCommunityIcons from "@react-native-vector-icons/material-design-i
 import {scale, verticalScale} from 'react-native-size-matters';
 
 import Text from '../../../../components/AppText';
+import ScalePressable from '../../../../components/ScalePressable';
 import {uiStyle, useTheme} from '../../../../components/ThemeContext';
 import {trigger} from '../../../../utils/trigger';
 import HarborProfileCard from './HarborProfileCard';
@@ -168,13 +169,12 @@ const HarborProfileOverview = ({
                 />
 
                 {user.isAdmin || user.isModerator ? (
-                    <Pressable
+                    <ScalePressable
                         accessibilityRole="button"
                         accessibilityLabel={t('審核', {ns: 'harbor'})}
-                        style={({pressed}) => [
+                        style={[
                             styles.reviewRow,
                             {borderTopColor: theme.disabled},
-                            pressed && {backgroundColor: theme.tonal.primary08},
                         ]}
                         onPress={() => {
                             trigger();
@@ -227,7 +227,7 @@ const HarborProfileOverview = ({
                                 color={theme.black.third}
                             />
                         </View>
-                    </Pressable>
+                    </ScalePressable>
                 ) : null}
 
                 <HarborStatsCard items={contributionItems} />

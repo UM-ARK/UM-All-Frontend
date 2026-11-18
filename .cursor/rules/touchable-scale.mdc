@@ -1,36 +1,40 @@
 ---
-description: 需要按下縮放彈簧回饋時使用內建 TouchableScale（Reanimated Pressable）
+description: 一般按鈕、列表列和側欄操作使用共用 ScalePressable 按壓回彈
 globs: src/**/*.js
 alwaysApply: false
 ---
 
-# TouchableScale 互動按鈕
+# 按壓回饋
 
 ## 適用時機
 
-凡需要**按下時縮放、鬆手彈簧回彈**等互動回饋的按鈕或可點區域，應使用專案內建元件，**不要**僅用無動畫的 `Pressable`／為此目的新增 `react-native-touchable-scale`。
+一般按鈕、圖示按鈕、可點列表列和側欄操作使用 `ScalePressable`。按下時微縮至 98%，放開時回彈。啟用系統「減少動態效果」時，由元件改用輕微淡化。
+
+禁止在 `pressed`、`onPressIn` 或 ripple 中鋪淺藍底或切換主題底色。普通按壓統一交給共用元件，避免另外疊加透明度、底色或縮放。選取、展開、未讀等持續狀態按各自的語義設定樣式。
 
 ## 正確用法
 
-- 元件路徑：[src/components/TouchableScale.js](src/components/TouchableScale.js)
-- 依檔案深度調整匯入，例如自 `src/pages/...`：`import TouchableScale from '../../../components/TouchableScale';`
-- 與一般 `Pressable` 相同：可傳 `style`、`onPress`、`onLongPress`、`disabled`、`hitSlop` 等；互動時維持 **`trigger()`** 觸覺（若為使用者可見操作）。
+- 元件路徑 [src/components/ScalePressable.js](../../src/components/ScalePressable.js)。
+- 傳入一般 `style` 物件或陣列，以及 `onPress`、`onLongPress`、`disabled`、`hitSlop` 等 Pressable props。
+- 保留 `trigger()` 觸覺回饋與原有無障礙屬性。
 
 ```javascript
-import TouchableScale from '../../../components/TouchableScale';
+import ScalePressable from '../../../components/ScalePressable';
 
-<TouchableScale style={pillStyle} onPress={() => { trigger(); handlePress(); }}>
-  <Text>操作</Text>
-</TouchableScale>
+<ScalePressable style={pillStyle} onPress={() => { trigger(); handlePress(); }}>
+    <Text>操作</Text>
+</ScalePressable>
 ```
 
-## 可選 Props
+## 自訂縮放
+
+特定互動確實需要自訂縮放時，可使用底層 [TouchableScale](../../src/components/TouchableScale.js)。
 
 - **`activeScale`**：按下目標 scale（預設見元件內 `DEFAULT_ACTIVE_SCALE`）。
 - **`springConfig`**：覆寫 `withSpring` 第二參數（`damping` / `stiffness` / `mass` 等）。
 
 ## 禁止與例外
 
-- ❌ 為「要有縮放回饋」而在新程式碼引入 **`TouchableOpacity`**（專案規範以 `Pressable` 為主；縮放請用 `TouchableScale`）。
+- ❌ 為縮放回饋而在新程式碼引入 `TouchableOpacity`。
 - ❌ 新功能不要依賴 **`react-native-touchable-scale`**（舊版 `Animated`）；存量可逐步改為內建 `TouchableScale`。
-- 不需縮放動畫時（例如純列表列、導覽列原生按鈕）仍依 `code-style.mdc`（Pressable 規範）或 React Navigation 原生按鈕即可。
+- 導覽列原生按鈕可使用 React Navigation 的原生回饋。

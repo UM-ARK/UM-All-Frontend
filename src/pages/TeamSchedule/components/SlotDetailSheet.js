@@ -11,6 +11,7 @@ import {scale, verticalScale} from 'react-native-size-matters';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 import Text from '../../../components/AppText';
+import ScalePressable from '../../../components/ScalePressable';
 import {uiStyle, useTheme} from '../../../components/ThemeContext';
 import {ARK_HARBOR_AVATAR_TEMPLATE} from '../../../utils/pathMap';
 import {
@@ -541,18 +542,16 @@ const SlotDetailSheet = ({
                         ) : null}
                     </>
                 ) : null}
-                <Pressable
+                <ScalePressable
                     accessibilityRole="button"
                     onPress={() => {
                         trigger();
                         sheetRef.current?.hide();
                     }}
-                    style={({pressed}) => [
+                    style={[
                         styles.closeBtn,
                         {
-                            backgroundColor: pressed
-                                ? theme.tonal.primary30
-                                : theme.tonal.primary15,
+                            backgroundColor: theme.tonal.primary15,
                         },
                     ]}>
                     <Text
@@ -562,7 +561,7 @@ const SlotDetailSheet = ({
                         ]}>
                         {t('關閉')}
                     </Text>
-                </Pressable>
+                </ScalePressable>
             </View>
         </ActionSheet>
     );

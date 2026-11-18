@@ -27,6 +27,7 @@ import {
 import {sendHarborChatMessage} from '../utils/harbor/harborApi';
 import {trigger} from '../utils/trigger';
 import Text from './AppText';
+import ScalePressable from './ScalePressable';
 import {uiStyle, useTheme} from './ThemeContext';
 
 const AppShareAvatar = ({channel, selected, onPress}) => {
@@ -218,7 +219,7 @@ const AppShareSheet = ({visible, payload, onClose}) => {
                     <Text style={[styles.title, {color: theme.black.main}]}>
                         {t('分享至')}
                     </Text>
-                    <Pressable
+                    <ScalePressable
                         accessibilityLabel={t('關閉')}
                         accessibilityRole="button"
                         hitSlop={scale(8)}
@@ -226,16 +227,13 @@ const AppShareSheet = ({visible, payload, onClose}) => {
                             trigger();
                             hideSheet();
                         }}
-                        style={({pressed}) => [
-                            styles.closeButton,
-                            pressed && {backgroundColor: theme.tonal.primary15},
-                        ]}>
+                        style={styles.closeButton}>
                         <Ionicons
                             color={theme.black.second}
                             name="close"
                             size={scale(22)}
                         />
-                    </Pressable>
+                    </ScalePressable>
                 </View>
 
                 <Text style={[styles.sectionTitle, {color: theme.black.main}]}>
@@ -335,16 +333,14 @@ const AppShareSheet = ({visible, payload, onClose}) => {
                 </View>
 
                 {selectedChannel ? (
-                    <Pressable
+                    <ScalePressable
                         accessibilityRole="button"
                         disabled={isSending}
                         onPress={handleSend}
-                        style={({pressed}) => [
+                        style={[
                             styles.sendButton,
                             {
-                                backgroundColor: pressed
-                                    ? theme.tonal.primary50
-                                    : theme.themeColor,
+                                backgroundColor: theme.themeColor,
                             },
                             isSending && {opacity: 0.65},
                         ]}>
@@ -357,7 +353,7 @@ const AppShareSheet = ({visible, payload, onClose}) => {
                                 {t('傳送給 {{name}}', {name: selectedChannel.title})}
                             </Text>
                         )}
-                    </Pressable>
+                    </ScalePressable>
                 ) : null}
             </View>
         </ActionSheet>

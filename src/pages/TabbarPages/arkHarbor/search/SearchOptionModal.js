@@ -17,6 +17,7 @@ import {scale, verticalScale} from 'react-native-size-matters';
 import {useTranslation} from 'react-i18next';
 
 import Text from '../../../../components/AppText';
+import ScalePressable from '../../../../components/ScalePressable';
 import {uiStyle, useTheme} from '../../../../components/ThemeContext';
 import {
     buildHarborCategoryRows,
@@ -75,14 +76,14 @@ const SearchOptionModal = ({
         ({item}) => {
             const selected = item.key === selectedKey;
             return (
-                <Pressable
+                <ScalePressable
                     accessibilityRole="button"
                     accessibilityState={{selected}}
                     onPress={() => {
                         trigger();
                         onSelect(item.value);
                     }}
-                    style={({pressed}) => [
+                    style={[
                         styles.optionRow,
                         hierarchical && item.depth > 0
                             ? {
@@ -92,11 +93,9 @@ const SearchOptionModal = ({
                             }
                             : null,
                         {
-                            backgroundColor: pressed
-                                ? theme.tonal.primary15
-                                : selected
-                                    ? theme.tonal.primary08
-                                    : theme.white,
+                            backgroundColor: selected
+                                ? theme.tonal.primary08
+                                : theme.white,
                             borderBottomColor: theme.themeColorUltraLight,
                         },
                     ]}>
@@ -125,7 +124,7 @@ const SearchOptionModal = ({
                         {item.label}
                     </Text>
                     {hierarchical && item.hasChildren ? (
-                        <Pressable
+                        <ScalePressable
                             accessibilityRole="button"
                             accessibilityState={{
                                 expanded: item.isExpanded,
@@ -142,13 +141,7 @@ const SearchOptionModal = ({
                                 trigger();
                                 handleToggleCategory(item);
                             }}
-                            style={({pressed}) => [
-                                styles.optionToggle,
-                                pressed && {
-                                    backgroundColor:
-                                        theme.tonal.primary15,
-                                },
-                            ]}>
+                            style={styles.optionToggle}>
                             <MaterialCommunityIcons
                                 name={
                                     item.isExpanded
@@ -158,7 +151,7 @@ const SearchOptionModal = ({
                                 size={scale(19)}
                                 color={theme.themeColor}
                             />
-                        </Pressable>
+                        </ScalePressable>
                     ) : null}
                     {selected ? (
                         <MaterialCommunityIcons
@@ -167,7 +160,7 @@ const SearchOptionModal = ({
                             color={theme.themeColor}
                         />
                     ) : null}
-                </Pressable>
+                </ScalePressable>
             );
         },
         [
@@ -220,7 +213,7 @@ const SearchOptionModal = ({
                             ]}>
                             {title}
                         </Text>
-                        <Pressable
+                        <ScalePressable
                             accessibilityRole="button"
                             accessibilityLabel={t('關閉')}
                             hitSlop={scale(8)}
@@ -228,19 +221,13 @@ const SearchOptionModal = ({
                                 trigger();
                                 onClose();
                             }}
-                            style={({pressed}) => [
-                                styles.modalCloseButton,
-                                pressed && {
-                                    backgroundColor:
-                                        theme.tonal.primary15,
-                                },
-                            ]}>
+                            style={styles.modalCloseButton}>
                             <MaterialCommunityIcons
                                 name="close"
                                 size={scale(20)}
                                 color={theme.black.main}
                             />
-                        </Pressable>
+                        </ScalePressable>
                     </View>
                     <FlashList
                         data={data}

@@ -20,6 +20,7 @@ import { scale, verticalScale } from 'react-native-size-matters';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import Text from '../../../components/AppText';
+import ScalePressable from '../../../components/ScalePressable';
 import searchFieldStyles, { SEARCH_FIELD_ICON_SIZE } from '../../../components/searchFieldStyles';
 import { uiStyle, useTheme } from '../../../components/ThemeContext';
 import { openLink } from '../../../utils/browser';
@@ -184,13 +185,10 @@ const WikiHome = ({navigation}) => {
                         styles.category,
                         {backgroundColor: theme.white, borderColor: theme.disabled},
                     ]}>
-                    <Pressable
+                    <ScalePressable
                         accessibilityState={{expanded: !isCollapsed}}
                         onPress={() => toggleCategory(item.key)}
-                        style={({pressed}) => [
-                            styles.categoryHeader,
-                            pressed && {backgroundColor: theme.tonal.primary15},
-                        ]}>
+                        style={styles.categoryHeader}>
                         <View style={styles.categoryTitleRow}>
                             <Text style={[styles.categoryTitle, {color: theme.black.main}]}>
                                 {t(item.title)}
@@ -204,19 +202,17 @@ const WikiHome = ({navigation}) => {
                             size={scale(20)}
                             color={theme.black.third}
                         />
-                    </Pressable>
+                    </ScalePressable>
                     {!isCollapsed ? (
                         <View style={styles.articleChips}>
                             {item.articles.map(article => (
-                                <Pressable
+                                <ScalePressable
                                     key={article.title}
                                     onPress={() => openArticle(article.title)}
-                                    style={({pressed}) => [
+                                    style={[
                                         styles.articleChip,
                                         {
-                                            backgroundColor: pressed
-                                                ? theme.tonal.primary30
-                                                : theme.tonal.primary08,
+                                            backgroundColor: theme.tonal.primary08,
                                             borderColor: theme.disabled,
                                         },
                                     ]}>
@@ -228,7 +224,7 @@ const WikiHome = ({navigation}) => {
                                     <Text style={[styles.articleChipText, {color: theme.black.main}]}>
                                         {article.label || article.title}
                                     </Text>
-                                </Pressable>
+                                </ScalePressable>
                             ))}
                         </View>
                     ) : null}
@@ -264,16 +260,15 @@ const WikiHome = ({navigation}) => {
             return (
                 <View style={styles.recentList}>
                     {item.articles.map((article, index) => (
-                        <Pressable
+                        <ScalePressable
                             key={`${article.title}-${article.timestamp || index}`}
                             onPress={() => openArticle(article.title)}
-                            style={({pressed}) => [
+                            style={[
                                 styles.recentRow,
                                 index < item.articles.length - 1 && {
                                     borderBottomWidth: StyleSheet.hairlineWidth,
                                     borderBottomColor: theme.disabled,
                                 },
-                                pressed && {backgroundColor: theme.tonal.primary15},
                             ]}>
                             <MaterialCommunityIcons
                                 name="history"
@@ -295,7 +290,7 @@ const WikiHome = ({navigation}) => {
                                 size={scale(20)}
                                 color={theme.black.third}
                             />
-                        </Pressable>
+                        </ScalePressable>
                     ))}
                 </View>
             );
@@ -308,28 +303,28 @@ const WikiHome = ({navigation}) => {
             <Text style={[styles.intro, {color: theme.black.second}]}>
                 {t('探索澳大資訊、攻略與學習經驗')}
             </Text>
-            <Pressable
+            <ScalePressable
                 accessibilityRole="button"
                 onPress={() => {
                     trigger();
                     navigation.navigate('WikiSearch');
                 }}
-                style={({pressed}) => [
+                style={[
                     searchFieldStyles.field,
-                    {backgroundColor: pressed ? theme.tonal.primary30 : theme.white, borderColor: theme.white},
+                    {backgroundColor: theme.white, borderColor: theme.white},
                 ]}>
                 <Text numberOfLines={1} style={[searchFieldStyles.text, {color: theme.black.third}]}>{t('搜尋 ARK Wiki')}</Text>
                 <View pointerEvents="none" style={searchFieldStyles.icon}>
                     <Ionicons name="search" size={SEARCH_FIELD_ICON_SIZE} color={theme.black.third} />
                 </View>
-            </Pressable>
+            </ScalePressable>
             <View style={styles.quickActions}>
-                <Pressable
+                <ScalePressable
                     onPress={openRandomArticle}
-                    style={({pressed}) => [styles.quickButton, {backgroundColor: pressed ? theme.tonal.primary50 : theme.tonal.primary30}]}>
+                    style={[styles.quickButton, {backgroundColor: theme.tonal.primary30}]}>
                     <MaterialCommunityIcons name="shuffle-variant" size={scale(20)} color={theme.themeColor} />
                     <Text style={[styles.quickText, {color: theme.themeColor}]}>{t('隨機條目')}</Text>
-                </Pressable>
+                </ScalePressable>
                 <Pressable
                     onPress={() => {
                         trigger();

@@ -1,12 +1,12 @@
 import React, {memo} from 'react';
 import {
-    Pressable,
     StyleSheet,
 } from 'react-native';
 
 import {scale, verticalScale} from 'react-native-size-matters';
 
 import Text from '../../../../components/AppText';
+import ScalePressable from '../../../../components/ScalePressable';
 import {uiStyle, useTheme} from '../../../../components/ThemeContext';
 import {trigger} from '../../../../utils/trigger';
 
@@ -14,23 +14,19 @@ const SearchFilterChip = memo(({label, selected, onPress}) => {
     const {theme} = useTheme();
 
     return (
-        <Pressable
+        <ScalePressable
             accessibilityRole="button"
             accessibilityState={{selected}}
             onPress={() => {
                 trigger('selection');
                 onPress();
             }}
-            style={({pressed}) => [
+            style={[
                 styles.filterChip,
                 {
                     backgroundColor: selected
-                        ? pressed
-                            ? theme.tonal.primary50
-                            : theme.tonal.primary30
-                        : pressed
-                            ? theme.tonal.primary15
-                            : theme.tonal.primary08,
+                        ? theme.tonal.primary30
+                        : theme.tonal.primary08,
                     borderColor: selected
                         ? theme.themeColor
                         : theme.themeColorUltraLight,
@@ -48,7 +44,7 @@ const SearchFilterChip = memo(({label, selected, onPress}) => {
                 ]}>
                 {label}
             </Text>
-        </Pressable>
+        </ScalePressable>
     );
 });
 

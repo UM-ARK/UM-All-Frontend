@@ -19,6 +19,7 @@ import Ionicons from "@react-native-vector-icons/ionicons";
 import {scale, verticalScale} from 'react-native-size-matters';
 
 import Text from '../../../../components/AppText';
+import ScalePressable from '../../../../components/ScalePressable';
 import SegmentControl from '../../../../components/SegmentControl';
 import {uiStyle, useTheme} from '../../../../components/ThemeContext';
 import {useHarborSession} from '../../../../contexts/HarborSessionContext';
@@ -678,16 +679,15 @@ const HarborInboxPage = ({
                 ? ARK_HARBOR_AVATAR(avatarActor.username)
                 : '');
         return (
-            <Pressable
+            <ScalePressable
                 accessibilityRole="button"
-                style={({pressed}) => [
+                style={[
                     styles.row,
                     {
                         backgroundColor: theme.white,
                         borderColor: theme.themeColorUltraLight,
                     },
                     unread && {borderColor: theme.themeColor},
-                    pressed && {backgroundColor: theme.tonal.primary08},
                 ]}
                 onPress={() => handlePress(item)}>
                 <Pressable
@@ -780,7 +780,7 @@ const HarborInboxPage = ({
                         color={theme.black.third}
                     />
                 )}
-            </Pressable>
+            </ScalePressable>
         );
     };
 

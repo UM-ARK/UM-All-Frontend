@@ -13,6 +13,7 @@ import {scale} from 'react-native-size-matters';
 import {useTranslation} from 'react-i18next';
 
 import Text from '../../../../components/AppText';
+import ScalePressable from '../../../../components/ScalePressable';
 import ARKImageView from '../../../../components/ARKImageView';
 import {useTheme} from '../../../../components/ThemeContext';
 import {trigger} from '../../../../utils/trigger';
@@ -328,20 +329,20 @@ const HarborComposerImageGrid = ({
                     ) : tile;
                 })}
                 {handleAddImages && itemSize > 0 ? (
-                    <Pressable
+                    <ScalePressable
                         accessibilityLabel={t(isPreparingImages ? '正在處理圖片…' : '新增圖片')}
                         accessibilityRole="button"
                         accessibilityState={{busy: isPreparingImages, disabled: addImageDisabled}}
                         disabled={addImageDisabled}
                         onPress={handleAddImages}
-                        style={({pressed}) => [
+                        style={[
                             styles.item,
                             styles.addTile,
                             itemSizeStyle,
                             {
                                 left: (images.length % GRID_COLUMNS) * stride,
                                 top: Math.floor(images.length / GRID_COLUMNS) * stride,
-                                backgroundColor: pressed ? theme.tonal.primary15 : theme.tonal.primary08,
+                                backgroundColor: theme.tonal.primary08,
                                 borderColor: theme.themeColorUltraLight,
                                 opacity: addImageDisabled && !isPreparingImages ? 0.55 : 1,
                             },
@@ -351,7 +352,7 @@ const HarborComposerImageGrid = ({
                         ) : (
                             <MaterialCommunityIcons name="plus" size={scale(29)} color={theme.themeColor} />
                         )}
-                    </Pressable>
+                    </ScalePressable>
                 ) : null}
             </Animated.View>
             <ARKImageView ref={imageViewerRef} imageUrls={imageUrls} />

@@ -5,7 +5,6 @@ import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {
     ActivityIndicator,
     Alert,
-    Pressable,
     StyleSheet,
     Switch,
     View,
@@ -24,6 +23,7 @@ import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import {scale, verticalScale} from 'react-native-size-matters';
 
 import Text from '../../components/AppText';
+import ScalePressable from '../../components/ScalePressable';
 import TextInput from '../../components/AppTextInput';
 import {uiStyle, useTheme} from '../../components/ThemeContext';
 import {logToFirebase} from '../../utils/firebaseAnalytics';
@@ -474,17 +474,15 @@ const TeamScheduleCreatePage = ({navigation}) => {
                     {t('回覆截止（選填）')}
                 </Text>
                 <View style={styles.deadlineRow}>
-                    <Pressable
+                    <ScalePressable
                         onPress={() => {
                             trigger();
                             setDeadlinePickerVisible(true);
                         }}
-                        style={({pressed}) => [
+                        style={[
                             styles.deadlineButton,
                             {
-                                backgroundColor: pressed
-                                    ? theme.tonal.primary30
-                                    : theme.tonal.primary15,
+                                backgroundColor: theme.tonal.primary15,
                             },
                         ]}>
                         <Text
@@ -494,19 +492,17 @@ const TeamScheduleCreatePage = ({navigation}) => {
                             ]}>
                             {deadlineDisplay}
                         </Text>
-                    </Pressable>
+                    </ScalePressable>
                     {responseDeadlineAt ? (
-                        <Pressable
+                        <ScalePressable
                             onPress={() => {
                                 trigger();
                                 setResponseDeadlineAt(null);
                             }}
-                            style={({pressed}) => [
+                            style={[
                                 styles.clearButton,
                                 {
-                                    backgroundColor: pressed
-                                        ? theme.tonal.primary30
-                                        : theme.tonal.primary08,
+                                    backgroundColor: theme.tonal.primary08,
                                 },
                             ]}>
                             <Text
@@ -516,7 +512,7 @@ const TeamScheduleCreatePage = ({navigation}) => {
                                 ]}>
                                 {t('清除')}
                             </Text>
-                        </Pressable>
+                        </ScalePressable>
                     ) : null}
                 </View>
 
@@ -573,15 +569,13 @@ const TeamScheduleCreatePage = ({navigation}) => {
                     scrollToStartMinute={scrollToStartMinute}
                 />
 
-                <Pressable
+                <ScalePressable
                     disabled={isSubmitting}
                     onPress={handleSubmit}
-                    style={({pressed}) => [
+                    style={[
                         styles.submitButton,
                         {
-                            backgroundColor: pressed
-                                ? theme.themeColorLight
-                                : theme.themeColor,
+                            backgroundColor: theme.themeColor,
                             opacity: isSubmitting ? 0.7 : 1,
                         },
                     ]}>
@@ -596,7 +590,7 @@ const TeamScheduleCreatePage = ({navigation}) => {
                             {t('建立組隊')}
                         </Text>
                     )}
-                </Pressable>
+                </ScalePressable>
             </KeyboardAwareScrollView>
             <KeyboardToolbar />
 

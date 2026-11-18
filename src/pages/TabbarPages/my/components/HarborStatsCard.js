@@ -1,10 +1,11 @@
 import React from 'react';
-import {Pressable, StyleSheet, View} from 'react-native';
+import {StyleSheet, View} from 'react-native';
 
 import {useTranslation} from 'react-i18next';
 import {scale, verticalScale} from 'react-native-size-matters';
 
 import Text from '../../../../components/AppText';
+import ScalePressable from '../../../../components/ScalePressable';
 import {uiStyle, useTheme} from '../../../../components/ThemeContext';
 import {trigger} from '../../../../utils/trigger';
 import HarborSectionHeader from './HarborSectionHeader';
@@ -48,7 +49,7 @@ const HarborStatsCard = ({title, items}) => {
                     );
                     if (item.onPress) {
                         return (
-                            <Pressable
+                            <ScalePressable
                                 key={item.key}
                                 accessibilityRole="button"
                                 accessibilityLabel={`${item.value} ${t(
@@ -58,16 +59,12 @@ const HarborStatsCard = ({title, items}) => {
                                     trigger();
                                     item.onPress();
                                 }}
-                                style={({pressed}) => [
+                                style={[
                                     styles.item,
                                     myCardStyles.column,
-                                    pressed && {
-                                        backgroundColor:
-                                            theme.tonal.primary08,
-                                    },
                                 ]}>
                                 {content}
-                            </Pressable>
+                            </ScalePressable>
                         );
                     }
                     return (

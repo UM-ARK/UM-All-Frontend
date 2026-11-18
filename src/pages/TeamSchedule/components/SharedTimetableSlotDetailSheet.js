@@ -2,7 +2,7 @@
  * 小組課表總覽：固定時段內正在上課的成員與實際課堂明細。
  */
 import React, {memo, useEffect, useMemo, useRef} from 'react';
-import {Pressable, StyleSheet, View} from 'react-native';
+import {StyleSheet, View} from 'react-native';
 
 import {Image} from 'expo-image';
 import {useTranslation} from 'react-i18next';
@@ -11,6 +11,7 @@ import {scale, verticalScale} from 'react-native-size-matters';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 import Text from '../../../components/AppText';
+import ScalePressable from '../../../components/ScalePressable';
 import {uiStyle, useTheme} from '../../../components/ThemeContext';
 import {ARK_HARBOR_AVATAR_TEMPLATE} from '../../../utils/pathMap';
 import {trigger} from '../../../utils/trigger';
@@ -177,18 +178,16 @@ const SharedTimetableSlotDetailSheet = ({
                         </ScrollView>
                     </>
                 ) : null}
-                <Pressable
+                <ScalePressable
                     accessibilityRole="button"
                     onPress={() => {
                         trigger();
                         sheetRef.current?.hide();
                     }}
-                    style={({pressed}) => [
+                    style={[
                         styles.closeButton,
                         {
-                            backgroundColor: pressed
-                                ? theme.tonal.primary30
-                                : theme.tonal.primary15,
+                            backgroundColor: theme.tonal.primary15,
                         },
                     ]}>
                     <Text
@@ -198,7 +197,7 @@ const SharedTimetableSlotDetailSheet = ({
                         ]}>
                         {t('關閉')}
                     </Text>
-                </Pressable>
+                </ScalePressable>
             </View>
         </ActionSheet>
     );

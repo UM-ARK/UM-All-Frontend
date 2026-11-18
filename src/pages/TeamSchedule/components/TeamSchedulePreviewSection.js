@@ -9,7 +9,7 @@ import React, {
     useMemo,
     useState,
 } from 'react';
-import {Pressable, StyleSheet, View} from 'react-native';
+import {StyleSheet, View} from 'react-native';
 
 import {useFocusEffect} from '@react-navigation/native';
 import {useTranslation} from 'react-i18next';
@@ -17,6 +17,7 @@ import Ionicons from '@react-native-vector-icons/ionicons';
 import {scale, verticalScale} from 'react-native-size-matters';
 
 import Text from '../../../components/AppText';
+import ScalePressable from '../../../components/ScalePressable';
 import {uiStyle, useTheme} from '../../../components/ThemeContext';
 import {logToFirebase} from '../../../utils/firebaseAnalytics';
 import {openTeamInviteDetail} from '../../../utils/scheduling/teamInviteLink';
@@ -138,7 +139,7 @@ const TeamSchedulePreviewSection = forwardRef(
 
         return (
             <>
-                <Pressable
+                <ScalePressable
                     accessibilityRole="button"
                     accessibilityLabel={t('組隊約時間')}
                     accessibilityState={{expanded}}
@@ -146,10 +147,7 @@ const TeamSchedulePreviewSection = forwardRef(
                         trigger();
                         setExpanded(current => !current);
                     }}
-                    style={({pressed}) => [
-                        myCardStyles.heading,
-                        pressed && styles.actionPressed,
-                    ]}>
+                    style={myCardStyles.heading}>
                     <View style={myCardStyles.iconColumn}>
                         <View
                             style={[
@@ -177,19 +175,16 @@ const TeamSchedulePreviewSection = forwardRef(
                             color={theme.black.third}
                         />
                     </View>
-                </Pressable>
+                </ScalePressable>
 
                 <View style={[styles.actionRow, !expanded && styles.collapsed]}>
                     <View style={myCardStyles.column} />
                     <View style={styles.primaryActions}>
-                        <Pressable
+                        <ScalePressable
                             accessibilityRole="button"
                             accessibilityLabel={t('新建組隊')}
                             onPress={openCreate}
-                            style={({pressed}) => [
-                                styles.actionButton,
-                                pressed && styles.actionPressed,
-                            ]}>
+                            style={styles.actionButton}>
                             <Ionicons
                                 name="add-circle-outline"
                                 size={scale(16)}
@@ -202,15 +197,12 @@ const TeamSchedulePreviewSection = forwardRef(
                                 ]}>
                                 {t('新建組隊')}
                             </Text>
-                        </Pressable>
-                        <Pressable
+                        </ScalePressable>
+                        <ScalePressable
                             accessibilityRole="button"
                             accessibilityLabel={t('加入隊伍')}
                             onPress={openJoin}
-                            style={({pressed}) => [
-                                styles.actionButton,
-                                pressed && styles.actionPressed,
-                            ]}>
+                            style={styles.actionButton}>
                             <Ionicons
                                 name="enter-outline"
                                 size={scale(16)}
@@ -223,23 +215,22 @@ const TeamSchedulePreviewSection = forwardRef(
                                 ]}>
                                 {t('加入隊伍')}
                             </Text>
-                        </Pressable>
+                        </ScalePressable>
                     </View>
-                    <Pressable
+                    <ScalePressable
                         accessibilityRole="button"
                         accessibilityLabel={t('了解組隊約時間')}
                         onPress={openIntro}
-                        style={({pressed}) => [
+                        style={[
                             myCardStyles.iconColumn,
                             styles.infoButton,
-                            pressed && styles.actionPressed,
                         ]}>
                         <Ionicons
                             name="information-circle-outline"
                             size={scale(17)}
                             color={theme.black.third}
                         />
-                    </Pressable>
+                    </ScalePressable>
                 </View>
 
                 <View
@@ -298,14 +289,13 @@ const TeamSchedulePreviewSection = forwardRef(
                             }
                         />
                     ) : null}
-                    <Pressable
+                    <ScalePressable
                         accessibilityRole="button"
                         accessibilityLabel={t('全部組隊約時間')}
                         onPress={openList}
-                        style={({pressed}) => [
+                        style={[
                             styles.listLink,
                             {borderTopColor: theme.disabled},
-                            pressed && styles.actionPressed,
                         ]}>
                         <Text
                             style={[
@@ -321,7 +311,7 @@ const TeamSchedulePreviewSection = forwardRef(
                                 color={theme.black.third}
                             />
                         </View>
-                    </Pressable>
+                    </ScalePressable>
                 </View>
 
                 <JoinTeamSheet
@@ -366,9 +356,6 @@ const styles = StyleSheet.create({
         minHeight: 44,
         flexShrink: 1,
         gap: scale(4),
-    },
-    actionPressed: {
-        opacity: 0.65,
     },
     actionButtonText: {
         ...uiStyle.defaultText,

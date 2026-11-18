@@ -2,7 +2,6 @@ import React, {
     memo,
 } from 'react';
 import {
-    Pressable,
     View,
 } from 'react-native';
 
@@ -11,6 +10,7 @@ import { scale } from 'react-native-size-matters';
 import { useTranslation } from 'react-i18next';
 
 import Text from '../../../../components/AppText';
+import ScalePressable from '../../../../components/ScalePressable';
 import { useTheme } from '../../../../components/ThemeContext';
 import { trigger } from '../../../../utils/trigger';
 import styles from './styles';
@@ -18,7 +18,7 @@ import styles from './styles';
 const HarborRelatedTopics = memo(({ topics, onPressTopic }) => {
     const { theme } = useTheme();
     const { t } = useTranslation('harbor');
-    const { black, disabled, themeColor, tonal, white } = theme;
+    const { black, disabled, themeColor, white } = theme;
 
     if (!Array.isArray(topics) || topics.length === 0) {
         return <View style={styles.listFooter} />;
@@ -34,18 +34,16 @@ const HarborRelatedTopics = memo(({ topics, onPressTopic }) => {
                 {t('推薦話題')}
             </Text>
             {topics.map(relatedTopic => (
-                <Pressable
+                <ScalePressable
                     key={relatedTopic.id}
                     onPress={() => {
                         trigger();
                         onPressTopic(relatedTopic);
                     }}
-                    style={({ pressed }) => [
+                    style={[
                         styles.relatedTopic,
                         {
-                            backgroundColor: pressed
-                                ? tonal.primary15
-                                : white,
+                            backgroundColor: white,
                             borderTopColor: disabled,
                         },
                     ]}>
@@ -59,7 +57,7 @@ const HarborRelatedTopics = memo(({ topics, onPressTopic }) => {
                         size={scale(18)}
                         color={themeColor}
                     />
-                </Pressable>
+                </ScalePressable>
             ))}
         </View>
     );

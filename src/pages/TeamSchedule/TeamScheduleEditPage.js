@@ -5,7 +5,6 @@ import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {
     ActivityIndicator,
     Alert,
-    Pressable,
     StyleSheet,
     View,
 } from 'react-native';
@@ -23,6 +22,7 @@ import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import {scale, verticalScale} from 'react-native-size-matters';
 
 import Text from '../../components/AppText';
+import ScalePressable from '../../components/ScalePressable';
 import TextInput from '../../components/AppTextInput';
 import {uiStyle, useTheme} from '../../components/ThemeContext';
 import {logToFirebase} from '../../utils/firebaseAnalytics';
@@ -281,17 +281,15 @@ const TeamScheduleEditPage = ({navigation, route}) => {
                     {t('回覆截止（選填）')}
                 </Text>
                 <View style={styles.deadlineRow}>
-                    <Pressable
+                    <ScalePressable
                         onPress={() => {
                             trigger();
                             setDeadlinePickerVisible(true);
                         }}
-                        style={({pressed}) => [
+                        style={[
                             styles.deadlineButton,
                             {
-                                backgroundColor: pressed
-                                    ? theme.tonal.primary30
-                                    : theme.tonal.primary15,
+                                backgroundColor: theme.tonal.primary15,
                             },
                         ]}>
                         <Text
@@ -301,19 +299,17 @@ const TeamScheduleEditPage = ({navigation, route}) => {
                             ]}>
                             {deadlineDisplay}
                         </Text>
-                    </Pressable>
+                    </ScalePressable>
                     {responseDeadlineAt ? (
-                        <Pressable
+                        <ScalePressable
                             onPress={() => {
                                 trigger();
                                 setResponseDeadlineAt(null);
                             }}
-                            style={({pressed}) => [
+                            style={[
                                 styles.clearButton,
                                 {
-                                    backgroundColor: pressed
-                                        ? theme.tonal.primary30
-                                        : theme.tonal.primary08,
+                                    backgroundColor: theme.tonal.primary08,
                                 },
                             ]}>
                             <Text
@@ -323,19 +319,17 @@ const TeamScheduleEditPage = ({navigation, route}) => {
                                 ]}>
                                 {t('清除')}
                             </Text>
-                        </Pressable>
+                        </ScalePressable>
                     ) : null}
                 </View>
 
-                <Pressable
+                <ScalePressable
                     disabled={isSubmitting}
                     onPress={handleSave}
-                    style={({pressed}) => [
+                    style={[
                         styles.submitButton,
                         {
-                            backgroundColor: pressed
-                                ? theme.themeColorLight
-                                : theme.themeColor,
+                            backgroundColor: theme.themeColor,
                             opacity: isSubmitting ? 0.7 : 1,
                         },
                     ]}>
@@ -350,7 +344,7 @@ const TeamScheduleEditPage = ({navigation, route}) => {
                             {t('儲存')}
                         </Text>
                     )}
-                </Pressable>
+                </ScalePressable>
             </KeyboardAwareScrollView>
             <KeyboardToolbar />
 

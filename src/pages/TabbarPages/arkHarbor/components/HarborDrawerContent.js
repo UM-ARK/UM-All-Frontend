@@ -9,7 +9,6 @@ import React, {
 import {
     ActivityIndicator,
     Image,
-    Pressable,
     StyleSheet,
     View,
 } from 'react-native';
@@ -25,6 +24,7 @@ import {
 import { useTranslation } from 'react-i18next';
 
 import Text from '../../../../components/AppText';
+import ScalePressable from '../../../../components/ScalePressable';
 import { uiStyle, useTheme } from '../../../../components/ThemeContext';
 import { useHarborSession } from '../../../../contexts/HarborSessionContext';
 import { openLink } from '../../../../utils/browser';
@@ -51,21 +51,19 @@ const DrawerMenuItem = ({
     const { theme } = useTheme();
 
     return (
-        <Pressable
+        <ScalePressable
             accessibilityRole="button"
             accessibilityState={{ selected: active }}
             onPress={() => {
                 trigger();
                 onPress?.();
             }}
-            style={({ pressed }) => [
+            style={[
                 styles.menuItem,
                 {
                     backgroundColor: active
-                        ? theme.tonal.primary15
-                        : pressed
-                            ? theme.tonal.primary08
-                            : theme.bg_color,
+                        ? theme.white
+                        : theme.bg_color,
                 },
             ]}>
             <MaterialCommunityIcons
@@ -83,7 +81,7 @@ const DrawerMenuItem = ({
                 ]}>
                 {label}
             </Text>
-        </Pressable>
+        </ScalePressable>
     );
 };
 
@@ -93,19 +91,17 @@ const AllCategoriesRow = ({ onPress }) => {
     const { t } = useTranslation('harbor');
 
     return (
-        <Pressable
+        <ScalePressable
             accessibilityRole="button"
             accessibilityLabel={t('所有分類')}
             onPress={() => {
                 trigger();
                 onPress?.();
             }}
-            style={({ pressed }) => [
+            style={[
                 styles.categoryRow,
                 {
-                    backgroundColor: pressed
-                        ? theme.tonal.primary15
-                        : theme.bg_color,
+                    backgroundColor: theme.bg_color,
                 },
             ]}>
             <View
@@ -133,7 +129,7 @@ const AllCategoriesRow = ({ onPress }) => {
                 size={scale(17)}
                 color={theme.black.third}
             />
-        </Pressable>
+        </ScalePressable>
     );
 };
 
@@ -143,19 +139,17 @@ const CategoryRow = ({ item, onPress, onToggle }) => {
     const isSubcategory = item.depth > 0;
 
     return (
-        <Pressable
+        <ScalePressable
             accessibilityRole="button"
             onPress={() => {
                 trigger();
                 onPress(item);
             }}
-            style={({ pressed }) => [
+            style={[
                 styles.categoryRow,
                 isSubcategory && styles.subcategoryRow,
                 {
-                    backgroundColor: pressed
-                        ? theme.tonal.primary15
-                        : theme.bg_color,
+                    backgroundColor: theme.bg_color,
                 },
             ]}>
             <View
@@ -203,7 +197,7 @@ const CategoryRow = ({ item, onPress, onToggle }) => {
                 />
             ) : null}
             {item.hasChildren ? (
-                <Pressable
+                <ScalePressable
                     accessibilityRole="button"
                     accessibilityState={{ expanded: item.isExpanded }}
                     accessibilityLabel={t(
@@ -218,12 +212,7 @@ const CategoryRow = ({ item, onPress, onToggle }) => {
                         trigger();
                         onToggle(item);
                     }}
-                    style={({ pressed }) => [
-                        styles.categoryToggle,
-                        pressed && {
-                            backgroundColor: theme.tonal.primary15,
-                        },
-                    ]}>
+                    style={styles.categoryToggle}>
                     <MaterialCommunityIcons
                         name={
                             item.isExpanded
@@ -233,14 +222,14 @@ const CategoryRow = ({ item, onPress, onToggle }) => {
                         size={scale(18)}
                         color={theme.themeColor}
                     />
-                </Pressable>
+                </ScalePressable>
             ) : null}
             <MaterialCommunityIcons
                 name="chevron-right"
                 size={scale(17)}
                 color={theme.black.third}
             />
-        </Pressable>
+        </ScalePressable>
     );
 };
 
@@ -317,7 +306,7 @@ const DrawerSectionTitle = ({
     }
 
     return (
-        <Pressable
+        <ScalePressable
             accessibilityRole="button"
             accessibilityState={{ expanded: isExpanded }}
             accessibilityLabel={t(isExpanded ? '收起分類' : '展開分類')}
@@ -325,19 +314,17 @@ const DrawerSectionTitle = ({
                 trigger();
                 onToggle();
             }}
-            style={({ pressed }) => [
+            style={[
                 styles.sectionTitle,
                 styles.sectionTitleButton,
                 {
                     backgroundColor: !isExpanded
-                        ? theme.tonal.primary15
-                        : pressed
-                            ? theme.tonal.primary08
-                            : undefined,
+                        ? theme.white
+                        : undefined,
                 },
             ]}>
             {content}
-        </Pressable>
+        </ScalePressable>
     );
 };
 
@@ -480,7 +467,7 @@ const HarborDrawerContent = ({ navigation }) => {
                         styles.drawerHeader,
                         { borderBottomColor: theme.themeColorUltraLight },
                     ]}>
-                    <Pressable
+                    <ScalePressable
                         accessibilityRole="link"
                         accessibilityLabel={t('Harbor 職涯港')}
                         onPress={() => {
@@ -488,10 +475,7 @@ const HarborDrawerContent = ({ navigation }) => {
                             logToFirebase('openPage', { page: 'harbor_web' });
                             openLink({ URL: ARK_HARBOR, mode: 'fullScreen' });
                         }}
-                        style={({ pressed }) => [
-                            styles.brandPressable,
-                            pressed && { opacity: 0.7 },
-                        ]}>
+                        style={styles.brandPressable}>
                         <View style={styles.brandIcon}>
                             <Image
                                 source={require('../../../../static/img/logo.png')}
@@ -515,8 +499,8 @@ const HarborDrawerContent = ({ navigation }) => {
                                 {t('求職、提問、校友、應有盡有！')}
                             </Text>
                         </View>
-                    </Pressable>
-                    <Pressable
+                    </ScalePressable>
+                    <ScalePressable
                         accessibilityRole="button"
                         accessibilityLabel={t('關閉選單')}
                         hitSlop={scale(8)}
@@ -524,12 +508,10 @@ const HarborDrawerContent = ({ navigation }) => {
                             trigger();
                             navigation.closeDrawer();
                         }}
-                        style={({ pressed }) => [
+                        style={[
                             styles.closeButton,
                             {
-                                backgroundColor: pressed
-                                    ? theme.tonal.primary30
-                                    : theme.tonal.primary15,
+                                backgroundColor: theme.white,
                             },
                         ]}>
                         <MaterialCommunityIcons
@@ -537,7 +519,7 @@ const HarborDrawerContent = ({ navigation }) => {
                             size={scale(19)}
                             color={theme.themeColor}
                         />
-                    </Pressable>
+                    </ScalePressable>
                 </View>
 
                 <View style={styles.menuGroup}>

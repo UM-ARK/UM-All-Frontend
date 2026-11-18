@@ -1,7 +1,8 @@
 import React, { useContext, useState, memo, useCallback, useMemo } from 'react';
-import { View, StyleSheet, ActivityIndicator, Pressable } from 'react-native';
+import { View, StyleSheet, ActivityIndicator } from 'react-native';
 
 import Text from '../../../../components/AppText';
+import ScalePressable from '../../../../components/ScalePressable';
 import { useTheme, uiStyle } from '../../../../components/ThemeContext';
 import { trigger } from '../../../../utils/trigger';
 
@@ -128,12 +129,9 @@ const NewsCard = ({ data, type = 'news', language = 'en' }) => {
     }, [navigation, type, data]);
 
     return (
-        <Pressable
+        <ScalePressable
             accessibilityRole="button"
-            style={({ pressed }) => [
-                newsRowStyles.row,
-                pressed && { backgroundColor: tonal.primary08 },
-            ]}
+            style={newsRowStyles.row}
             onPress={handlePress}>
             <View style={newsRowStyles.textColumn}>
                 {title.length > 0 && (
@@ -196,7 +194,7 @@ const NewsCard = ({ data, type = 'news', language = 'en' }) => {
                     )}
                 </View>
             ) : null}
-        </Pressable>
+        </ScalePressable>
     );
 };
 

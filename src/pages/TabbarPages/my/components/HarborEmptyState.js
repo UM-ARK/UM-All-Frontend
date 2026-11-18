@@ -1,10 +1,11 @@
 import React from 'react';
-import {Pressable, StyleSheet, View} from 'react-native';
+import {StyleSheet, View} from 'react-native';
 
 import Ionicons from "@react-native-vector-icons/ionicons";
 import {scale, verticalScale} from 'react-native-size-matters';
 
 import Text from '../../../../components/AppText';
+import ScalePressable from '../../../../components/ScalePressable';
 import {uiStyle, useTheme} from '../../../../components/ThemeContext';
 import {trigger} from '../../../../utils/trigger';
 
@@ -39,18 +40,16 @@ const HarborEmptyState = ({
                 </Text>
             ) : null}
             {actionLabel && onAction ? (
-                <Pressable
+                <ScalePressable
                     accessibilityRole="button"
                     onPress={() => {
                         trigger();
                         onAction();
                     }}
-                    style={({pressed}) => [
+                    style={[
                         styles.actionButton,
                         {
-                            backgroundColor: pressed
-                                ? theme.tonal.primary50
-                                : theme.themeColor,
+                            backgroundColor: theme.themeColor,
                         },
                     ]}>
                     <Text
@@ -60,7 +59,7 @@ const HarborEmptyState = ({
                         ]}>
                         {actionLabel}
                     </Text>
-                </Pressable>
+                </ScalePressable>
             ) : null}
         </View>
     );

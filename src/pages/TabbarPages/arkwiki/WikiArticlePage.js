@@ -15,6 +15,7 @@ import { useTranslation } from 'react-i18next';
 import { scale, verticalScale } from 'react-native-size-matters';
 
 import Text from '../../../components/AppText';
+import ScalePressable from '../../../components/ScalePressable';
 import ARKImageView from '../../../components/ARKImageView';
 import { uiStyle, useTheme } from '../../../components/ThemeContext';
 import { useAppShare } from '../../../contexts/AppShareContext';
@@ -191,17 +192,17 @@ const WikiArticlePage = ({route, navigation}) => {
                 <MaterialCommunityIcons name="book-alert-outline" size={scale(44)} color={theme.black.third} />
                 <Text style={[styles.errorTitle, {color: theme.black.main}]}>{t('條目載入失敗')}</Text>
                 <Text style={[styles.statusText, {color: theme.black.third}]}>{t('請檢查網絡後再試')}</Text>
-                <Pressable
+                <ScalePressable
                     onPress={() => {
                         trigger();
                         loadArticle({refresh: true});
                     }}
-                    style={({pressed}) => [
+                    style={[
                         styles.retryButton,
-                        {backgroundColor: pressed ? theme.tonal.primary50 : theme.tonal.primary30},
+                        {backgroundColor: theme.tonal.primary30},
                     ]}>
                     <Text style={[styles.buttonText, {color: theme.themeColor}]}>{t('重試')}</Text>
-                </Pressable>
+                </ScalePressable>
                 <Pressable onPress={() => openWikiAction(`/wiki/${encodeURIComponent(title)}`)}>
                     <Text style={[styles.browserLink, {color: theme.themeColor}]}>{t('在瀏覽器開啟')}</Text>
                 </Pressable>
@@ -217,24 +218,24 @@ const WikiArticlePage = ({route, navigation}) => {
                         {article.title}
                     </Text>
                     <View style={styles.toolbar}>
-                        <Pressable
+                        <ScalePressable
                             accessibilityLabel={t('分享')}
                             onPress={handleShare}
-                            style={({pressed}) => [styles.iconButton, {backgroundColor: pressed ? theme.tonal.primary30 : theme.tonal.primary15}]}>
+                            style={[styles.iconButton, {backgroundColor: theme.tonal.primary15}]}>
                             <MaterialCommunityIcons name="share-variant-outline" size={scale(20)} color={theme.themeColor} />
-                        </Pressable>
-                        <Pressable
+                        </ScalePressable>
+                        <ScalePressable
                             accessibilityLabel={t('重新整理')}
                             disabled={isRefreshing}
                             onPress={() => {
                                 trigger();
                                 loadArticle({refresh: true});
                             }}
-                            style={({pressed}) => [styles.iconButton, {backgroundColor: pressed ? theme.tonal.primary30 : theme.tonal.primary15}]}>
+                            style={[styles.iconButton, {backgroundColor: theme.tonal.primary15}]}>
                             {isRefreshing
                                 ? <ActivityIndicator size="small" color={theme.themeColor} />
                                 : <MaterialCommunityIcons name="refresh" size={scale(21)} color={theme.themeColor} />}
-                        </Pressable>
+                        </ScalePressable>
                         <MenuView
                             actions={[
                                 {id: 'edit', title: t('編輯條目')},

@@ -24,6 +24,7 @@ import Toast from 'react-native-simple-toast';
 import {useTranslation} from 'react-i18next';
 
 import Text from '../../../components/AppText';
+import ScalePressable from '../../../components/ScalePressable';
 import {uiStyle, useTheme} from '../../../components/ThemeContext';
 import {useHarborSession} from '../../../contexts/HarborSessionContext';
 import {
@@ -262,15 +263,13 @@ const HarborDraftsPage = ({
                 ? ''
                 : updatedAt.toLocaleString();
             return (
-                <Pressable
+                <ScalePressable
                     accessibilityRole="button"
                     onPress={() => openDraft(item)}
-                    style={({pressed}) => [
+                    style={[
                         styles.draftCard,
                         {
-                            backgroundColor: pressed
-                                ? theme.tonal.primary08
-                                : theme.white,
+                            backgroundColor: theme.white,
                             borderColor: theme.themeColorUltraLight,
                         },
                     ]}>
@@ -339,7 +338,7 @@ const HarborDraftsPage = ({
                             color={theme.unread}
                         />
                     </Pressable>
-                </Pressable>
+                </ScalePressable>
             );
         },
         [confirmDeleteDraft, openDraft, t, theme],
@@ -394,7 +393,7 @@ const HarborDraftsPage = ({
                     ]}>
                     {t('登入後查看草稿箱')}
                 </Text>
-                <Pressable
+                <ScalePressable
                     accessibilityRole="button"
                     onPress={() => {
                         trigger();
@@ -406,12 +405,10 @@ const HarborDraftsPage = ({
                             );
                         });
                     }}
-                    style={({pressed}) => [
+                    style={[
                         styles.loginButton,
                         {
-                            backgroundColor: pressed
-                                ? theme.themeColorLight
-                                : theme.themeColor,
+                            backgroundColor: theme.themeColor,
                         },
                     ]}>
                     <Text
@@ -421,7 +418,7 @@ const HarborDraftsPage = ({
                         ]}>
                         {t('登入 Harbor')}
                     </Text>
-                </Pressable>
+                </ScalePressable>
             </View>
         );
     }

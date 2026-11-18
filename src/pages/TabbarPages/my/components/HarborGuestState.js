@@ -2,7 +2,6 @@ import React from 'react';
 import {
     ActivityIndicator,
     Image,
-    Pressable,
     StyleSheet,
     View,
 } from 'react-native';
@@ -13,6 +12,7 @@ import MaterialCommunityIcons from "@react-native-vector-icons/material-design-i
 import {scale, verticalScale} from 'react-native-size-matters';
 
 import Text from '../../../../components/AppText';
+import ScalePressable from '../../../../components/ScalePressable';
 import {uiStyle, useTheme} from '../../../../components/ThemeContext';
 import TouchableScale from '../../../../components/TouchableScale';
 import {trigger} from '../../../../utils/trigger';
@@ -121,14 +121,12 @@ const HarborGuestState = ({isAuthorizing, onLogin, onBrowse}) => {
                         {t(isAuthorizing ? '處理中…' : '登入 Harbor')}
                     </Text>
                 </TouchableScale>
-                <Pressable
+                <ScalePressable
                     accessibilityRole="button"
-                    style={({pressed}) => [
+                    style={[
                         styles.secondaryButton,
                         {
-                            backgroundColor: pressed
-                                ? theme.tonal.primary30
-                                : theme.tonal.primary15,
+                            backgroundColor: theme.tonal.primary15,
                         },
                     ]}
                     onPress={() => {
@@ -147,7 +145,7 @@ const HarborGuestState = ({isAuthorizing, onLogin, onBrowse}) => {
                         size={scale(16)}
                         color={theme.themeColor}
                     />
-                </Pressable>
+                </ScalePressable>
                 <View style={styles.securityNote}>
                     <Ionicons
                         name="shield-checkmark-outline"
