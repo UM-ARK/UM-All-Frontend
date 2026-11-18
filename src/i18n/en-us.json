@@ -1340,6 +1340,9 @@
     },
     "features": {
         "常用服務": "Frequent Services",
+        "搜尋服務": "Search services",
+        "找到 {{total}} 項服務": "Results ({{total}})",
+        "網絡搜索": "Web search",
         "校園資訊": "Campus Services",
         "校園巴士": "Bus",
         "官方資訊": "Official Info",
