@@ -357,8 +357,8 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         flexWrap: 'wrap',
         alignItems: 'center',
-        justifyContent: 'center',
-        columnGap: scale(12),
+        justifyContent: 'flex-start',
+        columnGap: scale(24),
     },
     actionButton: {
         flexDirection: 'row',
