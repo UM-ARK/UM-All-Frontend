@@ -1,6 +1,7 @@
 import React, {
     useState,
     useEffect,
+    useLayoutEffect,
     useRef,
     useCallback,
     useContext,
@@ -37,6 +38,16 @@ import * as OpenCC from 'opencc-js';
 import { useTranslation } from 'react-i18next';
 import { useFocusEffect } from '@react-navigation/native';
 import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
+import {
+    cancelAnimation,
+    Easing,
+    ReduceMotion,
+    useReducedMotion,
+    useSharedValue,
+    withDelay,
+    withTiming,
+} from 'react-native-reanimated';
+import { scheduleOnRN } from 'react-native-worklets';
 
 import Text from '../../../../../components/AppText';
 import TextInput from '../../../../../components/AppTextInput';
@@ -58,7 +69,6 @@ import {
 } from '../../hooks/useConflict';
 import { normalizeImportText } from '../../utils/parseImportData';
 import AddCourseFab from '../../components/AddCourseFab';
-import CourseActionMenuCard from '../../components/CourseActionMenuCard';
 import CourseTimeRangePicker from '../../components/CourseTimeRangePicker';
 import { TIME_RANGE_PRESETS } from '../../constants';
 import {
@@ -87,6 +97,7 @@ import {
     OVERVIEW_RESERVED_HEIGHT,
 } from './utils/overviewConfig';
 import OverviewCourseCardContent from './components/OverviewCourseCardContent';
+import TimetableCourseCard from './components/TimetableCourseCard';
 
 const converter = OpenCC.Converter({ from: 'cn', to: 'tw' }); // 簡體轉繁體
 
@@ -99,6 +110,9 @@ const dayList = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
 const timeFrom = '00:00';
 const timeTo = '23:59';
 const TIMETABLE_VIEW_STORAGE_KEY = 'ARK_Course_TimetableView';
+const COURSE_REMOVAL_DURATION = 290;
+const COURSE_REMOVAL_ALERT_DELAY = Platform.select({ ios: 240, android: 140, default: 0 });
+const COURSE_REMOVAL_SHEET_DELAY = 220;
 
 // 將 HH:mm 時間轉為Date對象，用於排序
 function toDateTime(time) {
@@ -135,13 +149,17 @@ function TimetableCourseMenuCard({
     onPressAction,
     onPress,
     backgroundColor,
+    removalProgress,
+    reducedMotion,
     children,
 }) {
     return (
-        <CourseActionMenuCard
+        <TimetableCourseCard
             actions={actions}
             onPressAction={onPressAction}
             onOpen={onPress}
+            removalProgress={removalProgress}
+            reducedMotion={reducedMotion}
             menuStyle={{
                 alignSelf: 'center',
                 width: COURSE_CARD_WIDTH,
@@ -156,7 +174,7 @@ function TimetableCourseMenuCard({
                 justifyContent: 'center',
             }}>
             {children}
-        </CourseActionMenuCard>
+        </TimetableCourseCard>
     );
 }
 
@@ -171,6 +189,7 @@ function CourseSim({ route, navigation, isSplitPane = false }) {
     // 課程資料與排課狀態一律來自 CoursePlanProvider，本段落不再自行持有
     const {
         catalogMetadata,
+        programmeLevel,
         activeCoursePeriod,
         isHistoricalPeriod,
         courseTimeList,
@@ -206,6 +225,14 @@ function CourseSim({ route, navigation, isSplitPane = false }) {
     const [showTimePicker, setShowTimePicker] = useState(false);
     // null：尚未讀完上次具體／概覽；讀完前不渲染課表，避免先閃 detail
     const [timetableView, setTimetableView] = useState(null);
+    const [courseRemoval, setCourseRemoval] = useState(null);
+    const removalProgress = useSharedValue(0);
+    const reducedMotion = useReducedMotion();
+    const timetableScope = `${programmeLevel}-${activeCoursePeriod?.id}`;
+    const visibleRemoval = courseRemoval?.scope === timetableScope ? courseRemoval : null;
+    const visiblePlanSlots = visibleRemoval?.planSlots ?? planSlots;
+    const visiblePlanCourseCodes = visibleRemoval?.planCourseCodes ?? planCourseCodes;
+    const visibleConflictSlotKeys = visibleRemoval?.conflictSlotKeys ?? conflictSlotKeys;
 
     const [hasOpenCourseSearch, setHasOpenCourseSearch] = useState(
         !!initialCheckCode,
@@ -245,6 +272,39 @@ function CourseSim({ route, navigation, isSplitPane = false }) {
             cancelled = true;
         };
     }, []);
+
+    useLayoutEffect(() => {
+        if (!visibleRemoval) {
+            if (courseRemoval) {
+                setCourseRemoval(null);
+            }
+            return;
+        }
+
+        let cancelled = false;
+        const finish = () => {
+            if (!cancelled) {
+                setCourseRemoval(null);
+                visibleRemoval.onComplete();
+            }
+        };
+
+        removalProgress.set(0);
+        removalProgress.set(withDelay(visibleRemoval.delay, withTiming(1, {
+            duration: reducedMotion ? 120 : COURSE_REMOVAL_DURATION,
+            easing: Easing.linear,
+            reduceMotion: ReduceMotion.Never,
+        }, finished => {
+            if (finished) {
+                scheduleOnRN(finish);
+            }
+        }), ReduceMotion.Never));
+
+        return () => {
+            cancelled = true;
+            cancelAnimation(removalProgress);
+        };
+    }, [courseRemoval, visibleRemoval, removalProgress, reducedMotion]);
 
     // ref
     const verScroll = useRef();
@@ -446,7 +506,7 @@ function CourseSim({ route, navigation, isSplitPane = false }) {
     const overviewRows = useMemo(() => {
         const rows = [];
         lodash
-            .sortBy(planSlots, course => toMinutes(course['Time From']))
+            .sortBy(visiblePlanSlots, course => toMinutes(course['Time From']))
             .forEach(course => {
                 const start = toMinutes(course['Time From']);
                 const currentRow = rows[rows.length - 1];
@@ -472,18 +532,18 @@ function CourseSim({ route, navigation, isSplitPane = false }) {
             end: row.end,
             coursesByDay: lodash.groupBy(row.courses, 'Day'),
         }));
-    }, [planSlots]);
+    }, [visiblePlanSlots]);
     const overviewDays = useMemo(() => {
         const lastCourseDayIndex = lodash.max(
-            planSlots.map(course => daySorter[course.Day] - 1),
+            visiblePlanSlots.map(course => daySorter[course.Day] - 1),
         );
         return dayList.slice(0, Math.max(lastCourseDayIndex ?? 4, 4) + 1);
-    }, [planSlots]);
+    }, [visiblePlanSlots]);
     const overviewDayColumnWidth =
         (overviewViewportWidth || windowWidth) / overviewDays.length;
     const overviewStart = overviewRows[0]?.start ?? 0;
     const overviewEnd =
-        lodash.max(planSlots.map(course => toMinutes(course['Time To']))) ??
+        lodash.max(visiblePlanSlots.map(course => toMinutes(course['Time To']))) ??
         overviewStart;
     const overviewDuration = Math.max(overviewEnd - overviewStart, 60);
     const measuredOverviewMaxHeight =
@@ -509,7 +569,7 @@ function CourseSim({ route, navigation, isSplitPane = false }) {
     );
     // 預扣貼底擴展墊：最後一節矮卡可向下伸展，且總高仍落入可視區（無需翻頁）
     const { overviewHourHeight, overviewHeight } = resolveOverviewCanvasSize({
-        courses: planSlots,
+        courses: visiblePlanSlots,
         overviewStart,
         overviewEnd,
         overviewDuration,
@@ -520,7 +580,7 @@ function CourseSim({ route, navigation, isSplitPane = false }) {
         minCourseHeight: OVERVIEW_MIN_COURSE_HEIGHT,
     });
     const overviewFramesByDay = useMemo(() => {
-        const byDay = lodash.groupBy(planSlots, 'Day');
+        const byDay = lodash.groupBy(visiblePlanSlots, 'Day');
         const framesByDay = {};
         overviewDays.forEach(day => {
             framesByDay[day] = computeOverviewCourseFrames({
@@ -538,7 +598,7 @@ function CourseSim({ route, navigation, isSplitPane = false }) {
         });
         return framesByDay;
     }, [
-        planSlots,
+        visiblePlanSlots,
         overviewDays,
         overviewStart,
         overviewHourHeight,
@@ -589,28 +649,54 @@ function CourseSim({ route, navigation, isSplitPane = false }) {
         }, [route, navigation, addCourse]),
     );
 
-    /**
-     * 從課表移除單一 section，並回饋已刪除的是哪一節。
-     *
-     * @param {Object} course 課節
-     */
-    const handleDropCourse = course => {
+    /** 立即更新排課資料，保留原卡位與顏色直到刪除動畫結束。 */
+    const handleDropCourse = (courseCode, section = null, fromSearch = false) => {
         trigger();
-        dropCourse(course);
 
-        Toast.show(
-            t('已刪除課程', {
-                ns: 'timetable',
-                code: course['Course Code'],
-                section: course.Section,
-            }),
+        const removesAllSections = section === null;
+        const slotKeys = new Set(
+            planSlots.filter(course =>
+                course['Course Code'] === courseCode &&
+                (removesAllSections || course.Section === section),
+            ).map(getSlotKey),
         );
+        const onComplete = () => {
+            if (removesAllSections) {
+                verScroll.current?.scrollTo({ y: 0 });
+            } else {
+                Toast.show(t('已刪除課程', { ns: 'timetable', code: courseCode, section }));
+            }
+        };
+
+        if (removesAllSections) {
+            dropAllSections(courseCode);
+        } else {
+            dropCourse({ 'Course Code': courseCode, Section: section });
+        }
+
+        if (slotKeys.size === 0 || !timetableView) {
+            onComplete();
+            return;
+        }
+
+        if (fromSearch) {
+            bottomSheetRef.current?.close();
+        }
+        setCourseRemoval({
+            scope: timetableScope,
+            slotKeys,
+            planSlots,
+            planCourseCodes,
+            conflictSlotKeys,
+            delay: fromSearch ? COURSE_REMOVAL_SHEET_DELAY : COURSE_REMOVAL_ALERT_DELAY,
+            onComplete,
+        });
     };
 
     // 渲染一列（一天）的課表
     const renderDay = day => {
         // 獲取該天所有的課程數據
-        let dayCourseList = planSlots.filter(course => course.Day === day);
+        let dayCourseList = visiblePlanSlots.filter(course => course.Day === day);
 
         if (dayCourseList.length > 0) {
             // 按上課時間Time From排序
@@ -734,13 +820,21 @@ function CourseSim({ route, navigation, isSplitPane = false }) {
                     case 'replacement':
                         openReplacementSearch(course);
                         break;
-                    case 'del-all-sections':
+                    case 'del-all-sections': {
+                        const message = t('刪除所有Section確認', {
+                            ns: 'timetable',
+                            code: course['Course Code'],
+                        });
+                        const onConfirm = () => handleDropCourse(course['Course Code']);
+                        if (Platform.OS === 'web') {
+                            if (window.confirm(message)) {
+                                onConfirm();
+                            }
+                            break;
+                        }
                         Alert.alert(
                             '',
-                            t('刪除所有Section確認', {
-                                ns: 'timetable',
-                                code: course['Course Code'],
-                            }),
+                            message,
                             [
                                 {
                                     text: 'No',
@@ -748,27 +842,31 @@ function CourseSim({ route, navigation, isSplitPane = false }) {
                                 },
                                 {
                                     text: 'Yes',
-                                    onPress: () => {
-                                        trigger();
-                                        dropAllSections(
-                                            course['Course Code'],
-                                        );
-                                        verScroll.current?.scrollTo({ y: 0 });
-                                    },
+                                    onPress: onConfirm,
                                     style: 'destructive',
                                 },
                             ],
                             { cancelable: true },
                         );
                         break;
-                    case 'drop-section':
+                    }
+                    case 'drop-section': {
+                        const title = t('刪除Section確認', {
+                            ns: 'timetable',
+                            code: course['Course Code'],
+                            section: course.Section,
+                        });
+                        const message = `還會再見嗎燕子，再見的時候你要PASS！`;
+                        const onConfirm = () => handleDropCourse(course['Course Code'], course.Section);
+                        if (Platform.OS === 'web') {
+                            if (window.confirm(`${title}\n\n${message}`)) {
+                                onConfirm();
+                            }
+                            break;
+                        }
                         Alert.alert(
-                            t('刪除Section確認', {
-                                ns: 'timetable',
-                                code: course['Course Code'],
-                                section: course.Section,
-                            }),
-                            `還會再見嗎燕子，再見的時候你要PASS！`,
+                            title,
+                            message,
                             [
                                 {
                                     text: t('取消', { ns: 'timetable' }),
@@ -776,13 +874,14 @@ function CourseSim({ route, navigation, isSplitPane = false }) {
                                 },
                                 {
                                     text: 'Drop',
-                                    onPress: () => handleDropCourse(course),
+                                    onPress: onConfirm,
                                     style: 'destructive',
                                 },
                             ],
                             { cancelable: true },
                         );
                         break;
+                    }
                     default:
                         break;
                 }
@@ -802,8 +901,9 @@ function CourseSim({ route, navigation, isSplitPane = false }) {
     const renderCourse = (course, dayCourseList, idx) => {
         let timeDiffReminder = null;
         let afternoonReminder = null;
+        const slotKey = getSlotKey(course);
         // 衝突判斷交給共享層：同一天兩兩配對比較，能抓到被中間課節隔開的跨越式重疊
-        const timeWarning = conflictSlotKeys.has(getSlotKey(course));
+        const timeWarning = visibleConflictSlotKeys.has(slotKey);
 
         if (timeWarning) {
             timeDiffReminder = (
@@ -889,8 +989,7 @@ function CourseSim({ route, navigation, isSplitPane = false }) {
         const courseMenuProps = getTimetableCourseMenuProps(course);
 
         return (
-            <View
-                key={`${course.Day}-${course['Course Code']}-${course.Section}-${course['Time From']}-${course['Time To']}`}>
+            <View key={slotKey}>
                 {afternoonReminder}
                 {timeDiffReminder}
 
@@ -898,12 +997,14 @@ function CourseSim({ route, navigation, isSplitPane = false }) {
                     actions={courseMenuProps.actions}
                     onPressAction={courseMenuProps.onPressAction}
                     onPress={courseMenuProps.onOpen}
+                    removalProgress={visibleRemoval?.slotKeys.has(slotKey) ? removalProgress : undefined}
+                    reducedMotion={reducedMotion}
                     backgroundColor={
                         timeWarning
                             ? unread
                             : TIME_TABLE_COLOR[
                             lodash.indexOf(
-                                planCourseCodes,
+                                visiblePlanCourseCodes,
                                 course['Course Code'],
                             ) % TIME_TABLE_COLOR.length
                             ]
@@ -2328,13 +2429,7 @@ E11-0000
                                             borderRadius: scale(5),
                                             padding: scale(3),
                                         }}
-                                        onPress={() => {
-                                            trigger();
-                                            dropAllSections(i['Course Code']);
-                                            verScroll.current?.scrollTo({
-                                                y: 0,
-                                            });
-                                        }}>
+                                        onPress={() => handleDropCourse(i['Course Code'], null, true)}>
                                         <Text
                                             style={{
                                                 ...s.searchResultText,
@@ -2641,7 +2736,8 @@ E11-0000
             return null;
         }
 
-        const timeWarning = conflictSlotKeys.has(getSlotKey(course));
+        const slotKey = getSlotKey(course);
+        const timeWarning = visibleConflictSlotKeys.has(slotKey);
         const courseMenuProps = getTimetableCourseMenuProps(course);
         const compact =
             frame.laneCount > 1 ||
@@ -2649,12 +2745,14 @@ E11-0000
             frame.height < verticalScale(52);
 
         return (
-            <CourseActionMenuCard
-                key={getSlotKey(course)}
+            <TimetableCourseCard
+                key={slotKey}
                 accessibilityLabel={`${course['Course Code']}-${course.Section}`}
                 actions={courseMenuProps.actions}
                 onOpen={courseMenuProps.onOpen}
                 onPressAction={courseMenuProps.onPressAction}
+                removalProgress={visibleRemoval?.slotKeys.has(slotKey) ? removalProgress : undefined}
+                reducedMotion={reducedMotion}
                 menuStyle={{
                     position: 'absolute',
                     top: frame.top,
@@ -2671,7 +2769,7 @@ E11-0000
                         ? unread
                         : TIME_TABLE_COLOR[
                         lodash.indexOf(
-                            planCourseCodes,
+                            visiblePlanCourseCodes,
                             course['Course Code'],
                         ) % TIME_TABLE_COLOR.length
                         ],
@@ -2682,7 +2780,7 @@ E11-0000
                     justifyContent: 'center',
                 }}>
                 <OverviewCourseCardContent course={course} frame={frame} />
-            </CourseActionMenuCard>
+            </TimetableCourseCard>
         );
     };
 
@@ -2748,7 +2846,7 @@ E11-0000
                                     }}
                                 />
                             ))}
-                            {(lodash.groupBy(planSlots, 'Day')[day] || []).map(
+                            {(lodash.groupBy(visiblePlanSlots, 'Day')[day] || []).map(
                                 course =>
                                     renderOverviewCourse(
                                         course,
@@ -2856,10 +2954,10 @@ E11-0000
                 }}>
                 {/* 渲染課表或首次使用提示 */}
                 <View style={{ flex: 1 }}>
-                    {isHistoricalPeriod && planSlots.length === 0
+                    {isHistoricalPeriod && visiblePlanSlots.length === 0
                         ? renderReminder()
                         : null}
-                    {planSlots.length > 0 ? (
+                    {visiblePlanSlots.length > 0 ? (
                         timetableView ? (
                             <>
                                 {timetableView === 'overview' ? (
@@ -2881,7 +2979,7 @@ E11-0000
             </ScrollView>
 
             {/* 有排課時才顯示具體／概覽切換；與 FAB 同層，bottom 見 floatingBottom */}
-            {planSlots.length > 0 &&
+            {visiblePlanSlots.length > 0 &&
                 timetableView &&
                 !hasOpenCourseSearch
                 ? renderViewSwitcher()
