@@ -221,7 +221,7 @@ const ArkAppLinkCard = ({appLink, navigation, title}) => {
     const cardTitle = title || content.title;
 
     return (
-        <Pressable
+        <ScalePressable
             accessibilityHint={t('在 ARK ALL 內開啟')}
             accessibilityLabel={`${content.label}，${cardTitle}`}
             accessibilityRole="link"
@@ -229,12 +229,11 @@ const ArkAppLinkCard = ({appLink, navigation, title}) => {
                 trigger();
                 navigation.navigate(appLink.routeName, appLink.params);
             }}
-            style={({pressed}) => [
+            style={[
                 styles.appLinkCard,
                 {
                     backgroundColor: theme.white,
                     borderColor: theme.themeColorUltraLight,
-                    opacity: pressed ? 0.72 : 1,
                 },
             ]}>
             <View
@@ -270,7 +269,7 @@ const ArkAppLinkCard = ({appLink, navigation, title}) => {
                 name="chevron-right"
                 size={scale(19)}
             />
-        </Pressable>
+        </ScalePressable>
     );
 };
 
@@ -946,15 +945,12 @@ const HarborChatChannelPage = ({navigation, route}) => {
                         value={draft}
                     />
                     {isKeyboardVisible ? (
-                        <Pressable
+                        <ScalePressable
                             accessibilityLabel={t('完成')}
                             accessibilityRole="button"
                             hitSlop={scale(8)}
                             onPress={dismissKeyboard}
-                            style={({pressed}) => [
-                                styles.doneButton,
-                                pressed && {opacity: 0.7},
-                            ]}>
+                            style={styles.doneButton}>
                             <Text
                                 style={[
                                     styles.doneText,
@@ -962,7 +958,7 @@ const HarborChatChannelPage = ({navigation, route}) => {
                                 ]}>
                                 {t('完成')}
                             </Text>
-                        </Pressable>
+                        </ScalePressable>
                     ) : null}
                     <ScalePressable
                         accessibilityLabel={t('傳送')}

@@ -12,6 +12,7 @@ class DialogDIY extends Component {
     render() {
         const isLight = Appearance.getColorScheme() === 'light';
         const COLOR_DIY = themes[isLight ? 'light' : 'dark'];
+        const androidRipple = { color: COLOR_DIY.pressOverlay, borderless: false, foreground: true };
         return (
             <Dialog
                 isVisible={this.props.showDialog}
@@ -29,10 +30,12 @@ class DialogDIY extends Component {
                     <Dialog.Button
                         title="確認"
                         onPress={this.props.handleConfirm}
+                        android_ripple={androidRipple}
                     />
                     <Dialog.Button
                         title="取消"
                         onPress={this.props.handleCancel}
+                        android_ripple={androidRipple}
                     />
                 </Dialog.Actions>
             </Dialog>

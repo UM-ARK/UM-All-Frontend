@@ -580,6 +580,7 @@ const HarborPostContent = memo(
                 <RenderHTML
                     source={{ html: normalizedCooked, baseUrl: ARK_HARBOR }}
                     contentWidth={contentWidth}
+                    pressableHightlightColor={theme.pressOverlay}
                     baseStyle={baseStyle}
                     tagsStyles={tagsStyles}
                     classesStyles={classesStyles}

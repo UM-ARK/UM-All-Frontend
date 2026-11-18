@@ -26,6 +26,7 @@ const buildArticleDocument = (html, theme) => {
     html, body { margin: 0; padding: 0; background: ${theme.white}; color: ${theme.black.main}; }
     body { padding: 18px 16px 48px; font: 16px/1.7 -apple-system, BlinkMacSystemFont, sans-serif; overflow-wrap: anywhere; }
     a { color: ${theme.themeColor}; text-decoration: none; }
+    a, img { -webkit-tap-highlight-color: ${theme.pressOverlay}; }
     h1, h2, h3, h4, h5, h6 { line-height: 1.3; margin: 1.4em 0 .55em; color: ${theme.black.main}; }
     h2 { border-bottom: 1px solid ${theme.disabled}; padding-bottom: .3em; }
     img { max-width: 100%; height: auto; border-radius: 10px; }

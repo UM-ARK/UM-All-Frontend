@@ -378,6 +378,7 @@ const NewsDetail = ({ route, navigation }) => {
                     <RenderHTML
                         source={htmlSource}
                         contentWidth={htmlContentWidth}
+                        pressableHightlightColor={theme.pressOverlay}
                         baseStyle={{
                             ...uiStyle.defaultText,
                             fontFamily: BODY_FONT,

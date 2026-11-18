@@ -297,16 +297,15 @@ const HarborDirectMessageSettingsModal = ({onClose, username, visible}) => {
                                 ]}>
                                 {t('無法載入私訊設定，請檢查網絡後再試。')}
                             </Text>
-                            <Pressable
+                            <ScalePressable
                                 accessibilityRole="button"
                                 onPress={() => {
                                     trigger();
                                     loadPreference();
                                 }}
-                                style={({pressed}) => [
+                                style={[
                                     styles.retryButton,
                                     {backgroundColor: theme.tonal.primary15},
-                                    pressed && {opacity: 0.78},
                                 ]}>
                                 <Text
                                     style={[
@@ -315,7 +314,7 @@ const HarborDirectMessageSettingsModal = ({onClose, username, visible}) => {
                                     ]}>
                                     {t('重試')}
                                 </Text>
-                            </Pressable>
+                            </ScalePressable>
                         </View>
                     ) : (
                         <View style={styles.preferenceContent}>
@@ -378,14 +377,13 @@ const HarborDirectMessageSettingsModal = ({onClose, username, visible}) => {
                             styles.settingsActions,
                             {borderTopColor: theme.themeColorUltraLight},
                         ]}>
-                        <Pressable
+                        <ScalePressable
                             accessibilityRole="button"
                             disabled={isSaving}
                             onPress={handleClose}
-                            style={({pressed}) => [
+                            style={[
                                 styles.settingsAction,
                                 {backgroundColor: theme.tonal.primary08},
-                                pressed && {opacity: 0.78},
                             ]}>
                             <Text
                                 style={[
@@ -394,19 +392,18 @@ const HarborDirectMessageSettingsModal = ({onClose, username, visible}) => {
                                 ]}>
                                 {t('取消')}
                             </Text>
-                        </Pressable>
-                        <Pressable
+                        </ScalePressable>
+                        <ScalePressable
                             accessibilityRole="button"
                             disabled={!canSave}
                             onPress={handleSave}
-                            style={({pressed}) => [
+                            style={[
                                 styles.settingsAction,
                                 {
                                     backgroundColor: canSave
                                         ? theme.themeColor
                                         : theme.disabled,
                                 },
-                                pressed && canSave && {opacity: 0.78},
                             ]}>
                             {isSaving ? (
                                 <ActivityIndicator
@@ -422,7 +419,7 @@ const HarborDirectMessageSettingsModal = ({onClose, username, visible}) => {
                                     {t('儲存')}
                                 </Text>
                             )}
-                        </Pressable>
+                        </ScalePressable>
                     </View>
                 </View>
             </View>

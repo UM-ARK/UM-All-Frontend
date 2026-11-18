@@ -100,6 +100,8 @@ const getColorDiy = (isLight) => {
 
         // 全局背景白色(偏灰)
         bg_color: isLight ? '#F5F5F7' : trueBlack,
+        pressOverlay: rgba(isLight ? trueBlack : trueWhite, 0.12),
+        subtlePressOverlay: rgba(isLight ? trueBlack : trueWhite, 0.06),
 
         // 綠色，用在Toast上
         success: successValue,

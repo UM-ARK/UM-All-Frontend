@@ -38,3 +38,4 @@ import ScalePressable from '../../../components/ScalePressable';
 - ❌ 為縮放回饋而在新程式碼引入 `TouchableOpacity`。
 - ❌ 新功能不要依賴 **`react-native-touchable-scale`**（舊版 `Animated`）；存量可逐步改為內建 `TouchableScale`。
 - 導覽列原生按鈕可使用 React Navigation 的原生回饋。
+- 第三方元件需要沿用按壓底色或波紋時，使用中性的 `theme.pressOverlay`。

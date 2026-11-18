@@ -12,7 +12,6 @@ import { scale, verticalScale } from 'react-native-size-matters';
 import { useTranslation } from 'react-i18next';
 
 import Text from '../../../../components/AppText';
-import ScalePressable from '../../../../components/ScalePressable';
 import { uiStyle, useTheme } from '../../../../components/ThemeContext';
 import {
     ARK_HARBOR_ABSOLUTE_URL,
@@ -157,7 +156,7 @@ const HarborTopicCard = ({
     }, [coverUrl]);
 
     return (
-        <ScalePressable
+        <Pressable
             accessibilityRole="button"
             accessibilityLabel={topic.title}
             onLayout={isRowLayout ? undefined : event =>
@@ -170,7 +169,7 @@ const HarborTopicCard = ({
                 trigger();
                 onPress(topic);
             }}
-            style={[
+            style={({ pressed }) => [
                 isRowLayout ? harborTopicRowInsets : styles.card,
                 {
                     backgroundColor: isRowLayout
@@ -180,6 +179,7 @@ const HarborTopicCard = ({
                         ? undefined
                         : theme.themeColorUltraLight,
                 },
+                pressed && { backgroundColor: theme.subtlePressOverlay },
             ]}>
             <View style={styles.authorRow}>
                 <Pressable
@@ -380,7 +380,7 @@ const HarborTopicCard = ({
                     </Text>
                 ) : null}
             </View>
-        </ScalePressable>
+        </Pressable>
     );
 };
 

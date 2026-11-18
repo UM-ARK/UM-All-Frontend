@@ -171,7 +171,7 @@ const HarborTopicDetailOverlays = ({
                             {t('提醒日期')}
                         </Text>
                         <View style={styles.bookmarkReminderRow}>
-                            <Pressable
+                            <ScalePressable
                                 onPress={() => {
                                     trigger();
                                     setBookmarkEditor(current =>
@@ -180,11 +180,11 @@ const HarborTopicDetailOverlays = ({
                                             : current,
                                     );
                                 }}
-                                style={({ pressed }) => [
+                                style={[
                                     styles.reminderButton,
                                     {
                                         backgroundColor:
-                                            !bookmarkEditor?.reminderAt || pressed
+                                            !bookmarkEditor?.reminderAt
                                                 ? tonal.primary30
                                                 : tonal.primary15,
                                     },
@@ -196,18 +196,18 @@ const HarborTopicDetailOverlays = ({
                                     ]}>
                                     {t('無提醒')}
                                 </Text>
-                            </Pressable>
-                            <Pressable
+                            </ScalePressable>
+                            <ScalePressable
                                 onPress={() => {
                                     trigger();
                                     setIsBookmarkReminderVisible(true);
                                 }}
-                                style={({ pressed }) => [
+                                style={[
                                     styles.reminderButton,
                                     styles.reminderDateButton,
                                     {
                                         backgroundColor:
-                                            bookmarkEditor?.reminderAt || pressed
+                                            bookmarkEditor?.reminderAt
                                                 ? tonal.primary30
                                                 : tonal.primary15,
                                     },
@@ -229,7 +229,7 @@ const HarborTopicDetailOverlays = ({
                                         )
                                         : t('選擇日期')}
                                 </Text>
-                            </Pressable>
+                            </ScalePressable>
                         </View>
                         */}
                         <View style={styles.actionDialogActions}>
