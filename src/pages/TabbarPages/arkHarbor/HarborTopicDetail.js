@@ -492,11 +492,11 @@ const HarborTopicDetail = ({
         scrollToPost(2);
     }, [highestPostNumber, scrollToPost, t]);
 
-    const handleFirstPostLike = useCallback(() => {
+    const handleFirstPostLike = useCallback(onAddHeart => {
         if (!firstPost) {
             return;
         }
-        togglePostLike(firstPost);
+        togglePostLike(firstPost, onAddHeart);
     }, [firstPost, togglePostLike]);
 
     const handleFirstPostBookmark = useCallback(() => {
@@ -507,11 +507,11 @@ const HarborTopicDetail = ({
     }, [firstPost, openBookmarkEditor]);
 
     const handleFirstPostReaction = useCallback(
-        reactionId => {
+        (reactionId, onAddHeart) => {
             if (!firstPost?.id) {
                 return;
             }
-            selectPostReaction(firstPost.id, reactionId);
+            selectPostReaction(firstPost.id, reactionId, onAddHeart);
         },
         [firstPost?.id, selectPostReaction],
     );
@@ -1075,6 +1075,7 @@ const HarborTopicDetail = ({
                 onPressDisabledReaction={handleFirstPostDisabledReaction}
                 onPressLike={handleFirstPostLike}
                 onSelectReaction={handleFirstPostReaction}
+                postId={firstPost?.id}
                 reactionDisabled={firstPostReactionDisabled}
                 reactionPending={
                     firstPost

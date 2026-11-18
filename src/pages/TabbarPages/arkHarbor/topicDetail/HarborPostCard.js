@@ -24,6 +24,9 @@ import {
 } from '../../../../utils/pathMap';
 import { trigger } from '../../../../utils/trigger';
 import HarborCategoryIcon from '../components/HarborCategoryIcon';
+import HarborLikeFeedback, {
+    useHarborLikeFeedback,
+} from './HarborLikeFeedback';
 import HarborPostContent from './HarborPostContent';
 import HarborPostEventCard from './HarborPostEventCard';
 import HarborReactionControl, {
@@ -176,6 +179,7 @@ const HarborPostCard = memo(
         const currentReaction = post?.current_user_reaction?.id;
         // 已獲 reaction／讚摘要（1 樓操作在底部欄，卡片改展示已獲計數）
         const isHeartActive = reactionsEnabled ? currentReaction === 'heart' : isLiked;
+        const likeFeedback = useHarborLikeFeedback(post.id, isHeartActive);
         const reactionCount = getReactionCount(post);
         const reactionSummary = (
             Array.isArray(post?.reactions) ? post.reactions : []
@@ -571,7 +575,7 @@ const HarborPostCard = memo(
             reactionsEnabled &&
             currentReaction &&
             currentReaction !== 'heart';
-        const reactionIcon = pendingReaction || pendingLike ? (
+        const reactionIcon = pendingReaction && showCurrentReaction ? (
             <ActivityIndicator size="small" color={themeColor} />
         ) : showCurrentReaction ? (
             <HarborReactionIcon name={currentReaction} size={metaIconSize} />
@@ -598,7 +602,12 @@ const HarborPostCard = memo(
                         ? styles.postMetaIconButtonWithCount
                         : null,
                 ]}>
-                {reactionIcon}
+                <HarborLikeFeedback
+                    color={themeColor}
+                    hearted={isHeartActive}
+                    motion={likeFeedback}>
+                    {reactionIcon}
+                </HarborLikeFeedback>
                 {reactionCountLabel ? (
                     <Text
                         style={[
@@ -635,7 +644,12 @@ const HarborPostCard = memo(
                     });
                     onPressDisabledReaction(post.id);
                 }}
+                onPressIn={
+                    showCurrentReaction ? undefined : likeFeedback.pressIn
+                }
+                onPressOut={likeFeedback.release}
                 onSelectReaction={reaction => {
+                    likeFeedback.release();
                     logHarborPostCardAction('card.reaction_select', {
                         postId: post.id,
                         postNumber: post.post_number,
@@ -645,7 +659,7 @@ const HarborPostCard = memo(
                         pendingLike: Boolean(pendingLike),
                         pendingReaction: Boolean(pendingReaction),
                     });
-                    onSelectReaction(post.id, reaction);
+                    onSelectReaction(post.id, reaction, likeFeedback.playBurst);
                 }}
                 pending={Boolean(pendingLike || pendingReaction)}
                 reactions={reactions}
@@ -666,6 +680,7 @@ const HarborPostCard = memo(
                 }}
                 onPress={event => {
                     event?.stopPropagation?.();
+                    likeFeedback.release();
                     trigger();
                     logHarborPostCardAction('card.like_press', {
                         postId: post.id,
@@ -678,11 +693,13 @@ const HarborPostCard = memo(
                         onPressDisabledReaction(post.id);
                         return;
                     }
-                    onPressLike(post);
+                    onPressLike(post, likeFeedback.playBurst);
                 }}
                 onPressIn={event => {
                     event?.stopPropagation?.();
+                    likeFeedback.pressIn();
                 }}
+                onPressOut={likeFeedback.release}
                 style={reactionControlStyle}>
                 {reactionButtonContent}
             </Pressable>

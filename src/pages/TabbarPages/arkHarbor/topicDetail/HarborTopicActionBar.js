@@ -15,6 +15,9 @@ import { useTranslation } from 'react-i18next';
 import Text from '../../../../components/AppText';
 import { useTheme } from '../../../../components/ThemeContext';
 import { trigger } from '../../../../utils/trigger';
+import HarborLikeFeedback, {
+    useHarborLikeFeedback,
+} from './HarborLikeFeedback';
 import HarborReactionControl, {
     HarborReactionIcon,
 } from './HarborReactionControl';
@@ -52,6 +55,7 @@ const HarborTopicActionBar = memo(
         onPressDisabledReaction,
         onPressLike,
         onSelectReaction,
+        postId,
         reactionDisabled,
         reactionPending,
         reactions,
@@ -98,23 +102,32 @@ const HarborTopicActionBar = memo(
             reactionsEnabled &&
             currentReaction &&
             currentReaction !== 'heart';
+        const isHeartActive = likeActive && !showCurrentReaction;
+        const likeFeedback = useHarborLikeFeedback(postId, isHeartActive);
 
         const likeButton = (
             <View style={styles.topicActionIconButton}>
-                {reactionPending ? (
-                    <ActivityIndicator size="small" color={themeColor} />
-                ) : showCurrentReaction ? (
-                    <HarborReactionIcon
-                        name={currentReaction}
-                        size={scale(20)}
-                    />
-                ) : (
-                    <MaterialCommunityIcons
-                        name={likeIconName}
-                        size={scale(20)}
-                        color={likeActive ? themeColor : black.main}
-                    />
-                )}
+                <HarborLikeFeedback
+                    color={themeColor}
+                    hearted={isHeartActive}
+                    motion={likeFeedback}>
+                    {showCurrentReaction ? (
+                        reactionPending ? (
+                            <ActivityIndicator size="small" color={themeColor} />
+                        ) : (
+                            <HarborReactionIcon
+                                name={currentReaction}
+                                size={scale(20)}
+                            />
+                        )
+                    ) : (
+                        <MaterialCommunityIcons
+                            name={likeIconName}
+                            size={scale(20)}
+                            color={likeActive ? themeColor : black.main}
+                        />
+                    )}
+                </HarborLikeFeedback>
                 {formatCount(likeCount) ? (
                     <Text
                         style={[
@@ -187,7 +200,17 @@ const HarborTopicActionBar = memo(
                             currentReaction={currentReaction}
                             disabled={reactionDisabled}
                             onPressDisabled={onPressDisabledReaction}
-                            onSelectReaction={onSelectReaction}
+                            onPressIn={
+                                showCurrentReaction ? undefined : likeFeedback.pressIn
+                            }
+                            onPressOut={likeFeedback.release}
+                            onSelectReaction={reaction => {
+                                likeFeedback.release();
+                                onSelectReaction?.(
+                                    reaction,
+                                    likeFeedback.playBurst,
+                                );
+                            }}
                             pending={reactionPending}
                             reactions={reactions}>
                             {likeButton}
@@ -200,9 +223,12 @@ const HarborTopicActionBar = memo(
                             }
                             disabled={reactionPending}
                             onPress={() => {
+                                likeFeedback.release();
                                 trigger();
-                                onPressLike?.();
-                            }}>
+                                onPressLike?.(likeFeedback.playBurst);
+                            }}
+                            onPressIn={likeFeedback.pressIn}
+                            onPressOut={likeFeedback.release}>
                             {likeButton}
                         </Pressable>
                     )}

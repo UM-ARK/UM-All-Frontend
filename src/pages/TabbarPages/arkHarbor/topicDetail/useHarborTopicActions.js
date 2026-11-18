@@ -325,7 +325,7 @@ const useHarborTopicActions = ({
     );
 
     const togglePostLike = useCallback(
-        async post => {
+        async (post, onAddHeart) => {
             const key = `like:${post.id}`;
             const wasSignedIn = sessionStatusRef.current === 'signedIn';
             logHarborPostAction('like.press', {
@@ -383,6 +383,9 @@ const useHarborTopicActions = ({
             updateTopicPost(post.id, current =>
                 updateOptimisticLike(current, nextLiked),
             );
+            if (wasSignedIn && nextLiked) {
+                onAddHeart?.();
+            }
             setTopic(current => ({
                 ...current,
                 like_count: Math.max(
@@ -496,7 +499,7 @@ const useHarborTopicActions = ({
     );
 
     const selectPostReaction = useCallback(
-        async (postId, reactionId) => {
+        async (postId, reactionId, onAddHeart) => {
             const {post, ...lookup} = getTopicPostLookup(
                 latestTopicRef.current,
                 postId,
@@ -564,6 +567,13 @@ const useHarborTopicActions = ({
             updateTopicPost(post.id, current =>
                 updateOptimisticReaction(current, reactionId),
             );
+            if (
+                wasSignedIn &&
+                reactionId === 'heart' &&
+                post.current_user_reaction?.id !== 'heart'
+            ) {
+                onAddHeart?.();
+            }
             try {
                 const updatedPost = await toggleHarborPostReaction(
                     post.id,
