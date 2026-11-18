@@ -23,6 +23,10 @@ import HarborCategoryIcon from './HarborCategoryIcon';
 
 const CARD_MARGIN_HORIZONTAL = scale(6);
 const CARD_PADDING_HORIZONTAL = scale(12);
+export const harborTopicRowInsets = {
+    paddingHorizontal: scale(16),
+    paddingVertical: verticalScale(8),
+};
 // 豎圖預覽比例（相對螢幕）
 const COVER_PORTRAIT_WIDTH_RATIO = 1 / 2.3;
 const COVER_PORTRAIT_HEIGHT_RATIO = 1 / 3.6;
@@ -91,6 +95,7 @@ const HarborTopicCard = ({
     onAuthorPress,
     onCategoryPress,
     isPressAllowed,
+    isRowLayout = false,
 }) => {
     const { theme } = useTheme();
     const { t } = useTranslation('harbor');
@@ -154,7 +159,7 @@ const HarborTopicCard = ({
         <Pressable
             accessibilityRole="button"
             accessibilityLabel={topic.title}
-            onLayout={event =>
+            onLayout={isRowLayout ? undefined : event =>
                 setCardWidth(event.nativeEvent.layout.width)
             }
             onPress={() => {
@@ -165,12 +170,16 @@ const HarborTopicCard = ({
                 onPress(topic);
             }}
             style={({ pressed }) => [
-                styles.card,
+                isRowLayout ? harborTopicRowInsets : styles.card,
                 {
                     backgroundColor: pressed
                         ? theme.tonal.primary08
-                        : theme.white,
-                    borderColor: theme.themeColorUltraLight,
+                        : isRowLayout
+                            ? undefined
+                            : theme.white,
+                    borderColor: isRowLayout
+                        ? undefined
+                        : theme.themeColorUltraLight,
                 },
             ]}>
             <View style={styles.authorRow}>
@@ -283,49 +292,52 @@ const HarborTopicCard = ({
                 />
             ) : null}
 
-            <Text
-                numberOfLines={3}
-                style={[styles.title, { color: theme.black.main }]}>
-                {topic.title}
-            </Text>
+            <View style={[styles.preview, isRowLayout && styles.previewRow]}>
+                <View style={isRowLayout && styles.previewText}>
+                    <Text
+                        numberOfLines={isRowLayout ? 2 : 3}
+                        style={[styles.title, { color: theme.black.main }]}>
+                        {topic.title}
+                    </Text>
 
-            {topic.excerpt ? (
-                <Text
-                    numberOfLines={2}
-                    style={[styles.excerpt, { color: theme.black.third }]}>
-                    {topic.excerpt}
-                </Text>
-            ) : null}
-
-            {coverUrl && !coverFailed ? (
-                <View
-                    style={[
-                        styles.coverWrap,
-                        {
-                            backgroundColor: theme.tonal.primary08,
-                            width: coverWidth,
-                            height: coverHeight,
-                        },
-                    ]}>
-                    <Image
-                        source={{ uri: coverUrl }}
-                        style={styles.coverImage}
-                        contentFit="cover"
-                        placeholder={theme.imagePlaceholder}
-                        placeholderContentFit="cover"
-                        transition={180}
-                        recyclingKey={coverUrl}
-                        onLoad={event => {
-                            const width = Number(event?.source?.width);
-                            const height = Number(event?.source?.height);
-                            if (width > 0 && height > 0) {
-                                setIsLandscape(width > height);
-                            }
-                        }}
-                        onError={() => setCoverFailed(true)}
-                    />
+                    {topic.excerpt ? (
+                        <Text
+                            numberOfLines={2}
+                            style={[styles.excerpt, { color: theme.black.third }]}>
+                            {topic.excerpt}
+                        </Text>
+                    ) : null}
                 </View>
-            ) : null}
+
+                {coverUrl && !coverFailed ? (
+                    <View
+                        style={[
+                            styles.coverWrap,
+                            isRowLayout
+                                ? styles.thumbnail
+                                : { width: coverWidth, height: coverHeight },
+                            { backgroundColor: theme.tonal.primary08 },
+                        ]}>
+                        <Image
+                            source={{ uri: coverUrl }}
+                            style={styles.coverImage}
+                            contentFit="cover"
+                            placeholder={theme.imagePlaceholder}
+                            placeholderContentFit="cover"
+                            transition={180}
+                            recyclingKey={coverUrl}
+                            onLoad={isRowLayout ? undefined : event => {
+                                const width = Number(event?.source?.width);
+                                const height = Number(event?.source?.height);
+                                if (width > 0 && height > 0) {
+                                    setIsLandscape(width > height);
+                                }
+                            }}
+                            onError={() => setCoverFailed(true)}
+                        />
+                    </View>
+                ) : null}
+            </View>
 
             {statuses.length > 0 ? (
                 <View style={styles.statusRow}>
@@ -335,7 +347,7 @@ const HarborTopicCard = ({
                 </View>
             ) : null}
 
-            <View style={styles.footer}>
+            <View style={[styles.footer, isRowLayout && styles.rowFooter]}>
                 <View style={styles.metrics}>
                     <Metric
                         icon="comment-outline"
@@ -436,7 +448,6 @@ const styles = StyleSheet.create({
         fontSize: scale(14),
         lineHeight: scale(19),
         fontWeight: '600',
-        marginTop: verticalScale(6),
     },
     excerpt: {
         ...uiStyle.defaultText,
@@ -444,11 +455,27 @@ const styles = StyleSheet.create({
         lineHeight: scale(17),
         marginTop: verticalScale(3),
     },
+    preview: {
+        marginTop: verticalScale(6),
+    },
+    previewRow: {
+        flexDirection: 'row',
+        gap: scale(12),
+    },
+    previewText: {
+        flex: 1,
+        minWidth: 0,
+    },
     coverWrap: {
         alignSelf: 'flex-start',
         marginTop: verticalScale(8),
         borderRadius: scale(8),
         overflow: 'hidden',
+    },
+    thumbnail: {
+        width: scale(56),
+        height: scale(56),
+        marginTop: 0,
     },
     coverImage: {
         width: '100%',
@@ -496,6 +523,11 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-between',
         marginTop: verticalScale(6),
+    },
+    rowFooter: {
+        paddingBottom: 0,
+        flexWrap: 'wrap',
+        rowGap: verticalScale(4),
     },
     metrics: {
         flexShrink: 1,

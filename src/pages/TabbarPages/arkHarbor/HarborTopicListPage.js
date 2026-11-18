@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../../components/ThemeContext';
 import { openHarborComposer } from '../../../utils/harbor/harborNavigation';
 import { trigger } from '../../../utils/trigger';
+import { useWindowSizeClass } from '../../../utils/windowSizeClass';
 import HarborTopicList from './components/HarborTopicList';
 
 const HarborComposeButton = ({
@@ -39,6 +40,8 @@ const createHarborComposeButton = props => () => (
 
 const HarborTopicListPage = ({ route, navigation }) => {
     const { theme } = useTheme();
+    const { isCompact } = useWindowSizeClass();
+    const backgroundColor = isCompact ? theme.harbor_bg_color : theme.bg_color;
     const { t } = useTranslation(['harbor', 'my']);
     const headerHeight = useHeaderHeight();
     const categoryId = Number(route.params?.categoryId);
@@ -164,7 +167,7 @@ const HarborTopicListPage = ({ route, navigation }) => {
     );
 
     return (
-        <View style={[styles.page, { backgroundColor: theme.bg_color }]}>
+        <View style={[styles.page, { backgroundColor }]}>
             <HarborTopicList
                 source={source}
                 navigation={navigation}

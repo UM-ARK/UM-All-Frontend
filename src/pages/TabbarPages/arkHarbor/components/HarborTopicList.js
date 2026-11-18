@@ -41,12 +41,13 @@ import {
     subscribeHarborTopicUpdates,
 } from '../../../../utils/harbor/harborTopicUpdates';
 import { trigger } from '../../../../utils/trigger';
+import { useWindowSizeClass } from '../../../../utils/windowSizeClass';
 import {
     HarborFullState,
     HarborInlineRetry,
     HarborTopicSkeleton,
 } from './HarborListStates';
-import HarborTopicCard from './HarborTopicCard';
+import HarborTopicCard, { harborTopicRowInsets } from './HarborTopicCard';
 
 const SKELETON_ITEMS = ['one', 'two', 'three', 'four'];
 const TOPIC_LIST_CACHE_NAMESPACE = 'topic-list';
@@ -91,6 +92,13 @@ const resolveRecommendationRequest = request =>
         request.then(finish, () => finish(null));
     });
 
+const HarborTopicSeparator = ({ trailingItem }) => {
+    const { theme } = useTheme();
+    return trailingItem?.isHarborRecommendation ? null : (
+        <View style={[styles.topicSeparator, {backgroundColor: theme.disabled}]} />
+    );
+};
+
 const HarborTopicList = ({
     source,
     navigation,
@@ -112,6 +120,8 @@ const HarborTopicList = ({
     preserveItemsUntilRefresh = false,
 }) => {
     const { theme } = useTheme();
+    const { isCompact } = useWindowSizeClass();
+    const isRowLayout = isCompact && !isTwoColumn;
     const { t } = useTranslation('harbor');
     const { status, login, sessionGeneration } = useHarborSession();
     const isScreenFocused = useIsFocused();
@@ -672,7 +682,10 @@ const HarborTopicList = ({
         ({ item }) => (
             <>
                 {item.isHarborRecommendation ? (
-                    <View style={styles.recommendationHeader}>
+                    <View style={[
+                        styles.recommendationHeader,
+                        isRowLayout && styles.rowRecommendationHeader,
+                    ]}>
                         <View
                             style={[
                                 styles.recommendationLine,
@@ -700,6 +713,7 @@ const HarborTopicList = ({
                     onAuthorPress={handleAuthorPress}
                     onCategoryPress={handleCategoryPress}
                     isPressAllowed={isTopicPressAllowed}
+                    isRowLayout={isRowLayout}
                 />
             </>
         ),
@@ -708,6 +722,7 @@ const HarborTopicList = ({
             handleAuthorPress,
             handleTopicPress,
             isTopicPressAllowed,
+            isRowLayout,
             t,
             theme.black.third,
             theme.disabled,
@@ -919,7 +934,8 @@ const HarborTopicList = ({
                 numColumns={isTwoColumn ? 2 : 1}
                 masonry={isTwoColumn}
                 keyExtractor={item => `harbor-skeleton-${item}`}
-                renderItem={() => <HarborTopicSkeleton />}
+                renderItem={() => <HarborTopicSkeleton isRowLayout={isRowLayout} />}
+                ItemSeparatorComponent={isRowLayout ? HarborTopicSeparator : undefined}
                 ListHeaderComponent={ListHeaderComponent}
                 contentContainerStyle={contentContainerStyle}
                 contentInsetAdjustmentBehavior={contentInsetAdjustmentBehavior}
@@ -944,6 +960,7 @@ const HarborTopicList = ({
                     : `harbor-topic-${item.id}`
             }
             renderItem={renderTopic}
+            ItemSeparatorComponent={isRowLayout ? HarborTopicSeparator : undefined}
             extraData={displayItems}
             ListHeaderComponent={header}
             ListEmptyComponent={emptyState}
@@ -973,12 +990,19 @@ const HarborTopicList = ({
 };
 
 const styles = StyleSheet.create({
+    topicSeparator: {
+        height: StyleSheet.hairlineWidth,
+        marginHorizontal: harborTopicRowInsets.paddingHorizontal,
+    },
     recommendationHeader: {
         flexDirection: 'row',
         alignItems: 'center',
         marginHorizontal: scale(14),
         marginBottom: verticalScale(2),
         marginTop: verticalScale(1),
+    },
+    rowRecommendationHeader: {
+        marginHorizontal: harborTopicRowInsets.paddingHorizontal,
     },
     recommendationLine: {
         flex: 1,

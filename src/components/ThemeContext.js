@@ -125,6 +125,11 @@ const getColorDiy = (isLight) => {
 
         // Harbor頁面配色
         harbor_bg_color: isLight ? '#fbfdff' : '#111111',
+        harborSearch: {
+            background: isLight ? '#EDF0F2' : whiteColor,
+            pressedBackground: isLight ? '#E3E7EA' : '#343436',
+            foreground: isLight ? '#666666' : '#A8A8AC',
+        },
 
         // expo-image 通用圖片佔位（可直接傳給 placeholder prop）
         // 亮：淺灰；暗：深灰，避免深色模式下出現突兀亮塊
