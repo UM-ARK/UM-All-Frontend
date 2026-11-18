@@ -12,6 +12,7 @@ import { useNavigation } from '@react-navigation/native';
 import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { scale, verticalScale } from 'react-native-size-matters';
+import { LinearGradient } from 'expo-linear-gradient';
 import { t } from 'i18next';
 import lodash from 'lodash';
 
@@ -57,6 +58,7 @@ import {
 const itemHeight = scale(75);
 const COURSE_CARD_GAP = scale(10);
 const COURSE_GRID_HORIZONTAL_PADDING = scale(10);
+const SEARCH_HEADER_FADE_HEIGHT = verticalScale(8);
 /** 寬屏左欄寬度：固定一台手機的寬度，讓篩選面板沿用手機排版 */
 const FILTER_PANE_WIDTH = 360;
 
@@ -461,16 +463,29 @@ const What2Reg = ({ isSplitPane = false }) => {
 
     // 以下內容在緊湊（單欄滾動）與寬屏（左右分欄）兩種殼子之間共用，不因佈局分叉
     const searchBar = (
-        <SearchBarSection
-            theme={theme}
-            inputText={inputText}
-            inputOK={inputOK}
-            textInputRef={textInputRef}
-            onChangeText={setInputText}
-            onClear={onClearInput}
-            onPressAction={onPressSearchAction}
-            trigger={trigger}
-        />
+        <View pointerEvents="box-none" style={{ zIndex: 1 }}>
+            <SearchBarSection
+                theme={theme}
+                inputText={inputText}
+                inputOK={inputOK}
+                textInputRef={textInputRef}
+                onChangeText={setInputText}
+                onClear={onClearInput}
+                onPressAction={onPressSearchAction}
+                trigger={trigger}
+            />
+            <LinearGradient
+                pointerEvents="none"
+                colors={[bg_color, `${bg_color}00`]}
+                style={{
+                    position: 'absolute',
+                    top: '100%',
+                    left: 0,
+                    right: 0,
+                    height: SEARCH_HEADER_FADE_HEIGHT,
+                }}
+            />
+        </View>
     );
 
     const filterOrHint = hasSearchResult ? (
@@ -618,7 +633,7 @@ const What2Reg = ({ isSplitPane = false }) => {
                         <ScrollView
                             style={{ flex: 1 }}
                             contentContainerStyle={{
-                                paddingTop: COURSE_CARD_GAP,
+                                paddingTop: SEARCH_HEADER_FADE_HEIGHT,
                                 paddingBottom: floatingBottom + verticalScale(20),
                             }}
                             keyboardDismissMode="on-drag">
@@ -647,7 +662,7 @@ const What2Reg = ({ isSplitPane = false }) => {
                     stickyHeaderIndices={[0]}
                 >
                     {searchBar}
-                    <View style={{ rowGap: COURSE_CARD_GAP }}>
+                    <View style={{ paddingTop: SEARCH_HEADER_FADE_HEIGHT, rowGap: COURSE_CARD_GAP }}>
                         {filterOrHint}
                         {courseGrid}
                     </View>
