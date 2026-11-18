@@ -8,7 +8,6 @@ import {
     ActivityIndicator,
     Alert,
     Keyboard,
-    Pressable,
     StyleSheet,
     View,
 } from 'react-native';
@@ -577,15 +576,12 @@ const HarborComposerPage = ({route, navigation}) => {
                 ? () => (
                     <View style={styles.headerRightRow}>
                         {shouldShowDiscard ? (
-                            <Pressable
+                            <ScalePressable
                                 accessibilityLabel={t('捨棄這次修改')}
                                 accessibilityRole="button"
                                 hitSlop={scale(8)}
                                 onPress={handleDiscard}
-                                style={({pressed}) => [
-                                    styles.headerActionButton,
-                                    pressed && {opacity: 0.6},
-                                ]}>
+                                style={styles.headerActionButton}>
                                 <Text
                                     style={[
                                         styles.headerActionText,
@@ -593,9 +589,9 @@ const HarborComposerPage = ({route, navigation}) => {
                                     ]}>
                                     {t('捨棄')}
                                 </Text>
-                            </Pressable>
+                            </ScalePressable>
                         ) : null}
-                        <Pressable
+                        <ScalePressable
                             accessibilityLabel={t('發佈')}
                             accessibilityRole="button"
                             accessibilityState={{
@@ -604,13 +600,7 @@ const HarborComposerPage = ({route, navigation}) => {
                             disabled={isPublishDisabled}
                             hitSlop={scale(8)}
                             onPress={handleSubmit}
-                            style={({pressed}) => [
-                                styles.headerActionButton,
-                                pressed &&
-                                    !isPublishDisabled && {
-                                        opacity: 0.6,
-                                    },
-                            ]}>
+                            style={styles.headerActionButton}>
                             {isSubmitting ? (
                                 <ActivityIndicator
                                     size="small"
@@ -629,7 +619,7 @@ const HarborComposerPage = ({route, navigation}) => {
                                     {t('發佈')}
                                 </Text>
                             )}
-                        </Pressable>
+                        </ScalePressable>
                     </View>
                 )
                 : undefined,

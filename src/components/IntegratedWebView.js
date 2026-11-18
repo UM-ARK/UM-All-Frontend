@@ -3,7 +3,6 @@ import {
     StyleSheet,
     Dimensions,
     Animated,
-    TouchableOpacity,
     BackHandler,
     Linking,
     Platform,
@@ -15,7 +14,9 @@ import Icon from "@react-native-vector-icons/ant-design";
 import { NavigationContext } from '@react-navigation/native';
 import { scale } from 'react-native-size-matters';
 import Text from './AppText';
+import ScalePressable from './ScalePressable';
 import { useTheme } from './ThemeContext';
+import { trigger } from '../utils/trigger';
 
 const IntegratedWebView = ({
     source,
@@ -50,11 +51,13 @@ const IntegratedWebView = ({
 
     // 點擊後退按鈕觸發
     const handleBackPress = () => {
+        trigger();
         webViewRef.current.goBack();
     };
 
     // 點擊前進按鈕觸發
     const handleForwardPress = () => {
+        trigger();
         webViewRef.current.goForward();
     };
 
@@ -178,7 +181,7 @@ const NavigationView = ({
                 // { transform: [{ translateY: translateY }] },
             ]}>
             {/* 後退按鈕 */}
-            <TouchableOpacity
+            <ScalePressable
                 style={styles.button}
                 onPress={onBackPress}
                 disabled={canGoBack ? false : true}>
@@ -187,9 +190,9 @@ const NavigationView = ({
                     size={22}
                     color={canGoBack ? 'black' : 'grey'}
                 />
-            </TouchableOpacity>
+            </ScalePressable>
             {/* 前進按鈕 */}
-            <TouchableOpacity
+            <ScalePressable
                 style={styles.button}
                 onPress={onForwardPress}
                 disabled={canGoForward ? false : true}>
@@ -198,7 +201,7 @@ const NavigationView = ({
                     size={22}
                     color={canGoForward ? 'black' : 'grey'}
                 />
-            </TouchableOpacity>
+            </ScalePressable>
         </Animated.View>))
     );
 };

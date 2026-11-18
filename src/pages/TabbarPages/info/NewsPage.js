@@ -13,10 +13,10 @@ import {
     VirtualizedList,
     RefreshControl,
     StyleSheet,
-    TouchableOpacity,
 } from 'react-native';
 
 import Text from '../../../components/AppText';
+import ScalePressable from '../../../components/ScalePressable';
 import ClubSearchBar from './components/ClubSearchBar';
 import NewsCard, { NewsRowSeparator } from './components/NewsCard';
 import NewsListSkeleton from './components/NewsListSkeleton';
@@ -284,8 +284,7 @@ const NewsPage = forwardRef(function NewsPage(
                     </Text>
                 )}
                 <View style={styles.topNewsContainer}>
-                    <TouchableOpacity
-                        activeOpacity={0.8}
+                    <ScalePressable
                         style={{ width: '100%', height: '100%' }}
                         onPress={() => {
                             trigger();
@@ -328,7 +327,7 @@ const NewsPage = forwardRef(function NewsPage(
                                 </Text>
                             </View>
                         </View>
-                    </TouchableOpacity>
+                    </ScalePressable>
                 </View>
             </View >
         );

@@ -13,6 +13,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
 import Text from '../../../../components/AppText';
+import ScalePressable from '../../../../components/ScalePressable';
 import { useTheme } from '../../../../components/ThemeContext';
 import { trigger } from '../../../../utils/trigger';
 import HarborLikeFeedback, {
@@ -160,7 +161,7 @@ const HarborTopicActionBar = memo(
                         ),
                     },
                 ]}>
-                <Pressable
+                <ScalePressable
                     accessibilityRole="button"
                     accessibilityLabel={composeAccessibilityLabel}
                     disabled={!canReply}
@@ -168,15 +169,11 @@ const HarborTopicActionBar = memo(
                         trigger();
                         onPressCompose?.();
                     }}
-                    style={({ pressed }) => [
+                    style={[
                         styles.topicActionCompose,
                         {
                             backgroundColor: bg_color,
-                            opacity: !canReply
-                                ? 0.5
-                                : pressed
-                                    ? 0.7
-                                    : 1,
+                            opacity: canReply ? 1 : 0.5,
                         },
                     ]}>
                     <MaterialCommunityIcons
@@ -192,7 +189,7 @@ const HarborTopicActionBar = memo(
                         ]}>
                         {composePlaceholder}
                     </Text>
-                </Pressable>
+                </ScalePressable>
 
                 <View style={styles.topicActionIcons}>
                     {reactionsEnabled ? (
@@ -233,7 +230,7 @@ const HarborTopicActionBar = memo(
                         </Pressable>
                     )}
 
-                    <Pressable
+                    <ScalePressable
                         accessibilityRole="button"
                         accessibilityLabel={
                             bookmarked ? t('已收藏') : t('收藏')
@@ -262,9 +259,9 @@ const HarborTopicActionBar = memo(
                                 }
                             />
                         )}
-                    </Pressable>
+                    </ScalePressable>
 
-                    <Pressable
+                    <ScalePressable
                         accessibilityRole="button"
                         accessibilityLabel={t('評論')}
                         onPress={() => {
@@ -286,7 +283,7 @@ const HarborTopicActionBar = memo(
                                 {formatCount(commentCount)}
                             </Text>
                         ) : null}
-                    </Pressable>
+                    </ScalePressable>
                 </View>
             </View>
         );

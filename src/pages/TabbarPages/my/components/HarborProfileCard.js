@@ -1,5 +1,5 @@
 import React from 'react';
-import {Pressable, StyleSheet, View} from 'react-native';
+import {StyleSheet, View} from 'react-native';
 
 import {Image} from 'expo-image';
 import {useTranslation} from 'react-i18next';
@@ -8,6 +8,7 @@ import MaterialCommunityIcons from "@react-native-vector-icons/material-design-i
 import {scale, verticalScale} from 'react-native-size-matters';
 
 import Text from '../../../../components/AppText';
+import ScalePressable from '../../../../components/ScalePressable';
 import {uiStyle, useTheme} from '../../../../components/ThemeContext';
 import {trigger} from '../../../../utils/trigger';
 import {formatJoinedAt} from '../utils/harborUi';
@@ -29,16 +30,13 @@ const HarborProfileCard = ({
 
     return (
         <View style={styles.container}>
-            <Pressable
+            <ScalePressable
                 accessibilityRole="button"
                 accessibilityLabel={t(
                     onEditProfilePress ? '編輯個人資料' : 'Harbor 個人資料',
                 )}
                 disabled={!onAvatarPress}
-                style={({pressed}) => [
-                    styles.avatarButton,
-                    pressed && styles.profilePressed,
-                ]}
+                style={styles.avatarButton}
                 onPress={() => {
                     trigger();
                     onAvatarPress?.();
@@ -66,16 +64,13 @@ const HarborProfileCard = ({
                         />
                     </View>
                 ) : null}
-            </Pressable>
+            </ScalePressable>
 
-            <Pressable
+            <ScalePressable
                 accessibilityRole="button"
                 accessibilityLabel={t('Harbor 個人資料')}
                 disabled={!onProfilePress}
-                style={({pressed}) => [
-                    styles.identity,
-                    pressed && styles.profilePressed,
-                ]}
+                style={styles.identity}
                 onPress={() => {
                     trigger();
                     onProfilePress?.();
@@ -139,18 +134,15 @@ const HarborProfileCard = ({
                         {t('於 {{date}} 加入', {date: joinedAt})}
                     </Text>
                 ) : null}
-            </Pressable>
+            </ScalePressable>
 
             {onChatPress || onSettingsPress ? (
                 <View style={styles.actions}>
                     {onChatPress ? (
-                        <Pressable
+                        <ScalePressable
                             accessibilityRole="button"
                             accessibilityLabel={t('Chat')}
-                            style={({pressed}) => [
-                                styles.actionButton,
-                                pressed && styles.profilePressed,
-                            ]}
+                            style={styles.actionButton}
                             onPress={() => {
                                 trigger();
                                 onChatPress();
@@ -177,16 +169,13 @@ const HarborProfileCard = ({
                                     </Text>
                                 </View>
                             ) : null}
-                        </Pressable>
+                        </ScalePressable>
                     ) : null}
                     {onSettingsPress ? (
-                        <Pressable
+                        <ScalePressable
                             accessibilityRole="button"
                             accessibilityLabel={t('設置')}
-                            style={({pressed}) => [
-                                styles.actionButton,
-                                pressed && styles.profilePressed,
-                            ]}
+                            style={styles.actionButton}
                             onPress={() => {
                                 trigger();
                                 onSettingsPress();
@@ -196,7 +185,7 @@ const HarborProfileCard = ({
                                 size={scale(18)}
                                 color={theme.themeColor}
                             />
-                        </Pressable>
+                        </ScalePressable>
                     ) : null}
                 </View>
             ) : null}
@@ -211,9 +200,6 @@ const styles = StyleSheet.create({
         gap: scale(10),
         paddingTop: verticalScale(4),
         paddingBottom: verticalScale(4),
-    },
-    profilePressed: {
-        opacity: 0.7,
     },
     actions: {
         flexDirection: 'row',

@@ -2,7 +2,6 @@ import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {
     ActivityIndicator,
     Platform,
-    Pressable,
     Share,
     StyleSheet,
     View,
@@ -40,7 +39,7 @@ const AppShareAvatar = ({channel, selected, onPress}) => {
     }, [channel.avatarUrl]);
 
     return (
-        <Pressable
+        <ScalePressable
             accessibilityLabel={channel.title}
             accessibilityRole="button"
             accessibilityState={{selected}}
@@ -99,7 +98,7 @@ const AppShareAvatar = ({channel, selected, onPress}) => {
                 style={[styles.chatName, {color: theme.black.second}]}>
                 {channel.title || t('聊天')}
             </Text>
-        </Pressable>
+        </ScalePressable>
     );
 };
 
@@ -284,13 +283,10 @@ const AppShareSheet = ({visible, payload, onClose}) => {
                     ]}
                 />
                 <View style={styles.actionRow}>
-                    <Pressable
+                    <ScalePressable
                         accessibilityRole="button"
                         onPress={handleSystemShare}
-                        style={({pressed}) => [
-                            styles.actionItem,
-                            pressed && {opacity: 0.68},
-                        ]}>
+                        style={styles.actionItem}>
                         <View
                             style={[
                                 styles.actionIcon,
@@ -305,15 +301,12 @@ const AppShareSheet = ({visible, payload, onClose}) => {
                         <Text style={[styles.actionText, {color: theme.black.second}]}>
                             {t('系統分享')}
                         </Text>
-                    </Pressable>
+                    </ScalePressable>
                     {payload?.url ? (
-                        <Pressable
+                        <ScalePressable
                             accessibilityRole="button"
                             onPress={handleCopyLink}
-                            style={({pressed}) => [
-                                styles.actionItem,
-                                pressed && {opacity: 0.68},
-                            ]}>
+                            style={styles.actionItem}>
                             <View
                                 style={[
                                     styles.actionIcon,
@@ -328,7 +321,7 @@ const AppShareSheet = ({visible, payload, onClose}) => {
                             <Text style={[styles.actionText, {color: theme.black.second}]}>
                                 {t('複製連結')}
                             </Text>
-                        </Pressable>
+                        </ScalePressable>
                     ) : null}
                 </View>
 

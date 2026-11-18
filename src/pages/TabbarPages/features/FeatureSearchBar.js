@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import React, { useState } from 'react';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import { scale, verticalScale } from 'react-native-size-matters';
@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 
 import Text from '../../../components/AppText';
 import TextInput from '../../../components/AppTextInput';
+import ScalePressable from '../../../components/ScalePressable';
 import searchFieldStyles, { SEARCH_FIELD_ICON_SIZE } from '../../../components/searchFieldStyles';
 import { useTheme, uiStyle } from '../../../components/ThemeContext';
 import { logToFirebase } from '../../../utils/firebaseAnalytics';
@@ -55,16 +56,16 @@ export default function FeatureSearchBar({
                     <Ionicons name="search" size={SEARCH_FIELD_ICON_SIZE} color={isFocused ? themeColor : black.third} />
                 </View>
                 {query.length > 0 ? (
-                    <Pressable
+                    <ScalePressable
                         accessibilityRole="button"
                         accessibilityLabel={t('清除搜尋', { ns: 'common' })}
                         onPress={() => {
                             trigger();
                             onChangeQuery('');
                         }}
-                        style={({ pressed }) => [styles.button, pressed && styles.pressed]}>
+                        style={styles.button}>
                         <Ionicons name="close-circle" size={scale(16)} color={black.third} />
-                    </Pressable>
+                    </ScalePressable>
                 ) : null}
             </View>
             {hasQuery ? (
@@ -76,15 +77,15 @@ export default function FeatureSearchBar({
                             ? t('找到 {{total}} 項服務', { total: matchCount })
                             : t('沒有找到相關服務', { ns: 'home' })}
                     </Text>
-                    <Pressable
+                    <ScalePressable
                         accessibilityRole="button"
                         onPress={onWebSearch}
-                        style={({ pressed }) => [styles.button, styles.webSearch, pressed && styles.pressed]}>
+                        style={[styles.button, styles.webSearch]}>
                         <Ionicons name="globe-outline" size={scale(15)} color={themeColor} />
                         <Text style={[uiStyle.defaultText, styles.webSearchLabel, { color: themeColor }]}>
                             {t('網絡搜索')}
                         </Text>
-                    </Pressable>
+                    </ScalePressable>
                 </View>
             ) : null}
         </View>
@@ -123,8 +124,5 @@ const styles = StyleSheet.create({
     webSearchLabel: {
         fontSize: verticalScale(11),
         fontWeight: '600',
-    },
-    pressed: {
-        opacity: 0.55,
     },
 });

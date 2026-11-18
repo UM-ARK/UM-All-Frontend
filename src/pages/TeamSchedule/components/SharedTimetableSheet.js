@@ -2,7 +2,7 @@
  * 本人共享與管理課表的明確確認 Sheet。
  */
 import React, {memo, useEffect, useMemo, useRef, useState} from 'react';
-import {ActivityIndicator, Alert, Pressable, StyleSheet, View} from 'react-native';
+import {ActivityIndicator, Alert, StyleSheet, View} from 'react-native';
 
 import {useTranslation} from 'react-i18next';
 import ActionSheet, {ScrollView} from 'react-native-actions-sheet';
@@ -358,16 +358,14 @@ const SharedTimetableSheet = ({
                     ) : null}
                     <View style={styles.footerRow}>
                         {serverSnapshot ? (
-                            <Pressable
+                            <ScalePressable
                                 accessibilityRole="button"
                                 disabled={saving}
                                 onPress={handleStop}
-                                style={({pressed}) => [
+                                style={[
                                     styles.footerBtn,
                                     {
-                                        backgroundColor: pressed
-                                            ? theme.tonal.unread30
-                                            : theme.tonal.unread15,
+                                        backgroundColor: theme.tonal.unread15,
                                         opacity: saving ? 0.5 : 1,
                                     },
                                 ]}>
@@ -379,7 +377,7 @@ const SharedTimetableSheet = ({
                                     numberOfLines={1}>
                                     {t('停止共享')}
                                 </Text>
-                            </Pressable>
+                            </ScalePressable>
                         ) : null}
                         <ScalePressable
                             accessibilityRole="button"

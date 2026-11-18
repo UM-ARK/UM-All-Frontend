@@ -1,6 +1,5 @@
 import React, { memo, useEffect, useState } from 'react';
 import {
-    Pressable,
     StyleSheet,
     useWindowDimensions,
     View,
@@ -12,6 +11,7 @@ import { scale, verticalScale } from 'react-native-size-matters';
 import { useTranslation } from 'react-i18next';
 
 import Text from '../../../../components/AppText';
+import ScalePressable from '../../../../components/ScalePressable';
 import { uiStyle, useTheme } from '../../../../components/ThemeContext';
 import {
     ARK_HARBOR_ABSOLUTE_URL,
@@ -156,7 +156,7 @@ const HarborTopicCard = ({
     }, [coverUrl]);
 
     return (
-        <Pressable
+        <ScalePressable
             accessibilityRole="button"
             accessibilityLabel={topic.title}
             onLayout={isRowLayout ? undefined : event =>
@@ -169,7 +169,7 @@ const HarborTopicCard = ({
                 trigger();
                 onPress(topic);
             }}
-            style={({ pressed }) => [
+            style={[
                 isRowLayout ? harborTopicRowInsets : styles.card,
                 {
                     backgroundColor: isRowLayout
@@ -179,10 +179,9 @@ const HarborTopicCard = ({
                         ? undefined
                         : theme.themeColorUltraLight,
                 },
-                pressed && { backgroundColor: theme.subtlePressOverlay },
             ]}>
             <View style={styles.authorRow}>
-                <Pressable
+                <ScalePressable
                     accessibilityRole="link"
                     accessibilityLabel={authorId}
                     disabled={!onAuthorPress || !author.username}
@@ -190,10 +189,7 @@ const HarborTopicCard = ({
                         event.stopPropagation?.();
                         trigger();
                         onAuthorPress(author.username);
-                    }}
-                    style={({ pressed }) => [
-                        pressed && styles.avatarPressed,
-                    ]}>
+                    }}>
                     {avatarUrl ? (
                         <Image
                             source={{ uri: avatarUrl }}
@@ -212,7 +208,7 @@ const HarborTopicCard = ({
                             />
                         </View>
                     )}
-                </Pressable>
+                </ScalePressable>
                 <View style={styles.authorText}>
                     <Text
                         numberOfLines={1}
@@ -234,7 +230,7 @@ const HarborTopicCard = ({
                                 ]}>
                                 ·
                             </Text>
-                            <Pressable
+                            <ScalePressable
                                 accessibilityRole="button"
                                 onPress={event =>
                                     stopAndRun(
@@ -243,10 +239,7 @@ const HarborTopicCard = ({
                                         isPressAllowed,
                                     )
                                 }
-                                style={({ pressed }) => [
-                                    styles.categoryChip,
-                                    pressed && styles.categoryChipPressed,
-                                ]}>
+                                style={styles.categoryChip}>
                                 <HarborCategoryIcon
                                     category={category}
                                     color={theme.themeColor}
@@ -260,7 +253,7 @@ const HarborTopicCard = ({
                                     ]}>
                                     {category.name}
                                 </Text>
-                            </Pressable>
+                            </ScalePressable>
                         </>
                     ) : null}
                 </View>
@@ -380,7 +373,7 @@ const HarborTopicCard = ({
                     </Text>
                 ) : null}
             </View>
-        </Pressable>
+        </ScalePressable>
     );
 };
 
@@ -401,9 +394,6 @@ const styles = StyleSheet.create({
     avatarFallback: {
         alignItems: 'center',
         justifyContent: 'center',
-    },
-    avatarPressed: {
-        opacity: 0.65,
     },
     authorText: {
         flex: 1,
@@ -492,9 +482,6 @@ const styles = StyleSheet.create({
         flexShrink: 1,
         fontSize: scale(10),
         fontWeight: '600',
-    },
-    categoryChipPressed: {
-        opacity: 0.6,
     },
     statusRow: {
         flexDirection: 'row',

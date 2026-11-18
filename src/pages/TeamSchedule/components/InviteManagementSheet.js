@@ -4,7 +4,6 @@
 import React, {memo, useEffect, useRef, useState} from 'react';
 import {
     Alert,
-    Pressable,
     StyleSheet,
     View,
 } from 'react-native';
@@ -322,16 +321,14 @@ const InviteManagementSheet = ({
                     </Text>
                 </ScalePressable>
 
-                <Pressable
+                <ScalePressable
                     accessibilityRole="button"
                     disabled={actionsDisabled}
                     onPress={handleRotate}
-                    style={({pressed}) => [
+                    style={[
                         styles.action,
                         {
-                            backgroundColor: pressed
-                                ? theme.tonal.unread30
-                                : theme.tonal.unread15,
+                            backgroundColor: theme.tonal.unread15,
                             opacity: actionsDisabled ? 0.6 : 1,
                         },
                     ]}>
@@ -342,7 +339,7 @@ const InviteManagementSheet = ({
                         ]}>
                         {t('更換邀請連結')}
                     </Text>
-                </Pressable>
+                </ScalePressable>
 
                 <ScalePressable
                     accessibilityRole="button"

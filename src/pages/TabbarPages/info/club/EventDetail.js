@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 
 import Text from '../../../../components/AppText';
+import ScalePressable from '../../../../components/ScalePressable';
 import { useTheme, uiStyle } from '../../../../components/ThemeContext';
 import { getDeepLinkShareHeaderOptions } from '../../../../components/DeepLinkShareButton';
 import { useAppShare } from '../../../../contexts/AppShareContext';
@@ -498,16 +499,15 @@ const EventDetail = (props) => {
     // Follow 按鈕
     const renderFollowButton = () => {
         return (
-            <TouchableOpacity
+            <ScalePressable
                 style={{
                     ...styles.followButton,
                     backgroundColor: state.isFollow ? black.third : themeColor,
                 }}
-                activeOpacity={0.8}
                 onPress={handleFollow}
             >
                 <Text style={{ ...uiStyle.defaultText, color: white }}>{state.isFollow ? 'Del Follow' : 'Follow'}</Text>
-            </TouchableOpacity>
+            </ScalePressable>
         );
     };
 

@@ -3,7 +3,6 @@ import {
     ActivityIndicator,
     Alert,
     Platform,
-    Pressable,
     StyleSheet,
     View,
 } from 'react-native';
@@ -238,7 +237,7 @@ const WikiHome = ({navigation}) => {
                     {item.section === 'recent' && isLoadingRecent ? (
                         <ActivityIndicator size="small" color={theme.themeColor} />
                     ) : item.action ? (
-                        <Pressable
+                        <ScalePressable
                             accessibilityRole="button"
                             hitSlop={scale(8)}
                             onPress={() => {
@@ -248,7 +247,7 @@ const WikiHome = ({navigation}) => {
                             <Text style={[styles.headingAction, {color: theme.themeColor}]}>
                                 {item.action}
                             </Text>
-                        </Pressable>
+                        </ScalePressable>
                     ) : null}
                 </View>
             );
@@ -325,15 +324,15 @@ const WikiHome = ({navigation}) => {
                     <MaterialCommunityIcons name="shuffle-variant" size={scale(20)} color={theme.themeColor} />
                     <Text style={[styles.quickText, {color: theme.themeColor}]}>{t('隨機條目')}</Text>
                 </ScalePressable>
-                <Pressable
+                <ScalePressable
                     onPress={() => {
                         trigger();
                         openLink(ARK_WIKI);
                     }}
-                    style={({pressed}) => [styles.quickButton, {backgroundColor: pressed ? theme.tonal.secondary50 : theme.tonal.secondary30}]}>
+                    style={[styles.quickButton, {backgroundColor: theme.tonal.secondary30}]}>
                     <MaterialCommunityIcons name="pencil-outline" size={scale(20)} color={theme.secondThemeColor} />
                     <Text style={[styles.quickText, {color: theme.secondThemeColor}]}>{t('前往 Wiki 貢獻')}</Text>
-                </Pressable>
+                </ScalePressable>
             </View>
         </View>
     );

@@ -1,5 +1,5 @@
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
-import {ActivityIndicator, Pressable, StyleSheet, View} from 'react-native';
+import {ActivityIndicator, StyleSheet, View} from 'react-native';
 import ActionSheet from 'react-native-actions-sheet';
 import {useTranslation} from 'react-i18next';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
@@ -7,6 +7,7 @@ import MaterialCommunityIcons from '@react-native-vector-icons/material-design-i
 import axios from 'axios';
 
 import Text from '../../../components/AppText';
+import ScalePressable from '../../../components/ScalePressable';
 import SegmentControl from '../../../components/SegmentControl';
 import {uiStyle, useTheme} from '../../../components/ThemeContext';
 import {UM_BUS_STATS} from '../../../utils/pathMap';
@@ -298,7 +299,7 @@ const BusEtaStatsSheet = ({visible, onClose, selectedStop, selectedVehiclePlate,
                 <View style={styles.header}>
                     <Text style={styles.title}>{t('到站時間統計')}</Text>
                     <View style={styles.headerActions}>
-                        <Pressable
+                        <ScalePressable
                             accessibilityRole="button"
                             accessibilityLabel={t('更新到站時間統計')}
                             disabled={loading}
@@ -306,23 +307,23 @@ const BusEtaStatsSheet = ({visible, onClose, selectedStop, selectedVehiclePlate,
                                 trigger();
                                 fetchStats({force: true});
                             }}
-                            style={({pressed}) => [styles.iconButton, pressed && {opacity: 0.7}]}>
+                            style={styles.iconButton}>
                             <MaterialCommunityIcons
                                 name={loading ? 'timer-sand' : 'refresh'}
                                 color={themeColor}
                                 size={21}
                             />
-                        </Pressable>
-                        <Pressable
+                        </ScalePressable>
+                        <ScalePressable
                             accessibilityRole="button"
                             accessibilityLabel={t('關閉')}
                             onPress={() => {
                                 trigger();
                                 sheetRef.current?.hide();
                             }}
-                            style={({pressed}) => [styles.iconButton, pressed && {opacity: 0.7}]}>
+                            style={styles.iconButton}>
                             <MaterialCommunityIcons name="close" color={black.main} size={22} />
-                        </Pressable>
+                        </ScalePressable>
                     </View>
                 </View>
                 <Text style={styles.route} numberOfLines={2}>

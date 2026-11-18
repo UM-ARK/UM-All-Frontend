@@ -1,10 +1,11 @@
 // 設置頁基礎組件：分區標題、分區卡片、設置項。
 // 主設置頁與各設置子頁共用
 import React from 'react';
-import { View, Pressable } from 'react-native';
+import { View } from 'react-native';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import { scale, verticalScale } from 'react-native-size-matters';
 import Text from '../../../components/AppText';
+import ScalePressable from '../../../components/ScalePressable';
 import { useTheme, uiStyle } from '../../../components/ThemeContext';
 import { trigger } from '../../../utils/trigger';
 
@@ -109,7 +110,7 @@ export const SettingItem = ({
     const { theme } = useTheme();
     const { white, black } = theme;
     // 無 onPress 時用 View，供 MenuView 作為觸發錨點（避免內層 Pressable 搶手勢）
-    const Container = onPress ? Pressable : View;
+    const Container = onPress ? ScalePressable : View;
     const itemStyle = {
         flexDirection: 'row',
         alignItems: 'center',
@@ -136,9 +137,7 @@ export const SettingItem = ({
                     },
                 }
                 : {})}
-            style={onPress
-                ? ({ pressed }) => [itemStyle, pressed && { opacity: 0.7 }]
-                : itemStyle}>
+            style={itemStyle}>
             {/* 圖標 */}
             {icon && (
                 <View

@@ -1,5 +1,5 @@
 import React, {useCallback, useEffect, useMemo} from 'react';
-import {Pressable, ScrollView, StyleSheet, View} from 'react-native';
+import {ScrollView, StyleSheet, View} from 'react-native';
 import {Gesture, GestureDetector} from 'react-native-gesture-handler';
 import Animated, {
     runOnJS,
@@ -11,6 +11,7 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 
 import Text from '../../../components/AppText';
+import ScalePressable from '../../../components/ScalePressable';
 import {uiStyle} from '../../../components/ThemeContext';
 import {trigger} from '../../../utils/trigger';
 import {
@@ -498,7 +499,7 @@ const BusArrivalPanel = ({
         <Animated.View style={[styles.container, animatedContainerStyle]}>
             <GestureDetector gesture={panGesture}>
                 <Animated.View>
-                    <Pressable
+                    <ScalePressable
                         accessibilityRole="button"
                         accessibilityLabel={expanded ? translate('收起到站資訊') : translate('展開到站資訊')}
                         accessibilityState={{expanded}}
@@ -509,9 +510,9 @@ const BusArrivalPanel = ({
                         }}
                         style={styles.handleHit}>
                         <View style={styles.handle} />
-                    </Pressable>
+                    </ScalePressable>
                     <View style={styles.headingButton}>
-                        <Pressable
+                        <ScalePressable
                             accessibilityRole="button"
                             accessibilityLabel={expanded ? translate('收起到站資訊') : translate('展開到站資訊')}
                             accessibilityState={{expanded}}
@@ -519,7 +520,7 @@ const BusArrivalPanel = ({
                                 trigger();
                                 onToggleExpanded();
                             }}
-                            style={({pressed}) => [styles.headingContent, pressed && {opacity: 0.7}]}>
+                            style={styles.headingContent}>
                             <View style={styles.statusRow}>
                                 <MaterialCommunityIcons
                                     name={statusPresentation.icon}
@@ -541,60 +542,51 @@ const BusArrivalPanel = ({
                                             : translate('暫時沒有巴士位置')
                                         : translate('正在載入巴士資料')}
                             </Text>
-                        </Pressable>
+                        </ScalePressable>
                         <View style={styles.headingActions}>
                             {selectedStopInfo ? (
-                                <Pressable
+                                <ScalePressable
                                     accessibilityRole="button"
                                     accessibilityLabel={translate('查看車站圖片')}
                                     onPress={() => {
                                         trigger();
                                         onViewStop();
                                     }}
-                                    style={({pressed}) => [
-                                        styles.headingAction,
-                                        pressed && {opacity: 0.7},
-                                    ]}>
+                                    style={styles.headingAction}>
                                     <MaterialCommunityIcons
                                         name="image-outline"
                                         color={themeColor}
                                         size={20}
                                     />
-                                </Pressable>
+                                </ScalePressable>
                             ) : null}
-                            <Pressable
+                            <ScalePressable
                                 accessibilityRole="button"
                                 accessibilityLabel={translate('校園地圖')}
                                 onPress={() => {
                                     trigger();
                                     onOpenMap();
                                 }}
-                                style={({pressed}) => [
-                                    styles.headingAction,
-                                    pressed && {opacity: 0.7},
-                                ]}>
+                                style={styles.headingAction}>
                                 <MaterialCommunityIcons
                                     name="map-outline"
                                     color={themeColor}
                                     size={20}
                                 />
-                            </Pressable>
-                            <Pressable
+                            </ScalePressable>
+                            <ScalePressable
                                 accessibilityRole="button"
                                 accessibilityLabel={translate('更新巴士資料')}
                                 disabled={refreshing}
                                 onPress={onRefresh}
-                                style={({pressed}) => [
-                                    styles.headingAction,
-                                    pressed && {opacity: 0.7},
-                                ]}>
+                                style={styles.headingAction}>
                                 <MaterialCommunityIcons
                                     name={refreshing ? 'timer-sand' : 'refresh'}
                                     color={statusPresentation.color}
                                     size={20}
                                 />
-                            </Pressable>
-                            <Pressable
+                            </ScalePressable>
+                            <ScalePressable
                                 accessibilityRole="button"
                                 accessibilityLabel={expanded ? translate('收起到站資訊') : translate('展開到站資訊')}
                                 accessibilityState={{expanded}}
@@ -602,16 +594,13 @@ const BusArrivalPanel = ({
                                     trigger();
                                     onToggleExpanded();
                                 }}
-                                style={({pressed}) => [
-                                    styles.headingAction,
-                                    pressed && {opacity: 0.7},
-                                ]}>
+                                style={styles.headingAction}>
                                 <MaterialCommunityIcons
                                     name={expanded ? 'chevron-down' : 'chevron-up'}
                                     color={themeColor}
                                     size={26}
                                 />
-                            </Pressable>
+                            </ScalePressable>
                         </View>
                     </View>
                     {summaryEtaPresentation ? (
@@ -656,7 +645,7 @@ const BusArrivalPanel = ({
                     {BUS_STOPS.map(stop => {
                         const selected = selectedStop === stop.code;
                         return (
-                            <Pressable
+                            <ScalePressable
                                 key={stop.code}
                                 accessibilityRole="button"
                                 accessibilityState={{selected}}
@@ -664,12 +653,11 @@ const BusArrivalPanel = ({
                                     trigger();
                                     onSelectStop(stop.code);
                                 }}
-                                style={({pressed}) => [
+                                style={[
                                     styles.stopChip,
                                     {
                                         borderColor: selected ? themeColor : tonal.primary50,
                                         backgroundColor: selected ? themeColor : tonal.primary08,
-                                        opacity: pressed ? 0.7 : 1,
                                     },
                                 ]}>
                                 <Text style={[
@@ -678,7 +666,7 @@ const BusArrivalPanel = ({
                                 ]}>
                                     {stop.code} {translate(stop.shortName)}
                                 </Text>
-                            </Pressable>
+                            </ScalePressable>
                         );
                     })}
                 </View>
@@ -687,21 +675,21 @@ const BusArrivalPanel = ({
             ) : null}
 
             {expanded && selectedStopInfo ? (
-                <Pressable
+                <ScalePressable
                     accessibilityRole="button"
                     accessibilityLabel={translate('查看到站時間統計')}
                     onPress={() => {
                         trigger();
                         onOpenStats();
                     }}
-                    style={({pressed}) => [styles.statsButton, pressed && {opacity: 0.7}]}>
+                    style={styles.statsButton}>
                     <MaterialCommunityIcons name="chart-line" color={themeColor} size={20} />
                     <View style={styles.statsButtonContent}>
                         <Text style={styles.statsButtonTitle}>{translate('到站時間統計')}</Text>
                         <Text style={styles.statsButtonText}>{translate('查看近1天、7天及30天行車參考')}</Text>
                     </View>
                     <MaterialCommunityIcons name="chevron-right" color={themeColor} size={22} />
-                </Pressable>
+                </ScalePressable>
             ) : null}
 
             {expanded ? (
@@ -714,7 +702,7 @@ const BusArrivalPanel = ({
                         const selected = selectedVehiclePlate === vehicle.vehiclePlateNumber;
                         const etaPresentation = renderVehicleEta(vehicle);
                         return (
-                            <Pressable
+                            <ScalePressable
                                 key={vehicle.vehiclePlateNumber}
                                 accessibilityRole="button"
                                 accessibilityState={{selected}}
@@ -722,11 +710,10 @@ const BusArrivalPanel = ({
                                     trigger();
                                     onSelectVehicle(vehicle.vehiclePlateNumber);
                                 }}
-                                style={({pressed}) => [
+                                style={[
                                     styles.vehicleRow,
                                     {
                                         backgroundColor: selected ? tonal.secondary15 : tonal.primary08,
-                                        opacity: pressed ? 0.7 : 1,
                                     },
                                 ]}>
                                 <View style={[styles.vehicleIcon, {backgroundColor: secondThemeColor}]}>
@@ -749,7 +736,7 @@ const BusArrivalPanel = ({
                                         <Text style={styles.warning}>{translate('預測信心較低')}</Text>
                                     ) : null}
                                 </View>
-                            </Pressable>
+                            </ScalePressable>
                         );
                     }) : (
                         <View style={styles.empty}>

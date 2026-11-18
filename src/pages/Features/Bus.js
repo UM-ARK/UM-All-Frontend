@@ -1,5 +1,5 @@
 import React, {useState, useEffect, useCallback, useMemo, useRef, useLayoutEffect} from 'react';
-import {AppState, Image, Platform, Pressable, RefreshControl, ScrollView, StyleSheet, View} from 'react-native';
+import {AppState, Image, Platform, RefreshControl, ScrollView, StyleSheet, View} from 'react-native';
 import {isLiquidGlassSupported} from '../../utils/glassEffect';
 import {useHeaderHeight} from '@react-navigation/elements';
 import {useIsFocused} from '@react-navigation/native';
@@ -9,6 +9,7 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 // 引入本地工具
 import {useTheme} from '../../components/ThemeContext';
 import ARKImageView from '../../components/ARKImageView';
+import ScalePressable from '../../components/ScalePressable';
 import {UM_BUS_LIVE, UM_BUS_LOOP_ZH, UM_BUS_LOOP_EN, UM_BUS_LOOP_SERVICE, UM_MAP} from '../../utils/pathMap';
 import {openLink} from '../../utils/browser';
 import {logToFirebase} from '../../utils/firebaseAnalytics';
@@ -210,7 +211,7 @@ const BusScreen = ({navigation}) => {
                     ? undefined
                     : () => (
                         <View style={staticStyles.headerRightRow}>
-                            <Pressable
+                            <ScalePressable
                                 accessibilityRole="button"
                                 accessibilityLabel={t('官方網站')}
                                 onPress={() => {
@@ -223,8 +224,8 @@ const BusScreen = ({navigation}) => {
                                     size={scale(20)}
                                     color={themeColor}
                                 />
-                            </Pressable>
-                            <Pressable
+                            </ScalePressable>
+                            <ScalePressable
                                 accessibilityRole="button"
                                 accessibilityLabel={t('官方資訊')}
                                 onPress={() => {
@@ -237,7 +238,7 @@ const BusScreen = ({navigation}) => {
                                     size={scale(20)}
                                     color={themeColor}
                                 />
-                            </Pressable>
+                            </ScalePressable>
                         </View>
                     ),
             unstable_headerRightItems:

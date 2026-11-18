@@ -3,7 +3,6 @@ import {
     ActivityIndicator,
     Alert,
     Platform,
-    Pressable,
     StyleSheet,
     View,
 } from 'react-native';
@@ -62,7 +61,7 @@ const HarborChatProfileButton = ({
     onPress,
     themeColor,
 }) => (
-    <Pressable
+    <ScalePressable
         accessibilityLabel={accessibilityLabel}
         accessibilityRole="button"
         onPress={() => {
@@ -75,7 +74,7 @@ const HarborChatProfileButton = ({
             name="account-circle-outline"
             size={scale(22)}
         />
-    </Pressable>
+    </ScalePressable>
 );
 
 const createHarborChatProfileButton = props => () => (
@@ -869,7 +868,7 @@ const HarborChatChannelPage = ({navigation, route}) => {
                     }
                     ListHeaderComponent={
                         canLoadMorePast ? (
-                            <Pressable
+                            <ScalePressable
                                 accessibilityRole="button"
                                 disabled={isLoadingPast}
                                 onPress={() => {
@@ -891,7 +890,7 @@ const HarborChatChannelPage = ({navigation, route}) => {
                                         {t('載入較早訊息')}
                                     </Text>
                                 )}
-                            </Pressable>
+                            </ScalePressable>
                         ) : null
                     }
                     onContentSizeChange={() => {
