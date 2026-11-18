@@ -18,7 +18,7 @@ import {
 
 import Text from '../../../components/AppText';
 import ClubSearchBar from './components/ClubSearchBar';
-import NewsCard from './components/NewsCard';
+import NewsCard, { NewsRowSeparator } from './components/NewsCard';
 import NewsListSkeleton from './components/NewsListSkeleton';
 import { filterUMOpenDataItemsBySearchQuery } from './utils/umOpenDataSearch';
 
@@ -387,6 +387,7 @@ const NewsPage = forwardRef(function NewsPage(
                         maxToRenderPerBatch={8}
                         updateCellsBatchingPeriod={50}
                         renderItem={renderNewsItem}
+                        ItemSeparatorComponent={NewsRowSeparator}
                         contentContainerStyle={{
                             width: '100%',
                             paddingTop: contentTopInset,

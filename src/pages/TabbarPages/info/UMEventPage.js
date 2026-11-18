@@ -21,7 +21,7 @@ import {
     writeUMOpenDataCache,
 } from '../../../utils/umOpenDataCache';
 
-import NewsCard from './components/NewsCard';
+import NewsCard, { NewsRowSeparator } from './components/NewsCard';
 import NewsListSkeleton from './components/NewsListSkeleton';
 import ClubSearchBar from './components/ClubSearchBar';
 import { filterUMOpenDataItemsBySearchQuery } from './utils/umOpenDataSearch';
@@ -261,6 +261,7 @@ const UMEventPage = forwardRef(function UMEventPage(
                     contentContainerStyle={{ paddingTop: contentTopInset }}
                     keyExtractor={item => item._id}
                     renderItem={renderItem}
+                    ItemSeparatorComponent={NewsRowSeparator}
                     drawDistance={500}
                     onScroll={handleScroll}
                     scrollEventThrottle={16}
