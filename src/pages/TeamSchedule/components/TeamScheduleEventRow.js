@@ -75,6 +75,9 @@ const TeamScheduleEventRow = ({
     isFavorite = false,
     onPress,
     showDivider = false,
+    compact = false,
+    leadingAccessory,
+    chevronContainerStyle,
 }) => {
     const {theme} = useTheme();
     const {t} = useTranslation('my');
@@ -89,6 +92,16 @@ const TeamScheduleEventRow = ({
     const statusLabel = isClosed ? t('已關閉') : null;
     const roleLabel = isOwner ? t('我建立的') : t('我參加的');
     const createdAtLabel = formatCreatedAt(event.createdAt, timezone, t);
+    const metaLabel = compact && createdAtLabel
+        ? `${roleLabel} · ${createdAtLabel}`
+        : roleLabel;
+    const title = (
+        <Text
+            numberOfLines={2}
+            style={[styles.title, {color: theme.black.main}]}>
+            {event.title || t('未命名活動')}
+        </Text>
+    );
 
     return (
         <>
@@ -97,18 +110,25 @@ const TeamScheduleEventRow = ({
                 accessibilityLabel={event.title || t('組隊約時間')}
                 style={({pressed}) => [
                     styles.container,
+                    compact && styles.compactContainer,
                     pressed && {backgroundColor: theme.tonal.primary08},
                 ]}
                 onPress={() => {
                     trigger();
                     onPress?.(item);
                 }}>
-                <View style={styles.content}>
-                    <View style={styles.metaRow}>
+                {leadingAccessory}
+                <View style={[styles.content, compact && styles.compactContent]}>
+                    {compact ? title : null}
+                    <View style={[styles.metaRow, compact && styles.compactMetaRow]}>
                         <Text
-                            numberOfLines={1}
-                            style={[styles.meta, {color: theme.black.second}]}>
-                            {roleLabel}
+                            numberOfLines={compact ? 2 : 1}
+                            style={[
+                                styles.meta,
+                                compact && styles.compactMeta,
+                                {color: compact ? theme.black.third : theme.black.second},
+                            ]}>
+                            {metaLabel}
                         </Text>
                         {statusLabel || deadlineHint ? (
                             <Text
@@ -125,12 +145,8 @@ const TeamScheduleEventRow = ({
                             </Text>
                         ) : null}
                     </View>
-                    <Text
-                        numberOfLines={2}
-                        style={[styles.title, {color: theme.black.main}]}>
-                        {event.title || t('未命名活動')}
-                    </Text>
-                    {createdAtLabel ? (
+                    {compact ? null : title}
+                    {!compact && createdAtLabel ? (
                         <Text
                             numberOfLines={1}
                             style={[
@@ -149,17 +165,20 @@ const TeamScheduleEventRow = ({
                             color={theme.warning}
                         />
                     ) : null}
-                    <Ionicons
-                        name="chevron-forward"
-                        size={scale(17)}
-                        color={theme.black.third}
-                    />
+                    <View style={chevronContainerStyle}>
+                        <Ionicons
+                            name="chevron-forward"
+                            size={scale(17)}
+                            color={theme.black.third}
+                        />
+                    </View>
                 </View>
             </Pressable>
             {showDivider ? (
                 <View
                     style={[
                         styles.divider,
+                        compact && styles.compactDivider,
                         {backgroundColor: theme.disabled},
                     ]}
                 />
@@ -176,9 +195,17 @@ const styles = StyleSheet.create({
         paddingHorizontal: scale(14),
         paddingVertical: verticalScale(8),
     },
+    compactContainer: {
+        minHeight: 44,
+        paddingHorizontal: 0,
+        gap: 0,
+    },
     content: {
         flex: 1,
         minWidth: 0,
+    },
+    compactContent: {
+        paddingEnd: scale(8),
     },
     trailing: {
         flexDirection: 'row',
@@ -192,11 +219,18 @@ const styles = StyleSheet.create({
         gap: scale(8),
         marginBottom: verticalScale(3),
     },
+    compactMetaRow: {
+        marginBottom: 0,
+        marginTop: verticalScale(2),
+    },
     meta: {
         ...uiStyle.defaultText,
         flexShrink: 1,
         fontSize: scale(10),
         fontWeight: '700',
+    },
+    compactMeta: {
+        fontWeight: '400',
     },
     status: {
         ...uiStyle.defaultText,
@@ -220,6 +254,9 @@ const styles = StyleSheet.create({
     divider: {
         height: StyleSheet.hairlineWidth,
         marginHorizontal: scale(16),
+    },
+    compactDivider: {
+        marginHorizontal: 0,
     },
 });
 

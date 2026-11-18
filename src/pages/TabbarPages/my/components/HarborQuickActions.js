@@ -8,6 +8,7 @@ import {scale, verticalScale} from 'react-native-size-matters';
 import Text from '../../../../components/AppText';
 import {uiStyle, useTheme} from '../../../../components/ThemeContext';
 import {trigger} from '../../../../utils/trigger';
+import {myCardStyles} from './myCardStyles';
 
 const QUICK_ACTIONS = [
     {
@@ -50,6 +51,7 @@ const HarborQuickActions = ({unreadCount = 0, onSelect}) => {
                     accessibilityLabel={t(item.label)}
                     style={({pressed}) => [
                         styles.action,
+                        myCardStyles.column,
                         pressed && styles.pressed,
                     ]}
                     onPress={() => {
@@ -60,7 +62,7 @@ const HarborQuickActions = ({unreadCount = 0, onSelect}) => {
                         <Ionicons
                             name={item.icon_name}
                             size={scale(22)}
-                            color={theme.accentForeground}
+                            color={theme.themeColor}
                         />
                         {item.key === 'messages' && unreadCount > 0 ? (
                             <View
@@ -97,10 +99,9 @@ const HarborQuickActions = ({unreadCount = 0, onSelect}) => {
 const styles = StyleSheet.create({
     container: {
         flexDirection: 'row',
-        gap: scale(4),
+        justifyContent: 'space-between',
     },
     action: {
-        flex: 1,
         minWidth: 0,
         minHeight: 44,
         alignItems: 'center',

@@ -9,11 +9,6 @@ import {scale, verticalScale} from 'react-native-size-matters';
 
 import Text from '../../../../components/AppText';
 import {uiStyle, useTheme} from '../../../../components/ThemeContext';
-import TouchableScale from '../../../../components/TouchableScale';
-import {
-    GlassView,
-    isLiquidGlassSupported,
-} from '../../../../utils/glassEffect';
 import {trigger} from '../../../../utils/trigger';
 import {formatJoinedAt} from '../utils/harborUi';
 
@@ -60,7 +55,7 @@ const HarborProfileCard = ({
                         style={[
                             styles.avatarEditBadge,
                             {
-                                backgroundColor: theme.accentForeground,
+                                backgroundColor: theme.themeColor,
                                 borderColor: theme.white,
                             },
                         ]}>
@@ -95,7 +90,7 @@ const HarborProfileCard = ({
                         <Ionicons
                             name="chevron-forward"
                             size={scale(13)}
-                            color={theme.accentForeground}
+                            color={theme.themeColor}
                         />
                     ) : null}
                     <View
@@ -124,7 +119,7 @@ const HarborProfileCard = ({
                     <MaterialCommunityIcons
                         name="forum-outline"
                         size={scale(13)}
-                        color={theme.accentForeground}
+                        color={theme.themeColor}
                     />
                     <Text style={[styles.role, {color: theme.black.second}]}>
                         {t(user.role || 'Harbor 會員')}
@@ -147,32 +142,15 @@ const HarborProfileCard = ({
             </Pressable>
 
             {onChatPress || onSettingsPress ? (
-                <GlassView
-                    isInteractive
-                    style={[
-                        styles.actions,
-                        {
-                            backgroundColor: isLiquidGlassSupported
-                                ? null
-                                : theme.white,
-                        },
-                        isLiquidGlassSupported
-                            ? null
-                            : {
-                                shadowColor: theme.black.main,
-                                shadowOffset: {width: 0, height: 2},
-                                shadowOpacity: 0.1,
-                                shadowRadius: 4,
-                                elevation: 3,
-                            },
-                    ]}>
+                <View style={styles.actions}>
                     {onChatPress ? (
-                        <TouchableScale
+                        <Pressable
                             accessibilityRole="button"
                             accessibilityLabel={t('Chat')}
-                            activeScale={0.92}
-                            hitSlop={scale(8)}
-                            style={styles.actionButton}
+                            style={({pressed}) => [
+                                styles.actionButton,
+                                pressed && styles.profilePressed,
+                            ]}
                             onPress={() => {
                                 trigger();
                                 onChatPress();
@@ -180,7 +158,7 @@ const HarborProfileCard = ({
                             <MaterialCommunityIcons
                                 name="chat-outline"
                                 size={scale(18)}
-                                color={theme.accentForeground}
+                                color={theme.themeColor}
                             />
                             {chatUnreadCount > 0 ? (
                                 <View
@@ -199,15 +177,16 @@ const HarborProfileCard = ({
                                     </Text>
                                 </View>
                             ) : null}
-                        </TouchableScale>
+                        </Pressable>
                     ) : null}
                     {onSettingsPress ? (
-                        <TouchableScale
+                        <Pressable
                             accessibilityRole="button"
                             accessibilityLabel={t('設置')}
-                            activeScale={0.92}
-                            hitSlop={scale(8)}
-                            style={styles.actionButton}
+                            style={({pressed}) => [
+                                styles.actionButton,
+                                pressed && styles.profilePressed,
+                            ]}
                             onPress={() => {
                                 trigger();
                                 onSettingsPress();
@@ -215,11 +194,11 @@ const HarborProfileCard = ({
                             <Ionicons
                                 name="settings-outline"
                                 size={scale(18)}
-                                color={theme.accentForeground}
+                                color={theme.themeColor}
                             />
-                        </TouchableScale>
+                        </Pressable>
                     ) : null}
-                </GlassView>
+                </View>
             ) : null}
         </View>
     );
@@ -230,7 +209,6 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'flex-start',
         gap: scale(10),
-        paddingHorizontal: scale(7),
         paddingTop: verticalScale(4),
         paddingBottom: verticalScale(4),
     },
@@ -240,14 +218,10 @@ const styles = StyleSheet.create({
     actions: {
         flexDirection: 'row',
         alignItems: 'center',
-        height: scale(34),
-        borderRadius: scale(17),
-        overflow: 'hidden',
-        paddingHorizontal: scale(2),
     },
     actionButton: {
-        width: scale(32),
-        height: scale(34),
+        width: 44,
+        minHeight: 44,
         alignItems: 'center',
         justifyContent: 'center',
     },

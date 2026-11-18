@@ -1,5 +1,5 @@
 /**
- * 「我的」頁組隊約時間預覽：最多五筆、全部、新建／加入組隊
+ * 「我的」頁組隊約時間預覽：一筆隊伍、全部、新建／加入組隊
  */
 import React, {
     forwardRef,
@@ -21,19 +21,21 @@ import {uiStyle, useTheme} from '../../../components/ThemeContext';
 import {logToFirebase} from '../../../utils/firebaseAnalytics';
 import {openTeamInviteDetail} from '../../../utils/scheduling/teamInviteLink';
 import {trigger} from '../../../utils/trigger';
+import {myCardStyles} from '../../TabbarPages/my/components/myCardStyles';
 import {useTeamEvents} from '../hooks/useTeamEvents';
 import JoinTeamSheet from './JoinTeamSheet';
 import TeamScheduleEventRow from './TeamScheduleEventRow';
 import TeamScheduleIntroSheet from './TeamScheduleIntroSheet';
 import {
+    TeamScheduleEventSkeleton,
     TeamScheduleInlineError,
-    TeamScheduleSkeletonList,
 } from './TeamScheduleStateView';
 
 const TeamSchedulePreviewSection = forwardRef(
     ({navigation, refreshHandle}, ref) => {
         const {theme} = useTheme();
         const {t} = useTranslation('my');
+        const [expanded, setExpanded] = useState(true);
         const [joinSheetVisible, setJoinSheetVisible] = useState(false);
         const [introSheetVisible, setIntroSheetVisible] = useState(false);
         const {
@@ -132,62 +134,68 @@ const TeamSchedulePreviewSection = forwardRef(
         const showError = status === 'error' && recentEvents.length === 0;
         const showSoftError = status === 'error' && recentEvents.length > 0;
         const showEmpty = status === 'ready' && recentEvents.length === 0;
-        const showRows = recentEvents.length > 0;
+        const previewEvent = recentEvents[0];
 
         return (
-            <View
-                style={[
-                    styles.container,
-                    {backgroundColor: theme.white},
-                ]}>
+            <>
                 <Pressable
                     accessibilityRole="button"
-                    accessibilityLabel={t('全部組隊約時間')}
-                    accessibilityHint={t('找出最多組員有空的時段')}
-                    onPress={openList}
+                    accessibilityLabel={t('組隊約時間')}
+                    accessibilityState={{expanded}}
+                    onPress={() => {
+                        trigger();
+                        setExpanded(current => !current);
+                    }}
                     style={({pressed}) => [
-                        styles.header,
-                        {
-                            backgroundColor: pressed
-                                ? theme.tonal.primary30
-                                : theme.tonal.primary15,
-                        },
+                        myCardStyles.heading,
+                        pressed && styles.actionPressed,
                     ]}>
-                    <Ionicons
-                        name="calendar-outline"
-                        size={scale(22)}
-                        color={theme.accentForeground}
-                    />
-                    <View style={styles.headerTitleWrap}>
-                        <Text
+                    <View style={myCardStyles.iconColumn}>
+                        <View
                             style={[
-                                styles.headerTitle,
-                                {color: theme.black.main},
+                                myCardStyles.headingIcon,
+                                {backgroundColor: theme.tonal.primary15},
                             ]}>
-                            {t('組隊約時間')}
-                        </Text>
+                            <Ionicons
+                                name="calendar-outline"
+                                size={scale(19)}
+                                color={theme.themeColor}
+                            />
+                        </View>
                     </View>
-                    <Ionicons
-                        name="chevron-forward"
-                        size={scale(17)}
-                        color={theme.accentForeground}
-                    />
+                    <Text
+                        style={[
+                            myCardStyles.headingTitle,
+                            {color: theme.black.main},
+                        ]}>
+                        {t('組隊約時間')}
+                    </Text>
+                    <View style={myCardStyles.iconColumn}>
+                        <Ionicons
+                            name={expanded ? 'chevron-up' : 'chevron-down'}
+                            size={scale(17)}
+                            color={theme.black.third}
+                        />
+                    </View>
                 </Pressable>
 
-                <View style={styles.actionRow}>
+                <View style={[styles.actionRow, !expanded && styles.collapsed]}>
                     <Pressable
                         accessibilityRole="button"
                         accessibilityLabel={t('新建組隊')}
                         onPress={openCreate}
                         style={({pressed}) => [
                             styles.actionButton,
+                            styles.leadingAction,
                             pressed && styles.actionPressed,
                         ]}>
-                        <Ionicons
-                            name="add-circle-outline"
-                            size={scale(16)}
-                            color={theme.accentForeground}
-                        />
+                        <View style={myCardStyles.iconColumn}>
+                            <Ionicons
+                                name="add-circle-outline"
+                                size={scale(16)}
+                                color={theme.themeColor}
+                            />
+                        </View>
                         <Text
                             style={[
                                 styles.actionButtonText,
@@ -207,7 +215,7 @@ const TeamSchedulePreviewSection = forwardRef(
                         <Ionicons
                             name="enter-outline"
                             size={scale(16)}
-                            color={theme.accentForeground}
+                            color={theme.themeColor}
                         />
                         <Text
                             style={[
@@ -222,6 +230,7 @@ const TeamSchedulePreviewSection = forwardRef(
                         accessibilityLabel={t('了解組隊約時間')}
                         onPress={openIntro}
                         style={({pressed}) => [
+                            myCardStyles.iconColumn,
                             styles.infoButton,
                             pressed && styles.actionPressed,
                         ]}>
@@ -236,11 +245,12 @@ const TeamSchedulePreviewSection = forwardRef(
                 <View
                     style={[
                         styles.listWrap,
+                        !expanded && styles.collapsed,
                         {borderTopColor: theme.disabled},
                     ]}>
                     {showSkeleton ? (
                         <View style={styles.listInner}>
-                            <TeamScheduleSkeletonList rows={5} />
+                            <TeamScheduleEventSkeleton />
                         </View>
                     ) : null}
 
@@ -268,23 +278,50 @@ const TeamSchedulePreviewSection = forwardRef(
                         </View>
                     ) : null}
 
-                    {showRows
-                        ? recentEvents.map((item, index) => (
-                              <TeamScheduleEventRow
-                                  key={String(
-                                      item?.event?.eventId || index,
-                                  )}
-                                  item={item}
-                                  isFavorite={favoriteEventIds.includes(
-                                      String(item?.event?.eventId),
-                                  )}
-                                  onPress={openDetail}
-                                  showDivider={
-                                      index < recentEvents.length - 1
-                                  }
-                              />
-                          ))
-                        : null}
+                    {previewEvent ? (
+                        <TeamScheduleEventRow
+                            item={previewEvent}
+                            isFavorite={favoriteEventIds.includes(
+                                String(previewEvent.event.eventId),
+                            )}
+                            onPress={openDetail}
+                            compact
+                            chevronContainerStyle={myCardStyles.iconColumn}
+                            leadingAccessory={
+                                <View style={myCardStyles.iconColumn}>
+                                    <Ionicons
+                                        name="people-outline"
+                                        size={scale(17)}
+                                        color={theme.black.third}
+                                    />
+                                </View>
+                            }
+                        />
+                    ) : null}
+                    <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel={t('全部組隊約時間')}
+                        onPress={openList}
+                        style={({pressed}) => [
+                            styles.listLink,
+                            {borderTopColor: theme.disabled},
+                            pressed && styles.actionPressed,
+                        ]}>
+                        <Text
+                            style={[
+                                styles.actionButtonText,
+                                {color: theme.accentForeground},
+                            ]}>
+                            {t('查看全部')}
+                        </Text>
+                        <View style={myCardStyles.iconColumn}>
+                            <Ionicons
+                                name="chevron-forward"
+                                size={scale(17)}
+                                color={theme.black.third}
+                            />
+                        </View>
+                    </Pressable>
                 </View>
 
                 <JoinTeamSheet
@@ -296,7 +333,7 @@ const TeamSchedulePreviewSection = forwardRef(
                     visible={introSheetVisible}
                     onClose={() => setIntroSheetVisible(false)}
                 />
-            </View>
+            </>
         );
     },
 );
@@ -304,34 +341,10 @@ const TeamSchedulePreviewSection = forwardRef(
 TeamSchedulePreviewSection.displayName = 'TeamSchedulePreviewSection';
 
 const styles = StyleSheet.create({
-    container: {
-        borderRadius: scale(10),
-        borderCurve: 'continuous',
-        paddingBottom: verticalScale(4),
-        overflow: 'hidden',
-    },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: scale(10),
-        minHeight: 44,
-        paddingHorizontal: scale(14),
-        paddingVertical: verticalScale(10),
-    },
-    headerTitle: {
-        ...uiStyle.defaultText,
-        fontSize: scale(14),
-        fontWeight: '700',
-    },
-    headerTitleWrap: {
-        flex: 1,
-        minWidth: 0,
-        justifyContent: 'center',
+    collapsed: {
+        display: 'none',
     },
     infoButton: {
-        alignItems: 'center',
-        justifyContent: 'center',
-        width: 44,
         minHeight: 44,
         marginStart: 'auto',
     },
@@ -339,36 +352,44 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         flexWrap: 'wrap',
         alignItems: 'center',
-        gap: scale(8),
-        paddingHorizontal: scale(10),
+        gap: scale(12),
     },
     actionButton: {
         flexDirection: 'row',
         alignItems: 'center',
         minHeight: 44,
         flexShrink: 1,
-        paddingHorizontal: scale(4),
         gap: scale(4),
+    },
+    leadingAction: {
+        gap: 0,
     },
     actionPressed: {
         opacity: 0.65,
     },
     actionButtonText: {
         ...uiStyle.defaultText,
+        flexShrink: 1,
         fontSize: scale(12),
-        fontWeight: '700',
+        fontWeight: '600',
     },
     listWrap: {
         borderTopWidth: StyleSheet.hairlineWidth,
         overflow: 'hidden',
     },
+    listLink: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'flex-end',
+        minHeight: 44,
+        borderTopWidth: StyleSheet.hairlineWidth,
+    },
     listInner: {
-        padding: scale(12),
+        paddingVertical: verticalScale(12),
     },
     emptyWrap: {
         alignItems: 'center',
-        paddingHorizontal: scale(18),
-        paddingVertical: verticalScale(22),
+        paddingVertical: verticalScale(16),
     },
     emptyText: {
         ...uiStyle.defaultText,

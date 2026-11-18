@@ -33,6 +33,7 @@ import HarborProfileOverview from './components/HarborProfileOverview';
 import HarborRestoringState from './components/HarborRestoringState';
 
 const PROFILE_BACKDROP_SOURCE = require('../../../static/img/ark_brand_waves.png');
+const PAGE_GUTTER = scale(16);
 const PROFILE_BACKDROP_ENTRANCE = FadeInDown
     .duration(280)
     .easing(Easing.bezier(0.23, 1, 0.32, 1))
@@ -58,21 +59,40 @@ const MyScreen = ({ navigation }) => {
     const insets = useSafeAreaInsets();
     const { width } = useWindowDimensions();
     const contentWidth = Math.min(
-        width - insets.left - insets.right - scale(20),
+        width - insets.left - insets.right - PAGE_GUTTER * 2,
         scale(680),
     );
     const contentTopInset = insets.top + verticalScale(8);
+    const profileBackdropHeight = contentTopInset + verticalScale(92);
+    const isSignedIn = status === 'signedIn' && !!user;
+    const backgroundColor = theme.isLight
+        ? (isSignedIn ? theme.bg_color : theme.white)
+        : theme.harbor_bg_color;
+    // 漸變只改變頁面底色的透明度，避免混入黑色。
+    const fadeStartColor = backgroundColor.length === 4
+        ? `${backgroundColor}0`
+        : `${backgroundColor}00`;
     const [isRefreshing, setIsRefreshing] = React.useState(false);
     const [hasEnteredProfile, setHasEnteredProfile] = React.useState(false);
     const teamSchedulePreviewRef = React.useRef(null);
     const scrollY = useSharedValue(0);
-    const isSignedIn = status === 'signedIn' && !!user;
 
     const handleScroll = useAnimatedScrollHandler(event => {
         scrollY.set(event.contentOffset.y);
     });
+    const profileArtStyle = useAnimatedStyle(() => {
+        const offset = scrollY.get();
+        const pullDistance = Math.max(0, -offset);
+        // 下拉時從頂部延伸海浪，底端和頭像區同步往下移。
+        return {
+            transform: [
+                { translateY: -Math.max(0, offset) },
+                { scaleY: 1 + pullDistance / profileBackdropHeight },
+            ],
+        };
+    });
     const profileBackdropStyle = useAnimatedStyle(() => ({
-        transform: [{ translateY: -Math.max(0, scrollY.get()) }],
+        transform: [{ translateY: -scrollY.get() }],
     }));
 
     useFocusEffect(
@@ -181,31 +201,40 @@ const MyScreen = ({ navigation }) => {
     ) : null;
 
     return (
-        <View style={[styles.container, { backgroundColor: theme.bg_color }]}>
+        <View style={[styles.container, { backgroundColor }]}>
+            {isSignedIn && hasEnteredProfile ? (
+                <Reanimated.View
+                    pointerEvents="none"
+                    style={[
+                        styles.profileBackdrop,
+                        styles.profileBackdropArtClip,
+                        { height: profileBackdropHeight },
+                        profileArtStyle,
+                    ]}>
+                    <Reanimated.View
+                        entering={PROFILE_BACKDROP_ENTRANCE}
+                        style={styles.profileBackdropArt}>
+                        <Image
+                            source={PROFILE_BACKDROP_SOURCE}
+                            blurRadius={16}
+                            style={[
+                                StyleSheet.absoluteFill,
+                                { opacity: theme.isLight ? 0.36 : 0.24 },
+                            ]}
+                        />
+                    </Reanimated.View>
+                </Reanimated.View>
+            ) : null}
             {isSignedIn ? (
                 <Reanimated.View
                     pointerEvents="none"
                     style={[
                         styles.profileBackdrop,
-                        { height: contentTopInset + verticalScale(160) },
+                        { height: profileBackdropHeight },
                         profileBackdropStyle,
                     ]}>
-                    {hasEnteredProfile ? (
-                        <Reanimated.View
-                            entering={PROFILE_BACKDROP_ENTRANCE}
-                            style={styles.profileBackdropArt}>
-                            <Image
-                                source={PROFILE_BACKDROP_SOURCE}
-                                blurRadius={16}
-                                style={[
-                                    StyleSheet.absoluteFill,
-                                    { opacity: theme.isLight ? 0.36 : 0.24 },
-                                ]}
-                            />
-                        </Reanimated.View>
-                    ) : null}
                     <LinearGradient
-                        colors={[theme.tonal.primary08, theme.bg_color]}
+                        colors={[fadeStartColor, backgroundColor]}
                         style={StyleSheet.absoluteFill}
                     />
                 </Reanimated.View>
@@ -226,8 +255,8 @@ const MyScreen = ({ navigation }) => {
                     isSignedIn ? (
                         <RefreshControl
                             refreshing={isRefreshing}
-                            tintColor={theme.accentForeground}
-                            colors={[theme.accentForeground]}
+                            tintColor={theme.themeColor}
+                            colors={[theme.themeColor]}
                             progressViewOffset={contentTopInset}
                             onRefresh={handleRefresh}
                         />
@@ -243,32 +272,25 @@ const MyScreen = ({ navigation }) => {
                     />
                     {harborError}
                     {isSignedIn ? (
-                        <>
-                            <HarborProfileOverview
-                                user={user}
-                                unreadCount={inboxUnreadCount}
-                                chatUnreadCount={chatUnreadCount}
-                                reviewCount={reviewCount}
-                                navigation={navigation}
-                                onChatPress={() =>
-                                    navigation.navigate('HarborChatList')
-                                }
-                                onSettingsPress={() =>
-                                    navigation.navigate('SettingPage')
-                                }>
+                        <HarborProfileOverview
+                            user={user}
+                            unreadCount={inboxUnreadCount}
+                            chatUnreadCount={chatUnreadCount}
+                            reviewCount={reviewCount}
+                            navigation={navigation}
+                            onChatPress={() =>
+                                navigation.navigate('HarborChatList')
+                            }
+                            onSettingsPress={() =>
+                                navigation.navigate('SettingPage')
+                            }
+                            teamSchedule={
                                 <TeamSchedulePreviewSection
                                     ref={teamSchedulePreviewRef}
                                     navigation={navigation}
                                 />
-                            </HarborProfileOverview>
-                            <Text
-                                style={[
-                                    styles.footnote,
-                                    {color: theme.black.third},
-                                ]}>
-                                {t('更新可能會有延遲', {ns: 'my'})}
-                            </Text>
-                        </>
+                            }
+                        />
                     ) : status === 'restoring' ? (
                         <HarborRestoringState />
                     ) : (
@@ -290,7 +312,6 @@ const styles = StyleSheet.create({
     },
     scrollContent: {
         alignItems: 'center',
-        paddingHorizontal: scale(10),
     },
     profileBackdrop: {
         position: 'absolute',
@@ -298,6 +319,9 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         overflow: 'hidden',
+    },
+    profileBackdropArtClip: {
+        transformOrigin: 'center top',
     },
     profileBackdropArt: {
         position: 'absolute',
@@ -317,15 +341,6 @@ const styles = StyleSheet.create({
         ...uiStyle.defaultText,
         fontSize: scale(12),
         lineHeight: verticalScale(18),
-    },
-    footnote: {
-        ...uiStyle.defaultText,
-        fontSize: scale(10),
-        lineHeight: verticalScale(13),
-        textAlign: 'center',
-        paddingHorizontal: scale(12),
-        paddingTop: verticalScale(8),
-        paddingBottom: verticalScale(2),
     },
 });
 
