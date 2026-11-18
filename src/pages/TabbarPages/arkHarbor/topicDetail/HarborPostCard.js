@@ -175,6 +175,7 @@ const HarborPostCard = memo(
         const isLiked = Boolean(likeAction?.acted);
         const currentReaction = post?.current_user_reaction?.id;
         // 已獲 reaction／讚摘要（1 樓操作在底部欄，卡片改展示已獲計數）
+        const isHeartActive = reactionsEnabled ? currentReaction === 'heart' : isLiked;
         const reactionCount = getReactionCount(post);
         const reactionSummary = (
             Array.isArray(post?.reactions) ? post.reactions : []
@@ -540,10 +541,18 @@ const HarborPostCard = memo(
                                 getHarborReactionLabel(reaction.id),
                             )} ${reaction.count}`}
                             style={styles.reactionSummaryItem}>
-                            <HarborReactionIcon
-                                name={reaction.id}
-                                size={scale(14)}
-                            />
+                            {reaction.id === 'heart' ? (
+                                <MaterialCommunityIcons
+                                    name={isHeartActive ? 'heart' : 'heart-outline'}
+                                    size={scale(14)}
+                                    color={isHeartActive ? themeColor : black.third}
+                                />
+                            ) : (
+                                <HarborReactionIcon
+                                    name={reaction.id}
+                                    size={scale(14)}
+                                />
+                            )}
                             <Text
                                 style={[
                                     styles.reactionSummaryText,
