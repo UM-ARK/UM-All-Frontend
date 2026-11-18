@@ -35,6 +35,41 @@ const normalizeSearchResult = item => ({
     pageId: item?.pageid ?? null,
 });
 
+const normalizeSearchResults = ({pages = [], redirects = []} = {}) => {
+    const resultsByTitle = new Map();
+    for (const page of pages) {
+        if (page.pageid > 0) {
+            resultsByTitle.set(page.title, {
+                ...normalizeSearchResult(page),
+                aliases: [],
+                index: page.index ?? Infinity,
+            });
+        }
+    }
+
+    const targets = new Map(redirects.map(({from, to}) => [from, to]));
+    const matchedRedirects = redirects
+        .filter(({index}) => index != null)
+        .sort((first, second) => first.index - second.index);
+    for (const {from, to, index} of matchedRedirects) {
+        let title = to;
+        const visited = new Set([from]);
+        while (targets.has(title) && !visited.has(title)) {
+            visited.add(title);
+            title = targets.get(title);
+        }
+        const result = resultsByTitle.get(title);
+        if (result) {
+            result.aliases.push(normalizeWikiTitle(from));
+            result.index = Math.min(result.index, index);
+        }
+    }
+
+    return [...resultsByTitle.values()]
+        .sort((first, second) => first.index - second.index)
+        .map(({index, ...result}) => result);
+};
+
 export const fetchWikiPrefixSearch = async (query, {signal, limit = 8} = {}) => {
     const value = typeof query === 'string' ? query.trim() : '';
     if (!value) {
@@ -43,14 +78,15 @@ export const fetchWikiPrefixSearch = async (query, {signal, limit = 8} = {}) => 
     const data = await requestJson(
         buildActionUrl({
             action: 'query',
-            list: 'prefixsearch',
-            pssearch: value,
-            pslimit: String(limit),
-            psnamespace: '0',
+            generator: 'prefixsearch',
+            gpssearch: value,
+            gpslimit: String(limit),
+            gpsnamespace: '0',
+            redirects: '1',
         }),
         {signal},
     );
-    return dedupeWikiResults(data?.query?.prefixsearch?.map(normalizeSearchResult));
+    return normalizeSearchResults(data?.query);
 };
 
 export const fetchWikiFullSearch = async (query, {signal, limit = 20} = {}) => {
@@ -61,15 +97,16 @@ export const fetchWikiFullSearch = async (query, {signal, limit = 20} = {}) => {
     const data = await requestJson(
         buildActionUrl({
             action: 'query',
-            list: 'search',
-            srsearch: value,
-            srlimit: String(limit),
-            srnamespace: '0',
-            srprop: 'snippet',
+            generator: 'search',
+            gsrsearch: value,
+            gsrlimit: String(limit),
+            gsrnamespace: '0',
+            gsrprop: 'snippet',
+            redirects: '1',
         }),
         {signal},
     );
-    return dedupeWikiResults(data?.query?.search?.map(normalizeSearchResult));
+    return normalizeSearchResults(data?.query);
 };
 
 export const fetchWikiRecentChanges = async ({signal, limit = 10} = {}) => {

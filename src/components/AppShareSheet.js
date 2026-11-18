@@ -2,7 +2,6 @@ import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {
     ActivityIndicator,
     Platform,
-    Pressable,
     Share,
     StyleSheet,
     View,
@@ -27,6 +26,7 @@ import {
 import {sendHarborChatMessage} from '../utils/harbor/harborApi';
 import {trigger} from '../utils/trigger';
 import Text from './AppText';
+import ScalePressable from './ScalePressable';
 import {uiStyle, useTheme} from './ThemeContext';
 
 const AppShareAvatar = ({channel, selected, onPress}) => {
@@ -39,7 +39,7 @@ const AppShareAvatar = ({channel, selected, onPress}) => {
     }, [channel.avatarUrl]);
 
     return (
-        <Pressable
+        <ScalePressable
             accessibilityLabel={channel.title}
             accessibilityRole="button"
             accessibilityState={{selected}}
@@ -98,7 +98,7 @@ const AppShareAvatar = ({channel, selected, onPress}) => {
                 style={[styles.chatName, {color: theme.black.second}]}>
                 {channel.title || t('聊天')}
             </Text>
-        </Pressable>
+        </ScalePressable>
     );
 };
 
@@ -218,7 +218,7 @@ const AppShareSheet = ({visible, payload, onClose}) => {
                     <Text style={[styles.title, {color: theme.black.main}]}>
                         {t('分享至')}
                     </Text>
-                    <Pressable
+                    <ScalePressable
                         accessibilityLabel={t('關閉')}
                         accessibilityRole="button"
                         hitSlop={scale(8)}
@@ -226,16 +226,13 @@ const AppShareSheet = ({visible, payload, onClose}) => {
                             trigger();
                             hideSheet();
                         }}
-                        style={({pressed}) => [
-                            styles.closeButton,
-                            pressed && {backgroundColor: theme.tonal.primary15},
-                        ]}>
+                        style={styles.closeButton}>
                         <Ionicons
                             color={theme.black.second}
                             name="close"
                             size={scale(22)}
                         />
-                    </Pressable>
+                    </ScalePressable>
                 </View>
 
                 <Text style={[styles.sectionTitle, {color: theme.black.main}]}>
@@ -286,13 +283,10 @@ const AppShareSheet = ({visible, payload, onClose}) => {
                     ]}
                 />
                 <View style={styles.actionRow}>
-                    <Pressable
+                    <ScalePressable
                         accessibilityRole="button"
                         onPress={handleSystemShare}
-                        style={({pressed}) => [
-                            styles.actionItem,
-                            pressed && {opacity: 0.68},
-                        ]}>
+                        style={styles.actionItem}>
                         <View
                             style={[
                                 styles.actionIcon,
@@ -307,15 +301,12 @@ const AppShareSheet = ({visible, payload, onClose}) => {
                         <Text style={[styles.actionText, {color: theme.black.second}]}>
                             {t('系統分享')}
                         </Text>
-                    </Pressable>
+                    </ScalePressable>
                     {payload?.url ? (
-                        <Pressable
+                        <ScalePressable
                             accessibilityRole="button"
                             onPress={handleCopyLink}
-                            style={({pressed}) => [
-                                styles.actionItem,
-                                pressed && {opacity: 0.68},
-                            ]}>
+                            style={styles.actionItem}>
                             <View
                                 style={[
                                     styles.actionIcon,
@@ -330,21 +321,19 @@ const AppShareSheet = ({visible, payload, onClose}) => {
                             <Text style={[styles.actionText, {color: theme.black.second}]}>
                                 {t('複製連結')}
                             </Text>
-                        </Pressable>
+                        </ScalePressable>
                     ) : null}
                 </View>
 
                 {selectedChannel ? (
-                    <Pressable
+                    <ScalePressable
                         accessibilityRole="button"
                         disabled={isSending}
                         onPress={handleSend}
-                        style={({pressed}) => [
+                        style={[
                             styles.sendButton,
                             {
-                                backgroundColor: pressed
-                                    ? theme.tonal.primary50
-                                    : theme.themeColor,
+                                backgroundColor: theme.themeColor,
                             },
                             isSending && {opacity: 0.65},
                         ]}>
@@ -357,7 +346,7 @@ const AppShareSheet = ({visible, payload, onClose}) => {
                                 {t('傳送給 {{name}}', {name: selectedChannel.title})}
                             </Text>
                         )}
-                    </Pressable>
+                    </ScalePressable>
                 ) : null}
             </View>
         </ActionSheet>

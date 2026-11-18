@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
-import { View, TouchableOpacity } from 'react-native';
 
 import Text from './AppText';
+import ScalePressable from './ScalePressable';
 import { themes, uiStyle } from './ThemeContext';
+import { trigger } from '../utils/trigger';
 import { Appearance } from 'react-native';
 
 import { Dialog } from '@rneui/themed';
@@ -28,11 +29,21 @@ class DialogDIY extends Component {
                 <Dialog.Actions>
                     <Dialog.Button
                         title="確認"
-                        onPress={this.props.handleConfirm}
+                        onPress={event => {
+                            trigger();
+                            this.props.handleConfirm?.(event);
+                        }}
+                        TouchableComponent={ScalePressable}
+                        android_ripple={null}
                     />
                     <Dialog.Button
                         title="取消"
-                        onPress={this.props.handleCancel}
+                        onPress={event => {
+                            trigger();
+                            this.props.handleCancel?.(event);
+                        }}
+                        TouchableComponent={ScalePressable}
+                        android_ripple={null}
                     />
                 </Dialog.Actions>
             </Dialog>

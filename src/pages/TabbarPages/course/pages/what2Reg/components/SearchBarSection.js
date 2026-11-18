@@ -1,5 +1,5 @@
 import React from 'react';
-import { Keyboard, Pressable, View } from 'react-native';
+import { Keyboard, Pressable, StyleSheet, View } from 'react-native';
 import Ionicons from "@react-native-vector-icons/ionicons";
 import Text from '../../../../../../components/AppText';
 import TextInput from '../../../../../../components/AppTextInput';
@@ -21,7 +21,7 @@ const SearchBarSection = ({
     showOfficial = true,
     trigger,
 }) => {
-    const { themeColor, black, white } = theme;
+    const { themeColor, black, white, bg_color } = theme;
 
     const searchActions = [
         {
@@ -50,20 +50,19 @@ const SearchBarSection = ({
         <View
             style={{
                 width: '100%',
-                marginTop: scale(5),
+                paddingTop: scale(5),
                 paddingHorizontal: scale(10),
-                backgroundColor: 'transparent',
+                backgroundColor: bg_color,
             }}>
             <View
                 style={{
                     backgroundColor: white,
-                    borderWidth: scale(2),
-                    borderColor: themeColor,
+                    borderWidth: StyleSheet.hairlineWidth,
+                    borderColor: `${black.third}33`,
                     borderRadius: scale(10),
                     flexDirection: 'row',
                     alignItems: 'center',
-                    paddingHorizontal: scale(5),
-                    paddingVertical: scale(3),
+                    paddingHorizontal: scale(8),
                     width: '100%',
                 }}>
                 <Ionicons
@@ -74,7 +73,8 @@ const SearchBarSection = ({
                 <TextInput
                     style={{
                         ...uiStyle.defaultText,
-                        paddingVertical: verticalScale(3),
+                        minHeight: 44,
+                        paddingVertical: verticalScale(8),
                         paddingHorizontal: scale(5),
                         color: black.main,
                         fontSize: scale(12),

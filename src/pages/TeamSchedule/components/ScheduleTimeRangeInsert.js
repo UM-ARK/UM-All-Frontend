@@ -11,6 +11,7 @@ import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import {scale, verticalScale} from 'react-native-size-matters';
 
 import Text from '../../../components/AppText';
+import ScalePressable from '../../../components/ScalePressable';
 import {uiStyle, useTheme} from '../../../components/ThemeContext';
 import {trigger} from '../../../utils/trigger';
 import {
@@ -169,38 +170,34 @@ const ScheduleTimeRangeInsert = ({onClear, onInsert, emptyRangeMessage}) => {
             </View>
 
             {onClear ? (
-                <Pressable
+                <ScalePressable
                     accessibilityRole="button"
                     onPress={handleClear}
-                    style={({pressed}) => [
+                    style={[
                         styles.clearButton,
                         {
-                            backgroundColor: pressed
-                                ? theme.tonal.primary30
-                                : theme.tonal.primary15,
+                            backgroundColor: theme.tonal.primary15,
                         },
                     ]}>
                     <Text style={[styles.insertText, {color: theme.themeColor}]}>
                         {t('清除')}
                     </Text>
-                </Pressable>
+                </ScalePressable>
             ) : null}
 
-            <Pressable
+            <ScalePressable
                 accessibilityRole="button"
                 onPress={handleInsert}
-                style={({pressed}) => [
+                style={[
                     styles.insertButton,
                     {
-                        backgroundColor: pressed
-                            ? theme.themeColorLight
-                            : theme.themeColor,
+                        backgroundColor: theme.themeColor,
                     },
                 ]}>
                 <Text style={[styles.insertText, {color: theme.trueWhite}]}>
                     {t('插入')}
                 </Text>
-            </Pressable>
+            </ScalePressable>
 
             <DateTimePickerModal
                 isVisible={pickerTarget != null}

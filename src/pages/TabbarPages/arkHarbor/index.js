@@ -3,9 +3,7 @@ import {
     Alert,
     Animated,
     AppState,
-    Pressable,
     StyleSheet,
-    useWindowDimensions,
     View,
 } from 'react-native';
 
@@ -18,6 +16,7 @@ import { SafeAreaView } from 'react-native-screens/experimental';
 import { useTranslation } from 'react-i18next';
 
 import Text from '../../../components/AppText';
+import ScalePressable from '../../../components/ScalePressable';
 import { uiStyle, useTheme } from '../../../components/ThemeContext';
 import { useHarborSession } from '../../../contexts/HarborSessionContext';
 import { logToFirebase } from '../../../utils/firebaseAnalytics';
@@ -29,6 +28,7 @@ import {
 import { trigger } from '../../../utils/trigger';
 import HarborLoginConsentModal from '../my/components/HarborLoginConsentModal';
 import HarborDrawerContent from './components/HarborDrawerContent';
+import { harborTopicRowInsets } from './components/HarborTopicCard';
 import HarborTopicList from './components/HarborTopicList';
 import HarborTopicDetail from './HarborTopicDetail';
 
@@ -81,7 +81,7 @@ const HarborFeedTabs = ({ options, selectedIndex, position, onChange }) => {
                 const isSelected = selectedIndex === index;
 
                 return (
-                    <Pressable
+                    <ScalePressable
                         key={option.key}
                         accessibilityRole="tab"
                         accessibilityState={{ selected: isSelected }}
@@ -90,12 +90,7 @@ const HarborFeedTabs = ({ options, selectedIndex, position, onChange }) => {
                             trigger();
                             onChange(index);
                         }}
-                        style={({ pressed }) => [
-                            styles.feedTab,
-                            pressed && {
-                                backgroundColor: theme.tonal.primary15,
-                            },
-                        ]}>
+                        style={styles.feedTab}>
                         <Text
                             numberOfLines={1}
                             style={[
@@ -109,7 +104,7 @@ const HarborFeedTabs = ({ options, selectedIndex, position, onChange }) => {
                             ]}>
                             {option.label}
                         </Text>
-                    </Pressable>
+                    </ScalePressable>
                 );
             })}
             <Animated.View
@@ -146,12 +141,15 @@ const HarborStickyToolbar = ({
     onToolbarLayout,
     searchScrollY,
     searchCollapsed,
+    backgroundColor,
+    isCompact,
 }) => {
     const { theme } = useTheme();
     const { t } = useTranslation('harbor');
     const isSignedIn = status === 'signedIn';
     const showLoginPromptBadge =
         status === 'signedOut' || status === 'expired';
+    const searchBarForeground = isCompact ? theme.harborSearch.foreground : theme.black.third;
     // 搜尋列隨列表往下滑而上移淡出，工具列圖標則反向淡入
     const searchBarTranslateY = searchScrollY.interpolate({
         inputRange: [0, SEARCH_BAR_ROW_HEIGHT],
@@ -175,10 +173,10 @@ const HarborStickyToolbar = ({
                 onLayout={onToolbarLayout}
                 style={[
                     styles.stickyToolbar,
-                    { backgroundColor: theme.bg_color },
+                    { backgroundColor },
                 ]}>
                 <View style={[styles.toolbarSide, styles.toolbarLeft]}>
-                    <Pressable
+                    <ScalePressable
                         accessibilityRole="button"
                         accessibilityLabel={t('開啟選單')}
                         hitSlop={scale(8)}
@@ -186,18 +184,13 @@ const HarborStickyToolbar = ({
                             trigger();
                             onMenuPress();
                         }}
-                        style={({ pressed }) => [
-                            styles.toolbarIconButton,
-                            pressed && {
-                                backgroundColor: theme.tonal.primary15,
-                            },
-                        ]}>
+                        style={styles.toolbarIconButton}>
                         <MaterialCommunityIcons
                             name="menu"
                             size={scale(20)}
                             color={theme.themeColor}
                         />
-                    </Pressable>
+                    </ScalePressable>
                     {/* 搜尋放左側與選單並排，右側未登入時已有「登入」文字按鈕；
                         搜尋列展開時圖標隱藏且不可點 */}
                     <Animated.View
@@ -207,7 +200,7 @@ const HarborStickyToolbar = ({
                             searchCollapsed ? 'auto' : 'no-hide-descendants'
                         }
                         style={{ opacity: searchIconOpacity }}>
-                        <Pressable
+                        <ScalePressable
                             accessibilityRole="button"
                             accessibilityLabel={t('搜尋 Harbor')}
                             hitSlop={scale(8)}
@@ -215,18 +208,13 @@ const HarborStickyToolbar = ({
                                 trigger();
                                 onSearchPress();
                             }}
-                            style={({ pressed }) => [
-                                styles.toolbarIconButton,
-                                pressed && {
-                                    backgroundColor: theme.tonal.primary15,
-                                },
-                            ]}>
+                            style={styles.toolbarIconButton}>
                             <MaterialCommunityIcons
                                 name="magnify"
                                 size={scale(20)}
                                 color={theme.themeColor}
                             />
-                        </Pressable>
+                        </ScalePressable>
                     </Animated.View>
                 </View>
 
@@ -240,7 +228,7 @@ const HarborStickyToolbar = ({
                 <View style={[styles.toolbarSide, styles.toolbarRight]}>
                     <View style={styles.toolbarRightActions}>
                         {isSignedIn ? null : (
-                            <Pressable
+                            <ScalePressable
                                 accessibilityRole="button"
                                 accessibilityLabel={sessionLabel}
                                 disabled={
@@ -251,13 +239,7 @@ const HarborStickyToolbar = ({
                                     trigger();
                                     onSessionPress();
                                 }}
-                                style={({ pressed }) => [
-                                    styles.sessionButton,
-                                    pressed && {
-                                        backgroundColor:
-                                            theme.tonal.primary15,
-                                    },
-                                ]}>
+                                style={styles.sessionButton}>
                                 <MaterialCommunityIcons
                                     name="login"
                                     size={scale(14)}
@@ -280,10 +262,10 @@ const HarborStickyToolbar = ({
                                         ]}
                                     />
                                 ) : null}
-                            </Pressable>
+                            </ScalePressable>
                         )}
                         {isSignedIn && chatVisible ? (
-                            <Pressable
+                            <ScalePressable
                                 accessibilityRole="button"
                                 accessibilityLabel={t('Chat')}
                                 hitSlop={scale(8)}
@@ -291,13 +273,7 @@ const HarborStickyToolbar = ({
                                     trigger();
                                     onChatPress();
                                 }}
-                                style={({ pressed }) => [
-                                    styles.toolbarIconButton,
-                                    pressed && {
-                                        backgroundColor:
-                                            theme.tonal.primary15,
-                                    },
-                                ]}>
+                                style={styles.toolbarIconButton}>
                                 <MaterialCommunityIcons
                                     name="chat-outline"
                                     size={scale(19)}
@@ -320,9 +296,9 @@ const HarborStickyToolbar = ({
                                         </Text>
                                     </View>
                                 ) : null}
-                            </Pressable>
+                            </ScalePressable>
                         ) : null}
-                        <Pressable
+                        <ScalePressable
                             accessibilityRole="button"
                             accessibilityLabel={t('建立話題')}
                             hitSlop={scale(8)}
@@ -330,18 +306,13 @@ const HarborStickyToolbar = ({
                                 trigger();
                                 onComposePress();
                             }}
-                            style={({ pressed }) => [
-                                styles.toolbarIconButton,
-                                pressed && {
-                                    backgroundColor: theme.tonal.primary15,
-                                },
-                            ]}>
+                            style={styles.toolbarIconButton}>
                             <MaterialCommunityIcons
                                 name="plus"
                                 size={scale(20)}
                                 color={theme.themeColor}
                             />
-                        </Pressable>
+                        </ScalePressable>
                     </View>
                 </View>
             </View>
@@ -353,41 +324,44 @@ const HarborStickyToolbar = ({
                 }
                 style={[
                     styles.searchBarRow,
+                    isCompact && styles.compactSearchBarRow,
                     {
-                        backgroundColor: theme.bg_color,
+                        backgroundColor,
                         opacity: searchBarOpacity,
                         transform: [{ translateY: searchBarTranslateY }],
                     },
                 ]}>
-                <Pressable
+                <ScalePressable
                     accessibilityRole="button"
                     accessibilityLabel={t('搜尋 Harbor')}
                     onPress={() => {
                         trigger();
                         onSearchPress();
                     }}
-                    style={({ pressed }) => [
+                    style={[
                         styles.searchBar,
                         {
-                            backgroundColor: theme.white,
+                            backgroundColor: isCompact
+                                ? theme.harborSearch.background
+                                : theme.white,
                             borderColor: theme.themeColorUltraLight,
+                            borderWidth: isCompact ? 0 : StyleSheet.hairlineWidth,
                         },
-                        pressed && { opacity: 0.85 },
                     ]}>
                     <MaterialCommunityIcons
                         name="magnify"
                         size={scale(16)}
-                        color={theme.black.third}
+                        color={searchBarForeground}
                     />
                     <Text
                         numberOfLines={1}
                         style={[
                             styles.searchBarText,
-                            { color: theme.black.third },
+                            { color: searchBarForeground },
                         ]}>
                         {t('搜尋 Harbor')}
                     </Text>
-                </Pressable>
+                </ScalePressable>
             </Animated.View>
         </View>
     );
@@ -449,7 +423,8 @@ const HarborFeedPane = ({
  */
 const ForumPage = ({ navigation }) => {
     const { theme } = useTheme();
-    const { isExpanded } = useWindowSizeClass();
+    const { isCompact, isExpanded } = useWindowSizeClass();
+    const backgroundColor = isCompact ? theme.harbor_bg_color : theme.bg_color;
     const { t } = useTranslation('harbor');
     const {
         status,
@@ -774,7 +749,7 @@ const ForumPage = ({ navigation }) => {
 
     return (
         <SafeAreaView
-            style={[styles.page, { backgroundColor: theme.bg_color }]}
+            style={[styles.page, { backgroundColor }]}
             edges={{ top: true }}>
             <View
                 style={[
@@ -848,6 +823,8 @@ const ForumPage = ({ navigation }) => {
                         onToolbarLayout={handleToolbarLayout}
                         searchScrollY={searchScrollY}
                         searchCollapsed={searchCollapsed}
+                        backgroundColor={backgroundColor}
+                        isCompact={isCompact}
                     />
                 </View>
                 {isExpanded ? (
@@ -1019,9 +996,11 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         paddingHorizontal: scale(6),
     },
+    compactSearchBarRow: {
+        paddingHorizontal: harborTopicRowInsets.paddingHorizontal,
+    },
     searchBar: {
         minHeight: verticalScale(30),
-        borderWidth: StyleSheet.hairlineWidth,
         borderRadius: scale(9),
         flexDirection: 'row',
         alignItems: 'center',
@@ -1053,7 +1032,7 @@ const styles = StyleSheet.create({
 
 const HarborDrawerNavigator = () => {
     const { theme } = useTheme();
-    const { width } = useWindowDimensions();
+    const { width, isCompact } = useWindowSizeClass();
 
     const renderDrawerContent = useCallback(
         props => <HarborDrawerContent {...props} />,
@@ -1070,7 +1049,9 @@ const HarborDrawerNavigator = () => {
                     width: Math.min(width * 0.88, scale(360)),
                     backgroundColor: theme.bg_color,
                 },
-                sceneStyle: { backgroundColor: theme.bg_color },
+                sceneStyle: {
+                    backgroundColor: isCompact ? theme.harbor_bg_color : theme.bg_color,
+                },
                 swipeEdgeWidth: scale(38),
                 swipeMinDistance: scale(18),
                 drawerHideStatusBarOnOpen: false,

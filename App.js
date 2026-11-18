@@ -21,6 +21,7 @@ import { SchedulingSessionProvider } from './src/contexts/SchedulingSessionConte
 import { AppShareProvider } from './src/contexts/AppShareContext';
 import { ProgrammeLevelProvider } from './src/contexts/ProgrammeLevelContext';
 import { PushRegistrationProvider } from './src/contexts/PushRegistrationContext';
+import { ReducedMotionProvider } from './src/contexts/ReducedMotionContext';
 import HarborAuthorizationLoadingOverlay from './src/components/HarborAuthorizationLoadingOverlay';
 
 const { width: PAGE_WIDTH } = Dimensions.get('window');
@@ -183,8 +184,10 @@ const App = () => {
                                 <SchedulingSessionProvider>
                                     <PushRegistrationProvider>
                                         <View style={styles.appContainer}>
-                                            <Nav />
-                                            <HarborAuthorizationLoadingOverlay />
+                                            <ReducedMotionProvider>
+                                                <Nav />
+                                                <HarborAuthorizationLoadingOverlay />
+                                            </ReducedMotionProvider>
                                         </View>
                                     </PushRegistrationProvider>
                                 </SchedulingSessionProvider>

@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
     ActivityIndicator,
     Keyboard,
-    Pressable,
     StyleSheet,
     View,
 } from 'react-native';
@@ -15,6 +14,7 @@ import { useTranslation } from 'react-i18next';
 import { scale, verticalScale } from 'react-native-size-matters';
 
 import Text from '../../../components/AppText';
+import ScalePressable from '../../../components/ScalePressable';
 import TextInput from '../../../components/AppTextInput';
 import { uiStyle, useTheme } from '../../../components/ThemeContext';
 import { openLink } from '../../../utils/browser';
@@ -126,25 +126,30 @@ const WikiSearchPage = ({route, navigation}) => {
     };
 
     const renderResult = ({item}) => (
-        <Pressable
+        <ScalePressable
             onPress={() => openArticle(item)}
-            style={({pressed}) => [
+            style={[
                 styles.result,
                 {
-                    backgroundColor: pressed ? theme.tonal.primary15 : theme.white,
+                    backgroundColor: theme.white,
                     borderColor: theme.disabled,
                 },
             ]}>
             <View style={styles.resultText}>
                 <Text style={[styles.resultTitle, {color: theme.black.main}]}>{item.title}</Text>
+                {item.aliases.length > 0 ? (
+                    <Text style={[styles.resultDetail, {color: theme.black.third}]}>
+                        {t('亦稱 {{titles}}', {titles: item.aliases.join(' · ')})}
+                    </Text>
+                ) : null}
                 {item.snippet ? (
-                    <Text numberOfLines={2} style={[styles.snippet, {color: theme.black.third}]}>
+                    <Text numberOfLines={2} style={[styles.resultDetail, {color: theme.black.third}]}>
                         {item.snippet}
                     </Text>
                 ) : null}
             </View>
             <MaterialCommunityIcons name="chevron-right" size={scale(22)} color={theme.black.third} />
-        </Pressable>
+        </ScalePressable>
     );
 
     const emptyState = (
@@ -166,19 +171,19 @@ const WikiSearchPage = ({route, navigation}) => {
                         : t('輸入關鍵字開始搜尋')}
             </Text>
             {hasSearched && query.trim() ? (
-                <Pressable
+                <ScalePressable
                     onPress={() => {
                         trigger();
                         openLink(ARK_WIKI_SEARCH + encodeURIComponent(query.trim()));
                     }}
-                    style={({pressed}) => [
+                    style={[
                         styles.webButton,
-                        {backgroundColor: pressed ? theme.tonal.primary50 : theme.tonal.primary30},
+                        {backgroundColor: theme.tonal.primary30},
                     ]}>
                     <Text style={[styles.webButtonText, {color: theme.themeColor}]}>
                         {t('前往 Wiki 搜尋或建立')}
                     </Text>
-                </Pressable>
+                </ScalePressable>
             ) : null}
         </View>
     );
@@ -204,7 +209,7 @@ const WikiSearchPage = ({route, navigation}) => {
             <FlashList
                 data={results}
                 renderItem={renderResult}
-                keyExtractor={item => item.title}
+                keyExtractor={item => String(item.pageId)}
                 ListEmptyComponent={emptyState}
                 contentContainerStyle={styles.listContent}
                 keyboardShouldPersistTaps="handled"
@@ -251,16 +256,16 @@ const styles = StyleSheet.create({
     },
     resultText: {
         flex: 1,
+        gap: verticalScale(3),
     },
     resultTitle: {
         ...uiStyle.defaultText,
         fontSize: scale(15),
         fontWeight: '600',
     },
-    snippet: {
+    resultDetail: {
         ...uiStyle.defaultText,
         fontSize: scale(12),
-        marginTop: verticalScale(3),
     },
     empty: {
         alignItems: 'center',

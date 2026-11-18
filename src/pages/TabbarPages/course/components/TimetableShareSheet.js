@@ -11,7 +11,6 @@ import {
     ActivityIndicator,
     Alert,
     Image,
-    Pressable,
     StyleSheet,
     View,
     useWindowDimensions,
@@ -34,6 +33,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
 
 import Text from '../../../../components/AppText';
+import ScalePressable from '../../../../components/ScalePressable';
 import { useTheme, uiStyle } from '../../../../components/ThemeContext';
 import SegmentControl from '../../../../components/SegmentControl';
 import { logToFirebase } from '../../../../utils/firebaseAnalytics';
@@ -742,9 +742,6 @@ const TimetableShareSheet = forwardRef(({ catalogMetadata }, ref) => {
                     flexDirection: 'row',
                     gap: scale(6),
                 },
-                actionButtonPressed: {
-                    opacity: 0.7,
-                },
                 actionText: {
                     ...uiStyle.defaultText,
                     fontSize: scale(14),
@@ -978,15 +975,14 @@ const TimetableShareSheet = forwardRef(({ catalogMetadata }, ref) => {
                 </ScrollView>
             </ScrollView>
             <View style={styles.actions}>
-                <Pressable
+                <ScalePressable
                     accessibilityRole="button"
                     accessibilityLabel={t('分享圖片', { ns: 'timetable' })}
                     disabled={isGenerating}
                     onPress={() => handleOutput('share')}
-                    style={({ pressed }) => [
+                    style={[
                         styles.actionButton,
                         { backgroundColor: tonal.primary30 },
-                        pressed && styles.actionButtonPressed,
                     ]}>
                     {isGenerating ? (
                         <ActivityIndicator color={themeColor} />
@@ -1006,16 +1002,15 @@ const TimetableShareSheet = forwardRef(({ catalogMetadata }, ref) => {
                             </Text>
                         </>
                     )}
-                </Pressable>
-                <Pressable
+                </ScalePressable>
+                <ScalePressable
                     accessibilityRole="button"
                     accessibilityLabel={t('儲存圖片', { ns: 'timetable' })}
                     disabled={isGenerating}
                     onPress={() => handleOutput('save')}
-                    style={({ pressed }) => [
+                    style={[
                         styles.actionButton,
                         { backgroundColor: tonal.success15 },
-                        pressed && styles.actionButtonPressed,
                     ]}>
                     <Ionicons
                         name="download-outline"
@@ -1026,17 +1021,14 @@ const TimetableShareSheet = forwardRef(({ catalogMetadata }, ref) => {
                         style={[styles.actionText, { color: success }]}>
                         {t('儲存圖片', { ns: 'timetable' })}
                     </Text>
-                </Pressable>
+                </ScalePressable>
             </View>
-            <Pressable
+            <ScalePressable
                 accessibilityRole="button"
                 accessibilityLabel={t('複製純文字課表', { ns: 'timetable' })}
                 disabled={isGenerating}
                 onPress={handleCopyText}
-                style={({ pressed }) => [
-                    styles.textExportButton,
-                    pressed && styles.actionButtonPressed,
-                ]}>
+                style={styles.textExportButton}>
                 <Ionicons
                     name="document-text-outline"
                     size={scale(18)}
@@ -1046,19 +1038,16 @@ const TimetableShareSheet = forwardRef(({ catalogMetadata }, ref) => {
                     style={[styles.actionText, { color: themeColor }]}>
                     {t('複製純文字課表', { ns: 'timetable' })}
                 </Text>
-            </Pressable>
-            <Pressable
+            </ScalePressable>
+            <ScalePressable
                 accessibilityRole="button"
                 disabled={isGenerating}
                 onPress={handleCancel}
-                style={({ pressed }) => [
-                    styles.cancelButton,
-                    pressed && styles.actionButtonPressed,
-                ]}>
+                style={styles.cancelButton}>
                 <Text style={styles.cancelText}>
                     {t('取消', { ns: 'timetable' })}
                 </Text>
-            </Pressable>
+            </ScalePressable>
         </ActionSheet>
     );
 });

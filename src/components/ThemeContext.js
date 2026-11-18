@@ -44,6 +44,7 @@ const getColorDiy = (isLight) => {
         themeColor: themeColorValue,
         themeColorLight: isLight ? '#7ca8cc' : '#2d5f87',
         themeColorUltraLight: isLight ? '#c9e1f5' : '#23323d',
+        accentForeground: isLight ? '#195985' : '#83C7F7',
         secondThemeColor: secondThemeColorValue,
 
         // Tonal Color System — 主題色透明度分級背景色
@@ -54,7 +55,7 @@ const getColorDiy = (isLight) => {
             primary08: `${themeColorValue}08`,   // ~3%  極淺底：大面積輸入區域
             primary15: `${themeColorValue}15`,   // ~8%  淺色底：普通按鈕、標籤
             primary30: `${themeColorValue}30`,   // ~19% 中等底：重點按鈕
-            primary50: `${themeColorValue}50`,   // ~31% 較深底：強調容器、pressed態
+            primary50: `${themeColorValue}50`,   // ~31% 較深底：強調容器
             // 副主題色 (secondThemeColor) 背景分級
             secondary08: `${secondThemeColorValue}08`,
             secondary15: `${secondThemeColorValue}15`,
@@ -99,11 +100,14 @@ const getColorDiy = (isLight) => {
 
         // 全局背景白色(偏灰)
         bg_color: isLight ? '#F5F5F7' : trueBlack,
+        pressOverlay: rgba(isLight ? trueBlack : trueWhite, 0.12),
 
         // 綠色，用在Toast上
         success: successValue,
+        successForeground: isLight ? '#114D30' : '#78DBAB',
         warning: '#f39c12',
         unread: unreadValue,
+        unreadForeground: isLight ? '#AB2935' : '#FF9C9F',
         disabled: isLight ? '#cad5de' : '#3a3d40',
 
         // 我的頁顏色
@@ -122,6 +126,10 @@ const getColorDiy = (isLight) => {
 
         // Harbor頁面配色
         harbor_bg_color: isLight ? '#fbfdff' : '#111111',
+        harborSearch: {
+            background: isLight ? '#EDF0F2' : whiteColor,
+            foreground: isLight ? '#666666' : '#A8A8AC',
+        },
 
         // expo-image 通用圖片佔位（可直接傳給 placeholder prop）
         // 亮：淺灰；暗：深灰，避免深色模式下出現突兀亮塊

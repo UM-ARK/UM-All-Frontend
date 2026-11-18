@@ -55,7 +55,6 @@ import {
     isPushAuthorizationCurrent,
     normalizePushTokenError,
     PUSH_SERVICE_UNAVAILABLE_ERROR_CODE,
-    shouldShowHarborPushPrompt,
 } from '../pushRegistration';
 
 const GRANTED_PERMISSION = {
@@ -86,54 +85,6 @@ describe('pushRegistration', () => {
                 notificationLocale: 'zh-Hant',
             },
         });
-    });
-
-    it('狀態尚未靜默恢復時不顯示提示，確認異常後才顯示', () => {
-        const baseState = {
-            desiredEnabled: true,
-            pendingAction: 'enable',
-            dismissedPrompt: false,
-        };
-
-        expect(shouldShowHarborPushPrompt({
-            sessionStatus: 'signedIn',
-            accountKey: '2893:installation-id',
-            stateReady: false,
-            harborState: {...baseState, pendingAction: null},
-            harborDisplayStatus: 'needs_permission',
-        })).toBe(false);
-        expect(shouldShowHarborPushPrompt({
-            sessionStatus: 'signedIn',
-            accountKey: '2893:installation-id',
-            stateReady: true,
-            harborState: baseState,
-            harborDisplayStatus: 'needs_permission',
-        })).toBe(true);
-        expect(shouldShowHarborPushPrompt({
-            sessionStatus: 'signedIn',
-            accountKey: '2893:installation-id',
-            stateReady: true,
-            harborState: {...baseState, dismissedPrompt: true},
-            harborDisplayStatus: 'syncing',
-        })).toBe(true);
-        expect(shouldShowHarborPushPrompt({
-            sessionStatus: 'signedIn',
-            accountKey: '2893:installation-id',
-            stateReady: true,
-            harborState: baseState,
-            harborDisplayStatus: 'enabled',
-        })).toBe(false);
-        expect(shouldShowHarborPushPrompt({
-            sessionStatus: 'signedIn',
-            accountKey: '2893:installation-id',
-            stateReady: true,
-            harborState: {
-                desiredEnabled: false,
-                pendingAction: null,
-                dismissedPrompt: true,
-            },
-            harborDisplayStatus: 'disabled',
-        })).toBe(false);
     });
 
     it('Android 無法註冊 FCM 時標記推送服務不可用且不自動重試', () => {
@@ -307,6 +258,20 @@ describe('pushRegistration', () => {
         await ensureVisiblePushRegistration({requestPermission: true});
 
         expect(mockRequestPermissionsAsync).toHaveBeenCalledTimes(1);
+        expect(mockGetExpoPushTokenAsync).toHaveBeenCalledTimes(1);
+    });
+
+    it('首次登入已有 iOS 靜默授權時直接註冊', async () => {
+        mockGetPermissionsAsync.mockResolvedValue({
+            ios: {status: 3, allowsSound: false},
+        });
+
+        await ensureVisiblePushRegistration({
+            requestPermission: true,
+            upgradeProvisional: false,
+        });
+
+        expect(mockRequestPermissionsAsync).not.toHaveBeenCalled();
         expect(mockGetExpoPushTokenAsync).toHaveBeenCalledTimes(1);
     });
 

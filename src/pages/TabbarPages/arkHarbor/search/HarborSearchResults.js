@@ -4,7 +4,6 @@ import React, {
 } from 'react';
 import {
     ActivityIndicator,
-    Pressable,
     StyleSheet,
     View,
 } from 'react-native';
@@ -16,6 +15,7 @@ import {scale, verticalScale} from 'react-native-size-matters';
 import {useTranslation} from 'react-i18next';
 
 import Text from '../../../../components/AppText';
+import ScalePressable from '../../../../components/ScalePressable';
 import {uiStyle, useTheme} from '../../../../components/ThemeContext';
 import TouchableScale from '../../../../components/TouchableScale';
 import {filterHarborSearchItems} from '../../../../utils/harbor/harborSearch';
@@ -148,7 +148,7 @@ const HarborSearchResults = ({
         ({item}) => {
             if (item.kind === 'history') {
                 return (
-                    <Pressable
+                    <ScalePressable
                         accessibilityRole="button"
                         onPress={() => {
                             trigger();
@@ -156,12 +156,10 @@ const HarborSearchResults = ({
                             setQuery(item.query);
                             runSearch({queryOverride: item.query});
                         }}
-                        style={({pressed}) => [
+                        style={[
                             styles.historyRow,
                             {
-                                backgroundColor: pressed
-                                    ? theme.tonal.primary08
-                                    : theme.white,
+                                backgroundColor: theme.white,
                                 borderBottomColor:
                                     theme.themeColorUltraLight,
                             },
@@ -179,7 +177,7 @@ const HarborSearchResults = ({
                             ]}>
                             {item.query}
                         </Text>
-                        <Pressable
+                        <ScalePressable
                             accessibilityRole="button"
                             accessibilityLabel={t(
                                 '刪除搜尋記錄：{{query}}',
@@ -192,20 +190,14 @@ const HarborSearchResults = ({
                                 onCollapseSearch();
                                 await removeHistory(item.query);
                             }}
-                            style={({pressed}) => [
-                                styles.historyDeleteButton,
-                                pressed && {
-                                    backgroundColor:
-                                        theme.tonal.primary15,
-                                },
-                            ]}>
+                            style={styles.historyDeleteButton}>
                             <MaterialCommunityIcons
                                 name="close"
                                 size={scale(17)}
                                 color={theme.black.third}
                             />
-                        </Pressable>
-                    </Pressable>
+                        </ScalePressable>
+                    </ScalePressable>
                 );
             }
 
@@ -311,19 +303,14 @@ const HarborSearchResults = ({
                         ]}>
                         {t('最近搜尋')}
                     </Text>
-                    <Pressable
+                    <ScalePressable
                         accessibilityRole="button"
                         onPress={() => {
                             trigger();
                             onCollapseSearch();
                             onClearHistory();
                         }}
-                        style={({pressed}) => [
-                            styles.clearHistoryButton,
-                            pressed && {
-                                backgroundColor: theme.tonal.primary15,
-                            },
-                        ]}>
+                        style={styles.clearHistoryButton}>
                         <Text
                             style={[
                                 styles.clearHistoryText,
@@ -331,7 +318,7 @@ const HarborSearchResults = ({
                             ]}>
                             {t('清除全部')}
                         </Text>
-                    </Pressable>
+                    </ScalePressable>
                 </View>
             );
         }

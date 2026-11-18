@@ -2,7 +2,7 @@
  * 組隊詳情頁首：標題、狀態、說明、截止、提交進度
  */
 import React, {memo} from 'react';
-import {Pressable, ScrollView, StyleSheet, View} from 'react-native';
+import {ScrollView, StyleSheet, View} from 'react-native';
 
 import moment from 'moment-timezone';
 import {useTranslation} from 'react-i18next';
@@ -10,6 +10,7 @@ import {scale, verticalScale} from 'react-native-size-matters';
 import Ionicons from '@react-native-vector-icons/ionicons';
 
 import Text from '../../../components/AppText';
+import ScalePressable from '../../../components/ScalePressable';
 import {uiStyle, useTheme} from '../../../components/ThemeContext';
 import {trigger} from '../../../utils/trigger';
 
@@ -104,7 +105,7 @@ const TeamScheduleEventHeader = ({
                         </Text>
                     ) : null}
                     {typeof onSharePress === 'function' ? (
-                        <Pressable
+                        <ScalePressable
                             accessibilityLabel={t('分享邀請')}
                             accessibilityRole="button"
                             hitSlop={scale(8)}
@@ -112,12 +113,10 @@ const TeamScheduleEventHeader = ({
                                 trigger();
                                 onSharePress();
                             }}
-                            style={({pressed}) => [
+                            style={[
                                 styles.shareButton,
                                 {
-                                    backgroundColor: pressed
-                                        ? theme.tonal.primary30
-                                        : theme.tonal.primary15,
+                                    backgroundColor: theme.tonal.primary15,
                                 },
                             ]}>
                             <Ionicons
@@ -125,7 +124,7 @@ const TeamScheduleEventHeader = ({
                                 color={theme.themeColor}
                                 size={scale(18)}
                             />
-                        </Pressable>
+                        </ScalePressable>
                     ) : null}
                 </View>
             </View>

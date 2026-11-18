@@ -17,6 +17,7 @@ import { HarborSessionProvider } from './src/contexts/HarborSessionContext';
 import { SchedulingSessionProvider } from './src/contexts/SchedulingSessionContext';
 import { AppShareProvider } from './src/contexts/AppShareContext';
 import { ProgrammeLevelProvider } from './src/contexts/ProgrammeLevelContext';
+import { ReducedMotionProvider } from './src/contexts/ReducedMotionContext';
 import HarborAuthorizationLoadingOverlay from './src/components/HarborAuthorizationLoadingOverlay';
 
 const App = () => {
@@ -145,8 +146,10 @@ const App = () => {
                             <AppShareProvider>
                                 <SchedulingSessionProvider>
                                     <View style={styles.appContainer}>
-                                        <Nav />
-                                        <HarborAuthorizationLoadingOverlay />
+                                        <ReducedMotionProvider>
+                                            <Nav />
+                                            <HarborAuthorizationLoadingOverlay />
+                                        </ReducedMotionProvider>
                                     </View>
                                 </SchedulingSessionProvider>
                             </AppShareProvider>

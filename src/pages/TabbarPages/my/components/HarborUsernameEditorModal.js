@@ -15,6 +15,7 @@ import {useTranslation} from 'react-i18next';
 import {scale, verticalScale} from 'react-native-size-matters';
 
 import Text from '../../../../components/AppText';
+import ScalePressable from '../../../../components/ScalePressable';
 import TextInput from '../../../../components/AppTextInput';
 import {uiStyle, useTheme} from '../../../../components/ThemeContext';
 import {checkHarborUsername} from '../../../../utils/harbor/harborApi';
@@ -202,24 +203,19 @@ const HarborUsernameEditorModal = ({
                             style={[styles.title, {color: theme.black.main}]}>
                             {t('修改使用者名稱')}
                         </Text>
-                        <Pressable
+                        <ScalePressable
                             accessibilityLabel={t('關閉')}
                             accessibilityRole="button"
                             disabled={isSubmitting}
                             hitSlop={scale(8)}
                             onPress={handleClose}
-                            style={({pressed}) => [
-                                styles.closeButton,
-                                pressed && {
-                                    backgroundColor: theme.tonal.primary15,
-                                },
-                            ]}>
+                            style={styles.closeButton}>
                             <Ionicons
                                 color={theme.black.second}
                                 name="close"
                                 size={scale(22)}
                             />
-                        </Pressable>
+                        </ScalePressable>
                     </View>
 
                     <Text

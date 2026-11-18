@@ -1,5 +1,5 @@
 import React, {memo} from 'react';
-import {Pressable, ScrollView, StyleSheet, View} from 'react-native';
+import {ScrollView, StyleSheet, View} from 'react-native';
 
 import {Image} from 'expo-image';
 import {useTranslation} from 'react-i18next';
@@ -7,6 +7,7 @@ import Ionicons from '@react-native-vector-icons/ionicons';
 import {scale, verticalScale} from 'react-native-size-matters';
 
 import Text from '../../../components/AppText';
+import ScalePressable from '../../../components/ScalePressable';
 import {uiStyle, useTheme} from '../../../components/ThemeContext';
 import {ARK_HARBOR_AVATAR_TEMPLATE} from '../../../utils/pathMap';
 import {trigger} from '../../../utils/trigger';
@@ -27,21 +28,19 @@ const SharedTimetableMemberSelector = ({
 
     return (
         <View style={styles.selectorRow}>
-            <Pressable
+            <ScalePressable
                 accessibilityRole="tab"
                 accessibilityState={{selected: selectedId === 'all'}}
                 onPress={() => {
                     trigger();
                     onSelectAll();
                 }}
-                style={({pressed}) => [
+                style={[
                     styles.fixedButton,
                     {
                         backgroundColor: selectedId === 'all'
                             ? theme.tonal.primary15
-                            : pressed
-                              ? theme.tonal.primary08
-                              : undefined,
+                            : undefined,
                         borderColor: selectedId === 'all'
                             ? theme.themeColor
                             : theme.themeColorUltraLight,
@@ -55,7 +54,7 @@ const SharedTimetableMemberSelector = ({
                 <Text style={[styles.fixedLabel, {color: theme.themeColor}]}>
                     {t('全部')}
                 </Text>
-            </Pressable>
+            </ScalePressable>
             <ScrollView
                 contentContainerStyle={styles.recentList}
                 horizontal
@@ -69,7 +68,7 @@ const SharedTimetableMemberSelector = ({
                         ? ARK_HARBOR_AVATAR_TEMPLATE(member.avatarTemplate)
                         : null;
                     return (
-                        <Pressable
+                        <ScalePressable
                             key={key}
                             accessibilityLabel={name}
                             accessibilityRole="tab"
@@ -78,14 +77,12 @@ const SharedTimetableMemberSelector = ({
                                 trigger();
                                 onSelectMember(member);
                             }}
-                            style={({pressed}) => [
+                            style={[
                                 styles.memberButton,
                                 {
                                     backgroundColor: selected
                                         ? theme.tonal.primary15
-                                        : pressed
-                                          ? theme.tonal.primary08
-                                          : undefined,
+                                        : undefined,
                                     borderColor: selected
                                         ? theme.themeColor
                                         : theme.themeColorUltraLight,
@@ -117,23 +114,21 @@ const SharedTimetableMemberSelector = ({
                                 ]}>
                                 {name}
                             </Text>
-                        </Pressable>
+                        </ScalePressable>
                     );
                 })}
             </ScrollView>
-            <Pressable
+            <ScalePressable
                 accessibilityLabel={t('搜尋成員')}
                 accessibilityRole="button"
                 onPress={() => {
                     trigger();
                     onOpenSearch();
                 }}
-                style={({pressed}) => [
+                style={[
                     styles.fixedButton,
                     {
-                        backgroundColor: pressed
-                            ? theme.tonal.primary15
-                            : undefined,
+                        backgroundColor: undefined,
                         borderColor: theme.themeColorUltraLight,
                     },
                 ]}>
@@ -145,7 +140,7 @@ const SharedTimetableMemberSelector = ({
                 <Text style={[styles.fixedLabel, {color: theme.themeColor}]}>
                     {t('搜尋')}
                 </Text>
-            </Pressable>
+            </ScalePressable>
         </View>
     );
 };

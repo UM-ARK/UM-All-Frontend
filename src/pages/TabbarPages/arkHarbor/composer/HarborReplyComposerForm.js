@@ -14,6 +14,7 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useTranslation} from 'react-i18next';
 
 import Text from '../../../../components/AppText';
+import ScalePressable from '../../../../components/ScalePressable';
 import TextInput from '../../../../components/AppTextInput';
 import {useTheme} from '../../../../components/ThemeContext';
 import HarborComposerImageGrid from './HarborComposerImageGrid';
@@ -84,15 +85,13 @@ export const HarborReplyComposerState = ({
                     {description}
                 </Text>
                 {onAction ? (
-                    <Pressable
+                    <ScalePressable
                         accessibilityRole="button"
                         onPress={onAction}
-                        style={({pressed}) => [
+                        style={[
                             styles.stateAction,
                             {
-                                backgroundColor: pressed
-                                    ? theme.themeColorLight
-                                    : theme.themeColor,
+                                backgroundColor: theme.themeColor,
                             },
                         ]}>
                         <Text
@@ -102,7 +101,7 @@ export const HarborReplyComposerState = ({
                             ]}>
                             {actionLabel}
                         </Text>
-                    </Pressable>
+                    </ScalePressable>
                 ) : null}
             </View>
         </View>
@@ -222,7 +221,7 @@ const HarborReplyComposerForm = ({
                     ) : null}
 
                     <View style={styles.toolbar}>
-                        <Pressable
+                        <ScalePressable
                             accessibilityLabel={t('新增圖片')}
                             accessibilityRole="button"
                             accessibilityState={{
@@ -237,13 +236,7 @@ const HarborReplyComposerForm = ({
                                 hasReachedImageLimit
                             }
                             onPress={addImages}
-                            style={({pressed}) => [
-                                styles.imageButton,
-                                pressed && {
-                                    backgroundColor:
-                                        theme.tonal.primary15,
-                                },
-                            ]}>
+                            style={styles.imageButton}>
                             {isPreparingImages ? (
                                 <ActivityIndicator
                                     size="small"
@@ -269,7 +262,7 @@ const HarborReplyComposerForm = ({
                                     {`${images.length}/${MAX_IMAGES_PER_POST}`}
                                 </Text>
                             ) : null}
-                        </Pressable>
+                        </ScalePressable>
                         {pendingPostCount > 0 ? (
                             <Pressable
                                 accessibilityLabel={t('查看 {{count}} 項審核中的內容', {
@@ -311,25 +304,19 @@ const HarborReplyComposerForm = ({
                                 {`${visibleTextLength}/${maximumPostLength}`}
                             </Text>
                         ) : null}
-                        <Pressable
+                        <ScalePressable
                             accessibilityRole="button"
                             accessibilityState={{
                                 disabled: isSubmitDisabled,
                             }}
                             disabled={isSubmitDisabled}
                             onPress={handleSubmit}
-                            style={({pressed}) => [
+                            style={[
                                 styles.sendButton,
                                 {
                                     backgroundColor: sendDisabled
                                         ? theme.disabled
-                                        : pressed
-                                            ? theme.themeColorLight
-                                            : theme.themeColor,
-                                    opacity:
-                                        pressed && sendDisabled
-                                            ? 0.8
-                                            : 1,
+                                        : theme.themeColor,
                                 },
                             ]}>
                             {isSubmitting ? (
@@ -355,7 +342,7 @@ const HarborReplyComposerForm = ({
                                         ? t('正在提交…')
                                         : t('發布')}
                             </Text>
-                        </Pressable>
+                        </ScalePressable>
                     </View>
                 </View>
             </KeyboardStickyView>

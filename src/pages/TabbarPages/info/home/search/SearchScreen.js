@@ -13,11 +13,11 @@ import { isLiquidGlassSupported } from '../../../../../utils/glassEffect';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { scale, verticalScale } from 'react-native-size-matters';
 import Ionicons from "@react-native-vector-icons/ionicons";
-import * as OpenCC from 'opencc-js';
 import { useTranslation } from 'react-i18next';
 
 import { getFunctionArr } from '../../../features/FeatureList';
 import Text from '../../../../../components/AppText';
+import ScalePressable from '../../../../../components/ScalePressable';
 import TextInput from '../../../../../components/AppTextInput';
 import FeatureIcon from './components/FeatureIcon';
 import { useTheme, uiStyle } from '../../../../../components/ThemeContext';
@@ -30,13 +30,18 @@ import {
     removeSearchHistory,
 } from '../../../../../utils/searchHistory';
 import { recordFeatureUsage } from '../../../../../utils/featureRecentUsage';
+import {
+    getFeatureSearchText,
+    getUmWebSearchUrl,
+    normalizeSearchText,
+    toTraditionalSearchText,
+} from '../../../../../utils/featureSearch';
 import { trigger } from '../../../../../utils/trigger';
 import {
     COURSE_TAB_ROUTE,
     navigateToCourseTab,
 } from '../../../../../utils/courseNavigation';
 
-const converter = OpenCC.Converter({ from: 'cn', to: 'tw' });
 const MAX_LOCAL_RESULTS = 8;
 // 轉場結束後再短暫延遲，確保鍵盤從底部升起而非跟隨側滑
 const FOCUS_AFTER_TRANSITION_MS = 64;
@@ -50,13 +55,6 @@ const RECOMMENDED_FEATURE_KEYS = [
     '失物認領',
 ];
 
-const normalizeSearchText = value =>
-    converter(
-        String(value || '')
-            .trim()
-            .toLowerCase(),
-    );
-
 const escapeRegExp = value =>
     String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
@@ -69,7 +67,9 @@ const buildHighlightParts = (text, query) => {
     }
 
     const candidates = Array.from(
-        new Set([trimmedQuery, converter(trimmedQuery)].filter(Boolean)),
+        new Set(
+            [trimmedQuery, toTraditionalSearchText(trimmedQuery)].filter(Boolean),
+        ),
     );
     const pattern = new RegExp(
         `(${candidates.map(escapeRegExp).join('|')})`,
@@ -159,21 +159,11 @@ const SearchScreen = ({ navigation }) => {
         }
 
         return flattenedFeatures
-            .filter(item => {
-                const searchableText = normalizeSearchText(
-                    [
-                        item.fn_name,
-                        item.describe,
-                        item.keywords,
-                        item.key_name,
-                        item.category,
-                    ]
-                        .filter(Boolean)
-                        .join(' '),
-                );
-
-                return searchableText.includes(normalizedQuery);
-            })
+            .filter(item =>
+                getFeatureSearchText(item, item.category).includes(
+                    normalizedQuery,
+                ),
+            )
             .slice(0, MAX_LOCAL_RESULTS);
     }, [flattenedFeatures, normalizedQuery]);
 
@@ -287,11 +277,8 @@ const SearchScreen = ({ navigation }) => {
             funcName: 'searchBar_web',
             searchBarDetail: capturedQuery,
         });
-        const encodedQuery = encodeURIComponent(
-            `site:umall.one OR site:um.edu.mo ${capturedQuery}`,
-        );
         openLink({
-            URL: `https://www.google.com/search?q=${encodedQuery}`,
+            URL: getUmWebSearchUrl(capturedQuery),
             mode: 'fullScreen',
         });
     }, [query, saveHistory]);
@@ -494,7 +481,7 @@ const SearchScreen = ({ navigation }) => {
                                     {record.query}
                                 </Text>
                             </Pressable>
-                            <Pressable
+                            <ScalePressable
                                 onPress={() => handleRemoveHistory(record)}
                                 hitSlop={scale(6)}
                                 accessibilityRole="button"
@@ -505,18 +492,13 @@ const SearchScreen = ({ navigation }) => {
                                         query: record.query,
                                     },
                                 )}
-                                style={({ pressed }) => [
-                                    styles.historyChipRemove,
-                                    pressed && {
-                                        backgroundColor: tonal.primary30,
-                                    },
-                                ]}>
+                                style={styles.historyChipRemove}>
                                 <Ionicons
                                     name="close"
                                     size={scale(14)}
                                     color={black.third}
                                 />
-                            </Pressable>
+                            </ScalePressable>
                         </View>
                     ))}
                 </View>
@@ -529,16 +511,14 @@ const SearchScreen = ({ navigation }) => {
             {renderSectionHeader(t('推薦服務', { ns: 'home' }))}
             <View style={styles.chips}>
                 {recommendedFeatures.map(item => (
-                    <Pressable
+                    <ScalePressable
                         key={item.key_name}
                         onPress={() => handleRecommendedPress(item)}
                         accessibilityRole="button"
-                        style={({ pressed }) => [
+                        style={[
                             styles.chip,
                             {
-                                backgroundColor: pressed
-                                    ? tonal.primary30
-                                    : tonal.primary15,
+                                backgroundColor: tonal.primary15,
                             },
                         ]}>
                         <Ionicons
@@ -555,7 +535,7 @@ const SearchScreen = ({ navigation }) => {
                             ]}>
                             {item.fn_name}
                         </Text>
-                    </Pressable>
+                    </ScalePressable>
                 ))}
             </View>
         </View>
@@ -563,13 +543,10 @@ const SearchScreen = ({ navigation }) => {
 
     const renderResultRow = (item, index) => (
         <View key={item.key_name || item.fn_name}>
-            <Pressable
+            <ScalePressable
                 onPress={() => executeFeature(item, query)}
                 accessibilityRole="button"
-                style={({ pressed }) => [
-                    styles.resultRow,
-                    pressed && { backgroundColor: tonal.primary08 },
-                ]}>
+                style={styles.resultRow}>
                 <FeatureIcon item={item} />
                 <View style={styles.rowText}>
                     {renderHighlightedText(
@@ -594,7 +571,7 @@ const SearchScreen = ({ navigation }) => {
                     size={scale(18)}
                     color={black.third}
                 />
-            </Pressable>
+            </ScalePressable>
             {index < localResults.length - 1 ? (
                 <View
                     style={[
@@ -608,15 +585,13 @@ const SearchScreen = ({ navigation }) => {
 
     const renderResults = () => (
         <>
-            <Pressable
+            <ScalePressable
                 onPress={handleWebSearch}
                 accessibilityRole="button"
-                style={({ pressed }) => [
+                style={[
                     styles.webSearchButton,
                     {
-                        backgroundColor: pressed
-                            ? tonal.primary30
-                            : tonal.primary15,
+                        backgroundColor: tonal.primary15,
                     },
                 ]}>
                 <View
@@ -647,7 +622,7 @@ const SearchScreen = ({ navigation }) => {
                     size={scale(18)}
                     color={themeColor}
                 />
-            </Pressable>
+            </ScalePressable>
             {renderSectionHeader(t('相關服務', { ns: 'home' }))}
             <View style={[styles.card, { backgroundColor: white }, viewShadow]}>
                 {localResults.length > 0 ? (
@@ -731,7 +706,7 @@ const SearchScreen = ({ navigation }) => {
                         ]}
                     />
                     {query.length > 0 ? (
-                        <Pressable
+                        <ScalePressable
                             onPress={() => {
                                 trigger();
                                 setQuery('');
@@ -742,18 +717,13 @@ const SearchScreen = ({ navigation }) => {
                             accessibilityLabel={t('清除搜索內容', {
                                 ns: 'home',
                             })}
-                            style={({ pressed }) => [
-                                styles.clearInputButton,
-                                pressed && {
-                                    backgroundColor: tonal.primary15,
-                                },
-                            ]}>
+                            style={styles.clearInputButton}>
                             <Ionicons
                                 name="close-circle"
                                 size={scale(19)}
                                 color={black.third}
                             />
-                        </Pressable>
+                        </ScalePressable>
                     ) : null}
                 </View>
             </View>

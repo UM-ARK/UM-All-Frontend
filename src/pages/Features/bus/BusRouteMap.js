@@ -1,5 +1,5 @@
 import React, {useEffect, useMemo, useRef, useState} from 'react';
-import {Pressable, StyleSheet, useWindowDimensions, View} from 'react-native';
+import {StyleSheet, useWindowDimensions, View} from 'react-native';
 import Animated, {
     cancelAnimation,
     useAnimatedProps,
@@ -11,6 +11,7 @@ import MaterialCommunityIcons from '@react-native-vector-icons/material-design-i
 import Svg, {Circle, Path} from 'react-native-svg';
 
 import Text from '../../../components/AppText';
+import ScalePressable from '../../../components/ScalePressable';
 import {uiStyle} from '../../../components/ThemeContext';
 import TouchableScale from '../../../components/TouchableScale';
 import {trigger} from '../../../utils/trigger';
@@ -356,8 +357,12 @@ const BusRouteMap = ({
                         ? {left: 0, right: 0, top: percentY(stop.y + 13), alignItems: 'center'}
                         : {left: 0, right: percentX(MAP_WIDTH - stop.x + 13), top: percentY(stop.y), alignItems: 'flex-end'};
                 return (
-                    <View key={stop.code} style={[styles.stopLabelAnchor, anchorStyle]}>
-                        <Pressable
+                    <View key={stop.code} style={[
+                        styles.stopLabelAnchor,
+                        anchorStyle,
+                        stop.labelSide !== 'bottom' && {transform: [{translateY: -11 * mapScale}]},
+                    ]}>
+                        <ScalePressable
                             accessibilityRole="button"
                             accessibilityLabel={translate('選擇車站 {{station}}', {
                                 station: `${stop.code} ${translate(stop.name)}`,
@@ -367,7 +372,7 @@ const BusRouteMap = ({
                                 trigger();
                                 onSelectStop(stop.code);
                             }}
-                            style={({pressed}) => [
+                            style={[
                                 styles.stopLabel,
                                 {
                                     borderColor: labelBorder,
@@ -375,8 +380,6 @@ const BusRouteMap = ({
                                     maxWidth: stop.labelMaxWidth
                                         ? stop.labelMaxWidth * mapDisplayWidth / MAP_WIDTH
                                         : undefined,
-                                    opacity: pressed ? 0.7 : 1,
-                                    transform: stop.labelSide === 'bottom' ? [] : [{translateY: -11 * mapScale}],
                                 },
                             ]}>
                             {selected ? (
@@ -403,7 +406,7 @@ const BusRouteMap = ({
                                 {' ' + translate(stop.shortName)}
                                 {stop.terminalLabel ? ` (${translate(stop.terminalLabel)})` : ''}
                             </Text>
-                        </Pressable>
+                        </ScalePressable>
                     </View>
                 );
             })}

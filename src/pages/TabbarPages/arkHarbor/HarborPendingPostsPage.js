@@ -7,7 +7,6 @@ import React, {
 } from 'react';
 import {
     ActivityIndicator,
-    Pressable,
     StyleSheet,
     View,
 } from 'react-native';
@@ -21,6 +20,7 @@ import {scale, verticalScale} from 'react-native-size-matters';
 import {useTranslation} from 'react-i18next';
 
 import Text from '../../../components/AppText';
+import ScalePressable from '../../../components/ScalePressable';
 import {uiStyle, useTheme} from '../../../components/ThemeContext';
 import {useHarborSession} from '../../../contexts/HarborSessionContext';
 import {fetchHarborPendingPosts} from '../../../utils/harbor/harborApi';
@@ -116,16 +116,14 @@ const HarborPendingPostsPage = ({navigation}) => {
                 ? ''
                 : createdAt.toLocaleString();
             return (
-                <Pressable
+                <ScalePressable
                     accessibilityLabel={t('查看待審內容詳情')}
                     accessibilityRole="button"
                     onPress={() => openPendingPost(item)}
-                    style={({pressed}) => [
+                    style={[
                         styles.pendingCard,
                         {
-                            backgroundColor: pressed
-                                ? theme.tonal.primary08
-                                : theme.white,
+                            backgroundColor: theme.white,
                             borderColor: theme.themeColorUltraLight,
                         },
                     ]}>
@@ -181,7 +179,7 @@ const HarborPendingPostsPage = ({navigation}) => {
                             {timeLabel}
                         </Text>
                     ) : null}
-                </Pressable>
+                </ScalePressable>
             );
         },
         [openPendingPost, t, theme],

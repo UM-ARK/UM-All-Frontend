@@ -43,6 +43,7 @@ import {
     SettingSectionCard,
     SettingItem,
 } from './components/SettingPrimitives';
+import SettingReduceMotionItem from './components/SettingReduceMotionItem';
 
 /**
  * 設置頁面主元件
@@ -325,6 +326,7 @@ const SettingPage = ({ navigation }) => {
                             />
                         }
                     />
+                    <SettingReduceMotionItem />
                 </SettingSectionCard>
 
                 <SettingSection title={t('setting:Courses')} icon="school" />

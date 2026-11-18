@@ -15,6 +15,7 @@ import {scale, verticalScale} from 'react-native-size-matters';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 import Text from '../../../components/AppText';
+import ScalePressable from '../../../components/ScalePressable';
 import TextInput from '../../../components/AppTextInput';
 import {uiStyle, useTheme} from '../../../components/ThemeContext';
 import {ARK_HARBOR_AVATAR_TEMPLATE} from '../../../utils/pathMap';
@@ -84,7 +85,7 @@ const SharedTimetableMemberPickerSheet = ({
                             {t('共 {{count}} 人', {count: members.length})}
                         </Text>
                     </View>
-                    <Pressable
+                    <ScalePressable
                         accessibilityLabel={t('關閉')}
                         accessibilityRole="button"
                         hitSlop={scale(8)}
@@ -92,16 +93,13 @@ const SharedTimetableMemberPickerSheet = ({
                             trigger();
                             sheetRef.current?.hide();
                         }}
-                        style={({pressed}) => [
-                            styles.closeButton,
-                            pressed && {backgroundColor: theme.tonal.primary15},
-                        ]}>
+                        style={styles.closeButton}>
                         <Ionicons
                             color={theme.black.second}
                             name="close"
                             size={scale(22)}
                         />
-                    </Pressable>
+                    </ScalePressable>
                 </View>
                 <View
                     style={[
@@ -165,7 +163,7 @@ const SharedTimetableMemberPickerSheet = ({
                             ? ARK_HARBOR_AVATAR_TEMPLATE(item.avatarTemplate)
                             : null;
                         return (
-                            <Pressable
+                            <ScalePressable
                                 accessibilityRole="button"
                                 accessibilityState={{selected}}
                                 onPress={() => {
@@ -173,14 +171,12 @@ const SharedTimetableMemberPickerSheet = ({
                                     onSelect(item);
                                     sheetRef.current?.hide();
                                 }}
-                                style={({pressed}) => [
+                                style={[
                                     styles.memberRow,
                                     {
                                         backgroundColor: selected
                                             ? theme.tonal.primary15
-                                            : pressed
-                                              ? theme.tonal.primary08
-                                              : undefined,
+                                            : undefined,
                                         borderBottomColor: theme.themeColorUltraLight,
                                     },
                                 ]}>
@@ -228,7 +224,7 @@ const SharedTimetableMemberPickerSheet = ({
                                         size={scale(21)}
                                     />
                                 ) : null}
-                            </Pressable>
+                            </ScalePressable>
                         );
                     }}
                     showsVerticalScrollIndicator={false}

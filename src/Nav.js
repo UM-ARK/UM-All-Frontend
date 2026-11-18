@@ -63,6 +63,7 @@ import SettingPage from './pages/Features/SettingPage';
 import { useTheme } from './components/ThemeContext';
 import { useHarborSession } from './contexts/HarborSessionContext';
 import { usePushRegistration } from './contexts/PushRegistrationContext';
+import { useAppReducedMotion } from './contexts/ReducedMotionContext';
 import { APP_LINKING } from './utils/appLinks';
 import { logPushEvent } from './utils/pushLogger';
 import { getHarborPushNavigationTarget } from './utils/pushNavigation';
@@ -71,6 +72,7 @@ const Stack = createNativeStackNavigator();
 
 const Nav = () => {
     const { theme } = useTheme();
+    const reducedMotion = useAppReducedMotion();
     const { black } = theme;
     const { t } = useTranslation(['common', 'features', 'event', 'home', 'my']);
     const {
@@ -317,6 +319,7 @@ const Nav = () => {
                 initialRouteName="Tabbar"
                 screenOptions={{
                     freezeOnBlur: true,
+                    animation: reducedMotion ? 'fade' : undefined,
                     headerTransparent: isLiquidGlassSupported,
                     headerBlurEffect: isLiquidGlassSupported
                         ? null

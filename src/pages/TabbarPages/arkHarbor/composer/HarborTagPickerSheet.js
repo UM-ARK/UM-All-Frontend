@@ -22,6 +22,7 @@ import {scale, verticalScale} from 'react-native-size-matters';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 import Text from '../../../../components/AppText';
+import ScalePressable from '../../../../components/ScalePressable';
 import {uiStyle, useTheme} from '../../../../components/ThemeContext';
 import CustomBottomSheet from '../../../../utils/BottomSheet';
 import {trigger} from '../../../../utils/trigger';
@@ -116,19 +117,17 @@ const HarborTagPickerSheet = React.forwardRef(
                         ]}>
                         {t('選擇標籤')}
                     </Text>
-                    <Pressable
+                    <ScalePressable
                         accessibilityLabel={t('完成')}
                         accessibilityRole="button"
                         onPress={() => {
                             trigger();
                             sheetRef.current?.close();
                         }}
-                        style={({pressed}) => [
+                        style={[
                             styles.modalDoneButton,
                             {
-                                backgroundColor: pressed
-                                    ? theme.tonal.primary30
-                                    : theme.tonal.primary15,
+                                backgroundColor: theme.tonal.primary15,
                             },
                         ]}>
                         <Text
@@ -138,7 +137,7 @@ const HarborTagPickerSheet = React.forwardRef(
                             ]}>
                             {t('完成')}
                         </Text>
-                    </Pressable>
+                    </ScalePressable>
                 </View>
 
                 {tags.length > 0 ? (
@@ -235,7 +234,7 @@ const HarborTagPickerSheet = React.forwardRef(
                                         String(item.name),
                                 );
                                 return (
-                                    <Pressable
+                                    <ScalePressable
                                         key={String(item.name)}
                                         accessibilityRole="button"
                                         accessibilityState={{selected}}
@@ -243,16 +242,12 @@ const HarborTagPickerSheet = React.forwardRef(
                                             trigger();
                                             handleToggleTag(item);
                                         }}
-                                        style={({pressed}) => [
+                                        style={[
                                             styles.tagChip,
                                             {
                                                 backgroundColor: selected
-                                                    ? pressed
-                                                        ? theme.tonal.primary50
-                                                        : theme.tonal.primary30
-                                                    : pressed
-                                                        ? theme.tonal.primary15
-                                                        : theme.tonal.primary08,
+                                                    ? theme.tonal.primary30
+                                                    : theme.tonal.primary08,
                                                 borderColor: selected
                                                     ? theme.themeColor
                                                     : theme.themeColorUltraLight,
@@ -270,7 +265,7 @@ const HarborTagPickerSheet = React.forwardRef(
                                             ]}>
                                             {`#${item.name}`}
                                         </Text>
-                                    </Pressable>
+                                    </ScalePressable>
                                 );
                             })}
                         </View>

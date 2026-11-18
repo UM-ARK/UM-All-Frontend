@@ -1,9 +1,10 @@
 // 封裝：不用太多自定義的Webview，僅使用navigate跳轉
 // 網址可以參考pathMap.js
 import React, { Component } from 'react';
-import { View, TouchableOpacity, Linking, StyleSheet, Appearance } from 'react-native';
+import { View, Linking, StyleSheet, Appearance } from 'react-native';
 
 import Text from './AppText';
+import ScalePressable from './ScalePressable';
 import { themes, uiStyle } from './ThemeContext';
 import IntegratedWebView from './IntegratedWebView';
 import { ARK_WIKI } from '../utils/pathMap';
@@ -101,7 +102,7 @@ class WebViewer extends Component {
                 <Header
                     backgroundColor={bg_color_diy}
                     leftComponent={
-                        <TouchableOpacity
+                        <ScalePressable
                             onPress={() => {
                                 trigger();
                                 this.props.navigation.goBack();
@@ -111,7 +112,7 @@ class WebViewer extends Component {
                                 size={scale(25)}
                                 color={text_color}
                             />
-                        </TouchableOpacity>
+                        </ScalePressable>
                     }
                     centerComponent={{
                         text: title,
@@ -127,13 +128,13 @@ class WebViewer extends Component {
                         borderBottomWidth: 0,
                     }}
                     rightComponent={
-                        <TouchableOpacity onPress={this.tiggerModalBottom}>
+                        <ScalePressable onPress={this.tiggerModalBottom}>
                             <Feather
                                 name="more-horizontal"
                                 size={scale(25)}
                                 color={text_color}
                             />
-                        </TouchableOpacity>
+                        </ScalePressable>
                     }
                     statusBarProps={{
                         backgroundColor: 'transparent',
@@ -159,7 +160,7 @@ class WebViewer extends Component {
                                         justifyContent: 'center',
                                         alignItems: 'center',
                                     }}>
-                                    <TouchableOpacity
+                                    <ScalePressable
                                         style={{ ...s.iconContainer }}
                                         onPress={() => {
                                             trigger();
@@ -170,7 +171,7 @@ class WebViewer extends Component {
                                             size={scale(30)}
                                             color={COLOR_DIY.black.second}
                                         />
-                                    </TouchableOpacity>
+                                    </ScalePressable>
                                     <Text
                                         style={{
                                             ...uiStyle.defaultText,
@@ -188,7 +189,7 @@ class WebViewer extends Component {
                                     justifyContent: 'center',
                                     alignItems: 'center',
                                 }}>
-                                <TouchableOpacity
+                                <ScalePressable
                                     style={{ ...s.iconContainer }}
                                     onPress={this.triggerRefresh}>
                                     <Ionicons
@@ -196,7 +197,7 @@ class WebViewer extends Component {
                                         size={scale(30)}
                                         color={COLOR_DIY.black.second}
                                     />
-                                </TouchableOpacity>
+                                </ScalePressable>
                                 <Text
                                     style={{
                                         ...uiStyle.defaultText,

@@ -1,19 +1,21 @@
 import React from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import { scale, verticalScale } from 'react-native-size-matters';
 
 import Text from '../../../../components/AppText';
+import ScalePressable from '../../../../components/ScalePressable';
 import { uiStyle, useTheme } from '../../../../components/ThemeContext';
 import { trigger } from '../../../../utils/trigger';
+import { harborTopicRowInsets } from './HarborTopicCard';
 
-export const HarborTopicSkeleton = () => {
+export const HarborTopicSkeleton = ({ isRowLayout = false }) => {
     const { theme } = useTheme();
 
     return (
         <View
-            style={[
+            style={isRowLayout ? harborTopicRowInsets : [
                 styles.skeletonCard,
                 {
                     backgroundColor: theme.white,
@@ -41,6 +43,7 @@ export const HarborTopicSkeleton = () => {
                 style={[
                     styles.skeletonLine,
                     styles.skeletonTitleLine,
+                    isRowLayout && styles.skeletonRowLine,
                     { backgroundColor: theme.tonal.primary15 },
                 ]}
             />
@@ -48,6 +51,7 @@ export const HarborTopicSkeleton = () => {
                 style={[
                     styles.skeletonLine,
                     styles.skeletonBodyLine,
+                    isRowLayout && styles.skeletonRowLine,
                     { backgroundColor: theme.tonal.primary08 },
                 ]}
             />
@@ -55,6 +59,7 @@ export const HarborTopicSkeleton = () => {
                 style={[
                     styles.skeletonLine,
                     styles.skeletonFooterLine,
+                    isRowLayout && styles.skeletonRowLine,
                     { backgroundColor: theme.tonal.primary08 },
                 ]}
             />
@@ -98,7 +103,7 @@ export const HarborFullState = ({
                 </Text>
             ) : null}
             {actionLabel && onAction ? (
-                <Pressable
+                <ScalePressable
                     accessibilityRole="button"
                     accessibilityState={{ disabled: actionDisabled }}
                     disabled={actionDisabled}
@@ -106,14 +111,12 @@ export const HarborFullState = ({
                         trigger();
                         onAction();
                     }}
-                    style={({ pressed }) => [
+                    style={[
                         styles.stateButton,
                         {
                             backgroundColor: actionDisabled
                                 ? theme.tonal.primary30
-                                : pressed
-                                    ? theme.tonal.primary50
-                                    : theme.themeColor,
+                                : theme.themeColor,
                         },
                     ]}>
                     <Text
@@ -127,7 +130,7 @@ export const HarborFullState = ({
                         ]}>
                         {actionLabel}
                     </Text>
-                </Pressable>
+                </ScalePressable>
             ) : null}
         </View>
     );
@@ -160,7 +163,7 @@ export const HarborInlineRetry = ({
                 style={[styles.inlineRetryText, { color: theme.black.second }]}>
                 {message}
             </Text>
-            <Pressable
+            <ScalePressable
                 accessibilityRole="button"
                 accessibilityState={{ disabled }}
                 disabled={disabled}
@@ -169,14 +172,12 @@ export const HarborInlineRetry = ({
                     trigger();
                     onRetry();
                 }}
-                style={({ pressed }) => [
+                style={[
                     styles.inlineRetryButton,
                     {
-                        backgroundColor: pressed
-                            ? theme.tonal.primary30
-                            : disabled
-                                ? theme.tonal.primary08
-                                : theme.tonal.primary15,
+                        backgroundColor: disabled
+                            ? theme.tonal.primary08
+                            : theme.tonal.primary15,
                     },
                 ]}>
                 <Text
@@ -190,7 +191,7 @@ export const HarborInlineRetry = ({
                     ]}>
                     {actionLabel}
                 </Text>
-            </Pressable>
+            </ScalePressable>
         </View>
     );
 };
@@ -237,6 +238,9 @@ const styles = StyleSheet.create({
         width: '48%',
         height: verticalScale(7),
         marginTop: verticalScale(14),
+    },
+    skeletonRowLine: {
+        marginTop: verticalScale(6),
     },
     fullState: {
         minHeight: verticalScale(300),

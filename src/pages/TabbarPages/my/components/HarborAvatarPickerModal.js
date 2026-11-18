@@ -14,6 +14,7 @@ import {useTranslation} from 'react-i18next';
 import {scale, verticalScale} from 'react-native-size-matters';
 
 import Text from '../../../../components/AppText';
+import ScalePressable from '../../../../components/ScalePressable';
 import {uiStyle, useTheme} from '../../../../components/ThemeContext';
 import {trigger} from '../../../../utils/trigger';
 
@@ -81,24 +82,19 @@ const HarborAvatarPickerModal = ({
                             ]}>
                             {t('設定個人資料圖片')}
                         </Text>
-                        <Pressable
+                        <ScalePressable
                             accessibilityLabel={t('關閉')}
                             accessibilityRole="button"
                             disabled={isSubmitting}
                             hitSlop={scale(8)}
                             onPress={handleClose}
-                            style={({pressed}) => [
-                                styles.closeButton,
-                                pressed && {
-                                    backgroundColor: theme.tonal.primary15,
-                                },
-                            ]}>
+                            style={styles.closeButton}>
                             <Ionicons
                                 color={theme.black.second}
                                 name="close"
                                 size={scale(22)}
                             />
-                        </Pressable>
+                        </ScalePressable>
                     </View>
 
                     {isLoading ? (

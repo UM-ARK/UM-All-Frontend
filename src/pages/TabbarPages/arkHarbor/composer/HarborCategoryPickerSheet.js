@@ -6,7 +6,6 @@ import React, {
     useState,
 } from 'react';
 import {
-    Pressable,
     StyleSheet,
     View,
 } from 'react-native';
@@ -18,6 +17,7 @@ import MaterialCommunityIcons from "@react-native-vector-icons/material-design-i
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 import Text from '../../../../components/AppText';
+import ScalePressable from '../../../../components/ScalePressable';
 import {useTheme} from '../../../../components/ThemeContext';
 import CustomBottomSheet from '../../../../utils/BottomSheet';
 import {
@@ -32,6 +32,7 @@ const HarborCategoryPickerSheet = React.forwardRef(
         {
             categories,
             onSelect,
+            openOnMount = false,
             selectedCategoryId,
         },
         ref,
@@ -79,14 +80,14 @@ const HarborCategoryPickerSheet = React.forwardRef(
                 const selected =
                     Number(item.id) === Number(selectedCategoryId);
                 return (
-                    <Pressable
+                    <ScalePressable
                         accessibilityRole="button"
                         accessibilityState={{selected}}
                         onPress={() => {
                             trigger();
                             onSelect(item);
                         }}
-                        style={({pressed}) => [
+                        style={[
                             styles.optionRow,
                             item.depth > 0
                                 ? {
@@ -96,11 +97,9 @@ const HarborCategoryPickerSheet = React.forwardRef(
                                 }
                                 : null,
                             {
-                                backgroundColor: pressed
-                                    ? theme.tonal.primary15
-                                    : selected
-                                        ? theme.tonal.primary08
-                                        : theme.white,
+                                backgroundColor: selected
+                                    ? theme.tonal.primary08
+                                    : theme.white,
                                 borderBottomColor:
                                     theme.themeColorUltraLight,
                             },
@@ -128,7 +127,7 @@ const HarborCategoryPickerSheet = React.forwardRef(
                             {item.name}
                         </Text>
                         {item.hasChildren ? (
-                            <Pressable
+                            <ScalePressable
                                 accessibilityRole="button"
                                 accessibilityState={{
                                     expanded: item.isExpanded,
@@ -145,13 +144,7 @@ const HarborCategoryPickerSheet = React.forwardRef(
                                     trigger();
                                     handleToggleCategory(item);
                                 }}
-                                style={({pressed}) => [
-                                    styles.optionToggle,
-                                    pressed && {
-                                        backgroundColor:
-                                            theme.tonal.primary15,
-                                    },
-                                ]}>
+                                style={styles.optionToggle}>
                                 <MaterialCommunityIcons
                                     name={
                                         item.isExpanded
@@ -161,7 +154,7 @@ const HarborCategoryPickerSheet = React.forwardRef(
                                     size={scale(20)}
                                     color={theme.themeColor}
                                 />
-                            </Pressable>
+                            </ScalePressable>
                         ) : null}
                         {selected ? (
                             <MaterialCommunityIcons
@@ -170,7 +163,7 @@ const HarborCategoryPickerSheet = React.forwardRef(
                                 color={theme.themeColor}
                             />
                         ) : null}
-                    </Pressable>
+                    </ScalePressable>
                 );
             },
             [
@@ -188,6 +181,7 @@ const HarborCategoryPickerSheet = React.forwardRef(
                 // Stack 頁無 Tab Bar；bottomInset>0 會讓 sheet 懸空並露出下方表單
                 bottomInset={0}
                 enablePanDownToClose
+                index={openOnMount ? 3 : -1}
                 page="harborComposer">
                 <View
                     style={[
@@ -201,19 +195,17 @@ const HarborCategoryPickerSheet = React.forwardRef(
                         ]}>
                         {t('選擇分類')}
                     </Text>
-                    <Pressable
+                    <ScalePressable
                         accessibilityLabel={t('完成')}
                         accessibilityRole="button"
                         onPress={() => {
                             trigger();
                             sheetRef.current?.close();
                         }}
-                        style={({pressed}) => [
+                        style={[
                             styles.modalDoneButton,
                             {
-                                backgroundColor: pressed
-                                    ? theme.tonal.primary30
-                                    : theme.tonal.primary15,
+                                backgroundColor: theme.tonal.primary15,
                             },
                         ]}>
                         <Text
@@ -223,7 +215,7 @@ const HarborCategoryPickerSheet = React.forwardRef(
                             ]}>
                             {t('完成')}
                         </Text>
-                    </Pressable>
+                    </ScalePressable>
                 </View>
                 {categoryRows.length > 0 ? (
                     <BottomSheetFlatList

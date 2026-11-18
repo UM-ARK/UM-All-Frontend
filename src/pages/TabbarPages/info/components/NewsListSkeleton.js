@@ -3,58 +3,46 @@ import { StyleSheet, View } from 'react-native';
 
 import { useTheme } from '../../../../components/ThemeContext';
 import { scale, verticalScale } from 'react-native-size-matters';
+import { NewsRowSeparator, newsRowStyles } from './NewsCard';
 
-const DEFAULT_CARD_COUNT = 6;
-const CARD_IMAGE_SIZE = verticalScale(90);
+const DEFAULT_ROW_COUNT = 6;
 
-/** 單張新聞／活動卡骨架，佈局對齊 NewsCard */
-const NewsCardSkeleton = memo(function NewsCardSkeleton({
-    white,
+/** 單列新聞／活動骨架，佈局對齊 NewsCard */
+const NewsRowSkeleton = memo(function NewsRowSkeleton({
     tonal,
-    viewShadow,
     titleWidths,
 }) {
     return (
-        <View
-            style={[
-                styles.card,
-                {
-                    backgroundColor: white,
-                    ...viewShadow,
-                },
-            ]}>
-            <View style={styles.cardContent}>
-                <View style={styles.textColumn}>
-                    {titleWidths.map((width, index) => (
-                        <View
-                            key={`title-${index}`}
-                            style={[
-                                styles.titleLine,
-                                {
-                                    width,
-                                    marginTop: index === 0 ? 0 : verticalScale(6),
-                                    backgroundColor:
-                                        index === 0
-                                            ? tonal.primary15
-                                            : tonal.primary08,
-                                },
-                            ]}
-                        />
-                    ))}
+        <View style={newsRowStyles.row}>
+            <View style={newsRowStyles.textColumn}>
+                {titleWidths.map((width, index) => (
                     <View
+                        key={`title-${index}`}
                         style={[
-                            styles.dateLine,
-                            { backgroundColor: tonal.primary08 },
+                            styles.titleLine,
+                            {
+                                width,
+                                backgroundColor:
+                                    index === 0
+                                        ? tonal.primary15
+                                        : tonal.primary08,
+                            },
                         ]}
                     />
-                </View>
+                ))}
                 <View
                     style={[
-                        styles.image,
-                        { backgroundColor: tonal.primary15 },
+                        styles.dateLine,
+                        { backgroundColor: tonal.primary08 },
                     ]}
                 />
             </View>
+            <View
+                style={[
+                    newsRowStyles.thumbnail,
+                    { backgroundColor: tonal.primary15 },
+                ]}
+            />
         </View>
     );
 });
@@ -102,12 +90,12 @@ const TopNewsSkeleton = memo(function TopNewsSkeleton({ white, tonal, viewShadow
 
 /**
  * 澳大新聞／活動列表共用骨架
- * @param {number} [count=6] - 列表卡數量
+ * @param {number} [count=6] - 列表列數
  * @param {boolean} [showTopNews=false] - 是否顯示頭條大圖骨架（新聞頁）
  * @param {number} [contentTopInset=0] - 懸浮頁頭所需的頂部間距
  */
 const NewsListSkeleton = ({
-    count = DEFAULT_CARD_COUNT,
+    count = DEFAULT_ROW_COUNT,
     showTopNews = false,
     contentTopInset = 0,
 }) => {
@@ -136,15 +124,15 @@ const NewsListSkeleton = ({
                 />
             ) : null}
             {Array.from({ length: count }, (_, index) => (
-                <NewsCardSkeleton
-                    key={`news-skeleton-${index}`}
-                    white={white}
-                    tonal={tonal}
-                    viewShadow={viewShadow}
-                    titleWidths={
-                        titleWidthSets[index % titleWidthSets.length]
-                    }
-                />
+                <React.Fragment key={`news-skeleton-${index}`}>
+                    {index > 0 && <NewsRowSeparator />}
+                    <NewsRowSkeleton
+                        tonal={tonal}
+                        titleWidths={
+                            titleWidthSets[index % titleWidthSets.length]
+                        }
+                    />
+                </React.Fragment>
             ))}
         </View>
     );
@@ -156,40 +144,14 @@ const styles = StyleSheet.create({
         width: '100%',
         alignSelf: 'stretch',
     },
-    card: {
-        marginTop: verticalScale(6),
-        marginHorizontal: scale(8),
-        borderRadius: scale(16),
-        alignSelf: 'stretch',
-    },
-    cardContent: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: scale(12),
-        paddingVertical: verticalScale(10),
-    },
-    textColumn: {
-        flex: 1,
-        minWidth: 0,
-        alignSelf: 'stretch',
-        justifyContent: 'space-between',
-        marginRight: scale(12),
-    },
     titleLine: {
         height: verticalScale(14),
         borderRadius: scale(4),
     },
     dateLine: {
-        marginTop: scale(8),
         height: verticalScale(13),
         width: '28%',
         borderRadius: scale(4),
-    },
-    image: {
-        width: CARD_IMAGE_SIZE,
-        height: CARD_IMAGE_SIZE,
-        borderRadius: scale(12),
-        flexShrink: 0,
     },
     topNews: {
         borderRadius: scale(10),

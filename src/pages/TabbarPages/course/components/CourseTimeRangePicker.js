@@ -19,6 +19,7 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {t} from 'i18next';
 
 import Text from '../../../../components/AppText';
+import ScalePressable from '../../../../components/ScalePressable';
 import {useTheme, uiStyle} from '../../../../components/ThemeContext';
 import TouchableScale from '../../../../components/TouchableScale';
 import {trigger} from '../../../../utils/trigger';
@@ -557,19 +558,17 @@ const CourseTimeRangePicker = ({
                             justifyContent: 'space-between',
                             gap: scale(10),
                         }}>
-                        <Pressable
+                        <ScalePressable
                             accessibilityRole="button"
                             accessibilityLabel={t('取消', {ns: 'timetable'})}
                             onPress={handleCancel}
-                            style={({pressed}) => ({
+                            style={{
                                 flex: 1,
                                 alignItems: 'center',
                                 paddingVertical: verticalScale(12),
                                 borderRadius: scale(12),
-                                backgroundColor: pressed
-                                    ? tonal.primary30
-                                    : tonal.primary15,
-                            })}>
+                                backgroundColor: tonal.primary15,
+                            }}>
                             <Text
                                 style={{
                                     ...uiStyle.defaultText,
@@ -579,7 +578,7 @@ const CourseTimeRangePicker = ({
                                 }}>
                                 {t('取消', {ns: 'timetable'})}
                             </Text>
-                        </Pressable>
+                        </ScalePressable>
                         <Pressable
                             accessibilityRole="button"
                             accessibilityLabel={t('確認', {ns: 'timetable'})}

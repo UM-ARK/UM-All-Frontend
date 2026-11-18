@@ -1,28 +1,44 @@
 import React from 'react';
 import {
     Alert,
-    Animated,
-    Pressable,
     RefreshControl,
     StyleSheet,
     View,
     useWindowDimensions,
 } from 'react-native';
 
+import { useFocusEffect } from '@react-navigation/native';
+import { Image } from 'expo-image';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
+import Reanimated, {
+    Easing,
+    FadeInDown,
+    ReduceMotion,
+    useAnimatedScrollHandler,
+    useAnimatedStyle,
+    useSharedValue,
+} from 'react-native-reanimated';
 import { scale, verticalScale } from 'react-native-size-matters';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import Text from '../../../components/AppText';
 import { uiStyle, useTheme } from '../../../components/ThemeContext';
 import { useHarborSession } from '../../../contexts/HarborSessionContext';
-import { usePushRegistration } from '../../../contexts/PushRegistrationContext';
 import { trigger } from '../../../utils/trigger';
 import TeamSchedulePreviewSection from '../../TeamSchedule/components/TeamSchedulePreviewSection';
 import HarborGuestState from './components/HarborGuestState';
 import HarborPageHeader from './components/HarborPageHeader';
 import HarborProfileOverview from './components/HarborProfileOverview';
 import HarborRestoringState from './components/HarborRestoringState';
+
+const PROFILE_BACKDROP_SOURCE = require('../../../static/img/ark_brand_waves.png');
+const PAGE_GUTTER = scale(16);
+const PROFILE_BACKDROP_ENTRANCE = FadeInDown
+    .duration(280)
+    .easing(Easing.bezier(0.23, 1, 0.32, 1))
+    .withInitialValues({ opacity: 0.7, translateY: verticalScale(10) })
+    .reduceMotion(ReduceMotion.System);
 
 const MyScreen = ({ navigation }) => {
     const { theme } = useTheme();
@@ -40,28 +56,52 @@ const MyScreen = ({ navigation }) => {
         refreshChatUnreadCount,
         refreshReviewCount,
     } = useHarborSession();
-    const {
-        dismissHarborPushPrompt,
-        harborDisplayStatus,
-        harborState,
-        shouldShowHarborPrompt,
-    } = usePushRegistration();
     const insets = useSafeAreaInsets();
     const { width } = useWindowDimensions();
     const contentWidth = Math.min(
-        width - insets.left - insets.right - scale(20),
+        width - insets.left - insets.right - PAGE_GUTTER * 2,
         scale(680),
     );
     const contentTopInset = insets.top + verticalScale(8);
-    const [isRefreshing, setIsRefreshing] = React.useState(false);
-    const teamSchedulePreviewRef = React.useRef(null);
-    // 暫時關閉下滑頂部頭像動畫
-    // const scrollY = React.useRef(new Animated.Value(0)).current;
+    const profileBackdropHeight = contentTopInset + verticalScale(92);
     const isSignedIn = status === 'signedIn' && !!user;
-    const isHarborPushSetupIncomplete =
-        harborState.desiredEnabled &&
-        harborDisplayStatus !== 'enabled' &&
-        harborDisplayStatus !== 'silent';
+    const backgroundColor = theme.isLight
+        ? (isSignedIn ? theme.bg_color : theme.white)
+        : theme.harbor_bg_color;
+    // 漸變只改變頁面底色的透明度，避免混入黑色。
+    const fadeStartColor = backgroundColor.length === 4
+        ? `${backgroundColor}0`
+        : `${backgroundColor}00`;
+    const [isRefreshing, setIsRefreshing] = React.useState(false);
+    const [hasEnteredProfile, setHasEnteredProfile] = React.useState(false);
+    const teamSchedulePreviewRef = React.useRef(null);
+    const scrollY = useSharedValue(0);
+
+    const handleScroll = useAnimatedScrollHandler(event => {
+        scrollY.set(event.contentOffset.y);
+    });
+    const profileArtStyle = useAnimatedStyle(() => {
+        const offset = scrollY.get();
+        const pullDistance = Math.max(0, -offset);
+        // 下拉時從頂部延伸海浪，底端和頭像區同步往下移。
+        return {
+            transform: [
+                { translateY: -Math.max(0, offset) },
+                { scaleY: 1 + pullDistance / profileBackdropHeight },
+            ],
+        };
+    });
+    const profileBackdropStyle = useAnimatedStyle(() => ({
+        transform: [{ translateY: -scrollY.get() }],
+    }));
+
+    useFocusEffect(
+        React.useCallback(() => {
+            if (isSignedIn) {
+                setHasEnteredProfile(true);
+            }
+        }, [isSignedIn]),
+    );
 
     const presentHarborError = React.useCallback(
         sessionError => {
@@ -103,11 +143,6 @@ const MyScreen = ({ navigation }) => {
         navigation.navigate('ForumTabbar');
     };
 
-    const openHarborPushSettings = () => {
-        trigger();
-        navigation.navigate('HarborAccountSettings');
-    };
-
     const handleRefresh = async () => {
         trigger();
         setIsRefreshing(true);
@@ -139,16 +174,6 @@ const MyScreen = ({ navigation }) => {
         }
     };
 
-    // 暫時關閉下滑頂部頭像動畫
-    // const handleScroll = React.useMemo(
-    //     () =>
-    //         Animated.event(
-    //             [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-    //             { useNativeDriver: false },
-    //         ),
-    //     [scrollY],
-    // );
-
     const harborError = error ? (
         <View
             style={[
@@ -176,12 +201,49 @@ const MyScreen = ({ navigation }) => {
     ) : null;
 
     return (
-        <View style={[styles.container, { backgroundColor: theme.bg_color }]}>
-            <Animated.ScrollView
+        <View style={[styles.container, { backgroundColor }]}>
+            {isSignedIn && hasEnteredProfile ? (
+                <Reanimated.View
+                    pointerEvents="none"
+                    style={[
+                        styles.profileBackdrop,
+                        styles.profileBackdropArtClip,
+                        { height: profileBackdropHeight },
+                        profileArtStyle,
+                    ]}>
+                    <Reanimated.View
+                        entering={PROFILE_BACKDROP_ENTRANCE}
+                        style={styles.profileBackdropArt}>
+                        <Image
+                            source={PROFILE_BACKDROP_SOURCE}
+                            blurRadius={16}
+                            style={[
+                                StyleSheet.absoluteFill,
+                                { opacity: theme.isLight ? 0.36 : 0.24 },
+                            ]}
+                        />
+                    </Reanimated.View>
+                </Reanimated.View>
+            ) : null}
+            {isSignedIn ? (
+                <Reanimated.View
+                    pointerEvents="none"
+                    style={[
+                        styles.profileBackdrop,
+                        { height: profileBackdropHeight },
+                        profileBackdropStyle,
+                    ]}>
+                    <LinearGradient
+                        colors={[fadeStartColor, backgroundColor]}
+                        style={StyleSheet.absoluteFill}
+                    />
+                </Reanimated.View>
+            ) : null}
+            <Reanimated.ScrollView
                 contentInsetAdjustmentBehavior="never"
                 showsVerticalScrollIndicator={false}
-                // onScroll={handleScroll}
-                // scrollEventThrottle={16}
+                onScroll={handleScroll}
+                scrollEventThrottle={16}
                 contentContainerStyle={[
                     styles.scrollContent,
                     {
@@ -204,138 +266,31 @@ const MyScreen = ({ navigation }) => {
                     <HarborPageHeader
                         compact={isSignedIn}
                         // user={isSignedIn ? user : undefined}
-                        // scrollY={scrollY}
                         onSettingsPress={() =>
                             navigation.navigate('SettingPage')
                         }
                     />
                     {harborError}
                     {isSignedIn ? (
-                        <>
-                            {shouldShowHarborPrompt ? (
-                                <View
-                                    style={[
-                                        styles.pushPrompt,
-                                        {
-                                            backgroundColor:
-                                                theme.tonal.primary15,
-                                            borderColor:
-                                                theme.tonal.primary30,
-                                        },
-                                    ]}>
-                                    <View
-                                        style={[
-                                            styles.pushPromptAccent,
-                                            {
-                                                backgroundColor:
-                                                    theme.themeColor,
-                                            },
-                                        ]}
-                                    />
-                                    <Pressable
-                                        accessibilityRole="button"
-                                        style={styles.pushPromptText}
-                                        onPress={openHarborPushSettings}>
-                                        <Text
-                                            style={[
-                                                styles.pushPromptTitle,
-                                                {color: theme.black.main},
-                                            ]}>
-                                            {t(
-                                                isHarborPushSetupIncomplete
-                                                    ? '完成 Harbor 推送設定'
-                                                    : '開啟 Harbor 推送通知',
-                                                {ns: 'my'},
-                                            )}
-                                        </Text>
-                                        <Text
-                                            style={[
-                                                styles.pushPromptDescription,
-                                                {color: theme.black.second},
-                                            ]}>
-                                            {t(
-                                                isHarborPushSetupIncomplete
-                                                    ? '推送設定尚未完成，請前往查看或重試。'
-                                                    : '收到新回覆時以中性內容提醒你。',
-                                                {ns: 'my'},
-                                            )}
-                                        </Text>
-                                    </Pressable>
-                                    <View style={styles.pushPromptActions}>
-                                        <Pressable
-                                            accessibilityRole="button"
-                                            style={({pressed}) => [
-                                                styles.pushPromptGo,
-                                                {
-                                                    backgroundColor:
-                                                        theme.tonal.primary30,
-                                                },
-                                                pressed && {
-                                                    backgroundColor:
-                                                        theme.tonal.primary50,
-                                                },
-                                            ]}
-                                            onPress={openHarborPushSettings}>
-                                            <Text
-                                                style={[
-                                                    styles.pushPromptGoText,
-                                                    {color: theme.themeColor},
-                                                ]}>
-                                                {t(
-                                                    isHarborPushSetupIncomplete
-                                                        ? '繼續'
-                                                        : '前往',
-                                                    {ns: 'my'},
-                                                )}
-                                            </Text>
-                                        </Pressable>
-                                        {!isHarborPushSetupIncomplete ? (
-                                            <Pressable
-                                                accessibilityRole="button"
-                                                hitSlop={8}
-                                                onPress={() => {
-                                                    trigger();
-                                                    dismissHarborPushPrompt().catch(
-                                                        () => {},
-                                                    );
-                                                }}>
-                                                <Text
-                                                    style={[
-                                                        styles.pushPromptDismiss,
-                                                        {color: theme.black.third},
-                                                    ]}>
-                                                    {t('暫不顯示', {ns: 'my'})}
-                                                </Text>
-                                            </Pressable>
-                                        ) : null}
-                                    </View>
-                                </View>
-                            ) : null}
-                            <HarborProfileOverview
-                                user={user}
-                                unreadCount={inboxUnreadCount}
-                                chatUnreadCount={chatUnreadCount}
-                                reviewCount={reviewCount}
-                                navigation={navigation}
-                                onChatPress={() =>
-                                    navigation.navigate('HarborChatList')
-                                }
-                                onSettingsPress={() =>
-                                    navigation.navigate('SettingPage')
-                                }
-                            />
-                            <TeamSchedulePreviewSection
-                                ref={teamSchedulePreviewRef}
-                                navigation={navigation}
-                            />
-                            <Text
-                                style={[
-                                    styles.footnote,
-                                    {color: theme.black.third},
-                                ]}>
-                                {t('更新可能會有延遲', {ns: 'my'})}
-                            </Text>
-                        </>
+                        <HarborProfileOverview
+                            user={user}
+                            unreadCount={inboxUnreadCount}
+                            chatUnreadCount={chatUnreadCount}
+                            reviewCount={reviewCount}
+                            navigation={navigation}
+                            onChatPress={() =>
+                                navigation.navigate('HarborChatList')
+                            }
+                            onSettingsPress={() =>
+                                navigation.navigate('SettingPage')
+                            }
+                            teamSchedule={
+                                <TeamSchedulePreviewSection
+                                    ref={teamSchedulePreviewRef}
+                                    navigation={navigation}
+                                />
+                            }
+                        />
                     ) : status === 'restoring' ? (
                         <HarborRestoringState />
                     ) : (
@@ -346,7 +301,7 @@ const MyScreen = ({ navigation }) => {
                         />
                     )}
                 </View>
-            </Animated.ScrollView>
+            </Reanimated.ScrollView>
         </View>
     );
 };
@@ -357,7 +312,23 @@ const styles = StyleSheet.create({
     },
     scrollContent: {
         alignItems: 'center',
-        paddingHorizontal: scale(10),
+    },
+    profileBackdrop: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        overflow: 'hidden',
+    },
+    profileBackdropArtClip: {
+        transformOrigin: 'center top',
+    },
+    profileBackdropArt: {
+        position: 'absolute',
+        top: -verticalScale(12),
+        bottom: -verticalScale(12),
+        left: 0,
+        right: 0,
     },
     harborError: {
         borderWidth: StyleSheet.hairlineWidth,
@@ -370,64 +341,6 @@ const styles = StyleSheet.create({
         ...uiStyle.defaultText,
         fontSize: scale(12),
         lineHeight: verticalScale(18),
-    },
-    pushPrompt: {
-        borderWidth: StyleSheet.hairlineWidth,
-        borderRadius: scale(14),
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: scale(10),
-        marginBottom: verticalScale(10),
-        paddingHorizontal: scale(14),
-        paddingVertical: verticalScale(11),
-    },
-    pushPromptText: {
-        flex: 1,
-    },
-    pushPromptAccent: {
-        alignSelf: 'stretch',
-        borderRadius: scale(2),
-        width: scale(4),
-    },
-    pushPromptTitle: {
-        ...uiStyle.defaultText,
-        fontSize: scale(12),
-        fontWeight: '680',
-    },
-    pushPromptDescription: {
-        ...uiStyle.defaultText,
-        fontSize: scale(10),
-        lineHeight: verticalScale(14),
-        marginTop: verticalScale(3),
-    },
-    pushPromptDismiss: {
-        ...uiStyle.defaultText,
-        fontSize: scale(10),
-    },
-    pushPromptActions: {
-        alignItems: 'center',
-        gap: verticalScale(6),
-    },
-    pushPromptGo: {
-        borderRadius: scale(12),
-        minWidth: scale(52),
-        paddingHorizontal: scale(12),
-        paddingVertical: verticalScale(7),
-    },
-    pushPromptGoText: {
-        ...uiStyle.defaultText,
-        fontSize: scale(10),
-        fontWeight: '680',
-        textAlign: 'center',
-    },
-    footnote: {
-        ...uiStyle.defaultText,
-        fontSize: scale(10),
-        lineHeight: verticalScale(13),
-        textAlign: 'center',
-        paddingHorizontal: scale(12),
-        paddingTop: verticalScale(8),
-        paddingBottom: verticalScale(2),
     },
 });
 

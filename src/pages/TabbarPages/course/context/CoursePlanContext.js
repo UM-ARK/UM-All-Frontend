@@ -164,16 +164,18 @@ export const CoursePlanProvider = ({ children }) => {
     /**
      * 套用新的選課清單並寫回儲存（對應舊 courseSim 的 handleCourseList）。
      *
-     * @param {Array<{'Course Code': string, Section: string}>} nextPlanList 新的選課清單
+     * @param {Array|Function} nextPlan 新的選課清單，或依最新清單產生下一份清單的函式
      */
     const commitPlan = useCallback(
-        nextPlanList => {
+        nextPlan => {
+            const nextPlanList = typeof nextPlan === 'function' ? nextPlan(planListRef.current) : nextPlan;
             const nextPlanSlots = buildPlanSlots(nextPlanList, courseTimeList);
 
             setLocalStorage(weekPlanStorageKey, buildWeekPlan(nextPlanSlots));
             planListRef.current = nextPlanList;
             setPlanList(nextPlanList);
             setLocalStorage(planStorageKey, nextPlanList);
+            return nextPlanSlots;
         },
         [courseTimeList, planStorageKey, weekPlanStorageKey],
     );
@@ -221,7 +223,7 @@ export const CoursePlanProvider = ({ children }) => {
      * @param {{'Course Code': string, Section: string}} courseRow 課節或選課列
      */
     const addCourse = useCallback(
-        courseRow => {
+        courseRow =>
             commitPlan([
                 ...lodash.filter(
                     planListRef.current,
@@ -231,8 +233,7 @@ export const CoursePlanProvider = ({ children }) => {
                     'Course Code': courseRow['Course Code'],
                     Section: courseRow.Section,
                 },
-            ]);
-        },
+            ]),
         [commitPlan],
     );
 
@@ -243,7 +244,7 @@ export const CoursePlanProvider = ({ children }) => {
      * @param {Object} sectionObj 以 Section 為 key 的物件（lodash.groupBy 結果）
      */
     const addAllSections = useCallback(
-        (courseCode, sectionObj) => {
+        (courseCode, sectionObj) =>
             commitPlan([
                 ...lodash.filter(
                     planListRef.current,
@@ -253,8 +254,7 @@ export const CoursePlanProvider = ({ children }) => {
                     'Course Code': courseCode,
                     Section: key,
                 })),
-            ]);
-        },
+            ]),
         [commitPlan],
     );
 

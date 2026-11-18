@@ -21,7 +21,7 @@ alwaysApply: false
 | **極淺底** | `tonal.primary08` | `08` | ~3% | 大面積輸入區域背景、文本框底色 |
 | **淺色底** | `tonal.primary15` | `15` | ~8% | 普通按鈕底色、標籤底色、輕量容器 |
 | **中等底** | `tonal.primary30` | `30` | ~19% | 重點按鈕底色、CTA 次級按鈕 |
-| **較深底** | `tonal.primary50` | `50` | ~31% | 高強調容器、pressed 狀態 |
+| **較深底** | `tonal.primary50` | `50` | ~31% | 高強調容器 |
 | **實色** | `themeColor` | — | 100% | 最高優先級 CTA 按鈕、選中態 |
 
 副主題色同理：`tonal.secondary08` / `tonal.secondary15` / `tonal.secondary30` / `tonal.secondary50`
@@ -51,7 +51,7 @@ backgroundColor: tonal.primary15
 // 中等底 - 重點按鈕
 backgroundColor: tonal.primary30
 
-// 較深底 - pressed 態
+// 較深底 - 高強調容器
 backgroundColor: tonal.primary50
 
 // 副主題色
@@ -124,19 +124,16 @@ const { themeColor, themeColorUltraLight, tonal } = theme;
 </Pressable>
 ```
 
-### 模式四：按壓態反饋
+### 模式四：按壓回饋
 
-適用：Pressable 的 pressed 樣式
+用 `ScalePressable` 提供微縮回彈，底色在按壓期間維持原樣。
 
 ```javascript
-<Pressable
-    style={({ pressed }) => ({
-        backgroundColor: pressed ? tonal.primary50 : tonal.primary15,
-        borderRadius: scale(8),
-    })}
->
+<ScalePressable
+    onPress={() => { trigger(); handlePress(); }}
+    style={{ backgroundColor: tonal.primary15, borderRadius: scale(8) }}>
     <Text style={{ color: themeColor }}>按鈕</Text>
-</Pressable>
+</ScalePressable>
 ```
 
 ## 暗色模式注意事項

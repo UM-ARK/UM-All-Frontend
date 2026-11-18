@@ -1,12 +1,12 @@
 import React, { useState, useRef, useCallback, useContext, useMemo, useEffect } from 'react';
 import {
     Platform,
-    Pressable,
     ScrollView,
     View,
 } from 'react-native';
 
 import Text from '../../../components/AppText';
+import ScalePressable from '../../../components/ScalePressable';
 import { useTheme, uiStyle } from '../../../components/ThemeContext';
 import { useHarborSession } from '../../../contexts/HarborSessionContext';
 import { logToFirebase } from '../../../utils/firebaseAnalytics';
@@ -24,6 +24,12 @@ import {
     recordFeatureUsage,
 } from '../../../utils/featureRecentUsage';
 import {
+    getFeatureSearchText,
+    getUmWebSearchUrl,
+    normalizeSearchText,
+} from '../../../utils/featureSearch';
+import { addSearchHistory } from '../../../utils/searchHistory';
+import {
     TOP_TAB_STRIP_MAX_WIDTH,
     WIDE_CONTENT_MAX_WIDTH,
     useWindowSizeClass,
@@ -31,13 +37,14 @@ import {
 import { balanceColumns } from '../../../utils/balanceColumns';
 import CustomBottomSheet from '../../../utils/BottomSheet';
 import { getFunctionArr } from './FeatureList';
-import SearchBar from '../info/home/components/SearchBar';
+import FeatureSearchBar from './FeatureSearchBar';
 import FeatureIcon from '../info/home/search/components/FeatureIcon';
 import WikiHome from '../arkwiki';
 
 import { FlatGrid } from 'react-native-super-grid';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import * as Clipboard from 'expo-clipboard';
+import { LinearGradient } from 'expo-linear-gradient';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import { moderateScale, scale, verticalScale } from 'react-native-size-matters';
 import Toast from 'react-native-simple-toast';
@@ -47,6 +54,8 @@ import { useFocusEffect } from '@react-navigation/native';
 import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SafeAreaView } from 'react-native-screens/experimental';
+import Animated, { cubicBezier } from 'react-native-reanimated';
+import { useAppReducedMotion } from '../../../contexts/ReducedMotionContext';
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -66,6 +75,48 @@ const CARD_COLUMN_COUNT = {
 /** 每行圖標上限：手機 5 個剛好填滿；寬屏放寬到 8 個，避免 5 個圖標被拉開成大間距 */
 const COMPACT_GRID_MAX_ITEMS_PER_ROW = 5;
 const WIDE_GRID_MAX_ITEMS_PER_ROW = 8;
+const SEARCH_HEADER_FADE_HEIGHT = verticalScale(12);
+const SEARCH_HIGHLIGHT_ANIMATION = {
+    animationName: { from: { opacity: 0 }, to: { opacity: 1 } },
+    animationDuration: 180,
+    animationTimingFunction: cubicBezier(0.23, 1, 0.32, 1),
+};
+
+const getGridItemsPerRow = (width, itemDimension, spacing, maxItemsPerRow) =>
+    Math.max(1, Math.min(maxItemsPerRow, Math.floor((width - spacing) / (itemDimension + spacing))));
+
+function FeatureSectionGrid({ data, matchedFeatures, ...gridProps }) {
+    const [width, setWidth] = useState(0);
+    const { itemDimension, spacing, maxItemsPerRow } = gridProps;
+    const visibleItems = useMemo(() => {
+        if (!matchedFeatures) {
+            return data;
+        }
+        if (!width) {
+            return [];
+        }
+
+        // 使用同一個實測寬度分行。保留命中行的整排圖示，避免命中項換欄。
+        const itemsPerRow = getGridItemsPerRow(width, itemDimension, spacing, maxItemsPerRow);
+        const items = [];
+        for (let index = 0; index < data.length; index += itemsPerRow) {
+            const row = data.slice(index, index + itemsPerRow);
+            if (row.some(item => matchedFeatures.has(item))) {
+                items.push(...row);
+            }
+        }
+        return items;
+    }, [data, matchedFeatures, width, itemDimension, spacing, maxItemsPerRow]);
+
+    return (
+        <FlatGrid
+            {...gridProps}
+            data={visibleItems}
+            staticDimension={width || undefined}
+            onLayout={event => setWidth(event.nativeEvent.layout.width)}
+        />
+    );
+}
 
 function FeatureListPage({ navigation }) {
     const { theme } = useTheme();
@@ -78,7 +129,11 @@ function FeatureListPage({ navigation }) {
     const fontSize = isTc ? verticalScale(10) : verticalScale(8);
     const [bottomSheetInfo, setBottomSheetInfo] = useState(null);
     const [usageRecords, setUsageRecords] = useState([]);
+    const [searchQuery, setSearchQuery] = useState('');
     const bottomSheetRef = useRef(null);
+    const searchInputRef = useRef(null);
+    const listRef = useRef(null);
+    const reducedMotion = useAppReducedMotion();
     const insets = useSafeAreaInsets();
     const tabBarHeight =
         useContext(BottomTabBarHeightContext) ?? insets.bottom + 49;
@@ -111,6 +166,54 @@ function FeatureListPage({ navigation }) {
         [featureByKey, usageRecords],
     );
 
+    const searchTextByFeature = useMemo(() => new Map(
+        functionArr.flatMap(({ title, fn }) =>
+            fn.map(item => [item, getFeatureSearchText(item, title)]),
+        ),
+    ), [functionArr]);
+    const normalizedQuery = normalizeSearchText(searchQuery);
+    const isSearching = !!normalizedQuery;
+    const matchedFeatures = useMemo(() => {
+        if (!normalizedQuery) {
+            return null;
+        }
+
+        const matches = new Set();
+        searchTextByFeature.forEach((text, item) => {
+            if (text.includes(normalizedQuery)) {
+                matches.add(item);
+            }
+        });
+        return matches;
+    }, [normalizedQuery, searchTextByFeature]);
+    const visibleSections = useMemo(
+        () => matchedFeatures
+            ? functionArr.filter(section => section.fn.some(item => matchedFeatures.has(item)))
+            : functionArr,
+        [functionArr, matchedFeatures],
+    );
+
+    const handleChangeSearchQuery = value => {
+        setSearchQuery(value);
+        listRef.current?.scrollTo({ y: 0, animated: false });
+    };
+
+    const handleWebSearch = () => {
+        const query = searchQuery.trim();
+        if (!query) {
+            return;
+        }
+
+        trigger();
+        searchInputRef.current?.blur();
+        logToFirebase('funcUse', {
+            funcName: 'searchBar_web',
+            searchBarDetail: query,
+        });
+        openLink({ URL: getUmWebSearchUrl(query), mode: 'fullScreen' });
+        addSearchHistory(query);
+    };
+
     const refreshUsage = useCallback(async () => {
         const nextUsage = await getFeatureRecentUsage();
         setUsageRecords(nextUsage);
@@ -123,12 +226,16 @@ function FeatureListPage({ navigation }) {
     useFocusEffect(
         useCallback(() => {
             refreshUsage();
+            return () => {
+                searchInputRef.current?.blur();
+            };
         }, [refreshUsage]),
     );
 
     const handleFeaturePress = useCallback(
         item => {
             trigger();
+            searchInputRef.current?.blur();
             logToFirebase('funcUse', {
                 funcName: item.fn_name,
             });
@@ -191,9 +298,9 @@ function FeatureListPage({ navigation }) {
         [harborStatus, harborUser, login, navigation, t],
     );
 
-    // 預留兩行標題高度（英文如 Canteen Queue 會換行），避免同列單／雙行把圖標頂歪
+    // 繁中標籤按單行高度排版，英文預留兩行讓每列圖標對齊
     const featureLabelLineHeight = fontSize * 1.25;
-    const featureLabelHeight = featureLabelLineHeight * 2;
+    const featureLabelHeight = isTc ? undefined : featureLabelLineHeight * 2;
     // FlatGrid 末列會再加 marginBottom: spacing，與 row paddingBottom 重疊，需抵銷
     const gridSpacing = scale(10);
     const gridBottomTrim = -gridSpacing;
@@ -211,20 +318,20 @@ function FeatureListPage({ navigation }) {
     // 只決定卡片落在哪一欄；實際每行圖標數仍由 FlatGrid 量測後自行決定
     const cardColumns = useMemo(() => {
         const columnWidth = Math.min(windowWidth, WIDE_CONTENT_MAX_WIDTH) / cardColumnCount - gridSpacing * 2;
-        const itemsPerRow = Math.max(1, Math.min(
-            gridMaxItemsPerRow,
-            Math.floor((columnWidth - gridSpacing) / (gridItemDimension + gridSpacing)),
-        ));
+        const itemsPerRow = getGridItemsPerRow(columnWidth, gridItemDimension, gridSpacing, gridMaxItemsPerRow);
         return balanceColumns(
-            functionArr,
+            visibleSections,
             cardColumnCount,
             section => Math.ceil(section.fn.length / itemsPerRow) + 0.5,
         );
-    }, [cardColumnCount, functionArr, gridItemDimension, gridMaxItemsPerRow, gridSpacing, windowWidth]);
+    }, [cardColumnCount, visibleSections, gridItemDimension, gridMaxItemsPerRow, gridSpacing, windowWidth]);
 
     const renderFeatureItem = useCallback(
-        item => (
-            <TouchableScale
+        item => {
+            const isMatch = matchedFeatures?.has(item);
+            const isMuted = isMatch === false;
+            return <TouchableScale
+                accessibilityRole="button"
                 style={{
                     width: '100%',
                     justifyContent: 'flex-start',
@@ -234,6 +341,7 @@ function FeatureListPage({ navigation }) {
                 onPress={() => handleFeaturePress(item)}
                 onLongPress={() => {
                     trigger();
+                    searchInputRef.current?.blur();
                     setBottomSheetInfo(item);
                     // 一開始觸發即彈最高檔（同 courseSim 展開搜索）
                     bottomSheetRef.current?.snapToIndex(
@@ -241,28 +349,51 @@ function FeatureListPage({ navigation }) {
                     );
                 }}
                 key={item.key_name || item.fn_name}>
-                <FeatureIcon item={item} size={scale(22)} />
+                {isMatch ? (
+                    <Animated.View
+                        pointerEvents="none"
+                        style={{
+                            ...(!reducedMotion && SEARCH_HIGHLIGHT_ANIMATION),
+                            position: 'absolute',
+                            top: -verticalScale(3),
+                            right: -scale(2),
+                            bottom: -verticalScale(2),
+                            left: -scale(2),
+                            borderRadius: scale(12),
+                            borderWidth: 1.5,
+                            borderColor: themeColor,
+                            backgroundColor: tonal.primary30,
+                        }}
+                    />
+                ) : null}
+                <FeatureIcon item={item} size={scale(22)} muted={isMuted} />
                 <Text
-                    numberOfLines={2}
+                    numberOfLines={isTc ? 1 : 2}
                     style={{
                         ...uiStyle.defaultText,
                         fontSize: fontSize,
                         lineHeight: featureLabelLineHeight,
                         height: featureLabelHeight,
-                        color: black.second,
+                        color: isMuted ? black.third : black.second,
                         textAlign: 'center',
                         marginTop: verticalScale(4),
                     }}>
                     {item.fn_name}
                 </Text>
-            </TouchableScale>
-        ),
+            </TouchableScale>;
+        },
         [
             black.second,
+            black.third,
             featureLabelHeight,
             featureLabelLineHeight,
             fontSize,
             handleFeaturePress,
+            isTc,
+            matchedFeatures,
+            reducedMotion,
+            themeColor,
+            tonal.primary30,
         ],
     );
 
@@ -300,7 +431,7 @@ function FeatureListPage({ navigation }) {
                     </Text>
                 </View>
 
-                <FlatGrid
+                <FeatureSectionGrid
                     maxItemsPerRow={gridMaxItemsPerRow}
                     itemDimension={gridItemDimension}
                     spacing={gridSpacing}
@@ -310,6 +441,7 @@ function FeatureListPage({ navigation }) {
                         justifyContent: 'flex-start',
                     }}
                     data={fn_list}
+                    matchedFeatures={matchedFeatures}
                     renderItem={({ item }) => renderFeatureItem(item)}
                     showsVerticalScrollIndicator={false}
                     scrollEnabled={false}
@@ -317,7 +449,7 @@ function FeatureListPage({ navigation }) {
             </View>
             );
         },
-        [white, bg_color, black.main, renderFeatureItem, gridSpacing, gridBottomTrim, gridItemDimension, gridMaxItemsPerRow],
+        [white, bg_color, black.main, renderFeatureItem, gridSpacing, gridBottomTrim, gridItemDimension, gridMaxItemsPerRow, matchedFeatures],
     );
 
     // BottomSheet內容渲染
@@ -363,8 +495,8 @@ function FeatureListPage({ navigation }) {
                     </Text>
                 ) : null}
                 {haveLink ? (
-                    <Pressable
-                        style={({ pressed }) => ({
+                    <ScalePressable
+                        style={{
                             flexDirection: 'row',
                             alignItems: 'center',
                             justifyContent: 'center',
@@ -373,10 +505,8 @@ function FeatureListPage({ navigation }) {
                             paddingVertical: verticalScale(11),
                             paddingHorizontal: scale(14),
                             borderRadius: scale(12),
-                            backgroundColor: pressed
-                                ? tonal.primary50
-                                : themeColor,
-                        })}
+                            backgroundColor: themeColor,
+                        }}
                         onPress={() => {
                             trigger();
                             Clipboard.setStringAsync(webview_param.url);
@@ -397,7 +527,7 @@ function FeatureListPage({ navigation }) {
                             }}>
                             {t('複製功能Link', { ns: 'features' })}
                         </Text>
-                    </Pressable>
+                    </ScalePressable>
                 ) : null}
             </View>
         );
@@ -409,11 +539,37 @@ function FeatureListPage({ navigation }) {
                 flex: 1,
                 backgroundColor: bg_color,
             }}>
+            <View style={{ zIndex: 1 }}>
+                <FeatureSearchBar
+                    inputRef={searchInputRef}
+                    query={searchQuery}
+                    onChangeQuery={handleChangeSearchQuery}
+                    onWebSearch={handleWebSearch}
+                    hasQuery={isSearching}
+                    matchCount={matchedFeatures?.size ?? 0}
+                />
+                <LinearGradient
+                    pointerEvents="none"
+                    colors={[bg_color, `${bg_color}00`]}
+                    style={{
+                        position: 'absolute',
+                        top: '100%',
+                        left: 0,
+                        right: 0,
+                        height: SEARCH_HEADER_FADE_HEIGHT,
+                    }}
+                />
+            </View>
             <ScrollView
+                ref={listRef}
                 showsVerticalScrollIndicator={true}
                 contentInsetAdjustmentBehavior="automatic"
+                automaticallyAdjustKeyboardInsets
                 keyboardShouldPersistTaps="handled"
-                contentContainerStyle={{ paddingBottom: listBottomPad }}>
+                contentContainerStyle={{
+                    paddingTop: SEARCH_HEADER_FADE_HEIGHT,
+                    paddingBottom: listBottomPad,
+                }}>
                 {/* 超寬屏內容居中封頂，分類卡再按尺寸等級分成 1／2／3 欄 */}
                 <View
                     style={{
@@ -421,17 +577,7 @@ function FeatureListPage({ navigation }) {
                         maxWidth: WIDE_CONTENT_MAX_WIDTH,
                         alignSelf: 'center',
                     }}>
-                <SearchBar
-                    navigation={navigation}
-                    entryFuncName="features_search_entry"
-                    // 與下方功能卡片 marginHorizontal: scale(10) 同寬
-                    style={{
-                        width: '100%',
-                        paddingHorizontal: scale(10),
-                    }}
-                />
-
-                {frequentFeatures.length > 0 ? (
+                {!isSearching && frequentFeatures.length > 0 ? (
                     <View
                         style={{
                             width: '100%',

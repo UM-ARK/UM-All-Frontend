@@ -1,13 +1,15 @@
 import React from 'react';
-import {Pressable, StyleSheet, View} from 'react-native';
+import {StyleSheet, View} from 'react-native';
 
 import {useTranslation} from 'react-i18next';
 import {scale, verticalScale} from 'react-native-size-matters';
 
 import Text from '../../../../components/AppText';
+import ScalePressable from '../../../../components/ScalePressable';
 import {uiStyle, useTheme} from '../../../../components/ThemeContext';
 import {trigger} from '../../../../utils/trigger';
 import HarborSectionHeader from './HarborSectionHeader';
+import {myCardStyles} from './myCardStyles';
 
 const HarborStatsCard = ({title, items}) => {
     const {theme} = useTheme();
@@ -22,22 +24,11 @@ const HarborStatsCard = ({title, items}) => {
             style={[
                 styles.container,
                 !title && styles.containerWithoutTitle,
-                {backgroundColor: theme.white},
+                {borderTopColor: theme.disabled},
             ]}>
             {title ? <HarborSectionHeader title={title} /> : null}
             <View style={styles.statsRow}>
-                {items.map((item, index) => {
-                    const divider = index < items.length - 1 ? (
-                        <View
-                            style={[
-                                styles.divider,
-                                {
-                                    backgroundColor:
-                                        theme.themeColorUltraLight,
-                                },
-                            ]}
-                        />
-                    ) : null;
+                {items.map(item => {
                     const content = (
                         <>
                             <Text
@@ -54,12 +45,11 @@ const HarborStatsCard = ({title, items}) => {
                                 ]}>
                                 {t(item.label)}
                             </Text>
-                            {divider}
                         </>
                     );
                     if (item.onPress) {
                         return (
-                            <Pressable
+                            <ScalePressable
                                 key={item.key}
                                 accessibilityRole="button"
                                 accessibilityLabel={`${item.value} ${t(
@@ -69,19 +59,16 @@ const HarborStatsCard = ({title, items}) => {
                                     trigger();
                                     item.onPress();
                                 }}
-                                style={({pressed}) => [
+                                style={[
                                     styles.item,
-                                    pressed && {
-                                        backgroundColor:
-                                            theme.tonal.primary08,
-                                    },
+                                    myCardStyles.column,
                                 ]}>
                                 {content}
-                            </Pressable>
+                            </ScalePressable>
                         );
                     }
                     return (
-                        <View key={item.key} style={styles.item}>
+                        <View key={item.key} style={[styles.item, myCardStyles.column]}>
                             {content}
                         </View>
                     );
@@ -93,28 +80,24 @@ const HarborStatsCard = ({title, items}) => {
 
 const styles = StyleSheet.create({
     container: {
-        borderRadius: scale(10),
-        paddingBottom: verticalScale(8),
+        borderTopWidth: StyleSheet.hairlineWidth,
     },
     containerWithoutTitle: {
-        paddingTop: verticalScale(14),
+        paddingTop: verticalScale(4),
     },
     statsRow: {
-        minHeight: verticalScale(64),
         flexDirection: 'row',
-        alignItems: 'center',
+        justifyContent: 'space-between',
     },
     item: {
-        flex: 1,
+        minHeight: 44,
         alignItems: 'center',
-        justifyContent: 'center',
         borderRadius: scale(8),
-        paddingHorizontal: scale(3),
         paddingVertical: verticalScale(4),
     },
     value: {
         ...uiStyle.defaultText,
-        fontSize: scale(20),
+        fontSize: scale(18),
         fontWeight: '760',
         textAlign: 'center',
     },
@@ -124,12 +107,6 @@ const styles = StyleSheet.create({
         lineHeight: verticalScale(14),
         textAlign: 'center',
         marginTop: verticalScale(4),
-    },
-    divider: {
-        position: 'absolute',
-        right: 0,
-        width: StyleSheet.hairlineWidth,
-        height: verticalScale(34),
     },
 });
 

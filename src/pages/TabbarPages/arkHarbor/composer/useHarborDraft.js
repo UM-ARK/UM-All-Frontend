@@ -122,6 +122,7 @@ export function useHarborDraft({
     const [isDraftLoading, setIsDraftLoading] = useState(
         sessionStatus === 'signedIn' && Boolean(draftKey),
     );
+    const [hasRestoredDraft, setHasRestoredDraft] = useState(false);
 
     const composedRaw = supportsImages
         ? buildHarborComposerRaw(raw, images)
@@ -426,6 +427,7 @@ export function useHarborDraft({
                             getRestoredTags(data.tags, availableTags),
                         );
                     }
+                    setHasRestoredDraft(true);
                 };
                 if (
                     isTopicDetailEdit &&
@@ -692,6 +694,7 @@ export function useHarborDraft({
             discardDraftAndExit,
             draftKey,
             hasDraftContent,
+            hasRestoredDraft,
             isDraftLoading,
         }),
         [
@@ -699,6 +702,7 @@ export function useHarborDraft({
             discardDraftAndExit,
             draftKey,
             hasDraftContent,
+            hasRestoredDraft,
             isDraftLoading,
         ],
     );

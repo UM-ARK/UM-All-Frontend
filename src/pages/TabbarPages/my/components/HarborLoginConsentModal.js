@@ -11,6 +11,7 @@ import Ionicons from "@react-native-vector-icons/ionicons";
 import {scale, verticalScale} from 'react-native-size-matters';
 
 import Text from '../../../../components/AppText';
+import ScalePressable from '../../../../components/ScalePressable';
 import {uiStyle, useTheme} from '../../../../components/ThemeContext';
 import {openLink} from '../../../../utils/browser';
 import {ARK_HARBOR, USER_AGREE} from '../../../../utils/pathMap';
@@ -98,16 +99,14 @@ const HarborLoginConsentModal = ({visible, onCancel, onConfirm}) => {
 
                     <View style={styles.linkList}>
                         {links.map(link => (
-                            <Pressable
+                            <ScalePressable
                                 key={link.key}
                                 accessibilityRole="link"
                                 accessibilityLabel={link.label}
-                                style={({pressed}) => [
+                                style={[
                                     styles.linkRow,
                                     {
-                                        backgroundColor: pressed
-                                            ? theme.tonal.primary15
-                                            : theme.tonal.primary08,
+                                        backgroundColor: theme.tonal.primary08,
                                         borderColor:
                                             theme.themeColorUltraLight,
                                     },
@@ -139,7 +138,7 @@ const HarborLoginConsentModal = ({visible, onCancel, onConfirm}) => {
                                     size={scale(16)}
                                     color={theme.black.third}
                                 />
-                            </Pressable>
+                            </ScalePressable>
                         ))}
                     </View>
 
@@ -177,14 +176,12 @@ const HarborLoginConsentModal = ({visible, onCancel, onConfirm}) => {
                     </Pressable>
 
                     <View style={styles.actions}>
-                        <Pressable
+                        <ScalePressable
                             accessibilityRole="button"
-                            style={({pressed}) => [
+                            style={[
                                 styles.secondaryButton,
                                 {
-                                    backgroundColor: pressed
-                                        ? theme.tonal.primary30
-                                        : theme.tonal.primary15,
+                                    backgroundColor: theme.tonal.primary15,
                                 },
                             ]}
                             onPress={handleCancel}>
@@ -195,7 +192,7 @@ const HarborLoginConsentModal = ({visible, onCancel, onConfirm}) => {
                                 ]}>
                                 {t('取消')}
                             </Text>
-                        </Pressable>
+                        </ScalePressable>
                         <Pressable
                             accessibilityRole="button"
                             accessibilityState={{disabled: !agreed}}

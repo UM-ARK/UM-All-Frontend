@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
     ActivityIndicator,
     Pressable,
@@ -13,19 +13,23 @@ import {
     KeyboardToolbar,
 } from 'react-native-keyboard-controller';
 import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
+import { useAnimatedRef, useSharedValue } from 'react-native-reanimated';
 import { scale, verticalScale } from 'react-native-size-matters';
 import { useTranslation } from 'react-i18next';
 
 import Text from '../../../../components/AppText';
+import ScalePressable from '../../../../components/ScalePressable';
 import TextInput from '../../../../components/AppTextInput';
 import { useTheme } from '../../../../components/ThemeContext';
 import HarborCategoryIcon from '../components/HarborCategoryIcon';
 import HarborCategoryPickerSheet from './HarborCategoryPickerSheet';
+import { HarborComposerImageDragOverlay } from './HarborComposerImageDrag';
 import HarborComposerImageGrid from './HarborComposerImageGrid';
 import HarborTagPickerSheet from './HarborTagPickerSheet';
 import { MAX_IMAGES_PER_POST } from './harborComposerImages';
 
 const HarborComposerForm = ({
+    autoOpenCategoryPicker,
     categorySheetRef,
     composer,
     imagesState,
@@ -45,6 +49,11 @@ const HarborComposerForm = ({
     const { theme } = useTheme();
     const { t } = useTranslation('harbor');
     const headerHeight = useHeaderHeight();
+    const dragState = useSharedValue(null);
+    const dragOverlayRef = useAnimatedRef();
+    const deleteTargetRef = useAnimatedRef();
+    const [draggedImage, setDraggedImage] = useState(null);
+    const isDraggingImage = draggedImage != null;
     const {
         categories,
         categoryId,
@@ -112,20 +121,19 @@ const HarborComposerForm = ({
                 }
                 keyboardDismissMode="interactive"
                 keyboardShouldPersistTaps="handled"
+                scrollEnabled={!isDraggingImage}
                 scrollIndicatorInsets={
                     isLiquidGlassSupported ? { top: headerHeight } : undefined
                 }>
                 {!isNewTopic ? (
-                    <Pressable
+                    <ScalePressable
                         accessibilityLabel={t('查看原帖')}
                         accessibilityRole="button"
                         onPress={onPressContext}
-                        style={({ pressed }) => [
+                        style={[
                             styles.contextCard,
                             {
-                                backgroundColor: pressed
-                                    ? theme.tonal.primary15
-                                    : theme.tonal.primary08,
+                                backgroundColor: theme.tonal.primary08,
                                 borderColor: theme.themeColorUltraLight,
                             },
                         ]}>
@@ -170,7 +178,7 @@ const HarborComposerForm = ({
                             size={scale(20)}
                             color={theme.black.third}
                         />
-                    </Pressable>
+                    </ScalePressable>
                 ) : null}
 
                 {isNewTopic && pendingPostCount > 0 ? (
@@ -289,12 +297,33 @@ const HarborComposerForm = ({
                             scrollEnabled={false}
                             style={[
                                 styles.bodyInput,
+                                isNewTopic && styles.newTopicBodyInput,
                                 {color: theme.black.main},
                             ]}
                             textAlignVertical="top"
                             value={raw}
                         />
                     </View>
+
+                    {isNewTopic && supportsImages ? (
+                        <HarborComposerImageGrid
+                            deleteTargetRef={deleteTargetRef}
+                            dragOverlayRef={dragOverlayRef}
+                            dragState={dragState}
+                            handleAddImages={
+                                hasReachedImageLimit ? undefined : handleAddImages
+                            }
+                            handleMoveImage={handleMoveImage}
+                            handleRemoveImage={handleRemoveImage}
+                            handleRetryImage={handleRetryImage}
+                            images={images}
+                            isDraggingImage={isDraggingImage}
+                            isPreparingImages={isPreparingImages}
+                            isSubmitting={isSubmitting}
+                            isUploadingImages={isUploadingImages}
+                            onDraggedImageChange={setDraggedImage}
+                        />
+                    ) : null}
 
                     <Pressable
                         accessibilityLabel={t('查看 Markdown 基本語法')}
@@ -330,15 +359,13 @@ const HarborComposerForm = ({
                                 ]}>
                                 {t('分類')}
                             </Text>
-                            <Pressable
+                            <ScalePressable
                                 accessibilityRole="button"
                                 onPress={onOpenCategorySheet}
-                                style={({ pressed }) => [
+                                style={[
                                     styles.selectorButton,
                                     {
-                                        backgroundColor: pressed
-                                            ? theme.tonal.primary08
-                                            : theme.white,
+                                        backgroundColor: theme.white,
                                         borderColor:
                                             theme.themeColorUltraLight,
                                     },
@@ -368,7 +395,7 @@ const HarborComposerForm = ({
                                     size={scale(20)}
                                     color={theme.black.third}
                                 />
-                            </Pressable>
+                            </ScalePressable>
                         </View>
 
                         <View style={styles.fieldGroup}>
@@ -394,15 +421,13 @@ const HarborComposerForm = ({
                                     </Text>
                                 ) : null}
                             </View>
-                            <Pressable
+                            <ScalePressable
                                 accessibilityRole="button"
                                 onPress={onOpenTagSheet}
-                                style={({ pressed }) => [
+                                style={[
                                     styles.selectorButton,
                                     {
-                                        backgroundColor: pressed
-                                            ? theme.tonal.primary08
-                                            : theme.white,
+                                        backgroundColor: theme.white,
                                         borderColor:
                                             theme.themeColorUltraLight,
                                     },
@@ -428,14 +453,14 @@ const HarborComposerForm = ({
                                     size={scale(20)}
                                     color={theme.black.third}
                                 />
-                            </Pressable>
+                            </ScalePressable>
                         </View>
                     </>
                 ) : null}
 
                 {supportsImages || isEdit ? (
                     <View style={styles.fieldGroup}>
-                        {supportsImages ? (
+                        {supportsImages && !isNewTopic ? (
                             <>
                                 <View style={styles.bodyLabelRow}>
                                     <Text
@@ -461,7 +486,7 @@ const HarborComposerForm = ({
                                     handleRetryImage={handleRetryImage}
                                     images={images}
                                 />
-                                <Pressable
+                                <ScalePressable
                                     accessibilityRole="button"
                                     accessibilityState={{
                                         disabled:
@@ -475,16 +500,14 @@ const HarborComposerForm = ({
                                         hasReachedImageLimit
                                     }
                                     onPress={handleAddImages}
-                                    style={({ pressed }) => [
+                                    style={[
                                         styles.addImageButton,
                                         {
-                                            backgroundColor: pressed
-                                                ? theme.tonal.primary15
-                                                : isPreparingImages ||
-                                                    isUploadingImages ||
-                                                    hasReachedImageLimit
-                                                    ? theme.disabled
-                                                    : theme.white,
+                                            backgroundColor: isPreparingImages ||
+                                                isUploadingImages ||
+                                                hasReachedImageLimit
+                                                ? theme.disabled
+                                                : theme.white,
                                             borderColor:
                                                 theme.themeColorUltraLight,
                                         },
@@ -507,20 +530,14 @@ const HarborComposerForm = ({
                                                 })
                                                 : t('新增圖片')}
                                     </Text>
-                                </Pressable>
+                                </ScalePressable>
                             </>
                         ) : null}
                         {isNewTopic ? (
-                            <Pressable
+                            <ScalePressable
                                 accessibilityRole="link"
                                 onPress={onOpenWebComposer}
-                                style={({ pressed }) => [
-                                    styles.webComposerButton,
-                                    pressed && {
-                                        backgroundColor:
-                                            theme.tonal.primary08,
-                                    },
-                                ]}>
+                                style={styles.webComposerButton}>
                                 <MaterialCommunityIcons
                                     name="open-in-new"
                                     size={scale(17)}
@@ -533,7 +550,7 @@ const HarborComposerForm = ({
                                     ]}>
                                     {t('需要進階排版？前往 Harbor 網頁版')}
                                 </Text>
-                            </Pressable>
+                            </ScalePressable>
                         ) : null}
                     </View>
                 ) : null}
@@ -614,6 +631,7 @@ const HarborComposerForm = ({
                 ref={categorySheetRef}
                 categories={categories}
                 onSelect={onSelectCategory}
+                openOnMount={autoOpenCategoryPicker}
                 selectedCategoryId={categoryId}
             />
 
@@ -624,6 +642,15 @@ const HarborComposerForm = ({
                 selectedTags={selectedTags}
                 tags={tags}
             />
+
+            {isNewTopic && supportsImages ? (
+                <HarborComposerImageDragOverlay
+                    dragState={dragState}
+                    image={draggedImage}
+                    overlayRef={dragOverlayRef}
+                    targetRef={deleteTargetRef}
+                />
+            ) : null}
         </View>
     );
 };
@@ -664,6 +691,9 @@ const styles = StyleSheet.create({
         lineHeight: scale(22),
         paddingHorizontal: 0,
         paddingVertical: verticalScale(4),
+    },
+    newTopicBodyInput: {
+        minHeight: verticalScale(82),
     },
     bodyLabelRow: {
         alignItems: 'center',

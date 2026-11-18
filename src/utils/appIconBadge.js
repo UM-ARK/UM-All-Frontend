@@ -43,7 +43,7 @@ function evaluateBadgePermission(settings) {
 }
 
 /**
- * 被動檢查主畫面 App 角標權限；首次通知權限只可由明確推送 CTA 請求。
+ * 被動檢查主畫面 App 角標權限，通知權限由推送註冊流程請求。
  * @returns {Promise<boolean>}
  */
 export async function ensureAppIconBadgePermission() {

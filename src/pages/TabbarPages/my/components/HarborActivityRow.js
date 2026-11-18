@@ -7,6 +7,7 @@ import Ionicons from "@react-native-vector-icons/ionicons";
 import { scale, verticalScale } from 'react-native-size-matters';
 
 import Text from '../../../../components/AppText';
+import ScalePressable from '../../../../components/ScalePressable';
 import { uiStyle, useTheme } from '../../../../components/ThemeContext';
 import { ARK_HARBOR_AVATAR } from '../../../../utils/pathMap';
 import { trigger } from '../../../../utils/trigger';
@@ -115,12 +116,9 @@ const HarborActivityRow = ({
         : t(meta.label);
 
     return (
-        <Pressable
+        <ScalePressable
             accessibilityRole="button"
-            style={({ pressed }) => [
-                styles.container,
-                pressed && { backgroundColor: theme.tonal.primary08 },
-            ]}
+            style={styles.container}
             onPress={() => {
                 trigger();
                 onPress(item);
@@ -191,7 +189,7 @@ const HarborActivityRow = ({
                     ]}
                 />
             ) : null}
-        </Pressable>
+        </ScalePressable>
     );
 };
 

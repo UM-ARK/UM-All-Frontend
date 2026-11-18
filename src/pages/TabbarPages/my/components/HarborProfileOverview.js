@@ -1,18 +1,19 @@
 import React from 'react';
-import {Pressable, StyleSheet, View} from 'react-native';
+import {StyleSheet, View} from 'react-native';
 
 import {useTranslation} from 'react-i18next';
+import Ionicons from '@react-native-vector-icons/ionicons';
 import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import {scale, verticalScale} from 'react-native-size-matters';
 
 import Text from '../../../../components/AppText';
+import ScalePressable from '../../../../components/ScalePressable';
 import {uiStyle, useTheme} from '../../../../components/ThemeContext';
 import {trigger} from '../../../../utils/trigger';
-import HarborBadgeIcon from './HarborBadgeIcon';
 import HarborProfileCard from './HarborProfileCard';
 import HarborQuickActions from './HarborQuickActions';
-import HarborSectionHeader from './HarborSectionHeader';
 import HarborStatsCard from './HarborStatsCard';
+import {myCardStyles} from './myCardStyles';
 
 const QUICK_ACTION_ROUTES = {
     messages: navigation => navigation.navigate('HarborInbox'),
@@ -27,6 +28,7 @@ const QUICK_ACTION_ROUTES = {
             title: t('贊過'),
         }),
     drafts: navigation => navigation.navigate('HarborDrafts'),
+    badges: navigation => navigation.navigate('HarborBadges'),
 };
 
 const HarborProfileOverview = ({
@@ -37,13 +39,10 @@ const HarborProfileOverview = ({
     navigation,
     onChatPress,
     onSettingsPress,
+    teamSchedule,
 }) => {
     const {theme} = useTheme();
-    const {t} = useTranslation(['my', 'harbor']);
-
-    const openBadges = React.useCallback(() => {
-        navigation.navigate('HarborBadges');
-    }, [navigation]);
+    const {t} = useTranslation(['my', 'harbor', 'common']);
 
     const contributionItems = React.useMemo(() => {
         return (user.contributions || [])
@@ -98,6 +97,12 @@ const HarborProfileOverview = ({
         [navigation, t],
     );
 
+    const sectionStyle = [
+        styles.section,
+        {backgroundColor: theme.white},
+        theme.viewShadow,
+    ];
+
     return (
         <View style={styles.container}>
             <HarborProfileCard
@@ -107,6 +112,15 @@ const HarborProfileOverview = ({
                         username: user.username,
                         mode: 'preview',
                     })
+                }
+                onEditProfilePress={
+                    user.profile?.canEdit
+                        ? () =>
+                            navigation.navigate('HarborProfile', {
+                                username: user.username,
+                                mode: 'edit',
+                            })
+                        : undefined
                 }
                 onChatPress={onChatPress}
                 chatUnreadCount={chatUnreadCount}
@@ -130,147 +144,111 @@ const HarborProfileOverview = ({
                 </View>
             ) : null}
 
-            <HarborQuickActions
-                unreadCount={unreadCount}
-                onSelect={handleQuickAction}
-            />
+            <View style={sectionStyle}>{teamSchedule}</View>
 
-            {user.isAdmin || user.isModerator ? (
-                <Pressable
-                    accessibilityRole="button"
-                    accessibilityLabel={t('審核', {ns: 'harbor'})}
-                    style={({pressed}) => [
-                        styles.reviewCard,
-                        {backgroundColor: theme.white},
-                        pressed && {backgroundColor: theme.tonal.primary08},
-                    ]}
-                    onPress={() => {
-                        trigger();
-                        navigation.navigate('HarborReviewQueue');
-                    }}>
-                    <View
-                        style={[
-                            styles.reviewIcon,
-                            {backgroundColor: theme.tonal.primary15},
-                        ]}>
-                        <MaterialCommunityIcons
-                            name="shield-check-outline"
-                            size={scale(22)}
-                            color={theme.themeColor}
-                        />
-                    </View>
-                    <View style={styles.reviewContent}>
-                        <Text
-                            style={[
-                                styles.reviewTitle,
-                                {color: theme.black.main},
-                            ]}>
-                            {t('審核', {ns: 'harbor'})}
-                        </Text>
-                        <Text
-                            numberOfLines={1}
-                            style={[
-                                styles.reviewDescription,
-                                {color: theme.black.third},
-                            ]}>
-                            {reviewCount > 0
-                                ? t('{{count}} 項內容等待處理', {
-                                    ns: 'harbor',
-                                    count: reviewCount,
-                                })
-                                : t('目前沒有待審核內容', {ns: 'harbor'})}
-                        </Text>
-                    </View>
-                    <View
-                        style={[
-                            styles.reviewBadge,
-                            {
-                                backgroundColor:
-                                    reviewCount > 0
-                                        ? theme.unread
-                                        : theme.tonal.secondary15,
-                            },
-                        ]}>
-                        <Text
-                            style={[
-                                styles.reviewBadgeText,
-                                {
-                                    color:
-                                        reviewCount > 0
-                                            ? theme.trueWhite
-                                            : theme.black.third,
-                                },
-                            ]}>
-                            {reviewCount > 99 ? '99+' : reviewCount || 0}
-                        </Text>
-                    </View>
-                    <MaterialCommunityIcons
-                        name="chevron-right"
-                        size={scale(20)}
-                        color={theme.black.third}
-                    />
-                </Pressable>
-            ) : null}
-
-            <HarborStatsCard items={contributionItems} />
-
-            <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={t('論壇成就')}
-                style={[
-                    styles.badgesCard,
-                    {backgroundColor: theme.white},
-                ]}
-                onPress={() => {
-                    trigger();
-                    openBadges();
-                }}>
-                <HarborSectionHeader
-                    title={t('論壇成就')}
-                    showAction
-                />
-                <View style={styles.badgesRow}>
-                    {user.badges?.length ? (
-                        user.badges.slice(0, 3).map(badge => (
-                            <View
-                                key={badge.id}
-                                style={styles.badgeItem}>
-                                <HarborBadgeIcon badge={badge} compact />
-                                <Text
-                                    numberOfLines={2}
-                                    style={[
-                                        styles.badgeName,
-                                        {color: theme.black.second},
-                                    ]}>
-                                    {badge.name}
-                                </Text>
-                            </View>
-                        ))
-                    ) : (
-                        <View style={styles.badgeEmpty}>
+            <View style={sectionStyle}>
+                <View style={myCardStyles.heading}>
+                    <View style={myCardStyles.iconColumn}>
+                        <View style={[myCardStyles.headingIcon, {backgroundColor: theme.tonal.primary15}]}>
                             <MaterialCommunityIcons
-                                name="medal-outline"
-                                size={scale(22)}
+                                name="forum-outline"
+                                size={scale(19)}
+                                color={theme.themeColor}
+                            />
+                        </View>
+                    </View>
+                    <Text
+                        accessibilityRole="header"
+                        style={[myCardStyles.headingTitle, {color: theme.black.main}]}>
+                        {t('論壇', {ns: 'common'})}
+                    </Text>
+                </View>
+                <HarborQuickActions
+                    unreadCount={unreadCount}
+                    onSelect={handleQuickAction}
+                />
+
+                {user.isAdmin || user.isModerator ? (
+                    <ScalePressable
+                        accessibilityRole="button"
+                        accessibilityLabel={t('審核', {ns: 'harbor'})}
+                        style={[
+                            styles.reviewRow,
+                            {borderTopColor: theme.disabled},
+                        ]}
+                        onPress={() => {
+                            trigger();
+                            navigation.navigate('HarborReviewQueue');
+                        }}>
+                        <View style={myCardStyles.iconColumn}>
+                            <MaterialCommunityIcons
+                                name="shield-check-outline"
+                                size={scale(19)}
                                 color={theme.black.third}
                             />
+                        </View>
+                        <View style={styles.reviewContent}>
                             <Text
                                 style={[
-                                    styles.compactEmptyText,
+                                    styles.reviewTitle,
+                                    {color: theme.black.main},
+                                ]}>
+                                {t('審核', {ns: 'harbor'})}
+                            </Text>
+                            <Text
+                                numberOfLines={1}
+                                style={[
+                                    styles.reviewDescription,
                                     {color: theme.black.third},
                                 ]}>
-                                {t('繼續參與社群即可解鎖徽章')}
+                                {reviewCount > 0
+                                    ? t('{{count}} 項內容等待處理', {
+                                        ns: 'harbor',
+                                        count: reviewCount,
+                                    })
+                                    : t('目前沒有待審核內容', {ns: 'harbor'})}
                             </Text>
                         </View>
-                    )}
-                </View>
-            </Pressable>
+                        {reviewCount > 0 ? (
+                            <View
+                                style={[
+                                    styles.reviewBadge,
+                                    {backgroundColor: theme.unreadForeground},
+                                ]}>
+                                <Text style={[styles.reviewBadgeText, {color: theme.white}]}>
+                                    {reviewCount > 99 ? '99+' : reviewCount}
+                                </Text>
+                            </View>
+                        ) : null}
+                        <View style={myCardStyles.iconColumn}>
+                            <Ionicons
+                                name="chevron-forward"
+                                size={scale(17)}
+                                color={theme.black.third}
+                            />
+                        </View>
+                    </ScalePressable>
+                ) : null}
+
+                <HarborStatsCard items={contributionItems} />
+                <Text style={[styles.footnote, {color: theme.black.third}]}>
+                    {t('更新可能會有延遲')}
+                </Text>
+            </View>
         </View>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
-        gap: verticalScale(4),
+        gap: verticalScale(16),
+    },
+    section: {
+        gap: verticalScale(8),
+        borderRadius: scale(16),
+        borderCurve: 'continuous',
+        paddingHorizontal: scale(12),
+        paddingVertical: verticalScale(8),
     },
     partialProfile: {
         borderRadius: scale(10),
@@ -284,25 +262,16 @@ const styles = StyleSheet.create({
         lineHeight: verticalScale(14),
         textAlign: 'center',
     },
-    reviewCard: {
-        minHeight: verticalScale(64),
-        borderRadius: scale(10),
+    reviewRow: {
+        minHeight: 44,
         flexDirection: 'row',
         alignItems: 'center',
-        paddingHorizontal: scale(14),
+        borderTopWidth: StyleSheet.hairlineWidth,
         paddingVertical: verticalScale(10),
-    },
-    reviewIcon: {
-        width: scale(38),
-        height: scale(38),
-        borderRadius: scale(12),
-        alignItems: 'center',
-        justifyContent: 'center',
     },
     reviewContent: {
         flex: 1,
         minWidth: 0,
-        marginLeft: scale(11),
     },
     reviewTitle: {
         ...uiStyle.defaultText,
@@ -322,47 +291,18 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         paddingHorizontal: scale(6),
-        marginLeft: scale(8),
     },
     reviewBadgeText: {
         ...uiStyle.defaultText,
         fontSize: scale(9),
         fontWeight: '800',
     },
-    badgesCard: {
-        borderRadius: scale(10),
-        paddingBottom: verticalScale(10),
-    },
-    badgesRow: {
-        flexDirection: 'row',
-        alignItems: 'flex-start',
-        paddingHorizontal: scale(12),
-        paddingTop: verticalScale(4),
-    },
-    badgeItem: {
-        flex: 1,
-        alignItems: 'center',
-        paddingHorizontal: scale(4),
-    },
-    badgeName: {
+    footnote: {
         ...uiStyle.defaultText,
         fontSize: scale(10),
-        fontWeight: '600',
         lineHeight: verticalScale(13),
         textAlign: 'center',
-    },
-    badgeEmpty: {
-        flex: 1,
-        minHeight: verticalScale(56),
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: verticalScale(6),
-        paddingVertical: verticalScale(8),
-    },
-    compactEmptyText: {
-        ...uiStyle.defaultText,
-        fontSize: scale(11),
-        textAlign: 'center',
+        paddingHorizontal: scale(12),
     },
 });
 

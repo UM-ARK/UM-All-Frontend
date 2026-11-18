@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import Toast from 'react-native-simple-toast';
 import { Image } from 'expo-image';
 import Text from './AppText';
+import ScalePressable from './ScalePressable';
 import { useTheme } from './ThemeContext';
 import { scale } from 'react-native-size-matters';
 import Ionicons from "@react-native-vector-icons/ionicons";
@@ -158,16 +159,14 @@ const ImageQrResultSheet = ({
                                 {result.data}
                             </Text>
                             <View style={styles.qrResultActions}>
-                                <Pressable
+                                <ScalePressable
                                     accessibilityRole="button"
                                     accessibilityLabel={t('複製內容')}
                                     onPress={() => handleCopy(result.data)}
-                                    style={({pressed}) => [
+                                    style={[
                                         styles.qrResultButton,
                                         {
-                                            backgroundColor: pressed
-                                                ? theme.tonal.primary30
-                                                : theme.tonal.primary15,
+                                            backgroundColor: theme.tonal.primary15,
                                         },
                                     ]}>
                                     <Ionicons
@@ -178,18 +177,16 @@ const ImageQrResultSheet = ({
                                     <Text style={[styles.qrResultButtonText, {color: theme.themeColor}]}>
                                         {t('複製內容')}
                                     </Text>
-                                </Pressable>
+                                </ScalePressable>
                                 {url && (
-                                    <Pressable
+                                    <ScalePressable
                                         accessibilityRole="link"
                                         accessibilityLabel={t('打開連結')}
                                         onPress={() => onOpenLink(url)}
-                                        style={({pressed}) => [
+                                        style={[
                                             styles.qrResultButton,
                                             {
-                                                backgroundColor: pressed
-                                                    ? theme.tonal.primary50
-                                                    : theme.themeColor,
+                                                backgroundColor: theme.themeColor,
                                             },
                                         ]}>
                                         <Ionicons
@@ -200,7 +197,7 @@ const ImageQrResultSheet = ({
                                         <Text style={[styles.qrResultButtonText, {color: theme.trueWhite}]}>
                                             {t('打開連結')}
                                         </Text>
-                                    </Pressable>
+                                    </ScalePressable>
                                 )}
                             </View>
                         </View>

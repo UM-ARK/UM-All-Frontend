@@ -26,6 +26,7 @@ import {useTranslation} from 'react-i18next';
 
 import ARKImageView from '../../../../components/ARKImageView';
 import Text from '../../../../components/AppText';
+import ScalePressable from '../../../../components/ScalePressable';
 import TextInput from '../../../../components/AppTextInput';
 import {useTheme} from '../../../../components/ThemeContext';
 import {useHarborSession} from '../../../../contexts/HarborSessionContext';
@@ -236,19 +237,17 @@ const ReviewQueueRow = ({item, onPress}) => {
     const typeLabel = getReviewableTypeLabel(type, t);
 
     return (
-        <Pressable
+        <ScalePressable
             accessibilityRole="button"
             accessibilityLabel={title || typeLabel}
             onPress={() => {
                 trigger();
                 onPress(item);
             }}
-            style={({pressed}) => [
+            style={[
                 styles.queueRow,
                 {
-                    backgroundColor: pressed
-                        ? theme.tonal.primary08
-                        : theme.white,
+                    backgroundColor: theme.white,
                     borderColor: theme.themeColorUltraLight,
                 },
             ]}>
@@ -306,7 +305,7 @@ const ReviewQueueRow = ({item, onPress}) => {
                 name="chevron-right"
                 size={scale(21)}
             />
-        </Pressable>
+        </ScalePressable>
     );
 };
 
@@ -493,15 +492,13 @@ const ReviewReasonModal = ({
                         value={reason}
                     />
                     <View style={styles.reasonModalActions}>
-                        <Pressable
+                        <ScalePressable
                             accessibilityRole="button"
                             onPress={onCancel}
-                            style={({pressed}) => [
+                            style={[
                                 styles.reasonCancelButton,
                                 {
-                                    backgroundColor: pressed
-                                        ? theme.tonal.primary15
-                                        : theme.tonal.primary08,
+                                    backgroundColor: theme.tonal.primary08,
                                 },
                             ]}>
                             <Text
@@ -511,7 +508,7 @@ const ReviewReasonModal = ({
                                 ]}>
                                 {t('取消')}
                             </Text>
-                        </Pressable>
+                        </ScalePressable>
                         <Pressable
                             accessibilityRole="button"
                             onPress={onSubmit}
@@ -1007,17 +1004,15 @@ const HarborReviewQueuePage = ({navigation, route}) => {
             const isAllowed = actionCanBeSubmitted(action);
             const isDestructive = isDestructiveAction(action);
             return (
-                <Pressable
+                <ScalePressable
                     accessibilityRole="button"
                     accessibilityState={{disabled: isSubmitting || activeActionId != null}}
                     disabled={isSubmitting || activeActionId != null}
                     onPress={() => handleActionPress(action)}
-                    style={({pressed}) => [
+                    style={[
                         styles.actionRow,
                         {
-                            backgroundColor: pressed
-                                ? theme.tonal.primary15
-                                : theme.white,
+                            backgroundColor: theme.white,
                             borderColor: isDestructive
                                 ? theme.tonal.unread30
                                 : theme.themeColorUltraLight,
@@ -1055,7 +1050,7 @@ const HarborReviewQueuePage = ({navigation, route}) => {
                             size={scale(20)}
                         />
                     )}
-                </Pressable>
+                </ScalePressable>
             );
         },
         [activeActionId, handleActionPress, t, theme],

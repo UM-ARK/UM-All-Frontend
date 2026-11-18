@@ -168,6 +168,8 @@ const HarborReactionControl = ({
     disabled,
     hitSlop,
     onPressDisabled,
+    onPressIn,
+    onPressOut,
     onSelectReaction,
     pending,
     reactions,
@@ -289,7 +291,9 @@ const HarborReactionControl = ({
                 onPressIn={event => {
                     stopPressPropagation(event);
                     longPressTriggeredRef.current = false;
+                    onPressIn?.(event);
                 }}
+                onPressOut={onPressOut}
                 onLongPress={allowPicker ? handleLongPress : undefined}
                 style={style}>
                 {children}

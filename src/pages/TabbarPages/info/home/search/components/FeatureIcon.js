@@ -8,9 +8,10 @@ import MaterialCommunityIcons from "@react-native-vector-icons/material-design-i
 
 import {useTheme} from '../../../../../../components/ThemeContext';
 
-const FeatureIcon = ({item, size = scale(20)}) => {
+const FeatureIcon = ({item, size = scale(20), muted = false}) => {
     const {theme} = useTheme();
-    const {themeColor, tonal} = theme;
+    const {bg_color, black, themeColor, tonal} = theme;
+    const iconColor = muted ? black.third : themeColor;
 
     const renderIcon = () => {
         if (item.icon_type === 'ionicons') {
@@ -18,7 +19,7 @@ const FeatureIcon = ({item, size = scale(20)}) => {
                 <Ionicons
                     name={item.icon_name}
                     size={size}
-                    color={themeColor}
+                    color={iconColor}
                 />
             );
         }
@@ -28,7 +29,7 @@ const FeatureIcon = ({item, size = scale(20)}) => {
                 <MaterialCommunityIcons
                     name={item.icon_name}
                     size={size + scale(2)}
-                    color={themeColor}
+                    color={iconColor}
                 />
             );
         }
@@ -38,16 +39,17 @@ const FeatureIcon = ({item, size = scale(20)}) => {
                 <Image
                     source={item.icon_name}
                     style={[styles.image, {width: size, height: size}]}
+                    tintColor={muted ? iconColor : undefined}
                     contentFit="contain"
                 />
             );
         }
 
-        return <Ionicons name="apps-outline" size={size} color={themeColor} />;
+        return <Ionicons name="apps-outline" size={size} color={iconColor} />;
     };
 
     return (
-        <View style={[styles.container, {backgroundColor: tonal.primary15}]}>
+        <View style={[styles.container, {backgroundColor: muted ? bg_color : tonal.primary15}]}>
             {renderIcon()}
         </View>
     );

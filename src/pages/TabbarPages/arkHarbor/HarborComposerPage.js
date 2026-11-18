@@ -8,7 +8,6 @@ import {
     ActivityIndicator,
     Alert,
     Keyboard,
-    Pressable,
     StyleSheet,
     View,
 } from 'react-native';
@@ -20,6 +19,7 @@ import {scale, verticalScale} from 'react-native-size-matters';
 import {useTranslation} from 'react-i18next';
 
 import Text from '../../../components/AppText';
+import ScalePressable from '../../../components/ScalePressable';
 import {useTheme} from '../../../components/ThemeContext';
 import {openLink} from '../../../utils/browser';
 import {
@@ -151,6 +151,7 @@ const HarborComposerPage = ({route, navigation}) => {
         clearDraftAfterPublish,
         discardDraftAndExit,
         hasDraftContent,
+        hasRestoredDraft,
         isDraftLoading,
     } = useHarborDraft({
         categories,
@@ -575,15 +576,12 @@ const HarborComposerPage = ({route, navigation}) => {
                 ? () => (
                     <View style={styles.headerRightRow}>
                         {shouldShowDiscard ? (
-                            <Pressable
+                            <ScalePressable
                                 accessibilityLabel={t('捨棄這次修改')}
                                 accessibilityRole="button"
                                 hitSlop={scale(8)}
                                 onPress={handleDiscard}
-                                style={({pressed}) => [
-                                    styles.headerActionButton,
-                                    pressed && {opacity: 0.6},
-                                ]}>
+                                style={styles.headerActionButton}>
                                 <Text
                                     style={[
                                         styles.headerActionText,
@@ -591,9 +589,9 @@ const HarborComposerPage = ({route, navigation}) => {
                                     ]}>
                                     {t('捨棄')}
                                 </Text>
-                            </Pressable>
+                            </ScalePressable>
                         ) : null}
-                        <Pressable
+                        <ScalePressable
                             accessibilityLabel={t('發佈')}
                             accessibilityRole="button"
                             accessibilityState={{
@@ -602,13 +600,7 @@ const HarborComposerPage = ({route, navigation}) => {
                             disabled={isPublishDisabled}
                             hitSlop={scale(8)}
                             onPress={handleSubmit}
-                            style={({pressed}) => [
-                                styles.headerActionButton,
-                                pressed &&
-                                    !isPublishDisabled && {
-                                        opacity: 0.6,
-                                    },
-                            ]}>
+                            style={styles.headerActionButton}>
                             {isSubmitting ? (
                                 <ActivityIndicator
                                     size="small"
@@ -627,7 +619,7 @@ const HarborComposerPage = ({route, navigation}) => {
                                     {t('發佈')}
                                 </Text>
                             )}
-                        </Pressable>
+                        </ScalePressable>
                     </View>
                 )
                 : undefined,
@@ -758,15 +750,13 @@ const HarborComposerPage = ({route, navigation}) => {
                         {loadError}
                     </Text>
                 ) : null}
-                <Pressable
+                <ScalePressable
                     accessibilityRole="button"
                     onPress={handleLogin}
-                    style={({pressed}) => [
+                    style={[
                         styles.primaryButton,
                         {
-                            backgroundColor: pressed
-                                ? theme.themeColorLight
-                                : theme.themeColor,
+                            backgroundColor: theme.themeColor,
                         },
                     ]}>
                     <Text
@@ -776,7 +766,7 @@ const HarborComposerPage = ({route, navigation}) => {
                         ]}>
                         {t('登入 Harbor')}
                     </Text>
-                </Pressable>
+                </ScalePressable>
             </View>
         );
     }
@@ -852,19 +842,17 @@ const HarborComposerPage = ({route, navigation}) => {
                     ]}>
                     {loadError}
                 </Text>
-                <Pressable
+                <ScalePressable
                     accessibilityRole="button"
                     disabled={isRetryBlocked}
                     onPress={() => {
                         trigger();
                         loadComposerData();
                     }}
-                    style={({pressed}) => [
+                    style={[
                         styles.secondaryButton,
                         {
-                            backgroundColor: pressed
-                                ? theme.tonal.primary30
-                                : theme.tonal.primary15,
+                            backgroundColor: theme.tonal.primary15,
                             opacity: isRetryBlocked ? 0.5 : 1,
                         },
                     ]}>
@@ -875,7 +863,7 @@ const HarborComposerPage = ({route, navigation}) => {
                         ]}>
                         {t('重試')}
                     </Text>
-                </Pressable>
+                </ScalePressable>
             </View>
         );
     }
@@ -906,15 +894,13 @@ const HarborComposerPage = ({route, navigation}) => {
                     ]}>
                     {t('此帖子的圖片並非全部連續放在正文末尾，為避免改變圖片位置，App 不允許編輯。')}
                 </Text>
-                <Pressable
+                <ScalePressable
                     accessibilityRole="link"
                     onPress={handleOpenWebComposer}
-                    style={({pressed}) => [
+                    style={[
                         styles.secondaryButton,
                         {
-                            backgroundColor: pressed
-                                ? theme.tonal.primary30
-                                : theme.tonal.primary15,
+                            backgroundColor: theme.tonal.primary15,
                         },
                     ]}>
                     <Text
@@ -924,7 +910,7 @@ const HarborComposerPage = ({route, navigation}) => {
                         ]}>
                         {t('前往網頁版')}
                     </Text>
-                </Pressable>
+                </ScalePressable>
             </View>
         );
     }
@@ -966,6 +952,9 @@ const HarborComposerPage = ({route, navigation}) => {
 
     return (
         <HarborComposerForm
+            autoOpenCategoryPicker={
+                isNewTopic && !hasRestoredDraft && !route.params?.fromDraftBox
+            }
             categorySheetRef={categorySheetRef}
             composer={{
                 categories,

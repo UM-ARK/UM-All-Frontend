@@ -4,14 +4,14 @@ allowBuilds:
   protobufjs: false
   unrs-resolver: false
 minimumReleaseAgeExclude:
-  - '@expo/cli@57.0.19 || 57.0.22 || 58.1.13'
+  - '@expo/cli@57.0.19 || 57.0.22 || 58.1.13 || 58.1.21'
   - '@expo/inline-modules@0.1.7'
   - '@expo/local-build-cache-provider@57.0.8'
   - '@expo/log-box@57.0.4'
-  - '@expo/metro-config@57.0.11 || 58.0.15'
+  - '@expo/metro-config@57.0.11 || 58.0.15 || 58.0.23'
   - '@expo/prebuild-config@57.0.15'
-  - '@expo/router-server@57.0.8 || 58.0.15'
-  - '@expo/ui@57.0.14 || 57.0.16 || 58.0.21'
+  - '@expo/router-server@57.0.8 || 58.0.15 || 58.0.23'
+  - '@expo/ui@57.0.14 || 57.0.16 || 58.0.21 || 58.0.29'
   - '@react-navigation/bottom-tabs@7.18.18'
   - '@react-navigation/drawer@7.13.10'
   - '@react-navigation/elements@2.9.40'
@@ -19,14 +19,14 @@ minimumReleaseAgeExclude:
   - '@react-navigation/native-stack@7.18.10'
   - '@react-navigation/native@7.3.18'
   - axios@1.20.0
-  - babel-preset-expo@57.0.9 || 58.0.18
+  - babel-preset-expo@57.0.9 || 58.0.18 || 58.0.26
   - expo-asset@57.0.15 || 58.0.17
   - expo-build-properties@57.0.15 || 57.0.17 || 57.0.20
   - expo-constants@57.0.15
-  - expo-dev-client@57.0.16
-  - expo-dev-launcher@57.0.16
+  - expo-dev-client@57.0.16 || 58.0.21
+  - expo-dev-launcher@57.0.16 || 58.0.21
   - expo-dev-menu@57.0.16
-  - expo-file-system@57.0.6 || 58.0.10
+  - expo-file-system@57.0.6 || 58.0.10 || 58.0.14
   - expo-image-manipulator@57.0.14 || 57.0.16 || 58.0.15
   - expo-image-picker@57.0.14 || 57.0.16
   - expo-modules-autolinking@57.0.12
@@ -36,7 +36,7 @@ minimumReleaseAgeExclude:
   - expo-secure-store@57.0.2
   - expo-sharing@57.0.16 || 57.0.18
   - expo-system-ui@57.0.3
-  - expo@57.0.17 || 57.0.20 || 58.0.16
+  - expo@57.0.17 || 57.0.20 || 58.0.16 || 58.0.26
   - expo-blur@58.0.5
   - expo-camera@58.0.11
   - expo-font@58.0.9
@@ -45,3 +45,5 @@ minimumReleaseAgeExclude:
   - expo-modules-cli@0.3.1
   - '@react-native-firebase/analytics@27.0.0'
   - '@react-native-firebase/app@27.0.0'
+  - expo-web-browser@58.1.0
+  - jest-expo@58.0.15

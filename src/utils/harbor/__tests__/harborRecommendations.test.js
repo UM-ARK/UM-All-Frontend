@@ -31,7 +31,7 @@ describe('Harbor 推薦話題', () => {
         jest.restoreAllMocks();
     });
 
-    it('排除最新列表、已讀及不可推薦話題並保留熱門順序', () => {
+    it('排除最新列表、已讀及不可推薦話題並選出最熱門的一篇', () => {
         const latestItems = [topic(1), topic(2), topic(3)];
         const candidates = [
             topic(2),
@@ -47,36 +47,35 @@ describe('Harbor 推薦話題', () => {
             selectHarborRecommendations(candidates, latestItems).map(
                 item => item.id,
             ),
-        ).toEqual([6, 7]);
+        ).toEqual([6]);
     });
 
-    it('在第 3 及第 8 篇最新話題後插入推薦並移除後續重複項', () => {
+    it('在第 3 篇普通話題後只插入一篇推薦並移除後續重複項', () => {
         const latestItems = Array.from({length: 10}, (_, index) =>
             topic(index + 1),
         );
         const feed = composeHarborRecommendedFeed(latestItems, [
-            topic(20),
             topic(9),
+            topic(8),
         ]);
 
         expect(feed.map(item => item.id)).toEqual([
             1,
             2,
             3,
-            20,
+            9,
             4,
             5,
             6,
             7,
             8,
-            9,
             10,
         ]);
         expect(feed[3].isHarborRecommendation).toBe(true);
-        expect(feed[9].isHarborRecommendation).toBe(true);
+        expect(feed.filter(item => item.isHarborRecommendation)).toHaveLength(1);
     });
 
-    it('只有一篇候選時不建立空白的第二個推薦項', () => {
+    it('只有一篇候選時仍會插入推薦', () => {
         const latestItems = Array.from({length: 10}, (_, index) =>
             topic(index + 1),
         );

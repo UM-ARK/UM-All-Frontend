@@ -2,7 +2,7 @@
  * 本人共享與管理課表的明確確認 Sheet。
  */
 import React, {memo, useEffect, useMemo, useRef, useState} from 'react';
-import {ActivityIndicator, Alert, Pressable, StyleSheet, View} from 'react-native';
+import {ActivityIndicator, Alert, StyleSheet, View} from 'react-native';
 
 import {useTranslation} from 'react-i18next';
 import ActionSheet, {ScrollView} from 'react-native-actions-sheet';
@@ -10,6 +10,7 @@ import {scale, verticalScale} from 'react-native-size-matters';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 import Text from '../../../components/AppText';
+import ScalePressable from '../../../components/ScalePressable';
 import {uiStyle, useTheme} from '../../../components/ThemeContext';
 import {logToFirebase} from '../../../utils/firebaseAnalytics';
 import {trigger} from '../../../utils/trigger';
@@ -251,7 +252,7 @@ const SharedTimetableSheet = ({
                             {t('尚未建立模擬課表')}
                         </Text>
                     ) : null}
-                    <Pressable
+                    <ScalePressable
                         accessibilityRole="radio"
                         accessibilityState={{
                             selected: sharingLevel === 'time_only',
@@ -261,15 +262,13 @@ const SharedTimetableSheet = ({
                             trigger();
                             setSharingLevel('time_only');
                         }}
-                        style={({pressed}) => [
+                        style={[
                             styles.option,
                             {
                                 backgroundColor:
                                     sharingLevel === 'time_only'
                                         ? theme.tonal.primary15
-                                        : pressed
-                                          ? theme.tonal.primary08
-                                          : theme.white,
+                                        : theme.white,
                                 borderColor: theme.themeColorUltraLight,
                             },
                         ]}>
@@ -287,8 +286,8 @@ const SharedTimetableSheet = ({
                             ]}>
                             {t('組員只會看到上課與時間。')}
                         </Text>
-                    </Pressable>
-                    <Pressable
+                    </ScalePressable>
+                    <ScalePressable
                         accessibilityRole="radio"
                         accessibilityState={{
                             selected: sharingLevel === 'course_identity',
@@ -298,15 +297,13 @@ const SharedTimetableSheet = ({
                             trigger();
                             setSharingLevel('course_identity');
                         }}
-                        style={({pressed}) => [
+                        style={[
                             styles.option,
                             {
                                 backgroundColor:
                                     sharingLevel === 'course_identity'
                                         ? theme.tonal.primary15
-                                        : pressed
-                                          ? theme.tonal.primary08
-                                          : theme.white,
+                                        : theme.white,
                                 borderColor: theme.themeColorUltraLight,
                             },
                         ]}>
@@ -326,7 +323,7 @@ const SharedTimetableSheet = ({
                                 '組員會看到 Course Code、Section 與可還原的上課時間。',
                             )}
                         </Text>
-                    </Pressable>
+                    </ScalePressable>
                     {local?.hasPlan ? (
                         <Text
                             style={[
@@ -361,16 +358,14 @@ const SharedTimetableSheet = ({
                     ) : null}
                     <View style={styles.footerRow}>
                         {serverSnapshot ? (
-                            <Pressable
+                            <ScalePressable
                                 accessibilityRole="button"
                                 disabled={saving}
                                 onPress={handleStop}
-                                style={({pressed}) => [
+                                style={[
                                     styles.footerBtn,
                                     {
-                                        backgroundColor: pressed
-                                            ? theme.tonal.unread30
-                                            : theme.tonal.unread15,
+                                        backgroundColor: theme.tonal.unread15,
                                         opacity: saving ? 0.5 : 1,
                                     },
                                 ]}>
@@ -382,21 +377,19 @@ const SharedTimetableSheet = ({
                                     numberOfLines={1}>
                                     {t('停止共享')}
                                 </Text>
-                            </Pressable>
+                            </ScalePressable>
                         ) : null}
-                        <Pressable
+                        <ScalePressable
                             accessibilityRole="button"
                             disabled={saving}
                             onPress={() => {
                                 trigger();
                                 sheetRef.current?.hide();
                             }}
-                            style={({pressed}) => [
+                            style={[
                                 styles.footerBtn,
                                 {
-                                    backgroundColor: pressed
-                                        ? theme.tonal.primary15
-                                        : theme.white,
+                                    backgroundColor: theme.white,
                                     borderColor: theme.themeColorUltraLight,
                                     borderWidth: StyleSheet.hairlineWidth,
                                     opacity: saving ? 0.5 : 1,
@@ -410,22 +403,20 @@ const SharedTimetableSheet = ({
                                 numberOfLines={1}>
                                 {t('取消')}
                             </Text>
-                        </Pressable>
+                        </ScalePressable>
                         {eventStatus === 'active' ? (
-                            <Pressable
+                            <ScalePressable
                                 accessibilityRole="button"
                                 disabled={!canSave || saving}
                                 onPress={handleSave}
-                                style={({pressed}) => [
+                                style={[
                                     styles.footerBtn,
                                     styles.footerPrimary,
                                     {
                                         backgroundColor:
                                             !canSave || saving
                                                 ? theme.tonal.primary30
-                                                : pressed
-                                                  ? theme.tonal.primary50
-                                                  : theme.themeColor,
+                                                : theme.themeColor,
                                     },
                                 ]}>
                                 {saving ? (
@@ -444,7 +435,7 @@ const SharedTimetableSheet = ({
                                             : t('確定共享')}
                                     </Text>
                                 )}
-                            </Pressable>
+                            </ScalePressable>
                         ) : null}
                     </View>
                 </View>

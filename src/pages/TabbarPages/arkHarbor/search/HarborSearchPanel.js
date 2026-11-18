@@ -23,6 +23,7 @@ import { scale, verticalScale } from 'react-native-size-matters';
 import { useTranslation } from 'react-i18next';
 
 import Text from '../../../../components/AppText';
+import ScalePressable from '../../../../components/ScalePressable';
 import TextInput from '../../../../components/AppTextInput';
 import TouchableScale from '../../../../components/TouchableScale';
 import { uiStyle, useTheme } from '../../../../components/ThemeContext';
@@ -523,20 +524,14 @@ const HarborSearchPanel = forwardRef(
                             </Text>
                         ) : null}
                         {activeFilterCount > 0 ? (
-                            <Pressable
+                            <ScalePressable
                                 accessibilityRole="button"
                                 onPress={() => {
                                     trigger();
                                     collapseSearchFocus();
                                     resetFilters();
                                 }}
-                                style={({ pressed }) => [
-                                    styles.resetFiltersButton,
-                                    pressed && {
-                                        backgroundColor:
-                                            theme.tonal.primary15,
-                                    },
-                                ]}>
+                                style={styles.resetFiltersButton}>
                                 <Text
                                     style={[
                                         styles.resetFiltersText,
@@ -544,7 +539,7 @@ const HarborSearchPanel = forwardRef(
                                     ]}>
                                     {t('重設篩選')}
                                 </Text>
-                            </Pressable>
+                            </ScalePressable>
                         ) : null}
                     </View>
                 ) : null}

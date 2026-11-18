@@ -6,7 +6,6 @@ import React, {
     useState,
 } from 'react';
 import {
-    Pressable,
     RefreshControl,
     StyleSheet,
     View,
@@ -21,6 +20,7 @@ import { scale, verticalScale } from 'react-native-size-matters';
 import { useTranslation } from 'react-i18next';
 
 import Text from '../../../components/AppText';
+import ScalePressable from '../../../components/ScalePressable';
 import SegmentControl from '../../../components/SegmentControl';
 import { uiStyle, useTheme } from '../../../components/ThemeContext';
 import {
@@ -99,7 +99,7 @@ const CategoryRow = ({ item, onPress, onToggle, isPressAllowed }) => {
     const isSubcategory = item.depth > 0;
 
     return (
-        <Pressable
+        <ScalePressable
             accessibilityRole="button"
             onPress={() => {
                 if (isPressAllowed && !isPressAllowed()) {
@@ -108,14 +108,12 @@ const CategoryRow = ({ item, onPress, onToggle, isPressAllowed }) => {
                 trigger();
                 onPress(item);
             }}
-            style={({ pressed }) => [
+            style={[
                 styles.directoryRow,
                 {
-                    backgroundColor: pressed
-                        ? theme.tonal.primary15
-                        : isSubcategory
-                            ? theme.tonal.primary08
-                            : theme.white,
+                    backgroundColor: isSubcategory
+                        ? theme.tonal.primary08
+                        : theme.white,
                     borderColor: theme.themeColorUltraLight,
                 },
             ]}>
@@ -185,7 +183,7 @@ const CategoryRow = ({ item, onPress, onToggle, isPressAllowed }) => {
                 </Text>
             </View>
             {item.hasChildren ? (
-                <Pressable
+                <ScalePressable
                     accessibilityRole="button"
                     accessibilityState={{ expanded: item.isExpanded }}
                     accessibilityLabel={t(
@@ -203,12 +201,7 @@ const CategoryRow = ({ item, onPress, onToggle, isPressAllowed }) => {
                         trigger();
                         onToggle(item);
                     }}
-                    style={({ pressed }) => [
-                        styles.categoryToggle,
-                        pressed && {
-                            backgroundColor: theme.tonal.primary15,
-                        },
-                    ]}>
+                    style={styles.categoryToggle}>
                     <MaterialCommunityIcons
                         name={
                             item.isExpanded
@@ -218,14 +211,14 @@ const CategoryRow = ({ item, onPress, onToggle, isPressAllowed }) => {
                         size={scale(20)}
                         color={theme.themeColor}
                     />
-                </Pressable>
+                </ScalePressable>
             ) : null}
             <MaterialCommunityIcons
                 name="chevron-right"
                 size={scale(20)}
                 color={theme.black.third}
             />
-        </Pressable>
+        </ScalePressable>
     );
 };
 
@@ -234,7 +227,7 @@ const TagRow = ({ item, onPress, isPressAllowed }) => {
     const { t } = useTranslation('harbor');
 
     return (
-        <Pressable
+        <ScalePressable
             accessibilityRole="button"
             onPress={() => {
                 if (isPressAllowed && !isPressAllowed()) {
@@ -243,12 +236,10 @@ const TagRow = ({ item, onPress, isPressAllowed }) => {
                 trigger();
                 onPress(item);
             }}
-            style={({ pressed }) => [
+            style={[
                 styles.directoryRow,
                 {
-                    backgroundColor: pressed
-                        ? theme.tonal.primary08
-                        : theme.white,
+                    backgroundColor: theme.white,
                     borderColor: theme.themeColorUltraLight,
                 },
             ]}>
@@ -292,7 +283,7 @@ const TagRow = ({ item, onPress, isPressAllowed }) => {
                 size={scale(20)}
                 color={theme.black.third}
             />
-        </Pressable>
+        </ScalePressable>
     );
 };
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import {Pressable, StyleSheet, View} from 'react-native';
+import {StyleSheet, View} from 'react-native';
 
 import {Image} from 'expo-image';
 import {useTranslation} from 'react-i18next';
@@ -8,12 +8,8 @@ import MaterialCommunityIcons from "@react-native-vector-icons/material-design-i
 import {scale, verticalScale} from 'react-native-size-matters';
 
 import Text from '../../../../components/AppText';
+import ScalePressable from '../../../../components/ScalePressable';
 import {uiStyle, useTheme} from '../../../../components/ThemeContext';
-import TouchableScale from '../../../../components/TouchableScale';
-import {
-    GlassView,
-    isLiquidGlassSupported,
-} from '../../../../utils/glassEffect';
 import {trigger} from '../../../../utils/trigger';
 import {formatJoinedAt} from '../utils/harborUi';
 
@@ -22,6 +18,7 @@ const AVATAR_SOURCE = require('../../../../static/img/logo_round.png');
 const HarborProfileCard = ({
     user,
     onProfilePress,
+    onEditProfilePress,
     onChatPress,
     chatUnreadCount = 0,
     onSettingsPress,
@@ -29,134 +26,122 @@ const HarborProfileCard = ({
     const {theme} = useTheme();
     const {t, i18n} = useTranslation('my');
     const joinedAt = formatJoinedAt(user.joinedAt, i18n.language);
+    const onAvatarPress = onEditProfilePress || onProfilePress;
 
     return (
-        <View
-            style={[
-                styles.container,
-                {backgroundColor: theme.bg_color},
-            ]}>
-            <Pressable
+        <View style={styles.container}>
+            <ScalePressable
                 accessibilityRole="button"
-                accessibilityLabel={t('Harbor 個人資料')}
-                disabled={!onProfilePress}
-                style={({pressed}) => [
-                    styles.profilePressable,
-                    pressed && onProfilePress && styles.profilePressed,
-                ]}
+                accessibilityLabel={t(
+                    onEditProfilePress ? '編輯個人資料' : 'Harbor 個人資料',
+                )}
+                disabled={!onAvatarPress}
+                style={styles.avatarButton}
                 onPress={() => {
-                    if (!onProfilePress) {
-                        return;
-                    }
                     trigger();
-                    onProfilePress();
+                    onAvatarPress?.();
                 }}>
-                <View style={styles.avatarWrap}>
-                    <Image
-                        source={
-                            user.avatarUrl ? {uri: user.avatarUrl} : AVATAR_SOURCE
-                        }
-                        style={styles.avatar}
-                        contentFit="cover"
-                    />
+                <Image
+                    source={
+                        user.avatarUrl ? {uri: user.avatarUrl} : AVATAR_SOURCE
+                    }
+                    style={styles.avatar}
+                    contentFit="cover"
+                />
+                {onEditProfilePress ? (
                     <View
                         style={[
-                            styles.connectedDot,
+                            styles.avatarEditBadge,
                             {
-                                backgroundColor: theme.success,
-                                borderColor: theme.bg_color,
+                                backgroundColor: theme.themeColor,
+                                borderColor: theme.white,
                             },
                         ]}>
                         <Ionicons
-                            name="checkmark"
-                            size={scale(8)}
-                            color={theme.trueWhite}
+                            name="pencil"
+                            size={scale(11)}
+                            color={theme.white}
                         />
                     </View>
-                </View>
+                ) : null}
+            </ScalePressable>
 
-                <View style={styles.identity}>
-                    <View style={styles.nameRow}>
-                        <Text
-                            numberOfLines={1}
-                            style={[styles.name, {color: theme.black.main}]}>
-                            {user.displayName || user.username}
-                        </Text>
-                        <View
-                            style={[
-                                styles.connectedPill,
-                                {backgroundColor: theme.tonal.success15},
-                            ]}>
-                            <Ionicons
-                                name="checkmark-circle"
-                                size={scale(12)}
-                                color={theme.success}
-                            />
-                            <Text
-                                style={[
-                                    styles.connectedText,
-                                    {color: theme.success},
-                                ]}>
-                                {t('已連接')}
-                            </Text>
-                        </View>
-                    </View>
-                    <Text style={[styles.handle, {color: theme.black.third}]}>
-                        @{user.username}
+            <ScalePressable
+                accessibilityRole="button"
+                accessibilityLabel={t('Harbor 個人資料')}
+                disabled={!onProfilePress}
+                style={styles.identity}
+                onPress={() => {
+                    trigger();
+                    onProfilePress?.();
+                }}>
+                <View style={styles.nameRow}>
+                    <Text
+                        numberOfLines={1}
+                        style={[styles.name, {color: theme.black.main}]}>
+                        {user.displayName || user.username}
                     </Text>
-                    <View style={styles.metaRow}>
-                        <MaterialCommunityIcons
-                            name="forum-outline"
+                    {onProfilePress ? (
+                        <Ionicons
+                            name="chevron-forward"
                             size={scale(13)}
                             color={theme.themeColor}
                         />
-                        <Text style={[styles.role, {color: theme.black.second}]}>
-                            {t(user.role || 'Harbor 會員')}
-                        </Text>
-                        <View
-                            style={[
-                                styles.metaDivider,
-                                {backgroundColor: theme.themeColorUltraLight},
-                            ]}
+                    ) : null}
+                    <View
+                        style={[
+                            styles.connectedPill,
+                            {backgroundColor: theme.tonal.success15},
+                        ]}>
+                        <Ionicons
+                            name="checkmark-circle"
+                            size={scale(12)}
+                            color={theme.successForeground}
                         />
-                        <Text style={[styles.trust, {color: theme.black.third}]}>
-                            TL{user.trustLevel ?? 0}
+                        <Text
+                            style={[
+                                styles.connectedText,
+                                {color: theme.successForeground},
+                            ]}>
+                            {t('已連接')}
                         </Text>
                     </View>
-                    {joinedAt ? (
-                        <Text style={[styles.joinedAt, {color: theme.black.third}]}>
-                            {t('於 {{date}} 加入', {date: joinedAt})}
-                        </Text>
-                    ) : null}
                 </View>
-            </Pressable>
+                <Text style={[styles.handle, {color: theme.black.second}]}>
+                    @{user.username}
+                </Text>
+                <View style={styles.metaRow}>
+                    <MaterialCommunityIcons
+                        name="forum-outline"
+                        size={scale(13)}
+                        color={theme.themeColor}
+                    />
+                    <Text style={[styles.role, {color: theme.black.second}]}>
+                        {t(user.role || 'Harbor 會員')}
+                    </Text>
+                    <View
+                        style={[
+                            styles.metaDivider,
+                            {backgroundColor: theme.themeColorUltraLight},
+                        ]}
+                    />
+                    <Text style={[styles.trust, {color: theme.black.second}]}>
+                        TL{user.trustLevel ?? 0}
+                    </Text>
+                </View>
+                {joinedAt ? (
+                    <Text style={[styles.joinedAt, {color: theme.black.second}]}>
+                        {t('於 {{date}} 加入', {date: joinedAt})}
+                    </Text>
+                ) : null}
+            </ScalePressable>
 
             {onChatPress || onSettingsPress ? (
-                <GlassView
-                    isInteractive
-                    style={[
-                        styles.actions,
-                        {
-                            backgroundColor: isLiquidGlassSupported
-                                ? null
-                                : theme.white,
-                        },
-                        isLiquidGlassSupported
-                            ? null
-                            : {
-                                shadowColor: theme.black.main,
-                                shadowOffset: {width: 0, height: 2},
-                                shadowOpacity: 0.1,
-                                shadowRadius: 4,
-                                elevation: 3,
-                            },
-                    ]}>
+                <View style={styles.actions}>
                     {onChatPress ? (
-                        <TouchableScale
+                        <ScalePressable
                             accessibilityRole="button"
                             accessibilityLabel={t('Chat')}
-                            activeScale={0.92}
-                            hitSlop={scale(8)}
                             style={styles.actionButton}
                             onPress={() => {
                                 trigger();
@@ -171,12 +156,12 @@ const HarborProfileCard = ({
                                 <View
                                     style={[
                                         styles.chatUnreadBadge,
-                                        {backgroundColor: theme.unread},
+                                        {backgroundColor: theme.unreadForeground},
                                     ]}>
                                     <Text
                                         style={[
                                             styles.chatUnreadText,
-                                            {color: theme.trueWhite},
+                                            {color: theme.white},
                                         ]}>
                                         {chatUnreadCount > 99
                                             ? '99+'
@@ -184,14 +169,12 @@ const HarborProfileCard = ({
                                     </Text>
                                 </View>
                             ) : null}
-                        </TouchableScale>
+                        </ScalePressable>
                     ) : null}
                     {onSettingsPress ? (
-                        <TouchableScale
+                        <ScalePressable
                             accessibilityRole="button"
                             accessibilityLabel={t('設置')}
-                            activeScale={0.92}
-                            hitSlop={scale(8)}
                             style={styles.actionButton}
                             onPress={() => {
                                 trigger();
@@ -202,9 +185,9 @@ const HarborProfileCard = ({
                                 size={scale(18)}
                                 color={theme.themeColor}
                             />
-                        </TouchableScale>
+                        </ScalePressable>
                     ) : null}
-                </GlassView>
+                </View>
             ) : null}
         </View>
     );
@@ -214,31 +197,17 @@ const styles = StyleSheet.create({
     container: {
         flexDirection: 'row',
         alignItems: 'flex-start',
-        paddingHorizontal: scale(7),
+        gap: scale(10),
         paddingTop: verticalScale(4),
         paddingBottom: verticalScale(4),
-    },
-    profilePressable: {
-        flex: 1,
-        minWidth: 0,
-        flexDirection: 'row',
-        alignItems: 'flex-start',
-    },
-    profilePressed: {
-        opacity: 0.7,
     },
     actions: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginLeft: scale(6),
-        height: scale(34),
-        borderRadius: scale(17),
-        overflow: 'hidden',
-        paddingHorizontal: scale(2),
     },
     actionButton: {
-        width: scale(32),
-        height: scale(34),
+        width: 44,
+        minHeight: 44,
         alignItems: 'center',
         justifyContent: 'center',
     },
@@ -258,21 +227,22 @@ const styles = StyleSheet.create({
         fontSize: scale(6),
         fontWeight: '700',
     },
-    avatarWrap: {
-        marginRight: scale(13),
+    avatarButton: {
+        minWidth: 44,
+        minHeight: 44,
     },
     avatar: {
         width: scale(58),
         height: scale(58),
         borderRadius: scale(29),
     },
-    connectedDot: {
+    avatarEditBadge: {
         position: 'absolute',
         right: scale(-1),
         bottom: scale(-1),
-        width: scale(16),
-        height: scale(16),
-        borderRadius: scale(8),
+        width: scale(22),
+        height: scale(22),
+        borderRadius: scale(11),
         borderWidth: scale(2),
         alignItems: 'center',
         justifyContent: 'center',
@@ -284,7 +254,7 @@ const styles = StyleSheet.create({
     nameRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: scale(7),
+        gap: scale(5),
     },
     name: {
         ...uiStyle.defaultText,
@@ -302,7 +272,7 @@ const styles = StyleSheet.create({
     },
     connectedText: {
         ...uiStyle.defaultText,
-        fontSize: scale(9),
+        fontSize: scale(10),
         fontWeight: '750',
     },
     handle: {
@@ -334,7 +304,7 @@ const styles = StyleSheet.create({
     },
     joinedAt: {
         ...uiStyle.defaultText,
-        fontSize: scale(9),
+        fontSize: scale(10),
         marginTop: verticalScale(4),
     },
 });
