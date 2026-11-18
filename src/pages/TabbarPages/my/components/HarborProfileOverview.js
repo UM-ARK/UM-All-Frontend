@@ -36,6 +36,7 @@ const HarborProfileOverview = ({
     navigation,
     onChatPress,
     onSettingsPress,
+    children,
 }) => {
     const {theme} = useTheme();
     const {t} = useTranslation(['my', 'harbor']);
@@ -103,6 +104,15 @@ const HarborProfileOverview = ({
                         mode: 'preview',
                     })
                 }
+                onEditProfilePress={
+                    user.profile?.canEdit
+                        ? () =>
+                            navigation.navigate('HarborProfile', {
+                                username: user.username,
+                                mode: 'edit',
+                            })
+                        : undefined
+                }
                 onChatPress={onChatPress}
                 chatUnreadCount={chatUnreadCount}
                 onSettingsPress={onSettingsPress}
@@ -130,13 +140,14 @@ const HarborProfileOverview = ({
                 onSelect={handleQuickAction}
             />
 
+            {children}
+
             {user.isAdmin || user.isModerator ? (
                 <Pressable
                     accessibilityRole="button"
                     accessibilityLabel={t('審核', {ns: 'harbor'})}
                     style={({pressed}) => [
-                        styles.reviewCard,
-                        {backgroundColor: theme.white},
+                        styles.reviewRow,
                         pressed && {backgroundColor: theme.tonal.primary08},
                     ]}
                     onPress={() => {
@@ -151,7 +162,7 @@ const HarborProfileOverview = ({
                         <MaterialCommunityIcons
                             name="shield-check-outline"
                             size={scale(22)}
-                            color={theme.themeColor}
+                            color={theme.accentForeground}
                         />
                     </View>
                     <View style={styles.reviewContent}>
@@ -182,7 +193,7 @@ const HarborProfileOverview = ({
                             {
                                 backgroundColor:
                                     reviewCount > 0
-                                        ? theme.unread
+                                        ? theme.unreadForeground
                                         : theme.tonal.secondary15,
                             },
                         ]}>
@@ -192,7 +203,7 @@ const HarborProfileOverview = ({
                                 {
                                     color:
                                         reviewCount > 0
-                                            ? theme.trueWhite
+                                            ? theme.white
                                             : theme.black.third,
                                 },
                             ]}>
@@ -214,7 +225,7 @@ const HarborProfileOverview = ({
 
 const styles = StyleSheet.create({
     container: {
-        gap: verticalScale(4),
+        gap: verticalScale(8),
     },
     partialProfile: {
         borderRadius: scale(10),
@@ -228,9 +239,8 @@ const styles = StyleSheet.create({
         lineHeight: verticalScale(14),
         textAlign: 'center',
     },
-    reviewCard: {
+    reviewRow: {
         minHeight: verticalScale(64),
-        borderRadius: scale(10),
         flexDirection: 'row',
         alignItems: 'center',
         paddingHorizontal: scale(14),

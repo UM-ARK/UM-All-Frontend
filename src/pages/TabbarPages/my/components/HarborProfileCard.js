@@ -22,6 +22,7 @@ const AVATAR_SOURCE = require('../../../../static/img/logo_round.png');
 const HarborProfileCard = ({
     user,
     onProfilePress,
+    onEditProfilePress,
     onChatPress,
     chatUnreadCount = 0,
     onSettingsPress,
@@ -29,106 +30,120 @@ const HarborProfileCard = ({
     const {theme} = useTheme();
     const {t, i18n} = useTranslation('my');
     const joinedAt = formatJoinedAt(user.joinedAt, i18n.language);
+    const onAvatarPress = onEditProfilePress || onProfilePress;
 
     return (
-        <View
-            style={[
-                styles.container,
-                {backgroundColor: theme.bg_color},
-            ]}>
+        <View style={styles.container}>
+            <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t(
+                    onEditProfilePress ? '編輯個人資料' : 'Harbor 個人資料',
+                )}
+                disabled={!onAvatarPress}
+                style={({pressed}) => [
+                    styles.avatarButton,
+                    pressed && styles.profilePressed,
+                ]}
+                onPress={() => {
+                    trigger();
+                    onAvatarPress?.();
+                }}>
+                <Image
+                    source={
+                        user.avatarUrl ? {uri: user.avatarUrl} : AVATAR_SOURCE
+                    }
+                    style={styles.avatar}
+                    contentFit="cover"
+                />
+                {onEditProfilePress ? (
+                    <View
+                        style={[
+                            styles.avatarEditBadge,
+                            {
+                                backgroundColor: theme.accentForeground,
+                                borderColor: theme.white,
+                            },
+                        ]}>
+                        <Ionicons
+                            name="pencil"
+                            size={scale(11)}
+                            color={theme.white}
+                        />
+                    </View>
+                ) : null}
+            </Pressable>
+
             <Pressable
                 accessibilityRole="button"
                 accessibilityLabel={t('Harbor 個人資料')}
                 disabled={!onProfilePress}
                 style={({pressed}) => [
-                    styles.profilePressable,
-                    pressed && onProfilePress && styles.profilePressed,
+                    styles.identity,
+                    pressed && styles.profilePressed,
                 ]}
                 onPress={() => {
-                    if (!onProfilePress) {
-                        return;
-                    }
                     trigger();
-                    onProfilePress();
+                    onProfilePress?.();
                 }}>
-                <View style={styles.avatarWrap}>
-                    <Image
-                        source={
-                            user.avatarUrl ? {uri: user.avatarUrl} : AVATAR_SOURCE
-                        }
-                        style={styles.avatar}
-                        contentFit="cover"
-                    />
+                <View style={styles.nameRow}>
+                    <Text
+                        numberOfLines={1}
+                        style={[styles.name, {color: theme.black.main}]}>
+                        {user.displayName || user.username}
+                    </Text>
+                    {onProfilePress ? (
+                        <Ionicons
+                            name="chevron-forward"
+                            size={scale(13)}
+                            color={theme.accentForeground}
+                        />
+                    ) : null}
                     <View
                         style={[
-                            styles.connectedDot,
-                            {
-                                backgroundColor: theme.success,
-                                borderColor: theme.bg_color,
-                            },
+                            styles.connectedPill,
+                            {backgroundColor: theme.tonal.success15},
                         ]}>
                         <Ionicons
-                            name="checkmark"
-                            size={scale(8)}
-                            color={theme.trueWhite}
+                            name="checkmark-circle"
+                            size={scale(12)}
+                            color={theme.successForeground}
                         />
-                    </View>
-                </View>
-
-                <View style={styles.identity}>
-                    <View style={styles.nameRow}>
                         <Text
-                            numberOfLines={1}
-                            style={[styles.name, {color: theme.black.main}]}>
-                            {user.displayName || user.username}
-                        </Text>
-                        <View
                             style={[
-                                styles.connectedPill,
-                                {backgroundColor: theme.tonal.success15},
+                                styles.connectedText,
+                                {color: theme.successForeground},
                             ]}>
-                            <Ionicons
-                                name="checkmark-circle"
-                                size={scale(12)}
-                                color={theme.success}
-                            />
-                            <Text
-                                style={[
-                                    styles.connectedText,
-                                    {color: theme.success},
-                                ]}>
-                                {t('已連接')}
-                            </Text>
-                        </View>
-                    </View>
-                    <Text style={[styles.handle, {color: theme.black.third}]}>
-                        @{user.username}
-                    </Text>
-                    <View style={styles.metaRow}>
-                        <MaterialCommunityIcons
-                            name="forum-outline"
-                            size={scale(13)}
-                            color={theme.themeColor}
-                        />
-                        <Text style={[styles.role, {color: theme.black.second}]}>
-                            {t(user.role || 'Harbor 會員')}
-                        </Text>
-                        <View
-                            style={[
-                                styles.metaDivider,
-                                {backgroundColor: theme.themeColorUltraLight},
-                            ]}
-                        />
-                        <Text style={[styles.trust, {color: theme.black.third}]}>
-                            TL{user.trustLevel ?? 0}
+                            {t('已連接')}
                         </Text>
                     </View>
-                    {joinedAt ? (
-                        <Text style={[styles.joinedAt, {color: theme.black.third}]}>
-                            {t('於 {{date}} 加入', {date: joinedAt})}
-                        </Text>
-                    ) : null}
                 </View>
+                <Text style={[styles.handle, {color: theme.black.second}]}>
+                    @{user.username}
+                </Text>
+                <View style={styles.metaRow}>
+                    <MaterialCommunityIcons
+                        name="forum-outline"
+                        size={scale(13)}
+                        color={theme.accentForeground}
+                    />
+                    <Text style={[styles.role, {color: theme.black.second}]}>
+                        {t(user.role || 'Harbor 會員')}
+                    </Text>
+                    <View
+                        style={[
+                            styles.metaDivider,
+                            {backgroundColor: theme.themeColorUltraLight},
+                        ]}
+                    />
+                    <Text style={[styles.trust, {color: theme.black.second}]}>
+                        TL{user.trustLevel ?? 0}
+                    </Text>
+                </View>
+                {joinedAt ? (
+                    <Text style={[styles.joinedAt, {color: theme.black.second}]}>
+                        {t('於 {{date}} 加入', {date: joinedAt})}
+                    </Text>
+                ) : null}
             </Pressable>
 
             {onChatPress || onSettingsPress ? (
@@ -165,18 +180,18 @@ const HarborProfileCard = ({
                             <MaterialCommunityIcons
                                 name="chat-outline"
                                 size={scale(18)}
-                                color={theme.themeColor}
+                                color={theme.accentForeground}
                             />
                             {chatUnreadCount > 0 ? (
                                 <View
                                     style={[
                                         styles.chatUnreadBadge,
-                                        {backgroundColor: theme.unread},
+                                        {backgroundColor: theme.unreadForeground},
                                     ]}>
                                     <Text
                                         style={[
                                             styles.chatUnreadText,
-                                            {color: theme.trueWhite},
+                                            {color: theme.white},
                                         ]}>
                                         {chatUnreadCount > 99
                                             ? '99+'
@@ -200,7 +215,7 @@ const HarborProfileCard = ({
                             <Ionicons
                                 name="settings-outline"
                                 size={scale(18)}
-                                color={theme.themeColor}
+                                color={theme.accentForeground}
                             />
                         </TouchableScale>
                     ) : null}
@@ -214,15 +229,10 @@ const styles = StyleSheet.create({
     container: {
         flexDirection: 'row',
         alignItems: 'flex-start',
+        gap: scale(10),
         paddingHorizontal: scale(7),
         paddingTop: verticalScale(4),
         paddingBottom: verticalScale(4),
-    },
-    profilePressable: {
-        flex: 1,
-        minWidth: 0,
-        flexDirection: 'row',
-        alignItems: 'flex-start',
     },
     profilePressed: {
         opacity: 0.7,
@@ -230,7 +240,6 @@ const styles = StyleSheet.create({
     actions: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginLeft: scale(6),
         height: scale(34),
         borderRadius: scale(17),
         overflow: 'hidden',
@@ -258,21 +267,22 @@ const styles = StyleSheet.create({
         fontSize: scale(6),
         fontWeight: '700',
     },
-    avatarWrap: {
-        marginRight: scale(13),
+    avatarButton: {
+        minWidth: 44,
+        minHeight: 44,
     },
     avatar: {
         width: scale(58),
         height: scale(58),
         borderRadius: scale(29),
     },
-    connectedDot: {
+    avatarEditBadge: {
         position: 'absolute',
         right: scale(-1),
         bottom: scale(-1),
-        width: scale(16),
-        height: scale(16),
-        borderRadius: scale(8),
+        width: scale(22),
+        height: scale(22),
+        borderRadius: scale(11),
         borderWidth: scale(2),
         alignItems: 'center',
         justifyContent: 'center',
@@ -284,7 +294,7 @@ const styles = StyleSheet.create({
     nameRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: scale(7),
+        gap: scale(5),
     },
     name: {
         ...uiStyle.defaultText,
@@ -302,7 +312,7 @@ const styles = StyleSheet.create({
     },
     connectedText: {
         ...uiStyle.defaultText,
-        fontSize: scale(9),
+        fontSize: scale(10),
         fontWeight: '750',
     },
     handle: {
@@ -334,7 +344,7 @@ const styles = StyleSheet.create({
     },
     joinedAt: {
         ...uiStyle.defaultText,
-        fontSize: scale(9),
+        fontSize: scale(10),
         marginTop: verticalScale(4),
     },
 });

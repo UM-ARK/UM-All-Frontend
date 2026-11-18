@@ -1,45 +1,38 @@
 import React from 'react';
-import {StyleSheet, View} from 'react-native';
+import {Pressable, StyleSheet, View} from 'react-native';
 
 import {useTranslation} from 'react-i18next';
-import {FlatGrid} from 'react-native-super-grid';
+import Ionicons from '@react-native-vector-icons/ionicons';
 import {scale, verticalScale} from 'react-native-size-matters';
 
 import Text from '../../../../components/AppText';
 import {uiStyle, useTheme} from '../../../../components/ThemeContext';
-import TouchableScale from '../../../../components/TouchableScale';
 import {trigger} from '../../../../utils/trigger';
-import FeatureIcon from '../../info/home/search/components/FeatureIcon';
 
 const QUICK_ACTIONS = [
     {
         key: 'messages',
         label: '消息',
-        icon_type: 'ionicons',
         icon_name: 'mail-outline',
     },
     {
         key: 'bookmarks',
         label: '收藏',
-        icon_type: 'ionicons',
         icon_name: 'bookmark-outline',
     },
     {
         key: 'likes',
         label: '贊過',
-        icon_type: 'ionicons',
         icon_name: 'heart-outline',
     },
     {
         key: 'drafts',
         label: '草稿',
-        icon_type: 'ionicons',
         icon_name: 'document-text-outline',
     },
     {
         key: 'badges',
         label: '成就',
-        icon_type: 'ionicons',
         icon_name: 'ribbon-outline',
     },
 ];
@@ -49,80 +42,73 @@ const HarborQuickActions = ({unreadCount = 0, onSelect}) => {
     const {t} = useTranslation('my');
 
     return (
-        <View
-            style={[
-                styles.container,
-                {backgroundColor: theme.white},
-            ]}>
-            <FlatGrid
-                style={styles.grid}
-                itemContainerStyle={styles.itemContainer}
-                maxItemsPerRow={5}
-                itemDimension={scale(50)}
-                spacing={scale(6)}
-                data={QUICK_ACTIONS}
-                scrollEnabled={false}
-                keyExtractor={item => item.key}
-                renderItem={({item}) => (
-                    <TouchableScale
-                        accessibilityRole="button"
-                        accessibilityLabel={t(item.label)}
-                        style={styles.action}
-                        onPress={() => {
-                            trigger();
-                            onSelect(item.key);
-                        }}>
-                        <View style={styles.iconWrap}>
-                            <FeatureIcon item={item} size={scale(22)} />
-                            {item.key === 'messages' && unreadCount > 0 ? (
-                                <View
+        <View style={styles.container}>
+            {QUICK_ACTIONS.map(item => (
+                <Pressable
+                    key={item.key}
+                    accessibilityRole="button"
+                    accessibilityLabel={t(item.label)}
+                    style={({pressed}) => [
+                        styles.action,
+                        pressed && styles.pressed,
+                    ]}
+                    onPress={() => {
+                        trigger();
+                        onSelect(item.key);
+                    }}>
+                    <View style={styles.iconWrap}>
+                        <Ionicons
+                            name={item.icon_name}
+                            size={scale(22)}
+                            color={theme.accentForeground}
+                        />
+                        {item.key === 'messages' && unreadCount > 0 ? (
+                            <View
+                                style={[
+                                    styles.badge,
+                                    {backgroundColor: theme.unreadForeground},
+                                ]}>
+                                <Text
                                     style={[
-                                        styles.badge,
-                                        {backgroundColor: theme.unread},
+                                        styles.badgeText,
+                                        {color: theme.white},
                                     ]}>
-                                    <Text
-                                        style={[
-                                            styles.badgeText,
-                                            {color: theme.trueWhite},
-                                        ]}>
-                                        {unreadCount > 99
-                                            ? '99+'
-                                            : unreadCount}
-                                    </Text>
-                                </View>
-                            ) : null}
-                        </View>
-                        <Text
-                            numberOfLines={1}
-                            style={[
-                                styles.label,
-                                {color: theme.black.second},
-                            ]}>
-                            {t(item.label)}
-                        </Text>
-                    </TouchableScale>
-                )}
-            />
+                                    {unreadCount > 99
+                                        ? '99+'
+                                        : unreadCount}
+                                </Text>
+                            </View>
+                        ) : null}
+                    </View>
+                    <Text
+                        numberOfLines={2}
+                        style={[
+                            styles.label,
+                            {color: theme.black.second},
+                        ]}>
+                        {t(item.label)}
+                    </Text>
+                </Pressable>
+            ))}
         </View>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
-        borderRadius: scale(10),
-        paddingTop: verticalScale(10),
-        paddingBottom: verticalScale(6),
-    },
-    grid: {
-        marginBottom: verticalScale(-8),
-    },
-    itemContainer: {
-        alignItems: 'center',
-        justifyContent: 'center',
+        flexDirection: 'row',
+        gap: scale(4),
     },
     action: {
+        flex: 1,
+        minWidth: 0,
+        minHeight: 44,
         alignItems: 'center',
-        justifyContent: 'center',
+        gap: verticalScale(4),
+        paddingVertical: verticalScale(6),
+    },
+    pressed: {
+        opacity: 0.65,
     },
     iconWrap: {
         position: 'relative',
@@ -131,12 +117,12 @@ const styles = StyleSheet.create({
         ...uiStyle.defaultText,
         fontSize: scale(11),
         fontWeight: '600',
-        marginTop: verticalScale(6),
+        textAlign: 'center',
     },
     badge: {
         position: 'absolute',
         top: scale(-3),
-        right: scale(-5),
+        right: scale(-8),
         minWidth: scale(15),
         height: scale(15),
         borderRadius: scale(8),

@@ -22,7 +22,7 @@ const HarborStatsCard = ({title, items}) => {
             style={[
                 styles.container,
                 !title && styles.containerWithoutTitle,
-                {backgroundColor: theme.white},
+                {borderTopColor: theme.disabled},
             ]}>
             {title ? <HarborSectionHeader title={title} /> : null}
             <View style={styles.statsRow}>
@@ -93,11 +93,11 @@ const HarborStatsCard = ({title, items}) => {
 
 const styles = StyleSheet.create({
     container: {
-        borderRadius: scale(10),
+        borderTopWidth: StyleSheet.hairlineWidth,
         paddingBottom: verticalScale(8),
     },
     containerWithoutTitle: {
-        paddingTop: verticalScale(14),
+        paddingTop: verticalScale(4),
     },
     statsRow: {
         minHeight: verticalScale(64),

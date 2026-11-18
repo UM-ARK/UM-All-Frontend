@@ -44,6 +44,7 @@ const getColorDiy = (isLight) => {
         themeColor: themeColorValue,
         themeColorLight: isLight ? '#7ca8cc' : '#2d5f87',
         themeColorUltraLight: isLight ? '#c9e1f5' : '#23323d',
+        accentForeground: isLight ? '#195985' : '#83C7F7',
         secondThemeColor: secondThemeColorValue,
 
         // Tonal Color System — 主題色透明度分級背景色
@@ -102,8 +103,10 @@ const getColorDiy = (isLight) => {
 
         // 綠色，用在Toast上
         success: successValue,
+        successForeground: isLight ? '#114D30' : '#78DBAB',
         warning: '#f39c12',
         unread: unreadValue,
+        unreadForeground: isLight ? '#AB2935' : '#FF9C9F',
         disabled: isLight ? '#cad5de' : '#3a3d40',
 
         // 我的頁顏色

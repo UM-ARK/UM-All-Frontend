@@ -140,7 +140,24 @@ const TeamSchedulePreviewSection = forwardRef(
                     styles.container,
                     {backgroundColor: theme.white},
                 ]}>
-                <View style={styles.header}>
+                <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={t('全部組隊約時間')}
+                    accessibilityHint={t('找出最多組員有空的時段')}
+                    onPress={openList}
+                    style={({pressed}) => [
+                        styles.header,
+                        {
+                            backgroundColor: pressed
+                                ? theme.tonal.primary30
+                                : theme.tonal.primary15,
+                        },
+                    ]}>
+                    <Ionicons
+                        name="calendar-outline"
+                        size={scale(22)}
+                        color={theme.accentForeground}
+                    />
                     <View style={styles.headerTitleWrap}>
                         <Text
                             style={[
@@ -149,45 +166,13 @@ const TeamSchedulePreviewSection = forwardRef(
                             ]}>
                             {t('組隊約時間')}
                         </Text>
-                        <Pressable
-                            accessibilityRole="button"
-                            accessibilityLabel={t('了解組隊約時間')}
-                            hitSlop={scale(8)}
-                            onPress={openIntro}
-                            style={({pressed}) => [
-                                styles.infoButton,
-                                pressed && {opacity: 0.65},
-                            ]}>
-                            <Ionicons
-                                name="information-circle-outline"
-                                size={scale(17)}
-                                color={theme.black.third}
-                            />
-                        </Pressable>
                     </View>
-                    <Pressable
-                        accessibilityRole="button"
-                        accessibilityLabel={t('全部')}
-                        hitSlop={scale(8)}
-                        onPress={openList}
-                        style={({pressed}) => [
-                            styles.headerAction,
-                            pressed && {opacity: 0.65},
-                        ]}>
-                        <Text
-                            style={[
-                                styles.headerActionText,
-                                {color: theme.themeColor},
-                            ]}>
-                            {t('全部')}
-                        </Text>
-                        <Ionicons
-                            name="chevron-forward"
-                            size={scale(14)}
-                            color={theme.themeColor}
-                        />
-                    </Pressable>
-                </View>
+                    <Ionicons
+                        name="chevron-forward"
+                        size={scale(17)}
+                        color={theme.accentForeground}
+                    />
+                </Pressable>
 
                 <View style={styles.actionRow}>
                     <Pressable
@@ -196,23 +181,19 @@ const TeamSchedulePreviewSection = forwardRef(
                         onPress={openCreate}
                         style={({pressed}) => [
                             styles.actionButton,
-                            {
-                                backgroundColor: pressed
-                                    ? theme.tonal.primary50
-                                    : theme.tonal.primary15,
-                            },
+                            pressed && styles.actionPressed,
                         ]}>
                         <Ionicons
                             name="add-circle-outline"
-                            size={scale(18)}
-                            color={theme.themeColor}
+                            size={scale(16)}
+                            color={theme.accentForeground}
                         />
                         <Text
                             style={[
                                 styles.actionButtonText,
-                                {color: theme.themeColor},
+                                {color: theme.accentForeground},
                             ]}>
-                            {t('新建')}
+                            {t('新建組隊')}
                         </Text>
                     </Pressable>
                     <Pressable
@@ -221,28 +202,42 @@ const TeamSchedulePreviewSection = forwardRef(
                         onPress={openJoin}
                         style={({pressed}) => [
                             styles.actionButton,
-                            {
-                                backgroundColor: pressed
-                                    ? theme.tonal.primary50
-                                    : theme.tonal.primary15,
-                            },
+                            pressed && styles.actionPressed,
                         ]}>
                         <Ionicons
                             name="enter-outline"
-                            size={scale(18)}
-                            color={theme.themeColor}
+                            size={scale(16)}
+                            color={theme.accentForeground}
                         />
                         <Text
                             style={[
                                 styles.actionButtonText,
-                                {color: theme.themeColor},
+                                {color: theme.accentForeground},
                             ]}>
-                            {t('加入')}
+                            {t('加入隊伍')}
                         </Text>
+                    </Pressable>
+                    <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel={t('了解組隊約時間')}
+                        onPress={openIntro}
+                        style={({pressed}) => [
+                            styles.infoButton,
+                            pressed && styles.actionPressed,
+                        ]}>
+                        <Ionicons
+                            name="information-circle-outline"
+                            size={scale(17)}
+                            color={theme.black.third}
+                        />
                     </Pressable>
                 </View>
 
-                <View style={styles.listWrap}>
+                <View
+                    style={[
+                        styles.listWrap,
+                        {borderTopColor: theme.disabled},
+                    ]}>
                     {showSkeleton ? (
                         <View style={styles.listInner}>
                             <TeamScheduleSkeletonList rows={5} />
@@ -270,25 +265,6 @@ const TeamSchedulePreviewSection = forwardRef(
                                 ]}>
                                 {t('還沒有組隊約時間')}
                             </Text>
-                            <Pressable
-                                accessibilityRole="button"
-                                onPress={openCreate}
-                                style={({pressed}) => [
-                                    styles.emptyAction,
-                                    {
-                                        backgroundColor: pressed
-                                            ? theme.tonal.primary50
-                                            : theme.themeColor,
-                                    },
-                                ]}>
-                                <Text
-                                    style={[
-                                        styles.emptyActionText,
-                                        {color: theme.trueWhite},
-                                    ]}>
-                                    {t('新建組隊')}
-                                </Text>
-                            </Pressable>
                         </View>
                     ) : null}
 
@@ -330,71 +306,60 @@ TeamSchedulePreviewSection.displayName = 'TeamSchedulePreviewSection';
 const styles = StyleSheet.create({
     container: {
         borderRadius: scale(10),
-        marginTop: verticalScale(4),
-        marginBottom: verticalScale(6),
+        borderCurve: 'continuous',
         paddingBottom: verticalScale(4),
         overflow: 'hidden',
     },
     header: {
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'space-between',
+        gap: scale(10),
+        minHeight: 44,
         paddingHorizontal: scale(14),
-        paddingTop: verticalScale(8),
-        paddingBottom: verticalScale(2),
+        paddingVertical: verticalScale(10),
     },
     headerTitle: {
         ...uiStyle.defaultText,
-        flexShrink: 1,
         fontSize: scale(14),
+        fontWeight: '700',
     },
     headerTitleWrap: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        flexShrink: 1,
+        flex: 1,
+        minWidth: 0,
+        justifyContent: 'center',
     },
     infoButton: {
         alignItems: 'center',
         justifyContent: 'center',
-        width: scale(26),
-        height: scale(26),
-        marginLeft: scale(2),
-    },
-    headerAction: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginLeft: scale(8),
-        paddingVertical: verticalScale(2),
-    },
-    headerActionText: {
-        ...uiStyle.defaultText,
-        fontSize: scale(12),
-        fontWeight: '600',
-        marginRight: scale(2),
+        width: 44,
+        minHeight: 44,
+        marginStart: 'auto',
     },
     actionRow: {
         flexDirection: 'row',
         flexWrap: 'wrap',
         alignItems: 'center',
-        justifyContent: 'center',
-        paddingHorizontal: scale(14),
-        marginBottom: verticalScale(4),
         gap: scale(8),
+        paddingHorizontal: scale(10),
     },
     actionButton: {
         flexDirection: 'row',
         alignItems: 'center',
-        borderRadius: scale(10),
-        paddingHorizontal: scale(12),
-        paddingVertical: verticalScale(6),
-        gap: scale(6),
+        minHeight: 44,
+        flexShrink: 1,
+        paddingHorizontal: scale(4),
+        gap: scale(4),
+    },
+    actionPressed: {
+        opacity: 0.65,
     },
     actionButtonText: {
         ...uiStyle.defaultText,
-        fontSize: scale(13),
+        fontSize: scale(12),
         fontWeight: '700',
     },
     listWrap: {
+        borderTopWidth: StyleSheet.hairlineWidth,
         overflow: 'hidden',
     },
     listInner: {
@@ -409,19 +374,6 @@ const styles = StyleSheet.create({
         ...uiStyle.defaultText,
         fontSize: scale(13),
         textAlign: 'center',
-    },
-    emptyAction: {
-        minWidth: scale(112),
-        alignItems: 'center',
-        borderRadius: scale(10),
-        marginTop: verticalScale(12),
-        paddingHorizontal: scale(14),
-        paddingVertical: verticalScale(8),
-    },
-    emptyActionText: {
-        ...uiStyle.defaultText,
-        fontSize: scale(12),
-        fontWeight: '700',
     },
 });
 

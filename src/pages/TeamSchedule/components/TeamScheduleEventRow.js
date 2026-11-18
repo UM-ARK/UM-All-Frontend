@@ -107,7 +107,7 @@ const TeamScheduleEventRow = ({
                     <View style={styles.metaRow}>
                         <Text
                             numberOfLines={1}
-                            style={[styles.meta, {color: theme.themeColor}]}>
+                            style={[styles.meta, {color: theme.black.second}]}>
                             {roleLabel}
                         </Text>
                         {statusLabel || deadlineHint ? (
@@ -118,7 +118,7 @@ const TeamScheduleEventRow = ({
                                     {
                                         color: isClosed
                                             ? theme.black.third
-                                            : theme.unread || theme.black.third,
+                                            : theme.unreadForeground,
                                     },
                                 ]}>
                                 {statusLabel || deadlineHint}

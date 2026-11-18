@@ -1,14 +1,24 @@
 import React from 'react';
 import {
     Alert,
-    Animated,
     RefreshControl,
     StyleSheet,
     View,
     useWindowDimensions,
 } from 'react-native';
 
+import { useFocusEffect } from '@react-navigation/native';
+import { Image } from 'expo-image';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
+import Reanimated, {
+    Easing,
+    FadeInDown,
+    ReduceMotion,
+    useAnimatedScrollHandler,
+    useAnimatedStyle,
+    useSharedValue,
+} from 'react-native-reanimated';
 import { scale, verticalScale } from 'react-native-size-matters';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -21,6 +31,13 @@ import HarborGuestState from './components/HarborGuestState';
 import HarborPageHeader from './components/HarborPageHeader';
 import HarborProfileOverview from './components/HarborProfileOverview';
 import HarborRestoringState from './components/HarborRestoringState';
+
+const PROFILE_BACKDROP_SOURCE = require('../../../static/img/ark_brand_waves.png');
+const PROFILE_BACKDROP_ENTRANCE = FadeInDown
+    .duration(280)
+    .easing(Easing.bezier(0.23, 1, 0.32, 1))
+    .withInitialValues({ opacity: 0.7, translateY: verticalScale(10) })
+    .reduceMotion(ReduceMotion.System);
 
 const MyScreen = ({ navigation }) => {
     const { theme } = useTheme();
@@ -46,10 +63,25 @@ const MyScreen = ({ navigation }) => {
     );
     const contentTopInset = insets.top + verticalScale(8);
     const [isRefreshing, setIsRefreshing] = React.useState(false);
+    const [hasEnteredProfile, setHasEnteredProfile] = React.useState(false);
     const teamSchedulePreviewRef = React.useRef(null);
-    // 暫時關閉下滑頂部頭像動畫
-    // const scrollY = React.useRef(new Animated.Value(0)).current;
+    const scrollY = useSharedValue(0);
     const isSignedIn = status === 'signedIn' && !!user;
+
+    const handleScroll = useAnimatedScrollHandler(event => {
+        scrollY.set(event.contentOffset.y);
+    });
+    const profileBackdropStyle = useAnimatedStyle(() => ({
+        transform: [{ translateY: -Math.max(0, scrollY.get()) }],
+    }));
+
+    useFocusEffect(
+        React.useCallback(() => {
+            if (isSignedIn) {
+                setHasEnteredProfile(true);
+            }
+        }, [isSignedIn]),
+    );
 
     const presentHarborError = React.useCallback(
         sessionError => {
@@ -122,16 +154,6 @@ const MyScreen = ({ navigation }) => {
         }
     };
 
-    // 暫時關閉下滑頂部頭像動畫
-    // const handleScroll = React.useMemo(
-    //     () =>
-    //         Animated.event(
-    //             [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-    //             { useNativeDriver: false },
-    //         ),
-    //     [scrollY],
-    // );
-
     const harborError = error ? (
         <View
             style={[
@@ -160,11 +182,39 @@ const MyScreen = ({ navigation }) => {
 
     return (
         <View style={[styles.container, { backgroundColor: theme.bg_color }]}>
-            <Animated.ScrollView
+            {isSignedIn ? (
+                <Reanimated.View
+                    pointerEvents="none"
+                    style={[
+                        styles.profileBackdrop,
+                        { height: contentTopInset + verticalScale(160) },
+                        profileBackdropStyle,
+                    ]}>
+                    {hasEnteredProfile ? (
+                        <Reanimated.View
+                            entering={PROFILE_BACKDROP_ENTRANCE}
+                            style={styles.profileBackdropArt}>
+                            <Image
+                                source={PROFILE_BACKDROP_SOURCE}
+                                blurRadius={16}
+                                style={[
+                                    StyleSheet.absoluteFill,
+                                    { opacity: theme.isLight ? 0.36 : 0.24 },
+                                ]}
+                            />
+                        </Reanimated.View>
+                    ) : null}
+                    <LinearGradient
+                        colors={[theme.tonal.primary08, theme.bg_color]}
+                        style={StyleSheet.absoluteFill}
+                    />
+                </Reanimated.View>
+            ) : null}
+            <Reanimated.ScrollView
                 contentInsetAdjustmentBehavior="never"
                 showsVerticalScrollIndicator={false}
-                // onScroll={handleScroll}
-                // scrollEventThrottle={16}
+                onScroll={handleScroll}
+                scrollEventThrottle={16}
                 contentContainerStyle={[
                     styles.scrollContent,
                     {
@@ -176,8 +226,8 @@ const MyScreen = ({ navigation }) => {
                     isSignedIn ? (
                         <RefreshControl
                             refreshing={isRefreshing}
-                            tintColor={theme.themeColor}
-                            colors={[theme.themeColor]}
+                            tintColor={theme.accentForeground}
+                            colors={[theme.accentForeground]}
                             progressViewOffset={contentTopInset}
                             onRefresh={handleRefresh}
                         />
@@ -187,7 +237,6 @@ const MyScreen = ({ navigation }) => {
                     <HarborPageHeader
                         compact={isSignedIn}
                         // user={isSignedIn ? user : undefined}
-                        // scrollY={scrollY}
                         onSettingsPress={() =>
                             navigation.navigate('SettingPage')
                         }
@@ -206,12 +255,12 @@ const MyScreen = ({ navigation }) => {
                                 }
                                 onSettingsPress={() =>
                                     navigation.navigate('SettingPage')
-                                }
-                            />
-                            <TeamSchedulePreviewSection
-                                ref={teamSchedulePreviewRef}
-                                navigation={navigation}
-                            />
+                                }>
+                                <TeamSchedulePreviewSection
+                                    ref={teamSchedulePreviewRef}
+                                    navigation={navigation}
+                                />
+                            </HarborProfileOverview>
                             <Text
                                 style={[
                                     styles.footnote,
@@ -230,7 +279,7 @@ const MyScreen = ({ navigation }) => {
                         />
                     )}
                 </View>
-            </Animated.ScrollView>
+            </Reanimated.ScrollView>
         </View>
     );
 };
@@ -242,6 +291,20 @@ const styles = StyleSheet.create({
     scrollContent: {
         alignItems: 'center',
         paddingHorizontal: scale(10),
+    },
+    profileBackdrop: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        overflow: 'hidden',
+    },
+    profileBackdropArt: {
+        position: 'absolute',
+        top: -verticalScale(12),
+        bottom: -verticalScale(12),
+        left: 0,
+        right: 0,
     },
     harborError: {
         borderWidth: StyleSheet.hairlineWidth,
