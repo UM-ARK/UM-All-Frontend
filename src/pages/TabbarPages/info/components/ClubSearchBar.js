@@ -37,7 +37,7 @@ function ClubSearchBar({
 }) {
     const { t } = useTranslation(['club']);
     const { theme } = useTheme();
-    const { themeColor, black, isLight } = theme;
+    const { themeColor, black, white, isLight } = theme;
     const inputRef = useRef(null);
 
     const focused = useSharedValue(0);
@@ -138,6 +138,7 @@ function ClubSearchBar({
                         onPress={handleCancel}
                         accessibilityRole="button"
                         hitSlop={scale(6)}
+                        style={[styles.cancelButton, { backgroundColor: white }]}
                     >
                         <Text style={[styles.cancelText, { color: themeColor }]}>
                             {cancelLabel ?? t('club:CANCEL')}
@@ -156,11 +157,11 @@ const styles = StyleSheet.create({
         paddingBottom: scale(8),
         paddingLeft: scale(8),
         paddingRight: scale(14),
+        overflow: 'hidden',
     },
     row: {
         flexDirection: 'row',
         alignItems: 'center',
-        overflow: 'hidden',
         width: '100%',
     },
     inputOuter: {
@@ -188,11 +189,18 @@ const styles = StyleSheet.create({
     },
     cancelWrap: {
         position: 'absolute',
+        top: 0,
+        bottom: 0,
         right: 0,
         justifyContent: 'center',
-        paddingVertical: scale(6),
-        paddingLeft: scale(6),
-        paddingRight: scale(2),
+        paddingLeft: scale(4),
+    },
+    cancelButton: {
+        height: '100%',
+        borderRadius: scale(9),
+        paddingHorizontal: scale(10),
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     cancelText: {
         fontSize: verticalScale(14),
