@@ -10,6 +10,7 @@ import React, {
 } from 'react';
 import {
     Animated,
+    Platform,
     View,
     VirtualizedList,
     RefreshControl,
@@ -84,6 +85,10 @@ const NewsPage = forwardRef(function NewsPage(_props, ref) {
     // 指示器底部要停在底欄之上；原生 Tab 沒給高度時用安全區加底欄估算
     const tabBarHeight =
         useContext(BottomTabBarHeightContext) ?? insets.bottom + 49;
+    // 自動 contentInset 已關掉；iOS 浮動 Tab 需列表自行留白
+    const listBottomPad = Platform.OS === 'ios'
+        ? tabBarHeight + verticalScale(10)
+        : verticalScale(10);
     const { t, i18n } = useTranslation('common');
     const currentLanguage = i18n.resolvedLanguage || i18n.language;
     const { white, viewShadow, bg_color, black, themeColor, trueWhite, imagePlaceholder } = theme;
@@ -405,6 +410,7 @@ const NewsPage = forwardRef(function NewsPage(_props, ref) {
                         contentContainerStyle={{
                             width: '100%',
                             paddingTop: searchBarHeight,
+                            paddingBottom: listBottomPad,
                         }}
                         keyExtractor={item => item._id}
                         // 整理item數據

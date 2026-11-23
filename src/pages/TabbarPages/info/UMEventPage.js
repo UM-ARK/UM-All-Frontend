@@ -8,7 +8,7 @@ import React, {
     useImperativeHandle,
     useMemo,
 } from 'react';
-import { View, RefreshControl } from 'react-native';
+import { Platform, View, RefreshControl } from 'react-native';
 import { AnimatedFlashList } from '@shopify/flash-list';
 
 import { ThemeContext } from '../../../components/ThemeContext';
@@ -32,6 +32,7 @@ import { useTranslation } from 'react-i18next';
 import Reanimated from 'react-native-reanimated';
 import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { verticalScale } from 'react-native-size-matters';
 
 const orderEventData = result => {
     const nowTimeStamp = new Date().getTime();
@@ -89,6 +90,10 @@ const UMEventPage = forwardRef(function UMEventPage(_props, ref) {
     // 指示器底部要停在底欄之上；原生 Tab 沒給高度時用安全區加底欄估算
     const tabBarHeight =
         useContext(BottomTabBarHeightContext) ?? insets.bottom + 49;
+    // 自動 contentInset 已關掉；iOS 浮動 Tab 需列表自行留白
+    const listBottomPad = Platform.OS === 'ios'
+        ? tabBarHeight + verticalScale(10)
+        : verticalScale(10);
     const { t, i18n } = useTranslation('common');
     const currentLanguage = i18n.resolvedLanguage || i18n.language;
 
@@ -231,7 +236,10 @@ const UMEventPage = forwardRef(function UMEventPage(_props, ref) {
                     ref={scrollViewRef}
                     style={{ flex: 1, width: '100%' }}
                     data={filteredData}
-                    contentContainerStyle={{ paddingTop: searchBarHeight }}
+                    contentContainerStyle={{
+                        paddingTop: searchBarHeight,
+                        paddingBottom: listBottomPad,
+                    }}
                     onScroll={onSearchScroll}
                     onScrollBeginDrag={onSearchScrollBeginDrag}
                     onScrollEndDrag={onSearchScrollEndDrag}
