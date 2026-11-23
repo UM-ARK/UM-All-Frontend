@@ -30,6 +30,7 @@ const getLabelStyle = (isSelected, accent, inactive) => ({
  * @param {number} [fontSize] - 標籤字級（預設 scale(11)）
  * @param {boolean} [wrap] - 是否允許換行（多選項窄螢幕）
  * @param {boolean} [compact] - 緊湊模式（頂欄等需貼頂的場景）
+ * @param {boolean} [fill] - 選項平分軌道寬度（頁內兩段切換）
  */
 const SegmentControl = ({
     options,
@@ -43,6 +44,7 @@ const SegmentControl = ({
     fontSize,
     wrap,
     compact,
+    fill,
 }) => {
     const { theme } = useTheme();
     const { themeColor, bg_color, black, unread } = theme;
@@ -57,6 +59,7 @@ const SegmentControl = ({
             style={[
                 styles.track,
                 compact && styles.compactTrack,
+                fill && styles.fillTrack,
                 wrap ? styles.wrappedTrack : styles.singleLineTrack,
                 getTrackStyle(track),
                 style,
@@ -74,6 +77,7 @@ const SegmentControl = ({
                         style={[
                             styles.option,
                             compact && styles.compactOption,
+                            fill && styles.fillOption,
                             getOptionStyle(isSelected, selectedBackground),
                         ]}>
                         <View style={styles.labelRow}>
@@ -113,6 +117,14 @@ const styles = StyleSheet.create({
     },
     compactTrack: {
         padding: 0,
+    },
+    fillTrack: {
+        alignSelf: 'stretch',
+    },
+    fillOption: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     wrappedTrack: {
         flexWrap: 'wrap',

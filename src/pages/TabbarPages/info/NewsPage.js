@@ -33,6 +33,8 @@ import {
 
 import { Image } from 'expo-image';
 import { NavigationContext } from '@react-navigation/native';
+import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import axios from 'axios';
 import { useTranslation } from 'react-i18next';
 import { scale, verticalScale } from 'react-native-size-matters';
@@ -66,18 +68,16 @@ const splitNewsData = result => {
 
 /**
  * 澳大新聞列表
- * @param {boolean} [hideSourceLabel=false] - 嵌入校園頁時隱藏列表內來源標註
- * @param {number} [contentTopInset=0] - 懸浮頁頭所需的列表頂部間距
- * @param {(offsetY: number) => void} [onScrollOffsetChange] - 列表滾動位置回調
  */
-const NewsPage = forwardRef(function NewsPage(
-    { hideSourceLabel = false, contentTopInset = 0, onScrollOffsetChange },
-    ref,
-) {
+const NewsPage = forwardRef(function NewsPage(_props, ref) {
     const { theme } = useContext(ThemeContext);
+    const insets = useSafeAreaInsets();
+    // 指示器底部要停在底欄之上；原生 Tab 沒給高度時用安全區加底欄估算
+    const tabBarHeight =
+        useContext(BottomTabBarHeightContext) ?? insets.bottom + 49;
     const { t, i18n } = useTranslation('common');
     const currentLanguage = i18n.resolvedLanguage || i18n.language;
-    const { white, black, viewShadow, bg_color, themeColor, trueWhite, imagePlaceholder } = theme;
+    const { white, viewShadow, bg_color, themeColor, trueWhite, imagePlaceholder } = theme;
     const styles = StyleSheet.create({
         topNewsContainer: {
             borderRadius: scale(10),
@@ -165,13 +165,6 @@ const NewsPage = forwardRef(function NewsPage(
             </View>
         ),
         [currentLanguage],
-    );
-
-    const handleScroll = useCallback(
-        e => {
-            onScrollOffsetChange?.(e.nativeEvent.contentOffset.y);
-        },
-        [onScrollOffsetChange],
     );
 
     // 請求澳大api返回新聞數據
@@ -278,11 +271,6 @@ const NewsPage = forwardRef(function NewsPage(
 
         return (
             <View style={{ marginTop: verticalScale(5) }}>
-                {hideSourceLabel ? null : (
-                    <Text style={{ ...uiStyle.defaultText, color: black.third, alignSelf: 'center' }}>
-                        Data From: data.um.edu.mo
-                    </Text>
-                )}
                 <View style={styles.topNewsContainer}>
                     <ScalePressable
                         style={{ width: '100%', height: '100%' }}
@@ -331,7 +319,7 @@ const NewsPage = forwardRef(function NewsPage(
                 </View>
             </View >
         );
-    }, [topNews, hideSourceLabel, topNewsContent, topNewsImage, imagePlaceholder, black.third, navigation, styles.topNewsContainer, styles.topNewsOverlay, styles.topNewsPosition, styles.topNewsText, t, trueWhite]);
+    }, [topNews, topNewsContent, topNewsImage, imagePlaceholder, navigation, styles.topNewsContainer, styles.topNewsOverlay, styles.topNewsPosition, styles.topNewsText, t, trueWhite]);
 
     const handleSearchFocus = useCallback(() => {
         trigger();
@@ -367,19 +355,22 @@ const NewsPage = forwardRef(function NewsPage(
             {/* {isLoading ? null : renderGoTopButton()} */}
 
             {isLoading ? (
-                <NewsListSkeleton
-                    showTopNews
-                    contentTopInset={contentTopInset}
-                />
+                <NewsListSkeleton showTopNews />
             ) : (
                 <View style={{ flex: 1, width: '100%' }}>
                     <VirtualizedList
                         data={newsList}
                         ref={virtualizedList}
                         style={{ flex: 1, width: '100%' }}
-                        contentInsetAdjustmentBehavior="automatic"
-                        onScroll={handleScroll}
-                        scrollEventThrottle={16}
+                        // 只關 contentInset 不夠。指示器預設仍會把外層橫向 Pager 的
+                        // safe area 疊加上去；17 Pro 貼齊右緣時，這段間距會被算到
+                        // 水平方向，滾動條就落到內容裡。18 Pro Max 不會走這條計算。
+                        contentInsetAdjustmentBehavior="never"
+                        automaticallyAdjustsScrollIndicatorInsets={false}
+                        scrollIndicatorInsets={{
+                            bottom: tabBarHeight,
+                            right: 1,
+                        }}
                         // 初始渲染的元素，設置為剛好覆蓋屏幕
                         initialNumToRender={4}
                         windowSize={8}
@@ -389,7 +380,6 @@ const NewsPage = forwardRef(function NewsPage(
                         ItemSeparatorComponent={NewsRowSeparator}
                         contentContainerStyle={{
                             width: '100%',
-                            paddingTop: contentTopInset,
                         }}
                         keyExtractor={item => item._id}
                         // 整理item數據

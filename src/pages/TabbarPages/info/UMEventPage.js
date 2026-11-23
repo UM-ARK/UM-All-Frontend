@@ -11,8 +11,7 @@ import React, {
 import { View, RefreshControl } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 
-import Text from '../../../components/AppText';
-import { uiStyle, ThemeContext } from '../../../components/ThemeContext';
+import { ThemeContext } from '../../../components/ThemeContext';
 import { UM_API_EVENT, UM_API_TOKEN } from '../../../utils/pathMap';
 import { trigger } from '../../../utils/trigger';
 import {
@@ -29,7 +28,8 @@ import { filterUMOpenDataItemsBySearchQuery } from './utils/umOpenDataSearch';
 import axios from 'axios';
 import moment from 'moment-timezone';
 import { useTranslation } from 'react-i18next';
-import { scale, verticalScale } from 'react-native-size-matters';
+import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const orderEventData = result => {
     const nowTimeStamp = new Date().getTime();
@@ -76,23 +76,17 @@ const orderEventData = result => {
 
 /**
  * 澳大活動列表
- * @param {boolean} [hideSourceLabel=false] - 嵌入校園頁時隱藏列表內來源標註
- * @param {number} [contentTopInset=0] - 懸浮頁頭所需的列表頂部間距
- * @param {(offsetY: number) => void} [onScrollOffsetChange] - 列表滾動位置回調
  */
-const UMEventPage = forwardRef(function UMEventPage(
-    {
-        hideSourceLabel = false,
-        contentTopInset = 0,
-        onScrollOffsetChange,
-    },
-    ref,
-) {
+const UMEventPage = forwardRef(function UMEventPage(_props, ref) {
     const scrollViewRef = useRef(null);
     const mountedRef = useRef(true);
     const hasVisibleDataRef = useRef(false);
     const requestIdRef = useRef(0);
     const { theme } = useContext(ThemeContext);
+    const insets = useSafeAreaInsets();
+    // 指示器底部要停在底欄之上；原生 Tab 沒給高度時用安全區加底欄估算
+    const tabBarHeight =
+        useContext(BottomTabBarHeightContext) ?? insets.bottom + 49;
     const { t, i18n } = useTranslation('common');
     const currentLanguage = i18n.resolvedLanguage || i18n.language;
 
@@ -215,16 +209,9 @@ const UMEventPage = forwardRef(function UMEventPage(
         [currentLanguage],
     );
 
-    const handleScroll = useCallback(
-        e => {
-            onScrollOffsetChange?.(e.nativeEvent.contentOffset.y);
-        },
-        [onScrollOffsetChange],
-    );
-
     // 渲染主要內容
     const renderPage = () => {
-        const { black, themeColor } = theme;
+        const { themeColor } = theme;
         const listHeader = (
             <View>
                 <ClubSearchBar
@@ -237,18 +224,6 @@ const UMEventPage = forwardRef(function UMEventPage(
                     clearAccessibilityLabel={t('清除搜尋')}
                     containerStyle={{ backgroundColor: bg_color }}
                 />
-                {hideSourceLabel ? null : (
-                    <Text
-                        style={{
-                            ...uiStyle.defaultText,
-                            color: black.third,
-                            alignSelf: 'center',
-                            marginTop: scale(5),
-                            fontSize: verticalScale(12),
-                        }}>
-                        Data From: data.um.edu.mo
-                    </Text>
-                )}
             </View>
         );
 
@@ -257,14 +232,19 @@ const UMEventPage = forwardRef(function UMEventPage(
                 <FlashList
                     ref={scrollViewRef}
                     data={filteredData}
-                    contentInsetAdjustmentBehavior="automatic"
-                    contentContainerStyle={{ paddingTop: contentTopInset }}
+                    // 只關 contentInset 不夠。指示器預設仍會把外層橫向 Pager 的
+                    // safe area 疊加上去；17 Pro 貼齊右緣時，這段間距會被算到
+                    // 水平方向，滾動條就落到內容裡。18 Pro Max 不會走這條計算。
+                    contentInsetAdjustmentBehavior="never"
+                    automaticallyAdjustsScrollIndicatorInsets={false}
+                    scrollIndicatorInsets={{
+                        bottom: tabBarHeight,
+                        right: 1,
+                    }}
                     keyExtractor={item => item._id}
                     renderItem={renderItem}
                     ItemSeparatorComponent={NewsRowSeparator}
                     drawDistance={500}
-                    onScroll={handleScroll}
-                    scrollEventThrottle={16}
                     ListHeaderComponent={listHeader}
                     refreshControl={
                         <RefreshControl
@@ -292,7 +272,7 @@ const UMEventPage = forwardRef(function UMEventPage(
                 backgroundColor: bg_color,
             }}>
             {isLoading ? (
-                <NewsListSkeleton contentTopInset={contentTopInset} />
+                <NewsListSkeleton />
             ) : (
                 data != undefined && renderPage()
             )}
