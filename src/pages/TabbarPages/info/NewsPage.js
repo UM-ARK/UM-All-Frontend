@@ -9,6 +9,7 @@ import React, {
     useMemo,
 } from 'react';
 import {
+    Animated,
     View,
     VirtualizedList,
     RefreshControl,
@@ -20,7 +21,12 @@ import ScalePressable from '../../../components/ScalePressable';
 import ClubSearchBar from './components/ClubSearchBar';
 import NewsCard, { NewsRowSeparator } from './components/NewsCard';
 import NewsListSkeleton from './components/NewsListSkeleton';
-import { filterUMOpenDataItemsBySearchQuery } from './utils/umOpenDataSearch';
+import SearchHighlightText from './components/SearchHighlightText';
+import {
+    filterUMOpenDataItemsBySearchQuery,
+    pickDisplayedTitles,
+} from './utils/umOpenDataSearch';
+import { useCollapsingSearchHeader } from './utils/useCollapsingSearchHeader';
 
 import { uiStyle, ThemeContext } from '../../../components/ThemeContext';
 import { UM_API_NEWS, UM_API_TOKEN } from '../../../utils/pathMap';
@@ -37,8 +43,11 @@ import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import axios from 'axios';
 import { useTranslation } from 'react-i18next';
+import Reanimated from 'react-native-reanimated';
 import { scale, verticalScale } from 'react-native-size-matters';
 import lodash from 'lodash';
+
+const AnimatedVirtualizedList = Animated.createAnimatedComponent(VirtualizedList);
 
 // 整理需要返回的數據給renderItem
 // 此處返回的數據會成為renderItem({item})獲取到的數據。。。
@@ -77,7 +86,7 @@ const NewsPage = forwardRef(function NewsPage(_props, ref) {
         useContext(BottomTabBarHeightContext) ?? insets.bottom + 49;
     const { t, i18n } = useTranslation('common');
     const currentLanguage = i18n.resolvedLanguage || i18n.language;
-    const { white, viewShadow, bg_color, themeColor, trueWhite, imagePlaceholder } = theme;
+    const { white, viewShadow, bg_color, black, themeColor, trueWhite, imagePlaceholder } = theme;
     const styles = StyleSheet.create({
         topNewsContainer: {
             borderRadius: scale(10),
@@ -109,11 +118,6 @@ const NewsPage = forwardRef(function NewsPage(_props, ref) {
             fontWeight: 'bold',
             fontSize: verticalScale(20),
         },
-        searchContainer: {
-            backgroundColor: bg_color,
-            borderTopWidth: 0,
-            borderBottomWidth: 0,
-        },
     });
 
     const navigation = useContext(NavigationContext);
@@ -126,6 +130,16 @@ const NewsPage = forwardRef(function NewsPage(_props, ref) {
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [newsItems, setNewsItems] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
+    const {
+        onScroll: onSearchScroll,
+        onScrollBeginDrag: onSearchScrollBeginDrag,
+        onScrollEndDrag: onSearchScrollEndDrag,
+        onMomentumScrollEnd: onSearchMomentumScrollEnd,
+        onBarLayout: onSearchBarLayout,
+        animatedStyle: searchBarAnimatedStyle,
+        barHeight: searchBarHeight,
+        collapsed: searchCollapsed,
+    } = useCollapsingSearchHeader();
 
     const filteredNewsItems = useMemo(
         () => filterUMOpenDataItemsBySearchQuery(newsItems, searchQuery),
@@ -161,10 +175,14 @@ const NewsPage = forwardRef(function NewsPage(_props, ref) {
     const renderNewsItem = useCallback(
         ({ item }) => (
             <View style={{ width: '100%' }}>
-                <NewsCard data={item} language={currentLanguage} />
+                <NewsCard
+                    data={item}
+                    language={currentLanguage}
+                    searchQuery={searchQuery}
+                />
             </View>
         ),
-        [currentLanguage],
+        [currentLanguage, searchQuery],
     );
 
     // 請求澳大api返回新聞數據
@@ -240,14 +258,10 @@ const NewsPage = forwardRef(function NewsPage(_props, ref) {
         };
     }, [getData]);
 
-    const topNewsContent = useMemo(() => {
-        const titleLocale = currentLanguage === 'tc' ? 'zh_TW' : 'en_US';
-        const title =
-            topNews.details?.find(item => item.locale === titleLocale)?.title ||
-            '';
-
-        return { title };
-    }, [currentLanguage, topNews]);
+    const topNewsContent = useMemo(
+        () => pickDisplayedTitles(topNews.details, currentLanguage, searchQuery),
+        [currentLanguage, searchQuery, topNews.details],
+    );
 
     // 多圖時隨機取一張；依頭條 id 固定，避免語言切換或重渲染時換圖
     const topNewsImage = useMemo(() => {
@@ -267,7 +281,12 @@ const NewsPage = forwardRef(function NewsPage(_props, ref) {
         if (!topNews?._id) {
             return null;
         }
-        const { title } = topNewsContent;
+        const { title, alternateTitle } = topNewsContent;
+        const heroHighlightStyle = {
+            color: black.main,
+            backgroundColor: trueWhite,
+            fontWeight: 'bold',
+        };
 
         return (
             <View style={{ marginTop: verticalScale(5) }}>
@@ -304,43 +323,43 @@ const NewsPage = forwardRef(function NewsPage(_props, ref) {
                                 justifyContent: 'center',
                                 width: '100%',
                             }}>
-                                <Text style={{
-                                    ...uiStyle.defaultText,
-                                    color: trueWhite,
-                                    fontWeight: 'bold',
-                                    fontSize: verticalScale(18),
-                                }}
-                                    numberOfLines={3}>
-                                    {title}
-                                </Text>
+                                <SearchHighlightText
+                                    text={title}
+                                    query={searchQuery}
+                                    highlightStyle={heroHighlightStyle}
+                                    numberOfLines={alternateTitle ? 2 : 3}
+                                    style={{
+                                        ...uiStyle.defaultText,
+                                        color: trueWhite,
+                                        fontWeight: 'bold',
+                                        fontSize: verticalScale(18),
+                                    }}
+                                />
+                                {alternateTitle ? (
+                                    <SearchHighlightText
+                                        text={alternateTitle}
+                                        query={searchQuery}
+                                        highlightStyle={heroHighlightStyle}
+                                        numberOfLines={2}
+                                        style={{
+                                            ...uiStyle.defaultText,
+                                            color: trueWhite,
+                                            fontSize: verticalScale(13),
+                                            marginTop: verticalScale(4),
+                                        }}
+                                    />
+                                ) : null}
                             </View>
                         </View>
                     </ScalePressable>
                 </View>
             </View >
         );
-    }, [topNews, topNewsContent, topNewsImage, imagePlaceholder, navigation, styles.topNewsContainer, styles.topNewsOverlay, styles.topNewsPosition, styles.topNewsText, t, trueWhite]);
+    }, [black.main, imagePlaceholder, navigation, searchQuery, styles.topNewsContainer, styles.topNewsOverlay, styles.topNewsPosition, styles.topNewsText, t, topNews, topNewsContent, topNewsImage, trueWhite]);
 
     const handleSearchFocus = useCallback(() => {
         trigger();
     }, []);
-
-    const listHeader = useMemo(() => (
-        <>
-            <ClubSearchBar
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-                loading={isRefreshing}
-                onFocus={handleSearchFocus}
-                onCancel={() => setSearchQuery('')}
-                placeholder={t('搜索澳大新聞')}
-                cancelLabel={t('取消')}
-                clearAccessibilityLabel={t('清除搜尋')}
-                containerStyle={styles.searchContainer}
-            />
-            {renderTopNews}
-        </>
-    ), [handleSearchFocus, isRefreshing, renderTopNews, searchQuery, styles.searchContainer, t]);
 
     return (
         <View style={{
@@ -357,11 +376,16 @@ const NewsPage = forwardRef(function NewsPage(_props, ref) {
             {isLoading ? (
                 <NewsListSkeleton showTopNews />
             ) : (
-                <View style={{ flex: 1, width: '100%' }}>
-                    <VirtualizedList
+                <View style={{ flex: 1, width: '100%', overflow: 'hidden' }}>
+                    <AnimatedVirtualizedList
                         data={newsList}
                         ref={virtualizedList}
                         style={{ flex: 1, width: '100%' }}
+                        onScroll={onSearchScroll}
+                        onScrollBeginDrag={onSearchScrollBeginDrag}
+                        onScrollEndDrag={onSearchScrollEndDrag}
+                        onMomentumScrollEnd={onSearchMomentumScrollEnd}
+                        scrollEventThrottle={16}
                         // 只關 contentInset 不夠。指示器預設仍會把外層橫向 Pager 的
                         // safe area 疊加上去；17 Pro 貼齊右緣時，這段間距會被算到
                         // 水平方向，滾動條就落到內容裡。18 Pro Max 不會走這條計算。
@@ -380,6 +404,7 @@ const NewsPage = forwardRef(function NewsPage(_props, ref) {
                         ItemSeparatorComponent={NewsRowSeparator}
                         contentContainerStyle={{
                             width: '100%',
+                            paddingTop: searchBarHeight,
                         }}
                         keyExtractor={item => item._id}
                         // 整理item數據
@@ -387,12 +412,13 @@ const NewsPage = forwardRef(function NewsPage(_props, ref) {
                         // 渲染項目數量
                         getItemCount={getItemCount}
                         // 列表頭部渲染的組件 - 頭條新聞
-                        ListHeaderComponent={listHeader}
+                        ListHeaderComponent={renderTopNews}
                         refreshControl={
                             <RefreshControl
                                 colors={[themeColor]}
                                 tintColor={themeColor}
                                 refreshing={isRefreshing}
+                                progressViewOffset={searchBarHeight}
                                 onRefresh={() => {
                                     getData({ refreshing: true });
                                 }}
@@ -402,6 +428,34 @@ const NewsPage = forwardRef(function NewsPage(_props, ref) {
                         alwaysBounceHorizontal={false}
                         removeClippedSubviews
                     />
+                    <Reanimated.View
+                        onLayout={onSearchBarLayout}
+                        pointerEvents={searchCollapsed ? 'none' : 'auto'}
+                        accessibilityElementsHidden={searchCollapsed}
+                        importantForAccessibility={
+                            searchCollapsed ? 'no-hide-descendants' : 'auto'
+                        }
+                        style={[
+                            {
+                                position: 'absolute',
+                                top: 0,
+                                left: 0,
+                                right: 0,
+                                zIndex: 2,
+                            },
+                            searchBarAnimatedStyle,
+                        ]}>
+                        <ClubSearchBar
+                            value={searchQuery}
+                            onChangeText={setSearchQuery}
+                            loading={isRefreshing}
+                            onFocus={handleSearchFocus}
+                            onCancel={() => setSearchQuery('')}
+                            placeholder={t('搜索澳大新聞')}
+                            cancelLabel={t('取消')}
+                            clearAccessibilityLabel={t('清除搜尋')}
+                        />
+                    </Reanimated.View>
                 </View>
             )}
         </View>

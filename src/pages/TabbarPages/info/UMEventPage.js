@@ -9,7 +9,7 @@ import React, {
     useMemo,
 } from 'react';
 import { View, RefreshControl } from 'react-native';
-import { FlashList } from '@shopify/flash-list';
+import { AnimatedFlashList } from '@shopify/flash-list';
 
 import { ThemeContext } from '../../../components/ThemeContext';
 import { UM_API_EVENT, UM_API_TOKEN } from '../../../utils/pathMap';
@@ -24,10 +24,12 @@ import NewsCard, { NewsRowSeparator } from './components/NewsCard';
 import NewsListSkeleton from './components/NewsListSkeleton';
 import ClubSearchBar from './components/ClubSearchBar';
 import { filterUMOpenDataItemsBySearchQuery } from './utils/umOpenDataSearch';
+import { useCollapsingSearchHeader } from './utils/useCollapsingSearchHeader';
 
 import axios from 'axios';
 import moment from 'moment-timezone';
 import { useTranslation } from 'react-i18next';
+import Reanimated from 'react-native-reanimated';
 import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -93,6 +95,16 @@ const UMEventPage = forwardRef(function UMEventPage(_props, ref) {
     const [data, setData] = useState(undefined);
     const [searchQuery, setSearchQuery] = useState('');
     const [isLoading, setIsLoading] = useState(true);
+    const {
+        onScroll: onSearchScroll,
+        onScrollBeginDrag: onSearchScrollBeginDrag,
+        onScrollEndDrag: onSearchScrollEndDrag,
+        onMomentumScrollEnd: onSearchMomentumScrollEnd,
+        onBarLayout: onSearchBarLayout,
+        animatedStyle: searchBarAnimatedStyle,
+        barHeight: searchBarHeight,
+        collapsed: searchCollapsed,
+    } = useCollapsingSearchHeader();
     const [isRefreshing, setIsRefreshing] = useState(false);
 
     useImperativeHandle(
@@ -204,34 +216,27 @@ const UMEventPage = forwardRef(function UMEventPage(_props, ref) {
                 data={item}
                 type={'event'}
                 language={currentLanguage}
+                searchQuery={searchQuery}
             />
         ),
-        [currentLanguage],
+        [currentLanguage, searchQuery],
     );
 
     // 渲染主要內容
     const renderPage = () => {
         const { themeColor } = theme;
-        const listHeader = (
-            <View>
-                <ClubSearchBar
-                    value={searchQuery}
-                    onChangeText={setSearchQuery}
-                    loading={isRefreshing}
-                    onFocus={handleSearchFocus}
-                    placeholder={t('搜索澳大活動')}
-                    cancelLabel={t('取消')}
-                    clearAccessibilityLabel={t('清除搜尋')}
-                    containerStyle={{ backgroundColor: bg_color }}
-                />
-            </View>
-        );
-
         return (
-            <View style={{ flex: 1, width: '100%' }}>
-                <FlashList
+            <View style={{ flex: 1, width: '100%', overflow: 'hidden' }}>
+                <AnimatedFlashList
                     ref={scrollViewRef}
+                    style={{ flex: 1, width: '100%' }}
                     data={filteredData}
+                    contentContainerStyle={{ paddingTop: searchBarHeight }}
+                    onScroll={onSearchScroll}
+                    onScrollBeginDrag={onSearchScrollBeginDrag}
+                    onScrollEndDrag={onSearchScrollEndDrag}
+                    onMomentumScrollEnd={onSearchMomentumScrollEnd}
+                    scrollEventThrottle={16}
                     // 只關 contentInset 不夠。指示器預設仍會把外層橫向 Pager 的
                     // safe area 疊加上去；17 Pro 貼齊右緣時，這段間距會被算到
                     // 水平方向，滾動條就落到內容裡。18 Pro Max 不會走這條計算。
@@ -245,18 +250,45 @@ const UMEventPage = forwardRef(function UMEventPage(_props, ref) {
                     renderItem={renderItem}
                     ItemSeparatorComponent={NewsRowSeparator}
                     drawDistance={500}
-                    ListHeaderComponent={listHeader}
                     refreshControl={
                         <RefreshControl
                             colors={[themeColor]}
                             tintColor={themeColor}
                             refreshing={isRefreshing}
+                            progressViewOffset={searchBarHeight}
                             onRefresh={() => {
                                 getData({ refreshing: true });
                             }}
                         />
                     }
                 />
+                <Reanimated.View
+                    onLayout={onSearchBarLayout}
+                    pointerEvents={searchCollapsed ? 'none' : 'auto'}
+                    accessibilityElementsHidden={searchCollapsed}
+                    importantForAccessibility={
+                        searchCollapsed ? 'no-hide-descendants' : 'auto'
+                    }
+                    style={[
+                        {
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            zIndex: 2,
+                        },
+                        searchBarAnimatedStyle,
+                    ]}>
+                    <ClubSearchBar
+                        value={searchQuery}
+                        onChangeText={setSearchQuery}
+                        loading={isRefreshing}
+                        onFocus={handleSearchFocus}
+                        placeholder={t('搜索澳大活動')}
+                        cancelLabel={t('取消')}
+                        clearAccessibilityLabel={t('清除搜尋')}
+                    />
+                </Reanimated.View>
             </View>
         );
     };

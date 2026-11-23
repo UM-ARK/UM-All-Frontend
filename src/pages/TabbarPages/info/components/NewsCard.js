@@ -5,6 +5,8 @@ import Text from '../../../../components/AppText';
 import ScalePressable from '../../../../components/ScalePressable';
 import { useTheme, uiStyle } from '../../../../components/ThemeContext';
 import { trigger } from '../../../../utils/trigger';
+import SearchHighlightText from './SearchHighlightText';
+import { pickDisplayedTitles } from '../utils/umOpenDataSearch';
 
 import { NavigationContext } from '@react-navigation/native';
 import { Image } from 'expo-image';
@@ -72,7 +74,7 @@ const getDateColor = (
     return black.third;
 };
 
-const NewsCard = ({ data, type = 'news', language = 'en' }) => {
+const NewsCard = ({ data, type = 'news', language = 'en', searchQuery = '' }) => {
     // NavigationContext 可在非基頁拿到路由資訊
     const navigation = useContext(NavigationContext);
     const { theme } = useTheme();
@@ -105,12 +107,17 @@ const NewsCard = ({ data, type = 'news', language = 'en' }) => {
         ],
     );
 
-    const title = useMemo(() => {
-        const titleLocale = language === 'tc' ? 'zh_TW' : 'en_US';
-        return (
-            data.details.find(item => item.locale === titleLocale)?.title || ''
-        );
-    }, [data.details, language]);
+    const { title, alternateTitle } = useMemo(
+        () => pickDisplayedTitles(data.details, language, searchQuery),
+        [data.details, language, searchQuery],
+    );
+    const highlightStyle = useMemo(
+        () => ({
+            color: themeColor,
+            fontWeight: '700',
+        }),
+        [themeColor],
+    );
 
     const thumbnailUrl = type === 'event' ? data.common.posterUrl : data.common.imageUrls?.[0];
     const thumbnailUri = typeof thumbnailUrl === 'string'
@@ -135,16 +142,32 @@ const NewsCard = ({ data, type = 'news', language = 'en' }) => {
             onPress={handlePress}>
             <View style={newsRowStyles.textColumn}>
                 {title.length > 0 && (
-                    <Text
+                    <SearchHighlightText
+                        text={title}
+                        query={searchQuery}
+                        highlightStyle={highlightStyle}
+                        numberOfLines={3}
                         style={{
                             ...uiStyle.defaultText,
                             color: black.main,
                             fontSize: verticalScale(14),
                             lineHeight: verticalScale(20),
                         }}
-                        numberOfLines={3}>
-                        {title}
-                    </Text>
+                    />
+                )}
+                {alternateTitle.length > 0 && (
+                    <SearchHighlightText
+                        text={alternateTitle}
+                        query={searchQuery}
+                        highlightStyle={highlightStyle}
+                        numberOfLines={2}
+                        style={{
+                            ...uiStyle.defaultText,
+                            color: black.third,
+                            fontSize: verticalScale(12),
+                            lineHeight: verticalScale(16),
+                        }}
+                    />
                 )}
                 <Text
                     style={{
