@@ -110,6 +110,7 @@ const HarborTopicList = ({
     onCapabilities,
     isTopicPressAllowed,
     onScroll,
+    onScrollBeginDrag,
     onScrollEndDrag,
     onMomentumScrollEnd,
     emptyTitle,
@@ -942,6 +943,7 @@ const HarborTopicList = ({
                 scrollIndicatorInsets={scrollIndicatorInsets}
                 showsVerticalScrollIndicator={true}
                 onScroll={onScroll}
+                onScrollBeginDrag={onScrollBeginDrag}
                 onScrollEndDrag={onScrollEndDrag}
                 onMomentumScrollEnd={onMomentumScrollEnd}
                 scrollEventThrottle={16}
@@ -970,6 +972,7 @@ const HarborTopicList = ({
             scrollIndicatorInsets={scrollIndicatorInsets}
             showsVerticalScrollIndicator={true}
             onScroll={onScroll}
+            onScrollBeginDrag={onScrollBeginDrag}
             onScrollEndDrag={onScrollEndDrag}
             onMomentumScrollEnd={onMomentumScrollEnd}
             scrollEventThrottle={16}
