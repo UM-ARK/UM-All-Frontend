@@ -26,8 +26,9 @@ const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
  * @param {Object} props.virtualizedListRef - 虛擬列表的 ref，用於調用 scrollToOffset 方法
  * @param {number} [props.initialSnapPointIndex=5] - 初始吸附點索引，默認為右下位置
  *                                                 0: 左上, 1: 左中, 2: 左下, 3: 右上, 4: 右中, 5: 右下
+ * @param {Object} [props.style] - 附加在按鈕容器上的樣式，例如層級
  */
-const ScrollToTopButton = ({ visible = true, onScrollToTop, virtualizedListRef, initialSnapPointIndex = 5 }) => {
+const ScrollToTopButton = ({ visible = true, onScrollToTop, virtualizedListRef, initialSnapPointIndex = 5, style }) => {
     // 獲取主題上下文
     const { theme } = useContext(ThemeContext);
 
@@ -151,7 +152,8 @@ const ScrollToTopButton = ({ visible = true, onScrollToTop, virtualizedListRef, 
         <GestureDetector gesture={panGesture}>
             <Animated.View
                 style={[
-                    { position: 'absolute', },
+                    { position: 'absolute' },
+                    style,
                     animatedStyle,
                 ]}
             >

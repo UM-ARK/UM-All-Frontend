@@ -111,7 +111,10 @@ const CampusPage = () => {
                 </View>
             </PagerView>
 
-            <ScrollToTopButton onScrollToTop={onScrollToTopPress} />
+            <ScrollToTopButton
+                onScrollToTop={onScrollToTopPress}
+                style={styles.scrollTopButton}
+            />
         </View>
     );
 };
@@ -128,6 +131,10 @@ const styles = StyleSheet.create({
     },
     segment: {
         alignSelf: 'stretch',
+    },
+    scrollTopButton: {
+        zIndex: 30,
+        elevation: 30,
     },
     pager: {
         flex: 1,
