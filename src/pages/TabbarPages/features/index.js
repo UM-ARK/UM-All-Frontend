@@ -2,6 +2,7 @@ import React, { useState, useRef, useCallback, useContext, useMemo, useEffect } 
 import {
     Platform,
     ScrollView,
+    StyleSheet,
     View,
 } from 'react-native';
 
@@ -72,8 +73,8 @@ const CARD_COLUMN_COUNT = {
     expanded: 2,
     large: 3,
 };
-/** 每行圖標上限：手機 5 個剛好填滿；寬屏放寬到 8 個，避免 5 個圖標被拉開成大間距 */
-const COMPACT_GRID_MAX_ITEMS_PER_ROW = 5;
+/** 每行圖標上限：手機 4 個保持舒展留白；寬屏放寬到 8 個 */
+const COMPACT_GRID_MAX_ITEMS_PER_ROW = 4;
 const WIDE_GRID_MAX_ITEMS_PER_ROW = 8;
 const SEARCH_HEADER_FADE_HEIGHT = verticalScale(12);
 const SEARCH_HIGHLIGHT_ANIMATION = {
@@ -120,13 +121,13 @@ function FeatureSectionGrid({ data, matchedFeatures, ...gridProps }) {
 
 function FeatureListPage({ navigation }) {
     const { theme } = useTheme();
-    const { themeColor, white, black, bg_color, tonal } = theme;
+    const { themeColor, white, black, featuresScreen, tonal } = theme;
     const { status: harborStatus, user: harborUser, login } = useHarborSession();
     const { t, i18n } = useTranslation(['common', 'home', 'features']);
     const functionArr = useMemo(() => getFunctionArr(t), [t]);
     const { width: windowWidth, sizeClass, isCompact } = useWindowSizeClass();
     const isTc = i18n.language === 'tc';
-    const fontSize = isTc ? verticalScale(10) : verticalScale(8);
+    const fontSize = isTc ? verticalScale(11) : verticalScale(9);
     const [bottomSheetInfo, setBottomSheetInfo] = useState(null);
     const [usageRecords, setUsageRecords] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
@@ -299,12 +300,14 @@ function FeatureListPage({ navigation }) {
     );
 
     // 繁中標籤按單行高度排版，英文預留兩行讓每列圖標對齊
-    const featureLabelLineHeight = fontSize * 1.25;
+    const featureLabelLineHeight = fontSize * 1.3;
     const featureLabelHeight = isTc ? undefined : featureLabelLineHeight * 2;
     // FlatGrid 末列會再加 marginBottom: spacing，與 row paddingBottom 重疊，需抵銷
     const gridSpacing = scale(10);
     const gridBottomTrim = -gridSpacing;
-    const gridItemDimension = scale(50);
+    const gridItemDimension = scale(64);
+    const cardHorizontalMargin = scale(12);
+    const cardHorizontalPadding = scale(6);
     const gridMaxItemsPerRow = isCompact
         ? COMPACT_GRID_MAX_ITEMS_PER_ROW
         : WIDE_GRID_MAX_ITEMS_PER_ROW;
@@ -314,17 +317,38 @@ function FeatureListPage({ navigation }) {
         : FREQUENT_FEATURES_DISPLAY_LIMIT * (gridItemDimension + gridSpacing * 2) + gridSpacing;
     const cardColumnCount = CARD_COLUMN_COUNT[sizeClass] || 1;
 
-    // 分類卡分欄：用估算的每行圖標數換算行數作平衡權重（標題約半行），
-    // 只決定卡片落在哪一欄；實際每行圖標數仍由 FlatGrid 量測後自行決定
-    const cardColumns = useMemo(() => {
-        const columnWidth = Math.min(windowWidth, WIDE_CONTENT_MAX_WIDTH) / cardColumnCount - gridSpacing * 2;
+    // 同一 groupKey（出行／餐飲／學習空間）合併成同一個視覺卡片，組內以細線輕隔
+    const sectionBlocks = useMemo(() => {
+        const blocks = [];
+        visibleSections.forEach(section => {
+            const lastBlock = blocks[blocks.length - 1];
+            if (section.groupKey && lastBlock?.groupKey === section.groupKey) {
+                lastBlock.sections.push(section);
+            } else {
+                blocks.push({
+                    key: section.groupKey || section.title,
+                    groupKey: section.groupKey || null,
+                    sections: [section],
+                });
+            }
+        });
+        return blocks;
+    }, [visibleSections]);
+
+    // 分類區塊分欄：用估算的每行圖標數換算行數作平衡權重（標題約 0.4 行），
+    // 只決定區塊落在哪一欄；實際每行圖標數仍由 FlatGrid 量測後自行決定
+    const sectionColumns = useMemo(() => {
+        const columnWidth = Math.min(windowWidth, WIDE_CONTENT_MAX_WIDTH) / cardColumnCount - (cardHorizontalMargin + cardHorizontalPadding) * 2;
         const itemsPerRow = getGridItemsPerRow(columnWidth, gridItemDimension, gridSpacing, gridMaxItemsPerRow);
         return balanceColumns(
-            visibleSections,
+            sectionBlocks,
             cardColumnCount,
-            section => Math.ceil(section.fn.length / itemsPerRow) + 0.5,
+            block => block.sections.reduce(
+                (sum, section) => sum + Math.ceil(section.fn.length / itemsPerRow) + 0.4,
+                0,
+            ),
         );
-    }, [cardColumnCount, visibleSections, gridItemDimension, gridMaxItemsPerRow, gridSpacing, windowWidth]);
+    }, [cardColumnCount, cardHorizontalMargin, cardHorizontalPadding, sectionBlocks, gridItemDimension, gridMaxItemsPerRow, gridSpacing, windowWidth]);
 
     const renderFeatureItem = useCallback(
         item => {
@@ -366,7 +390,12 @@ function FeatureListPage({ navigation }) {
                         }}
                     />
                 ) : null}
-                <FeatureIcon item={item} size={scale(22)} muted={isMuted} />
+                <FeatureIcon
+                    item={item}
+                    size={scale(26)}
+                    muted={isMuted}
+                    showBackground={false}
+                />
                 <Text
                     numberOfLines={isTc ? 1 : 2}
                     style={{
@@ -376,7 +405,7 @@ function FeatureListPage({ navigation }) {
                         height: featureLabelHeight,
                         color: isMuted ? black.third : black.second,
                         textAlign: 'center',
-                        marginTop: verticalScale(4),
+                        marginTop: verticalScale(6),
                     }}>
                     {item.fn_name}
                 </Text>
@@ -397,59 +426,78 @@ function FeatureListPage({ navigation }) {
         ],
     );
 
-    // 功能卡片渲染，useCallback避免不必要的重渲染
-    const GetFunctionCard = useCallback(
-        (title, fn_list, options = {}) => {
-            const { marginTop = verticalScale(10) } = options;
-            return (
+    // 圓角白卡分類區塊，標題視覺退後讓彩色雙色圖標成為焦點
+    const renderSectionBlock = useCallback(
+        (block, blockIndex) => (
             <View
-                key={title}
+                key={block.key}
                 style={{
-                    backgroundColor: white,
-                    borderRadius: scale(10),
-                    marginHorizontal: scale(10),
-                    marginTop,
+                    backgroundColor: featuresScreen.cardBg,
+                    borderRadius: scale(14),
+                    marginTop: blockIndex === 0 ? verticalScale(2) : verticalScale(10),
+                    paddingTop: verticalScale(12),
+                    paddingBottom: verticalScale(12),
+                    paddingHorizontal: cardHorizontalPadding,
                 }}>
-                <View
-                    style={{
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        paddingHorizontal: scale(10),
-                        paddingTop: verticalScale(10),
-                        paddingBottom: verticalScale(8),
-                        borderBottomWidth: verticalScale(2),
-                        borderBottomColor: bg_color,
-                    }}>
-                    <Text
+                {block.sections.map((section, sectionIndex) => (
+                    <View
+                        key={section.title}
                         style={{
-                            ...uiStyle.defaultText,
-                            fontSize: verticalScale(13),
-                            color: black.main,
-                            fontWeight: '500',
+                            marginTop: sectionIndex === 0 ? 0 : verticalScale(10),
                         }}>
-                        {title}
-                    </Text>
-                </View>
+                        {sectionIndex > 0 ? (
+                            <View
+                                style={{
+                                    height: StyleSheet.hairlineWidth,
+                                    backgroundColor: featuresScreen.divider,
+                                    marginHorizontal: scale(10),
+                                    marginBottom: verticalScale(10),
+                                }}
+                            />
+                        ) : null}
+                        <Text
+                            style={{
+                                ...uiStyle.defaultText,
+                                fontSize: verticalScale(11.5),
+                                color: black.third,
+                                fontWeight: '500',
+                                paddingHorizontal: scale(10),
+                                paddingBottom: verticalScale(4),
+                            }}>
+                            {section.title}
+                        </Text>
 
-                <FeatureSectionGrid
-                    maxItemsPerRow={gridMaxItemsPerRow}
-                    itemDimension={gridItemDimension}
-                    spacing={gridSpacing}
-                    style={{ marginBottom: gridBottomTrim }}
-                    itemContainerStyle={{
-                        alignItems: 'center',
-                        justifyContent: 'flex-start',
-                    }}
-                    data={fn_list}
-                    matchedFeatures={matchedFeatures}
-                    renderItem={({ item }) => renderFeatureItem(item)}
-                    showsVerticalScrollIndicator={false}
-                    scrollEnabled={false}
-                />
+                        <FeatureSectionGrid
+                            maxItemsPerRow={gridMaxItemsPerRow}
+                            itemDimension={gridItemDimension}
+                            spacing={gridSpacing}
+                            style={{ marginBottom: gridBottomTrim }}
+                            itemContainerStyle={{
+                                alignItems: 'center',
+                                justifyContent: 'flex-start',
+                            }}
+                            data={section.fn}
+                            matchedFeatures={matchedFeatures}
+                            renderItem={({ item }) => renderFeatureItem(item)}
+                            showsVerticalScrollIndicator={false}
+                            scrollEnabled={false}
+                        />
+                    </View>
+                ))}
             </View>
-            );
-        },
-        [white, bg_color, black.main, renderFeatureItem, gridSpacing, gridBottomTrim, gridItemDimension, gridMaxItemsPerRow, matchedFeatures],
+        ),
+        [
+            black.third,
+            cardHorizontalPadding,
+            featuresScreen.cardBg,
+            featuresScreen.divider,
+            gridBottomTrim,
+            gridItemDimension,
+            gridMaxItemsPerRow,
+            gridSpacing,
+            matchedFeatures,
+            renderFeatureItem,
+        ],
     );
 
     // BottomSheet內容渲染
@@ -468,7 +516,11 @@ function FeatureListPage({ navigation }) {
                     paddingTop: verticalScale(4),
                     paddingBottom: sheetContentBottomPad,
                 }}>
-                <FeatureIcon item={bottomSheetInfo} size={scale(26)} />
+                <FeatureIcon
+                    item={bottomSheetInfo}
+                    size={scale(34)}
+                    showBackground={false}
+                />
                 <Text
                     style={{
                         ...uiStyle.defaultText,
@@ -537,7 +589,7 @@ function FeatureListPage({ navigation }) {
         <View
             style={{
                 flex: 1,
-                backgroundColor: bg_color,
+                backgroundColor: featuresScreen.bg_color,
             }}>
             <View style={{ zIndex: 1 }}>
                 <FeatureSearchBar
@@ -550,7 +602,7 @@ function FeatureListPage({ navigation }) {
                 />
                 <LinearGradient
                     pointerEvents="none"
-                    colors={[bg_color, `${bg_color}00`]}
+                    colors={[featuresScreen.bg_color, featuresScreen.bgTransparent]}
                     style={{
                         position: 'absolute',
                         top: '100%',
@@ -570,26 +622,33 @@ function FeatureListPage({ navigation }) {
                     paddingTop: SEARCH_HEADER_FADE_HEIGHT,
                     paddingBottom: listBottomPad,
                 }}>
-                {/* 超寬屏內容居中封頂，分類卡再按尺寸等級分成 1／2／3 欄 */}
+                {/* 超寬屏內容居中封頂，分類區塊再按尺寸等級分成 1／2／3 欄 */}
                 <View
                     style={{
                         width: '100%',
                         maxWidth: WIDE_CONTENT_MAX_WIDTH,
                         alignSelf: 'center',
+                        paddingHorizontal: cardHorizontalMargin,
                     }}>
                 {!isSearching && frequentFeatures.length > 0 ? (
                     <View
                         style={{
                             width: '100%',
-                            marginTop: verticalScale(8),
+                            backgroundColor: featuresScreen.cardBg,
+                            borderRadius: scale(14),
+                            marginTop: verticalScale(2),
+                            marginBottom: verticalScale(8),
+                            paddingTop: verticalScale(12),
+                            paddingBottom: verticalScale(12),
+                            paddingHorizontal: cardHorizontalPadding,
                         }}>
                         <Text
                             style={{
                                 ...uiStyle.defaultText,
-                                fontSize: verticalScale(13),
-                                color: black.main,
-                                fontWeight: '600',
-                                paddingHorizontal: scale(16),
+                                fontSize: verticalScale(11.5),
+                                color: black.third,
+                                fontWeight: '500',
+                                paddingHorizontal: scale(10),
                                 paddingBottom: verticalScale(4),
                             }}>
                             {t('常用服務', { ns: 'features' })}
@@ -612,14 +671,16 @@ function FeatureListPage({ navigation }) {
                     </View>
                 ) : null}
 
-                <View style={{ flexDirection: 'row', alignItems: 'flex-start' }}>
-                    {cardColumns.map((sections, columnIndex) => (
+                <View
+                    style={{
+                        flexDirection: 'row',
+                        alignItems: 'flex-start',
+                        columnGap: cardColumnCount > 1 ? scale(12) : 0,
+                    }}>
+                    {sectionColumns.map((blocks, columnIndex) => (
                         <View key={columnIndex} style={{ flex: 1 }}>
-                            {sections.map((fn_card, index) =>
-                                GetFunctionCard(fn_card.title, fn_card.fn, {
-                                    // 每欄第一張分類卡貼近上方常用服務
-                                    marginTop: index === 0 ? verticalScale(2) : verticalScale(10),
-                                }),
+                            {blocks.map((block, index) =>
+                                renderSectionBlock(block, index),
                             )}
                         </View>
                     ))}
@@ -647,62 +708,64 @@ function FeatureListPage({ navigation }) {
 
 export default function Index() {
     const { theme } = useTheme();
-    const { bg_color, black, themeColor } = theme;
+    const { black, featuresScreen, themeColor } = theme;
     const { t } = useTranslation('common');
 
     return (
-        <SafeAreaView
-            style={{ backgroundColor: bg_color, flex: 1 }}
-            edges={{ top: true }}>
-            <Tab.Navigator
-                screenOptions={{
-                    tabBarLabel: TopTabLabel,
-                    tabBarStyle: {
-                        backgroundColor: bg_color,
-                        height: TAB_BAR_HEIGHT,
-                        overflow: 'hidden',
-                        // 寬屏時兩個 Tab 不再被拉到左右兩端，手機寬度小於此值不受影響
-                        width: '100%',
-                        maxWidth: TOP_TAB_STRIP_MAX_WIDTH,
-                        alignSelf: 'center',
-                    },
-                    tabBarItemStyle: {
-                        minHeight: TAB_BAR_HEIGHT,
-                        paddingVertical: 0,
-                    },
-                    tabBarContentContainerStyle: {
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                    },
-                    tabBarBounces: false,
-                    tabBarActiveTintColor: black.second,
-                    tabBarInactiveTintColor: black.third,
-                    tabBarPressColor: bg_color,
-                    tabBarIndicatorStyle: {
-                        backgroundColor: themeColor,
-                        width: TAB_INDICATOR_WIDTH,
-                        marginHorizontal: 'auto',
-                    },
-                    lazy: true,
-                }}
-                initialRouteName="FeatureList">
-                <Tab.Screen
-                    name="FeatureList"
-                    component={FeatureListPage}
-                    options={{ title: t('服務') }}
-                    listeners={() => ({
-                        tabPress: () => trigger(),
-                    })}
-                />
-                <Tab.Screen
-                    name="WikiHome"
-                    component={WikiHome}
-                    options={{ title: t('百科') }}
-                    listeners={() => ({
-                        tabPress: () => trigger(),
-                    })}
-                />
-            </Tab.Navigator>
-        </SafeAreaView>
+        <View style={{ flex: 1, backgroundColor: featuresScreen.bg_color }}>
+            <SafeAreaView
+                style={{ backgroundColor: featuresScreen.bg_color, flex: 1 }}
+                edges={{ top: true }}>
+                <Tab.Navigator
+                    screenOptions={{
+                        tabBarLabel: TopTabLabel,
+                        tabBarStyle: {
+                            backgroundColor: featuresScreen.bg_color,
+                            height: TAB_BAR_HEIGHT,
+                            overflow: 'hidden',
+                            // 寬屏時兩個 Tab 不再被拉到左右兩端，手機寬度小於此值不受影響
+                            width: '100%',
+                            maxWidth: TOP_TAB_STRIP_MAX_WIDTH,
+                            alignSelf: 'center',
+                        },
+                        tabBarItemStyle: {
+                            minHeight: TAB_BAR_HEIGHT,
+                            paddingVertical: 0,
+                        },
+                        tabBarContentContainerStyle: {
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                        },
+                        tabBarBounces: false,
+                        tabBarActiveTintColor: black.second,
+                        tabBarInactiveTintColor: black.third,
+                        tabBarPressColor: featuresScreen.bg_color,
+                        tabBarIndicatorStyle: {
+                            backgroundColor: themeColor,
+                            width: TAB_INDICATOR_WIDTH,
+                            marginHorizontal: 'auto',
+                        },
+                        lazy: true,
+                    }}
+                    initialRouteName="FeatureList">
+                    <Tab.Screen
+                        name="FeatureList"
+                        component={FeatureListPage}
+                        options={{ title: t('服務') }}
+                        listeners={() => ({
+                            tabPress: () => trigger(),
+                        })}
+                    />
+                    <Tab.Screen
+                        name="WikiHome"
+                        component={WikiHome}
+                        options={{ title: t('百科') }}
+                        listeners={() => ({
+                            tabPress: () => trigger(),
+                        })}
+                    />
+                </Tab.Navigator>
+            </SafeAreaView>
+        </View>
     );
 }

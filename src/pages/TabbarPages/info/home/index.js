@@ -114,6 +114,8 @@ const HomeScreen = ({ navigation }) => {
         {
             icon_name: 'bus-stop',
             icon_type: iconTypes.materialCommunityIcons,
+            phosphorIcon: 'bus',
+            iconTone: 'transport',
             function_name: t('校園巴士', { ns: 'home' }),
             func: () => {
                 trigger();
@@ -125,6 +127,8 @@ const HomeScreen = ({ navigation }) => {
         {
             icon_name: 'alpha-m-circle-outline',
             icon_type: iconTypes.materialCommunityIcons,
+            phosphorIcon: 'graduation-cap',
+            iconTone: 'academic',
             function_name: t('Moodle', { ns: 'home' }),
             func: () => {
                 trigger();
@@ -146,6 +150,8 @@ const HomeScreen = ({ navigation }) => {
         {
             icon_name: 'hand-heart',
             icon_type: iconTypes.materialCommunityIcons,
+            phosphorIcon: 'hand-heart',
+            iconTone: 'campus',
             function_name: t('支持我們', { ns: 'home' }),
             func: () => {
                 trigger();
@@ -164,6 +170,8 @@ const HomeScreen = ({ navigation }) => {
         {
             icon_name: 'help-circle-outline',
             icon_type: iconTypes.ionicons,
+            phosphorIcon: 'help-circle',
+            iconTone: 'academic',
             function_name: t('常見問題', { ns: 'home' }),
             func: () => {
                 trigger();

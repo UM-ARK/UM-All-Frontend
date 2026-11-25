@@ -132,6 +132,43 @@ const getColorDiy = (isLight) => {
         // ARK Wiki配色（與 white 相同）
         wiki_bg_color: whiteColor,
 
+        // 服務頁灰底白卡分組表面與分類語義色（收斂於 5 組低疲勞線性圖標配色）
+        featuresScreen: {
+            bg_color: isLight ? '#F5F5F7' : trueBlack,
+            bgTransparent: rgba(isLight ? '#F5F5F7' : trueBlack, 0),
+            cardBg: whiteColor,
+            searchBg: isLight ? '#FFFFFF' : whiteColor,
+            divider: rgba(isLight ? trueBlack : trueWhite, isLight ? 0.06 : 0.09),
+        },
+        featureIconTones: {
+            // 線性圖標語義色盤（亮色確保白卡 >=3:1 對比度；暗色提亮保持柔和通透）
+            // 出行、設施與預約（翠綠）
+            green: {
+                foreground: isLight ? '#18A957' : '#4ADE80',
+                background: isLight ? rgba('#18A957', 0.1) : rgba('#4ADE80', 0.16),
+            },
+            // 餐飲、新生與社群指南（暖橘）
+            orange: {
+                foreground: isLight ? '#EA7615' : '#FB923C',
+                background: isLight ? rgba('#EA7615', 0.1) : rgba('#FB923C', 0.16),
+            },
+            // 學習空間（柔紫）
+            violet: {
+                foreground: isLight ? '#7C5CE6' : '#A78BFA',
+                background: isLight ? rgba('#7C5CE6', 0.1) : rgba('#A78BFA', 0.16),
+            },
+            // 學業與選課（主題藍）
+            blue: {
+                foreground: themeColorValue,
+                background: isLight ? rgba(themeColorValue, 0.1) : rgba(themeColorValue, 0.16),
+            },
+            // 校務與資訊（珊瑚紅）
+            pink: {
+                foreground: isLight ? '#E6536C' : '#FB7185',
+                background: isLight ? rgba('#E6536C', 0.1) : rgba('#FB7185', 0.16),
+            },
+        },
+
         // Harbor頁面配色
         harbor_bg_color: isLight ? '#fbfdff' : '#111111',
         harborSearch: {

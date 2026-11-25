@@ -7,13 +7,39 @@ import Ionicons from "@react-native-vector-icons/ionicons";
 import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 
 import {useTheme} from '../../../../../../components/ThemeContext';
+import PhosphorFeatureIcon, {phosphorFeatureIcons} from './PhosphorFeatureIcon';
 
-const FeatureIcon = ({item, size = scale(20), muted = false}) => {
+const ICON_TONE_MAP = {
+    transport: 'green',
+    facility: 'green',
+    dining: 'orange',
+    guide: 'orange',
+    studySpaces: 'violet',
+    academic: 'blue',
+    campus: 'pink',
+};
+
+const FeatureIcon = ({item, size = scale(20), muted = false, showBackground = true}) => {
     const {theme} = useTheme();
-    const {bg_color, black, themeColor, tonal} = theme;
-    const iconColor = muted ? black.third : themeColor;
+    const {bg_color, black, featureIconTones} = theme;
+    const toneKey = ICON_TONE_MAP[item.iconTone] || item.iconTone || 'blue';
+    const tone = featureIconTones[toneKey] || featureIconTones.blue;
+    const iconColor = muted ? black.third : tone.foreground;
+    const phosphorKey = item.phosphorIcon;
+    const hasPhosphorIcon = Boolean(phosphorKey && phosphorFeatureIcons[phosphorKey]);
+    const iconBackground = tone.background;
 
     const renderIcon = () => {
+        if (hasPhosphorIcon) {
+            return (
+                <PhosphorFeatureIcon
+                    name={phosphorKey}
+                    size={size}
+                    color={iconColor}
+                />
+            );
+        }
+
         if (item.icon_type === 'ionicons') {
             return (
                 <Ionicons
@@ -48,8 +74,12 @@ const FeatureIcon = ({item, size = scale(20), muted = false}) => {
         return <Ionicons name="apps-outline" size={size} color={iconColor} />;
     };
 
+    if (!showBackground) {
+        return <View style={styles.bareContainer}>{renderIcon()}</View>;
+    }
+
     return (
-        <View style={[styles.container, {backgroundColor: muted ? bg_color : tonal.primary15}]}>
+        <View style={[styles.container, {backgroundColor: muted ? bg_color : iconBackground}]}>
             {renderIcon()}
         </View>
     );
@@ -60,6 +90,12 @@ const styles = StyleSheet.create({
         width: scale(42),
         height: scale(42),
         borderRadius: scale(14),
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    bareContainer: {
+        width: scale(36),
+        height: scale(34),
         alignItems: 'center',
         justifyContent: 'center',
     },

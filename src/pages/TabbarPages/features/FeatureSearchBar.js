@@ -26,7 +26,7 @@ export default function FeatureSearchBar({
     matchCount,
 }) {
     const { theme } = useTheme();
-    const { black, themeColor, white } = theme;
+    const { black, featuresScreen, themeColor } = theme;
     const { t } = useTranslation(['features', 'common', 'home']);
     const [isFocused, setIsFocused] = useState(false);
     const searchLabel = t('搜尋服務');
@@ -36,7 +36,10 @@ export default function FeatureSearchBar({
             <View style={[
                 searchFieldStyles.field,
                 searchFieldStyles.borderedField,
-                { backgroundColor: white, borderColor: isFocused ? themeColor : white },
+                {
+                    backgroundColor: featuresScreen.searchBg,
+                    borderColor: isFocused ? themeColor : featuresScreen.searchBg,
+                },
             ]}>
                 <Ionicons name="search" size={SEARCH_FIELD_ICON_SIZE} color={isFocused ? themeColor : black.third} />
                 <TextInput
@@ -107,7 +110,7 @@ const styles = StyleSheet.create({
         maxWidth: WIDE_CONTENT_MAX_WIDTH,
         alignSelf: 'center',
         marginTop: verticalScale(10),
-        paddingHorizontal: scale(10),
+        paddingHorizontal: scale(12),
     },
     statusRow: {
         flexDirection: 'row',
