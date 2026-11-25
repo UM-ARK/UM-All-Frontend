@@ -121,7 +121,7 @@ function FeatureSectionGrid({ data, matchedFeatures, ...gridProps }) {
 
 function FeatureListPage({ navigation }) {
     const { theme } = useTheme();
-    const { themeColor, white, black, featuresScreen, tonal } = theme;
+    const { themeColor, white, black, featuresScreen, viewShadow } = theme;
     const { status: harborStatus, user: harborUser, login } = useHarborSession();
     const { t, i18n } = useTranslation(['common', 'home', 'features']);
     const functionArr = useMemo(() => getFunctionArr(t), [t]);
@@ -384,9 +384,7 @@ function FeatureListPage({ navigation }) {
                             bottom: -verticalScale(2),
                             left: -scale(2),
                             borderRadius: scale(12),
-                            borderWidth: 1.5,
-                            borderColor: themeColor,
-                            backgroundColor: tonal.primary30,
+                            ...viewShadow,
                         }}
                     />
                 ) : null}
@@ -421,8 +419,7 @@ function FeatureListPage({ navigation }) {
             isTc,
             matchedFeatures,
             reducedMotion,
-            themeColor,
-            tonal.primary30,
+            viewShadow,
         ],
     );
 
