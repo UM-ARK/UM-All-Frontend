@@ -13,10 +13,9 @@ import { TAB_LABEL_FONT_SIZE } from '../constants';
  * - 有衝突 → 顯示衝突數
  * - 尚未選課 → 小紅點提示去排課
  *
- * 必須嵌在 tabBarLabel 上並用 absolute 疊加，不可用 tabBarBadge（會貼到 ⋯），
- * 也不可佔 flex 寬度（會擠開「課表」與底線）。
+ * 分段切換器與寬屏標題都將角標疊加在「課表」文字右上角，維持文字居中。
  */
-const TimetableTabBadge = () => {
+export const TimetableTabBadge = () => {
     const { theme } = useTheme();
     const { unread, trueWhite } = theme;
     const { conflictCount, planList } = useCoursePlan();
@@ -70,16 +69,13 @@ const TimetableTabBadge = () => {
 };
 
 /**
- * 「課表」標籤 + 角標（衝突數／空課表紅點）。
+ * 寬屏分屏的「課表」標題及角標。
  *
- * 手機由 material top tabs 當 tabBarLabel 使用；寬屏分屏時由 CoursePaneHeader 直接渲染。
- *
- * @param {{ color: string, focused?: boolean }} props 標籤色及分頁選中狀態
+ * @param {{ color: string }} props 標題顏色
  * @returns {React.ReactElement}
  */
-const TimetableTabLabel = ({ color, focused }) => {
+const TimetableTabLabel = ({ color }) => {
     const { t } = useTranslation('common');
-    const fontWeight = focused ? '600' : '400';
 
     return (
         <View>
@@ -88,7 +84,7 @@ const TimetableTabLabel = ({ color, focused }) => {
                     ...uiStyle.defaultText,
                     color,
                     fontSize: TAB_LABEL_FONT_SIZE,
-                    fontWeight: focused === undefined ? 'bold' : fontWeight,
+                    fontWeight: 'bold',
                 }}>
                 {t('課表')}
             </Text>

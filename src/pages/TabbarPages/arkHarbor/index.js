@@ -11,14 +11,13 @@ import { createDrawerNavigator } from '@react-navigation/drawer';
 import { useIsFocused } from '@react-navigation/native';
 import PagerView from 'react-native-pager-view';
 import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
-import { moderateScale, scale, verticalScale } from 'react-native-size-matters';
+import { scale, verticalScale } from 'react-native-size-matters';
 import { SafeAreaView } from 'react-native-screens/experimental';
 import { useTranslation } from 'react-i18next';
 import Reanimated, {
     Easing,
     ReduceMotion,
     interpolate,
-    interpolateColor,
     useAnimatedStyle,
     useSharedValue,
     withTiming,
@@ -27,11 +26,10 @@ import { scheduleOnRN } from 'react-native-worklets';
 
 import Text from '../../../components/AppText';
 import ScalePressable from '../../../components/ScalePressable';
+import SegmentedTabControl from '../../../components/SegmentedTabControl';
 import { uiStyle, useTheme } from '../../../components/ThemeContext';
 import { useHarborSession } from '../../../contexts/HarborSessionContext';
-import { useAppReducedMotion } from '../../../contexts/ReducedMotionContext';
 import { logToFirebase } from '../../../utils/firebaseAnalytics';
-import { GlassView, isLiquidGlassSupported } from '../../../utils/glassEffect';
 import { useWindowSizeClass } from '../../../utils/windowSizeClass';
 import {
     fetchHarborSiteCapabilities,
@@ -61,164 +59,13 @@ const STICKY_TOOLBAR_HEIGHT = verticalScale(38);
 const SEARCH_BAR_ROW_HEIGHT = SEARCH_FIELD_MIN_HEIGHT + verticalScale(8);
 const SEARCH_BAR_SETTLE_MS = 180;
 const SEARCH_BAR_EASE_OUT = Easing.bezier(0.23, 1, 0.32, 1);
-const HARBOR_TAB_TRACK_PADDING = scale(3);
-const HARBOR_TAB_ITEM_WIDTH = scale(60);
-const HARBOR_TAB_ITEM_HEIGHT = moderateScale(28, 0.1);
-const HARBOR_TAB_LABEL_FONT_SIZE = moderateScale(11.5, 0.25);
-const HarborFeedTrackContainer = isLiquidGlassSupported ? GlassView : View;
 const Drawer = createDrawerNavigator();
 const AnimatedPagerView = Animated.createAnimatedComponent(PagerView);
-const AnimatedText = Reanimated.createAnimatedComponent(Text);
-
-// 文字色跟分頁滾動進度走，與滑塊同一段切換裡漸變
-const HarborFeedTabLabel = ({
-    label,
-    index,
-    scrollProgress,
-    selectedColor,
-    idleColor,
-    isSelected,
-}) => {
-    const indexSv = useSharedValue(index);
-    const selectedColorSv = useSharedValue(selectedColor);
-    const idleColorSv = useSharedValue(idleColor);
-    indexSv.value = index;
-    selectedColorSv.value = selectedColor;
-    idleColorSv.value = idleColor;
-
-    const animatedStyle = useAnimatedStyle(() => ({
-        color: interpolateColor(
-            scrollProgress.value,
-            [indexSv.value - 1, indexSv.value, indexSv.value + 1],
-            [idleColorSv.value, selectedColorSv.value, idleColorSv.value],
-        ),
-    }));
-
-    return (
-        <AnimatedText
-            numberOfLines={1}
-            style={[
-                styles.feedTabLabel,
-                animatedStyle,
-                isSelected && styles.feedTabLabelSelected,
-            ]}>
-            {label}
-        </AnimatedText>
-    );
-};
-
-const HarborFeedTabs = ({
-    options,
-    selectedIndex,
-    position,
-    scrollProgress,
-    onChange,
-}) => {
-    const { theme } = useTheme();
-    const reducedMotion = useAppReducedMotion();
-    const { isLight, white, black, featuresScreen, pressOverlay, unread, viewShadow } = theme;
-    const optionCount = options.length;
-    const thumbInputRange =
-        optionCount > 1 ? options.map((_, index) => index) : [0, 1];
-    const thumbOutputRange =
-        optionCount > 1
-            ? options.map((_, index) => index * HARBOR_TAB_ITEM_WIDTH)
-            : [0, 0];
-    const thumbTranslateX =
-        reducedMotion || optionCount <= 1 || !position
-            ? selectedIndex * HARBOR_TAB_ITEM_WIDTH
-            : position.interpolate({
-                inputRange: thumbInputRange,
-                outputRange: thumbOutputRange,
-                extrapolate: 'clamp',
-            });
-
-    return (
-        <HarborFeedTrackContainer
-            {...(isLiquidGlassSupported ? { isInteractive: true } : {})}
-            style={[
-                styles.feedTabs,
-                !isLiquidGlassSupported && { backgroundColor: white },
-                !isLiquidGlassSupported && isLight && viewShadow,
-            ]}>
-            {optionCount > 0 ? (
-                <Animated.View
-                    pointerEvents="none"
-                    style={[
-                        styles.feedTabThumb,
-                        {
-                            backgroundColor: isLight
-                                ? featuresScreen.divider
-                                : pressOverlay,
-                            transform: [{ translateX: thumbTranslateX }],
-                        },
-                    ]}
-                />
-            ) : null}
-            {options.map((option, index) => {
-                const isSelected = selectedIndex === index;
-
-                return (
-                    <ScalePressable
-                        key={option.key}
-                        accessibilityRole="tab"
-                        accessibilityState={{ selected: isSelected }}
-                        accessibilityLabel={option.label}
-                        onPress={() => {
-                            trigger(isSelected ? 'tap' : 'selection');
-                            onChange(index);
-                        }}
-                        style={styles.feedTab}>
-                        <View style={styles.feedTabLabelRow}>
-                            {reducedMotion || !scrollProgress ? (
-                                <Text
-                                    numberOfLines={1}
-                                    style={[
-                                        styles.feedTabLabel,
-                                        {
-                                            color: isSelected
-                                                ? black.main
-                                                : black.third,
-                                        },
-                                        isSelected && styles.feedTabLabelSelected,
-                                    ]}>
-                                    {option.label}
-                                </Text>
-                            ) : (
-                                <HarborFeedTabLabel
-                                    label={option.label}
-                                    index={index}
-                                    scrollProgress={scrollProgress}
-                                    selectedColor={black.main}
-                                    idleColor={black.third}
-                                    isSelected={isSelected}
-                                />
-                            )}
-                            {option.showDot ? (
-                                <View
-                                    pointerEvents="none"
-                                    style={[
-                                        styles.feedTabDot,
-                                        {
-                                            backgroundColor:
-                                                option.dotColor ?? unread,
-                                        },
-                                    ]}
-                                />
-                            ) : null}
-                        </View>
-                    </ScalePressable>
-                );
-            })}
-        </HarborFeedTrackContainer>
-    );
-};
 
 const HarborStickyToolbar = ({
     segmentOptions,
     currentIndex,
     tabPosition,
-    tabScrollProgress,
     onChange,
     status,
     sessionLabel,
@@ -311,12 +158,15 @@ const HarborStickyToolbar = ({
                     </Reanimated.View>
                 </View>
 
-                <HarborFeedTabs
+                <SegmentedTabControl
                     options={segmentOptions}
                     selectedIndex={currentIndex}
                     position={tabPosition}
-                    scrollProgress={tabScrollProgress}
-                    onChange={onChange}
+                    onChange={index => {
+                        trigger(currentIndex === index ? 'tap' : 'selection');
+                        onChange(index);
+                    }}
+                    compact
                 />
 
                 <View style={[styles.toolbarSide, styles.toolbarRight]}>
@@ -534,7 +384,6 @@ const ForumPage = ({ navigation }) => {
     const pageScrollOffset = useRef(new Animated.Value(0)).current;
     const pageScrollPosition = useRef(new Animated.Value(0)).current;
     const searchProgress = useSharedValue(0);
-    const tabScrollProgress = useSharedValue(0);
     const scrollOffsetsRef = useRef({});
     const searchProgressByViewRef = useRef({});
     const lastScrollYRef = useRef({});
@@ -639,9 +488,14 @@ const ForumPage = ({ navigation }) => {
             enabledViews.map(view => ({
                 key: view,
                 label: t(VIEW_CONFIG[view].label),
-                showDot: view === 'unread' && hasUnreadTopics,
+                badge: view === 'unread' && hasUnreadTopics ? (
+                    <View
+                        pointerEvents="none"
+                        style={[styles.feedTabDot, { backgroundColor: theme.unread }]}
+                    />
+                ) : null,
             })),
-        [enabledViews, hasUnreadTopics, t],
+        [enabledViews, hasUnreadTopics, t, theme.unread],
     );
     const tabPosition = useMemo(
         () => Animated.add(pageScrollPosition, pageScrollOffset),
@@ -660,13 +514,9 @@ const ForumPage = ({ navigation }) => {
                 ],
                 {
                     useNativeDriver: true,
-                    listener: event => {
-                        const { position, offset } = event.nativeEvent;
-                        tabScrollProgress.value = position + offset;
-                    },
                 },
             ),
-        [pageScrollOffset, pageScrollPosition, tabScrollProgress],
+        [pageScrollOffset, pageScrollPosition],
     );
     const ensureMounted = useCallback(view => {
         setMountedViews(current =>
@@ -845,7 +695,6 @@ const ForumPage = ({ navigation }) => {
                 setCurrentIndex(nextIndex);
                 pageScrollPosition.setValue(nextIndex);
                 pageScrollOffset.setValue(0);
-                tabScrollProgress.value = nextIndex;
                 pagerRef.current?.setPageWithoutAnimation(nextIndex);
             }
             return;
@@ -855,14 +704,12 @@ const ForumPage = ({ navigation }) => {
         setCurrentIndex(0);
         pageScrollPosition.setValue(0);
         pageScrollOffset.setValue(0);
-        tabScrollProgress.value = 0;
         pagerRef.current?.setPageWithoutAnimation(0);
     }, [
         currentIndex,
         enabledViews,
         pageScrollOffset,
         pageScrollPosition,
-        tabScrollProgress,
     ]);
 
     const handleSessionPress = useCallback(() => {
@@ -1027,7 +874,6 @@ const ForumPage = ({ navigation }) => {
                         segmentOptions={segmentOptions}
                         currentIndex={currentIndex}
                         tabPosition={tabPosition}
-                        tabScrollProgress={tabScrollProgress}
                         onChange={selectView}
                         status={status}
                         sessionLabel={sessionLabel}
@@ -1178,45 +1024,6 @@ const styles = StyleSheet.create({
         width: scale(6),
         height: scale(6),
         borderRadius: scale(3),
-    },
-    feedTabs: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        flexShrink: 0,
-        marginHorizontal: scale(2),
-        borderRadius: scale(999),
-        padding: HARBOR_TAB_TRACK_PADDING,
-        overflow: 'hidden',
-        position: 'relative',
-    },
-    feedTabThumb: {
-        position: 'absolute',
-        top: HARBOR_TAB_TRACK_PADDING,
-        bottom: HARBOR_TAB_TRACK_PADDING,
-        left: HARBOR_TAB_TRACK_PADDING,
-        width: HARBOR_TAB_ITEM_WIDTH,
-        borderRadius: scale(999),
-    },
-    feedTab: {
-        width: HARBOR_TAB_ITEM_WIDTH,
-        height: HARBOR_TAB_ITEM_HEIGHT,
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderRadius: scale(999),
-    },
-    feedTabLabelRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: scale(3),
-    },
-    feedTabLabel: {
-        ...uiStyle.defaultText,
-        fontSize: HARBOR_TAB_LABEL_FONT_SIZE,
-        fontWeight: '500',
-    },
-    feedTabLabelSelected: {
-        fontWeight: '600',
     },
     feedTabDot: {
         width: scale(5),

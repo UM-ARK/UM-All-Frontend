@@ -17,7 +17,6 @@ import { Dialog } from '@rneui/themed';
 import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '../../../components/ThemeContext';
-import TopTabLabel from '../../../components/TopTabLabel';
 import { trigger } from '../../../utils/trigger';
 import { openLink } from '../../../utils/browser';
 import { UM_PRE_ENROLMENT_EXCEL } from '../../../utils/pathMap';
@@ -34,11 +33,9 @@ import CourseSim from './pages/courseSim';
 import CourseTabBar from './components/CourseTabBar';
 import CoursePaneHeader from './components/CoursePaneHeader';
 import SplitPaneDivider from './components/SplitPaneDivider';
-import TimetableTabLabel from './components/TimetableTabLabel';
+import { TimetableTabBadge } from './components/TimetableTabLabel';
 import { CoursePlanProvider, useCoursePlan } from './context/CoursePlanContext';
 import {
-    TAB_BAR_HEIGHT,
-    TAB_INDICATOR_WIDTH,
     SEARCH_PANE_DEFAULT_WIDTH,
     SEARCH_PANE_MIN_WIDTH,
     TIMETABLE_PANE_MIN_WIDTH,
@@ -54,7 +51,7 @@ const Tab = createMaterialTopTabNavigator();
  */
 const CourseTabContent = () => {
     const { theme } = useTheme();
-    const { bg_color, black, themeColor } = theme;
+    const { bg_color } = theme;
     const { t } = useTranslation(['common', 'catalog', 'timetable']);
     const isFocused = useIsFocused();
     const navigation = useNavigation();
@@ -315,33 +312,6 @@ const CourseTabContent = () => {
                         state: handleTopTabStateChange,
                     }}
                     screenOptions={{
-                        tabBarLabel: TopTabLabel,
-                        tabBarStyle: {
-                            backgroundColor: bg_color,
-                            height: TAB_BAR_HEIGHT,
-                            overflow: 'hidden',
-                            // TabBar 預設 elevation:4；本頁 Tab 僅佔左側 flex，
-                            // Android 會在右側 ⋯ 交界投下垂直陰影，需關掉
-                            elevation: 0,
-                            shadowOpacity: 0,
-                        },
-                        tabBarItemStyle: {
-                            minHeight: TAB_BAR_HEIGHT,
-                            paddingVertical: 0,
-                        },
-                        tabBarContentContainerStyle: {
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                        },
-                        tabBarBounces: false,
-                        tabBarActiveTintColor: black.second,
-                        tabBarInactiveTintColor: black.third,
-                        tabBarPressColor: bg_color,
-                        tabBarIndicatorStyle: {
-                            backgroundColor: themeColor,
-                            width: TAB_INDICATOR_WIDTH,
-                            marginHorizontal: 'auto',
-                        },
                         lazy: true,
                     }}
                     initialRouteName={initialSegment}>
@@ -349,20 +319,14 @@ const CourseTabContent = () => {
                         name={COURSE_SEARCH_SEGMENT}
                         component={What2Reg}
                         options={{ title: t('搵課') }}
-                        listeners={() => ({
-                            tabPress: () => trigger(),
-                        })}
                     />
                     <Tab.Screen
                         name={COURSE_TIMETABLE_SEGMENT}
                         component={CourseSim}
                         options={{
                             title: t('課表'),
-                            tabBarLabel: TimetableTabLabel,
+                            tabBarBadge: () => <TimetableTabBadge />,
                         }}
-                        listeners={() => ({
-                            tabPress: () => trigger(),
-                        })}
                     />
                 </Tab.Navigator>
             ) : null}

@@ -1,6 +1,5 @@
 import React, { useState, useRef, useCallback, useContext, useMemo, useEffect } from 'react';
 import {
-    Animated as RNAnimated,
     Platform,
     ScrollView,
     StyleSheet,
@@ -9,6 +8,7 @@ import {
 
 import Text from '../../../components/AppText';
 import ScalePressable from '../../../components/ScalePressable';
+import SegmentedTopTabBar from '../../../components/SegmentedTopTabBar';
 import { useTheme, uiStyle } from '../../../components/ThemeContext';
 import { useHarborSession } from '../../../contexts/HarborSessionContext';
 import { logToFirebase } from '../../../utils/firebaseAnalytics';
@@ -32,7 +32,6 @@ import {
 } from '../../../utils/featureSearch';
 import { addSearchHistory } from '../../../utils/searchHistory';
 import {
-    TOP_TAB_STRIP_MAX_WIDTH,
     WIDE_CONTENT_MAX_WIDTH,
     useWindowSizeClass,
 } from '../../../utils/windowSizeClass';
@@ -40,7 +39,6 @@ import { balanceColumns } from '../../../utils/balanceColumns';
 import CustomBottomSheet from '../../../utils/BottomSheet';
 import { getFunctionArr } from './FeatureList';
 import FeatureSearchBar from './FeatureSearchBar';
-import { GlassView, isLiquidGlassSupported } from '../../../utils/glassEffect';
 import FeatureIcon from '../info/home/search/components/FeatureIcon';
 import WikiHome from '../arkwiki';
 
@@ -49,7 +47,7 @@ import { createMaterialTopTabNavigator } from '@react-navigation/material-top-ta
 import * as Clipboard from 'expo-clipboard';
 import { LinearGradient } from 'expo-linear-gradient';
 import Ionicons from '@react-native-vector-icons/ionicons';
-import { moderateScale, scale, verticalScale } from 'react-native-size-matters';
+import { scale, verticalScale } from 'react-native-size-matters';
 import Toast from 'react-native-simple-toast';
 import TouchableScale from '../../../components/TouchableScale';
 import { useTranslation } from 'react-i18next';
@@ -62,12 +60,6 @@ import { useAppReducedMotion } from '../../../contexts/ReducedMotionContext';
 
 const Tab = createMaterialTopTabNavigator();
 
-const TOP_TAB_SCALE_FACTOR = 0.1;
-const SEGMENT_TRACK_PADDING = scale(3.5);
-const SEGMENT_ITEM_HEIGHT = moderateScale(30, TOP_TAB_SCALE_FACTOR);
-const SEGMENT_CAPSULE_WIDTH = scale(172);
-const SEGMENT_LABEL_FONT_SIZE = moderateScale(12.5, 0.25);
-const TopTabTrackContainer = isLiquidGlassSupported ? GlassView : View;
 // 功能詳情內容精簡；預設檔需高於底部懸浮 Tab Bar 避免遮擋按鈕，長說明可再上拉
 const FEATURE_SHEET_SNAP_POINTS = ['44%', '56%'];
 /** 分類卡欄數：expanded 兩欄、large 三欄；手機與 medium 維持單欄 */
@@ -795,151 +787,14 @@ function FeatureListPage({ navigation }) {
     );
 }
 
-function FeaturesTopTabBar({ state, descriptors, navigation, position }) {
-    const { theme } = useTheme();
-    const { isLight, white, black, featuresScreen, pressOverlay, viewShadow } = theme;
-    const reducedMotion = useAppReducedMotion();
-    const [trackWidth, setTrackWidth] = useState(0);
-
-    const handleSelectIndex = index => {
-        const route = state.routes[index];
-        if (!route) {
-            return;
-        }
-        const isFocused = state.index === index;
-        const event = navigation.emit({
-            type: 'tabPress',
-            target: route.key,
-            canPreventDefault: true,
-        });
-        if (!isFocused && !event.defaultPrevented) {
-            trigger('selection');
-            navigation.navigate(route.name, route.params);
-        } else if (isFocused) {
-            trigger();
-        }
-    };
-
-    const routeCount = state.routes.length;
-    const segmentWidth =
-        trackWidth > 0 && routeCount > 0
-            ? (trackWidth - SEGMENT_TRACK_PADDING * 2) / routeCount
-            : 0;
-    const thumbTranslateX =
-        reducedMotion || routeCount <= 1 || !position
-            ? state.index * segmentWidth
-            : position.interpolate({
-                inputRange: state.routes.map((_, index) => index),
-                outputRange: state.routes.map((_, index) => index * segmentWidth),
-                extrapolate: 'clamp',
-            });
-
-    return (
-        <View
-            style={[
-                styles.topTabBarContainer,
-                { backgroundColor: featuresScreen.bg_color },
-            ]}>
-            <TopTabTrackContainer
-                {...(isLiquidGlassSupported ? { isInteractive: true } : {})}
-                onLayout={event => setTrackWidth(event.nativeEvent.layout.width)}
-                style={[
-                    styles.topTabTrack,
-                    !isLiquidGlassSupported && { backgroundColor: white },
-                    !isLiquidGlassSupported && isLight && viewShadow,
-                ]}>
-                {segmentWidth > 0 ? (
-                    <RNAnimated.View
-                        pointerEvents="none"
-                        style={[
-                            styles.topTabThumb,
-                            {
-                                width: segmentWidth,
-                                backgroundColor: isLight
-                                    ? featuresScreen.divider
-                                    : pressOverlay,
-                                transform: [{ translateX: thumbTranslateX }],
-                            },
-                        ]}
-                    />
-                ) : null}
-                {state.routes.map((route, index) => {
-                    const { options } = descriptors[route.key];
-                    const label = options.title ?? route.name;
-                    const isFocused = state.index === index;
-
-                    return (
-                        <ScalePressable
-                            key={route.key}
-                            accessibilityRole="tab"
-                            accessibilityState={{ selected: isFocused }}
-                            accessibilityLabel={label}
-                            onPress={() => handleSelectIndex(index)}
-                            style={styles.topTabButton}>
-                            <Text
-                                numberOfLines={1}
-                                style={[
-                                    styles.topTabLabel,
-                                    isFocused && styles.topTabLabelActive,
-                                    { color: isFocused ? black.main : black.third },
-                                ]}>
-                                {label}
-                            </Text>
-                        </ScalePressable>
-                    );
-                })}
-            </TopTabTrackContainer>
-        </View>
-    );
-}
-
-const styles = StyleSheet.create({
-    topTabBarContainer: {
-        width: '100%',
-        maxWidth: TOP_TAB_STRIP_MAX_WIDTH,
-        alignSelf: 'center',
-        alignItems: 'center',
-        paddingHorizontal: scale(12),
-        paddingTop: verticalScale(4),
-        paddingBottom: verticalScale(2),
-    },
-    topTabTrack: {
-        width: SEGMENT_CAPSULE_WIDTH,
-        flexDirection: 'row',
-        alignItems: 'center',
-        borderRadius: scale(999),
-        padding: SEGMENT_TRACK_PADDING,
-        overflow: 'hidden',
-    },
-    topTabThumb: {
-        position: 'absolute',
-        top: SEGMENT_TRACK_PADDING,
-        bottom: SEGMENT_TRACK_PADDING,
-        left: SEGMENT_TRACK_PADDING,
-        borderRadius: scale(999),
-    },
-    topTabButton: {
-        flex: 1,
-        height: SEGMENT_ITEM_HEIGHT,
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderRadius: scale(999),
-    },
-    topTabLabel: {
-        ...uiStyle.defaultText,
-        fontSize: SEGMENT_LABEL_FONT_SIZE,
-        fontWeight: '500',
-    },
-    topTabLabelActive: {
-        fontWeight: '600',
-    },
-});
-
 export default function Index() {
     const { theme } = useTheme();
     const { featuresScreen } = theme;
     const { t } = useTranslation('common');
-    const renderTopTabBar = useCallback(props => <FeaturesTopTabBar {...props} />, []);
+    const renderTopTabBar = useCallback(
+        props => <SegmentedTopTabBar {...props} backgroundColor={featuresScreen.bg_color} />,
+        [featuresScreen.bg_color],
+    );
 
     return (
         <View style={{ flex: 1, backgroundColor: featuresScreen.bg_color }}>

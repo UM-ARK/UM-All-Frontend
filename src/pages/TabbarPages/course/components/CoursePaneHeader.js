@@ -3,8 +3,9 @@ import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import Text from '../../../../components/AppText';
+import { SEGMENTED_TOP_TAB_BAR_HEIGHT } from '../../../../components/SegmentedTopTabBar';
 import { useTheme, uiStyle } from '../../../../components/ThemeContext';
-import { COURSE_TOP_BAR_HEIGHT, TAB_LABEL_FONT_SIZE } from '../constants';
+import { TAB_LABEL_FONT_SIZE } from '../constants';
 import CourseMoreMenu from './CourseMoreMenu';
 import TimetableTabLabel from './TimetableTabLabel';
 
@@ -25,7 +26,7 @@ const CoursePaneHeader = ({ segment, menuProps }) => {
     const styles = useMemo(
         () => ({
             wrapper: {
-                height: COURSE_TOP_BAR_HEIGHT,
+                height: SEGMENTED_TOP_TAB_BAR_HEIGHT,
                 backgroundColor: bg_color,
                 flexDirection: 'row',
                 alignItems: 'center',
