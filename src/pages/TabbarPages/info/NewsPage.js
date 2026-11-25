@@ -39,6 +39,7 @@ import {
 } from '../../../utils/umOpenDataCache';
 
 import { Image } from 'expo-image';
+import { LinearGradient } from 'expo-linear-gradient';
 import { NavigationContext } from '@react-navigation/native';
 import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -91,37 +92,34 @@ const NewsPage = forwardRef(function NewsPage(_props, ref) {
         : verticalScale(10);
     const { t, i18n } = useTranslation('common');
     const currentLanguage = i18n.resolvedLanguage || i18n.language;
-    const { white, viewShadow, bg_color, black, themeColor, trueWhite, imagePlaceholder } = theme;
+    const { white, bg_color, black, themeColor, trueWhite, trueBlack, imagePlaceholder } = theme;
     const styles = StyleSheet.create({
         topNewsContainer: {
-            borderRadius: scale(10),
+            borderRadius: scale(12),
             overflow: 'hidden',
-            marginHorizontal: scale(8),
-            marginVertical: verticalScale(5),
-            height: verticalScale(200),
+            marginHorizontal: scale(16),
+            marginTop: verticalScale(4),
+            marginBottom: verticalScale(2),
+            height: verticalScale(188),
             backgroundColor: white,
-            ...viewShadow,
         },
         topNewsOverlay: {
-            position: 'absolute', // 【核心】脫離文檔流，覆蓋在 Image 上
+            position: 'absolute',
             top: 0,
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundColor: 'rgba(0,0,0,0.5)', // 50% 透明度的黑
-            padding: verticalScale(15),
+            paddingHorizontal: scale(14),
+            paddingBottom: verticalScale(12),
             justifyContent: 'flex-end',
-        },
-        topNewsPosition: {
-            position: 'absolute',
-            top: verticalScale(10),
-            left: scale(15),
         },
         topNewsText: {
             ...uiStyle.defaultText,
             color: trueWhite,
-            fontWeight: 'bold',
-            fontSize: verticalScale(20),
+            fontWeight: '600',
+            fontSize: verticalScale(12),
+            lineHeight: verticalScale(16),
+            marginBottom: verticalScale(4),
         },
     });
 
@@ -313,31 +311,25 @@ const NewsPage = forwardRef(function NewsPage(_props, ref) {
                             transition={200}
                             priority="high"
                         />
-                        {/* 塗上50%透明度的黑，讓白色字體能看清 */}
-                        <View style={styles.topNewsOverlay}>
-                            {/* Top Story字樣 */}
-                            <View style={styles.topNewsPosition}>
-                                <Text style={styles.topNewsText}>
-                                    {t('澳大焦點')}
-                                </Text>
-                            </View>
-
-                            {/* 標題 */}
-                            <View style={{
-                                alignSelf: 'center',
-                                justifyContent: 'center',
-                                width: '100%',
-                            }}>
+                        <LinearGradient
+                            colors={[`${trueBlack}00`, `${trueBlack}E0`]}
+                            locations={[0.42, 1]}
+                            style={styles.topNewsOverlay}>
+                            <Text style={styles.topNewsText}>
+                                {t('澳大焦點')}
+                            </Text>
+                            <View style={{ width: '100%' }}>
                                 <SearchHighlightText
                                     text={title}
                                     query={searchQuery}
                                     highlightStyle={heroHighlightStyle}
-                                    numberOfLines={alternateTitle ? 2 : 3}
+                                    numberOfLines={2}
                                     style={{
                                         ...uiStyle.defaultText,
                                         color: trueWhite,
                                         fontWeight: 'bold',
-                                        fontSize: verticalScale(18),
+                                        fontSize: verticalScale(17),
+                                        lineHeight: verticalScale(23),
                                     }}
                                 />
                                 {alternateTitle ? (
@@ -345,22 +337,23 @@ const NewsPage = forwardRef(function NewsPage(_props, ref) {
                                         text={alternateTitle}
                                         query={searchQuery}
                                         highlightStyle={heroHighlightStyle}
-                                        numberOfLines={2}
+                                        numberOfLines={1}
                                         style={{
                                             ...uiStyle.defaultText,
                                             color: trueWhite,
                                             fontSize: verticalScale(13),
+                                            lineHeight: verticalScale(18),
                                             marginTop: verticalScale(4),
                                         }}
                                     />
                                 ) : null}
                             </View>
-                        </View>
+                        </LinearGradient>
                     </ScalePressable>
                 </View>
             </View >
         );
-    }, [black.main, imagePlaceholder, navigation, searchQuery, styles.topNewsContainer, styles.topNewsOverlay, styles.topNewsPosition, styles.topNewsText, t, topNews, topNewsContent, topNewsImage, trueWhite]);
+    }, [black.main, imagePlaceholder, navigation, searchQuery, styles.topNewsContainer, styles.topNewsOverlay, styles.topNewsText, t, topNews, topNewsContent, topNewsImage, trueBlack, trueWhite]);
 
     const handleSearchFocus = useCallback(() => {
         trigger();

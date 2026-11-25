@@ -1,5 +1,5 @@
-import React, { useContext, useState, memo, useCallback, useMemo } from 'react';
-import { View, StyleSheet, ActivityIndicator } from 'react-native';
+import React, { useContext, useState, useEffect, memo, useCallback, useMemo } from 'react';
+import { View, StyleSheet } from 'react-native';
 
 import Text from '../../../../components/AppText';
 import ScalePressable from '../../../../components/ScalePressable';
@@ -11,29 +11,36 @@ import { pickDisplayedTitles } from '../utils/umOpenDataSearch';
 import { NavigationContext } from '@react-navigation/native';
 import { Image } from 'expo-image';
 import moment from 'moment-timezone';
-import { scale, verticalScale } from 'react-native-size-matters';
+import { useTranslation } from 'react-i18next';
+import { moderateScale, scale } from 'react-native-size-matters';
 
 const ROW_HORIZONTAL_INSET = scale(16);
+const THUMBNAIL_SIZE = scale(60);
 
 export const newsRowStyles = StyleSheet.create({
     row: {
         flexDirection: 'row',
         alignItems: 'center',
         alignSelf: 'stretch',
-        minHeight: 48,
         paddingHorizontal: ROW_HORIZONTAL_INSET,
-        paddingVertical: verticalScale(8),
+        paddingVertical: scale(10),
         columnGap: scale(12),
     },
     textColumn: {
         flex: 1,
         minWidth: 0,
-        rowGap: verticalScale(4),
+        justifyContent: 'center',
+        rowGap: scale(4),
+    },
+    metaRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        columnGap: scale(4),
     },
     thumbnail: {
-        width: scale(56),
-        height: scale(56),
-        borderRadius: scale(8),
+        width: THUMBNAIL_SIZE,
+        height: THUMBNAIL_SIZE,
+        borderRadius: scale(6),
         overflow: 'hidden',
         flexShrink: 0,
     },
@@ -55,57 +62,23 @@ export const NewsRowSeparator = () => {
     return <View style={[styles.separator, { backgroundColor: theme.disabled }]} />;
 };
 
-const getDateColor = (
-    type,
-    beginMomentDate,
-    nowMomentDate,
-    themeColor,
-    secondThemeColor,
-    black,
-) => {
-    if (type === 'event') {
-        if (beginMomentDate.isSameOrAfter(nowMomentDate)) {
-            return secondThemeColor;
-        }
-        if (beginMomentDate.isSame(nowMomentDate, 'day')) {
-            return themeColor;
-        }
-    }
-    return black.third;
-};
-
 const NewsCard = ({ data, type = 'news', language = 'en', searchQuery = '' }) => {
     // NavigationContext 可在非基頁拿到路由資訊
     const navigation = useContext(NavigationContext);
+    const { t } = useTranslation('common');
     const { theme } = useTheme();
-    const { black, themeColor, secondThemeColor, tonal, imagePlaceholder } = theme;
+    const { black, themeColor, accentForeground, imagePlaceholder } = theme;
 
-    // 圖片加載狀態
-    const [imageLoading, setImageLoading] = useState(true);
     const [imageError, setImageError] = useState(false);
 
     const beginDate =
         type === 'event' ? data.common.dateFrom : data.common.publishDate;
     const beginMomentDate = useMemo(() => moment(beginDate), [beginDate]);
     const nowMomentDate = useMemo(() => moment(new Date()), []);
-    const dateColor = useMemo(() =>
-        getDateColor(
-            type,
-            beginMomentDate,
-            nowMomentDate,
-            themeColor,
-            secondThemeColor,
-            black,
-        ),
-        [
-            type,
-            beginMomentDate,
-            nowMomentDate,
-            themeColor,
-            secondThemeColor,
-            black,
-        ],
-    );
+    const isToday = type === 'event' && beginMomentDate.isSame(nowMomentDate, 'day');
+    const dateLabel = language === 'tc'
+        ? beginMomentDate.format('M月D日')
+        : beginMomentDate.format('MMM D');
 
     const { title, alternateTitle } = useMemo(
         () => pickDisplayedTitles(data.details, language, searchQuery),
@@ -118,11 +91,21 @@ const NewsCard = ({ data, type = 'news', language = 'en', searchQuery = '' }) =>
         }),
         [themeColor],
     );
+    const metaTextStyle = {
+        ...uiStyle.defaultText,
+        fontSize: moderateScale(12),
+        lineHeight: moderateScale(16),
+        color: black.third,
+    };
 
     const thumbnailUrl = type === 'event' ? data.common.posterUrl : data.common.imageUrls?.[0];
     const thumbnailUri = typeof thumbnailUrl === 'string'
         ? thumbnailUrl.replace('http:', 'https:')
         : '';
+
+    useEffect(() => {
+        setImageError(false);
+    }, [thumbnailUri]);
 
     // 點擊跳轉邏輯
     const handlePress = useCallback(() => {
@@ -146,12 +129,12 @@ const NewsCard = ({ data, type = 'news', language = 'en', searchQuery = '' }) =>
                         text={title}
                         query={searchQuery}
                         highlightStyle={highlightStyle}
-                        numberOfLines={3}
+                        numberOfLines={2}
                         style={{
                             ...uiStyle.defaultText,
-                            color: black.main,
-                            fontSize: verticalScale(14),
-                            lineHeight: verticalScale(20),
+                            color: black.second,
+                            fontSize: moderateScale(15),
+                            lineHeight: moderateScale(21),
                         }}
                     />
                 )}
@@ -160,26 +143,32 @@ const NewsCard = ({ data, type = 'news', language = 'en', searchQuery = '' }) =>
                         text={alternateTitle}
                         query={searchQuery}
                         highlightStyle={highlightStyle}
-                        numberOfLines={2}
+                        numberOfLines={1}
                         style={{
                             ...uiStyle.defaultText,
                             color: black.third,
-                            fontSize: verticalScale(12),
-                            lineHeight: verticalScale(16),
+                            fontSize: moderateScale(13),
+                            lineHeight: moderateScale(18),
                         }}
                     />
                 )}
-                <Text
-                    style={{
-                        ...uiStyle.defaultText,
-                        fontSize: verticalScale(13),
-                        color: dateColor,
-                    }}>
-                    {beginMomentDate.format('MM-DD')}
-                </Text>
+                <View style={newsRowStyles.metaRow}>
+                    {isToday ? (
+                        <Text style={[metaTextStyle, { color: accentForeground }]}>
+                            {t('今天')}
+                        </Text>
+                    ) : null}
+                    {isToday ? (
+                        <Text style={metaTextStyle}>·</Text>
+                    ) : null}
+                    <Text style={metaTextStyle}>{dateLabel}</Text>
+                </View>
             </View>
             {thumbnailUri ? (
-                <View style={newsRowStyles.thumbnail}>
+                <View style={[
+                    newsRowStyles.thumbnail,
+                    { backgroundColor: theme.bg_color },
+                ]}>
                     <Image
                         source={{ uri: thumbnailUri }}
                         style={[
@@ -191,30 +180,8 @@ const NewsCard = ({ data, type = 'news', language = 'en', searchQuery = '' }) =>
                         placeholder={imagePlaceholder}
                         placeholderContentFit="cover"
                         transition={200}
-                        onLoadStart={() => {
-                            setImageLoading(true);
-                            setImageError(false);
-                        }}
-                        onLoadEnd={() => setImageLoading(false)}
-                        onError={() => {
-                            setImageLoading(false);
-                            setImageError(true);
-                        }}
+                        onError={() => setImageError(true)}
                     />
-                    {imageLoading && (
-                        <View
-                            style={{
-                                ...StyleSheet.absoluteFillObject,
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                backgroundColor: tonal.primary08,
-                            }}>
-                            <ActivityIndicator
-                                size="small"
-                                color={themeColor}
-                            />
-                        </View>
-                    )}
                 </View>
             ) : null}
         </ScalePressable>
