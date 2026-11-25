@@ -132,9 +132,9 @@ const HarborIframeRenderer = ({ tnode }) => {
                     onPress={openFullscreen}
                     style={({ pressed }) => [
                         styles.iframeExpandButton,
+                        theme.floatingShadow,
                         {
                             backgroundColor: theme.trueWhite,
-                            shadowColor: theme.trueBlack,
                             opacity: pressed ? 0.8 : 1,
                         },
                     ]}>
@@ -175,10 +175,10 @@ const HarborIframeRenderer = ({ tnode }) => {
                         onPress={closeFullscreen}
                         style={({ pressed }) => [
                             styles.iframeFullscreenClose,
+                            theme.floatingShadow,
                             {
                                 top: Math.max(insets.top, verticalScale(12)),
                                 backgroundColor: theme.trueWhite,
-                                shadowColor: theme.trueBlack,
                                 opacity: pressed ? 0.8 : 1,
                             },
                         ]}>

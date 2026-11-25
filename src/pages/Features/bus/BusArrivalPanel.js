@@ -96,7 +96,7 @@ const BusArrivalPanel = ({
         trueWhite,
         warning,
         white,
-        viewShadow,
+        floatingShadow,
     } = theme;
     const hasVehicles = (snapshot?.vehicles || []).length > 0;
     const bottomInset = 10 + insets.bottom;
@@ -114,7 +114,7 @@ const BusArrivalPanel = ({
             paddingHorizontal: 16,
             paddingBottom: bottomInset,
             overflow: 'hidden',
-            ...viewShadow,
+            ...floatingShadow,
         },
         handleHit: {
             alignItems: 'center',
@@ -303,7 +303,7 @@ const BusArrivalPanel = ({
             fontSize: 12,
             textAlign: 'center',
         },
-    }), [black.main, black.third, bottomInset, disabled, themeColor, tonal.primary08, viewShadow, warning, white]);
+    }), [black.main, black.third, bottomInset, disabled, themeColor, tonal.primary08, floatingShadow, warning, white]);
 
     const selectedStopInfo = getBusStop(selectedStop);
     const vehicles = useMemo(

@@ -34,6 +34,8 @@ const ViewerChromeButton = ({
     trueWhite,
     trueBlack,
 }) => {
+    const { theme } = useTheme();
+
     return (
         <Pressable
             onPress={onPress}
@@ -50,11 +52,7 @@ const ViewerChromeButton = ({
                     justifyContent: 'center',
                     alignItems: 'center',
                     opacity: disabled ? 0.65 : pressed ? 0.8 : 1,
-                    shadowColor: trueBlack,
-                    shadowOffset: { width: 0, height: 2 },
-                    shadowOpacity: 0.35,
-                    shadowRadius: 4,
-                    elevation: 6,
+                    ...theme.floatingShadow,
                 },
             ]}
         >

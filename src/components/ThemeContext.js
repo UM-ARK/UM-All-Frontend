@@ -21,6 +21,14 @@ const rgba = (hex, opacity) => {
     return `rgba(${r}, ${g}, ${b}, ${opacity})`;
 };
 
+// Android 9 以下不支援外陰影的 boxShadow。
+const supportsBoxShadow = Platform.OS !== 'android' || Platform.Version >= 28;
+const createShadow = (offsetY, blurRadius, color, elevation) => (
+    supportsBoxShadow
+        ? { boxShadow: [{ offsetX: 0, offsetY, blurRadius, spreadDistance: 0, color }] }
+        : { elevation }
+);
+
 // 定義主題配置
 const getColorDiy = (isLight) => {
     // 基礎色值定義，避免重複硬編碼
@@ -147,19 +155,11 @@ const getColorDiy = (isLight) => {
             bg_color: isLight ? '#fbfbfb' : trueBlack,
         },
 
-        // 跨平台陰影（RN New Architecture boxShadow，iOS / Android 視覺一致）
-        viewShadow: {
-            boxShadow: [
-                {
-                    offsetX: 0,
-                    offsetY: 2,
-                    blurRadius: 8,
-                    spreadDistance: 0,
-                    // 暗色模式略加深，避免陰影幾乎不可見
-                    color: rgba(trueBlack, isLight ? 0.1 : 0.45),
-                },
-            ],
-        },
+        // 內容卡片、浮動控制與彈層的陰影層次
+        viewShadow: createShadow(2, isLight ? 12 : 8, rgba(trueBlack, isLight ? 0.06 : 0.45), 2),
+        floatingShadow: createShadow(4, 16, rgba(trueBlack, isLight ? 0.14 : 0.55), 6),
+        modalShadow: createShadow(8, 24, rgba(trueBlack, isLight ? 0.18 : 0.6), 12),
+        tabBarShadow: createShadow(-2, 12, rgba(trueBlack, isLight ? 0.1 : 0.45), 8),
 
         barStyle: isLight ? 'dark-content' : 'light-content',
 

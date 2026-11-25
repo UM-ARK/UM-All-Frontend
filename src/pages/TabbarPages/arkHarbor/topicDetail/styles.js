@@ -478,10 +478,6 @@ const styles = StyleSheet.create({
         borderRadius: scale(18),
         alignItems: 'center',
         justifyContent: 'center',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.35,
-        shadowRadius: scale(4),
-        elevation: 6,
     },
     iframeFullscreenModal: {
         flex: 1,
@@ -498,10 +494,6 @@ const styles = StyleSheet.create({
         borderRadius: scale(22),
         alignItems: 'center',
         justifyContent: 'center',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.35,
-        shadowRadius: scale(4),
-        elevation: 6,
     },
     imageGrid: {
         flexDirection: 'row',

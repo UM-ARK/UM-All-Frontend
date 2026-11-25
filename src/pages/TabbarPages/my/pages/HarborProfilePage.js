@@ -129,9 +129,9 @@ const UmerAvatarBadge = ({ label }) => {
             pointerEvents="none"
             style={[
                 styles.umerBadge,
+                theme.floatingShadow,
                 {
                     backgroundColor: theme.themeColor,
-                    shadowColor: theme.themeColor,
                 },
                 animatedStyle,
             ]}>
@@ -1699,10 +1699,6 @@ const styles = StyleSheet.create({
         borderRadius: scale(6),
         paddingHorizontal: scale(7),
         paddingVertical: verticalScale(3),
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.35,
-        shadowRadius: 4,
-        elevation: 4,
     },
     umerBadgeText: {
         ...uiStyle.defaultText,

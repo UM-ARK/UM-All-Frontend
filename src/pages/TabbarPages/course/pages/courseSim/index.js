@@ -2789,13 +2789,7 @@ E11-0000
                     selectedIndex={timetableView === 'overview' ? 1 : 0}
                     onChange={handleTimetableViewChange}
                     trackBackgroundColor={white}
-                    style={{
-                        shadowColor: black.main,
-                        shadowOffset: { width: 0, height: 2 },
-                        shadowOpacity: 0.1,
-                        shadowRadius: 4,
-                        elevation: 3,
-                    }}
+                    style={theme.viewShadow}
                 />
             </View>
         );

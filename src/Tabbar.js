@@ -120,7 +120,9 @@ const getTabBarStyle = (theme, insets) => {
             ? 'rgba(0,0,0,0.1)'
             : 'rgba(255,255,255,0.1)',
         borderTopWidth: 0.5,
-        elevation: 8,
+        elevation: 0,
+        zIndex: 1,
+        ...theme.tabBarShadow,
         // 高度只加一次 bottomInset；icon/文字緊湊靠 item 樣式，不靠加高內容區
         height: ANDROID_TAB_BAR_CONTENT_HEIGHT + bottomInset,
         paddingBottom: bottomInset,

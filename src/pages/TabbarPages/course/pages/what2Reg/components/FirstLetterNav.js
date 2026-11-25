@@ -21,7 +21,7 @@ const FirstLetterNav = ({ firstLetterList, scrollData, theme, onScrollTo }) => {
             backgroundColor: theme.white,
             borderRadius: scale(8),
             padding: scale(3),
-            ...theme.viewShadow,
+            ...theme.floatingShadow,
         }}>
             {firstLetterList.map(letter => (
                 <Pressable

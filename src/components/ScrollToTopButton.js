@@ -166,7 +166,8 @@ const ScrollToTopButton = ({ visible = true, onScrollToTop, virtualizedListRef, 
                             width: buttonSize,
                             height: buttonSize,
                             justifyContent: 'center',
-                            alignItems: 'center'
+                            alignItems: 'center',
+                            ...(isLiquidGlassSupported ? {} : theme.floatingShadow),
                         }}
                     >
                         <Ionicons name="arrow-up" size={scale(24)} color={theme.themeColor} />

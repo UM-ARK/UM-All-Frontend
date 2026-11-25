@@ -72,7 +72,7 @@ const HarborAvatarPickerModal = ({
                             backgroundColor: theme.white,
                             borderColor: theme.themeColorUltraLight,
                         },
-                        theme.viewShadow,
+                        theme.modalShadow,
                     ]}>
                     <View style={styles.header}>
                         <Text

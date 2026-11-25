@@ -43,7 +43,7 @@ const HarborAuthorizationLoadingOverlay = () => {
                 style={[
                     styles.card,
                     {backgroundColor: theme.white},
-                    theme.viewShadow,
+                    theme.modalShadow,
                 ]}>
                 <ActivityIndicator
                     size="large"

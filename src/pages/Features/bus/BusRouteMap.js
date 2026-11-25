@@ -148,7 +148,7 @@ const BusRouteMap = ({
         themeColor,
         trueWhite,
         white,
-        viewShadow,
+        floatingShadow,
     } = theme;
     const styles = useMemo(() => StyleSheet.create({
         container: {
@@ -193,7 +193,7 @@ const BusRouteMap = ({
             borderWidth: 3,
             alignItems: 'center',
             justifyContent: 'center',
-            ...viewShadow,
+            ...floatingShadow,
         },
         vehicleCount: {
             position: 'absolute',
@@ -213,7 +213,7 @@ const BusRouteMap = ({
             fontSize: 9,
             fontWeight: '700',
         },
-    }), [mapScale, themeColor, trueWhite, viewShadow, white]);
+    }), [mapScale, themeColor, trueWhite, floatingShadow, white]);
 
     // 巴士目前停在站點上的站碼集合（positionCode 等於站點碼）
     const arrivedStopCodes = useMemo(() => {

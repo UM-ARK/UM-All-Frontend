@@ -321,11 +321,11 @@ const HarborReactionControl = ({
                         <View
                             style={[
                                 reactionStyles.picker,
+                                theme.floatingShadow,
                                 {
                                     backgroundColor: theme.white,
                                     borderColor: theme.disabled,
                                     left: pickerLeft,
-                                    shadowColor: theme.black.main,
                                     top: pickerTop,
                                     width: pickerWidth,
                                 },
@@ -389,13 +389,6 @@ const reactionStyles = StyleSheet.create({
         height: PICKER_HEIGHT,
         borderWidth: StyleSheet.hairlineWidth,
         borderRadius: PICKER_HEIGHT / 2,
-        shadowOffset: {
-            width: 0,
-            height: scale(4),
-        },
-        shadowOpacity: 0.16,
-        shadowRadius: scale(10),
-        elevation: 8,
     },
     pickerContent: {
         alignItems: 'center',

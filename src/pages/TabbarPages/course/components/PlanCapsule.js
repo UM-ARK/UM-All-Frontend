@@ -25,7 +25,7 @@ import { useCoursePlan } from '../context/CoursePlanContext';
  */
 const PlanCapsule = ({ bottom, onPress }) => {
     const { theme } = useTheme();
-    const { themeColor, black, white, unread } = theme;
+    const { themeColor, white, unread, floatingShadow } = theme;
 
     const { planList, conflictCount } = useCoursePlan();
 
@@ -55,15 +55,7 @@ const PlanCapsule = ({ bottom, onPress }) => {
                         borderRadius: scale(20),
                         overflow: 'hidden',
                         backgroundColor: isLiquidGlassSupported ? null : white,
-                        ...(isLiquidGlassSupported
-                            ? {}
-                            : {
-                                shadowColor: black.main,
-                                shadowOffset: { width: 0, height: 2 },
-                                shadowOpacity: 0.1,
-                                shadowRadius: 4,
-                                elevation: 3,
-                            }),
+                        ...(isLiquidGlassSupported ? {} : floatingShadow),
                     }}>
                     <Ionicons
                         name="calendar-outline"
