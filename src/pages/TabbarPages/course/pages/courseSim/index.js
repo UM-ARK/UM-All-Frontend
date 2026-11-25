@@ -82,6 +82,7 @@ import {
     handleCourseInfoMenuAction,
 } from '../../utils/courseInfoMenu';
 import SegmentControl from '../../../../../components/SegmentControl';
+import { GlassView, isLiquidGlassSupported } from '../../../../../utils/glassEffect';
 import { COURSE_SEARCH_SEGMENT } from '../../../../../utils/courseNavigation';
 import {
     getCourseDisplayTitle,
@@ -107,6 +108,7 @@ import OverviewCourseCardContent from './components/OverviewCourseCardContent';
 import TimetableCourseCard, { DepartingCourseCard, getTimetableParticlesPerCard } from './components/TimetableCourseCard';
 
 const converter = OpenCC.Converter({ from: 'cn', to: 'tw' }); // 簡體轉繁體
+const ViewSwitcherContainer = isLiquidGlassSupported ? GlassView : View;
 
 /** 課表單一星期欄寬 */
 const DAY_COLUMN_WIDTH = scale(135);
@@ -2774,7 +2776,7 @@ E11-0000
         ];
 
         return (
-            <View
+            <ViewSwitcherContainer
                 onLayout={({ nativeEvent }) =>
                     setViewSwitcherHeight(nativeEvent.layout.height)
                 }
@@ -2783,15 +2785,19 @@ E11-0000
                     bottom: floatingBottom,
                     alignSelf: 'center',
                     zIndex: 10,
+                    ...(isLiquidGlassSupported ? {
+                        borderRadius: scale(999),
+                        overflow: 'hidden',
+                    } : {}),
                 }}>
                 <SegmentControl
                     options={viewOptions}
                     selectedIndex={timetableView === 'overview' ? 1 : 0}
                     onChange={handleTimetableViewChange}
-                    trackBackgroundColor={white}
-                    style={theme.viewShadow}
+                    trackBackgroundColor={isLiquidGlassSupported ? 'transparent' : white}
+                    style={isLiquidGlassSupported ? undefined : theme.viewShadow}
                 />
-            </View>
+            </ViewSwitcherContainer>
         );
     };
 

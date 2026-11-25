@@ -3,6 +3,9 @@ import { Pressable, View } from 'react-native';
 import { scale } from 'react-native-size-matters';
 import Text from '../../../../../../components/AppText';
 import { uiStyle } from '../../../../../../components/ThemeContext';
+import { GlassView, isLiquidGlassSupported } from '../../../../../../utils/glassEffect';
+
+const FirstLetterNavContainer = isLiquidGlassSupported ? GlassView : View;
 
 /**
  * 側邊首字母快速導航
@@ -13,15 +16,19 @@ const FirstLetterNav = ({ firstLetterList, scrollData, theme, onScrollTo }) => {
     }
 
     return (
-        <View style={{
+        <FirstLetterNavContainer style={{
             position: 'absolute',
             right: scale(8),
             justifyContent: 'center',
             alignItems: 'center',
-            backgroundColor: theme.white,
             borderRadius: scale(8),
             padding: scale(3),
-            ...theme.floatingShadow,
+            ...(isLiquidGlassSupported ? {
+                overflow: 'hidden',
+            } : {
+                backgroundColor: theme.white,
+                ...theme.floatingShadow,
+            }),
         }}>
             {firstLetterList.map(letter => (
                 <Pressable
@@ -38,7 +45,7 @@ const FirstLetterNav = ({ firstLetterList, scrollData, theme, onScrollTo }) => {
                     </Text>
                 </Pressable>
             ))}
-        </View>
+        </FirstLetterNavContainer>
     );
 };
 
