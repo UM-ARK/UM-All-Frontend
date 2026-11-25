@@ -29,7 +29,7 @@ const getCalItemWidth = item => moment(item.endDate).diff(item.startDate, 'day')
 
 const CalendarBar = ({ refreshTrigger = 0 }) => {
     const { theme } = useTheme();
-    const { bg_color, black, themeColor, themeColorUltraLight } = theme;
+    const { bg_color, black, themeColor } = theme;
 
     const calScrollRef = useRef(null);
     const [selectDay, setSelectDay] = useState(0);
@@ -127,8 +127,6 @@ const CalendarBar = ({ refreshTrigger = 0 }) => {
                         paddingVertical: verticalScale(2),
                         height: '100%',
                         justifyContent: 'center',
-                        borderWidth: 1,
-                        borderColor: isThisDateSelected ? themeColorUltraLight : 'transparent',
                     }}
                 >
                     <View style={{ alignItems: 'center', justifyContent: 'center' }}>
@@ -214,8 +212,6 @@ const CalendarBar = ({ refreshTrigger = 0 }) => {
                             width: '80%',
                             backgroundColor: `${themeColor}15`,
                             borderRadius: scale(10),
-                            borderWidth: 1,
-                            borderColor: themeColorUltraLight,
                         }}
                     >
                         <Text
