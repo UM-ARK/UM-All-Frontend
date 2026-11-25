@@ -88,24 +88,6 @@ const HarborProfileCard = ({
                             color={theme.themeColor}
                         />
                     ) : null}
-                    <View
-                        style={[
-                            styles.connectedPill,
-                            {backgroundColor: theme.tonal.success15},
-                        ]}>
-                        <Ionicons
-                            name="checkmark-circle"
-                            size={scale(12)}
-                            color={theme.successForeground}
-                        />
-                        <Text
-                            style={[
-                                styles.connectedText,
-                                {color: theme.successForeground},
-                            ]}>
-                            {t('已連接')}
-                        </Text>
-                    </View>
                 </View>
                 <Text style={[styles.handle, {color: theme.black.second}]}>
                     @{user.username}
@@ -150,7 +132,7 @@ const HarborProfileCard = ({
                             <MaterialCommunityIcons
                                 name="chat-outline"
                                 size={scale(18)}
-                                color={theme.themeColor}
+                                color={theme.black.second}
                             />
                             {chatUnreadCount > 0 ? (
                                 <View
@@ -183,7 +165,7 @@ const HarborProfileCard = ({
                             <Ionicons
                                 name="settings-outline"
                                 size={scale(18)}
-                                color={theme.themeColor}
+                                color={theme.black.second}
                             />
                         </ScalePressable>
                     ) : null}
@@ -261,19 +243,6 @@ const styles = StyleSheet.create({
         flexShrink: 1,
         fontSize: scale(18),
         fontWeight: '760',
-    },
-    connectedPill: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: scale(3),
-        borderRadius: scale(20),
-        paddingHorizontal: scale(7),
-        paddingVertical: verticalScale(3),
-    },
-    connectedText: {
-        ...uiStyle.defaultText,
-        fontSize: scale(10),
-        fontWeight: '750',
     },
     handle: {
         ...uiStyle.defaultText,
