@@ -18,6 +18,7 @@ import Reanimated, {
     Easing,
     ReduceMotion,
     interpolate,
+    interpolateColor,
     useAnimatedStyle,
     useSharedValue,
     withTiming,
@@ -67,8 +68,52 @@ const HARBOR_TAB_LABEL_FONT_SIZE = moderateScale(11.5, 0.25);
 const HarborFeedTrackContainer = isLiquidGlassSupported ? GlassView : View;
 const Drawer = createDrawerNavigator();
 const AnimatedPagerView = Animated.createAnimatedComponent(PagerView);
+const AnimatedText = Reanimated.createAnimatedComponent(Text);
 
-const HarborFeedTabs = ({ options, selectedIndex, position, onChange }) => {
+// 文字色跟分頁滾動進度走，與滑塊同一段切換裡漸變
+const HarborFeedTabLabel = ({
+    label,
+    index,
+    scrollProgress,
+    selectedColor,
+    idleColor,
+    isSelected,
+}) => {
+    const indexSv = useSharedValue(index);
+    const selectedColorSv = useSharedValue(selectedColor);
+    const idleColorSv = useSharedValue(idleColor);
+    indexSv.value = index;
+    selectedColorSv.value = selectedColor;
+    idleColorSv.value = idleColor;
+
+    const animatedStyle = useAnimatedStyle(() => ({
+        color: interpolateColor(
+            scrollProgress.value,
+            [indexSv.value - 1, indexSv.value, indexSv.value + 1],
+            [idleColorSv.value, selectedColorSv.value, idleColorSv.value],
+        ),
+    }));
+
+    return (
+        <AnimatedText
+            numberOfLines={1}
+            style={[
+                styles.feedTabLabel,
+                animatedStyle,
+                isSelected && styles.feedTabLabelSelected,
+            ]}>
+            {label}
+        </AnimatedText>
+    );
+};
+
+const HarborFeedTabs = ({
+    options,
+    selectedIndex,
+    position,
+    scrollProgress,
+    onChange,
+}) => {
     const { theme } = useTheme();
     const reducedMotion = useAppReducedMotion();
     const { isLight, white, black, featuresScreen, pressOverlay, unread, viewShadow } = theme;
@@ -125,19 +170,30 @@ const HarborFeedTabs = ({ options, selectedIndex, position, onChange }) => {
                         }}
                         style={styles.feedTab}>
                         <View style={styles.feedTabLabelRow}>
-                            <Text
-                                numberOfLines={1}
-                                style={[
-                                    styles.feedTabLabel,
-                                    {
-                                        color: isSelected
-                                            ? black.main
-                                            : black.third,
-                                    },
-                                    isSelected && styles.feedTabLabelSelected,
-                                ]}>
-                                {option.label}
-                            </Text>
+                            {reducedMotion || !scrollProgress ? (
+                                <Text
+                                    numberOfLines={1}
+                                    style={[
+                                        styles.feedTabLabel,
+                                        {
+                                            color: isSelected
+                                                ? black.main
+                                                : black.third,
+                                        },
+                                        isSelected && styles.feedTabLabelSelected,
+                                    ]}>
+                                    {option.label}
+                                </Text>
+                            ) : (
+                                <HarborFeedTabLabel
+                                    label={option.label}
+                                    index={index}
+                                    scrollProgress={scrollProgress}
+                                    selectedColor={black.main}
+                                    idleColor={black.third}
+                                    isSelected={isSelected}
+                                />
+                            )}
                             {option.showDot ? (
                                 <View
                                     pointerEvents="none"
@@ -162,6 +218,7 @@ const HarborStickyToolbar = ({
     segmentOptions,
     currentIndex,
     tabPosition,
+    tabScrollProgress,
     onChange,
     status,
     sessionLabel,
@@ -258,6 +315,7 @@ const HarborStickyToolbar = ({
                     options={segmentOptions}
                     selectedIndex={currentIndex}
                     position={tabPosition}
+                    scrollProgress={tabScrollProgress}
                     onChange={onChange}
                 />
 
@@ -476,6 +534,7 @@ const ForumPage = ({ navigation }) => {
     const pageScrollOffset = useRef(new Animated.Value(0)).current;
     const pageScrollPosition = useRef(new Animated.Value(0)).current;
     const searchProgress = useSharedValue(0);
+    const tabScrollProgress = useSharedValue(0);
     const scrollOffsetsRef = useRef({});
     const searchProgressByViewRef = useRef({});
     const lastScrollYRef = useRef({});
@@ -599,9 +658,15 @@ const ForumPage = ({ navigation }) => {
                         },
                     },
                 ],
-                { useNativeDriver: true },
+                {
+                    useNativeDriver: true,
+                    listener: event => {
+                        const { position, offset } = event.nativeEvent;
+                        tabScrollProgress.value = position + offset;
+                    },
+                },
             ),
-        [pageScrollOffset, pageScrollPosition],
+        [pageScrollOffset, pageScrollPosition, tabScrollProgress],
     );
     const ensureMounted = useCallback(view => {
         setMountedViews(current =>
@@ -780,6 +845,7 @@ const ForumPage = ({ navigation }) => {
                 setCurrentIndex(nextIndex);
                 pageScrollPosition.setValue(nextIndex);
                 pageScrollOffset.setValue(0);
+                tabScrollProgress.value = nextIndex;
                 pagerRef.current?.setPageWithoutAnimation(nextIndex);
             }
             return;
@@ -789,12 +855,14 @@ const ForumPage = ({ navigation }) => {
         setCurrentIndex(0);
         pageScrollPosition.setValue(0);
         pageScrollOffset.setValue(0);
+        tabScrollProgress.value = 0;
         pagerRef.current?.setPageWithoutAnimation(0);
     }, [
         currentIndex,
         enabledViews,
         pageScrollOffset,
         pageScrollPosition,
+        tabScrollProgress,
     ]);
 
     const handleSessionPress = useCallback(() => {
@@ -959,6 +1027,7 @@ const ForumPage = ({ navigation }) => {
                         segmentOptions={segmentOptions}
                         currentIndex={currentIndex}
                         tabPosition={tabPosition}
+                        tabScrollProgress={tabScrollProgress}
                         onChange={selectView}
                         status={status}
                         sessionLabel={sessionLabel}
