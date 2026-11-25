@@ -1,0 +1,77 @@
+---
+description: 專案目錄架構、React Navigation V7 導覽（行動端與 Web 邊界）、全域 Context 與命名慣例
+alwaysApply: false
+---
+
+# 架構、導覽與目錄結構
+
+## 一、專案目錄結構
+
+```text
+App.js / App.web.js            # 應用根入口（Providers、Toast、初始化）
+app.json / metro.config.js     # Expo CNG 設定、Metro 代理與模組替身
+plugins/                       # 自訂 Expo Config Plugins（Android 簽名、QuickActions 等）
+scripts/                       # 維護腳本（如 updateHarborEmojiShortcodes.js）
+src/
+├── Nav.js / Nav.web.js        # React Navigation V7 主 Stack 導覽（行動端 / Web 殼子）
+├── Tabbar.js / Tabbar.web.js  # 底部標籤導覽（行動端 5 Tab / Web 3 Tab）
+├── components/                # 共用 UI（ThemeContext、AppText、AppTextInput、ScalePressable 等）
+├── contexts/                  # 全域狀態 Provider
+│   ├── HarborSessionContext.js      # Harbor 論壇登入態與未讀計數
+│   ├── PushRegistrationContext.js   # 推送註冊與通知跳轉
+│   ├── ReducedMotionContext.js      # 系統與應用內「減少動態效果」偏好
+│   ├── ProgrammeLevelContext.js     # 本科 / 研究生學歷切換
+│   ├── SchedulingSessionContext.js  # 組隊排班會話
+│   └── AppShareContext.js           # 跨頁分享面板狀態
+├── pages/
+│   ├── TabbarPages/
+│   │   ├── info/              # 資訊（校園活動、組織、澳大新聞、搜尋）
+│   │   ├── arkHarbor/         # 論壇（Harbor 討論區、發帖、聊天、審核）
+│   │   ├── course/            # 選課（what2Reg 搵課 + courseSim 課表模擬）
+│   │   ├── features/          # 服務（校園功能大全入口）
+│   │   ├── my/                # 我的（個人主頁、信箱、成就、帳號設定）
+│   │   └── arkwiki/           # ARK Wiki（由服務頁或導覽進入）
+│   ├── Features/              # 獨立功能頁（Bus、CarPark、EatingSchedule、UMOrg、SettingPage）
+│   └── TeamSchedule/          # 組隊排班頁面與元件
+├── utils/                     # 工具模組（glassEffect、trigger、storageKits、checkCoursesKits、
+│                              # pathMap、scaling、windowSizeClass、balanceColumns、harbor/ 等）
+├── static/                    # 打包資源（UMCourses v2 JSON、UMCalendar.js、fonts、img）
+├── i18n/                      # i18next 設定（i18n.js、en-us.json、zh-hk.js）
+└── web-stubs/                 # Web 端原生模組替身（由 metro.config.js 映射）
+```
+
+## 二、React Navigation V7 導覽規範
+
+### 行動端（`src/Nav.js` + `src/Tabbar.js`）
+
+- **主導覽**：`createNativeStackNavigator`；`screenOptions` 統一設定 `freezeOnBlur: true`、`animation: reducedMotion ? 'fade' : undefined`、`headerTransparent: isLiquidGlassSupported`、`headerBlurEffect`、`headerTitleAlign: 'center'`、`headerBackButtonDisplayMode: 'minimal'` 與深淺色同步的 `statusBarStyle`。
+- **底部 5 個主 Tab**（順序以 `src/Tabbar.js` 的 `tabScreen` 為準）：
+  1. `NewsTabbar`（資訊）
+  2. `ForumTabbar`（論壇）
+  3. `CourseTab`（選課：合併搵課與課表段落）
+  4. `FeaturesTabbar`（服務）
+  5. `MyTabbar`（我的）
+- **平台分流**：iOS 使用 `createNativeBottomTabNavigator`（`@react-navigation/bottom-tabs/unstable`，寬屏支援 `tabSidebar`，iOS 26+ 支援 `translucent` 液態玻璃）；Android 使用 `createBottomTabNavigator`。
+- **原生導覽列按鈕**：優先使用 `@react-navigation/elements` 的 `HeaderBackButton` 與 `Button`，在 iOS 26+ 自動呈現原生樣式。
+- **透明 Header 內容留白**：滾動容器依液態玻璃狀態設定 `contentInsetAdjustmentBehavior={isLiquidGlassSupported ? undefined : 'automatic'}`，或套用 `headerHeight` 內距（參考 `UMEventDetail.js`、`SearchScreen.js`）。
+- **註冊新頁面**：
+  - 僅 Stack 頁 → 註冊至 `src/Nav.js`（若 Web 端也需開啟再同步考量 `Nav.web.js`）。
+  - 底部標籤頁 → 同步更新 `src/Tabbar.js` 的 `tabIconDescription`、`tabScreen` 與 iOS／Android 圖示映射。
+
+### Web 端邊界（`src/Nav.web.js` + `src/Tabbar.web.js`）
+
+- Web 版定位為輕量免安裝工具版，部署於 `https://umall.one/webAPP/`。
+- 僅掛載 3 個 Tab（`CourseTab`、`FeaturesTabbar`、`SettingPage`）與少數深鏈接頁（`LocalCourse`、`ClubDetail`、`EventDetail`、`AllEvents`、`UMOrg`）。
+- 論壇、Wiki、推送通知、快捷操作等純行動能力不打包進 Web；僅原生模組在 `metro.config.js` 的 `WEB_STUBS` 中映射到 `src/web-stubs/`。
+- 修改 Web 子路徑時需同時保持 `app.json`（`experiments.baseUrl`）、`src/Nav.web.js`（`WEB_BASE_PATH`）與伺服器 nginx 配置三處一致。
+
+## 三、命名與新檔 Import 慣例
+
+| 類型 | 規範 | 範例 |
+| --- | --- | --- |
+| 元件／頁面檔案 | PascalCase | `ClubDetail.js`、`ScalePressable.js` |
+| 函式／變數 | camelCase | `handleLogin`、`getCourseCatalog` |
+| 常數 | UPPER_SNAKE_CASE | `BASE_URI`、`WIDE_CONTENT_MAX_WIDTH` |
+
+- 模組匯入使用相對路徑（`../../`），不使用未配置的路徑別名。
+- **新建檔案或新增匯入**時建議按順序排列：React／React Native → 第三方套件 → 本地模組／元件／工具；**既有檔案依 `AGENTS.md` 編輯原則，禁止順手重排既有 import**。

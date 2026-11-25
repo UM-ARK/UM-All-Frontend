@@ -1,4 +1,5 @@
-## **🎉ARK ALL 是一個免費的開源 APP🎉**
+## **🎉 ARK ALL 是一個免費的開源 APP 🎉**
+
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/UM-ARK/UM-All-Frontend?style=for-the-badge&label=Github%20Release)](https://github.com/UM-ARK/UM-All-Frontend/releases/latest)
 
 <div align="center">
@@ -10,226 +11,133 @@
 </a>
 </div>
 
--   感興趣的話可以來 Wiki 看看更多[關於 ARK 的故事](https://wiki.umall.one/wiki/ARK_ALL)~
--   如果 ARK ALL 有幫助到您，可以請我們[喝杯咖啡](https://github.com/UM-ARK/Donate)！
--   如果您也想參與到 ARK ALL 的開發中，立即聯繫我們 `umacark@gmail.com`！
+- 感興趣的話可以來 Wiki 看看更多[關於 ARK 的故事](https://wiki.umall.one/wiki/ARK_ALL) ~
+- 如果 ARK ALL 有幫助到您，可以請我們[喝杯咖啡](https://github.com/UM-ARK/Donate)！
+- 如果您也想參與到 ARK ALL 的開發中，立即聯繫我們 `umacark@gmail.com`！
 
 <div align="center">
 
-**APP熒幕截圖**
+**APP 熒幕截圖**
 
-|                                                                      |                                                                    |                                                                  |
-| :------------------------------------------------------------------: | :----------------------------------------------------------------: | :--------------------------------------------------------------: |
-|      <img src="./README/img/Home.png" width="30%" alt="Home" />      |     <img src="./README/img/Club.png" width="30%" alt="Club" />     | <img src="./README/img/Courses.png" width="30%" alt="Courses" /> |
-| <img src="./README/img/Timetable.png" width="30%" alt="Timetable" /> | <img src="./README/img/Features.png" width="30%" alt="Features" /> |     <img src="./README/img/Bus.png" width="30%" alt="Bus" />     |
+| | | |
+| :---: | :---: | :---: |
+| <img src="./README/img/Home.png" width="30%" alt="Home" /> | <img src="./README/img/Club.png" width="30%" alt="Club" /> | <img src="./README/img/Courses.png" width="30%" alt="Courses" /> |
+| <img src="./README/img/Timetable.png" width="30%" alt="Timetable" /> | <img src="./README/img/Features.png" width="30%" alt="Features" /> | <img src="./README/img/Bus.png" width="30%" alt="Bus" /> |
 
 </div>
 
-- [**🎉ARK ALL 是一個免費的開源 APP🎉**](#ark-all-是一個免費的開源-app)
-- [🎉 首次運行該項目](#-首次運行該項目)
-  - [🤖 Android 環境 Setup](#-android-環境-setup)
-  - [🍎 iOS 環境 Setup](#-ios-環境-setup)
-    - [React Native 預編譯依賴下載失敗](#react-native-預編譯依賴下載失敗)
-  - [📘 Expo CNG 工作流說明](#-expo-cng-工作流說明)
-- [🌈 開發本項目準備](#-開發本項目準備)
-  - [⛵ 啟動流程](#-啟動流程)
+---
+
+## 🧭 關於 ARK ALL
+
+**ARK ALL** 是一個面向**澳門大學（University of Macau）**社群的免費開源一站式校園生活平台，主要服務澳大本科生、研究生，亦兼顧教職員與校友的日常需求，提供**繁體中文**與**英文**雙語介面。
+
+### 核心功能
+
+| 模組 | 涵蓋內容 |
+| --- | --- |
+| **資訊** | 校園活動、學生組織、澳大新聞與站內搜尋 |
+| **論壇（ARK Harbor）** | 澳大校園討論區、發帖互動、站內聊天與通知 |
+| **選課** | 搵課目錄查詢（支援本科／研究生與歷史學期）與課表模擬（寬屏支援左右分屏） |
+| **服務** | 校巴實時動態、停車場空位、餐飲開放時間、組隊排班、澳大部門與 ARK Wiki |
+| **我的** | 個人主頁、信箱、成就徽章與主題／語言／無障礙設定 |
+
+### 支援平台與技術棧
+
+- **平台**：iOS／iPadOS、Android、Web 輕量工具版（[umall.one/webAPP](https://umall.one/webAPP/)，提供選課、服務與設定）
+- **技術棧**：Expo（CNG 連續原生生成）+ React Native + React Navigation V7 + `pnpm`（具體依賴與 Node 版本以 [`package.json`](./package.json) 及 [`app.json`](./app.json) 為準）
+
+---
+
+## 📑 目錄
+
+- [**🎉 ARK ALL 是一個免費的開源 APP 🎉**](#-ark-all-是一個免費的開源-app-)
+- [🧭 關於 ARK ALL](#-關於-ark-all)
+  - [核心功能](#核心功能)
+  - [支援平台與技術棧](#支援平台與技術棧)
+- [📑 目錄](#-目錄)
+- [🚀 快速開始與開發環境](#-快速開始與開發環境)
+  - [前置環境](#前置環境)
+  - [1. 克隆與安裝依賴](#1-克隆與安裝依賴)
+  - [2. 配置環境變數與 Firebase](#2-配置環境變數與-firebase)
     - [🔑 UM Open Data API Token 配置](#-um-open-data-api-token-配置)
     - [📋 Firebase 配置文件說明](#-firebase-配置文件說明)
-      - [`google-services.json` 模板結構](#google-servicesjson-模板結構)
-      - [`GoogleService-Info.plist` 模板結構](#googleservice-infoplist-模板結構)
-    - [🤖 Android 運行](#-android-運行)
-    - [🍎 iOS 運行](#-ios-運行)
-      - [模擬器截圖（狀態列）](#模擬器截圖狀態列)
-    - [配置Firebase](#配置firebase)
-  - [🐛 如何 Debug?](#-如何-debug)
-    - [重新打開 Dev Menu / 開啟 Tools button](#重新打開-dev-menu--開啟-tools-button)
-      - [方法 1：重新打開 Dev Menu](#方法-1重新打開-dev-menu)
-      - [方法 2：通過 Expo CLI 快捷鍵](#方法-2通過-expo-cli-快捷鍵)
-    - [Google Firebase Analytics](#google-firebase-analytics)
-- [📦 打包方式](#-打包方式)
+  - [3. 生成原生工程（Expo CNG）](#3-生成原生工程expo-cng)
+  - [4. 啟動開發與常用指令](#4-啟動開發與常用指令)
+- [🐛 除錯與開發工具](#-除錯與開發工具)
+  - [Metro 與 Dev Menu / Tools button](#metro-與-dev-menu--tools-button)
+  - [Google Firebase Analytics DebugView](#google-firebase-analytics-debugview)
+  - [iOS 模擬器截圖（覆寫狀態列）](#ios-模擬器截圖覆寫狀態列)
+- [📦 打包與部署](#-打包與部署)
   - [🍎 iOS 打包](#-ios-打包)
-    - [方式一：使用 Expo 構建（推薦）](#方式一使用-expo-構建推薦)
-    - [方式二：本地 Xcode 構建（傳統方式）](#方式二本地-xcode-構建傳統方式)
+    - [方式一：EAS 雲端建置（推薦）](#方式一eas-雲端建置推薦)
+    - [方式二：本地 Xcode Archive](#方式二本地-xcode-archive)
     - [本地 Release 真機除錯（不走 EAS）](#本地-release-真機除錯不走-eas)
   - [🤖 Android 打包](#-android-打包)
-    - [方式一：使用 Expo 構建（推薦）](#方式一使用-expo-構建推薦-1)
-    - [方式二：本地 Gradle 構建](#方式二本地-gradle-構建)
+    - [方式一：EAS 雲端建置（推薦）](#方式一eas-雲端建置推薦-1)
+    - [方式二：本地 Gradle 建置／真機 Release 測試](#方式二本地-gradle-建置真機-release-測試)
     - [本機 Release 簽名設定](#本機-release-簽名設定)
-  - [🐛 故障排除](#-故障排除)
-- [⛵ 維護須知](#-維護須知)
-  - [觸覺回饋標準](#觸覺回饋標準)
+  - [🌐 Web 版部署](#-web-版部署)
+    - [關鍵配置（三處須保持一致）](#關鍵配置三處須保持一致)
+    - [匯出與同步到伺服器](#匯出與同步到伺服器)
+    - [已知限制](#已知限制)
+- [⛵ 維護與貢獻指南](#-維護與貢獻指南)
 
 ---
 
-## 🎉 首次運行該項目
+## 🚀 快速開始與開發環境
 
-本專案使用 **pnpm** 作為套件管理器。請先執行 `corepack enable` 啟用 pnpm，再於根目錄執行 `pnpm install`。
+開發規範、架構說明與 AI 協作指引請參閱 [`AGENTS.md`](./AGENTS.md)；常見報錯與排雷請見 [除錯手冊](./README/debugging_doc.md)。
 
-在此查看[已知 BUG](./README/debugging_doc.md#android%E9%96%8B%E7%99%BC%E7%92%B0%E5%A2%83)，現在可以參考`./AGENTS.md`文件看項目說明了~~AI萬歲~~。
+### 前置環境
 
-### 🤖 Android 環境 [Setup](https://reactnative.dev/docs/environment-setup)
+- **Node.js**：依 [`package.json`](./package.json) 的 `engines.node` 安裝對應 LTS 版本
+- **pnpm**：本專案使用 `pnpm`，請先執行 `corepack enable` 啟用
+- **iOS（僅限 macOS）**：Xcode 15+、Watchman（`brew install watchman`）；Expo CNG 會自動處理 CocoaPods，無需手動跑 `pod install`
+- **Android**：Android Studio、Android SDK 與模擬器、JDK 18+
 
-1. 確保自己是 `Android API 33` 或 `API 31` 的模擬器環境，下載安裝 JDK、SDK
-2. 在項目根目錄(`package.json`所在的目錄)打開命令行運行 `pnpm install` 安裝依賴
-3. 執行 `npx expo prebuild --clean` 生成 Android 原生項目
-   - 僅生成 Android：`npx expo prebuild --clean --platform android`
-   - 僅生成 iOS：`npx expo prebuild --clean --platform ios`
-   - 如安裝了跨平台庫，直接使用 `npx expo prebuild --clean` 生成兩個平台
-4. 前往 `Android Studio` 啟動所需的模擬器
-5. 敲入 `pnpm android` 運行本項目吧!
-
----
-
-### 🍎 iOS 環境 [Setup](https://reactnative.dev/docs/environment-setup)
-
-> 基於 Expo SDK 57 + React Native 0.86，iOS APP 目前只能在 Mac 開發調試
-
-1. 先安裝 Node（≥18）並啟用 pnpm，方便之後使用指令
-
-```console
-brew install node
-brew install watchman
-corepack enable
-```
-
-2. 確保安裝了 `Xcode` (版本 15 或以上)，建議在[官網](https://developer.apple.com/download/all/?q=Xcode)下載
-3. 在項目根目錄(`package.json`所在的目錄)打開命令行運行 `pnpm install` 安裝依賴
-4. 執行 `npx expo prebuild --clean` 生成 iOS 原生項目
-   - 僅生成 iOS：`npx expo prebuild --clean --platform ios`
-   - 僅生成 Android：`npx expo prebuild --clean --platform android`
-   - 如安裝了跨平台庫，直接使用 `npx expo prebuild --clean` 生成兩個平台
-
-5. 使用 Expo 運行 iOS（**不需要手動管理 CocoaPods**）
-
-```console
-pnpm ios          # 運行 iPhone 16 Pro 模擬器
-pnpm iosNew       # 運行 iPhone 17 Pro 模擬器
-pnpm iosTrue      # 運行到真實設備
-pnpm iosBig       # 運行 iPad Pro 13-inch 模擬器
-```
-
-> **注意**：Expo CNG 會自動處理 iOS 原生代碼生成和 CocoaPods 依賴，無需手動運行 `pod install` 或 `prebuild`。首次運行 `pnpm ios` 時會自動生成原生項目文件。
-
-#### React Native 預編譯依賴下載失敗
-
-如果 prebuild 後運行 iOS 時出現 `ReactNativeFeatureFlagsDefaults.h`、`react_native_assert.h` 或 `folly/dynamic.h` 等 header 找不到，可能是當前網絡對 Maven Central 的 React Native 預編譯依賴檢查返回 HTTP 403，令 CocoaPods 回退至從源碼編譯。
-
-可改用 Maven mirror 重新生成 iOS 原生項目：
-
-```console
-env ENTERPRISE_REPOSITORY=https://maven.aliyun.com/repository/central npx expo prebuild --clean --platform ios
-```
-
-生成後確認 `ios/Podfile.lock` 包含 `React-Core-prebuilt` 和 `ReactNativeDependencies`：
-
-```console
-rg -n "React-Core-prebuilt \(|ReactNativeDependencies \(" ios/Podfile.lock
-```
-
-然後在同一 mirror 設定下運行 iOS：
-
-```console
-env ENTERPRISE_REPOSITORY=https://maven.aliyun.com/repository/central pnpm iosNew
-```
-
-此方案只適用於預編譯依賴探測或下載受阻的情況，無需修改 `node_modules`、Pod header search paths 或 `useFrameworks` 設定。
-
----
-
-### 📘 Expo CNG 工作流說明
-
-項目使用 **Expo CNG (Continuous Native Generation)** 自動管理原生項目：
-
-| 操作         | 命令                             | 說明                                                           |
-| ------------ | -------------------------------- | -------------------------------------------------------------- |
-| 安裝依賴     | `pnpm install` 或 `pnpm expo install` | 推薦使用 pnpm                                             |
-| 生成原生項目 | `npx expo prebuild --clean`      | **首次運行前必須執行**，可加 `--platform ios/android` 指定平台 |
-| ------       | ------                           | ------                                                         |
-| 運行 iOS     | `pnpm ios`                       | 運行 iOS 模擬器或真機                                          |
-| 運行 Android | `pnpm android`                   | 運行 Android 模擬器                                            |
-
-**重要**：
-- **首次運行前必須先執行 `npx expo prebuild --clean`** 生成原生項目文件
-- 生成後會創建 `./ios` 和 `./android` 目錄
-- **無需手動運行 `pod install`**：Expo CNG 會自動處理
-- 如果遇到原生構建問題，可重新運行 `npx expo prebuild --clean` 重新生成
-
----
-
-## 🌈 開發本項目準備
-
-### ⛵ 啟動流程
-
-1. 克隆倉庫的代碼到本地（推薦使用`GitHub Desktop`）
+### 1. 克隆與安裝依賴
 
 ```console
 git clone https://github.com/UM-ARK/UM-All-Frontend.git
-```
-
-2. 在項目根目錄下(`./package.json`所在的目錄)啟動 Terminal/命令行安裝依賴包
-
-```console
+cd UM-All-Frontend
+corepack enable
 pnpm install
-# 或使用 expo install（自動處理依賴兼容性）
-pnpm expo install
 ```
 
-3. 執行 `npx expo prebuild --clean` 生成 iOS/Android 原生項目
-   - 僅生成 iOS：`npx expo prebuild --clean --platform ios`
-   - 僅生成 Android：`npx expo prebuild --clean --platform android`
-   - 如安裝了跨平台庫，直接使用 `npx expo prebuild --clean` 生成兩個平台
-
-4. 配置 **UM Open Data API Token**（新聞、活動、停車場即時資料等 `api.data.um.edu.mo` 請求需要 `Authorization`）。請見下方 [🔑 UM Open Data API Token 配置](#-um-open-data-api-token-配置)。
+### 2. 配置環境變數與 Firebase
 
 #### 🔑 UM Open Data API Token 配置
 
-程式透過 `src/utils/pathMap.js` 匯出的 `UM_API_TOKEN` 讀取 **`process.env.EXPO_PUBLIC_UM_API_TOKEN`**（Expo 會在打包／開發時把 `EXPO_PUBLIC_*` 內嵌進 JS，因此必須使用此前綴）。
+新聞、活動、停車場即時資料等 `api.data.um.edu.mo` 請求需要授權金鑰。程式透過 `src/utils/pathMap.js` 匯出的 `UM_API_TOKEN` 讀取 **`process.env.EXPO_PUBLIC_UM_API_TOKEN`**（Expo 僅內嵌 `EXPO_PUBLIC_*` 前綴變數）。
 
-**本機開發**
-
-1. 在專案**根目錄**（與 `package.json` 同層）新增 `.env` 或 `.env.local`。
-2. 寫入一行（將值換成你向澳大 Open Data 申請到的金鑰，勿使用範例字串）：
+1. 在專案根目錄（與 `package.json` 同層）建立 `.env` 或 `.env.local`：
 
 ```bash
 EXPO_PUBLIC_UM_API_TOKEN=你的_UM_Open_Data_Token
 ```
 
-3. 修改環境變數後請**重新啟動 Metro**；若仍讀不到，可嘗試 `pnpm start` 清快取再啟動。
-
-**版控與安全**
-
-- `.env`、`.env.local` 與歷史上的 `umAPIToken.json` 均已列於 `.gitignore`，**請勿把真實 Token 提交到 Git**。
-- 舊版文件曾要求根目錄 `umAPIToken.json`；**目前程式碼已不再讀取該 JSON**，請改用上方的 `EXPO_PUBLIC_UM_API_TOKEN`。
-
-**EAS / 雲端建置**
-
-- 雲端機器不會自動帶上你電腦裡的 `.env`。使用 EAS Build 時，請在 [Expo 專案 Environment variables](https://docs.expo.dev/eas/environment-variables/) 為對應建置 profile 設定同名變數 `EXPO_PUBLIC_UM_API_TOKEN`，否則正式版中相關 API 可能無法通過驗證。
-
-**取得 Token**
-
-- 請依澳門大學 Open Data／Data API 官方流程申請；維護者或團隊內部文件會說明申請管道與權限範圍。開源貢獻者若無金鑰，與上述 API 有關的畫面可能無法取得資料，屬預期行為。
-
-5. 需要配置 Firebase 配置文件（用於 Analytics 等功能）：
+2. 修改環境變數後請**重啟 Metro**（如 `pnpm start` 清除快取）。
+3. **版控與安全**：`.env`、`.env.local` 已列於 `.gitignore`，**切勿將真實 Token 提交到 Git**（舊版 `umAPIToken.json` 已不再讀取）。
+4. **EAS 雲端建置**：雲端不會自動帶上本機 `.env`，請於 [Expo Environment variables](https://docs.expo.dev/eas/environment-variables/) 為對應 profile 設定同名變數 `EXPO_PUBLIC_UM_API_TOKEN`。
+5. **取得方式**：依澳門大學 Open Data 官方流程申請；開源貢獻者若暫無金鑰，僅影響相關 Open Data 畫面，其餘功能仍可正常開發。
 
 #### 📋 Firebase 配置文件說明
 
-本項目需要以下 Firebase 配置文件：
+| 平台 | 文件路徑 | 用途 |
+| --- | --- | --- |
+| Android | `google-services.json`（專案根目錄） | Firebase Analytics |
+| iOS | `GoogleService-Info.plist`（專案根目錄） | Firebase Analytics |
 
-| 平台    | 文件路徑                                 | 用途                            |
-| ------- | ---------------------------------------- | ------------------------------- |
-| Android | `google-services.json`（項目根目錄）     | Firebase Analytics、Crashlytics |
-| iOS     | `GoogleService-Info.plist`（項目根目錄） | Firebase Analytics、Crashlytics |
+從 [Firebase Console](https://console.firebase.google.com/) 建立專案並註冊包名 `one.umall` 後下載至專案根目錄（已列於 `.gitignore`，請勿提交真實金鑰）。
 
-**獲取方式：**
-1. 前往 [Firebase Console](https://console.firebase.google.com/) 創建項目
-2. 註冊 Android/iOS 應用（包名：`one.umall`）
-3. 下載配置文件並放到對應目錄
+若僅需本地啟動開發（不使用真實 Firebase 功能），可先放入下方模板結構（請勿填入真實私密金鑰）：
 
-**如果只需運行項目（不使用 Firebase 功能）：**
+<details>
+<summary>展開查看 <code>google-services.json</code> 與 <code>GoogleService-Info.plist</code> 模板結構</summary>
 
-可以嘗試使用空文件或模板文件。以下是文件結構僅供參考（請勿填入真實隱私 key）：
+`google-services.json`：
 
-##### `google-services.json` 模板結構
 ```json
 {
   "project_info": {
@@ -262,7 +170,8 @@ EXPO_PUBLIC_UM_API_TOKEN=你的_UM_Open_Data_Token
 }
 ```
 
-##### `GoogleService-Info.plist` 模板結構
+`GoogleService-Info.plist`：
+
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -300,50 +209,58 @@ EXPO_PUBLIC_UM_API_TOKEN=你的_UM_Open_Data_Token
 </plist>
 ```
 
-> ⚠️ **注意**：空文件可能導致 Firebase 功能異常。建議從 Firebase Console 獲取真實配置文件，或至少填入有效的 `API_KEY`。
+</details>
 
-#### 🤖 Android 運行
+### 3. 生成原生工程（Expo CNG）
 
-1. 在 Android 上運行 App
+本專案採 **Expo CNG（Continuous Native Generation）**，`ios/` 與 `android/` 目錄由 `app.json` 及 `plugins/` 自動生成（已列於 `.gitignore`）：
 
-```console
-pnpm android
-```
-
-**說明：**
-- Expo CNG 會在首次運行時自動生成 Android 原生項目文件
-- 首次運行前需先執行 `npx expo prebuild --clean` 生成原生項目
-- 運行 `pnpm android` 前不需要手動執行 `prebuild`
-
-#### 🍎 iOS 運行
-
-> 項目使用 Expo SDK 57 與 CNG (Continuous Native Generation)，無需手動管理 CocoaPods
-
-1. 確保已安裝依賴
+- **何時需要執行 `prebuild`**：首次 clone 專案、增刪原生依賴、或修改 `app.json`／`plugins/` 時。
+- **何時不需要執行**：日常修改 JS 程式碼直接靠 Metro 熱重載即可，亦**無需手動執行 `pod install`**。
 
 ```console
-pnpm install
+npx expo prebuild --clean                    # 同時生成 iOS 與 Android 原生工程
+npx expo prebuild --clean --platform ios     # 僅生成 iOS
+npx expo prebuild --clean --platform android # 僅生成 Android
 ```
 
-2. 使用 Expo 運行 iOS
+> 若 iOS prebuild／編譯時因網路對 Maven Central 返回 HTTP 403 而找不到 `ReactNativeFeatureFlagsDefaults.h`、`folly/dynamic.h` 等 header，請見 [除錯手冊：iOS 預編譯依賴下載失敗](./README/debugging_doc.md#ios-預編譯依賴下載失敗http-403)。
 
-```console
-pnpm ios          # 運行 iPhone 16 Pro 模擬器
-pnpm iosNew       # 運行 iPhone 17 Pro 模擬器
-pnpm iosTrue      # 運行到真實設備
-pnpm iosBig       # 運行 iPad Pro 13-inch 模擬器
-```
+### 4. 啟動開發與常用指令
 
-**說明：**
-- Expo CNG 會自動處理 iOS 原生代碼生成和 CocoaPods 依賴
-- **首次運行前需先執行 `npx expo prebuild --clean` 生成原生項目**
-- **無需手動運行 `pod install`**
-- **無需手動打開 Xcode** 進行編譯
-- 如需在 Xcode 中調試，可打開 `./ios` 目錄下的項目文件（首次運行 `pnpm ios` 後會生成）
+| 操作 | 指令 | 說明 |
+| --- | --- | --- |
+| 啟動 Metro | `pnpm start` | 清快取啟動開發伺服器（`--reset-cache`） |
+| 運行 iOS（選擇裝置） | `pnpm ios` / `pnpm iosTrue` | 互動選擇模擬器或已連線真機 |
+| 運行指定 iOS 模擬器 | `pnpm iosNew` / `pnpm iosBig` | iPhone 17 Pro / iPad Pro 13-inch (M5) |
+| 運行 Android | `pnpm android` | 先於 Android Studio 啟動模擬器或連接真機 |
+| 運行 Web | `npx expo start --web` | 啟動 Web 版，Metro 自動代理 `/api/*` |
+| 程式碼檢查 | `pnpm lint` | 執行 ESLint |
+| 單元測試 | `pnpm test` | 若遇 Watchman 權限錯誤請加 `-- --watchman=false` |
 
-##### 模擬器截圖（狀態列）
+---
 
-製作 App Store 截圖或更新 README 展示圖時，可先覆寫模擬器狀態列，避免時間、電量、訊號等干擾畫面：
+## 🐛 除錯與開發工具
+
+### Metro 與 Dev Menu / Tools button
+
+- **React DevTools**：在運行中的 Metro 終端機按下 `j` 即可開啟。
+- **重新開啟 Dev Menu / Tools button**：若畫面上看不到浮動 **Tools** 按鈕，可透過以下方式開啟 Dev Menu 並開啟 `Tools button`：
+  - **Metro 終端機**：按 `m` 開啟開發選單（或按 `i` 啟動 iOS）。
+  - **iOS 模擬器**：按 `⌘ + D`，或選單 `Device → Shake`。
+  - **真機**：搖晃裝置。
+
+<div align="center">
+  <img src="./README/img/DevMenu.png" width="45%" alt="Expo Dev Menu" />
+</div>
+
+### Google Firebase Analytics DebugView
+
+依官方 [偵錯事件](https://firebase.google.com/docs/analytics/debugview) 啟用偵錯模式後，可在 Firebase Console 的 `DebugView` 查看近乎即時的 `logToFirebase` 事件上報。
+
+### iOS 模擬器截圖（覆寫狀態列）
+
+製作 App Store 截圖或更新展示圖時，可覆寫模擬器狀態列以保持乾淨畫面：
 
 ```console
 xcrun simctl status_bar booted override \
@@ -362,261 +279,113 @@ xcrun simctl status_bar booted override \
 xcrun simctl status_bar booted clear
 ```
 
-#### 配置Firebase
-
-從Firebase控制台導出配置文件放入項目根目錄 `google-services.json` 和 `GoogleService-Info.plist`。
-
-詳細說明見上方「Firebase 配置文件說明」章節。
+更多建置與執行期排錯請見 [除錯手冊](./README/debugging_doc.md)。
 
 ---
 
-### 🐛 如何 Debug?
+## 📦 打包與部署
 
--   當需要 log 出對象或者數組時，有 Chrome 的 Web Debugger 肯定更好用。
--   舊版的項目可以在 `Metro` 的命令窗口中按下 `d` 再在模擬器中選擇 `Debug` 即可直接跳轉瀏覽器查看 log。
-<br>
-
-**react-native@0.86 / Metro 除錯：**
-- 在`Metro`中直接使用`j`調出React DevTools。
-- iOS 模擬器支持最新的 Debugging 方案。
-
-#### 重新打開 Dev Menu / 開啟 Tools button
-
-開發模式下可透過 Expo Dev Menu 開啟效能監視、Element Inspector、DevTools 等工具。若畫面上看不到浮動 **Tools** 按鈕，請依下方方式打開 Dev Menu，並將 **Tools button** 設為開啟。
-
-<div align="center">
-  <img src="./README/img/DevMenu.png" width="45%" alt="Expo Dev Menu" />
-</div>
-
-##### 方法 1：重新打開 Dev Menu
-
-在開發模式下：
-
-**iOS Simulator**
-
-- 按：`⌘ + D`
-- 或 Simulator 選單：`Device` → `Shake`
-
-**真機 iPhone**
-
-- 搖晃設備，或者先啟動 Metro：
-
-```bash
-npx expo start
-```
-
-啟動後在終端機按：`i`
-
-重新打開 Dev Menu 後，進入：
-
-```text
-Dev Menu → Tools button → 開啟
-```
-
-##### 方法 2：通過 Expo CLI 快捷鍵
-
-Metro 運行時：
-
-```bash
-npx expo start
-```
-
-按：`m` 打開開發菜單。
-
-#### Google Firebase Analytics
-
-iOS和Android平台：打開 [偵錯事件](https://firebase.google.com/docs/analytics/debugview)
-隨後可以在Firebase控制台`Debug View`中看到近乎實時(可能有1min延遲)的logEvent反饋，用於測試Analytics是否正常。
-
----
-
-## 📦 打包方式
+版本號統一於 [`app.json`](./app.json) 中管理，建置時會自動同步至原生工程。
 
 ### 🍎 iOS 打包
 
-> 項目使用 Expo SDK 57 與 CNG，推薦使用 Expo 進行打包
-
-#### 方式一：使用 Expo 構建（推薦）
-
-1. 確保已安裝 EAS CLI
+#### 方式一：EAS 雲端建置（推薦）
 
 ```console
 pnpm add -g eas-cli
-# 或
-npm install -g eas-cli
-```
-
-2. 登錄 Expo 賬號
-
-```console
 eas login
-```
-
-3. 構建 iOS 應用
-
-```console
 eas build --platform ios
 ```
 
-4. 按照提示選擇構建類型（內部分發或 App Store 提交）
+#### 方式二：本地 Xcode Archive
 
-#### 方式二：本地 Xcode 構建（傳統方式）
-
-如需在 Xcode 中手動構建：
-
-1. 確保已運行過 `npx expo prebuild --clean` 生成 iOS 項目文件
-2. 打開 `./ios/UMALL.xcworkspace`
-3. 在 Xcode 中配置簽名和版本號
-4. 使用 `Product -> Archive` 進行歸檔和發佈
-
-**注意事項：**
-- 版本號在 `app.json` 中統一管理，構建時會自動同步到原生項目
-- 使用 EAS 構建時，不需要手動管理簽名證書
-- 提交 App Store 前確保已在 [App Store Connect](https://appstoreconnect.apple.com) 創建應用記錄
+1. 確認已執行 `npx expo prebuild --clean --platform ios`。
+2. 開啟 `./ios/ARKALL.xcworkspace`（以實際生成的 `.xcworkspace` 為準）。
+3. 確認 **Signing & Capabilities** 後使用 `Product → Archive` 歸檔與發佈。
 
 #### 本地 Release 真機除錯（不走 EAS）
 
-在需要驗證 **Production / Release** 行為、且希望**不經 EAS 雲端建置**時，可在本機用 **Xcode 簽名**，將 **Release** 組態直接安裝到已以 USB 連接的真機。
+需要在本機快速驗證 Release 組態且具備有效 Apple 開發者簽名環境時，連接真機後執行：
 
 ```console
-npx expo run:ios --configuration Release --device
+pnpm iosRelease
 ```
-
-|                 |                                                                                                    |
-| --------------- | -------------------------------------------------------------------------------------------------- |
-| **好處**        | 不必等待 EAS 雲端排隊，本機建置與重裝較快。                                                        |
-| **條件 / 壞處** | 需要有效的 **Apple 開發者帳號**，且本機 **Xcode 與簽名環境**（Team、憑證、裝置信任等）需設定正確。 |
-
-首次使用前請先依上文完成 `npx expo prebuild` 與依賴安裝；若簽名失敗，請在 Xcode 中開啟 `ios` 內的 workspace，檢查 **Signing & Capabilities** 與目標裝置是否已加入開發團隊。
 
 ---
 
 ### 🤖 Android 打包
 
-#### 方式一：使用 Expo 構建（推薦）
+#### 方式一：EAS 雲端建置（推薦）
 
 ```console
 eas build --platform android
 ```
 
-選擇構建類型：
 - **APK**：內部分發測試
-- **AAB (Android App Bundle)**：Google Play Store 提交
+- **AAB（Android App Bundle）**：Google Play Store 正式上架
 
-#### 方式二：本地 Gradle 構建
+#### 方式二：本地 Gradle 建置／真機 Release 測試
 
-1. 確保已運行過 `npx expo prebuild --clean` 生成 Android 項目文件
-2. 依下方 [本機 Release 簽名設定](#本機-release-簽名設定) 完成 Release 簽名（本倉庫透過 Expo config plugin 注入，無需在 `android/app/build.gradle` 手動改寫）
-3. 運行構建命令：
+1. 確認已執行 `npx expo prebuild --clean --platform android` 並完成下方簽名設定。
+2. 執行建置（需 JDK 18+）：
 
 ```console
-cd android
-./gradlew assembleRelease  # 構建 APK
-# 或
-./gradlew bundleRelease    # 構建 AAB (Google Play)
-```
+pnpm androidRelease            # 直接安裝 Release 到已連接真機
 
-**注意事項：**
-- 確保 JDK 版本為 18 或以上
-- 版本號在 `app.json` 中統一管理
-- 首次發布到 Play Store 需要使用 AAB 格式
-- 內部測試可使用 APK 格式直接安裝
+# 或手動產出安裝包
+cd android
+./gradlew assembleRelease      # 產出 APK
+./gradlew bundleRelease        # 產出 AAB (Google Play)
+```
 
 #### 本機 Release 簽名設定
 
-對應最新提交中的 **Android Release 簽名與 Expo CNG**：`app.json` 已掛載 `./plugins/withAndroidSigning`，在執行 `npx expo prebuild` 時會自動在 `android/app/build.gradle` 注入 **Release** 的 `signingConfigs`。只有當 Gradle 能讀到 `MYAPP_RELEASE_*` 屬性時才會套用正式 keystore；**密碼與路徑請勿寫入倉庫內的 `gradle.properties`**（避免提交）。
+`app.json` 已掛載 `./plugins/withAndroidSigning`，`expo prebuild` 會自動將 Release `signingConfigs` 注入 `android/app/build.gradle`，**無需手動改寫 `build.gradle`**。只有當 Gradle 讀到 `MYAPP_RELEASE_*` 屬性時才會套用正式 keystore；**切勿將密碼寫入倉庫內的檔案**。
 
-**1. Keystore 檔要放哪？**
-
-- `MYAPP_RELEASE_STORE_FILE` 在 Gradle 裡會解析成：**相對於專案根目錄**（與 `package.json` 同層）的路徑。
-- 常見做法：把keystore.keystore放在根目錄
-- 亦可將檔案放在倉庫外，只要 `MYAPP_RELEASE_STORE_FILE` 仍能以「自專案根目錄起算」的相對路徑指到該檔（或依你本機 Gradle／Java 版本使用絕對路徑；仍以不進版控為原則）。
-
-**2. 在 `~/.gradle/` 裡怎麼配置？**
-
-在使用者家目錄建立或編輯 **`~/.gradle/gradle.properties`**（全機共用、不進專案 Git），寫入以下鍵值（請替換成你自己的路徑與密碼）：
+1. **放置 Keystore**：`MYAPP_RELEASE_STORE_FILE` 會解析為**相對於專案根目錄**的路徑（例如放於根目錄的 `keystore.keystore`，已列於 `.gitignore`）。
+2. **設定本機 `~/.gradle/gradle.properties`**（全機共用、不進專案版控）：
 
 ```properties
 # Android Release 簽名（僅本機，勿提交）
 # MYAPP_RELEASE_STORE_FILE：相對「專案根目錄」的 keystore 路徑
-MYAPP_RELEASE_STORE_FILE=android/app/release.keystore
+MYAPP_RELEASE_STORE_FILE=keystore.keystore
 MYAPP_RELEASE_STORE_PASSWORD=你的_store_密碼
 MYAPP_RELEASE_KEY_ALIAS=你的_key_alias
 MYAPP_RELEASE_KEY_PASSWORD=你的_key_密碼
 ```
 
-存檔後在專案根目錄執行 `cd android && ./gradlew bundleRelease`（或 `assembleRelease`）即可。若未設定上述屬性，Release 區塊不會套用 store 檔，請勿在遺失簽名設定的情況下誤發佈。
-
-**3. 維護提醒**
-
-- 重新執行 `npx expo prebuild --clean` 時，只要 `app.json` 仍包含 `./plugins/withAndroidSigning`，簽名區塊會一併重新產生，無需手動合併 `build.gradle`。
-- CI／EAS 請改用 EAS 的 [Android 憑證管理](https://docs.expo.dev/app-signing/app-credentials/) 或對應的 secrets，而不是依賴某台機器上的 `~/.gradle/gradle.properties`。
+3. **CI / EAS**：請改用 EAS 的 [Android 憑證管理](https://docs.expo.dev/app-signing/app-credentials/) 或 Secrets，不依賴本機 `~/.gradle/gradle.properties`。
 
 ---
 
 ### 🌐 Web 版部署
 
-Web 版是 `react-native-web` 打出來的純靜態單頁應用（入口 `App.web.js`、路由 `src/Nav.web.js`），部署在 **https://umall.one/webAPP/**，與 `/api/` 同源，所以瀏覽器不會觸發 CORS。服務器不需要 Node，只需要 nginx 把靜態文件端出來。
+Web 版是 `react-native-web` 匯出的純靜態單頁應用（入口 `App.web.js`、路由 `src/Nav.web.js`），部署於 **https://umall.one/webAPP/**，與 `/api/` 同源因此不觸發 CORS。
 
-#### 關鍵配置（三處要保持一致）
+#### 關鍵配置（三處須保持一致）
 
 | 位置 | 內容 | 作用 |
 | --- | --- | --- |
-| `app.json` → `experiments.baseUrl` | `"/webAPP"` | 讓 `index.html` 和 bundle 裡的資源路徑帶上子路徑前綴 |
-| `src/Nav.web.js` → `WEB_BASE_PATH` | `'webAPP'` | 讓 React Navigation 生成和解析的瀏覽器地址帶上前綴，刷新不會掉進官網的路由 |
-| 服務器 nginx `location /webAPP/` | `alias /data/umall/webAPP/` | 靜態文件目錄，見下方 |
+| `app.json` → `experiments.baseUrl` | `"/webAPP"` | 讓 `index.html` 與 bundle 資源路徑帶上子路徑前綴 |
+| `src/Nav.web.js` → `WEB_BASE_PATH` | `'webAPP'` | 讓 React Navigation 路由維持於 `/webAPP/` 下，刷新不落入官網 |
+| 伺服器 nginx `location /webAPP/` | `alias /data/umall/webAPP/` | 靜態文件目錄與 SPA fallback |
 
-`src/utils/pathMap.js` 裡 web 端的 `API_HOST` 為空字符串（同源相對路徑），本地調試時由 `metro.config.js` 的代理把 `/api/*` 轉發到線上。
-
-#### 本地調試
-
-```console
-npx expo start --web
-```
-
-#### 導出靜態文件
+#### 匯出與同步到伺服器
 
 ```console
 npx expo export --platform web
-```
-
-產物在 `dist/`（已 gitignore），每次導出會先清空再生成：
-
-```
-dist/
-├── index.html          唯一沒有 hash 的文件
-├── favicon.ico
-├── metadata.json
-├── _expo/static/js/web/index-<hash>.js
-└── assets/             字體、圖片，文件名帶 hash
-```
-
-本地檢查產物時**不要**用 Live Server 直接打開 `dist/index.html`，因為資源路徑是 `/webAPP/...` 的絕對路徑，根目錄對不上會白屏。要看效果直接部署到服務器，或者用 `npx serve dist` 後手動把地址改成 `/webAPP/`。
-
-#### 同步到服務器
-
-服務器是 `ARK_ALL_Server_OVH`（`~/.ssh/config` 裡的別名，`ubuntu` 用戶），目標目錄 `/data/umall/webAPP/`：
-
-```console
 rsync -avz --delete dist/ ARK_ALL_Server_OVH:/data/umall/webAPP/
 ```
 
-`--delete` 會把上一版的舊 hash 文件清掉，目錄裡永遠是最新一次導出的完整快照。nginx 不需要重啟，文件落地即生效。
+- 產物位於 `dist/`（已 gitignore），`--delete` 會清掉舊 hash 檔；nginx 無需重啟即生效。
+- 本地檢查時**不要**用 Live Server 直接開 `dist/index.html`（資源為 `/webAPP/...` 絕對路徑會白屏），請用 `npx expo start --web` 調試，或同步後驗證。
 
-一條命令完成導出加同步：
-
-```console
-npx expo export --platform web && rsync -avz --delete dist/ ARK_ALL_Server_OVH:/data/umall/webAPP/
-```
-
-#### 服務器 nginx 配置
+<details>
+<summary>展開查看伺服器 nginx 配置與上線驗證指令</summary>
 
 在 `/etc/nginx/sites-available/umall.one.conf` 的 443 server 塊裡、`location /`（反代官網 Next.js）**之前**：
 
 ```nginx
-# ARK ALL web 版（React Native Web 靜態產物，由前端 repo 的 expo export 生成）
-# 帶內容 hash 的 _expo/ 長緩存；index.html 不緩存，保證發版後拿到新入口
-# 不帶結尾斜槓的 /webAPP 匹配不到下面的前綴 location，會落到官網反代拿到 404，這裡補上跳轉
 location = /webAPP {
     return 301 /webAPP/;
 }
@@ -637,67 +406,35 @@ location /webAPP/ {
 }
 ```
 
-改完後：
+重載並驗證：
 
 ```console
 sudo nginx -t && sudo systemctl reload nginx
-```
-
-驗證各路徑是否正常（單頁回退、緩存頭）：
-
-```console
 for u in /webAPP /webAPP/ /webAPP/course/CISC1001 /webAPP/favicon.ico; do curl -s -o /dev/null -w "$u %{http_code} cache=%header{cache-control}\n" "https://umall.one$u"; done
 ```
 
+</details>
+
 #### 已知限制
 
-- 網站前面有 Cloudflare，`index.html` 會被注入一段 `/cdn-cgi/` 腳本，屬正常現象；bundle 由 Cloudflare 做 brotli 壓縮。
-- `umall.one/app/*` 是官網（ARK-ALL-Web，Next.js）的分享落地頁，web 版不要佔用這個前綴。
-- 課程目錄另一數據源 `umeh.top` 不回 CORS 頭，web 端請求會被攔，待補反代或後端加頭。
-- `src/Nav.web.js` 的 linking 只聲明了頂層路徑，嵌套頁面（如 `/webAPP/features/FeatureList`）刷新會回到默認 Tab。
+- Cloudflare 會於 `index.html` 注入 `/cdn-cgi/` 腳本並壓縮 bundle，屬正常現象。
+- `umall.one/app/*` 為官網（Next.js）分享落地頁專用，Web 版不可佔用。
+- 課程輔助資料來源 `umeh.top` 未回傳 CORS 標頭，Web 端請求會被瀏覽器攔截。
+- `src/Nav.web.js` 的 linking 僅宣告頂層與特定深鏈接，未宣告的深層嵌套頁刷新會回到預設 Tab。
 
 ---
 
-### 🐛 故障排除
+## ⛵ 維護與貢獻指南
 
-在此查看[Android 解決方案](./README/debugging_doc.md#android)與[iOS 解決方案](./README/debugging_doc.md#ios)
-
----
-
-&nbsp;
-
-## ⛵ 維護須知
-
-1. 澳大日曆更新。從 `https://reg.um.edu.mo/university-almanac/?lang=zh-hant` 獲取 ics 文件；使用任何工具將 ics 轉為 json（course-data-parse 倉庫內也有 icsToJSON 工具），例如 `https://ical-to-json.herokuapp.com/`。**務必注意最終 json 中的 key 必須為小寫**。覆蓋 `src/static/UMCalendar/UMCalendar.json` 中的內容即可。
-    - 按照程序注釋增加校曆的繁體中文翻譯內容。
-2. 澳大課程更新。使用預選課 Excel，使用 Excel to JSON 工具獲得 JSON 數據，放入`src/static/UMCourses/offer courses.json`。
-    - 按照程序注釋增加開設課程的繁體中文翻譯內容。
-3. icon 更新。使用 `https://www.appicon.co/` 生成 iOS icon 文件，使用 `Android Studio` 生成 Android icon 文件（Studio 生成的文件最全面，適配各個廠商的 UI）。
-
-### 觸覺回饋標準
-
-APP 使用 `expo-haptics`，所有功能統一透過 `src/utils/trigger.js` 的 `trigger()` 呼叫。頁面與元件不可直接 import `expo-haptics`，避免各處自行決定平台 enum 或 fallback。
-
-| 語意 | 使用時機 | iOS／Web | Android |
-| ---- | -------- | -------- | ------- |
-| `trigger()`／`tap` | 一般按鈕、卡片、返回、重試 | Soft impact | Virtual key |
-| `selection` | 分段控制、篩選條件、單次選項變更 | Selection | Segment tick |
-| `tick` | 滑桿、時間格等連續且高頻的刻度變更 | Selection | Segment frequent tick |
-| `context` | 選單、操作表或其他上下文操作正式開啟 | Rigid impact | Context click |
-| `longPress` | 長按手勢達到觸發門檻 | Rigid impact | Long press |
-| `dragStart` | 可拖曳項目被拾起或開始批量拖選 | Medium impact | Drag start |
-| `gestureStart`／`gestureEnd` | 有明確開始與結束狀態的手勢 | Light／Soft impact | Gesture start／end |
-| `toggleOn`／`toggleOff` | Switch 或二態功能完成切換 | Selection | Toggle on／off |
-| `success` | 後端或本地操作已確認成功 | Success notification | Confirm |
-| `warning` | 操作完成但需注意，或只完成部分內容 | Warning notification | Warning notification |
-| `error` | 操作實際失敗且需要使用者處理 | Error notification | Reject |
-
-使用規則：
-
-- 所有可互動元件仍須有觸覺回饋；一般操作使用 `trigger()`，只有語意明確時才傳入分類。
-- `success`、`warning`、`error` 必須在結果確定後觸發，不可因為按鈕文字是「儲存」或「刪除」就在送出前使用結果震感。
-- 破壞性操作本身不是 `error`；確認按鈕使用一般 `tap`，刪除成功後才使用 `success`，請求失敗才使用 `error`。
-- 高頻互動只使用 `tick`，並避免每一幀觸發。部分 Android 裝置可能主動省略過密或不支援的震感，屬正常行為。
-- `soft` 與 `rigid` 只保留給舊呼叫相容；新程式碼應使用 `tap` 或對應的語意名稱。
-- 震感失敗不得阻斷原本操作，也不能取代畫面、文字、Toast 或無障礙狀態提示。
-- 尊重使用者的系統觸覺設定，不得加入忽略 Android 系統設定的旗標。
+- **開發與程式碼規範**：請先閱讀 [`AGENTS.md`](./AGENTS.md)，細節按領域分置於 [`.cursor/rules/`](./.cursor/rules/)：
+  - 設計系統、主題配色、按壓與**觸覺回饋 11 種語意標準**：[`.cursor/rules/design-system.mdc`](./.cursor/rules/design-system.mdc)
+  - 寬屏（iPad／Web）響應式佈局：[`.cursor/rules/responsive-layout.mdc`](./.cursor/rules/responsive-layout.mdc)
+  - 架構與導覽：[`.cursor/rules/architecture-navigation.mdc`](./.cursor/rules/architecture-navigation.mdc)
+  - 資料儲存與 API：[`.cursor/rules/data-storage-api.mdc`](./.cursor/rules/data-storage-api.mdc)
+  - 多語言翻譯策略：[`.cursor/rules/i18n-patterns.mdc`](./.cursor/rules/i18n-patterns.mdc)
+- **常規維護 SOP**（詳細步驟見 [`.agents/skills/`](./.agents/skills/)）：
+  1. **澳大校曆更新**：從 `https://reg.um.edu.mo/university-almanac/?lang=zh-hant` 取得 `.ics` 並轉為 `src/static/UMCalendar/UMCalendar.js`（鍵名維持小寫駝峰並補齊 `summary_cn` 繁體翻譯），同時檢查 `CalendarConst.js`。
+  2. **澳大課程目錄更新**：採用 v2 catalog 架構（`preenrollCatalog.json`、`adddropCatalog.json`、`adddropCatalogPG.json`），詳見 [`src/static/UMCourses/README.md`](./src/static/UMCourses/README.md)。
+  3. **Harbor Emoji 映射更新**：執行 `node scripts/updateHarborEmojiShortcodes.js`。
+  4. **App Icon 更新**：替換 `app.json` 指定的圖片資源（`src/static/img/logo.png`、`ic_launcher_foreground.png` 等）後重新執行 `npx expo prebuild --clean`。
+  5. **提交訊息**：採用 Gitmoji + 繁體中文，詳見 [`.agents/skills/git-commit/SKILL.md`](./.agents/skills/git-commit/SKILL.md)。

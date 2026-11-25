@@ -1,67 +1,101 @@
 # Debugging Documentation for UM-All-Frontend
 
-此文檔記錄了開發中遇到的問題與解決方案。
+本文件記錄 **Expo CNG + pnpm** 工作流下常見的建置、執行期與測試排錯方式。
 
-## 內容
+> **Expo CNG 原則**：`ios/` 與 `android/` 由 `app.json` 及 `plugins/` 自動生成。遇到編譯問題請優先透過 `npx expo prebuild --clean`、清理快取或 Config Plugin 處理，**勿手動修改 `node_modules` 或直接編輯生成後的原生工程**。
 
-- [Debugging Documentation for UM-All-Frontend](#debugging-documentation-for-um-all-frontend)
-  - [內容](#內容)
-  - [環境安裝與運行模擬器時的問題](#環境安裝與運行模擬器時的問題)
-    - [Android 開發環境](#android-開發環境)
-  - [開發本倉庫項目時的問題](#開發本倉庫項目時的問題)
-    - [通用方案](#通用方案)
-    - [Android](#android)
-    - [iOS](#ios)
+## 目錄
+
+- [通用／Metro／測試](#通用metro測試)
+- [iOS](#ios)
+- [Android](#android)
 
 ---
 
-&nbsp;
+## 通用／Metro／測試
 
-## 環境安裝與運行模擬器時的問題
+### 1. 修改 `.env` 或 `metro.config.js` 後未生效
 
-### Android 開發環境
+Expo 內嵌 `EXPO_PUBLIC_*` 環境變數與 Metro 解析規則都會被快取，修改後請清除快取重啟：
 
-1. 如果遇到`react-native-vector-icons/xxxx`圖標錯誤顯示(正方形框裡面是 X)
-    > 需要參考文檔 `https://github.com/oblador/react-native-vector-icons#android` 進行修復。
-2. 如果在使用 Flipper 後，再次運行項目而不運行 Flipper，Metro 命令行提示無連接設備。則需要重啟模擬器，並在另一個 RN 項目 run 一次（正常來講另外的項目會成功運行），再回本項目不使用 Flipper 地 run。
-3. 如果在安裝 npm 包或刪除本地文件時出現卡頓或提示正在使用中
-    > 需要在任務管理器停止所有 `Java SE xxxx` 字樣的進程，即可恢復 npm 的運作。
+```console
+pnpm start
+```
 
-<!-- ### iOS開發環境 -->
+（對應 `npx expo start --reset-cache`）
+
+### 2. Jest 遭遇 Watchman 權限錯誤
+
+在 sandbox、部分本機環境或 Watchman socket 權限異常時，執行測試可能出現：
+
+```text
+fchmod(.../watchman/...-state, 2700): Operation not permitted
+watchman --no-pretty get-sockname returned with exit code=1
+```
+
+改用 `--watchman=false` 即可：
+
+```console
+pnpm exec jest <測試檔案路徑> --watchman=false
+```
+
+### 3. 修改原生依賴或 `app.json` 後找不到原生模組
+
+JS 熱重載不會更新原生層。新增／升級原生套件、或修改 `app.json`／`plugins/` 後，需重新生成原生工程並重編譯：
+
+```console
+npx expo prebuild --clean
+pnpm ios      # 或 pnpm android
+```
 
 ---
 
-&nbsp;
+## iOS
 
-## 開發本倉庫項目時的問題
+### iOS 預編譯依賴下載失敗（HTTP 403）
 
-### 通用方案
+若 `prebuild` 後編譯出現找不到 `ReactNativeFeatureFlagsDefaults.h`、`react_native_assert.h` 或 `folly/dynamic.h`，可能是當前網路對 Maven Central 探測 React Native 預編譯依賴時返回 HTTP 403，令 CocoaPods 退回從源碼編譯。
 
-**2022.06.26 更新：**
-因為某些包的 npm 和 yarn 兼容性問題，安裝依賴的指令有所改變：
+改用 Maven mirror 重新生成 iOS 原生工程（無需改動 `node_modules` 或 `useFrameworks`）：
 
-1. 如果你是新 clone 請使用 `npm i --legacy-peer-deps` 安裝依賴。
-2. 如果你是已有倉庫，建議把 `node_modules` 刪除後再使用 `npm i --legacy-peer-deps` 安裝依賴。
-3. 此指令適用於大多數 npm 報 ERROR 的情況。
-4. 如需 update 包，可以使用 `npm info 包名` 先查看需要版本，再在 package.json 裡修改版本號，`npm i --legacy-peer-deps`。
+```console
+env ENTERPRISE_REPOSITORY=https://maven.aliyun.com/repository/central npx expo prebuild --clean --platform ios
+```
 
-    2022.06.28 更新：
-    加入 linear-gradient，在 android 配置了若干項，如 IOS 編譯出錯則應該前往 github 頁查看文檔再進行安裝。
+確認 `ios/Podfile.lock` 包含 `React-Core-prebuilt` 與 `ReactNativeDependencies`：
 
-5. 可能的隱患：更改了此文件`android\app\src\main\java\com\umall\MainApplication.java`路徑上存在現版本的項目名`umall`，如果項目更名後發現報錯，需來這裡修改代碼。
+```console
+grep -nE "React-Core-prebuilt \(|ReactNativeDependencies \(" ios/Podfile.lock
+```
 
-**2024.09.30 更新:tada::tada:：**
-更新`react-native@0.69.0`後，對重新開始開發的流程產生了重大變化：
+之後在同一 mirror 環境變數下啟動：
 
-1. ViewPropTypes 的棄用，參考教程進行補丁修復：https://stackoverflow.com/questions/72755476/invariant-violation-viewproptypes-has-been-removed-from-react-native-migrate-t ，使用`yarn postinstall`安裝先前的補丁，如再更新 RN 版本，需再修改`node_modules`中 react-native 的 index.js 代碼，再打上補丁。
-2. 部分第三方包使用了過時的`jcenter()`，主要是 Android 端問題，需使用 `mavenCentral()`代替，也是需要修改`node_modules`中對應的包的代碼。
+```console
+env ENTERPRISE_REPOSITORY=https://maven.aliyun.com/repository/central pnpm iosNew
+```
 
-**2024.10.03 更新**
-RN 版本更新 0.71.19 後，使用 yarn3 作為新的 package 管理器，遵循說明 set version：https://yarnpkg.com/getting-started/install
+### Xcode 真機簽名失敗
 
-### Android
+執行 `pnpm iosRelease` 或在 Xcode 歸檔時若提示 `Signing for ... requires a development team`：
 
-1. Android 檔案權限報錯-`Error: spawn ./gradlew EACCES`
+1. 確認透過 `.xcworkspace`（而非 `.xcodeproj`）開啟 `./ios/` 內工程。
+2. 於 **Signing & Capabilities** 選擇有效的 Apple Developer Team，並確認目標裝置已加入開發團隊且在裝置上信任該開發者憑證。
+
+### CocoaPods 或原生建置狀態異常
+
+無需手動到 `ios/` 執行繁複清理，直接透過 CNG 重建即可：
+
+```console
+npx expo prebuild --clean --platform ios
+```
+
+若仍殘留 Xcode 舊編譯快取，可在 Xcode 執行 `Product → Clean Build Folder`（`⇧⌘K`）或清理 `~/Library/Developer/Xcode/DerivedData/`。
+
+---
+
+## Android
+
+### 1. `./gradlew` 執行權限報錯（`EACCES`）
 
 ```console
 cd android
@@ -69,82 +103,16 @@ chmod +x ./gradlew
 xattr -l ./gradlew
 ```
 
-### iOS
+### 2. Release 建置未套用正式簽名
 
-1. iOS 实机调试报错-`Signing for XXX requires a development team. Select a development team in the Signing and Cap Editor`
+- 確認 `~/.gradle/gradle.properties` 已設定 `MYAPP_RELEASE_STORE_FILE`、`MYAPP_RELEASE_STORE_PASSWORD`、`MYAPP_RELEASE_KEY_ALIAS`、`MYAPP_RELEASE_KEY_PASSWORD`。
+- `MYAPP_RELEASE_STORE_FILE` 解析自**專案根目錄**（詳見 `plugins/withAndroidSigning.js`）。
+- 確認已跑過 `npx expo prebuild --clean --platform android` 讓 config plugin 注入 `signingConfigs.release`。
 
-    > 请尝试在 Xcode 中双击 Pods，然后在 Targets 中选择 React-Core-AccessibilityResources，找到 Singing 中的 Development Team 进行选择。仅在 UMAllWhite 中选择 Development Team 无效
+### 3. Gradle / JDK 版本相容問題
 
-2. iOS 实机调试报错-`module map file not found`
-
-    > 请在 Xcode 选择项目时选择 UMAllWhite.xcworkspace 打开，不要选择 UMAllWhite.xcodeproj
-
-3. iOS 運行文件報錯-`error React Native CLI uses autolinking for native dependencies`
+確保本機 Android 建置環境使用 **JDK 18 或以上**；若原生依賴快取異常，先重新生成工程：
 
 ```console
-npx react-native unlink react-native-vector-icons
-本条已经尝试修复，需要后续测试
+npx expo prebuild --clean --platform android
 ```
-
-4. Pod 找不到目標工程-`Could not automatically select an Xcode project`
-    > 在`ios/Podfile`中加入以下路徑以解決報錯
-
-```console
-target 'ProjectName' do
- project './ProjectName.xcodeproj'
-...
-end
-```
-
-5. Build 時遇到`yoga.cpp`編譯問題:
-
-```console
-The following build commands failed:
-    CompileC ......
-    Yoga.cpp normal arm64 c++ com.apple.compilers.llvm.clang.1_0.compiler (in target 'Yoga' from project 'Pods')
-(1 failure)
-```
-
-&emsp; 使用 Xcode Build，雙擊該錯誤提示定位到錯誤發生位置，點按`Fix`快速修復錯誤。即可正常編譯。
-
-6. Build 時遇到`hash`編譯問題：
-   &emsp; 與上一點修復方式相同。
-
-7. 再莫名遇到`CompileC`錯誤：
-   刪除`./package-lock.json`，刪除`./ios`下的`Pods`和`build`文件夾。
-   刪除`~/Library/Developer/Xcode/DerivedData/`目錄下的所有文件。
-   回到`./`使用`npm i --legacy-peer-deps`重新安裝依賴包。
-   到`./ios`使用`pod install --repo-update;`安裝 Pod 相關包，**該步驟可能會使電腦重裝 iOS 模擬器**。
-   使用 Xcode 嘗試 Build，Fix`yoga.cpp`和`hash`問題後，應該可以正常 Build。
-
-8. Build、Archive 等步驟出現問題。提示`Multiple commands produce`。
-
-<img width="844" alt="Snipaste_2023-12-20_00-50-41" src="https://github.com/UM-ARK/UM-All-Frontend/assets/55580370/7a8b6b21-6e0b-44a9-9586-12c4e7c397a1">
-
-在 Xcode 中 點選目錄中的`Pods`，選擇`Signing & Capabilities`選擇正確的`Team`。
-
-<img width="960" alt="Snipaste_2023-12-20_00-51-06" src="https://github.com/UM-ARK/UM-All-Frontend/assets/55580370/665b0ea6-b5be-488f-87b3-2d5b2b43baf2">
-
-在`TARGETS`中使用底部的篩選輸入框，輸入`Core`定位重複的文件，右鍵`Delete` `React-Core.common-Access`。
-
-<img width="320" alt="Snipaste_2023-12-20_00-51-31" src="https://github.com/UM-ARK/UM-All-Frontend/assets/55580370/0e29a0bf-8469-419d-bf2b-377b8936b106">
-
-然後重新 Run 和 Build 試試。
-
-9. `pod install`時遇到`hermes-engine`報錯：
-
-```bash
-Fetching podspec for `hermes-engine` from `../node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec`
-[!] Failed to load 'hermes-engine' podspec:
-[!] Invalid `hermes-engine.podspec` file: undefined method `exists?' for class File.
-
- #  from /pathToProject/UM-All-Frontend/node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec:46
- #  -------------------------------------------
- #    source[:http] = "file://#{destination_path}"
- >  elsif File.exists?(hermestag_file) && isInCI
- #    Pod::UI.puts '[Hermes] Detected that you are on a React Native release branch, building Hermes from source but fetched from tag...'.yellow if Object.const_defined?("Pod::UI")
-```
-
-找到 `/node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec`，修改`File.exists?(hermestag_file)`為`File.exist?(hermestag_file)`。
-
----

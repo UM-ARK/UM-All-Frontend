@@ -1,0 +1,51 @@
+---
+description: 本地儲存、v2 課程目錄資料、API 端點與錯誤處理、Firebase Analytics 及工具庫規範
+alwaysApply: false
+---
+
+# 資料儲存、API 與分析規範
+
+## 一、本地儲存（`src/utils/storageKits.js`）
+
+**禁止在頁面或元件中直接使用 `AsyncStorage`**，統一透過 `src/utils/storageKits.js` 存取（敏感憑證改用 `expo-secure-store`）：
+
+| 函式 | 用途 |
+| --- | --- |
+| `getLocalStorage(key)` / `setLocalStorage(key, data)` | 一般資料讀寫（自動 JSON 序列化） |
+| `setLocalStorageSilently(key, data)` | 高頻更新且不輸出 console 日誌的寫入 |
+| `getLocalStorageKeys()` / `removeLocalStorageItems(keys)` | 查詢所有鍵／批量移除 |
+| `handleLogin(userInfo)` / `handleLogout()` | 寫入或清除登入狀態並呼叫 `reloadAppAsync()` 重啟 |
+| `updateUserInfo(userInfo)` | 即時更新登入資料（不重啟） |
+
+## 二、課程目錄資料（v2 Catalog 架構）
+
+課程資料統一由 `src/utils/checkCoursesKits.js` 與 `src/utils/courseProgramme.js` 管理，詳見 `src/static/UMCourses/README.md`：
+
+- **離線後備不可刪除**：`src/static/UMCourses/` 下的 `preenrollCatalog.json`、`adddropCatalog.json`、`adddropCatalogPG.json` 及 `courseCatalogs.js` 是冷啟動與離線後備。
+- **正確 API**：使用 `getCourseCatalogs()`、`getCourseCatalog(mode)`、`refreshCourseCatalogs({ force })`、`getPostgraduateCatalog()`、`refreshPostgraduateCatalog({ force })`、`getHistoricalCourseCatalog(...)`。
+- **禁止直接寫入儲存鍵**：不要手動覆寫 `ARK_CourseCatalog_v2_*`、`ARK_CourseCatalog_history_v1*` 或由 `courseProgramme.js` 產生的課表鍵名。
+
+## 三、API 呼叫與錯誤處理（`src/utils/pathMap.js`）
+
+- 所有端點常數統一集中於 `src/utils/pathMap.js` 定義與匯出：
+  - `BASE_URI` 包含尾部斜線（`API_HOST + '/api/'`）；Web 端 `API_HOST` 為空字串以走同源相對路徑（開發時由 `metro.config.js` 代理轉發，避免 CORS）。
+  - `SCHEDULING_BASE_URI`（`/api/v2`）等 v2 端點直接基於 `API_HOST`，**不可拼接 `BASE_URI`**。
+  - UM Open Data（`api.data.um.edu.mo`）透過 `UM_API_TOKEN` 讀取 `process.env.EXPO_PUBLIC_UM_API_TOKEN`（設定於根目錄 `.env`；舊版 `umAPIToken.json` 已廢棄）。
+- **使用者可見錯誤必須回饋**：網路請求失敗或操作異常時，透過 `Alert.alert` 或 `react-native-toast-message` 的 `Toast.show` 顯示清楚的錯誤說明（文案走 i18n 繁體中文），不可靜默吞錯讓畫面無反應；若為背景靜默刷新（如啟動檢查更新）則不打擾使用者。
+
+## 四、Firebase Analytics（`src/utils/firebaseAnalytics.js`）
+
+統一使用 `logToFirebase(eventName, optionObj)` 記錄事件（內部已做 try/catch，不阻塞主流程；Web 端由 `src/web-stubs/firebase-analytics.js` 靜默替身）：
+
+```javascript
+import { logToFirebase } from '../../utils/firebaseAnalytics';
+
+logToFirebase('openPage', { value: 'arkCourse' });
+logToFirebase('button_click', { button_name: 'submit' });
+```
+
+## 五、常用工具庫
+
+- **Lodash**：統一使用完整匯入 `import lodash from 'lodash';`（常用 `isEqual`、`uniq`、`groupBy`、`cloneDeep`、`get`）。
+- **Moment.js**：一般日期用 `import moment from 'moment';`，需要時區計算時用 `import moment from 'moment-timezone';`。
+- 套件版本一律以 `package.json` 為準。
