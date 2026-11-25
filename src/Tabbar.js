@@ -19,7 +19,11 @@ import ForumPage from './pages/TabbarPages/arkHarbor';
 import CourseTab from './pages/TabbarPages/course';
 import MyScreen from './pages/TabbarPages/my';
 
-import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
+import { BookBookmark } from 'phosphor-react-native/src/icons/BookBookmark';
+import { ChatCircleDots } from 'phosphor-react-native/src/icons/ChatCircleDots';
+import { Newspaper } from 'phosphor-react-native/src/icons/Newspaper';
+import { SquaresFour } from 'phosphor-react-native/src/icons/SquaresFour';
+import { UserCircle } from 'phosphor-react-native/src/icons/UserCircle';
 import { trigger } from './utils/trigger';
 import { uiStyle } from './components/ThemeContext';
 import { isLiquidGlassSupported } from './utils/glassEffect';
@@ -66,22 +70,37 @@ const IOSNativeTabScreen = props => {
     );
 };
 
-// iOS SF Symbols 設定
+// iOS 原生 Tab Bar 使用 Phosphor 模板圖（未選中 regular / 選中 duotone），保留原生液態玻璃與系統著色
 const iosTabIconConfig = {
-    NewsTabbar: 'newspaper',
-    ForumTabbar: 'ellipsis.bubble',
-    CourseTab: 'text.book.closed',
-    FeaturesTabbar: 'square.grid.2x2',
-    MyTabbar: 'person.crop.circle',
+    NewsTabbar: {
+        regular: require('./static/img/tabbar/news-regular.png'),
+        duotone: require('./static/img/tabbar/news-duotone.png'),
+    },
+    ForumTabbar: {
+        regular: require('./static/img/tabbar/forum-regular.png'),
+        duotone: require('./static/img/tabbar/forum-duotone.png'),
+    },
+    CourseTab: {
+        regular: require('./static/img/tabbar/course-regular.png'),
+        duotone: require('./static/img/tabbar/course-duotone.png'),
+    },
+    FeaturesTabbar: {
+        regular: require('./static/img/tabbar/features-regular.png'),
+        duotone: require('./static/img/tabbar/features-duotone.png'),
+    },
+    MyTabbar: {
+        regular: require('./static/img/tabbar/my-regular.png'),
+        duotone: require('./static/img/tabbar/my-duotone.png'),
+    },
 };
 
-// Android MaterialCommunityIcons 名稱映射
+// Android Phosphor 圖標映射（未選中 regular / 選中 duotone）
 const androidTabIconConfig = {
-    NewsTabbar: 'newspaper-variant',
-    ForumTabbar: 'message',
-    CourseTab: 'book-open-page-variant',
-    FeaturesTabbar: 'view-grid',
-    MyTabbar: 'account-circle',
+    NewsTabbar: Newspaper,
+    ForumTabbar: ChatCircleDots,
+    CourseTab: BookBookmark,
+    FeaturesTabbar: SquaresFour,
+    MyTabbar: UserCircle,
 };
 
 // 論壇更新角標一般刷新間隔
@@ -147,13 +166,17 @@ class IOSTabbar {
         this.badges = badges || {};
         this.badgeListeners = badgeListeners || {};
         this.getTabbarIcon = (routeName, focused) => {
-            let baseName = iosTabIconConfig[routeName] || 'questionmark.circle';
-            if (focused) {
-                baseName += '.fill';
+            const iconSet = iosTabIconConfig[routeName];
+            if (!iconSet) {
+                return {
+                    type: 'sfSymbol',
+                    name: 'questionmark.circle',
+                };
             }
             return {
-                type: 'sfSymbol',
-                name: baseName,
+                type: 'image',
+                source: focused ? iconSet.duotone : iconSet.regular,
+                tinted: true,
             };
         };
         this.createTabScreen = name => {
@@ -225,15 +248,12 @@ class AndroidTabbar {
         this.badgeListeners = badgeListeners || {};
 
         this.getTabbarIcon = (routeName, focused, color) => {
-            let baseName = androidTabIconConfig[routeName] || 'help-circle';
-            if (!focused) {
-                baseName += '-outline';
-            }
+            const IconComponent = androidTabIconConfig[routeName] || SquaresFour;
             return (
-                <MaterialCommunityIcons
-                    name={baseName}
+                <IconComponent
                     size={ANDROID_TAB_ICON_SIZE}
-                    color={focused ? color : '#222'}
+                    color={color}
+                    weight={focused ? 'duotone' : 'regular'}
                 />
             );
         };

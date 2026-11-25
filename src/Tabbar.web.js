@@ -4,7 +4,9 @@
 import React from 'react';
 import { View } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
+import { BookBookmark } from 'phosphor-react-native/src/icons/BookBookmark';
+import { GearSix } from 'phosphor-react-native/src/icons/GearSix';
+import { SquaresFour } from 'phosphor-react-native/src/icons/SquaresFour';
 import { useTranslation } from 'react-i18next';
 
 import { useTheme, uiStyle } from './components/ThemeContext';
@@ -23,12 +25,12 @@ const tabConfig = {
     CourseTab: {
         component: CourseTab,
         title: '選課',
-        icon: 'book-open-page-variant',
+        Icon: BookBookmark,
     },
     FeaturesTabbar: {
         component: FeaturesScreen,
         title: '服務',
-        icon: 'view-grid',
+        Icon: SquaresFour,
     },
     // 手機端設置頁是 Stack 頁（從「我的」進入），web 沒有「我的」Tab，直接掛成分頁；
     // 路由名沿用 SettingPage，選課頁裡 navigate('SettingPage') 的既有入口在 web 端照常可用
@@ -36,7 +38,7 @@ const tabConfig = {
         component: SettingPage,
         // 文案在 setting 命名空間，t() 支持「命名空間:鍵」寫法
         title: 'setting:Settings',
-        icon: 'cog',
+        Icon: GearSix,
     },
 };
 
@@ -66,23 +68,26 @@ const Tabbar = () => {
                         height: TAB_BAR_HEIGHT,
                     },
                 }}>
-                {Object.entries(tabConfig).map(([name, config]) => (
-                    <Tabs.Screen
-                        key={name}
-                        name={name}
-                        component={config.component}
-                        options={{
-                            title: t(config.title),
-                            tabBarIcon: ({ focused, color }) => (
-                                <MaterialCommunityIcons
-                                    name={focused ? config.icon : `${config.icon}-outline`}
-                                    size={TAB_ICON_SIZE}
-                                    color={color}
-                                />
-                            ),
-                        }}
-                    />
-                ))}
+                {Object.entries(tabConfig).map(([name, config]) => {
+                    const IconComponent = config.Icon;
+                    return (
+                        <Tabs.Screen
+                            key={name}
+                            name={name}
+                            component={config.component}
+                            options={{
+                                title: t(config.title),
+                                tabBarIcon: ({ focused, color }) => (
+                                    <IconComponent
+                                        size={TAB_ICON_SIZE}
+                                        color={color}
+                                        weight={focused ? 'duotone' : 'regular'}
+                                    />
+                                ),
+                            }}
+                        />
+                    );
+                })}
             </Tabs.Navigator>
         </View>
     );
