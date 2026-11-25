@@ -17,10 +17,10 @@ import UMEventPage from './UMEventPage';
 import NewsPage from './NewsPage';
 
 const TOP_TAB_SCALE_FACTOR = 0.1;
-const SEGMENT_TRACK_PADDING = scale(3.5);
-const SEGMENT_ITEM_HEIGHT = moderateScale(30, TOP_TAB_SCALE_FACTOR);
-const SEGMENT_CAPSULE_WIDTH = scale(172);
-const SEGMENT_LABEL_FONT_SIZE = moderateScale(12.5, 0.25);
+const SEGMENT_TRACK_PADDING = scale(2.5);
+const SEGMENT_ITEM_HEIGHT = moderateScale(22, TOP_TAB_SCALE_FACTOR);
+const SEGMENT_CAPSULE_WIDTH = scale(140);
+const SEGMENT_LABEL_FONT_SIZE = moderateScale(10, 0.25);
 const TopTabTrackContainer = isLiquidGlassSupported ? GlassView : View;
 const AnimatedPagerView = Animated.createAnimatedComponent(PagerView);
 
@@ -251,7 +251,7 @@ const styles = StyleSheet.create({
     segmentLabel: {
         ...uiStyle.defaultText,
         fontSize: SEGMENT_LABEL_FONT_SIZE,
-        fontWeight: '500',
+        fontWeight: '400',
     },
     segmentLabelActive: {
         fontWeight: '600',
