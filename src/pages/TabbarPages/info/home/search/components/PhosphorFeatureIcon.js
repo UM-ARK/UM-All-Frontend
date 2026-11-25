@@ -53,6 +53,15 @@ import { UserCheck } from 'phosphor-react-native/src/icons/UserCheck';
 import { UsersThree } from 'phosphor-react-native/src/icons/UsersThree';
 import { Wallet } from 'phosphor-react-native/src/icons/Wallet';
 import { Wrench } from 'phosphor-react-native/src/icons/Wrench';
+import { Bell } from 'phosphor-react-native/src/icons/Bell';
+import { BookmarkSimple } from 'phosphor-react-native/src/icons/BookmarkSimple';
+import { EnvelopeSimple } from 'phosphor-react-native/src/icons/EnvelopeSimple';
+import { Heart } from 'phosphor-react-native/src/icons/Heart';
+import { NotePencil } from 'phosphor-react-native/src/icons/NotePencil';
+import { PlusCircle } from 'phosphor-react-native/src/icons/PlusCircle';
+import { Pulse } from 'phosphor-react-native/src/icons/Pulse';
+import { UserCircle } from 'phosphor-react-native/src/icons/UserCircle';
+import { UserPlus } from 'phosphor-react-native/src/icons/UserPlus';
 
 // 靜態按需匯入 Phosphor Duotone 圖標（線性描邊＋輕量雙色填底），兼顧層次感與打包體積
 export const phosphorFeatureIcons = {
@@ -125,6 +134,17 @@ export const phosphorFeatureIcons = {
     // 首頁快捷入口
     'hand-heart': HandHeart,
     'help-circle': Question,
+
+    // 我的
+    envelope: EnvelopeSimple,
+    bookmark: BookmarkSimple,
+    heart: Heart,
+    note: NotePencil,
+    'user-circle': UserCircle,
+    bell: Bell,
+    pulse: Pulse,
+    'plus-circle': PlusCircle,
+    'user-plus': UserPlus,
 };
 
 export default function PhosphorFeatureIcon({

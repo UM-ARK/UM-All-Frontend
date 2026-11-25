@@ -3,12 +3,12 @@ import {StyleSheet, View} from 'react-native';
 
 import {useTranslation} from 'react-i18next';
 import Ionicons from '@react-native-vector-icons/ionicons';
-import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import {scale, verticalScale} from 'react-native-size-matters';
 
 import Text from '../../../../components/AppText';
 import ScalePressable from '../../../../components/ScalePressable';
 import {uiStyle, useTheme} from '../../../../components/ThemeContext';
+import PhosphorFeatureIcon from '../../info/home/search/components/PhosphorFeatureIcon';
 import {trigger} from '../../../../utils/trigger';
 import HarborProfileCard from './HarborProfileCard';
 import HarborQuickActions from './HarborQuickActions';
@@ -149,13 +149,11 @@ const HarborProfileOverview = ({
             <View style={sectionStyle}>
                 <View style={myCardStyles.heading}>
                     <View style={myCardStyles.iconColumn}>
-                        <View style={[myCardStyles.headingIcon, {backgroundColor: theme.tonal.primary15}]}>
-                            <MaterialCommunityIcons
-                                name="forum-outline"
-                                size={scale(19)}
-                                color={theme.themeColor}
-                            />
-                        </View>
+                        <PhosphorFeatureIcon
+                            name="messages-square"
+                            size={scale(22)}
+                            color={theme.featureIconTones.orange.foreground}
+                        />
                     </View>
                     <Text
                         accessibilityRole="header"
@@ -181,10 +179,10 @@ const HarborProfileOverview = ({
                             navigation.navigate('HarborReviewQueue');
                         }}>
                         <View style={myCardStyles.iconColumn}>
-                            <MaterialCommunityIcons
-                                name="shield-check-outline"
-                                size={scale(19)}
-                                color={theme.black.third}
+                            <PhosphorFeatureIcon
+                                name="shield"
+                                size={scale(20)}
+                                color={theme.featureIconTones.pink.foreground}
                             />
                         </View>
                         <View style={styles.reviewContent}>

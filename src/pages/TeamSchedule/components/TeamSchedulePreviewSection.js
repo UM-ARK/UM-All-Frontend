@@ -19,6 +19,7 @@ import {scale, verticalScale} from 'react-native-size-matters';
 import Text from '../../../components/AppText';
 import ScalePressable from '../../../components/ScalePressable';
 import {uiStyle, useTheme} from '../../../components/ThemeContext';
+import PhosphorFeatureIcon from '../../TabbarPages/info/home/search/components/PhosphorFeatureIcon';
 import {logToFirebase} from '../../../utils/firebaseAnalytics';
 import {openTeamInviteDetail} from '../../../utils/scheduling/teamInviteLink';
 import {trigger} from '../../../utils/trigger';
@@ -149,17 +150,11 @@ const TeamSchedulePreviewSection = forwardRef(
                     }}
                     style={myCardStyles.heading}>
                     <View style={myCardStyles.iconColumn}>
-                        <View
-                            style={[
-                                myCardStyles.headingIcon,
-                                {backgroundColor: theme.tonal.primary15},
-                            ]}>
-                            <Ionicons
-                                name="calendar-outline"
-                                size={scale(19)}
-                                color={theme.themeColor}
-                            />
-                        </View>
+                        <PhosphorFeatureIcon
+                            name="calendar-check"
+                            size={scale(22)}
+                            color={theme.featureIconTones.green.foreground}
+                        />
                     </View>
                     <Text
                         style={[
@@ -185,8 +180,8 @@ const TeamSchedulePreviewSection = forwardRef(
                             accessibilityLabel={t('新建組隊')}
                             onPress={openCreate}
                             style={styles.actionButton}>
-                            <Ionicons
-                                name="add-circle-outline"
+                            <PhosphorFeatureIcon
+                                name="plus-circle"
                                 size={scale(16)}
                                 color={theme.themeColor}
                             />
@@ -203,8 +198,8 @@ const TeamSchedulePreviewSection = forwardRef(
                             accessibilityLabel={t('加入隊伍')}
                             onPress={openJoin}
                             style={styles.actionButton}>
-                            <Ionicons
-                                name="enter-outline"
+                            <PhosphorFeatureIcon
+                                name="user-plus"
                                 size={scale(16)}
                                 color={theme.themeColor}
                             />
@@ -280,10 +275,10 @@ const TeamSchedulePreviewSection = forwardRef(
                             chevronContainerStyle={myCardStyles.iconColumn}
                             leadingAccessory={
                                 <View style={myCardStyles.iconColumn}>
-                                    <Ionicons
-                                        name="people-outline"
-                                        size={scale(17)}
-                                        color={theme.black.third}
+                                    <PhosphorFeatureIcon
+                                        name="users"
+                                        size={scale(18)}
+                                        color={theme.featureIconTones.green.foreground}
                                     />
                                 </View>
                             }
@@ -302,7 +297,7 @@ const TeamSchedulePreviewSection = forwardRef(
                                 styles.actionButtonText,
                                 {color: theme.accentForeground},
                             ]}>
-                            {t('查看全部')}
+                            {t('全部')}
                         </Text>
                         <View style={myCardStyles.iconColumn}>
                             <Ionicons

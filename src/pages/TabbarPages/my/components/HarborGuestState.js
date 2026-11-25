@@ -8,13 +8,13 @@ import {
 
 import {useTranslation} from 'react-i18next';
 import Ionicons from "@react-native-vector-icons/ionicons";
-import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import {scale, verticalScale} from 'react-native-size-matters';
 
 import Text from '../../../../components/AppText';
 import ScalePressable from '../../../../components/ScalePressable';
 import {uiStyle, useTheme} from '../../../../components/ThemeContext';
 import TouchableScale from '../../../../components/TouchableScale';
+import PhosphorFeatureIcon from '../../info/home/search/components/PhosphorFeatureIcon';
 import {trigger} from '../../../../utils/trigger';
 import HarborLoginConsentModal from './HarborLoginConsentModal';
 import HarborSectionHeader from './HarborSectionHeader';
@@ -26,25 +26,29 @@ const HarborGuestState = ({isAuthorizing, onLogin, onBrowse}) => {
     const features = [
         {
             key: 'teamSchedule',
-            icon: 'calendar-outline',
+            phosphorIcon: 'calendar-check',
+            iconTone: 'green',
             title: t('組隊約時間'),
             description: t('邀請同學標記空檔，找出共同空閒時段'),
         },
         {
             key: 'identity',
-            icon: 'person-circle-outline',
+            phosphorIcon: 'user-circle',
+            iconTone: 'blue',
             title: t('同步論壇身份'),
             description: t('查看等級、徽章與個人統計'),
         },
         {
             key: 'activity',
-            icon: 'pulse-outline',
+            phosphorIcon: 'pulse',
+            iconTone: 'orange',
             title: t('集中管理互動'),
             description: t('快速找到話題、回覆與收藏'),
         },
         {
             key: 'message',
-            icon: 'notifications-outline',
+            phosphorIcon: 'bell',
+            iconTone: 'pink',
             title: t('不錯過新消息'),
             description: t('集中查看站內訊息與通知'),
         },
@@ -66,8 +70,8 @@ const HarborGuestState = ({isAuthorizing, onLogin, onBrowse}) => {
                         styles.harborPill,
                         {backgroundColor: theme.tonal.secondary15},
                     ]}>
-                    <MaterialCommunityIcons
-                        name="forum-outline"
+                    <PhosphorFeatureIcon
+                        name="messages-square"
                         size={scale(14)}
                         color={theme.secondThemeColor}
                     />
@@ -171,17 +175,14 @@ const HarborGuestState = ({isAuthorizing, onLogin, onBrowse}) => {
                 {features.map((feature, index) => (
                     <View key={feature.key}>
                         <View style={styles.featureRow}>
-                            <View
-                                style={[
-                                    styles.featureIcon,
-                                    {
-                                        backgroundColor: theme.tonal.primary15,
-                                    },
-                                ]}>
-                                <Ionicons
-                                    name={feature.icon}
-                                    size={scale(21)}
-                                    color={theme.themeColor}
+                            <View style={styles.featureIcon}>
+                                <PhosphorFeatureIcon
+                                    name={feature.phosphorIcon}
+                                    size={scale(24)}
+                                    color={
+                                        theme.featureIconTones[feature.iconTone]
+                                            .foreground
+                                    }
                                 />
                             </View>
                             <View style={styles.featureText}>

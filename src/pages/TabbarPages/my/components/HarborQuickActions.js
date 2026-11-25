@@ -2,11 +2,11 @@ import React from 'react';
 import {Pressable, StyleSheet, View} from 'react-native';
 
 import {useTranslation} from 'react-i18next';
-import Ionicons from '@react-native-vector-icons/ionicons';
 import {scale, verticalScale} from 'react-native-size-matters';
 
 import Text from '../../../../components/AppText';
 import {uiStyle, useTheme} from '../../../../components/ThemeContext';
+import PhosphorFeatureIcon from '../../info/home/search/components/PhosphorFeatureIcon';
 import {trigger} from '../../../../utils/trigger';
 import {myCardStyles} from './myCardStyles';
 
@@ -14,27 +14,32 @@ const QUICK_ACTIONS = [
     {
         key: 'messages',
         label: '消息',
-        icon_name: 'mail-outline',
+        phosphorIcon: 'envelope',
+        iconTone: 'blue',
     },
     {
         key: 'bookmarks',
         label: '收藏',
-        icon_name: 'bookmark-outline',
+        phosphorIcon: 'bookmark',
+        iconTone: 'orange',
     },
     {
         key: 'likes',
         label: '贊過',
-        icon_name: 'heart-outline',
+        phosphorIcon: 'heart',
+        iconTone: 'pink',
     },
     {
         key: 'drafts',
         label: '草稿',
-        icon_name: 'document-text-outline',
+        phosphorIcon: 'note',
+        iconTone: 'green',
     },
     {
         key: 'badges',
         label: '成就',
-        icon_name: 'ribbon-outline',
+        phosphorIcon: 'award',
+        iconTone: 'orange',
     },
 ];
 
@@ -59,10 +64,12 @@ const HarborQuickActions = ({unreadCount = 0, onSelect}) => {
                         onSelect(item.key);
                     }}>
                     <View style={styles.iconWrap}>
-                        <Ionicons
-                            name={item.icon_name}
-                            size={scale(22)}
-                            color={theme.themeColor}
+                        <PhosphorFeatureIcon
+                            name={item.phosphorIcon}
+                            size={scale(24)}
+                            color={
+                                theme.featureIconTones[item.iconTone].foreground
+                            }
                         />
                         {item.key === 'messages' && unreadCount > 0 ? (
                             <View

@@ -20,13 +20,6 @@ export const myCardStyles = StyleSheet.create({
         minHeight: 48,
         paddingVertical: verticalScale(6),
     },
-    headingIcon: {
-        width: scale(36),
-        height: scale(36),
-        borderRadius: scale(10),
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
     headingTitle: {
         ...uiStyle.defaultText,
         flex: 1,
