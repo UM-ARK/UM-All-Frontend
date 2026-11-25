@@ -317,7 +317,7 @@ function FeatureListPage({ navigation }) {
         : FREQUENT_FEATURES_DISPLAY_LIMIT * (gridItemDimension + gridSpacing * 2) + gridSpacing;
     const cardColumnCount = CARD_COLUMN_COUNT[sizeClass] || 1;
 
-    // 同一 groupKey（出行／餐飲／學習空間）合併成同一個視覺卡片，組內以細線輕隔
+    // 相鄰分類可透過 groupKey 共用卡片，組內以細線分隔
     const sectionBlocks = useMemo(() => {
         const blocks = [];
         visibleSections.forEach(section => {
