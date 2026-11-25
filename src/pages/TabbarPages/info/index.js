@@ -2,6 +2,7 @@ import React from 'react';
 
 import { trigger } from '../../../utils/trigger';
 import { useTheme } from '../../../components/ThemeContext';
+import TopTabLabel from '../../../components/TopTabLabel';
 import HomePage from './home/index';
 import ClubPage from './ClubPage';
 import CampusPage from './CampusPage';
@@ -17,8 +18,6 @@ const Tab = createMaterialTopTabNavigator();
 const TOP_TAB_SCALE_FACTOR = 0.1;
 const TAB_INDICATOR_WIDTH = moderateScale(25, TOP_TAB_SCALE_FACTOR);
 const TAB_BAR_HEIGHT = moderateScale(30, TOP_TAB_SCALE_FACTOR);
-// 字體在平板上保留較明顯的放大幅度，但不影響 Tab Bar 本身高度
-const TAB_LABEL_FONT_SIZE = moderateScale(11, 0.3);
 
 export default function NewsScreen() {
     const { theme } = useTheme();
@@ -29,10 +28,7 @@ export default function NewsScreen() {
         <SafeAreaView style={{ backgroundColor: bg_color, flex: 1 }} edges={{ top: true }}>
             <Tab.Navigator
                 screenOptions={{
-                    tabBarLabelStyle: {
-                        fontSize: TAB_LABEL_FONT_SIZE,
-                        fontWeight: 'bold',
-                    },
+                    tabBarLabel: TopTabLabel,
                     tabBarStyle: {
                         backgroundColor: bg_color,
                         height: TAB_BAR_HEIGHT,
@@ -47,7 +43,7 @@ export default function NewsScreen() {
                         justifyContent: 'center',
                     },
                     tabBarBounces: false,
-                    tabBarActiveTintColor: themeColor,
+                    tabBarActiveTintColor: black.second,
                     tabBarInactiveTintColor: black.third,
                     tabBarPressColor: bg_color,
                     tabBarIndicatorStyle: {

@@ -17,6 +17,7 @@ import { Dialog } from '@rneui/themed';
 import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '../../../components/ThemeContext';
+import TopTabLabel from '../../../components/TopTabLabel';
 import { trigger } from '../../../utils/trigger';
 import { openLink } from '../../../utils/browser';
 import { UM_PRE_ENROLMENT_EXCEL } from '../../../utils/pathMap';
@@ -38,7 +39,6 @@ import { CoursePlanProvider, useCoursePlan } from './context/CoursePlanContext';
 import {
     TAB_BAR_HEIGHT,
     TAB_INDICATOR_WIDTH,
-    TAB_LABEL_FONT_SIZE,
     SEARCH_PANE_DEFAULT_WIDTH,
     SEARCH_PANE_MIN_WIDTH,
     TIMETABLE_PANE_MIN_WIDTH,
@@ -315,10 +315,7 @@ const CourseTabContent = () => {
                         state: handleTopTabStateChange,
                     }}
                     screenOptions={{
-                        tabBarLabelStyle: {
-                            fontSize: TAB_LABEL_FONT_SIZE,
-                            fontWeight: 'bold',
-                        },
+                        tabBarLabel: TopTabLabel,
                         tabBarStyle: {
                             backgroundColor: bg_color,
                             height: TAB_BAR_HEIGHT,
@@ -337,7 +334,7 @@ const CourseTabContent = () => {
                             justifyContent: 'center',
                         },
                         tabBarBounces: false,
-                        tabBarActiveTintColor: themeColor,
+                        tabBarActiveTintColor: black.second,
                         tabBarInactiveTintColor: black.third,
                         tabBarPressColor: bg_color,
                         tabBarIndicatorStyle: {

@@ -7,6 +7,7 @@ import {
 
 import Text from '../../../components/AppText';
 import ScalePressable from '../../../components/ScalePressable';
+import TopTabLabel from '../../../components/TopTabLabel';
 import { useTheme, uiStyle } from '../../../components/ThemeContext';
 import { useHarborSession } from '../../../contexts/HarborSessionContext';
 import { logToFirebase } from '../../../utils/firebaseAnalytics';
@@ -62,7 +63,6 @@ const Tab = createMaterialTopTabNavigator();
 const TOP_TAB_SCALE_FACTOR = 0.1;
 const TAB_INDICATOR_WIDTH = moderateScale(25, TOP_TAB_SCALE_FACTOR);
 const TAB_BAR_HEIGHT = moderateScale(30, TOP_TAB_SCALE_FACTOR);
-const TAB_LABEL_FONT_SIZE = moderateScale(11, 0.3);
 // 功能詳情內容精簡；最高檔供長按一次彈滿
 const FEATURE_SHEET_SNAP_POINTS = ['32%', '48%'];
 /** 分類卡欄數：expanded 兩欄、large 三欄；手機與 medium 維持單欄 */
@@ -656,10 +656,7 @@ export default function Index() {
             edges={{ top: true }}>
             <Tab.Navigator
                 screenOptions={{
-                    tabBarLabelStyle: {
-                        fontSize: TAB_LABEL_FONT_SIZE,
-                        fontWeight: 'bold',
-                    },
+                    tabBarLabel: TopTabLabel,
                     tabBarStyle: {
                         backgroundColor: bg_color,
                         height: TAB_BAR_HEIGHT,
@@ -678,7 +675,7 @@ export default function Index() {
                         justifyContent: 'center',
                     },
                     tabBarBounces: false,
-                    tabBarActiveTintColor: themeColor,
+                    tabBarActiveTintColor: black.second,
                     tabBarInactiveTintColor: black.third,
                     tabBarPressColor: bg_color,
                     tabBarIndicatorStyle: {

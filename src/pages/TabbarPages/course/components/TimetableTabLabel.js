@@ -74,11 +74,12 @@ const TimetableTabBadge = () => {
  *
  * 手機由 material top tabs 當 tabBarLabel 使用；寬屏分屏時由 CoursePaneHeader 直接渲染。
  *
- * @param {{ color: string }} props React Navigation 傳入的標籤色
+ * @param {{ color: string, focused?: boolean }} props 標籤色及分頁選中狀態
  * @returns {React.ReactElement}
  */
-const TimetableTabLabel = ({ color }) => {
+const TimetableTabLabel = ({ color, focused }) => {
     const { t } = useTranslation('common');
+    const fontWeight = focused ? '600' : '400';
 
     return (
         <View>
@@ -87,7 +88,7 @@ const TimetableTabLabel = ({ color }) => {
                     ...uiStyle.defaultText,
                     color,
                     fontSize: TAB_LABEL_FONT_SIZE,
-                    fontWeight: 'bold',
+                    fontWeight: focused === undefined ? 'bold' : fontWeight,
                 }}>
                 {t('課表')}
             </Text>

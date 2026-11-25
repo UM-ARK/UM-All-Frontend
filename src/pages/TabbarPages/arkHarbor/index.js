@@ -115,7 +115,7 @@ const HarborFeedTabs = ({ options, selectedIndex, position, onChange }) => {
                                 styles.feedTabLabel,
                                 {
                                     color: isSelected
-                                        ? theme.themeColor
+                                        ? theme.black.second
                                         : theme.black.third,
                                 },
                                 isSelected && styles.feedTabLabelSelected,
@@ -208,7 +208,7 @@ const HarborStickyToolbar = ({
                         <MaterialCommunityIcons
                             name="menu"
                             size={scale(20)}
-                            color={theme.themeColor}
+                            color={theme.black.second}
                         />
                     </ScalePressable>
                     {/* 搜尋放左側與選單並排，右側未登入時已有「登入」文字按鈕；
@@ -232,7 +232,7 @@ const HarborStickyToolbar = ({
                             <MaterialCommunityIcons
                                 name="magnify"
                                 size={scale(20)}
-                                color={theme.themeColor}
+                                color={theme.black.second}
                             />
                         </ScalePressable>
                     </Reanimated.View>
@@ -263,13 +263,13 @@ const HarborStickyToolbar = ({
                                 <MaterialCommunityIcons
                                     name="login"
                                     size={scale(14)}
-                                    color={theme.themeColor}
+                                    color={theme.black.second}
                                 />
                                 <Text
                                     numberOfLines={1}
                                     style={[
                                         styles.sessionText,
-                                        { color: theme.themeColor },
+                                        { color: theme.black.second },
                                     ]}>
                                     {sessionLabel}
                                 </Text>
@@ -297,7 +297,7 @@ const HarborStickyToolbar = ({
                                 <MaterialCommunityIcons
                                     name="chat-outline"
                                     size={scale(19)}
-                                    color={theme.themeColor}
+                                    color={theme.black.second}
                                 />
                                 {chatUnreadCount > 0 ? (
                                     <View
@@ -330,7 +330,7 @@ const HarborStickyToolbar = ({
                             <MaterialCommunityIcons
                                 name="plus"
                                 size={scale(20)}
-                                color={theme.themeColor}
+                                color={theme.black.second}
                             />
                         </ScalePressable>
                     </View>
