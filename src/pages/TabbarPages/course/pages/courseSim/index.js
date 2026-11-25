@@ -50,6 +50,11 @@ import { scheduleOnRN } from 'react-native-worklets';
 import Text from '../../../../../components/AppText';
 import ScalePressable from '../../../../../components/ScalePressable';
 import TextInput from '../../../../../components/AppTextInput';
+import searchFieldStyles, {
+    SEARCH_FIELD_CLEAR_ICON_SIZE,
+    SEARCH_FIELD_ICON_SIZE,
+    SEARCH_FIELD_MAX_FONT_SIZE_MULTIPLIER,
+} from '../../../../../components/searchFieldStyles';
 import { useTheme, uiStyle } from '../../../../../components/ThemeContext';
 import { useAppReducedMotion } from '../../../../../contexts/ReducedMotionContext';
 import { openLink } from '../../../../../utils/browser';
@@ -1855,38 +1860,32 @@ E11-0000
                     </TouchableScale>
                 ) : null}
                 <View
-                    style={{
-                        flex: 1,
-                        minWidth: 0,
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        backgroundColor: searchFieldBg,
-                        borderRadius: scale(9),
-                        minHeight: scale(32),
-                        paddingLeft: scale(6),
-                        paddingRight: scale(6),
-                    }}>
+                    style={[
+                        searchFieldStyles.field,
+                        {
+                            flex: 1,
+                            minWidth: 0,
+                            backgroundColor: searchFieldBg,
+                        },
+                    ]}>
                     <Ionicons
                         name="search"
-                        size={scale(15)}
+                        size={SEARCH_FIELD_ICON_SIZE}
                         color={black.third}
                     />
                     <BottomSheetTextInput
                         ref={inputRef}
-                        style={{
-                            ...uiStyle.defaultText,
-                            color: black.main,
-                            fontSize: verticalScale(12),
-                            flex: 1,
-                            minWidth: 0,
-                            marginLeft: scale(4),
-                            paddingVertical: scale(6),
-                        }}
+                        style={[
+                            searchFieldStyles.text,
+                            searchFieldStyles.input,
+                            { color: black.main },
+                        ]}
                         onChangeText={onChangeText}
                         value={value ?? ''}
                         selectTextOnFocus
                         placeholder={placeholder}
                         placeholderTextColor={black.third}
+                        maxFontSizeMultiplier={SEARCH_FIELD_MAX_FONT_SIZE_MULTIPLIER}
                         returnKeyType="search"
                         selectionColor={themeColor}
                         blurOnSubmit
@@ -1904,10 +1903,11 @@ E11-0000
                             onPress={() => {
                                 trigger();
                                 onChangeText?.('');
-                            }}>
+                            }}
+                            style={searchFieldStyles.clearButton}>
                             <Ionicons
                                 name="close-circle"
-                                size={scale(17)}
+                                size={SEARCH_FIELD_CLEAR_ICON_SIZE}
                                 color={black.third}
                             />
                         </TouchableScale>

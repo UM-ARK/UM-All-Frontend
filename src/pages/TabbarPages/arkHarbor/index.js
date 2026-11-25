@@ -40,6 +40,11 @@ import HarborDrawerContent from './components/HarborDrawerContent';
 import { harborTopicRowInsets } from './components/HarborTopicCard';
 import HarborTopicList from './components/HarborTopicList';
 import HarborTopicDetail from './HarborTopicDetail';
+import searchFieldStyles, {
+    SEARCH_FIELD_ICON_SIZE,
+    SEARCH_FIELD_MAX_FONT_SIZE_MULTIPLIER,
+    SEARCH_FIELD_MIN_HEIGHT,
+} from '../../../components/searchFieldStyles';
 import { nextHarborSearchBarProgress } from './harborSearchBarProgress';
 
 const VIEW_CONFIG = {
@@ -50,7 +55,7 @@ const VIEW_CONFIG = {
 // 對齊資訊頁 Top Tab（~30）。往下瀏覽時搜尋列收進工具列；
 // 往回滑時用較長距離展開，不必回到列表頂部。
 const STICKY_TOOLBAR_HEIGHT = verticalScale(36);
-const SEARCH_BAR_ROW_HEIGHT = verticalScale(38);
+const SEARCH_BAR_ROW_HEIGHT = SEARCH_FIELD_MIN_HEIGHT + verticalScale(8);
 const SEARCH_BAR_SETTLE_MS = 180;
 const SEARCH_BAR_EASE_OUT = Easing.bezier(0.23, 1, 0.32, 1);
 const HARBOR_TAB_INDICATOR_WIDTH = moderateScale(25, 0.1);
@@ -351,7 +356,7 @@ const HarborStickyToolbar = ({
                         onSearchPress();
                     }}
                     style={[
-                        styles.searchBar,
+                        searchFieldStyles.field,
                         {
                             backgroundColor: isCompact
                                 ? theme.harborSearch.background
@@ -362,13 +367,14 @@ const HarborStickyToolbar = ({
                     ]}>
                     <MaterialCommunityIcons
                         name="magnify"
-                        size={scale(16)}
+                        size={SEARCH_FIELD_ICON_SIZE}
                         color={searchBarForeground}
                     />
                     <Text
                         numberOfLines={1}
+                        maxFontSizeMultiplier={SEARCH_FIELD_MAX_FONT_SIZE_MULTIPLIER}
                         style={[
-                            styles.searchBarText,
+                            searchFieldStyles.text,
                             { color: searchBarForeground },
                         ]}>
                         {t('搜尋 Harbor')}
@@ -1115,19 +1121,6 @@ const styles = StyleSheet.create({
     },
     compactSearchBarRow: {
         paddingHorizontal: harborTopicRowInsets.paddingHorizontal,
-    },
-    searchBar: {
-        minHeight: verticalScale(30),
-        borderRadius: scale(9),
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: scale(10),
-    },
-    searchBarText: {
-        ...uiStyle.defaultText,
-        flex: 1,
-        fontSize: scale(12),
-        marginLeft: scale(6),
     },
     sharedHeader: {
         position: 'absolute',

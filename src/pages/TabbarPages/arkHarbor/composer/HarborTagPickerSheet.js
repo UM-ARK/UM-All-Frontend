@@ -23,6 +23,11 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 import Text from '../../../../components/AppText';
 import ScalePressable from '../../../../components/ScalePressable';
+import searchFieldStyles, {
+    SEARCH_FIELD_CLEAR_ICON_SIZE,
+    SEARCH_FIELD_ICON_SIZE,
+    SEARCH_FIELD_MAX_FONT_SIZE_MULTIPLIER,
+} from '../../../../components/searchFieldStyles';
 import {uiStyle, useTheme} from '../../../../components/ThemeContext';
 import CustomBottomSheet from '../../../../utils/BottomSheet';
 import {trigger} from '../../../../utils/trigger';
@@ -143,6 +148,7 @@ const HarborTagPickerSheet = React.forwardRef(
                 {tags.length > 0 ? (
                     <View
                         style={[
+                            searchFieldStyles.field,
                             styles.searchRow,
                             {
                                 // 對齊 HarborSearchPanel／iOS UISearchBar 常見底色（ThemeContext 無對應語義 token）
@@ -153,20 +159,22 @@ const HarborTagPickerSheet = React.forwardRef(
                         ]}>
                         <MaterialCommunityIcons
                             name="magnify"
-                            size={scale(16)}
+                            size={SEARCH_FIELD_ICON_SIZE}
                             color={theme.black.third}
                         />
                         <BottomSheetTextInput
                             autoCapitalize="none"
                             autoCorrect={false}
                             clearButtonMode="never"
+                            maxFontSizeMultiplier={SEARCH_FIELD_MAX_FONT_SIZE_MULTIPLIER}
                             onChangeText={setSearchQuery}
                             placeholder={t('搜尋標籤')}
                             placeholderTextColor={theme.black.third}
                             returnKeyType="search"
                             selectionColor={theme.themeColor}
                             style={[
-                                styles.searchInput,
+                                searchFieldStyles.text,
+                                searchFieldStyles.input,
                                 {color: theme.black.main},
                             ]}
                             value={searchQuery}
@@ -178,12 +186,12 @@ const HarborTagPickerSheet = React.forwardRef(
                                 hitSlop={scale(8)}
                                 onPress={handleClearSearch}
                                 style={({pressed}) => [
-                                    styles.clearButton,
+                                    searchFieldStyles.clearButton,
                                     {opacity: pressed ? 0.6 : 1},
                                 ]}>
                                 <MaterialCommunityIcons
                                     name="close-circle"
-                                    size={scale(16)}
+                                    size={SEARCH_FIELD_CLEAR_ICON_SIZE}
                                     color={theme.black.third}
                                 />
                             </Pressable>
@@ -285,11 +293,6 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         flexWrap: 'wrap',
     },
-    clearButton: {
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginLeft: scale(4),
-    },
     modalDoneButton: {
         borderRadius: scale(8),
         paddingHorizontal: scale(12),
@@ -319,21 +322,9 @@ const styles = StyleSheet.create({
         fontSize: scale(17),
         fontWeight: '700',
     },
-    searchInput: {
-        ...uiStyle.defaultText,
-        flex: 1,
-        fontSize: scale(13),
-        marginLeft: scale(6),
-        paddingVertical: verticalScale(6),
-    },
     searchRow: {
-        alignItems: 'center',
-        borderRadius: scale(10),
-        flexDirection: 'row',
         marginHorizontal: scale(14),
         marginTop: verticalScale(10),
-        minHeight: verticalScale(36),
-        paddingHorizontal: scale(10),
     },
     secondaryText: {
         ...uiStyle.defaultText,

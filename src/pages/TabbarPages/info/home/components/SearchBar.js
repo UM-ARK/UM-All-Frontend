@@ -6,7 +6,11 @@ import Ionicons from "@react-native-vector-icons/ionicons";
 import { useTranslation } from 'react-i18next';
 
 import Text from '../../../../../components/AppText';
-import { useTheme, uiStyle } from '../../../../../components/ThemeContext';
+import searchFieldStyles, {
+    SEARCH_FIELD_ICON_SIZE,
+    SEARCH_FIELD_MAX_FONT_SIZE_MULTIPLIER,
+} from '../../../../../components/searchFieldStyles';
+import { useTheme } from '../../../../../components/ThemeContext';
 import { logToFirebase } from '../../../../../utils/firebaseAnalytics';
 import { trigger } from '../../../../../utils/trigger';
 
@@ -65,13 +69,14 @@ const SearchBar = ({
                 accessibilityRole="button"
                 accessibilityLabel={t('搜索', { ns: 'common' })}
                 style={({ pressed }) => [
+                    searchFieldStyles.field,
                     styles.inputWrapper,
                     { backgroundColor: white },
                     pressed && styles.pressed,
                 ]}>
                 <Ionicons
                     name="search"
-                    size={scale(15)}
+                    size={SEARCH_FIELD_ICON_SIZE}
                     color={black.third}
                     style={styles.icon}
                 />
@@ -80,8 +85,9 @@ const SearchBar = ({
                     pointerEvents="none">
                     <Text
                         numberOfLines={1}
+                        maxFontSizeMultiplier={SEARCH_FIELD_MAX_FONT_SIZE_MULTIPLIER}
                         style={[
-                            uiStyle.defaultText,
+                            searchFieldStyles.typography,
                             styles.placeholderText,
                             { color: black.third },
                         ]}>
@@ -102,31 +108,23 @@ const styles = StyleSheet.create({
         zIndex: 100,
         width: scale(310),
         marginTop: verticalScale(10),
-        height: verticalScale(30),
         paddingHorizontal: verticalScale(10),
     },
     inputWrapper: {
-        flex: 1,
-        flexDirection: 'row',
-        alignItems: 'center',
-        borderRadius: verticalScale(8),
+        width: '100%',
     },
     pressed: {
         opacity: 0.85,
     },
     icon: {
-        marginLeft: scale(8),
-        marginRight: scale(6),
         opacity: 0.7,
     },
     placeholder: {
         flex: 1,
         minWidth: 0,
         justifyContent: 'center',
-        paddingRight: scale(8),
     },
     placeholderText: {
-        fontSize: verticalScale(13),
         opacity: 0.7,
     },
 });

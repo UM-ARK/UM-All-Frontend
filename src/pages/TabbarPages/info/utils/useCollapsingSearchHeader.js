@@ -10,10 +10,11 @@ import {
 } from 'react-native-reanimated';
 import { scheduleOnRN } from 'react-native-worklets';
 
+import { SEARCH_FIELD_MIN_HEIGHT } from '../../../../components/searchFieldStyles';
 import { nextHarborSearchBarProgress } from '../../arkHarbor/harborSearchBarProgress';
 
 // 與 ClubSearchBar 外距加膠囊高度接近，量到真實高度前先佔位
-const FALLBACK_SEARCH_HEADER_HEIGHT = scale(48);
+const FALLBACK_SEARCH_HEADER_HEIGHT = SEARCH_FIELD_MIN_HEIGHT + scale(16);
 const SEARCH_BAR_SETTLE_MS = 180;
 const SEARCH_BAR_EASE_OUT = Easing.bezier(0.23, 1, 0.32, 1);
 

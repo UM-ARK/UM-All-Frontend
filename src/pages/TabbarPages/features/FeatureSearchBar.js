@@ -7,7 +7,11 @@ import { useTranslation } from 'react-i18next';
 import Text from '../../../components/AppText';
 import TextInput from '../../../components/AppTextInput';
 import ScalePressable from '../../../components/ScalePressable';
-import searchFieldStyles, { SEARCH_FIELD_ICON_SIZE } from '../../../components/searchFieldStyles';
+import searchFieldStyles, {
+    SEARCH_FIELD_CLEAR_ICON_SIZE,
+    SEARCH_FIELD_ICON_SIZE,
+    SEARCH_FIELD_MAX_FONT_SIZE_MULTIPLIER,
+} from '../../../components/searchFieldStyles';
 import { useTheme, uiStyle } from '../../../components/ThemeContext';
 import { logToFirebase } from '../../../utils/firebaseAnalytics';
 import { trigger } from '../../../utils/trigger';
@@ -31,8 +35,10 @@ export default function FeatureSearchBar({
         <View style={styles.root}>
             <View style={[
                 searchFieldStyles.field,
+                searchFieldStyles.borderedField,
                 { backgroundColor: white, borderColor: isFocused ? themeColor : white },
             ]}>
+                <Ionicons name="search" size={SEARCH_FIELD_ICON_SIZE} color={isFocused ? themeColor : black.third} />
                 <TextInput
                     ref={inputRef}
                     value={query}
@@ -49,12 +55,15 @@ export default function FeatureSearchBar({
                     returnKeyType="search"
                     autoCapitalize="none"
                     autoCorrect={false}
+                    maxFontSizeMultiplier={SEARCH_FIELD_MAX_FONT_SIZE_MULTIPLIER}
                     accessibilityLabel={searchLabel}
-                    style={[searchFieldStyles.text, searchFieldStyles.input, { color: black.main }]}
+                    style={[
+                        searchFieldStyles.text,
+                        searchFieldStyles.input,
+                        searchFieldStyles.inputNoWebOutline,
+                        { color: black.main },
+                    ]}
                 />
-                <View pointerEvents="none" style={searchFieldStyles.icon}>
-                    <Ionicons name="search" size={SEARCH_FIELD_ICON_SIZE} color={isFocused ? themeColor : black.third} />
-                </View>
                 {query.length > 0 ? (
                     <ScalePressable
                         accessibilityRole="button"
@@ -63,8 +72,8 @@ export default function FeatureSearchBar({
                             trigger();
                             onChangeQuery('');
                         }}
-                        style={styles.button}>
-                        <Ionicons name="close-circle" size={scale(16)} color={black.third} />
+                        style={[styles.button, styles.clearButton]}>
+                        <Ionicons name="close-circle" size={SEARCH_FIELD_CLEAR_ICON_SIZE} color={black.third} />
                     </ScalePressable>
                 ) : null}
             </View>
@@ -115,6 +124,9 @@ const styles = StyleSheet.create({
         minHeight: 44,
         alignItems: 'center',
         justifyContent: 'center',
+    },
+    clearButton: {
+        marginRight: -12,
     },
     webSearch: {
         flexDirection: 'row',

@@ -25,6 +25,12 @@ import { useTranslation } from 'react-i18next';
 import Text from '../../../../components/AppText';
 import ScalePressable from '../../../../components/ScalePressable';
 import TextInput from '../../../../components/AppTextInput';
+import searchFieldStyles, {
+    SEARCH_FIELD_CLEAR_ICON_SIZE,
+    SEARCH_FIELD_FONT_SIZE,
+    SEARCH_FIELD_ICON_SIZE,
+    SEARCH_FIELD_MAX_FONT_SIZE_MULTIPLIER,
+} from '../../../../components/searchFieldStyles';
 import TouchableScale from '../../../../components/TouchableScale';
 import { uiStyle, useTheme } from '../../../../components/ThemeContext';
 import { trigger } from '../../../../utils/trigger';
@@ -197,6 +203,7 @@ const HarborSearchPanel = forwardRef(
                         ]}>
                         <View
                             style={[
+                                searchFieldStyles.field,
                                 styles.searchInputContainer,
                                 {
                                     // 對齊 ClubSearchBar／iOS UISearchBar 常見底色（ThemeContext 無對應語義 token）
@@ -207,7 +214,7 @@ const HarborSearchPanel = forwardRef(
                             ]}>
                             <MaterialCommunityIcons
                                 name="magnify"
-                                size={scale(15)}
+                                size={SEARCH_FIELD_ICON_SIZE}
                                 color={theme.black.third}
                             />
                             <TextInput
@@ -223,9 +230,11 @@ const HarborSearchPanel = forwardRef(
                                 autoCapitalize="none"
                                 autoCorrect={false}
                                 clearButtonMode="never"
+                                maxFontSizeMultiplier={SEARCH_FIELD_MAX_FONT_SIZE_MULTIPLIER}
                                 selectionColor={theme.themeColor}
                                 style={[
-                                    styles.searchInput,
+                                    searchFieldStyles.text,
+                                    searchFieldStyles.input,
                                     { color: theme.black.main },
                                 ]}
                             />
@@ -242,10 +251,10 @@ const HarborSearchPanel = forwardRef(
                                     accessibilityLabel={t('清除搜尋內容')}
                                     hitSlop={scale(8)}
                                     onPress={handleClearSearchQuery}
-                                    style={styles.inputActionButton}>
+                                    style={searchFieldStyles.clearButton}>
                                     <MaterialCommunityIcons
                                         name="close-circle"
-                                        size={scale(17)}
+                                        size={SEARCH_FIELD_CLEAR_ICON_SIZE}
                                         color={theme.black.third}
                                     />
                                 </TouchableScale>
@@ -453,6 +462,7 @@ const HarborSearchPanel = forwardRef(
                             </Text>
                             <View
                                 style={[
+                                    searchFieldStyles.field,
                                     styles.authorInputContainer,
                                     {
                                         backgroundColor:
@@ -462,6 +472,7 @@ const HarborSearchPanel = forwardRef(
                                     },
                                 ]}>
                                 <Text
+                                    maxFontSizeMultiplier={SEARCH_FIELD_MAX_FONT_SIZE_MULTIPLIER}
                                     style={[
                                         styles.authorPrefix,
                                         { color: theme.black.third },
@@ -479,13 +490,15 @@ const HarborSearchPanel = forwardRef(
                                     placeholderTextColor={theme.black.third}
                                     autoCapitalize="none"
                                     autoCorrect={false}
+                                    maxFontSizeMultiplier={SEARCH_FIELD_MAX_FONT_SIZE_MULTIPLIER}
                                     returnKeyType="search"
                                     onSubmitEditing={() => {
                                         trigger();
                                         runSearch();
                                     }}
                                     style={[
-                                        styles.authorInput,
+                                        searchFieldStyles.text,
+                                        searchFieldStyles.input,
                                         { color: theme.black.main },
                                     ]}
                                 />
@@ -567,31 +580,11 @@ const styles = StyleSheet.create({
         minWidth: 0,
     },
     searchInputContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        borderRadius: scale(9),
-        minHeight: verticalScale(30),
-        paddingLeft: scale(6),
-        paddingRight: scale(6),
         marginLeft: scale(4),
         marginRight: scale(4),
-    },
-    searchInput: {
-        ...uiStyle.defaultText,
-        flex: 1,
-        width: 0,
-        marginLeft: scale(4),
-        // 覆寫 iOS TextInput 預設內距，避免 placeholder／游標下沉
-        paddingVertical: scale(6),
-        textAlignVertical: 'center',
-        fontSize: verticalScale(12),
     },
     searchLoading: {
         marginRight: scale(4),
-    },
-    inputActionButton: {
-        alignItems: 'center',
-        justifyContent: 'center',
     },
     searchActionWrap: {
         position: 'absolute',
@@ -678,24 +671,12 @@ const styles = StyleSheet.create({
         flexWrap: 'wrap',
     },
     authorInputContainer: {
-        minHeight: verticalScale(34),
         borderWidth: StyleSheet.hairlineWidth,
-        borderRadius: scale(10),
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: scale(10),
     },
     authorPrefix: {
         ...uiStyle.defaultText,
-        fontSize: scale(12),
+        fontSize: SEARCH_FIELD_FONT_SIZE,
         fontWeight: '700',
-    },
-    authorInput: {
-        ...uiStyle.defaultText,
-        flex: 1,
-        fontSize: scale(11),
-        paddingHorizontal: scale(4),
-        paddingVertical: verticalScale(6),
     },
     filterOptionError: {
         ...uiStyle.defaultText,

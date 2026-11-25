@@ -20,7 +20,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import Text from '../../../components/AppText';
 import ScalePressable from '../../../components/ScalePressable';
-import searchFieldStyles, { SEARCH_FIELD_ICON_SIZE } from '../../../components/searchFieldStyles';
+import searchFieldStyles, {
+    SEARCH_FIELD_ICON_SIZE,
+    SEARCH_FIELD_MAX_FONT_SIZE_MULTIPLIER,
+} from '../../../components/searchFieldStyles';
 import { uiStyle, useTheme } from '../../../components/ThemeContext';
 import { openLink } from '../../../utils/browser';
 import { logToFirebase } from '../../../utils/firebaseAnalytics';
@@ -310,12 +313,16 @@ const WikiHome = ({navigation}) => {
                 }}
                 style={[
                     searchFieldStyles.field,
+                    searchFieldStyles.borderedField,
                     {backgroundColor: theme.white, borderColor: theme.white},
                 ]}>
-                <Text numberOfLines={1} style={[searchFieldStyles.text, {color: theme.black.third}]}>{t('搜尋 ARK Wiki')}</Text>
-                <View pointerEvents="none" style={searchFieldStyles.icon}>
-                    <Ionicons name="search" size={SEARCH_FIELD_ICON_SIZE} color={theme.black.third} />
-                </View>
+                <Ionicons name="search" size={SEARCH_FIELD_ICON_SIZE} color={theme.black.third} />
+                <Text
+                    numberOfLines={1}
+                    maxFontSizeMultiplier={SEARCH_FIELD_MAX_FONT_SIZE_MULTIPLIER}
+                    style={[searchFieldStyles.text, {color: theme.black.third}]}>
+                    {t('搜尋 ARK Wiki')}
+                </Text>
             </ScalePressable>
             <View style={styles.quickActions}>
                 <ScalePressable

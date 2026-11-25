@@ -1,8 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Keyboard, Pressable, StyleSheet, View } from 'react-native';
 import Ionicons from "@react-native-vector-icons/ionicons";
 import Text from '../../../../../../components/AppText';
 import TextInput from '../../../../../../components/AppTextInput';
+import searchFieldStyles, {
+    SEARCH_FIELD_CLEAR_ICON_SIZE,
+    SEARCH_FIELD_ICON_SIZE,
+    SEARCH_FIELD_MAX_FONT_SIZE_MULTIPLIER,
+} from '../../../../../../components/searchFieldStyles';
 import { scale, verticalScale } from 'react-native-size-matters';
 import { t } from 'i18next';
 import { uiStyle } from '../../../../../../components/ThemeContext';
@@ -22,6 +27,7 @@ const SearchBarSection = ({
     trigger,
 }) => {
     const { themeColor, black, white, bg_color } = theme;
+    const [isFocused, setIsFocused] = useState(false);
 
     const searchActions = [
         {
@@ -55,31 +61,27 @@ const SearchBarSection = ({
                 backgroundColor: bg_color,
             }}>
             <View
-                style={{
-                    backgroundColor: white,
-                    borderWidth: StyleSheet.hairlineWidth,
-                    borderColor: `${black.third}33`,
-                    borderRadius: scale(10),
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    paddingHorizontal: scale(8),
-                    width: '100%',
-                }}>
+                style={[
+                    searchFieldStyles.field,
+                    {
+                        backgroundColor: white,
+                        borderWidth: StyleSheet.hairlineWidth,
+                        borderColor: isFocused ? themeColor : `${black.third}33`,
+                        width: '100%',
+                    },
+                ]}>
                 <Ionicons
                     name={'search'}
-                    size={scale(15)}
+                    size={SEARCH_FIELD_ICON_SIZE}
                     color={black.third}
                 />
                 <TextInput
-                    style={{
-                        ...uiStyle.defaultText,
-                        minHeight: 44,
-                        paddingVertical: verticalScale(8),
-                        paddingHorizontal: scale(5),
-                        color: black.main,
-                        fontSize: scale(12),
-                        flex: 1,
-                    }}
+                    style={[
+                        searchFieldStyles.text,
+                        searchFieldStyles.input,
+                        searchFieldStyles.inputNoWebOutline,
+                        { color: black.main },
+                    ]}
                     onChangeText={onChangeText}
                     value={inputText}
                     selectTextOnFocus
@@ -88,7 +90,12 @@ const SearchBarSection = ({
                     })}
                     placeholderTextColor={black.third}
                     ref={textInputRef}
-                    onFocus={() => trigger()}
+                    onFocus={() => {
+                        setIsFocused(true);
+                        trigger();
+                    }}
+                    onBlur={() => setIsFocused(false)}
+                    maxFontSizeMultiplier={SEARCH_FIELD_MAX_FONT_SIZE_MULTIPLIER}
                     returnKeyType={'search'}
                     selectionColor={themeColor}
                     blurOnSubmit
@@ -97,10 +104,11 @@ const SearchBarSection = ({
                 {inputText.length > 0 ? (
                     <Pressable
                         onPress={onClear}
-                        style={{ padding: scale(3), marginLeft: 'auto' }}>
+                        hitSlop={6}
+                        style={searchFieldStyles.clearButton}>
                         <Ionicons
                             name={'close-circle'}
-                            size={scale(15)}
+                            size={SEARCH_FIELD_CLEAR_ICON_SIZE}
                             color={themeColor}
                         />
                     </Pressable>

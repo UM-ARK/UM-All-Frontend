@@ -16,6 +16,10 @@ import { scale, verticalScale } from 'react-native-size-matters';
 import Text from '../../../components/AppText';
 import ScalePressable from '../../../components/ScalePressable';
 import TextInput from '../../../components/AppTextInput';
+import searchFieldStyles, {
+    SEARCH_FIELD_ICON_SIZE,
+    SEARCH_FIELD_MAX_FONT_SIZE_MULTIPLIER,
+} from '../../../components/searchFieldStyles';
 import { uiStyle, useTheme } from '../../../components/ThemeContext';
 import { openLink } from '../../../utils/browser';
 import { logToFirebase } from '../../../utils/firebaseAnalytics';
@@ -190,8 +194,8 @@ const WikiSearchPage = ({route, navigation}) => {
 
     return (
         <View style={pageStyle}>
-            <View style={[styles.searchBar, {backgroundColor: theme.white, borderColor: theme.disabled}]}>
-                <MaterialCommunityIcons name="magnify" size={scale(22)} color={theme.black.third} />
+            <View style={[searchFieldStyles.field, styles.searchBar, {backgroundColor: theme.white, borderColor: theme.disabled}]}>
+                <MaterialCommunityIcons name="magnify" size={SEARCH_FIELD_ICON_SIZE} color={theme.black.third} />
                 <TextInput
                     ref={inputRef}
                     value={query}
@@ -202,7 +206,8 @@ const WikiSearchPage = ({route, navigation}) => {
                     returnKeyType="search"
                     autoCorrect={false}
                     clearButtonMode="while-editing"
-                    style={[styles.input, {color: theme.black.main}]}
+                    maxFontSizeMultiplier={SEARCH_FIELD_MAX_FONT_SIZE_MULTIPLIER}
+                    style={[searchFieldStyles.text, searchFieldStyles.input, {color: theme.black.main}]}
                 />
                 {isLoading ? <ActivityIndicator size="small" color={theme.themeColor} /> : null}
             </View>
@@ -226,19 +231,7 @@ const styles = StyleSheet.create({
         marginHorizontal: scale(14),
         marginTop: verticalScale(10),
         marginBottom: verticalScale(8),
-        height: verticalScale(44),
-        paddingHorizontal: scale(12),
         borderWidth: StyleSheet.hairlineWidth,
-        borderRadius: scale(14),
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: scale(8),
-    },
-    input: {
-        ...uiStyle.defaultText,
-        flex: 1,
-        fontSize: scale(15),
-        paddingVertical: 0,
     },
     listContent: {
         paddingHorizontal: scale(14),

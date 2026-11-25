@@ -13,7 +13,13 @@ import Animated, {
 import { useTranslation } from 'react-i18next';
 import Text from '../../../../components/AppText';
 import TextInput from '../../../../components/AppTextInput';
-import { useTheme, uiStyle } from '../../../../components/ThemeContext';
+import searchFieldStyles, {
+    SEARCH_FIELD_BORDER_RADIUS,
+    SEARCH_FIELD_CLEAR_ICON_SIZE,
+    SEARCH_FIELD_ICON_SIZE,
+    SEARCH_FIELD_MAX_FONT_SIZE_MULTIPLIER,
+} from '../../../../components/searchFieldStyles';
+import { useTheme } from '../../../../components/ThemeContext';
 import { trigger } from '../../../../utils/trigger';
 import { scale, verticalScale } from 'react-native-size-matters';
 import TouchableScale from '../../../../components/TouchableScale';
@@ -83,8 +89,8 @@ function ClubSearchBar({
         <View style={[styles.outer, containerStyle]}>
             <View style={styles.row}>
                 <Animated.View style={[styles.inputOuter, inputOuterAnimated]}>
-                    <View style={[styles.pill, { backgroundColor: searchFieldBg }]}>
-                        <Ionicons name="search" size={scale(15)} color={black.third} />
+                    <View style={[searchFieldStyles.field, styles.pill, { backgroundColor: searchFieldBg }]}>
+                        <Ionicons name="search" size={SEARCH_FIELD_ICON_SIZE} color={black.third} />
                         <TextInput
                             ref={inputRef}
                             value={value}
@@ -92,9 +98,10 @@ function ClubSearchBar({
                             onFocus={handleFocus}
                             placeholder={placeholder ?? t('club:SEARCH_PLACEHOLDER')}
                             placeholderTextColor={black.third}
+                            maxFontSizeMultiplier={SEARCH_FIELD_MAX_FONT_SIZE_MULTIPLIER}
                             style={[
-                                uiStyle.defaultText,
-                                styles.input,
+                                searchFieldStyles.text,
+                                searchFieldStyles.input,
                                 { color: black.main },
                             ]}
                             selectionColor={themeColor}
@@ -114,10 +121,11 @@ function ClubSearchBar({
                                 hitSlop={scale(8)}
                                 accessibilityRole="button"
                                 accessibilityLabel={clearAccessibilityLabel ?? t('club:A11Y_CLEAR_SEARCH')}
+                                style={searchFieldStyles.clearButton}
                             >
                                 <Ionicons
                                     name="close-circle"
-                                    size={scale(17)}
+                                    size={SEARCH_FIELD_CLEAR_ICON_SIZE}
                                     color={black.third}
                                 />
                             </TouchableScale>
@@ -169,20 +177,8 @@ const styles = StyleSheet.create({
         minWidth: 0,
     },
     pill: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        borderRadius: scale(9),
-        minHeight: scale(32),
-        paddingLeft: scale(6),
-        paddingRight: scale(6),
         marginLeft: scale(4),
         marginRight: scale(4),
-    },
-    input: {
-        flex: 1,
-        marginLeft: scale(4),
-        paddingVertical: scale(6),
-        fontSize: verticalScale(12),
     },
     loading: {
         marginRight: scale(4),
@@ -197,7 +193,7 @@ const styles = StyleSheet.create({
     },
     cancelButton: {
         height: '100%',
-        borderRadius: scale(9),
+        borderRadius: SEARCH_FIELD_BORDER_RADIUS,
         paddingHorizontal: scale(10),
         justifyContent: 'center',
         alignItems: 'center',

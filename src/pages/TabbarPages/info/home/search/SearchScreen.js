@@ -19,6 +19,11 @@ import { getFunctionArr } from '../../../features/FeatureList';
 import Text from '../../../../../components/AppText';
 import ScalePressable from '../../../../../components/ScalePressable';
 import TextInput from '../../../../../components/AppTextInput';
+import searchFieldStyles, {
+    SEARCH_FIELD_CLEAR_ICON_SIZE,
+    SEARCH_FIELD_ICON_SIZE,
+    SEARCH_FIELD_MAX_FONT_SIZE_MULTIPLIER,
+} from '../../../../../components/searchFieldStyles';
 import FeatureIcon from './components/FeatureIcon';
 import { useTheme, uiStyle } from '../../../../../components/ThemeContext';
 import { openLink } from '../../../../../utils/browser';
@@ -676,6 +681,7 @@ const SearchScreen = ({ navigation }) => {
             <View style={styles.searchHeader}>
                 <View
                     style={[
+                        searchFieldStyles.field,
                         styles.inputContainer,
                         {
                             backgroundColor: tonal.primary08,
@@ -684,7 +690,7 @@ const SearchScreen = ({ navigation }) => {
                     ]}>
                     <Ionicons
                         name="search"
-                        size={scale(19)}
+                        size={SEARCH_FIELD_ICON_SIZE}
                         color={themeColor}
                     />
                     <TextInput
@@ -698,10 +704,11 @@ const SearchScreen = ({ navigation }) => {
                         returnKeyType="search"
                         autoCapitalize="none"
                         autoCorrect={false}
+                        maxFontSizeMultiplier={SEARCH_FIELD_MAX_FONT_SIZE_MULTIPLIER}
                         accessibilityLabel={t('搜索', { ns: 'common' })}
                         style={[
-                            uiStyle.defaultText,
-                            styles.input,
+                            searchFieldStyles.text,
+                            searchFieldStyles.input,
                             { color: black.main },
                         ]}
                     />
@@ -720,7 +727,7 @@ const SearchScreen = ({ navigation }) => {
                             style={styles.clearInputButton}>
                             <Ionicons
                                 name="close-circle"
-                                size={scale(19)}
+                                size={SEARCH_FIELD_CLEAR_ICON_SIZE}
                                 color={black.third}
                             />
                         </ScalePressable>
@@ -751,25 +758,13 @@ const styles = StyleSheet.create({
         paddingBottom: verticalScale(8),
     },
     inputContainer: {
-        minHeight: verticalScale(44),
-        borderRadius: scale(15),
         borderWidth: StyleSheet.hairlineWidth,
-        paddingLeft: scale(13),
         paddingRight: scale(8),
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: scale(8),
-    },
-    input: {
-        flex: 1,
-        minHeight: verticalScale(44),
-        paddingVertical: 0,
-        fontSize: scale(14),
     },
     clearInputButton: {
-        width: scale(36),
-        height: scale(36),
-        borderRadius: scale(18),
+        width: 36,
+        height: 36,
+        borderRadius: 18,
         alignItems: 'center',
         justifyContent: 'center',
     },
