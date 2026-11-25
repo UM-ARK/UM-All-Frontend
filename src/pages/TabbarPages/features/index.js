@@ -64,8 +64,8 @@ const Tab = createMaterialTopTabNavigator();
 const TOP_TAB_SCALE_FACTOR = 0.1;
 const TAB_INDICATOR_WIDTH = moderateScale(25, TOP_TAB_SCALE_FACTOR);
 const TAB_BAR_HEIGHT = moderateScale(30, TOP_TAB_SCALE_FACTOR);
-// 功能詳情內容精簡；最高檔供長按一次彈滿
-const FEATURE_SHEET_SNAP_POINTS = ['32%', '48%'];
+// 功能詳情內容精簡；預設檔需高於底部懸浮 Tab Bar 避免遮擋按鈕，長說明可再上拉
+const FEATURE_SHEET_SNAP_POINTS = ['44%', '56%'];
 /** 分類卡欄數：expanded 兩欄、large 三欄；手機與 medium 維持單欄 */
 const CARD_COLUMN_COUNT = {
     compact: 1,
@@ -85,6 +85,17 @@ const SEARCH_HIGHLIGHT_ANIMATION = {
 
 const getGridItemsPerRow = (width, itemDimension, spacing, maxItemsPerRow) =>
     Math.max(1, Math.min(maxItemsPerRow, Math.floor((width - spacing) / (itemDimension + spacing))));
+
+const getUrlHost = url => {
+    if (!url || typeof url !== 'string') {
+        return '';
+    }
+    try {
+        return new URL(url).hostname.replace(/^www\./, '');
+    } catch {
+        return '';
+    }
+};
 
 function FeatureSectionGrid({ data, matchedFeatures, ...gridProps }) {
     const [width, setWidth] = useState(0);
@@ -121,7 +132,7 @@ function FeatureSectionGrid({ data, matchedFeatures, ...gridProps }) {
 
 function FeatureListPage({ navigation }) {
     const { theme } = useTheme();
-    const { themeColor, white, black, featuresScreen, viewShadow } = theme;
+    const { themeColor, white, black, featuresScreen, viewShadow, tonal, pressOverlay } = theme;
     const { status: harborStatus, user: harborUser, login } = useHarborSession();
     const { t, i18n } = useTranslation(['common', 'home', 'features']);
     const functionArr = useMemo(() => getFunctionArr(t), [t]);
@@ -364,13 +375,10 @@ function FeatureListPage({ navigation }) {
                 activeOpacity={0.7}
                 onPress={() => handleFeaturePress(item)}
                 onLongPress={() => {
-                    trigger();
+                    trigger('longPress');
                     searchInputRef.current?.blur();
                     setBottomSheetInfo(item);
-                    // 一開始觸發即彈最高檔（同 courseSim 展開搜索）
-                    bottomSheetRef.current?.snapToIndex(
-                        FEATURE_SHEET_SNAP_POINTS.length - 1,
-                    );
+                    bottomSheetRef.current?.snapToIndex(0);
                 }}
                 key={item.key_name || item.fn_name}>
                 {isMatch ? (
@@ -497,87 +505,157 @@ function FeatureListPage({ navigation }) {
         ],
     );
 
-    // BottomSheet內容渲染
+    // BottomSheet內容渲染：左圖右文資訊頭 + 輕量 Tonal 操作列
     const renderBottomSheet = () => {
         if (!bottomSheetInfo) {
             return null;
         }
         const { go_where, webview_param, describe, fn_name } = bottomSheetInfo;
-        const haveLink = go_where === 'Webview' || go_where === 'Linking';
+        const haveLink = (go_where === 'Webview' || go_where === 'Linking') && Boolean(webview_param?.url);
+        const urlHost = haveLink ? getUrlHost(webview_param.url) : '';
         return (
             <View
                 style={{
-                    alignItems: 'center',
                     backgroundColor: white,
                     paddingHorizontal: scale(20),
-                    paddingTop: verticalScale(4),
+                    paddingTop: verticalScale(6),
                     paddingBottom: sheetContentBottomPad,
                 }}>
-                <FeatureIcon
-                    item={bottomSheetInfo}
-                    size={scale(34)}
-                    showBackground={false}
-                />
-                <Text
+                <View
                     style={{
-                        ...uiStyle.defaultText,
-                        color: black.main,
-                        fontSize: verticalScale(15),
-                        fontWeight: '600',
-                        textAlign: 'center',
-                        marginTop: verticalScale(12),
+                        flexDirection: 'row',
+                        alignItems: 'flex-start',
+                        columnGap: scale(12),
                     }}>
-                    {fn_name}
-                </Text>
-                {describe ? (
-                    <Text
-                        style={{
-                            ...uiStyle.defaultText,
-                            color: black.third,
-                            fontSize: verticalScale(12),
-                            lineHeight: verticalScale(18),
-                            textAlign: 'center',
-                            marginTop: verticalScale(6),
-                        }}
-                        selectable>
-                        {describe}
-                    </Text>
-                ) : null}
-                {haveLink ? (
-                    <ScalePressable
-                        style={{
-                            flexDirection: 'row',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            width: '100%',
-                            marginTop: verticalScale(16),
-                            paddingVertical: verticalScale(11),
-                            paddingHorizontal: scale(14),
-                            borderRadius: scale(12),
-                            backgroundColor: themeColor,
-                        }}
-                        onPress={() => {
-                            trigger();
-                            Clipboard.setStringAsync(webview_param.url);
-                            Toast.show(t('已複製Link到剪貼板！'));
-                        }}>
-                        <Ionicons
-                            name="link-outline"
-                            size={scale(16)}
-                            color={white}
-                            style={{ marginRight: scale(6) }}
-                        />
+                    <FeatureIcon
+                        item={bottomSheetInfo}
+                        size={scale(24)}
+                        showBackground={true}
+                    />
+                    <View style={{ flex: 1, paddingTop: verticalScale(1) }}>
                         <Text
                             style={{
                                 ...uiStyle.defaultText,
-                                color: white,
+                                color: black.main,
+                                fontSize: verticalScale(15),
+                                fontWeight: '600',
+                            }}>
+                            {fn_name}
+                        </Text>
+                        {describe ? (
+                            <Text
+                                style={{
+                                    ...uiStyle.defaultText,
+                                    color: black.third,
+                                    fontSize: verticalScale(12),
+                                    lineHeight: verticalScale(17),
+                                    marginTop: verticalScale(4),
+                                }}
+                                selectable>
+                                {describe}
+                            </Text>
+                        ) : null}
+                        {urlHost ? (
+                            <View
+                                style={{
+                                    flexDirection: 'row',
+                                    alignItems: 'center',
+                                    columnGap: scale(4),
+                                    marginTop: verticalScale(4),
+                                }}>
+                                <Ionicons
+                                    name="link-outline"
+                                    size={scale(12)}
+                                    color={black.third}
+                                />
+                                <Text
+                                    numberOfLines={1}
+                                    style={{
+                                        ...uiStyle.defaultText,
+                                        flex: 1,
+                                        color: black.third,
+                                        fontSize: verticalScale(11),
+                                    }}>
+                                    {urlHost}
+                                </Text>
+                            </View>
+                        ) : null}
+                    </View>
+                </View>
+
+                <View
+                    style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        columnGap: scale(10),
+                        marginTop: verticalScale(16),
+                    }}>
+                    {haveLink ? (
+                        <ScalePressable
+                            style={{
+                                flex: 1,
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                paddingVertical: verticalScale(10),
+                                paddingHorizontal: scale(12),
+                                borderRadius: scale(12),
+                                backgroundColor: featuresScreen.bg_color,
+                            }}
+                            onPress={() => {
+                                Clipboard.setStringAsync(webview_param.url);
+                                trigger('success');
+                                Toast.show(t('已複製Link到剪貼板！'));
+                            }}>
+                            <Ionicons
+                                name="link-outline"
+                                size={scale(15)}
+                                color={black.second}
+                                style={{ marginRight: scale(5) }}
+                            />
+                            <Text
+                                style={{
+                                    ...uiStyle.defaultText,
+                                    color: black.second,
+                                    fontSize: verticalScale(13),
+                                    fontWeight: '600',
+                                }}>
+                                {t('複製連結')}
+                            </Text>
+                        </ScalePressable>
+                    ) : null}
+                    <ScalePressable
+                        style={{
+                            flex: 1,
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            paddingVertical: verticalScale(10),
+                            paddingHorizontal: scale(12),
+                            borderRadius: scale(12),
+                            backgroundColor: tonal.primary15,
+                        }}
+                        onPress={() => {
+                            bottomSheetRef.current?.close();
+                            handleFeaturePress(bottomSheetInfo);
+                        }}>
+                        <Text
+                            style={{
+                                ...uiStyle.defaultText,
+                                color: themeColor,
                                 fontSize: verticalScale(13),
                                 fontWeight: '600',
                             }}>
-                            {t('複製功能Link', { ns: 'features' })}
+                            {t('開啟服務', { ns: 'features' })}
                         </Text>
+                        <Ionicons
+                            name={haveLink ? 'open-outline' : 'arrow-forward-outline'}
+                            size={scale(15)}
+                            color={themeColor}
+                            style={{ marginLeft: scale(5) }}
+                        />
                     </ScalePressable>
-                ) : null}
+                </View>
             </View>
         );
     };
@@ -696,6 +774,12 @@ function FeatureListPage({ navigation }) {
                 page={'features'}
                 // 同 courseSim：sheet 延伸至螢幕底部，避免 Tab 上方露出 bg_color
                 bottomInset={0}
+                topCornerRadius={scale(26)}
+                handleIndicatorStyle={{
+                    backgroundColor: pressOverlay,
+                    width: scale(34),
+                    height: verticalScale(3.5),
+                }}
                 snapPoints={FEATURE_SHEET_SNAP_POINTS}>
                 {renderBottomSheet()}
             </CustomBottomSheet>

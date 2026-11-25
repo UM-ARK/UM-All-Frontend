@@ -16,7 +16,7 @@ const CustomBottomSheet = forwardRef((props, ref) => {
     const tabBarHeight =
         useContext(BottomTabBarHeightContext) ?? insets.bottom + 49;
     const bottomInset = props.bottomInset ?? tabBarHeight;
-    const topCornerRadius = scale(50);
+    const topCornerRadius = props.topCornerRadius ?? scale(50);
 
     const styles = StyleSheet.create({
         contentContainer: {
@@ -74,7 +74,10 @@ const CustomBottomSheet = forwardRef((props, ref) => {
                 ['features', 'home', 'courseSim'].includes(props?.page)
             }
             backgroundStyle={{ backgroundColor: 'transparent' }}
-            handleIndicatorStyle={{ backgroundColor: black.third }}
+            handleIndicatorStyle={[
+                { backgroundColor: black.third },
+                props.handleIndicatorStyle,
+            ]}
             style={[
                 {
                     borderTopLeftRadius: topCornerRadius,
