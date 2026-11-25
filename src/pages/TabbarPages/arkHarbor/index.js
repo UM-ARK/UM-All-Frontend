@@ -28,7 +28,9 @@ import Text from '../../../components/AppText';
 import ScalePressable from '../../../components/ScalePressable';
 import { uiStyle, useTheme } from '../../../components/ThemeContext';
 import { useHarborSession } from '../../../contexts/HarborSessionContext';
+import { useAppReducedMotion } from '../../../contexts/ReducedMotionContext';
 import { logToFirebase } from '../../../utils/firebaseAnalytics';
+import { GlassView, isLiquidGlassSupported } from '../../../utils/glassEffect';
 import { useWindowSizeClass } from '../../../utils/windowSizeClass';
 import {
     fetchHarborSiteCapabilities,
@@ -52,49 +54,62 @@ const VIEW_CONFIG = {
     top: { label: '熱門', analytics: 'top' },
     unread: { label: '未讀', analytics: 'unread' },
 };
-// 對齊資訊頁 Top Tab（~30）。往下瀏覽時搜尋列收進工具列；
+// 對齊服務頁頂部液態玻璃膠囊高度。往下瀏覽時搜尋列收進工具列；
 // 往回滑時用較長距離展開，不必回到列表頂部。
-const STICKY_TOOLBAR_HEIGHT = verticalScale(36);
+const STICKY_TOOLBAR_HEIGHT = verticalScale(38);
 const SEARCH_BAR_ROW_HEIGHT = SEARCH_FIELD_MIN_HEIGHT + verticalScale(8);
 const SEARCH_BAR_SETTLE_MS = 180;
 const SEARCH_BAR_EASE_OUT = Easing.bezier(0.23, 1, 0.32, 1);
-const HARBOR_TAB_INDICATOR_WIDTH = moderateScale(25, 0.1);
+const HARBOR_TAB_TRACK_PADDING = scale(3);
+const HARBOR_TAB_ITEM_WIDTH = scale(60);
+const HARBOR_TAB_ITEM_HEIGHT = moderateScale(28, 0.1);
+const HARBOR_TAB_LABEL_FONT_SIZE = moderateScale(11.5, 0.25);
+const HarborFeedTrackContainer = isLiquidGlassSupported ? GlassView : View;
 const Drawer = createDrawerNavigator();
 const AnimatedPagerView = Animated.createAnimatedComponent(PagerView);
 
 const HarborFeedTabs = ({ options, selectedIndex, position, onChange }) => {
     const { theme } = useTheme();
-    const [indicatorOffsets, setIndicatorOffsets] = useState({});
-    const hasMeasuredAllOptions = options.every(
-        option => indicatorOffsets[option.key] !== undefined,
-    );
-    const indicatorInputRange =
-        options.length > 1 ? options.map((option, index) => index) : [0, 1];
-    const indicatorOutputRange =
-        options.length > 1
-            ? options.map(option => indicatorOffsets[option.key] ?? 0)
-            : [
-                indicatorOffsets[options[0]?.key] ?? 0,
-                indicatorOffsets[options[0]?.key] ?? 0,
-            ];
-    const translateX = position.interpolate({
-        inputRange: indicatorInputRange,
-        outputRange: indicatorOutputRange,
-        extrapolate: 'clamp',
-    });
-
-    const handleOptionLayout = useCallback((key, event) => {
-        const { x, width } = event.nativeEvent.layout;
-        const nextOffset = x + (width - HARBOR_TAB_INDICATOR_WIDTH) / 2;
-        setIndicatorOffsets(current =>
-            current[key] === nextOffset
-                ? current
-                : { ...current, [key]: nextOffset },
-        );
-    }, []);
+    const reducedMotion = useAppReducedMotion();
+    const { isLight, white, black, featuresScreen, pressOverlay, unread, viewShadow } = theme;
+    const optionCount = options.length;
+    const thumbInputRange =
+        optionCount > 1 ? options.map((_, index) => index) : [0, 1];
+    const thumbOutputRange =
+        optionCount > 1
+            ? options.map((_, index) => index * HARBOR_TAB_ITEM_WIDTH)
+            : [0, 0];
+    const thumbTranslateX =
+        reducedMotion || optionCount <= 1 || !position
+            ? selectedIndex * HARBOR_TAB_ITEM_WIDTH
+            : position.interpolate({
+                inputRange: thumbInputRange,
+                outputRange: thumbOutputRange,
+                extrapolate: 'clamp',
+            });
 
     return (
-        <View style={styles.feedTabs}>
+        <HarborFeedTrackContainer
+            {...(isLiquidGlassSupported ? { isInteractive: true } : {})}
+            style={[
+                styles.feedTabs,
+                !isLiquidGlassSupported && { backgroundColor: white },
+                !isLiquidGlassSupported && isLight && viewShadow,
+            ]}>
+            {optionCount > 0 ? (
+                <Animated.View
+                    pointerEvents="none"
+                    style={[
+                        styles.feedTabThumb,
+                        {
+                            backgroundColor: isLight
+                                ? featuresScreen.divider
+                                : pressOverlay,
+                            transform: [{ translateX: thumbTranslateX }],
+                        },
+                    ]}
+                />
+            ) : null}
             {options.map((option, index) => {
                 const isSelected = selectedIndex === index;
 
@@ -103,42 +118,43 @@ const HarborFeedTabs = ({ options, selectedIndex, position, onChange }) => {
                         key={option.key}
                         accessibilityRole="tab"
                         accessibilityState={{ selected: isSelected }}
-                        onLayout={event => handleOptionLayout(option.key, event)}
+                        accessibilityLabel={option.label}
                         onPress={() => {
-                            trigger();
+                            trigger(isSelected ? 'tap' : 'selection');
                             onChange(index);
                         }}
                         style={styles.feedTab}>
-                        <Text
-                            numberOfLines={1}
-                            style={[
-                                styles.feedTabLabel,
-                                {
-                                    color: isSelected
-                                        ? theme.black.second
-                                        : theme.black.third,
-                                },
-                                isSelected && styles.feedTabLabelSelected,
-                            ]}>
-                            {option.label}
-                        </Text>
+                        <View style={styles.feedTabLabelRow}>
+                            <Text
+                                numberOfLines={1}
+                                style={[
+                                    styles.feedTabLabel,
+                                    {
+                                        color: isSelected
+                                            ? black.main
+                                            : black.third,
+                                    },
+                                    isSelected && styles.feedTabLabelSelected,
+                                ]}>
+                                {option.label}
+                            </Text>
+                            {option.showDot ? (
+                                <View
+                                    pointerEvents="none"
+                                    style={[
+                                        styles.feedTabDot,
+                                        {
+                                            backgroundColor:
+                                                option.dotColor ?? unread,
+                                        },
+                                    ]}
+                                />
+                            ) : null}
+                        </View>
                     </ScalePressable>
                 );
             })}
-            <Animated.View
-                pointerEvents="none"
-                style={[
-                    styles.feedTabIndicator,
-                    hasMeasuredAllOptions
-                        ? styles.feedTabIndicatorVisible
-                        : styles.feedTabIndicatorHidden,
-                    {
-                        backgroundColor: theme.themeColor,
-                        transform: [{ translateX }],
-                    },
-                ]}
-            />
-        </View>
+        </HarborFeedTrackContainer>
     );
 };
 
@@ -397,6 +413,7 @@ const HarborFeedPane = ({
     onScrollOffset,
     onScrollBeginDrag,
     onScrollSettle,
+    onUnseenChange,
 }) => {
     const source = useMemo(
         () =>
@@ -434,6 +451,7 @@ const HarborFeedPane = ({
                 onScrollEndDrag={handleScrollSettle}
                 onMomentumScrollEnd={handleScrollSettle}
                 isActive={isActive}
+                onUnseenChange={onUnseenChange}
             />
         </View>
     );
@@ -482,6 +500,10 @@ const ForumPage = ({ navigation }) => {
     });
     const [consentVisible, setConsentVisible] = useState(false);
     const [searchCollapsed, setSearchCollapsed] = useState(false);
+    const [hasUnseenLatest, setHasUnseenLatest] = useState(false);
+    const [hasUnseenPane, setHasUnseenPane] = useState(false);
+    const hasUnreadTopics =
+        status === 'signedIn' && (hasUnseenLatest || hasUnseenPane);
 
     useEffect(() => {
         // 僅在首次聚焦時打點；iOS Native Tabs 會預先掛載，
@@ -558,8 +580,9 @@ const ForumPage = ({ navigation }) => {
             enabledViews.map(view => ({
                 key: view,
                 label: t(VIEW_CONFIG[view].label),
+                showDot: view === 'unread' && hasUnreadTopics,
             })),
-        [enabledViews, t],
+        [enabledViews, hasUnreadTopics, t],
     );
     const tabPosition = useMemo(
         () => Animated.add(pageScrollPosition, pageScrollOffset),
@@ -914,6 +937,13 @@ const ForumPage = ({ navigation }) => {
                                     onScrollOffset={handleScrollOffset}
                                     onScrollBeginDrag={handleSearchScrollBegin}
                                     onScrollSettle={handleSearchScrollEnd}
+                                    onUnseenChange={
+                                        view === 'latest'
+                                            ? setHasUnseenLatest
+                                            : view === 'unread'
+                                                ? setHasUnseenPane
+                                                : undefined
+                                    }
                                 />
                             ) : null}
                         </View>
@@ -1081,38 +1111,48 @@ const styles = StyleSheet.create({
         borderRadius: scale(3),
     },
     feedTabs: {
-        height: verticalScale(22),
         flexDirection: 'row',
+        alignItems: 'center',
         flexShrink: 0,
         marginHorizontal: scale(2),
+        borderRadius: scale(999),
+        padding: HARBOR_TAB_TRACK_PADDING,
+        overflow: 'hidden',
         position: 'relative',
     },
+    feedTabThumb: {
+        position: 'absolute',
+        top: HARBOR_TAB_TRACK_PADDING,
+        bottom: HARBOR_TAB_TRACK_PADDING,
+        left: HARBOR_TAB_TRACK_PADDING,
+        width: HARBOR_TAB_ITEM_WIDTH,
+        borderRadius: scale(999),
+    },
     feedTab: {
+        width: HARBOR_TAB_ITEM_WIDTH,
+        height: HARBOR_TAB_ITEM_HEIGHT,
         alignItems: 'center',
         justifyContent: 'center',
-        paddingHorizontal: scale(8),
+        borderRadius: scale(999),
+    },
+    feedTabLabelRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: scale(3),
     },
     feedTabLabel: {
         ...uiStyle.defaultText,
-        fontSize: scale(11),
-        fontWeight: '400',
+        fontSize: HARBOR_TAB_LABEL_FONT_SIZE,
+        fontWeight: '500',
     },
     feedTabLabelSelected: {
         fontWeight: '600',
     },
-    feedTabIndicator: {
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        width: HARBOR_TAB_INDICATOR_WIDTH,
-        height: verticalScale(2),
-        borderRadius: scale(1),
-    },
-    feedTabIndicatorVisible: {
-        opacity: 1,
-    },
-    feedTabIndicatorHidden: {
-        opacity: 0,
+    feedTabDot: {
+        width: scale(5),
+        height: scale(5),
+        borderRadius: scale(2.5),
     },
     searchBarRow: {
         height: SEARCH_BAR_ROW_HEIGHT,

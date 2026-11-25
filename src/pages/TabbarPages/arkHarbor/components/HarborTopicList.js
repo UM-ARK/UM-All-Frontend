@@ -119,6 +119,7 @@ const HarborTopicList = ({
     isTwoColumn = false,
     isActive = true,
     preserveItemsUntilRefresh = false,
+    onUnseenChange,
 }) => {
     const { theme } = useTheme();
     const { isCompact } = useWindowSizeClass();
@@ -140,6 +141,8 @@ const HarborTopicList = ({
     const rateLimitRef = useRef(null);
     const sourceRef = useRef(source);
     sourceRef.current = source;
+    const onUnseenChangeRef = useRef(onUnseenChange);
+    onUnseenChangeRef.current = onUnseenChange;
     const [items, setItems] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
@@ -168,6 +171,7 @@ const HarborTopicList = ({
     const replaceItems = useCallback(nextItems => {
         itemsRef.current = nextItems;
         setItems(nextItems);
+        onUnseenChangeRef.current?.(nextItems.some(isHarborTopicUnseen));
     }, []);
 
     const replaceRecommendationItems = useCallback(nextItems => {
