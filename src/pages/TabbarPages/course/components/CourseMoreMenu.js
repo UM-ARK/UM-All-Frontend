@@ -164,7 +164,7 @@ const CourseMoreMenu = ({
                 <Ionicons
                     name="ellipsis-horizontal"
                     size={verticalScale(16)}
-                    color={themeColor}
+                    color={black.main}
                 />
             </TouchableScale>
 
