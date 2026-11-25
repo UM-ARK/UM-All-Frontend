@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import PagerView from 'react-native-pager-view';
-import { scale, verticalScale } from 'react-native-size-matters';
+import { moderateScale, scale, verticalScale } from 'react-native-size-matters';
 import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '../../../components/ThemeContext';
@@ -14,11 +14,11 @@ import NewsPage from './NewsPage';
 
 /**
  * 校園資訊頁：活動 / 新聞合併為單一 Top Tab。
- * 分段控制與頂部 Tab 同屬一塊實色表面；左右滑仍由 PagerView 換頁。
+ * 這一列只放文字導航，選中偏黑、未選中偏灰；左右滑仍由 PagerView 換頁。
  */
 const CampusPage = () => {
     const { theme } = useTheme();
-    const { bg_color, tonal } = theme;
+    const { bg_color, black } = theme;
     const { t } = useTranslation('common');
 
     const pagerRef = useRef(null);
@@ -82,13 +82,16 @@ const CampusPage = () => {
 
     return (
         <View style={[styles.container, { backgroundColor: bg_color }]}>
-            <View style={[styles.segmentBar, { backgroundColor: bg_color }]}>
+            <View style={styles.segmentBar}>
                 <SegmentControl
-                    fill
                     options={segmentOptions}
                     selectedIndex={pageIndex}
                     onChange={onSegmentChange}
-                    trackBackgroundColor={tonal.primary08}
+                    trackBackgroundColor="transparent"
+                    selectedBackgroundColor="transparent"
+                    accentColor={black.main}
+                    inactiveLabelColor={black.third}
+                    fontSize={moderateScale(11, 0.3)}
                     style={styles.segment}
                 />
             </View>
@@ -124,13 +127,14 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     segmentBar: {
-        paddingLeft: scale(8),
-        paddingRight: scale(14),
-        paddingTop: verticalScale(6),
+        alignItems: 'center',
+        paddingTop: verticalScale(4),
         paddingBottom: verticalScale(2),
     },
     segment: {
-        alignSelf: 'stretch',
+        alignSelf: 'center',
+        gap: scale(16),
+        padding: 0,
     },
     scrollTopButton: {
         zIndex: 30,
