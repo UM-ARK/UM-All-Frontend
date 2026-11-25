@@ -10,11 +10,17 @@ import {useTheme} from '../../../../../../components/ThemeContext';
 import PhosphorFeatureIcon, {phosphorFeatureIcons} from './PhosphorFeatureIcon';
 
 const ICON_TONE_MAP = {
+    // 四組功能性質語義色（與服務卡片場景分組正交）
+    core: 'blue',
+    live: 'green',
+    life: 'orange',
+    alert: 'pink',
+    // 兼容既有分類鍵名
     transport: 'green',
     facility: 'green',
     dining: 'orange',
     guide: 'orange',
-    studySpaces: 'violet',
+    studySpaces: 'green',
     academic: 'blue',
     campus: 'pink',
 };
