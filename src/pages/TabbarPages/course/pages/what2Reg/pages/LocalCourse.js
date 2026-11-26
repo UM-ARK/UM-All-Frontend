@@ -8,9 +8,10 @@ import Text from '../../../../../../components/AppText';
 import { useTheme, uiStyle } from '../../../../../../components/ThemeContext';
 import { getDeepLinkShareHeaderOptions } from '../../../../../../components/DeepLinkShareButton';
 import { useAppShare } from '../../../../../../contexts/AppShareContext';
-import SegmentControl from '../../../../../../components/SegmentControl';
+import SegmentedTabControl from '../../../../../../components/SegmentedTabControl';
 import { ARK_COURSE_SHARE_URL, ARK_WIKI_SEARCH } from '../../../../../../utils/pathMap';
 import { openLink } from '../../../../../../utils/browser';
+import { trigger } from '../../../../../../utils/trigger';
 import {
     getCourseCatalog,
     getPostgraduateCatalog,
@@ -566,12 +567,20 @@ const LocalCourse = (props) => {
 
                     {/* 按班別／教師切換 */}
                     <View style={{ alignSelf: 'center', marginVertical: scale(10) }}>
-                        <SegmentControl
+                        <SegmentedTabControl
                             options={groupByOptions}
                             selectedIndex={groupChoice === 'section' ? 0 : 1}
-                            onChange={(index) => setGroupChoice(index === 0 ? 'section' : 'teacher')}
-                            trackBackgroundColor={tonal.primary08}
-                            selectedBackgroundColor={white}
+                            onChange={index => {
+                                const nextChoice =
+                                    index === 0 ? 'section' : 'teacher';
+                                trigger(
+                                    groupChoice === nextChoice
+                                        ? 'tap'
+                                        : 'selection',
+                                );
+                                setGroupChoice(nextChoice);
+                            }}
+                            raisedTrack
                         />
                     </View>
 

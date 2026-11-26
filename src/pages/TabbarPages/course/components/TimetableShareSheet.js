@@ -37,7 +37,7 @@ import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
 import Text from '../../../../components/AppText';
 import ScalePressable from '../../../../components/ScalePressable';
 import { useTheme, uiStyle } from '../../../../components/ThemeContext';
-import SegmentControl from '../../../../components/SegmentControl';
+import SegmentedTabControl from '../../../../components/SegmentedTabControl';
 import { logToFirebase } from '../../../../utils/firebaseAnalytics';
 import { trigger } from '../../../../utils/trigger';
 import { useCoursePlan } from '../context/CoursePlanContext';
@@ -982,15 +982,23 @@ const TimetableShareSheet = forwardRef(({ catalogMetadata }, ref) => {
             <Text style={styles.heading}>
                 {t('課表分享預覽', { ns: 'timetable' })}
             </Text>
-            <SegmentControl
-                options={shareModeOptions}
-                selectedIndex={shareMode === 'overview' ? 1 : 0}
-                onChange={index =>
-                    setShareMode(index === 0 ? 'detail' : 'overview')
-                }
-                trackBackgroundColor={tonal.primary08}
-                style={styles.modeSwitcher}
-            />
+            <View style={styles.modeSwitcher}>
+                <SegmentedTabControl
+                    options={shareModeOptions}
+                    selectedIndex={shareMode === 'overview' ? 1 : 0}
+                    onChange={index => {
+                        const nextMode =
+                            index === 0 ? 'detail' : 'overview';
+                        trigger(
+                            shareMode === nextMode
+                                ? 'tap'
+                                : 'selection',
+                        );
+                        setShareMode(nextMode);
+                    }}
+                    raisedTrack
+                />
+            </View>
             <ScrollView
                 style={styles.previewScroll}
                 showsVerticalScrollIndicator={false}
