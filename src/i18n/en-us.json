@@ -1340,6 +1340,12 @@
     },
     "features": {
         "常用服務": "Frequent Services",
+        "調整": "Edit",
+        "完成": "Done",
+        "長按並拖拽調整順序": "Hold & drag to reorder",
+        "點擊下方服務添加到常用": "Tap services below to add",
+        "移除常用服務": "Remove from frequent services",
+        "添加到常用服務": "Add to frequent services",
         "搜尋服務": "Search services",
         "找到 {{total}} 項服務": "Results ({{total}})",
         "網絡搜索": "Web search",

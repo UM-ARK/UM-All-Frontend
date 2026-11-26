@@ -27,11 +27,19 @@ import {
 } from '../../../utils/courseNavigation';
 import { canNavigateTo } from '../../../utils/routeAvailability';
 import {
-    FREQUENT_FEATURES_DISPLAY_LIMIT,
-    buildFrequentFeatures,
-    getFeatureRecentUsage,
-    recordFeatureUsage,
-} from '../../../utils/featureRecentUsage';
+    addCustomFrequentFeatureKey,
+    getCustomFrequentFeatureKeys,
+    removeCustomFrequentFeatureKey,
+    reorderCustomFrequentFeatureKeys,
+    resolveCustomFrequentFeatures,
+    saveCustomFrequentFeatureKeys,
+} from '../../../utils/customFrequentFeatures';
+import { GlassView, isLiquidGlassSupported } from '../../../utils/glassEffect';
+import { SEGMENTED_TAB_CONTROL_HEIGHT } from '../../../components/SegmentedTabControl';
+import FrequentFeaturesGrid, {
+    FeatureCornerBadge,
+    WiggleIconWrapper,
+} from './FrequentFeaturesGrid';
 import {
     getFeatureSearchText,
     getUmWebSearchUrl,
@@ -55,6 +63,8 @@ import { createMaterialTopTabNavigator } from '@react-navigation/material-top-ta
 import * as Clipboard from 'expo-clipboard';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import { scale, verticalScale } from 'react-native-size-matters';
+import { Check } from 'phosphor-react-native/src/icons/Check';
+import { SlidersHorizontal } from 'phosphor-react-native/src/icons/SlidersHorizontal';
 import Toast from 'react-native-simple-toast';
 import TouchableScale from '../../../components/TouchableScale';
 import { useTranslation } from 'react-i18next';
@@ -142,14 +152,19 @@ function FeatureListPage({ navigation }) {
     const isTc = i18n.language === 'tc';
     const fontSize = isTc ? verticalScale(11) : verticalScale(9);
     const [bottomSheetInfo, setBottomSheetInfo] = useState(null);
-    const [usageRecords, setUsageRecords] = useState([]);
+    const [frequentKeys, setFrequentKeys] = useState([]);
+    const [isDraggingFrequent, setIsDraggingFrequent] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const bottomSheetRef = useRef(null);
     const searchInputRef = useRef(null);
     const listRef = useRef(null);
     const reducedMotion = useAppReducedMotion();
     const insets = useSafeAreaInsets();
-    const { topChromeHeight } = useFeaturesChrome();
+    const {
+        topChromeHeight,
+        isEditingFrequent,
+        setIsEditingFrequent,
+    } = useFeaturesChrome();
     const scrollY = useRef(new RNAnimated.Value(0)).current;
     const [searchHeaderHeight, setSearchHeaderHeight] = useState(
         SEARCH_FIELD_MIN_HEIGHT + 2 + verticalScale(10),
@@ -191,8 +206,12 @@ function FeatureListPage({ navigation }) {
     }, [functionArr]);
 
     const frequentFeatures = useMemo(
-        () => buildFrequentFeatures(featureByKey, usageRecords),
-        [featureByKey, usageRecords],
+        () => resolveCustomFrequentFeatures(featureByKey, frequentKeys),
+        [featureByKey, frequentKeys],
+    );
+    const frequentKeySet = useMemo(
+        () => new Set(frequentFeatures.map(item => item.key_name || item.fn_name)),
+        [frequentFeatures],
     );
 
     const searchTextByFeature = useMemo(() => new Map(
@@ -223,6 +242,9 @@ function FeatureListPage({ navigation }) {
     );
 
     const handleChangeSearchQuery = value => {
+        if (isEditingFrequent) {
+            setIsEditingFrequent(false);
+        }
         setSearchQuery(value);
         listRef.current?.scrollTo({ y: 0, animated: false });
     };
@@ -243,23 +265,76 @@ function FeatureListPage({ navigation }) {
         addSearchHistory(query);
     };
 
-    const refreshUsage = useCallback(async () => {
-        const nextUsage = await getFeatureRecentUsage();
-        setUsageRecords(nextUsage);
+    const refreshFrequentKeys = useCallback(async () => {
+        const nextKeys = await getCustomFrequentFeatureKeys();
+        setFrequentKeys(nextKeys);
     }, []);
 
     useEffect(() => {
-        refreshUsage();
-    }, [refreshUsage]);
+        refreshFrequentKeys();
+    }, [refreshFrequentKeys]);
+
+    useEffect(() => {
+        if (isEditingFrequent) {
+            searchInputRef.current?.blur();
+            setSearchQuery('');
+        } else {
+            setIsDraggingFrequent(false);
+        }
+    }, [isEditingFrequent]);
 
     useFocusEffect(
         useCallback(() => {
-            refreshUsage();
+            refreshFrequentKeys();
             return () => {
                 searchInputRef.current?.blur();
+                setIsEditingFrequent(false);
             };
-        }, [refreshUsage]),
+        }, [refreshFrequentKeys, setIsEditingFrequent]),
     );
+
+    const handleAddFrequent = useCallback(item => {
+        const key = item.key_name || item.fn_name;
+        if (!key) {
+            return;
+        }
+        trigger('tap');
+        setFrequentKeys(current => {
+            const next = addCustomFrequentFeatureKey(current, key);
+            if (next !== current) {
+                saveCustomFrequentFeatureKeys(next);
+            }
+            return next;
+        });
+    }, []);
+
+    const handleRemoveFrequent = useCallback(item => {
+        const key = item.key_name || item.fn_name;
+        if (!key) {
+            return;
+        }
+        trigger('tap');
+        setFrequentKeys(current => {
+            const next = removeCustomFrequentFeatureKey(current, key);
+            saveCustomFrequentFeatureKeys(next);
+            return next;
+        });
+    }, []);
+
+    const handleReorderFrequent = useCallback((fromIndex, toIndex) => {
+        setFrequentKeys(current => {
+            const next = reorderCustomFrequentFeatureKeys(current, fromIndex, toIndex);
+            saveCustomFrequentFeatureKeys(next);
+            return next;
+        });
+    }, []);
+
+    const handleFeatureLongPress = useCallback(item => {
+        trigger('longPress');
+        searchInputRef.current?.blur();
+        setBottomSheetInfo(item);
+        bottomSheetRef.current?.snapToIndex(0);
+    }, []);
 
     const handleFeaturePress = useCallback(
         item => {
@@ -268,10 +343,6 @@ function FeatureListPage({ navigation }) {
             logToFirebase('funcUse', {
                 funcName: item.fn_name,
             });
-            // 異步寫入常用紀錄，不阻塞導航
-            recordFeatureUsage(item.key_name || item.fn_name).then(
-                setUsageRecords,
-            );
 
             const { go_where, webview_param, needLogin, loginRoute } = item;
             // web 端只掛了部分頁面（見 Nav.web.js），站內路由未註冊時提示改用 APP；
@@ -339,10 +410,6 @@ function FeatureListPage({ navigation }) {
     const gridMaxItemsPerRow = isCompact
         ? COMPACT_GRID_MAX_ITEMS_PER_ROW
         : WIDE_GRID_MAX_ITEMS_PER_ROW;
-    // 寬屏時常用服務只佔「4 個圖標 + 左右各一個間距」的寬度，不再被拉到整行
-    const frequentGridMaxWidth = isCompact
-        ? undefined
-        : FREQUENT_FEATURES_DISPLAY_LIMIT * (gridItemDimension + gridSpacing * 2) + gridSpacing;
     const cardColumnCount = CARD_COLUMN_COUNT[sizeClass] || 1;
 
     // 相鄰分類可透過 groupKey 共用卡片，組內以細線分隔
@@ -379,9 +446,77 @@ function FeatureListPage({ navigation }) {
     }, [cardColumnCount, cardHorizontalMargin, cardHorizontalPadding, sectionBlocks, gridItemDimension, gridMaxItemsPerRow, gridSpacing, windowWidth]);
 
     const renderFeatureItem = useCallback(
-        item => {
+        (item, index = 0) => {
+            const itemKey = item.key_name || item.fn_name;
             const isMatch = matchedFeatures?.has(item);
             const isMuted = isMatch === false;
+            const isInFrequent = frequentKeySet.has(itemKey);
+
+            if (isEditingFrequent) {
+                return (
+                    <WiggleIconWrapper
+                        key={itemKey}
+                        active={!isInFrequent}
+                        phaseIndex={index}
+                        reducedMotion={reducedMotion}
+                        style={{
+                            width: '100%',
+                            opacity: isInFrequent ? 0.52 : 1,
+                        }}>
+                        <TouchableScale
+                            accessibilityRole="button"
+                            accessibilityLabel={
+                                isInFrequent
+                                    ? item.fn_name
+                                    : `${t('添加到常用服務', { ns: 'features' })} ${item.fn_name}`
+                            }
+                            disabled={isInFrequent}
+                            style={{
+                                width: '100%',
+                                justifyContent: 'flex-start',
+                                alignItems: 'center',
+                                paddingTop: verticalScale(2),
+                            }}
+                            activeOpacity={0.7}
+                            onPress={() => handleAddFrequent(item)}>
+                            <View
+                                style={{
+                                    width: scale(30),
+                                    height: scale(30),
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    position: 'relative',
+                                }}>
+                                <FeatureIcon
+                                    item={item}
+                                    size={scale(26)}
+                                    muted={isInFrequent}
+                                    showBackground={false}
+                                />
+                                <FeatureCornerBadge
+                                    variant={isInFrequent ? 'added' : 'add'}
+                                    accessibilityLabel={t('添加到常用服務', { ns: 'features' })}
+                                    onPress={isInFrequent ? undefined : () => handleAddFrequent(item)}
+                                />
+                            </View>
+                            <Text
+                                numberOfLines={isTc ? 1 : 2}
+                                style={{
+                                    ...uiStyle.defaultText,
+                                    fontSize: fontSize,
+                                    lineHeight: featureLabelLineHeight,
+                                    height: featureLabelHeight,
+                                    color: isInFrequent ? black.third : black.second,
+                                    textAlign: 'center',
+                                    marginTop: verticalScale(6),
+                                }}>
+                                {item.fn_name}
+                            </Text>
+                        </TouchableScale>
+                    </WiggleIconWrapper>
+                );
+            }
+
             return <TouchableScale
                 accessibilityRole="button"
                 style={{
@@ -391,13 +526,8 @@ function FeatureListPage({ navigation }) {
                 }}
                 activeOpacity={0.7}
                 onPress={() => handleFeaturePress(item)}
-                onLongPress={() => {
-                    trigger('longPress');
-                    searchInputRef.current?.blur();
-                    setBottomSheetInfo(item);
-                    bottomSheetRef.current?.snapToIndex(0);
-                }}
-                key={item.key_name || item.fn_name}>
+                onLongPress={() => handleFeatureLongPress(item)}
+                key={itemKey}>
                 {isMatch ? (
                     <Animated.View
                         pointerEvents="none"
@@ -440,10 +570,15 @@ function FeatureListPage({ navigation }) {
             featureLabelHeight,
             featureLabelLineHeight,
             fontSize,
+            frequentKeySet,
+            handleAddFrequent,
+            handleFeatureLongPress,
             handleFeaturePress,
+            isEditingFrequent,
             isTc,
             matchedFeatures,
             reducedMotion,
+            t,
             viewShadow,
         ],
     );
@@ -500,7 +635,7 @@ function FeatureListPage({ navigation }) {
                             }}
                             data={section.fn}
                             matchedFeatures={matchedFeatures}
-                            renderItem={({ item }) => renderFeatureItem(item)}
+                            renderItem={({ item, index }) => renderFeatureItem(item, index)}
                             showsVerticalScrollIndicator={false}
                             scrollEnabled={false}
                         />
@@ -689,6 +824,7 @@ function FeatureListPage({ navigation }) {
             }}>
             <ScrollView
                 ref={listRef}
+                scrollEnabled={!isDraggingFrequent}
                 showsVerticalScrollIndicator={true}
                 contentInsetAdjustmentBehavior="never"
                 automaticallyAdjustKeyboardInsets
@@ -711,7 +847,7 @@ function FeatureListPage({ navigation }) {
                         alignSelf: 'center',
                         paddingHorizontal: cardHorizontalMargin,
                     }}>
-                {!isSearching && frequentFeatures.length > 0 ? (
+                {!isSearching && (frequentFeatures.length > 0 || isEditingFrequent) ? (
                     <View
                         style={{
                             width: '100%',
@@ -723,31 +859,49 @@ function FeatureListPage({ navigation }) {
                             paddingBottom: verticalScale(12),
                             paddingHorizontal: cardHorizontalPadding,
                         }}>
-                        <Text
+                        <View
                             style={{
-                                ...uiStyle.defaultText,
-                                fontSize: verticalScale(11.5),
-                                color: black.third,
-                                fontWeight: '500',
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
                                 paddingHorizontal: scale(10),
                                 paddingBottom: verticalScale(4),
                             }}>
-                            {t('常用服務', { ns: 'features' })}
-                        </Text>
-                        <FlatGrid
-                            maxItemsPerRow={FREQUENT_FEATURES_DISPLAY_LIMIT}
-                            maxDimension={frequentGridMaxWidth}
+                            <Text
+                                style={{
+                                    ...uiStyle.defaultText,
+                                    fontSize: verticalScale(11.5),
+                                    color: black.third,
+                                    fontWeight: '500',
+                                }}>
+                                {t('常用服務', { ns: 'features' })}
+                            </Text>
+                            {isEditingFrequent && frequentFeatures.length > 1 ? (
+                                <Text
+                                    style={{
+                                        ...uiStyle.defaultText,
+                                        fontSize: verticalScale(10.5),
+                                        color: black.third,
+                                    }}>
+                                    {t('長按並拖拽調整順序', { ns: 'features' })}
+                                </Text>
+                            ) : null}
+                        </View>
+                        <FrequentFeaturesGrid
+                            items={frequentFeatures}
+                            isEditing={isEditingFrequent}
                             itemDimension={gridItemDimension}
                             spacing={gridSpacing}
-                            style={{ marginBottom: gridBottomTrim }}
-                            itemContainerStyle={{
-                                alignItems: 'center',
-                                justifyContent: 'flex-start',
-                            }}
-                            data={frequentFeatures}
-                            renderItem={({ item }) => renderFeatureItem(item)}
-                            showsVerticalScrollIndicator={false}
-                            scrollEnabled={false}
+                            maxItemsPerRow={gridMaxItemsPerRow}
+                            fontSize={fontSize}
+                            featureLabelLineHeight={featureLabelLineHeight}
+                            featureLabelHeight={featureLabelHeight}
+                            isTc={isTc}
+                            onPressItem={handleFeaturePress}
+                            onLongPressItem={handleFeatureLongPress}
+                            onRemoveItem={handleRemoveFrequent}
+                            onReorder={handleReorderFrequent}
+                            onDragActiveChange={setIsDraggingFrequent}
                         />
                     </View>
                 ) : null}
@@ -826,9 +980,18 @@ function FeatureListPage({ navigation }) {
 
 export default function Index() {
     const { theme } = useTheme();
-    const { featuresScreen } = theme;
-    const { t } = useTranslation('common');
+    const {
+        isLight,
+        white,
+        trueWhite,
+        black,
+        themeColor,
+        featuresScreen,
+        viewShadow,
+    } = theme;
+    const { t } = useTranslation(['common', 'features']);
     const insets = useSafeAreaInsets();
+    const [isEditingFrequent, setIsEditingFrequent] = useState(false);
     const [topBarRowHeight, setTopBarRowHeight] = useState(
         SEGMENTED_TOP_TAB_BAR_HEIGHT,
     );
@@ -838,30 +1001,115 @@ export default function Index() {
             Math.abs(current - nextHeight) > 0.5 ? nextHeight : current,
         );
     }, []);
+    const handleToggleEditFrequent = useCallback(() => {
+        trigger('selection');
+        setIsEditingFrequent(current => !current);
+    }, []);
     const topChromeHeight = insets.top + topBarRowHeight;
     const renderTopTabBar = useCallback(
-        props => (
-            <View
-                pointerEvents="box-none"
-                style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    zIndex: 10,
-                    paddingTop: insets.top,
-                }}>
-                <View pointerEvents="box-none" onLayout={handleTopBarLayout}>
-                    <SegmentedTopTabBar {...props} backgroundColor="transparent" />
+        props => {
+            const activeRouteName = props.state.routes[props.state.index]?.name;
+            const showEditButton = activeRouteName === 'FeatureList';
+            const EditButtonSurface =
+                isLiquidGlassSupported && !isEditingFrequent ? GlassView : View;
+
+            return (
+                <View
+                    pointerEvents="box-none"
+                    style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        zIndex: 10,
+                        paddingTop: insets.top,
+                    }}>
+                    <View
+                        pointerEvents="box-none"
+                        onLayout={handleTopBarLayout}
+                        style={{
+                            width: '100%',
+                            justifyContent: 'center',
+                        }}>
+                        <SegmentedTopTabBar {...props} backgroundColor="transparent" />
+                        {showEditButton ? (
+                            <View
+                                pointerEvents="box-none"
+                                style={{
+                                    position: 'absolute',
+                                    top: 0,
+                                    right: scale(12),
+                                    bottom: 0,
+                                    justifyContent: 'center',
+                                }}>
+                                <ScalePressable
+                                    accessibilityRole="button"
+                                    accessibilityLabel={
+                                        isEditingFrequent
+                                            ? t('完成', { ns: 'features' })
+                                            : t('調整', { ns: 'features' })
+                                    }
+                                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                                    onPress={handleToggleEditFrequent}>
+                                    <EditButtonSurface
+                                        style={[
+                                            {
+                                                width: SEGMENTED_TAB_CONTROL_HEIGHT,
+                                                height: SEGMENTED_TAB_CONTROL_HEIGHT,
+                                                borderRadius: scale(999),
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                overflow: 'hidden',
+                                            },
+                                            isEditingFrequent
+                                                ? { backgroundColor: themeColor }
+                                                : !isLiquidGlassSupported && [
+                                                    { backgroundColor: white },
+                                                    isLight && viewShadow,
+                                                ],
+                                        ]}>
+                                        {isEditingFrequent ? (
+                                            <Check
+                                                size={scale(17)}
+                                                color={trueWhite}
+                                                weight="bold"
+                                            />
+                                        ) : (
+                                            <SlidersHorizontal
+                                                size={scale(17)}
+                                                color={black.second}
+                                                weight="duotone"
+                                            />
+                                        )}
+                                    </EditButtonSurface>
+                                </ScalePressable>
+                            </View>
+                        ) : null}
+                    </View>
                 </View>
-            </View>
-        ),
-        [handleTopBarLayout, insets.top],
+            );
+        },
+        [
+            black.second,
+            handleToggleEditFrequent,
+            handleTopBarLayout,
+            insets.top,
+            isEditingFrequent,
+            isLight,
+            t,
+            themeColor,
+            trueWhite,
+            viewShadow,
+            white,
+        ],
     );
 
     return (
         <View style={{ flex: 1, backgroundColor: featuresScreen.bg_color }}>
-            <FeaturesChromeProvider topChromeHeight={topChromeHeight}>
+            <FeaturesChromeProvider
+                topChromeHeight={topChromeHeight}
+                isEditingFrequent={isEditingFrequent}
+                setIsEditingFrequent={setIsEditingFrequent}>
                 <Tab.Navigator
                     tabBar={renderTopTabBar}
                     screenOptions={{
