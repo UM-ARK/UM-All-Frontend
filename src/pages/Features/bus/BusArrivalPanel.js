@@ -8,7 +8,7 @@ import Animated, {
     withSpring,
 } from 'react-native-reanimated';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
+import PhosphorFeatureIcon from '../../TabbarPages/info/home/search/components/PhosphorFeatureIcon';
 
 import Text from '../../../components/AppText';
 import ScalePressable from '../../../components/ScalePressable';
@@ -25,9 +25,15 @@ import {
 } from './busModel';
 
 // 面板高度（不含底部安全區；收合態預留摘要次行，例如 PGH 出發 ETA）
-export const BUS_PANEL_COLLAPSED_EMPTY = 112;
-export const BUS_PANEL_COLLAPSED = 138;
+const BUS_PANEL_COLLAPSED_EMPTY = 112;
+const BUS_PANEL_COLLAPSED = 138;
+const BUS_PANEL_DESTINATION_HEIGHT = 32;
 export const BUS_PANEL_EXPANDED = 440;
+
+export const getBusPanelCollapsedHeight = (hasVehicles, hasDestination) => (
+    (hasVehicles ? BUS_PANEL_COLLAPSED : BUS_PANEL_COLLAPSED_EMPTY)
+    + (hasDestination ? BUS_PANEL_DESTINATION_HEIGHT : 0)
+);
 
 const PANEL_SPRING = {
     damping: 28,
@@ -89,18 +95,19 @@ const BusArrivalPanel = ({
     const insets = useSafeAreaInsets();
     const {
         black,
-        disabled,
+        featureIconTones,
+        featuresScreen,
+        pressOverlay,
         secondThemeColor,
-        themeColor,
-        tonal,
-        trueWhite,
+        successForeground,
         warning,
         white,
         floatingShadow,
     } = theme;
     const hasVehicles = (snapshot?.vehicles || []).length > 0;
+    const selectedStopInfo = getBusStop(selectedStop);
     const bottomInset = 10 + insets.bottom;
-    const collapsedHeight = (hasVehicles ? BUS_PANEL_COLLAPSED : BUS_PANEL_COLLAPSED_EMPTY) + insets.bottom;
+    const collapsedHeight = getBusPanelCollapsedHeight(hasVehicles, Boolean(selectedStopInfo)) + insets.bottom;
     const expandedHeight = BUS_PANEL_EXPANDED + insets.bottom;
     const panelHeight = useSharedValue(expanded ? expandedHeight : collapsedHeight);
     const dragStartHeight = useSharedValue(0);
@@ -124,7 +131,7 @@ const BusArrivalPanel = ({
             width: 38,
             height: 4,
             borderRadius: 2,
-            backgroundColor: disabled,
+            backgroundColor: pressOverlay,
         },
         headingButton: {
             minHeight: 45,
@@ -142,9 +149,8 @@ const BusArrivalPanel = ({
             alignItems: 'center',
         },
         headingAction: {
-            width: 36,
-            height: 36,
-            borderRadius: 18,
+            width: 44,
+            height: 44,
             alignItems: 'center',
             justifyContent: 'center',
         },
@@ -175,9 +181,23 @@ const BusArrivalPanel = ({
         },
         departureText: {
             ...uiStyle.defaultText,
-            color: themeColor,
+            color: black.second,
             fontSize: 12,
             fontWeight: '700',
+        },
+        destinationText: {
+            ...uiStyle.defaultText,
+            flex: 1,
+            color: successForeground,
+            fontSize: 12,
+            lineHeight: 15,
+            fontWeight: '600',
+        },
+        departureSecondaryText: {
+            ...uiStyle.defaultText,
+            color: black.third,
+            fontSize: 12,
+            fontWeight: '400',
         },
         hint: {
             ...uiStyle.defaultText,
@@ -194,21 +214,34 @@ const BusArrivalPanel = ({
         },
         stopChip: {
             minHeight: 34,
+            maxWidth: '100%',
             paddingHorizontal: 10,
             borderRadius: 17,
             borderWidth: 1,
+            borderColor: pressOverlay,
             flexDirection: 'row',
             alignItems: 'center',
         },
+        selectedStopChip: {
+            borderColor: featureIconTones.green.foreground,
+            borderWidth: 1.5,
+        },
         stopChipText: {
             ...uiStyle.defaultText,
+            color: black.second,
+            flexShrink: 1,
             fontSize: 12,
+        },
+        selectedStopChipText: {
+            color: successForeground,
+            fontWeight: '700',
         },
         statsButton: {
             minHeight: 46,
-            borderRadius: 14,
-            backgroundColor: tonal.primary08,
-            paddingHorizontal: 12,
+            borderTopWidth: StyleSheet.hairlineWidth,
+            borderBottomWidth: StyleSheet.hairlineWidth,
+            borderColor: featuresScreen.divider,
+            paddingHorizontal: 8,
             flexDirection: 'row',
             alignItems: 'center',
             gap: 9,
@@ -239,7 +272,7 @@ const BusArrivalPanel = ({
         vehicleRow: {
             minHeight: 70,
             borderRadius: 14,
-            paddingHorizontal: 12,
+            paddingHorizontal: 8,
             paddingVertical: 9,
             marginBottom: 8,
             flexDirection: 'row',
@@ -247,9 +280,7 @@ const BusArrivalPanel = ({
             gap: 10,
         },
         vehicleIcon: {
-            width: 38,
-            height: 38,
-            borderRadius: 19,
+            width: 24,
             alignItems: 'center',
             justifyContent: 'center',
         },
@@ -270,7 +301,7 @@ const BusArrivalPanel = ({
         },
         eta: {
             ...uiStyle.defaultText,
-            color: themeColor,
+            color: black.main,
             fontSize: 13,
             fontWeight: '700',
             marginTop: 3,
@@ -291,7 +322,6 @@ const BusArrivalPanel = ({
         empty: {
             minHeight: 42,
             borderRadius: 14,
-            backgroundColor: tonal.primary08,
             alignItems: 'center',
             justifyContent: 'center',
             paddingHorizontal: 18,
@@ -303,9 +333,8 @@ const BusArrivalPanel = ({
             fontSize: 12,
             textAlign: 'center',
         },
-    }), [black.main, black.third, bottomInset, disabled, themeColor, tonal.primary08, floatingShadow, warning, white]);
+    }), [black.main, black.second, black.third, bottomInset, featureIconTones.green.foreground, featuresScreen.divider, floatingShadow, pressOverlay, successForeground, warning, white]);
 
-    const selectedStopInfo = getBusStop(selectedStop);
     const vehicles = useMemo(
         () => sortVehiclesByDestinationEta(snapshot?.vehicles || [], selectedStop),
         [selectedStop, snapshot?.vehicles],
@@ -522,7 +551,7 @@ const BusArrivalPanel = ({
                             }}
                             style={styles.headingContent}>
                             <View style={styles.statusRow}>
-                                <MaterialCommunityIcons
+                                <PhosphorFeatureIcon
                                     name={statusPresentation.icon}
                                     color={statusPresentation.color}
                                     size={13}
@@ -553,9 +582,9 @@ const BusArrivalPanel = ({
                                         onViewStop();
                                     }}
                                     style={styles.headingAction}>
-                                    <MaterialCommunityIcons
-                                        name="image-outline"
-                                        color={themeColor}
+                                    <PhosphorFeatureIcon
+                                        name="image"
+                                        color={featureIconTones.orange.foreground}
                                         size={20}
                                     />
                                 </ScalePressable>
@@ -568,9 +597,9 @@ const BusArrivalPanel = ({
                                     onOpenMap();
                                 }}
                                 style={styles.headingAction}>
-                                <MaterialCommunityIcons
-                                    name="map-outline"
-                                    color={themeColor}
+                                <PhosphorFeatureIcon
+                                    name="map"
+                                    color={featureIconTones.green.foreground}
                                     size={20}
                                 />
                             </ScalePressable>
@@ -580,9 +609,9 @@ const BusArrivalPanel = ({
                                 disabled={refreshing}
                                 onPress={onRefresh}
                                 style={styles.headingAction}>
-                                <MaterialCommunityIcons
-                                    name={refreshing ? 'timer-sand' : 'refresh'}
-                                    color={statusPresentation.color}
+                                <PhosphorFeatureIcon
+                                    name={refreshing ? 'hourglass-medium' : 'arrow-clockwise'}
+                                    color={featureIconTones.blue.foreground}
                                     size={20}
                                 />
                             </ScalePressable>
@@ -595,19 +624,30 @@ const BusArrivalPanel = ({
                                     onToggleExpanded();
                                 }}
                                 style={styles.headingAction}>
-                                <MaterialCommunityIcons
-                                    name={expanded ? 'chevron-down' : 'chevron-up'}
-                                    color={themeColor}
-                                    size={26}
+                                <PhosphorFeatureIcon
+                                    name={expanded ? 'caret-down' : 'caret-up'}
+                                    color={black.second}
+                                    size={20}
+                                    weight="regular"
                                 />
                             </ScalePressable>
                         </View>
                     </View>
+                    {selectedStopInfo ? (
+                        <View style={styles.departureRow}>
+                            <PhosphorFeatureIcon name="map-pin" color={successForeground} size={14} />
+                            <Text style={styles.destinationText} numberOfLines={2}>
+                                {translate('目的站 {{station}}', {
+                                    station: `${selectedStopInfo.code} ${translate(selectedStopInfo.name)}${selectedStopInfo.terminalLabel ? ` (${translate(selectedStopInfo.terminalLabel)})` : ''}`,
+                                })}
+                            </Text>
+                        </View>
+                    ) : null}
                     {summaryEtaPresentation ? (
                         <View style={styles.departureRow}>
-                            <MaterialCommunityIcons
-                                name="map-marker-distance"
-                                color={themeColor}
+                            <PhosphorFeatureIcon
+                                name="path"
+                                color={featureIconTones.green.foreground}
                                 size={14}
                             />
                             <Text style={styles.departureText} numberOfLines={1}>
@@ -617,23 +657,23 @@ const BusArrivalPanel = ({
                     ) : null}
                     {summaryEtaPresentation?.secondary ? (
                         <View style={styles.departureRow}>
-                            <MaterialCommunityIcons
-                                name="bus-clock"
-                                color={themeColor}
+                            <PhosphorFeatureIcon
+                                name="bus"
+                                color={featureIconTones.orange.foreground}
                                 size={14}
                             />
-                            <Text style={styles.departureText} numberOfLines={1}>
+                            <Text style={styles.departureSecondaryText} numberOfLines={1}>
                                 {summaryEtaPresentation.secondary}
                             </Text>
                         </View>
                     ) : null}
                     <View style={styles.departureRow}>
-                        <MaterialCommunityIcons
-                            name="clock-outline"
-                            color={themeColor}
+                        <PhosphorFeatureIcon
+                            name="clock"
+                            color={featureIconTones.blue.foreground}
                             size={14}
                         />
-                        <Text style={styles.departureText} numberOfLines={1}>
+                        <Text style={styles.departureSecondaryText} numberOfLines={1}>
                             {officialNextDepartureText}
                         </Text>
                     </View>
@@ -655,14 +695,11 @@ const BusArrivalPanel = ({
                                 }}
                                 style={[
                                     styles.stopChip,
-                                    {
-                                        borderColor: selected ? themeColor : tonal.primary50,
-                                        backgroundColor: selected ? themeColor : tonal.primary08,
-                                    },
+                                    selected && styles.selectedStopChip,
                                 ]}>
                                 <Text style={[
                                     styles.stopChipText,
-                                    {color: selected ? trueWhite : themeColor},
+                                    selected && styles.selectedStopChipText,
                                 ]}>
                                     {stop.code} {translate(stop.shortName)}
                                 </Text>
@@ -683,12 +720,12 @@ const BusArrivalPanel = ({
                         onOpenStats();
                     }}
                     style={styles.statsButton}>
-                    <MaterialCommunityIcons name="chart-line" color={themeColor} size={20} />
+                    <PhosphorFeatureIcon name="chart-line-up" color={featureIconTones.blue.foreground} size={20} />
                     <View style={styles.statsButtonContent}>
                         <Text style={styles.statsButtonTitle}>{translate('到站時間統計')}</Text>
                         <Text style={styles.statsButtonText}>{translate('查看近1天、7天及30天行車參考')}</Text>
                     </View>
-                    <MaterialCommunityIcons name="chevron-right" color={themeColor} size={22} />
+                    <PhosphorFeatureIcon name="caret-right" color={black.third} size={18} weight="regular" />
                 </ScalePressable>
             ) : null}
 
@@ -710,14 +747,9 @@ const BusArrivalPanel = ({
                                     trigger();
                                     onSelectVehicle(vehicle.vehiclePlateNumber);
                                 }}
-                                style={[
-                                    styles.vehicleRow,
-                                    {
-                                        backgroundColor: selected ? tonal.secondary15 : tonal.primary08,
-                                    },
-                                ]}>
-                                <View style={[styles.vehicleIcon, {backgroundColor: secondThemeColor}]}>
-                                    <MaterialCommunityIcons name="bus" color={trueWhite} size={21} />
+                                style={[styles.vehicleRow, selected && {backgroundColor: featuresScreen.divider}]}>
+                                <View style={styles.vehicleIcon}>
+                                    <PhosphorFeatureIcon name="bus" color={secondThemeColor} size={22} />
                                 </View>
                                 <View style={styles.vehicleContent}>
                                     <Text style={styles.vehicleTitle}>{vehicle.vehiclePlateNumber}</Text>

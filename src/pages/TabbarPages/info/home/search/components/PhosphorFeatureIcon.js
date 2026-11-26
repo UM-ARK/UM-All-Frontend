@@ -18,6 +18,7 @@ import { Calculator } from 'phosphor-react-native/src/icons/Calculator';
 import { CalendarCheck } from 'phosphor-react-native/src/icons/CalendarCheck';
 import { CalendarDots } from 'phosphor-react-native/src/icons/CalendarDots';
 import { Camera } from 'phosphor-react-native/src/icons/Camera';
+import { ChartLineUp } from 'phosphor-react-native/src/icons/ChartLineUp';
 import { CaretDown } from 'phosphor-react-native/src/icons/CaretDown';
 import { CaretRight } from 'phosphor-react-native/src/icons/CaretRight';
 import { CaretUp } from 'phosphor-react-native/src/icons/CaretUp';
@@ -26,6 +27,10 @@ import { ChatsCircle } from 'phosphor-react-native/src/icons/ChatsCircle';
 import { ClipboardText } from 'phosphor-react-native/src/icons/ClipboardText';
 import { Clock } from 'phosphor-react-native/src/icons/Clock';
 import { ClockCounterClockwise } from 'phosphor-react-native/src/icons/ClockCounterClockwise';
+import { CloudSlash } from 'phosphor-react-native/src/icons/CloudSlash';
+import { HourglassMedium } from 'phosphor-react-native/src/icons/HourglassMedium';
+import { Path } from 'phosphor-react-native/src/icons/Path';
+import { StopCircle } from 'phosphor-react-native/src/icons/StopCircle';
 import { Code } from 'phosphor-react-native/src/icons/Code';
 import { Compass } from 'phosphor-react-native/src/icons/Compass';
 import { Cpu } from 'phosphor-react-native/src/icons/Cpu';
@@ -150,6 +155,11 @@ export const phosphorFeatureIcons = {
     parking: LetterCircleP,
     ticket: Ticket,
     database: Database,
+    'chart-line-up': ChartLineUp,
+    'cloud-slash': CloudSlash,
+    'hourglass-medium': HourglassMedium,
+    path: Path,
+    'stop-circle': StopCircle,
 
     // 餐飲
     utensils: ForkKnife,

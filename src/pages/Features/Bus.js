@@ -1,5 +1,5 @@
 import React, {useState, useEffect, useCallback, useMemo, useRef, useLayoutEffect} from 'react';
-import {AppState, Image, Platform, RefreshControl, ScrollView, StyleSheet, View} from 'react-native';
+import {AppState, Image, RefreshControl, ScrollView, StyleSheet, View} from 'react-native';
 import {isLiquidGlassSupported} from '../../utils/glassEffect';
 import {useHeaderHeight} from '@react-navigation/elements';
 import {useIsFocused} from '@react-navigation/native';
@@ -19,11 +19,10 @@ import {DOMParser} from 'react-native-html-parser';
 import {scale} from 'react-native-size-matters';
 import axios from 'axios';
 import Toast from 'react-native-simple-toast';
-import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
+import PhosphorFeatureIcon from '../TabbarPages/info/home/search/components/PhosphorFeatureIcon';
 import BusArrivalPanel, {
-    BUS_PANEL_COLLAPSED,
-    BUS_PANEL_COLLAPSED_EMPTY,
     BUS_PANEL_EXPANDED,
+    getBusPanelCollapsedHeight,
 } from './bus/BusArrivalPanel';
 import BusEtaStatsSheet from './bus/BusEtaStatsSheet';
 import BusRouteMap from './bus/BusRouteMap';
@@ -31,6 +30,7 @@ import {
     BUS_STOPS,
     createFallbackBusLive,
     extractVehiclePlates,
+    getBusStop,
     isBusLiveSnapshotFresh,
     isCachedBusLiveUsable,
     normalizeBusLive,
@@ -115,9 +115,8 @@ const staticStyles = StyleSheet.create({
         alignItems: 'center',
     },
     headerButton: {
-        width: scale(36),
-        height: scale(36),
-        borderRadius: scale(18),
+        width: 44,
+        height: 44,
         alignItems: 'center',
         justifyContent: 'center',
     },
@@ -133,8 +132,8 @@ const BusScreen = ({navigation}) => {
     const {
         bg_color,
         black,
-        success,
-        themeColor,
+        featureIconTones,
+        successForeground,
         warning,
     } = theme;
     const s = useMemo(() => StyleSheet.create({
@@ -146,7 +145,6 @@ const BusScreen = ({navigation}) => {
             flex: 1,
         },
         routeContent: {
-            paddingHorizontal: 12,
             paddingTop: 4,
             paddingBottom: 8,
         },
@@ -174,10 +172,10 @@ const BusScreen = ({navigation}) => {
     const requestInFlightRef = useRef(false);
     const snapshotRef = useRef(null);
     const panelBottomInset = insets.bottom;
-    const collapsedPanelReservedHeight = (snapshot?.vehicles?.length > 0
-        ? BUS_PANEL_COLLAPSED
-        : BUS_PANEL_COLLAPSED_EMPTY)
-        + panelBottomInset;
+    const collapsedPanelReservedHeight = getBusPanelCollapsedHeight(
+        snapshot?.vehicles?.length > 0,
+        Boolean(getBusStop(selectedStop)),
+    ) + panelBottomInset;
     const panelReservedHeight = (panelExpanded
         ? BUS_PANEL_EXPANDED
         : collapsedPanelReservedHeight);
@@ -195,7 +193,7 @@ const BusScreen = ({navigation}) => {
 
     const busUrl = i18n.resolvedLanguage === 'en' ? UM_BUS_LOOP_EN : UM_BUS_LOOP_ZH;
 
-    // 右上角：官方網站 / 服務說明（參考 LocalCourse / DeepLinkShareButton header 模式）
+    // 右上角：官方網站與服務說明
     const openBusOfficialPage = useCallback(() => {
         openLink(busUrl);
     }, [busUrl]);
@@ -206,76 +204,46 @@ const BusScreen = ({navigation}) => {
 
     useLayoutEffect(() => {
         navigation.setOptions({
-            headerRight:
-                Platform.OS === 'ios'
-                    ? undefined
-                    : () => (
-                        <View style={staticStyles.headerRightRow}>
-                            <ScalePressable
-                                accessibilityRole="button"
-                                accessibilityLabel={t('官方網站')}
-                                onPress={() => {
-                                    trigger();
-                                    openBusOfficialPage();
-                                }}
-                                style={staticStyles.headerButton}>
-                                <MaterialCommunityIcons
-                                    name="earth"
-                                    size={scale(20)}
-                                    color={themeColor}
-                                />
-                            </ScalePressable>
-                            <ScalePressable
-                                accessibilityRole="button"
-                                accessibilityLabel={t('官方資訊')}
-                                onPress={() => {
-                                    trigger();
-                                    openBusServiceInfo();
-                                }}
-                                style={staticStyles.headerButton}>
-                                <MaterialCommunityIcons
-                                    name="information-outline"
-                                    size={scale(20)}
-                                    color={themeColor}
-                                />
-                            </ScalePressable>
-                        </View>
-                    ),
-            unstable_headerRightItems:
-                Platform.OS === 'ios'
-                    ? () => [
-                        {
-                            type: 'button',
-                            label: t('官方資訊'),
-                            accessibilityLabel: t('官方資訊'),
-                            icon: {
-                                type: 'sfSymbol',
-                                name: 'info.circle',
-                            },
-                            tintColor: themeColor,
-                            onPress: () => {
-                                trigger();
-                                openBusServiceInfo();
-                            },
-                        },
-                        {
-                            type: 'button',
-                            label: t('官方網站'),
-                            accessibilityLabel: t('官方網站'),
-                            icon: {
-                                type: 'sfSymbol',
-                                name: 'globe',
-                            },
-                            tintColor: themeColor,
-                            onPress: () => {
-                                trigger();
-                                openBusOfficialPage();
-                            },
-                        },
-                    ]
-                    : undefined,
+            headerLeftBackgroundVisible: false,
+            headerRightBackgroundVisible: false,
+            headerLeft: ({canGoBack}) => canGoBack ? (
+                <ScalePressable
+                    accessibilityRole="button"
+                    accessibilityLabel={t('返回')}
+                    onPress={() => {
+                        trigger();
+                        navigation.goBack();
+                    }}
+                    style={staticStyles.headerButton}>
+                    <PhosphorFeatureIcon name="caret-left" color={black.main} size={scale(22)} weight="regular" />
+                </ScalePressable>
+            ) : null,
+            headerRight: () => (
+                <View style={staticStyles.headerRightRow}>
+                    <ScalePressable
+                        accessibilityRole="button"
+                        accessibilityLabel={t('官方資訊')}
+                        onPress={() => {
+                            trigger();
+                            openBusServiceInfo();
+                        }}
+                        style={staticStyles.headerButton}>
+                        <PhosphorFeatureIcon name="info" color={featureIconTones.blue.foreground} size={scale(22)} />
+                    </ScalePressable>
+                    <ScalePressable
+                        accessibilityRole="button"
+                        accessibilityLabel={t('官方網站')}
+                        onPress={() => {
+                            trigger();
+                            openBusOfficialPage();
+                        }}
+                        style={staticStyles.headerButton}>
+                        <PhosphorFeatureIcon name="globe" color={featureIconTones.blue.foreground} size={scale(22)} />
+                    </ScalePressable>
+                </View>
+            ),
         });
-    }, [navigation, openBusOfficialPage, openBusServiceInfo, t, themeColor]);
+    }, [black.main, featureIconTones.blue.foreground, navigation, openBusOfficialPage, openBusServiceInfo, t]);
 
     // 將 stopImgArr 轉換為 ARKImageView 可用的格式
     const processedStopImages = useMemo(() => {
@@ -440,22 +408,22 @@ const BusScreen = ({navigation}) => {
     const statusPresentation = useMemo(() => {
         if (!snapshot) {
             return {
-                color: themeColor,
-                icon: 'bus-clock',
+                color: black.third,
+                icon: 'hourglass-medium',
                 text: isLoading ? t('正在載入巴士資料') : t('暫時無法取得巴士資料'),
             };
         }
         if (snapshot.stale || snapshot.deliverySource === 'stale') {
             return {
                 color: warning,
-                icon: 'alert-circle-outline',
+                icon: 'warning-circle',
                 text: t('資料更新較慢，顯示最後位置'),
             };
         }
         if (snapshot.deliverySource === 'fallback') {
             return {
                 color: warning,
-                icon: 'cloud-alert-outline',
+                icon: 'cloud-slash',
                 text: snapshot.vehicles?.length > 0
                     ? t('即時位置可用，預計時間暫不可用')
                     : t('暫未偵測到行駛中的巴士'),
@@ -464,14 +432,14 @@ const BusScreen = ({navigation}) => {
         if (snapshot.deliverySource === 'cache') {
             return {
                 color: warning,
-                icon: 'history',
+                icon: 'clock-counter-clockwise',
                 text: t('暫時使用最近更新的資料'),
             };
         }
         if (snapshot.serviceStatus === 'stopped') {
             return {
                 color: black.third,
-                icon: 'bus-stop-covered',
+                icon: 'stop-circle',
                 text: snapshot.observerMode === 'scheduled_idle'
                     ? t('目前停駛')
                     : t('巴士服務暫停'),
@@ -480,7 +448,7 @@ const BusScreen = ({navigation}) => {
         if (snapshot.serviceStatus === 'running' && snapshot.vehicles?.length === 0) {
             return {
                 color: black.third,
-                icon: 'bus-clock',
+                icon: 'clock',
                 text: t('服務時段內，暫未有巴士出現'),
             };
         }
@@ -489,13 +457,13 @@ const BusScreen = ({navigation}) => {
             ? Math.max(0, Math.floor((now - observedAt) / 60000))
             : 0;
         return {
-            color: success,
-            icon: 'bus-marker',
+            color: successForeground,
+            icon: 'bus',
             text: elapsedMinutes < 1
                 ? t('服務中 · 剛剛更新')
                 : t('服務中 · 約 {{minutes}} 分鐘前更新', {minutes: elapsedMinutes}),
         };
-    }, [black.third, isLoading, now, snapshot, success, t, themeColor, warning]);
+    }, [black.third, isLoading, now, snapshot, successForeground, t, warning]);
 
     return (
         <View style={[s.container, contentTopStyle]}>
@@ -510,8 +478,8 @@ const BusScreen = ({navigation}) => {
                     <RefreshControl
                         refreshing={isRefreshing}
                         onRefresh={handleRefresh}
-                        tintColor={themeColor}
-                        colors={[themeColor]}
+                        tintColor={black.second}
+                        colors={[black.second]}
                     />
                 }>
                 <BusRouteMap
@@ -524,6 +492,7 @@ const BusScreen = ({navigation}) => {
                         && snapshot.deliverySource !== 'stale'
                     )}
                     maxHeight={routeMapMaxHeight}
+                    motionEnabled={isFocused && isAppActive && !snapshot?.stale}
                     observedAt={snapshot?.observedAt}
                     onSelectStop={handleSelectStop}
                     onSelectVehicle={plate => {

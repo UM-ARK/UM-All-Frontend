@@ -3,7 +3,7 @@ import {ActivityIndicator, StyleSheet, View} from 'react-native';
 import ActionSheet from 'react-native-actions-sheet';
 import {useTranslation} from 'react-i18next';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
+import PhosphorFeatureIcon from '../../TabbarPages/info/home/search/components/PhosphorFeatureIcon';
 import axios from 'axios';
 
 import Text from '../../../components/AppText';
@@ -67,9 +67,8 @@ const BusEtaStatsSheet = ({visible, onClose, selectedStop, selectedVehiclePlate,
             alignItems: 'center',
         },
         iconButton: {
-            width: 36,
-            height: 36,
-            borderRadius: 18,
+            width: 44,
+            height: 44,
             alignItems: 'center',
             justifyContent: 'center',
         },
@@ -308,9 +307,9 @@ const BusEtaStatsSheet = ({visible, onClose, selectedStop, selectedVehiclePlate,
                                 fetchStats({force: true});
                             }}
                             style={styles.iconButton}>
-                            <MaterialCommunityIcons
-                                name={loading ? 'timer-sand' : 'refresh'}
-                                color={themeColor}
+                            <PhosphorFeatureIcon
+                                name={loading ? 'hourglass-medium' : 'arrow-clockwise'}
+                                color={black.second}
                                 size={21}
                             />
                         </ScalePressable>
@@ -322,7 +321,7 @@ const BusEtaStatsSheet = ({visible, onClose, selectedStop, selectedVehiclePlate,
                                 sheetRef.current?.hide();
                             }}
                             style={styles.iconButton}>
-                            <MaterialCommunityIcons name="close" color={black.main} size={22} />
+                            <PhosphorFeatureIcon name="x" color={black.main} size={22} weight="regular" />
                         </ScalePressable>
                     </View>
                 </View>
