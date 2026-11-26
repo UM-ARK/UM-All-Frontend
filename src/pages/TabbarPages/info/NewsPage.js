@@ -293,64 +293,62 @@ const NewsPage = forwardRef(function NewsPage(_props, ref) {
 
         return (
             <View style={{ marginTop: verticalScale(5) }}>
-                <View style={styles.topNewsContainer}>
-                    <ScalePressable
+                <ScalePressable
+                    style={styles.topNewsContainer}
+                    onPress={() => {
+                        trigger();
+                        navigation.navigate('NewsDetail', { data: topNews });
+                    }}>
+                    <Image
+                        source={topNewsImage ? { uri: topNewsImage } : null}
                         style={{ width: '100%', height: '100%' }}
-                        onPress={() => {
-                            trigger();
-                            navigation.navigate('NewsDetail', { data: topNews });
-                        }}>
-                        <Image
-                            source={topNewsImage ? { uri: topNewsImage } : null}
-                            style={{ width: '100%', height: '100%' }}
-                            contentFit="cover"
-                            cachePolicy="memory-disk"
-                            recyclingKey={topNews?._id || 'top-news'}
-                            placeholder={imagePlaceholder}
-                            placeholderContentFit="cover"
-                            transition={200}
-                            priority="high"
-                        />
-                        <LinearGradient
-                            colors={[`${trueBlack}00`, `${trueBlack}E0`]}
-                            locations={[0.42, 1]}
-                            style={styles.topNewsOverlay}>
-                            <Text style={styles.topNewsText}>
-                                {t('澳大焦點')}
-                            </Text>
-                            <View style={{ width: '100%' }}>
+                        contentFit="cover"
+                        cachePolicy="memory-disk"
+                        recyclingKey={topNews?._id || 'top-news'}
+                        placeholder={imagePlaceholder}
+                        placeholderContentFit="cover"
+                        transition={200}
+                        priority="high"
+                    />
+                    <LinearGradient
+                        colors={[`${trueBlack}00`, `${trueBlack}E0`]}
+                        locations={[0.42, 1]}
+                        style={styles.topNewsOverlay}>
+                        <Text style={styles.topNewsText}>
+                            {t('澳大焦點')}
+                        </Text>
+                        <View style={{ width: '100%' }}>
+                            <SearchHighlightText
+                                text={title}
+                                query={searchQuery}
+                                highlightStyle={heroHighlightStyle}
+                                numberOfLines={2}
+                                style={{
+                                    ...uiStyle.defaultText,
+                                    color: trueWhite,
+                                    fontWeight: 'bold',
+                                    fontSize: verticalScale(17),
+                                    lineHeight: verticalScale(23),
+                                }}
+                            />
+                            {alternateTitle ? (
                                 <SearchHighlightText
-                                    text={title}
+                                    text={alternateTitle}
                                     query={searchQuery}
                                     highlightStyle={heroHighlightStyle}
-                                    numberOfLines={2}
+                                    numberOfLines={1}
                                     style={{
                                         ...uiStyle.defaultText,
                                         color: trueWhite,
-                                        fontWeight: 'bold',
-                                        fontSize: verticalScale(17),
-                                        lineHeight: verticalScale(23),
+                                        fontSize: verticalScale(13),
+                                        lineHeight: verticalScale(18),
+                                        marginTop: verticalScale(4),
                                     }}
                                 />
-                                {alternateTitle ? (
-                                    <SearchHighlightText
-                                        text={alternateTitle}
-                                        query={searchQuery}
-                                        highlightStyle={heroHighlightStyle}
-                                        numberOfLines={1}
-                                        style={{
-                                            ...uiStyle.defaultText,
-                                            color: trueWhite,
-                                            fontSize: verticalScale(13),
-                                            lineHeight: verticalScale(18),
-                                            marginTop: verticalScale(4),
-                                        }}
-                                    />
-                                ) : null}
-                            </View>
-                        </LinearGradient>
-                    </ScalePressable>
-                </View>
+                            ) : null}
+                        </View>
+                    </LinearGradient>
+                </ScalePressable>
             </View >
         );
     }, [black.main, imagePlaceholder, navigation, searchQuery, styles.topNewsContainer, styles.topNewsOverlay, styles.topNewsText, t, topNews, topNewsContent, topNewsImage, trueBlack, trueWhite]);
