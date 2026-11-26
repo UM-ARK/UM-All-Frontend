@@ -136,6 +136,8 @@ const getColorDiy = (isLight) => {
         bg_color: isLight ? '#F5F5F7' : trueBlack,
         pressOverlay: rgba(isLight ? trueBlack : trueWhite, 0.12),
 
+        // 沙灘金（取自 App Logo 沙灘色 #E6AB52，亮色微調深以確保白/灰底對比度）
+        sand: isLight ? '#D48E2A' : '#E6AB52',
         // 綠色，用在Toast上
         success: successValue,
         successForeground: isLight ? '#114D30' : '#78DBAB',

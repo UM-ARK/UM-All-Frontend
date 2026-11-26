@@ -61,7 +61,9 @@ import ScrollToTopButton from '../../../../components/ScrollToTopButton';
 import TopScrollEdgeBackdrop from '../../../../components/TopScrollEdgeBackdrop';
 import TouchableScale from '../../../../components/TouchableScale';
 import FeatureIcon from './search/components/FeatureIcon';
+import PhosphorFeatureIcon from './search/components/PhosphorFeatureIcon';
 import Ionicons from '@react-native-vector-icons/ionicons';
+import { SEARCH_FIELD_BORDER_RADIUS } from '../../../../components/searchFieldStyles';
 
 const MIN_REFRESH_DURATION = 800;
 const DONATE_PROBE_TIMEOUT_MS = 2500;
@@ -105,7 +107,7 @@ const iconTypes = {
 
 const HomeScreen = ({ navigation, topChromeHeight }) => {
     const { theme } = useTheme();
-    const { white, bg_color, black, themeColor, themeColorLight, themeColorUltraLight, viewShadow, TIME_TABLE_COLOR } = theme;
+    const { white, bg_color, black, themeColor, themeColorLight, themeColorUltraLight, viewShadow, TIME_TABLE_COLOR, featureIconTones } = theme;
     const { t, i18n } = useTranslation(['common', 'home']);
     const { programmeLevel } = useProgrammeLevel();
     const isTc = i18n.language === 'tc';
@@ -543,66 +545,60 @@ const HomeScreen = ({ navigation, topChromeHeight }) => {
                 {/* 校曆列表 */}
                 <CalendarBar refreshTrigger={calRefreshKey} />
 
-                {/** 即將到來的課程 */}
-                <View style={{
-                    flexDirection: 'row',
-                    alignItems: 'center', justifyContent: 'center',
-                    alignSelf: 'center',
-                    width: '80%',
-                    marginTop: verticalScale(6),
-                }}>
-                    <TouchableScale
-                        style={{ width: '100%' }}
-                        onPress={() => {
-                            trigger();
-                            navigateToCourseTab(navigation, {
-                                segment: 'timetable',
-                            });
-                        }}>
-                        {upcomingCourse ? (
+                {/** 即將到來的課程：無課時不展示 */}
+                {upcomingCourse ? (
+                    <View style={{
+                        flexDirection: 'row',
+                        alignItems: 'center', justifyContent: 'center',
+                        alignSelf: 'center',
+                        width: '80%',
+                        marginTop: verticalScale(6),
+                    }}>
+                        <TouchableScale
+                            style={{ width: '100%' }}
+                            onPress={() => {
+                                trigger();
+                                navigateToCourseTab(navigation, {
+                                    segment: 'timetable',
+                                });
+                            }}>
                             <View style={{
                                 flexDirection: 'column', flex: 1,
                                 alignItems: 'center', justifyContent: 'center',
                                 gap: scale(3),
-                                backgroundColor: `${themeColor}15`,
+                                backgroundColor: white,
                                 paddingHorizontal: scale(20),
                                 paddingVertical: verticalScale(6),
-                                borderRadius: scale(10),
+                                borderRadius: SEARCH_FIELD_BORDER_RADIUS,
                             }}>
                                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: scale(3) }}>
-                                    <Text style={{ ...uiStyle.defaultText, color: black.main, opacity: 0.7, fontWeight: 'bold' }}>{`⏰${t('下節課：', { ns: 'timetable' })}`}</Text>
-                                    <Text style={{ ...uiStyle.defaultText, color: black.main, opacity: 0.7 }}>{upcomingCourse['Course Code']}</Text>
-                                    <Text style={{ ...uiStyle.defaultText, color: black.main, opacity: 0.7 }}>{upcomingCourse['Time From']}</Text>
+                                    <PhosphorFeatureIcon
+                                        name="alarm-clock"
+                                        size={verticalScale(10)}
+                                        color={featureIconTones.green.foreground}
+                                    />
+                                    <Text style={{ ...uiStyle.defaultText, color: featureIconTones.green.foreground, fontWeight: 'bold', fontSize: verticalScale(10), lineHeight: verticalScale(14) }}>{t('下節課：', { ns: 'timetable' })}</Text>
+                                    <Text style={{ ...uiStyle.defaultText, color: black.main, fontWeight: '600', fontSize: verticalScale(10), lineHeight: verticalScale(14) }}>{upcomingCourse['Course Code']}</Text>
+                                    <Text style={{ ...uiStyle.defaultText, color: black.second, fontSize: verticalScale(10), lineHeight: verticalScale(14) }}>{upcomingCourse['Time From']}</Text>
                                 </View>
                                 {upcomingCourse.Classroom?.trim?.() ? (
-                                    <Text
-                                        style={{ ...uiStyle.defaultText, color: black.main, opacity: 0.7 }}
-                                        numberOfLines={1}>
-                                        {`📍${upcomingCourse.Classroom.trim()}`}
-                                    </Text>
+                                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: scale(3) }}>
+                                        <PhosphorFeatureIcon
+                                            name="map-pin"
+                                            size={verticalScale(10)}
+                                            color={black.third}
+                                        />
+                                        <Text
+                                            style={{ ...uiStyle.defaultText, color: black.third, fontSize: verticalScale(10), lineHeight: verticalScale(14) }}
+                                            numberOfLines={1}>
+                                            {upcomingCourse.Classroom.trim()}
+                                        </Text>
+                                    </View>
                                 ) : null}
                             </View>
-                        ) : (
-                            <View style={{
-                                display: 'flex',
-                                flexDirection: 'row',
-                                width: '100%',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                paddingVertical: verticalScale(6),
-                                backgroundColor: `${theme.disabled}70`,
-                                opacity: 0.7,
-                                borderRadius: scale(10),
-                            }}>
-                                <Text style={{
-                                    ...uiStyle.defaultText,
-                                    color: black.second,
-                                    fontSize: i18n.resolvedLanguage === 'en' ? verticalScale(10) : verticalScale(12),
-                                }}>{`☕${t('接下來無課程~ 點我看課表！', { ns: 'timetable' })}👀`}</Text>
-                            </View>
-                        )}
-                    </TouchableScale>
-                </View>
+                        </TouchableScale>
+                    </View>
+                ) : null}
 
                 {/* 快捷功能圖標（固定寬與間距，整組置中聚攏） */}
                 <View

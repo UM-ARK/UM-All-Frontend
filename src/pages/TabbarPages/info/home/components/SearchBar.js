@@ -103,12 +103,12 @@ const SearchBar = ({
 };
 
 const styles = StyleSheet.create({
-    // 與舊版一致：固定寬度長條，由首頁 ScrollView 置中
+    // 與校曆左右邊距對齊，橫向佔滿可用寬度
     root: {
         zIndex: 100,
-        width: scale(310),
+        width: '100%',
         marginTop: verticalScale(10),
-        paddingHorizontal: verticalScale(10),
+        paddingHorizontal: scale(20),
     },
     inputWrapper: {
         width: '100%',
