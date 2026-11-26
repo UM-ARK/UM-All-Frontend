@@ -175,7 +175,7 @@ export const getFunctionArr = (t) => [
                 fn_name: t('幹飯時間', { ns: 'features' }),
                 needLogin: false,
                 go_where: 'EatingSchedule',
-                describe: t('依目前本科課表統計各時段上、下課的Section數，以估算校園人流高峰，方便同學安排乾飯或通勤，減少排隊。數字代表Section數，並非實際人數。', { ns: 'features' }),
+                describe: t('查看上、下課高峰及各建築物的 Section 分布', { ns: 'features' }),
                 key_name: '幹飯時間',
                 keywords: 'Eating Schedule, Class Time, Commute, Canteen, Section, 幹飯, 乾飯, 上課, 下課, 通勤, 人流, 排隊',
             },

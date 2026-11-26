@@ -1,18 +1,24 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Platform, ScrollView, View } from 'react-native';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { AppState, ScrollView, StyleSheet, View } from 'react-native';
 import { useIsFocused } from '@react-navigation/native';
+import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 import { scale, verticalScale } from 'react-native-size-matters';
 import { useTranslation } from 'react-i18next';
-import lodash from 'lodash';
-import moment from 'moment';
+import moment from 'moment-timezone';
 
 import Text from '../../components/AppText';
 import { uiStyle, useTheme } from '../../components/ThemeContext';
-import SegmentControl from '../../components/SegmentControl';
+import ScalePressable from '../../components/ScalePressable';
+import SegmentedTabControl from '../../components/SegmentedTabControl';
 import { getCourseCatalog } from '../../utils/checkCoursesKits';
+import { trigger } from '../../utils/trigger';
+import { useWindowSizeClass } from '../../utils/windowSizeClass';
 import { adddropCatalog } from '../../static/UMCourses/courseCatalogs';
+import { BuildingChart, TimeChart } from './eatingSchedule/EatingScheduleCharts';
+import { SAMPLE_MINUTES, WEEKDAYS, buildSchedule, formatTime, formatWindow, getBuildingCounts, getTimeSample } from './eatingSchedule/eatingScheduleModel';
 
-const DAY_LIST = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
+const DAY_LABELS = ['週一', '週二', '週三', '週四', '週五', '週六', '週日'];
+const EMPTY_EVENTS = [];
 
 /**
  * 根據本科課表統計每日上、下課 Section 數量，
@@ -20,32 +26,27 @@ const DAY_LIST = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
  */
 const EatingSchedule = () => {
     const { theme } = useTheme();
-    const { t } = useTranslation('features');
+    const { t } = useTranslation(['features', 'my']);
     const isFocused = useIsFocused();
+    const { isExpanded } = useWindowSizeClass();
     const styles = useMemo(() => getStyles(theme), [theme]);
-    const { black, themeColor, unread, warning } = theme;
 
     const [courses, setCourses] = useState(adddropCatalog?.Courses || []);
     const [statMode, setStatMode] = useState('end');
-    const now = useMemo(() => moment(), []);
-    const horizontalScrollRef = useRef(null);
-    const hasAutoScrolledRef = useRef(false);
+    const [now, setNow] = useState(() => moment.tz('Asia/Macau'));
+    const [selectedDay, setSelectedDay] = useState(null);
+    const [selectedMinute, setSelectedMinute] = useState(null);
 
     const statOptions = [
         {
             key: 'end',
-            label: t('下課Section數'),
-            timeKey: 'Time To',
+            label: t('下課 section'),
         },
         {
             key: 'start',
-            label: t('上課Section數'),
-            timeKey: 'Time From',
+            label: t('上課 section'),
         },
     ];
-    const currentStatOption =
-        statOptions.find(option => option.key === statMode) ?? statOptions[0];
-
     useEffect(() => {
         let isMounted = true;
 
@@ -69,161 +70,171 @@ const EatingSchedule = () => {
         };
     }, [isFocused]);
 
-    const currentDay = useMemo(() => DAY_LIST[now.isoWeekday() - 1], [now]);
-    const coursesByDay = useMemo(
-        () => lodash.groupBy(courses, 'Day'),
-        [courses],
-    );
-    const visibleDayList = useMemo(
-        () => DAY_LIST.filter(day => (coursesByDay[day]?.length ?? 0) > 0),
-        [coursesByDay],
-    );
-    const currentDayIndex = visibleDayList.indexOf(currentDay);
-
     useEffect(() => {
-        hasAutoScrolledRef.current = false;
-    }, [currentDayIndex, statMode]);
+        if (!isFocused) return undefined;
 
-    const scrollToCurrentDay = useCallback(() => {
-        if (
-            hasAutoScrolledRef.current ||
-            currentDayIndex < 0 ||
-            !horizontalScrollRef.current
-        ) {
-            return;
-        }
-
-        hasAutoScrolledRef.current = true;
-        const dayColumnWidth = scale(85) + scale(20);
-        horizontalScrollRef.current.scrollTo({
-            x: Math.max(currentDayIndex * dayColumnWidth - scale(10), 0),
-            animated: true,
+        let timer;
+        const updateNow = () => {
+            clearTimeout(timer);
+            const macauNow = moment.tz('Asia/Macau');
+            setNow(macauNow);
+            timer = setTimeout(updateNow, 60000 - macauNow.valueOf() % 60000);
+        };
+        const subscription = AppState.addEventListener('change', state => {
+            if (state === 'active') {
+                updateNow();
+            } else {
+                clearTimeout(timer);
+            }
         });
-    }, [currentDayIndex]);
+        updateNow();
+        return () => {
+            subscription.remove();
+            clearTimeout(timer);
+        };
+    }, [isFocused]);
 
-    const isWithin30Min = timeStr => {
-        const target = moment(
-            `${now.format('YYYY-MM-DD')} ${timeStr}`,
-            'YYYY-MM-DD HH:mm',
-        );
-        return Math.abs(now.diff(target, 'minutes')) <= 30;
-    };
+    const schedule = useMemo(() => buildSchedule(courses), [courses]);
+    const todayIndex = now.isoWeekday() - 1;
+    const today = WEEKDAYS[todayIndex];
+    const modeDays = schedule.days[statMode];
+    const visibleDays = WEEKDAYS.filter(weekday => modeDays[weekday]);
+    const defaultDay = visibleDays.find(weekday => WEEKDAYS.indexOf(weekday) >= todayIndex) ?? visibleDays[0];
+    const day = modeDays[selectedDay] ? selectedDay : defaultDay;
+    const daySchedule = modeDays[day];
+    const clockMinute = now.hour() * 60 + now.minute();
+    const nowMinute = day === today ? clockMinute : null;
+    const events = daySchedule?.events ?? EMPTY_EVENTS;
+    const selectedSample = selectedMinute === null ? undefined :
+        daySchedule?.samples[(selectedMinute - schedule.startMinute) / SAMPLE_MINUTES];
+    const activeSample = useMemo(() => selectedSample ?? getTimeSample(events, clockMinute),
+        [selectedSample, events, clockMinute]);
+    const buildingCounts = useMemo(() => getBuildingCounts(events, activeSample), [events, activeSample]);
+    const timeDetail = t('{{window}} · {{count}} 個 Section', {
+        window: formatWindow(activeSample.minute),
+        count: activeSample.count,
+    });
+
+    const selectMinute = useCallback((minute, feedback = true) => {
+        if (feedback) trigger('selection');
+        setSelectedMinute(minute);
+    }, []);
 
     return (
         <View style={styles.container}>
             <ScrollView
                 contentInsetAdjustmentBehavior="automatic"
-                contentContainerStyle={styles.contentContainer}
+                contentContainerStyle={[styles.contentContainer, isExpanded && styles.wideContent]}
                 showsVerticalScrollIndicator={false}>
-                <View style={styles.infoCard}>
-                    <Text style={styles.title}>{t('幹飯時間')}🍱</Text>
-                    <Text style={styles.description}>
-                        {t(
-                            '依目前本科課表統計各時段上、下課的Section數，以估算校園人流高峰，方便同學安排乾飯或通勤，減少排隊。數字代表Section數，並非實際人數。',
-                        )}
-                    </Text>
-                </View>
-
                 <View style={styles.scheduleCard}>
-                    <SegmentControl
-                        style={styles.segmentControl}
-                        options={statOptions}
-                        selectedIndex={statMode === 'end' ? 0 : 1}
-                        onChange={index => setStatMode(statOptions[index].key)}
-                    />
-                    <Text style={styles.hint}>
-                        {t(
-                            '數值越大，預計人流越集中；今日前後30分鐘的時段會高亮顯示。',
-                        )}
-                    </Text>
-
-                    <ScrollView
-                        ref={horizontalScrollRef}
-                        horizontal
-                        showsHorizontalScrollIndicator={false}
-                        contentContainerStyle={styles.dayList}
-                        onContentSizeChange={scrollToCurrentDay}>
-                        {visibleDayList.map(day => {
-                            const groupByDay = coursesByDay[day] ?? [];
-                            const groupedResult = lodash.groupBy(
-                                groupByDay,
-                                currentStatOption.timeKey,
-                            );
-                            const finalResult = Object.fromEntries(
-                                Object.entries(groupedResult)
-                                    .filter(([key]) => key !== 'undefined')
-                                    .map(([key, entries]) => [
-                                        key,
-                                        entries.length,
-                                    ]),
-                            );
-
-                            const isToday = currentDay === day;
-                            const sortedTimes = lodash.sortBy(
-                                Object.keys(finalResult),
-                                time => moment(time, 'HH:mm').toDate(),
-                            );
-                            const sortedResult = sortedTimes.map(time => ({
-                                time,
-                                num: finalResult[time],
-                            }));
-
-                            return (
-                                <View key={day} style={styles.dayColumn}>
-                                    <View style={styles.dayUnderline(isToday)}>
-                                        <Text style={styles.dayTitle(isToday)}>
-                                            {day}
-                                        </Text>
-                                    </View>
-
-                                    <View style={styles.timeList(isToday)}>
-                                        {sortedResult.map(item => {
-                                            let isWithinPeriod = false;
-                                            let textColor = black.third;
-
-                                            if (isToday) {
-                                                isWithinPeriod = isWithin30Min(
-                                                    item.time,
-                                                );
-                                                if (item.num > 50) {
-                                                    textColor = unread;
-                                                } else if (item.num > 30) {
-                                                    textColor = warning;
-                                                } else {
-                                                    textColor = isWithinPeriod
-                                                        ? themeColor
-                                                        : black.main;
-                                                }
-                                            }
-
-                                            return (
-                                                <View
-                                                    key={item.time}
-                                                    style={styles.timeRow(
-                                                        isWithinPeriod,
-                                                    )}>
-                                                    <Text
-                                                        style={styles.timeText(
-                                                            textColor,
-                                                            isWithinPeriod,
-                                                        )}>
-                                                        {item.time}
-                                                    </Text>
-                                                    <Text
-                                                        style={styles.countText(
-                                                            textColor,
-                                                            isWithinPeriod,
-                                                        )}>
-                                                        {item.num}
-                                                    </Text>
-                                                </View>
-                                            );
-                                        })}
-                                    </View>
+                    <View style={styles.summary}>
+                        <View style={styles.summaryIcon} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+                            <MaterialCommunityIcons name="clock-time-four-outline" size={scale(22)} color={theme.accentForeground} />
+                        </View>
+                        <Text style={styles.description}>{t('展示現在上課的 section 數')}</Text>
+                    </View>
+                    <View style={styles.modeControl}>
+                        <SegmentedTabControl
+                            options={statOptions}
+                            selectedIndex={statMode === 'end' ? 0 : 1}
+                            onChange={index => {
+                                const nextMode = statOptions[index].key;
+                                if (statMode === nextMode) return;
+                                trigger('selection');
+                                setStatMode(nextMode);
+                            }}
+                        />
+                    </View>
+                    {daySchedule ? (
+                        <>
+                            <View style={styles.dayList}>
+                                {visibleDays.map(weekday => {
+                                    const isSelected = weekday === day;
+                                    const isToday = weekday === today;
+                                    const label = t(DAY_LABELS[WEEKDAYS.indexOf(weekday)], { ns: 'my' });
+                                    return (
+                                        <ScalePressable
+                                            key={weekday}
+                                            accessibilityRole="button"
+                                            accessibilityState={{ selected: isSelected }}
+                                            accessibilityLabel={isToday ? t('今日，{{day}}', { day: label }) : label}
+                                            onPress={() => {
+                                                if (isSelected) return;
+                                                trigger('selection');
+                                                setSelectedDay(isToday ? null : weekday);
+                                            }}
+                                            style={[styles.dayButton, isSelected && styles.selectedDay]}>
+                                            <Text numberOfLines={1} style={[styles.dayLabel, isSelected && styles.selectedDayLabel]}>
+                                                {label}
+                                            </Text>
+                                            <View style={[styles.todayDot, isToday && styles.visibleTodayDot]} />
+                                        </ScalePressable>
+                                    );
+                                })}
+                            </View>
+                            <View style={styles.axisHeader}>
+                                <Text style={styles.axisLabel}>{t('Section 數／30 分鐘')}</Text>
+                                {nowMinute !== null && nowMinute < schedule.startMinute ? (
+                                    <Text style={styles.axisLabel}>{t('現在 {{time}}', { time: formatTime(nowMinute) })}</Text>
+                                ) : null}
+                            </View>
+                            <TimeChart
+                                samples={daySchedule.samples}
+                                startMinute={schedule.startMinute}
+                                peak={daySchedule.peak}
+                                nowMinute={nowMinute}
+                                nowLabel={nowMinute === null ? '' : t('現在 {{time}}', { time: formatTime(nowMinute) })}
+                                selectedSample={selectedSample}
+                                onSelect={selectMinute}
+                                accessibilityLabel={t('全日 Section 分布')}
+                                accessibilityHint={t('調整時間以查看建築物分布')}
+                                accessibilityValue={timeDetail}
+                            />
+                            <Text accessibilityLiveRegion="polite" style={styles.detail}>
+                                {timeDetail}
+                            </Text>
+                            <View style={styles.buildingSection}>
+                                <View style={styles.buildingHeader}>
+                                    <Text accessibilityRole="header" style={styles.buildingTitle}>
+                                        {t('建築物分布')}
+                                    </Text>
+                                    {selectedSample ? (
+                                        <ScalePressable
+                                            accessibilityRole="button"
+                                            onPress={() => {
+                                                trigger('selection');
+                                                setSelectedMinute(null);
+                                            }}
+                                            style={styles.nowButton}>
+                                            <Text style={styles.nowButtonLabel}>{t('回到現在')}</Text>
+                                        </ScalePressable>
+                                    ) : null}
                                 </View>
-                            );
-                        })}
-                    </ScrollView>
+                                {buildingCounts.buildings.length ? (
+                                    <>
+                                        <Text style={styles.axisLabel}>{t('Section 數')}</Text>
+                                        <BuildingChart
+                                            buildings={buildingCounts.buildings}
+                                            accessibilityLabel={buildingCounts.buildings.map(([building, count]) =>
+                                                t('{{building}}：{{count}} 個 Section', { building, count }),
+                                            ).join('，')}
+                                        />
+                                        <Text style={styles.buildingAxisLabel}>{t('建築物')}</Text>
+                                    </>
+                                ) : null}
+                                {buildingCounts.unassigned ? (
+                                    <Text style={styles.axisLabel}>
+                                        {t('未標示教室：{{count}} 個 Section', { count: buildingCounts.unassigned })}
+                                    </Text>
+                                ) : null}
+                                {activeSample.count === 0 ? (
+                                    <Text style={styles.axisLabel}>{t('這段時間沒有排課')}</Text>
+                                ) : null}
+                            </View>
+                        </>
+                    ) : (
+                        <Text style={styles.detail}>{t('暫無排課資料')}</Text>
+                    )}
                 </View>
             </ScrollView>
         </View>
@@ -239,99 +250,134 @@ const getStyles = theme => ({
         paddingHorizontal: scale(12),
         paddingBottom: verticalScale(24),
     },
-    infoCard: {
-        backgroundColor: theme.white,
-        borderRadius: scale(16),
-        paddingHorizontal: scale(16),
-        paddingVertical: verticalScale(16),
-        marginTop: verticalScale(10),
-        ...theme.viewShadow,
+    wideContent: {
+        width: '100%',
+        maxWidth: 680,
+        alignSelf: 'center',
     },
-    title: {
-        ...uiStyle.defaultText,
-        color: theme.black.main,
-        fontSize: verticalScale(18),
-        fontWeight: '700',
-        textAlign: 'center',
+    summary: {
+        alignItems: 'center',
+        gap: verticalScale(6),
+        marginBottom: verticalScale(12),
+    },
+    summaryIcon: {
+        width: scale(38),
+        height: scale(38),
+        borderRadius: scale(19),
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: theme.tonal.primary15,
     },
     description: {
         ...uiStyle.defaultText,
         color: theme.black.second,
         fontSize: verticalScale(11),
         lineHeight: verticalScale(17),
-        marginTop: verticalScale(8),
         textAlign: 'center',
     },
     scheduleCard: {
         backgroundColor: theme.white,
         borderRadius: scale(16),
         marginTop: verticalScale(12),
+        paddingHorizontal: scale(12),
         paddingVertical: verticalScale(14),
         ...theme.viewShadow,
     },
-    segmentControl: {
-        alignSelf: 'center',
-    },
-    hint: {
-        ...uiStyle.defaultText,
-        color: theme.black.third,
-        fontSize: verticalScale(9),
-        lineHeight: verticalScale(14),
-        marginHorizontal: scale(18),
-        marginTop: verticalScale(8),
-        textAlign: 'center',
+    modeControl: {
+        alignItems: 'center',
     },
     dayList: {
-        paddingHorizontal: scale(12),
-        paddingTop: verticalScale(12),
-        paddingBottom: verticalScale(4),
-    },
-    dayColumn: {
-        marginRight: scale(20),
-        width: scale(85),
-    },
-    dayUnderline: isToday => ({
-        alignSelf: 'center',
-        borderBottomColor: isToday ? theme.themeColor : theme.black.second,
-        borderBottomWidth: verticalScale(2),
-    }),
-    dayTitle: isToday => ({
-        ...uiStyle.defaultText,
-        color: isToday ? theme.themeColor : theme.black.main,
-        fontSize: verticalScale(15),
-        fontWeight: isToday ? 'bold' : 'normal',
-        textAlign: 'center',
-    }),
-    timeList: isToday => ({
-        borderColor: isToday ? theme.themeColor : theme.black.third,
-        borderRadius: verticalScale(8),
-        borderWidth: verticalScale(2),
-        marginTop: verticalScale(4),
-        padding: verticalScale(3),
-    }),
-    timeRow: isWithinPeriod => ({
-        alignItems: 'center',
-        backgroundColor: isWithinPeriod
-            ? theme.themeColorUltraLight
-            : undefined,
-        borderRadius: verticalScale(3),
         flexDirection: 'row',
-        justifyContent: 'space-between',
+        gap: scale(2),
+        marginTop: verticalScale(10),
+        marginBottom: verticalScale(8),
+    },
+    dayButton: {
+        flex: 1,
+        minHeight: 44,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: scale(8),
+    },
+    selectedDay: {
+        backgroundColor: theme.tonal.primary15,
+    },
+    dayLabel: {
+        ...uiStyle.defaultText,
+        color: theme.black.third,
+        fontSize: scale(10),
+    },
+    selectedDayLabel: {
+        color: theme.accentForeground,
+        fontWeight: '600',
+    },
+    todayDot: {
+        width: scale(4),
+        height: scale(4),
+        borderRadius: scale(2),
         marginTop: verticalScale(2),
-    }),
-    timeText: (textColor, isWithinPeriod) => ({
+    },
+    visibleTodayDot: {
+        backgroundColor: theme.accentForeground,
+    },
+    axisHeader: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'space-between',
+        gap: scale(4),
+    },
+    axisLabel: {
         ...uiStyle.defaultText,
-        color: textColor,
-        fontFamily: Platform.OS === 'ios' ? 'Courier New' : 'monospace',
-        fontSize: verticalScale(12),
-        fontWeight: isWithinPeriod ? 'bold' : 'normal',
-    }),
-    countText: (textColor, isWithinPeriod) => ({
+        color: theme.black.third,
+        fontSize: scale(10),
+    },
+    detail: {
         ...uiStyle.defaultText,
-        color: textColor,
-        fontSize: verticalScale(12),
-        fontWeight: isWithinPeriod ? 'bold' : 'normal',
-    }),
+        color: theme.black.main,
+        backgroundColor: theme.bg_color,
+        fontSize: scale(11),
+        fontWeight: '600',
+        borderRadius: scale(8),
+        marginTop: verticalScale(5),
+        paddingHorizontal: scale(10),
+        paddingVertical: verticalScale(8),
+    },
+    buildingSection: {
+        borderTopWidth: StyleSheet.hairlineWidth,
+        borderTopColor: theme.pressOverlay,
+        marginTop: verticalScale(14),
+        paddingTop: verticalScale(12),
+    },
+    buildingHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        gap: scale(6),
+        marginBottom: verticalScale(3),
+    },
+    buildingTitle: {
+        ...uiStyle.defaultText,
+        color: theme.black.main,
+        fontSize: scale(15),
+        fontWeight: '700',
+    },
+    nowButton: {
+        minHeight: 44,
+        justifyContent: 'center',
+        paddingHorizontal: scale(6),
+    },
+    nowButtonLabel: {
+        ...uiStyle.defaultText,
+        color: theme.accentForeground,
+        fontSize: scale(11),
+    },
+    buildingAxisLabel: {
+        ...uiStyle.defaultText,
+        color: theme.black.third,
+        fontSize: scale(10),
+        textAlign: 'right',
+    },
 });
 
 export default EatingSchedule;
