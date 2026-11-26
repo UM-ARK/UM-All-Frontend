@@ -79,6 +79,47 @@ import { PlusCircle } from 'phosphor-react-native/src/icons/PlusCircle';
 import { Pulse } from 'phosphor-react-native/src/icons/Pulse';
 import { UserCircle } from 'phosphor-react-native/src/icons/UserCircle';
 import { UserPlus } from 'phosphor-react-native/src/icons/UserPlus';
+import { Archive } from 'phosphor-react-native/src/icons/Archive';
+import { ArrowBendUpLeft } from 'phosphor-react-native/src/icons/ArrowBendUpLeft';
+import { ArrowCircleDown } from 'phosphor-react-native/src/icons/ArrowCircleDown';
+import { ArrowClockwise } from 'phosphor-react-native/src/icons/ArrowClockwise';
+import { ArrowSquareOut } from 'phosphor-react-native/src/icons/ArrowSquareOut';
+import { ArrowsInLineVertical } from 'phosphor-react-native/src/icons/ArrowsInLineVertical';
+import { BellRinging } from 'phosphor-react-native/src/icons/BellRinging';
+import { BellSlash } from 'phosphor-react-native/src/icons/BellSlash';
+import { CaretLeft } from 'phosphor-react-native/src/icons/CaretLeft';
+import { ChatCircle } from 'phosphor-react-native/src/icons/ChatCircle';
+import { Check } from 'phosphor-react-native/src/icons/Check';
+import { CheckCircle } from 'phosphor-react-native/src/icons/CheckCircle';
+import { Copy } from 'phosphor-react-native/src/icons/Copy';
+import { CornersOut } from 'phosphor-react-native/src/icons/CornersOut';
+import { DeviceMobile } from 'phosphor-react-native/src/icons/DeviceMobile';
+import { DotsThree } from 'phosphor-react-native/src/icons/DotsThree';
+import { DotsThreeVertical } from 'phosphor-react-native/src/icons/DotsThreeVertical';
+import { Eye } from 'phosphor-react-native/src/icons/Eye';
+import { EyeSlash } from 'phosphor-react-native/src/icons/EyeSlash';
+import { FileText } from 'phosphor-react-native/src/icons/FileText';
+import { Flag } from 'phosphor-react-native/src/icons/Flag';
+import { Funnel } from 'phosphor-react-native/src/icons/Funnel';
+import { Image } from 'phosphor-react-native/src/icons/Image';
+import { Info } from 'phosphor-react-native/src/icons/Info';
+import { Link } from 'phosphor-react-native/src/icons/Link';
+import { List } from 'phosphor-react-native/src/icons/List';
+import { MapPin } from 'phosphor-react-native/src/icons/MapPin';
+import { PaperPlaneTilt } from 'phosphor-react-native/src/icons/PaperPlaneTilt';
+import { PencilSimple } from 'phosphor-react-native/src/icons/PencilSimple';
+import { Plus } from 'phosphor-react-native/src/icons/Plus';
+import { PushPin } from 'phosphor-react-native/src/icons/PushPin';
+import { ShareNetwork } from 'phosphor-react-native/src/icons/ShareNetwork';
+import { ShieldWarning } from 'phosphor-react-native/src/icons/ShieldWarning';
+import { SignIn } from 'phosphor-react-native/src/icons/SignIn';
+import { SlidersHorizontal } from 'phosphor-react-native/src/icons/SlidersHorizontal';
+import { SpeakerSlash } from 'phosphor-react-native/src/icons/SpeakerSlash';
+import { Star } from 'phosphor-react-native/src/icons/Star';
+import { Trash } from 'phosphor-react-native/src/icons/Trash';
+import { User } from 'phosphor-react-native/src/icons/User';
+import { WarningCircle } from 'phosphor-react-native/src/icons/WarningCircle';
+import { XCircle } from 'phosphor-react-native/src/icons/XCircle';
 
 // 靜態按需匯入 Phosphor Duotone 圖標（線性描邊＋輕量雙色填底），兼顧層次感與打包體積
 export const phosphorFeatureIcons = {
@@ -175,7 +216,7 @@ export const phosphorFeatureIcons = {
     cpu: Cpu,
     calculator: Calculator,
 
-    // Harbor 側欄
+    // Harbor 側欄與論壇共用
     stack: Stack,
     'plus-square': PlusSquare,
     tag: Tag,
@@ -183,6 +224,47 @@ export const phosphorFeatureIcons = {
     folders: Folders,
     lock: Lock,
     x: X,
+    'x-circle': XCircle,
+    list: List,
+    plus: Plus,
+    check: Check,
+    'check-circle': CheckCircle,
+    'caret-left': CaretLeft,
+    'sign-in': SignIn,
+    'warning-circle': WarningCircle,
+    info: Info,
+    'push-pin': PushPin,
+    archive: Archive,
+    'speaker-slash': SpeakerSlash,
+    user: User,
+    'chat-circle': ChatCircle,
+    'bell-ringing': BellRinging,
+    'bell-slash': BellSlash,
+    'arrows-in-line-vertical': ArrowsInLineVertical,
+    'arrow-circle-down': ArrowCircleDown,
+    star: Star,
+    'dots-three': DotsThree,
+    'dots-three-vertical': DotsThreeVertical,
+    eye: Eye,
+    'eye-slash': EyeSlash,
+    trash: Trash,
+    'arrow-bend-up-left': ArrowBendUpLeft,
+    copy: Copy,
+    link: Link,
+    'share-network': ShareNetwork,
+    flag: Flag,
+    'pencil-simple': PencilSimple,
+    'corners-out': CornersOut,
+    'arrow-square-out': ArrowSquareOut,
+    'map-pin': MapPin,
+    'sliders-horizontal': SlidersHorizontal,
+    funnel: Funnel,
+    image: Image,
+    'arrow-clockwise': ArrowClockwise,
+    'paper-plane-tilt': PaperPlaneTilt,
+    'device-mobile': DeviceMobile,
+    'file-text': FileText,
+    'shield-warning': ShieldWarning,
 };
 
 export default function PhosphorFeatureIcon({
@@ -190,6 +272,7 @@ export default function PhosphorFeatureIcon({
     size,
     color,
     weight = 'duotone',
+    style,
 }) {
     const IconComponent = phosphorFeatureIcons[name] || SquaresFour;
     return (
@@ -197,6 +280,7 @@ export default function PhosphorFeatureIcon({
             size={size}
             color={color}
             weight={weight}
+            style={style}
         />
     );
 }

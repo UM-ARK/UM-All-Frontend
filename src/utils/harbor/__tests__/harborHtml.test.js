@@ -2,6 +2,7 @@ import {
     groupConsecutiveHarborImages,
     replaceHarborEmojiImages,
     replaceHarborEmojiShortcodes,
+    replaceHarborOneboxes,
     stripTrailingEmptyHarborHtml,
 } from '../harborHtml';
 
@@ -158,5 +159,34 @@ describe('replaceHarborEmojiShortcodes', () => {
         expect(replaceHarborEmojiShortcodes('自訂:custom_site_emoji:表情')).toBe(
             '自訂:custom_site_emoji:表情',
         );
+    });
+});
+
+describe('replaceHarborOneboxes', () => {
+    it('將 Discourse onebox 轉為 harbor-onebox 並抽取圖標與標題', () => {
+        const html =
+            '<aside class="onebox allowlistedgeneric" data-onebox-src="https://campusmatch.com.cn">' +
+            '<header class="source">' +
+            '<img src="https://campusmatch.com.cn/logo.svg" class="site-icon" width="32" height="32">' +
+            '<a href="https://campusmatch.com.cn">campusmatch.com.cn</a>' +
+            '</header>' +
+            '<article class="onebox-body">' +
+            '<h3><a href="https://campusmatch.com.cn">CampusMatch &#8212; 校园匹配</a></h3>' +
+            '<p>找舍友、找搭子</p>' +
+            '</article>' +
+            '</aside>';
+
+        const result = replaceHarborOneboxes(html);
+        expect(result).toContain('<harbor-onebox');
+        expect(result).toContain('url="https://campusmatch.com.cn"');
+        expect(result).toContain('title="CampusMatch — 校园匹配"');
+        expect(result).toContain('domain="campusmatch.com.cn"');
+        expect(result).toContain('description="找舍友、找搭子"');
+        expect(result).toContain('icon="https://campusmatch.com.cn/logo.svg"');
+    });
+
+    it('保留非 onebox 的 quote aside', () => {
+        const quote = '<aside class="quote"><p>引用內容</p></aside>';
+        expect(replaceHarborOneboxes(quote)).toBe(quote);
     });
 });

@@ -13,7 +13,6 @@ import {
     View,
 } from 'react-native';
 
-import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import Animated, {
     useAnimatedStyle,
     useSharedValue,
@@ -34,6 +33,7 @@ import searchFieldStyles, {
 import TouchableScale from '../../../../components/TouchableScale';
 import { uiStyle, useTheme } from '../../../../components/ThemeContext';
 import { trigger } from '../../../../utils/trigger';
+import PhosphorFeatureIcon from '../../info/home/search/components/PhosphorFeatureIcon';
 import SearchFilterChip from './SearchFilterChip';
 
 const TIME_OPTIONS = [
@@ -212,10 +212,11 @@ const HarborSearchPanel = forwardRef(
                                         : '#3A3A3C',
                                 },
                             ]}>
-                            <MaterialCommunityIcons
-                                name="magnify"
+                            <PhosphorFeatureIcon
+                                name="search"
                                 size={SEARCH_FIELD_ICON_SIZE}
                                 color={theme.black.third}
+                                weight="regular"
                             />
                             <TextInput
                                 ref={inputRef}
@@ -252,10 +253,11 @@ const HarborSearchPanel = forwardRef(
                                     hitSlop={scale(8)}
                                     onPress={handleClearSearchQuery}
                                     style={searchFieldStyles.clearButton}>
-                                    <MaterialCommunityIcons
-                                        name="close-circle"
+                                    <PhosphorFeatureIcon
+                                        name="x-circle"
                                         size={SEARCH_FIELD_CLEAR_ICON_SIZE}
                                         color={theme.black.third}
+                                        weight="fill"
                                     />
                                 </TouchableScale>
                             ) : null}
@@ -335,14 +337,15 @@ const HarborSearchPanel = forwardRef(
                                 styles.topicFilterButton,
                                 pressed && { opacity: 0.6 },
                             ]}>
-                            <MaterialCommunityIcons
-                                name="filter-variant"
+                            <PhosphorFeatureIcon
+                                name="funnel"
                                 size={scale(16)}
                                 color={
                                     activeFilterCount > 0 || filtersExpanded
                                         ? theme.themeColor
                                         : theme.black.third
                                 }
+                                weight={activeFilterCount > 0 || filtersExpanded ? 'duotone' : 'regular'}
                             />
                             {activeFilterCount > 0 ? (
                                 <View

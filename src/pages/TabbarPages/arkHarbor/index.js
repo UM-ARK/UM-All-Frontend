@@ -10,7 +10,6 @@ import {
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { useIsFocused } from '@react-navigation/native';
 import PagerView from 'react-native-pager-view';
-import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import { scale, verticalScale } from 'react-native-size-matters';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
@@ -40,6 +39,7 @@ import {
 } from '../../../utils/harbor/harborApi';
 import { trigger } from '../../../utils/trigger';
 import HarborLoginConsentModal from '../my/components/HarborLoginConsentModal';
+import PhosphorFeatureIcon from '../info/home/search/components/PhosphorFeatureIcon';
 import HarborDrawerContent from './components/HarborDrawerContent';
 import { harborTopicRowInsets } from './components/HarborTopicCard';
 import HarborTopicList from './components/HarborTopicList';
@@ -142,10 +142,11 @@ const HarborStickyToolbar = ({
                             onMenuPress();
                         }}
                         style={styles.toolbarIconButton}>
-                        <MaterialCommunityIcons
-                            name="menu"
+                        <PhosphorFeatureIcon
+                            name="list"
                             size={scale(20)}
                             color={theme.black.second}
+                            weight="regular"
                         />
                     </ScalePressable>
                     {/* 搜尋放左側與選單並排，右側未登入時已有「登入」文字按鈕；
@@ -166,10 +167,11 @@ const HarborStickyToolbar = ({
                                 onSearchPress();
                             }}
                             style={styles.toolbarIconButton}>
-                            <MaterialCommunityIcons
-                                name="magnify"
+                            <PhosphorFeatureIcon
+                                name="search"
                                 size={scale(20)}
                                 color={theme.black.second}
+                                weight="regular"
                             />
                         </ScalePressable>
                     </Reanimated.View>
@@ -201,10 +203,11 @@ const HarborStickyToolbar = ({
                                     onSessionPress();
                                 }}
                                 style={styles.sessionButton}>
-                                <MaterialCommunityIcons
-                                    name="login"
+                                <PhosphorFeatureIcon
+                                    name="sign-in"
                                     size={scale(14)}
                                     color={theme.black.second}
+                                    weight="regular"
                                 />
                                 <Text
                                     numberOfLines={1}
@@ -235,10 +238,11 @@ const HarborStickyToolbar = ({
                                     onChatPress();
                                 }}
                                 style={styles.toolbarIconButton}>
-                                <MaterialCommunityIcons
-                                    name="chat-outline"
+                                <PhosphorFeatureIcon
+                                    name="message-circle"
                                     size={scale(19)}
                                     color={theme.black.second}
+                                    weight="regular"
                                 />
                                 {chatUnreadCount > 0 ? (
                                     <View
@@ -268,10 +272,11 @@ const HarborStickyToolbar = ({
                                 onComposePress();
                             }}
                             style={styles.toolbarIconButton}>
-                            <MaterialCommunityIcons
+                            <PhosphorFeatureIcon
                                 name="plus"
                                 size={scale(20)}
                                 color={theme.black.second}
+                                weight="regular"
                             />
                         </ScalePressable>
                     </View>
@@ -305,10 +310,11 @@ const HarborStickyToolbar = ({
                             borderWidth: isCompact ? 0 : StyleSheet.hairlineWidth,
                         },
                     ]}>
-                    <MaterialCommunityIcons
-                        name="magnify"
+                    <PhosphorFeatureIcon
+                        name="search"
                         size={SEARCH_FIELD_ICON_SIZE}
                         color={searchBarForeground}
+                        weight="regular"
                     />
                     <Text
                         numberOfLines={1}

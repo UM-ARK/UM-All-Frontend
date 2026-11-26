@@ -6,7 +6,6 @@ import {
 } from 'react-native';
 
 import {Image} from 'expo-image';
-import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import {scale, verticalScale} from 'react-native-size-matters';
 import {useTranslation} from 'react-i18next';
 
@@ -14,6 +13,7 @@ import Text from '../../../../components/AppText';
 import ScalePressable from '../../../../components/ScalePressable';
 import {uiStyle, useTheme} from '../../../../components/ThemeContext';
 import {trigger} from '../../../../utils/trigger';
+import PhosphorFeatureIcon from '../../info/home/search/components/PhosphorFeatureIcon';
 
 /** 搜尋結果中的使用者列（話題／貼文直接複用 HarborTopicCard） */
 const HarborSearchResultCard = memo(({user, onPress, onAvatarPress}) => {
@@ -63,8 +63,8 @@ const HarborSearchResultCard = memo(({user, onPress, onAvatarPress}) => {
                             styles.resultAvatarFallback,
                             {backgroundColor: theme.tonal.primary15},
                         ]}>
-                        <MaterialCommunityIcons
-                            name="account-outline"
+                        <PhosphorFeatureIcon
+                            name="user-circle"
                             size={scale(20)}
                             color={theme.themeColor}
                         />
@@ -89,10 +89,11 @@ const HarborSearchResultCard = memo(({user, onPress, onAvatarPress}) => {
                     @{user.username} · {t('查看此作者的貼文')}
                 </Text>
             </View>
-            <MaterialCommunityIcons
-                name="chevron-right"
+            <PhosphorFeatureIcon
+                name="caret-right"
                 size={scale(20)}
                 color={theme.black.third}
+                weight="regular"
             />
         </ScalePressable>
     );

@@ -12,7 +12,6 @@ import {
 } from 'react-native';
 
 import {FlashList} from '@shopify/flash-list';
-import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import {scale, verticalScale} from 'react-native-size-matters';
 import {useTranslation} from 'react-i18next';
 
@@ -24,6 +23,7 @@ import {
     getHarborCategoryKey,
 } from '../../../../utils/harbor/harborCategories';
 import {trigger} from '../../../../utils/trigger';
+import PhosphorFeatureIcon from '../../info/home/search/components/PhosphorFeatureIcon';
 import HarborCategoryIcon from '../components/HarborCategoryIcon';
 
 const SearchOptionModal = ({
@@ -142,22 +142,24 @@ const SearchOptionModal = ({
                                 handleToggleCategory(item);
                             }}
                             style={styles.optionToggle}>
-                            <MaterialCommunityIcons
+                            <PhosphorFeatureIcon
                                 name={
                                     item.isExpanded
-                                        ? 'chevron-up'
-                                        : 'chevron-down'
+                                        ? 'caret-up'
+                                        : 'caret-down'
                                 }
                                 size={scale(19)}
                                 color={theme.themeColor}
+                                weight="regular"
                             />
                         </ScalePressable>
                     ) : null}
                     {selected ? (
-                        <MaterialCommunityIcons
+                        <PhosphorFeatureIcon
                             name="check"
                             size={scale(19)}
                             color={theme.themeColor}
+                            weight="regular"
                         />
                     ) : null}
                 </ScalePressable>
@@ -222,10 +224,11 @@ const SearchOptionModal = ({
                                 onClose();
                             }}
                             style={styles.modalCloseButton}>
-                            <MaterialCommunityIcons
-                                name="close"
+                            <PhosphorFeatureIcon
+                                name="x"
                                 size={scale(20)}
                                 color={theme.black.main}
+                                weight="regular"
                             />
                         </ScalePressable>
                     </View>

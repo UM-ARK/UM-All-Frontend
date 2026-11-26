@@ -44,7 +44,17 @@ const extractPostImages = html => {
     });
 
     if (images.length === 0) {
-        const imageTags = html.match(/<img\b[^>]*>/gi) || [];
+        const htmlWithoutOnebox = html.replace(
+            /<aside\b[^>]*>[\s\S]*?<\/aside>/gi,
+            block => {
+                const openingTag = block.match(/^<aside\b[^>]*>/i)?.[0] || '';
+                const className = getHarborHtmlAttribute(openingTag, 'class');
+                return className.toLowerCase().split(/\s+/).includes('onebox')
+                    ? ''
+                    : block;
+            },
+        );
+        const imageTags = htmlWithoutOnebox.match(/<img\b[^>]*>/gi) || [];
         imageTags.forEach(tag => {
             const className = getHarborHtmlAttribute(tag, 'class');
             if (className.split(/\s+/).includes('emoji')) {
@@ -368,8 +378,8 @@ const getTagLabel = tag => {
 
 // 詳情頁展示用：與列表卡片相同的話題狀態
 const HARBOR_TOPIC_STATUS_CONFIG = [
-    { key: 'closed', icon: 'lock-outline', label: '已關閉' },
-    { key: 'archived', icon: 'archive-outline', label: '已封存' },
+    { key: 'closed', icon: 'lock', label: '已關閉' },
+    { key: 'archived', icon: 'archive', label: '已封存' },
 ];
 
 const getHarborTopicStatuses = topic => {

@@ -10,7 +10,6 @@ import {
 
 import {isLiquidGlassSupported} from '../../../../utils/glassEffect';
 import {FlashList} from '@shopify/flash-list';
-import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import {scale, verticalScale} from 'react-native-size-matters';
 import {useTranslation} from 'react-i18next';
 
@@ -20,6 +19,7 @@ import {uiStyle, useTheme} from '../../../../components/ThemeContext';
 import TouchableScale from '../../../../components/TouchableScale';
 import {filterHarborSearchItems} from '../../../../utils/harbor/harborSearch';
 import {trigger} from '../../../../utils/trigger';
+import PhosphorFeatureIcon from '../../info/home/search/components/PhosphorFeatureIcon';
 import {
     HarborFullState,
     HarborInlineRetry,
@@ -164,10 +164,11 @@ const HarborSearchResults = ({
                                     theme.themeColorUltraLight,
                             },
                         ]}>
-                        <MaterialCommunityIcons
-                            name="history"
+                        <PhosphorFeatureIcon
+                            name="clock-counter-clockwise"
                             size={scale(18)}
                             color={theme.black.third}
+                            weight="regular"
                         />
                         <Text
                             numberOfLines={2}
@@ -191,10 +192,11 @@ const HarborSearchResults = ({
                                 await removeHistory(item.query);
                             }}
                             style={styles.historyDeleteButton}>
-                            <MaterialCommunityIcons
-                                name="close"
+                            <PhosphorFeatureIcon
+                                name="x"
                                 size={scale(17)}
                                 color={theme.black.third}
+                                weight="regular"
                             />
                         </ScalePressable>
                     </ScalePressable>
@@ -274,10 +276,11 @@ const HarborSearchResults = ({
                         styles.composeButton,
                         {backgroundColor: theme.tonal.primary15},
                     ]}>
-                    <MaterialCommunityIcons
+                    <PhosphorFeatureIcon
                         name="plus"
                         size={scale(16)}
                         color={theme.themeColor}
+                        weight="regular"
                     />
                     <Text
                         style={[
@@ -373,7 +376,7 @@ const HarborSearchResults = ({
             const noPermission = [401, 403].includes(error?.response?.status);
             return (
                 <HarborFullState
-                    icon={noPermission ? 'lock-outline' : 'cloud-alert-outline'}
+                    icon={noPermission ? 'lock' : 'warning-circle'}
                     title={
                         noPermission
                             ? t('你沒有權限查看此搜尋結果')
@@ -393,7 +396,7 @@ const HarborSearchResults = ({
             return (
                 <View style={styles.emptyState}>
                     <HarborFullState
-                        icon="magnify-close"
+                        icon="search"
                         title={
                             isUsersTab
                                 ? t('沒有找到使用者')
@@ -411,7 +414,7 @@ const HarborSearchResults = ({
         }
         return (
             <HarborFullState
-                icon="magnify"
+                icon="search"
                 title={t('搜尋 Harbor')}
                 description={t(
                     '搜尋話題、貼文與使用者，也可直接輸入 Discourse 進階語法。',

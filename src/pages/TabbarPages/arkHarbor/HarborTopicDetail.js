@@ -20,7 +20,6 @@ import { FlashList } from '@shopify/flash-list';
 import { isLiquidGlassSupported } from '../../../utils/glassEffect';
 import { useHeaderHeight } from '@react-navigation/elements';
 import Toast from 'react-native-simple-toast';
-import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import { scale, verticalScale } from 'react-native-size-matters';
 import { useTranslation } from 'react-i18next';
 
@@ -46,6 +45,7 @@ import {
     ARK_HARBOR_TOPIC_URL,
 } from '../../../utils/pathMap';
 import { trigger } from '../../../utils/trigger';
+import PhosphorFeatureIcon from '../info/home/search/components/PhosphorFeatureIcon';
 import HarborPostCard from './topicDetail/HarborPostCard';
 import HarborPostMoreSheet from './topicDetail/HarborPostMoreSheet';
 import HarborRelatedTopics from './topicDetail/HarborRelatedTopics';
@@ -76,31 +76,31 @@ const TOPIC_NOTIFICATION_OPTIONS = [
         level: HARBOR_TOPIC_NOTIFICATION_LEVELS.normal,
         label: '一般',
         description: '只在有人提及或直接回覆你時通知',
-        icon: 'bell-outline',
+        icon: 'bell',
     },
     {
         level: HARBOR_TOPIC_NOTIFICATION_LEVELS.tracking,
         label: '追蹤',
         description: '顯示新回覆數量，但不主動通知',
-        icon: 'bell-badge-outline',
+        icon: 'bell-ringing',
     },
     {
         level: HARBOR_TOPIC_NOTIFICATION_LEVELS.watching,
         label: '關注',
         description: '每篇新回覆都會通知你',
-        icon: 'bell-ring-outline',
+        icon: 'bell-ringing',
     },
     {
         level: HARBOR_TOPIC_NOTIFICATION_LEVELS.watchingFirstPost,
         label: '只關注第一篇',
         description: '只在這個話題的第一篇有活動時通知',
-        icon: 'bell-check-outline',
+        icon: 'bell',
     },
     {
         level: HARBOR_TOPIC_NOTIFICATION_LEVELS.muted,
         label: '靜音',
         description: '不顯示這個話題的通知與未讀提示',
-        icon: 'bell-off-outline',
+        icon: 'bell-slash',
     },
 ];
 
@@ -932,8 +932,8 @@ const HarborTopicDetail = ({
                         styles.errorIcon,
                         { backgroundColor: tonal.primary15 },
                     ]}>
-                    <MaterialCommunityIcons
-                        name="alert-circle-outline"
+                    <PhosphorFeatureIcon
+                        name="warning-circle"
                         size={scale(34)}
                         color={themeColor}
                     />
@@ -1107,10 +1107,11 @@ const HarborTopicDetail = ({
                             styles.postNavigationButton,
                             pressed ? styles.pressedLink : null,
                         ]}>
-                        <MaterialCommunityIcons
-                            name="arrow-collapse-vertical"
+                        <PhosphorFeatureIcon
+                            name="arrows-in-line-vertical"
                             size={scale(15)}
                             color={themeColor}
+                            weight="regular"
                         />
                         <Text
                             style={[
@@ -1148,10 +1149,11 @@ const HarborTopicDetail = ({
                             color={trueWhite}
                         />
                     ) : (
-                        <MaterialCommunityIcons
-                            name="arrow-down-circle-outline"
+                        <PhosphorFeatureIcon
+                            name="arrow-circle-down"
                             size={scale(18)}
                             color={trueWhite}
+                            weight="regular"
                         />
                     )}
                     <Text

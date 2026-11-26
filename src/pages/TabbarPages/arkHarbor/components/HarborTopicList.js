@@ -880,7 +880,7 @@ const HarborTopicList = ({
 
     const emptyState = firstPageError ? (
         <HarborFullState
-            icon={needsLogin ? 'account-lock-outline' : 'alert-circle-outline'}
+            icon={needsLogin ? 'lock' : 'warning-circle'}
             title={
                 needsLogin
                     ? t('登入後查看此內容')
@@ -924,7 +924,7 @@ const HarborTopicList = ({
         />
     ) : (
         <HarborFullState
-            icon="forum-outline"
+            icon="messages-square"
             title={emptyTitle || t('這裡暫時沒有話題')}
             description={
                 emptyDescription || t('稍後再來看看，或切換到其他話題視圖。')

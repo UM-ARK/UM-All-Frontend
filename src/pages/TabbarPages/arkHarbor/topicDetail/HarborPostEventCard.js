@@ -7,7 +7,6 @@ import {
 } from 'react-native';
 
 import moment from 'moment-timezone';
-import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import { scale } from 'react-native-size-matters';
 import { useTranslation } from 'react-i18next';
 
@@ -16,6 +15,7 @@ import ScalePressable from '../../../../components/ScalePressable';
 import { useTheme } from '../../../../components/ThemeContext';
 import { openLink } from '../../../../utils/browser';
 import { trigger } from '../../../../utils/trigger';
+import PhosphorFeatureIcon from '../../info/home/search/components/PhosphorFeatureIcon';
 import styles from './styles';
 
 const formatEventMoment = (value, timezone) => {
@@ -152,10 +152,11 @@ const HarborPostEventCard = memo(({ event, postUrl }) => {
                 ) : null}
                 {rangeText ? (
                     <View style={styles.eventMetaRow}>
-                        <MaterialCommunityIcons
-                            name="clock-outline"
+                        <PhosphorFeatureIcon
+                            name="clock"
                             size={scale(13)}
                             color={black.third}
+                            weight="regular"
                         />
                         <Text
                             style={[
@@ -169,10 +170,11 @@ const HarborPostEventCard = memo(({ event, postUrl }) => {
                 ) : null}
                 {event.location ? (
                     <View style={styles.eventMetaRow}>
-                        <MaterialCommunityIcons
-                            name="map-marker-outline"
+                        <PhosphorFeatureIcon
+                            name="map-pin"
                             size={scale(13)}
                             color={black.third}
+                            weight="regular"
                         />
                         <Text
                             style={[

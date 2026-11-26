@@ -5,7 +5,6 @@ import {
     View,
 } from 'react-native';
 
-import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import { scale } from 'react-native-size-matters';
 import { useTranslation } from 'react-i18next';
 
@@ -13,6 +12,7 @@ import Text from '../../../../components/AppText';
 import ScalePressable from '../../../../components/ScalePressable';
 import { useTheme } from '../../../../components/ThemeContext';
 import { trigger } from '../../../../utils/trigger';
+import PhosphorFeatureIcon from '../../info/home/search/components/PhosphorFeatureIcon';
 import styles from './styles';
 
 const HarborRelatedTopics = memo(({ topics, onPressTopic }) => {
@@ -52,10 +52,11 @@ const HarborRelatedTopics = memo(({ topics, onPressTopic }) => {
                         numberOfLines={2}>
                         {relatedTopic.title}
                     </Text>
-                    <MaterialCommunityIcons
-                        name="chevron-right"
+                    <PhosphorFeatureIcon
+                        name="caret-right"
                         size={scale(18)}
                         color={themeColor}
+                        weight="regular"
                     />
                 </ScalePressable>
             ))}
