@@ -1,5 +1,6 @@
 import React, { useState, useRef, useCallback, useContext, useMemo, useEffect } from 'react';
 import {
+    Animated as RNAnimated,
     Platform,
     ScrollView,
     StyleSheet,
@@ -8,7 +9,13 @@ import {
 
 import Text from '../../../components/AppText';
 import ScalePressable from '../../../components/ScalePressable';
-import SegmentedTopTabBar from '../../../components/SegmentedTopTabBar';
+import SegmentedTopTabBar, {
+    SEGMENTED_TOP_TAB_BAR_HEIGHT,
+} from '../../../components/SegmentedTopTabBar';
+import TopScrollEdgeBackdrop, {
+    SCROLL_EDGE_FADE_HEIGHT,
+} from '../../../components/TopScrollEdgeBackdrop';
+import { SEARCH_FIELD_MIN_HEIGHT } from '../../../components/searchFieldStyles';
 import { useTheme, uiStyle } from '../../../components/ThemeContext';
 import { useHarborSession } from '../../../contexts/HarborSessionContext';
 import { logToFirebase } from '../../../utils/firebaseAnalytics';
@@ -39,13 +46,13 @@ import { balanceColumns } from '../../../utils/balanceColumns';
 import CustomBottomSheet from '../../../utils/BottomSheet';
 import { getFunctionArr } from './FeatureList';
 import FeatureSearchBar from './FeatureSearchBar';
+import { FeaturesChromeProvider, useFeaturesChrome } from './FeaturesChromeContext';
 import FeatureIcon from '../info/home/search/components/FeatureIcon';
 import WikiHome from '../arkwiki';
 
 import { FlatGrid } from 'react-native-super-grid';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import * as Clipboard from 'expo-clipboard';
-import { LinearGradient } from 'expo-linear-gradient';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import { scale, verticalScale } from 'react-native-size-matters';
 import Toast from 'react-native-simple-toast';
@@ -54,7 +61,6 @@ import { useTranslation } from 'react-i18next';
 import { useFocusEffect } from '@react-navigation/native';
 import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { SafeAreaView } from 'react-native-screens/experimental';
 import Animated, { cubicBezier } from 'react-native-reanimated';
 import { useAppReducedMotion } from '../../../contexts/ReducedMotionContext';
 
@@ -143,6 +149,21 @@ function FeatureListPage({ navigation }) {
     const listRef = useRef(null);
     const reducedMotion = useAppReducedMotion();
     const insets = useSafeAreaInsets();
+    const { topChromeHeight } = useFeaturesChrome();
+    const scrollY = useRef(new RNAnimated.Value(0)).current;
+    const [searchHeaderHeight, setSearchHeaderHeight] = useState(
+        SEARCH_FIELD_MIN_HEIGHT + 2 + verticalScale(10),
+    );
+    const totalSearchHeaderHeight = topChromeHeight + searchHeaderHeight;
+    const handleSearchChromeScroll = useCallback(event => {
+        scrollY.setValue(event.nativeEvent.contentOffset.y);
+    }, [scrollY]);
+    const handleSearchHeaderLayout = useCallback(event => {
+        const nextHeight = event.nativeEvent.layout.height;
+        setSearchHeaderHeight(current => (
+            Math.abs(current - nextHeight) > 0.5 ? nextHeight : current
+        ));
+    }, []);
     const tabBarHeight =
         useContext(BottomTabBarHeightContext) ?? insets.bottom + 49;
     // 同 courseSim：Android 場景底已在 Tab 上方；iOS 浮動 Tab 需自行預留
@@ -666,35 +687,20 @@ function FeatureListPage({ navigation }) {
                 flex: 1,
                 backgroundColor: featuresScreen.bg_color,
             }}>
-            <View style={{ zIndex: 1 }}>
-                <FeatureSearchBar
-                    inputRef={searchInputRef}
-                    query={searchQuery}
-                    onChangeQuery={handleChangeSearchQuery}
-                    onWebSearch={handleWebSearch}
-                    hasQuery={isSearching}
-                    matchCount={matchedFeatures?.size ?? 0}
-                />
-                <LinearGradient
-                    pointerEvents="none"
-                    colors={[featuresScreen.bg_color, featuresScreen.bgTransparent]}
-                    style={{
-                        position: 'absolute',
-                        top: '100%',
-                        left: 0,
-                        right: 0,
-                        height: SEARCH_HEADER_FADE_HEIGHT,
-                    }}
-                />
-            </View>
             <ScrollView
                 ref={listRef}
                 showsVerticalScrollIndicator={true}
-                contentInsetAdjustmentBehavior="automatic"
+                contentInsetAdjustmentBehavior="never"
                 automaticallyAdjustKeyboardInsets
                 keyboardShouldPersistTaps="handled"
+                scrollIndicatorInsets={{
+                    top: totalSearchHeaderHeight,
+                    bottom: listBottomPad,
+                }}
+                scrollEventThrottle={16}
+                onScroll={handleSearchChromeScroll}
                 contentContainerStyle={{
-                    paddingTop: SEARCH_HEADER_FADE_HEIGHT,
+                    paddingTop: totalSearchHeaderHeight + SEARCH_HEADER_FADE_HEIGHT,
                     paddingBottom: listBottomPad,
                 }}>
                 {/* 超寬屏內容居中封頂，分類區塊再按尺寸等級分成 1／2／3 欄 */}
@@ -769,6 +775,37 @@ function FeatureListPage({ navigation }) {
                 </View>
             </ScrollView>
 
+            <View
+                pointerEvents="box-none"
+                style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    zIndex: 2,
+                }}>
+                <TopScrollEdgeBackdrop
+                    headerHeight={totalSearchHeaderHeight}
+                    fadeHeight={SCROLL_EDGE_FADE_HEIGHT}
+                    scrollY={scrollY}
+                    backgroundColor={featuresScreen.bg_color}
+                />
+                <View
+                    pointerEvents="box-none"
+                    style={{ paddingTop: topChromeHeight, zIndex: 2 }}>
+                    <View pointerEvents="box-none" onLayout={handleSearchHeaderLayout}>
+                        <FeatureSearchBar
+                            inputRef={searchInputRef}
+                            query={searchQuery}
+                            onChangeQuery={handleChangeSearchQuery}
+                            onWebSearch={handleWebSearch}
+                            hasQuery={isSearching}
+                            matchCount={matchedFeatures?.size ?? 0}
+                        />
+                    </View>
+                </View>
+            </View>
+
             <CustomBottomSheet
                 ref={bottomSheetRef}
                 page={'features'}
@@ -791,16 +828,40 @@ export default function Index() {
     const { theme } = useTheme();
     const { featuresScreen } = theme;
     const { t } = useTranslation('common');
+    const insets = useSafeAreaInsets();
+    const [topBarRowHeight, setTopBarRowHeight] = useState(
+        SEGMENTED_TOP_TAB_BAR_HEIGHT,
+    );
+    const handleTopBarLayout = useCallback(event => {
+        const nextHeight = event.nativeEvent.layout.height;
+        setTopBarRowHeight(current =>
+            Math.abs(current - nextHeight) > 0.5 ? nextHeight : current,
+        );
+    }, []);
+    const topChromeHeight = insets.top + topBarRowHeight;
     const renderTopTabBar = useCallback(
-        props => <SegmentedTopTabBar {...props} backgroundColor={featuresScreen.bg_color} />,
-        [featuresScreen.bg_color],
+        props => (
+            <View
+                pointerEvents="box-none"
+                style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    zIndex: 10,
+                    paddingTop: insets.top,
+                }}>
+                <View pointerEvents="box-none" onLayout={handleTopBarLayout}>
+                    <SegmentedTopTabBar {...props} backgroundColor="transparent" />
+                </View>
+            </View>
+        ),
+        [handleTopBarLayout, insets.top],
     );
 
     return (
         <View style={{ flex: 1, backgroundColor: featuresScreen.bg_color }}>
-            <SafeAreaView
-                style={{ backgroundColor: featuresScreen.bg_color, flex: 1 }}
-                edges={{ top: true }}>
+            <FeaturesChromeProvider topChromeHeight={topChromeHeight}>
                 <Tab.Navigator
                     tabBar={renderTopTabBar}
                     screenOptions={{
@@ -818,7 +879,7 @@ export default function Index() {
                         options={{ title: t('百科') }}
                     />
                 </Tab.Navigator>
-            </SafeAreaView>
+            </FeaturesChromeProvider>
         </View>
     );
 }

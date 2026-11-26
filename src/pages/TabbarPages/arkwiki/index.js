@@ -1,7 +1,8 @@
-import React, { useContext, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import {
     ActivityIndicator,
     Alert,
+    Animated,
     Platform,
     StyleSheet,
     View,
@@ -20,6 +21,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import Text from '../../../components/AppText';
 import ScalePressable from '../../../components/ScalePressable';
+import TopScrollEdgeBackdrop, {
+    SCROLL_EDGE_FADE_HEIGHT,
+} from '../../../components/TopScrollEdgeBackdrop';
+import { useFeaturesChrome } from '../features/FeaturesChromeContext';
 import searchFieldStyles, {
     SEARCH_FIELD_ICON_SIZE,
     SEARCH_FIELD_MAX_FONT_SIZE_MULTIPLIER,
@@ -81,6 +86,12 @@ const WikiHome = ({navigation}) => {
     const {t} = useTranslation('wiki');
     const headerHeight = useHeaderHeight();
     const insets = useSafeAreaInsets();
+    const { topChromeHeight } = useFeaturesChrome();
+    const hasFloatingChrome = topChromeHeight > 0;
+    const scrollY = useRef(new Animated.Value(0)).current;
+    const handleTopScroll = useCallback(event => {
+        scrollY.setValue(event.nativeEvent.contentOffset.y);
+    }, [scrollY]);
     const tabBarHeight =
         useContext(BottomTabBarHeightContext) ?? insets.bottom + 49;
     // 服務頁外層不再預留 Tab 高度；iOS 浮動 Tab 需列表自行留白
@@ -131,9 +142,9 @@ const WikiHome = ({navigation}) => {
         styles.page,
         {
             backgroundColor: theme.bg_color,
-            paddingTop: isLiquidGlassSupported ? headerHeight : 0,
+            paddingTop: !hasFloatingChrome && isLiquidGlassSupported ? headerHeight : 0,
         },
-    ], [headerHeight, theme.bg_color]);
+    ], [hasFloatingChrome, headerHeight, theme.bg_color]);
 
     const openArticle = title => {
         trigger();
@@ -356,8 +367,26 @@ const WikiHome = ({navigation}) => {
                         : `${item.type}-${item.key || item.title}-${index}`
                 }
                 ListHeaderComponent={listHeader}
-                contentContainerStyle={[styles.content, {paddingBottom: listBottomPad}]}
+                scrollIndicatorInsets={
+                    hasFloatingChrome
+                        ? { top: topChromeHeight, bottom: listBottomPad }
+                        : undefined
+                }
+                scrollEventThrottle={16}
+                onScroll={hasFloatingChrome ? handleTopScroll : undefined}
+                contentContainerStyle={[
+                    styles.content,
+                    { paddingTop: topChromeHeight, paddingBottom: listBottomPad },
+                ]}
             />
+            {hasFloatingChrome ? (
+                <TopScrollEdgeBackdrop
+                    headerHeight={topChromeHeight}
+                    fadeHeight={SCROLL_EDGE_FADE_HEIGHT}
+                    scrollY={scrollY}
+                    zIndex={2}
+                />
+            ) : null}
         </View>
     );
 };

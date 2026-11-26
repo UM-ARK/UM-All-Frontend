@@ -33,7 +33,7 @@ import { useCoursePlan } from '../../context/CoursePlanContext';
 import PlanCapsule from '../../components/PlanCapsule';
 import TopScrollEdgeBackdrop, {
     SCROLL_EDGE_FADE_HEIGHT,
-} from '../../components/TopScrollEdgeBackdrop';
+} from '../../../../../components/TopScrollEdgeBackdrop';
 
 import CourseCard from './components/CourseCard';
 import useCourseFiltering, {

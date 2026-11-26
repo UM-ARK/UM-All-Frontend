@@ -4,7 +4,7 @@ import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { verticalScale } from 'react-native-size-matters';
 
-import { useTheme } from '../../../../components/ThemeContext';
+import { useTheme } from './ThemeContext';
 
 export const SCROLL_EDGE_FADE_HEIGHT = verticalScale(12);
 const SCROLL_EDGE_FADE_DISTANCE = 16;
@@ -30,22 +30,24 @@ const withHexAlpha = (hex, alpha) => {
 };
 
 /**
- * 選課頁頂部統一毛玻璃＋Scroll Edge 遮罩：
- * 覆蓋狀態列、頂部切換欄與（搵課頁的）搜尋欄，並於底緣柔和羽化過渡。
+ * 頂部統一毛玻璃＋Scroll Edge 遮罩：
+ * 覆蓋狀態列、頂部切換欄與搜尋欄，並於底緣柔和羽化過渡。
  *
  * @param {number} headerHeight 頂部 sticky 區域總高度（含安全區與工具列）
  * @param {number} [fadeHeight] 底緣漸變羽化高度
  * @param {Animated.Value} scrollY 對應滾動容器的垂直位移
+ * @param {string} [backgroundColor] 漸變底色（預設取 theme.bg_color）
  * @param {number} [zIndex] 疊層層級
  */
 const TopScrollEdgeBackdrop = ({
     headerHeight,
     fadeHeight = SCROLL_EDGE_FADE_HEIGHT,
     scrollY,
+    backgroundColor,
     zIndex = 1,
 }) => {
     const { theme, isLight } = useTheme();
-    const { bg_color } = theme;
+    const effectiveBgColor = backgroundColor ?? theme.bg_color;
 
     const edgeOpacity = useMemo(
         () => scrollY.interpolate({
@@ -61,7 +63,7 @@ const TopScrollEdgeBackdrop = ({
     const { gradientColors, gradientLocations } = useMemo(() => {
         if (totalHeight <= 0) {
             return {
-                gradientColors: [bg_color, bg_color],
+                gradientColors: [effectiveBgColor, effectiveBgColor],
                 gradientLocations: [0, 1],
             };
         }
@@ -69,14 +71,14 @@ const TopScrollEdgeBackdrop = ({
         const headerStop = Math.min(0.96, Math.max(midStop + 0.02, headerHeight / totalHeight));
         return {
             gradientColors: [
-                withHexAlpha(bg_color, 0.85),
-                withHexAlpha(bg_color, 0.68),
-                withHexAlpha(bg_color, 0.96),
-                withHexAlpha(bg_color, 0),
+                withHexAlpha(effectiveBgColor, 0.85),
+                withHexAlpha(effectiveBgColor, 0.68),
+                withHexAlpha(effectiveBgColor, 0.96),
+                withHexAlpha(effectiveBgColor, 0),
             ],
             gradientLocations: [0, midStop, headerStop, 1],
         };
-    }, [bg_color, headerHeight, totalHeight]);
+    }, [effectiveBgColor, headerHeight, totalHeight]);
 
     if (headerHeight <= 0) {
         return null;
