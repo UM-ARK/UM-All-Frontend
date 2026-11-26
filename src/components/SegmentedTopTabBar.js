@@ -42,7 +42,9 @@ export default function SegmentedTopTabBar({ state, descriptors, navigation, pos
     });
 
     return (
-        <View style={[styles.topTabBarContainer, { backgroundColor }]}>
+        <View
+            pointerEvents="box-none"
+            style={[styles.topTabBarContainer, { backgroundColor }]}>
             <SegmentedTabControl
                 options={options}
                 selectedIndex={state.index}

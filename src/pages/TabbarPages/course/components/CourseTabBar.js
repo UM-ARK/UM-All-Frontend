@@ -16,31 +16,63 @@ const CourseTabBar = ({
     onOpenSharePoint,
     canClear,
     onClearPress,
+    topInset = 0,
+    floating = false,
+    onBarLayout,
     ...tabBarProps
 }) => {
     const { theme } = useTheme();
     const { bg_color } = theme;
+    const isFloating = floating || topInset > 0;
 
     return (
-        <View style={[styles.wrapper, { backgroundColor: bg_color }]}>
-            <SegmentedTopTabBar {...tabBarProps} backgroundColor={bg_color} />
-            <View style={styles.menu}>
-                <CourseMoreMenu
-                    programmeLevel={programmeLevel}
-                    catalogMetadata={catalogMetadata}
-                    onManualUpdate={onManualUpdate}
-                    onOpenSharePoint={onOpenSharePoint}
-                    canClear={canClear}
-                    onClearPress={onClearPress}
+        <View
+            pointerEvents="box-none"
+            style={[
+                styles.wrapper,
+                {
+                    paddingTop: topInset,
+                    backgroundColor: isFloating ? 'transparent' : bg_color,
+                },
+                isFloating && styles.floatingWrapper,
+            ]}>
+            <View
+                pointerEvents="box-none"
+                onLayout={onBarLayout}
+                style={styles.barRow}>
+                <SegmentedTopTabBar
+                    {...tabBarProps}
+                    backgroundColor={isFloating ? 'transparent' : bg_color}
                 />
+                <View pointerEvents="box-none" style={styles.menu}>
+                    <CourseMoreMenu
+                        programmeLevel={programmeLevel}
+                        catalogMetadata={catalogMetadata}
+                        onManualUpdate={onManualUpdate}
+                        onOpenSharePoint={onOpenSharePoint}
+                        canClear={canClear}
+                        onClearPress={onClearPress}
+                    />
+                </View>
             </View>
         </View>
     );
 };
 
 const styles = StyleSheet.create({
+    floatingWrapper: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 10,
+    },
     wrapper: {
+        width: '100%',
+    },
+    barRow: {
         paddingHorizontal: verticalScale(42),
+        justifyContent: 'center',
     },
     menu: {
         position: 'absolute',

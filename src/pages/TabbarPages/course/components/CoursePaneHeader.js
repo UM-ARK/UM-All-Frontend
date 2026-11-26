@@ -18,7 +18,12 @@ import TimetableTabLabel from './TimetableTabLabel';
  * @param {'search'|'timetable'} segment 標題對應的段落；課表會帶衝突數／空課表角標
  * @param {object} [menuProps] 有值時渲染 CourseMoreMenu，透傳其全部 props
  */
-const CoursePaneHeader = ({ segment, menuProps }) => {
+const CoursePaneHeader = ({
+    segment,
+    menuProps,
+    topInset = 0,
+    floating = false,
+}) => {
     const { theme } = useTheme();
     const { bg_color, themeColor } = theme;
     const { t } = useTranslation('common');
@@ -26,10 +31,18 @@ const CoursePaneHeader = ({ segment, menuProps }) => {
     const styles = useMemo(
         () => ({
             wrapper: {
-                height: SEGMENTED_TOP_TAB_BAR_HEIGHT,
-                backgroundColor: bg_color,
+                paddingTop: topInset,
+                height: topInset + SEGMENTED_TOP_TAB_BAR_HEIGHT,
+                backgroundColor: floating ? 'transparent' : bg_color,
                 flexDirection: 'row',
                 alignItems: 'center',
+                ...(floating ? {
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    zIndex: 10,
+                } : null),
             },
             labelCell: {
                 flex: 1,
@@ -42,12 +55,12 @@ const CoursePaneHeader = ({ segment, menuProps }) => {
                 fontWeight: 'bold',
             },
         }),
-        [bg_color, themeColor],
+        [bg_color, floating, themeColor, topInset],
     );
 
     return (
-        <View style={styles.wrapper}>
-            <View style={styles.labelCell}>
+        <View pointerEvents={floating ? 'box-none' : 'auto'} style={styles.wrapper}>
+            <View pointerEvents="none" style={styles.labelCell}>
                 {segment === 'timetable' ? (
                     <TimetableTabLabel color={themeColor} />
                 ) : (

@@ -63,7 +63,7 @@ const CustomBottomSheet = forwardRef((props, ref) => {
             index={props.index ?? -1}
             snapPoints={snapPoints}
             enableDynamicSizing={false} // 修復v5無法snapToIndex問題
-            topInset={insets.top + verticalScale(10)}
+            topInset={props.topInset ?? insets.top + verticalScale(10)}
             bottomInset={bottomInset}
             keyboardBehavior={'extend'}
             keyboardBlurBehavior="restore"

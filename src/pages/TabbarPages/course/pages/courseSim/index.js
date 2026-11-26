@@ -8,6 +8,7 @@ import React, {
     useMemo,
 } from 'react';
 import {
+    Animated,
     View,
     TouchableOpacity,
     Alert,
@@ -67,7 +68,11 @@ import {
 } from '../../../../../utils/storageKits';
 import TouchableScale from '../../../../../components/TouchableScale';
 import CustomBottomSheet from '../../../../../utils/BottomSheet';
+import { useCourseChrome } from '../../context/CourseChromeContext';
 import { useCoursePlan } from '../../context/CoursePlanContext';
+import TopScrollEdgeBackdrop, {
+    SCROLL_EDGE_FADE_HEIGHT,
+} from '../../components/TopScrollEdgeBackdrop';
 import {
     getSectionFilterStatus,
     getSlotKey,
@@ -362,6 +367,14 @@ function CourseSim({ route, navigation, isSplitPane = false }) {
 
     const insets = useSafeAreaInsets();
     const { width: windowWidth, height: windowHeight } = useWindowDimensions();
+    const { topChromeHeight } = useCourseChrome();
+    const courseSimTopInset = topChromeHeight > 0
+        ? topChromeHeight + SCROLL_EDGE_FADE_HEIGHT
+        : 0;
+    const scrollY = useRef(new Animated.Value(0)).current;
+    const handleTopScroll = useCallback(event => {
+        scrollY.setValue(event.nativeEvent.contentOffset.y);
+    }, [scrollY]);
     const tabBarHeight = useContext(BottomTabBarHeightContext) ?? insets.bottom + 49;
     // Android：JS Bottom Tab 與內容分欄，場景底邊已在 Tab Bar 上方，勿再扣 tabBarHeight
     // iOS：原生 Tab 多為半透明疊層，內容延伸至螢幕底，需扣 tabBarHeight 才不會被擋住
@@ -583,6 +596,7 @@ function CourseSim({ route, navigation, isSplitPane = false }) {
             overviewReminderHeight > 0 &&
             viewSwitcherHeight > 0
             ? overviewViewportHeight -
+            courseSimTopInset -
             overviewWeekdayHeight -
             overviewReminderHeight -
             floatingBottom -
@@ -594,7 +608,7 @@ function CourseSim({ route, navigation, isSplitPane = false }) {
         OVERVIEW_HOUR_HEIGHT,
         measuredOverviewMaxHeight ??
         windowHeight -
-        insets.top -
+        (courseSimTopInset || insets.top) -
         tabBarHeight -
         OVERVIEW_RESERVED_HEIGHT,
     );
@@ -3000,7 +3014,7 @@ E11-0000
     };
 
     return (
-        // 頂欄由 course/index.js 容器統一提供；頂部 insets 亦在容器處理，此處不可重複扣一次
+        // 頂部安全區與切換欄浮於頁面之上，實際預留高度由 CourseChromeContext 的 topChromeHeight 提供
         <View
             onLayout={({ nativeEvent }) => {
                 setOverviewViewportHeight(nativeEvent.layout.height);
@@ -3014,7 +3028,14 @@ E11-0000
                 ref={verScroll}
                 keyboardDismissMode="on-drag"
                 contentInsetAdjustmentBehavior="never"
+                scrollIndicatorInsets={{
+                    top: topChromeHeight,
+                    bottom: floatingBottom,
+                }}
+                scrollEventThrottle={16}
+                onScroll={handleTopScroll}
                 contentContainerStyle={{
+                    paddingTop: courseSimTopInset,
                     // 預留底部 SegmentControl；Android 場景底已在 Tab 上方，勿再扣 tabBarHeight
                     paddingBottom: floatingBottom + verticalScale(50),
                 }}>
@@ -3050,6 +3071,13 @@ E11-0000
                 </View>
             </ScrollView>
 
+            <TopScrollEdgeBackdrop
+                headerHeight={topChromeHeight}
+                fadeHeight={SCROLL_EDGE_FADE_HEIGHT}
+                scrollY={scrollY}
+                zIndex={2}
+            />
+
             {/* 有排課時才顯示具體／概覽切換；與 FAB 同層，bottom 見 floatingBottom */}
             {visiblePlanSlots.length > 0 &&
                 timetableView &&
@@ -3074,6 +3102,7 @@ E11-0000
                 ref={bottomSheetRef}
                 page={'courseSim'}
                 index={sheetIndex}
+                topInset={topChromeHeight > 0 ? topChromeHeight + verticalScale(6) : undefined}
                 // Tab 已隱藏，sheet 需延伸至螢幕底部
                 bottomInset={0}
                 onAnimate={(fromIndex, toIndex) => {
