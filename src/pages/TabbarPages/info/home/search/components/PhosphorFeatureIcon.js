@@ -106,6 +106,7 @@ import { Info } from 'phosphor-react-native/src/icons/Info';
 import { Link } from 'phosphor-react-native/src/icons/Link';
 import { List } from 'phosphor-react-native/src/icons/List';
 import { MapPin } from 'phosphor-react-native/src/icons/MapPin';
+import { Moon } from 'phosphor-react-native/src/icons/Moon';
 import { Microphone } from 'phosphor-react-native/src/icons/Microphone';
 import { PaperPlaneTilt } from 'phosphor-react-native/src/icons/PaperPlaneTilt';
 import { PencilSimple } from 'phosphor-react-native/src/icons/PencilSimple';
@@ -131,7 +132,10 @@ import { Key } from 'phosphor-react-native/src/icons/Key';
 import { LinkBreak } from 'phosphor-react-native/src/icons/LinkBreak';
 import { Palette } from 'phosphor-react-native/src/icons/Palette';
 import { Sun } from 'phosphor-react-native/src/icons/Sun';
+import { Sunglasses } from 'phosphor-react-native/src/icons/Sunglasses';
 import { Translate } from 'phosphor-react-native/src/icons/Translate';
+import { Umbrella } from 'phosphor-react-native/src/icons/Umbrella';
+import { Coffee } from 'phosphor-react-native/src/icons/Coffee';
 
 // 靜態按需匯入 Phosphor Duotone 圖標（線性描邊＋輕量雙色填底），兼顧層次感與打包體積
 export const phosphorFeatureIcons = {
@@ -290,7 +294,11 @@ export const phosphorFeatureIcons = {
     'link-break': LinkBreak,
     palette: Palette,
     sun: Sun,
+    moon: Moon,
+    sunglasses: Sunglasses,
     translate: Translate,
+    umbrella: Umbrella,
+    coffee: Coffee,
 };
 
 export default function PhosphorFeatureIcon({

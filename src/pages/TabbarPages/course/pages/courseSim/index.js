@@ -36,7 +36,6 @@ import { FlashList } from '@shopify/flash-list';
 import { ScrollView } from 'react-native-gesture-handler';
 import lodash from 'lodash';
 import * as OpenCC from 'opencc-js';
-import { useTranslation } from 'react-i18next';
 import { useFocusEffect } from '@react-navigation/native';
 import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
 import {
@@ -180,8 +179,9 @@ function TimetableCourseMenuCard({
             cardStyle={{
                 width: COURSE_CARD_WIDTH,
                 backgroundColor,
-                borderRadius: scale(10),
-                padding: scale(5),
+                borderRadius: scale(12),
+                paddingHorizontal: scale(8),
+                paddingVertical: verticalScale(7),
                 alignItems: 'center',
                 justifyContent: 'center',
             }}>
@@ -362,6 +362,7 @@ function CourseSim({ route, navigation, isSplitPane = false }) {
         success,
         warning,
         TIME_TABLE_COLOR,
+        featuresScreen,
         isLight,
     } = theme;
 
@@ -527,7 +528,6 @@ function CourseSim({ route, navigation, isSplitPane = false }) {
         },
     });
 
-    const { i18n } = useTranslation();
     const replacementResult = useMemo(
         () =>
             getReplacementCourses({
@@ -817,16 +817,25 @@ function CourseSim({ route, navigation, isSplitPane = false }) {
                                 : null,
                     }}>
                     {/* 星期幾 */}
-                    <Text
+                    <View
                         style={{
-                            ...uiStyle.defaultText,
-                            color: todayText === day ? themeColor : black.third,
-                            fontSize: scale(25),
-                            fontWeight: 'bold',
                             alignSelf: 'center',
+                            paddingHorizontal: scale(10),
+                            paddingVertical: verticalScale(2),
+                            marginBottom: verticalScale(2),
+                            borderRadius: scale(999),
+                            backgroundColor: todayText === day ? tonal.primary15 : 'transparent',
                         }}>
-                        {day}
-                    </Text>
+                        <Text
+                            style={{
+                                ...uiStyle.defaultText,
+                                color: todayText === day ? themeColor : black.third,
+                                fontSize: scale(14),
+                                fontWeight: 'bold',
+                            }}>
+                            {day}
+                        </Text>
+                    </View>
 
                     {/* 渲染單一課程卡片 */}
                     <View style={{ flexDirection: 'column' }}>
@@ -1002,16 +1011,31 @@ function CourseSim({ route, navigation, isSplitPane = false }) {
 
         if (timeWarning) {
             timeDiffReminder = (
-                <Text
+                <View
                     style={{
-                        ...uiStyle.defaultText,
-                        alignSelf: 'center',
-                        color: unread,
-                        fontWeight: 'bold',
-                        textAlign: 'center',
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        marginTop: verticalScale(4),
+                        marginBottom: verticalScale(2),
                     }}>
-                    {'🆘' + t('課程衝突', { ns: 'timetable' }) + '🆘'}
-                </Text>
+                    <PhosphorFeatureIcon
+                        name="warning-circle"
+                        weight="fill"
+                        size={scale(12)}
+                        color={unread}
+                        style={{ marginRight: scale(3) }}
+                    />
+                    <Text
+                        style={{
+                            ...uiStyle.defaultText,
+                            color: unread,
+                            fontSize: scale(11),
+                            fontWeight: 'bold',
+                        }}>
+                        {t('課程衝突', { ns: 'timetable' })}
+                    </Text>
+                </View>
             );
         } else if (idx > 0) {
             // 未衝突才有休息時間可言，負數間隔一律由上面的衝突提示接手
@@ -1026,6 +1050,8 @@ function CourseSim({ route, navigation, isSplitPane = false }) {
                         ...uiStyle.defaultText,
                         alignSelf: 'center',
                         color: black.third,
+                        fontSize: scale(11),
+                        marginVertical: verticalScale(2),
                         textAlign: 'center',
                     }}>
                     {t('休息', { ns: 'timetable' })}
@@ -1043,15 +1069,14 @@ function CourseSim({ route, navigation, isSplitPane = false }) {
             );
         }
 
-        // 判斷是否下午
+        // 判斷是否下午／晚上
         let timeHH = moment(course['Time From'], 'HH').format('HH');
-        let timeReminderText = null;
-        timeReminderText =
-            timeHH > 12
-                ? timeHH >= 18
-                    ? `🌜${t('晚上', { ns: 'timetable' })}🌛`
-                    : `☕️${t('下午', { ns: 'timetable' })}☕️`
-                : null;
+        let timePeriod = null;
+        if (timeHH > 12) {
+            timePeriod = timeHH >= 18
+                ? { icon: 'moon', label: t('晚上', { ns: 'timetable' }) }
+                : { icon: 'sun', label: t('下午', { ns: 'timetable' }) };
+        }
 
         if (timeHH > 12 && dayCourseList.length > 1 && idx > 0) {
             let preTimeHH = moment(
@@ -1059,26 +1084,39 @@ function CourseSim({ route, navigation, isSplitPane = false }) {
                 'HH',
             ).format('HH');
             if (preTimeHH >= 18 && timeHH >= 18) {
-                timeReminderText = null;
+                timePeriod = null;
             }
             if (preTimeHH > 12 && preTimeHH < 18 && timeHH < 18) {
-                timeReminderText = null;
+                timePeriod = null;
             }
         }
 
-        afternoonReminder = timeReminderText ? (
-            <Text
+        afternoonReminder = timePeriod ? (
+            <View
                 style={{
-                    ...uiStyle.defaultText,
-                    alignSelf: 'center',
-                    textAlign: 'center',
-                    color: black.third,
-                    fontWeight: 'bold',
-                    fontSize:
-                        i18n.resolvedLanguage == 'en' ? scale(18) : scale(20),
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginTop: verticalScale(6),
+                    marginBottom: verticalScale(2),
                 }}>
-                {timeReminderText}
-            </Text>
+                <PhosphorFeatureIcon
+                    name={timePeriod.icon}
+                    weight="regular"
+                    size={scale(12)}
+                    color={black.third}
+                    style={{ marginRight: scale(3) }}
+                />
+                <Text
+                    style={{
+                        ...uiStyle.defaultText,
+                        color: black.third,
+                        fontWeight: '600',
+                        fontSize: scale(11),
+                    }}>
+                    {timePeriod.label}
+                </Text>
+            </View>
         ) : null;
 
         const courseMenuProps = getTimetableCourseMenuProps(slot);
@@ -1099,15 +1137,15 @@ function CourseSim({ route, navigation, isSplitPane = false }) {
                         style={{
                             ...uiStyle.defaultText,
                             color: black.main,
-                            opacity: 0.7,
-                            fontSize: scale(20),
+                            fontSize: scale(18),
+                            lineHeight: scale(20),
                             textAlign: 'center',
                             fontWeight: '700',
                         }}>
                         {course['Course Code'].substring(0, 4) + '\n'}
                         <Text
                             style={{
-                                fontSize: scale(20),
+                                fontSize: scale(18),
                                 fontWeight: 'bold',
                             }}>
                             {course['Course Code'].substring(4, 8)}
@@ -1118,8 +1156,10 @@ function CourseSim({ route, navigation, isSplitPane = false }) {
                     <Text
                         style={{
                             ...uiStyle.defaultText,
-                            color: black.main,
-                            opacity: 0.8,
+                            color: black.third,
+                            fontSize: scale(11),
+                            fontWeight: '600',
+                            marginTop: verticalScale(1),
                         }}>
                         {course.Section}
                     </Text>
@@ -1129,11 +1169,11 @@ function CourseSim({ route, navigation, isSplitPane = false }) {
                         <Text
                             style={{
                                 ...uiStyle.defaultText,
-                                color: black.main,
+                                color: black.third,
                                 textAlign: 'center',
                                 alignSelf: 'stretch',
                                 fontSize: scale(10),
-                                opacity: 0.45,
+                                marginTop: verticalScale(2),
                             }}>
                             {course['Teacher Information']}
                         </Text>
@@ -1143,9 +1183,11 @@ function CourseSim({ route, navigation, isSplitPane = false }) {
                     <Text
                         style={{
                             ...uiStyle.defaultText,
-                            color: black.main,
+                            color: black.second,
                             textAlign: 'center',
-                            opacity: 0.4,
+                            fontSize: scale(11.5),
+                            lineHeight: scale(15),
+                            marginVertical: verticalScale(2),
                         }}
                         numberOfLines={4}>
                         {course['Course Title']}
@@ -1156,8 +1198,8 @@ function CourseSim({ route, navigation, isSplitPane = false }) {
                         style={{
                             ...uiStyle.defaultText,
                             color: black.main,
+                            fontSize: scale(11),
                             fontWeight: 'bold',
-                            opacity: 0.5,
                         }}>
                         {course.Classroom}
                     </Text>
@@ -1166,31 +1208,34 @@ function CourseSim({ route, navigation, isSplitPane = false }) {
                     <View
                         style={{
                             flexDirection: 'row',
-                            justifyContent: 'space-between',
-                            alignSelf: 'stretch',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            marginTop: verticalScale(2),
                         }}>
                         <Text
                             style={{
                                 ...uiStyle.defaultText,
-                                color: black.main,
+                                color: black.second,
+                                fontSize: scale(11),
                                 fontWeight: '600',
-                                opacity: 0.8,
                             }}>
                             {course['Time From']}
                         </Text>
-                        <PhosphorFeatureIcon
-                            name="dots-three"
-                            weight="regular"
-                            size={scale(20)}
-                            color={black.main}
-                            style={{ opacity: 0.4 }}
-                        />
                         <Text
                             style={{
                                 ...uiStyle.defaultText,
-                                color: black.main,
+                                color: black.third,
+                                fontSize: scale(11),
+                                marginHorizontal: scale(3),
+                            }}>
+                            {'–'}
+                        </Text>
+                        <Text
+                            style={{
+                                ...uiStyle.defaultText,
+                                color: black.second,
+                                fontSize: scale(11),
                                 fontWeight: '600',
-                                opacity: 0.8,
                             }}>
                             {course['Time To']}
                         </Text>
@@ -2854,7 +2899,7 @@ E11-0000
                     width: '100%',
                     overflow: 'hidden',
                     backgroundColor: getCardColor(course, visiblePlanCourseCodes, visibleConflictSlotKeys),
-                    borderRadius: scale(7),
+                    borderRadius: scale(8),
                     paddingHorizontal: scale(compact ? 2 : 3),
                     paddingVertical: verticalScale(compact ? 1 : 3),
                     alignItems: 'center',
@@ -2880,22 +2925,39 @@ E11-0000
                     }
                     style={{ flexDirection: 'row' }}>
                     {overviewDays.map(day => (
-                        <Text
+                        <View
                             key={day}
                             style={{
-                                ...uiStyle.defaultText,
                                 width: overviewDayColumnWidth,
-                                paddingVertical: verticalScale(5),
-                                color:
-                                    todayText === day
-                                        ? themeColor
-                                        : black.third,
-                                fontSize: scale(11),
-                                fontWeight: 'bold',
-                                textAlign: 'center',
+                                paddingVertical: verticalScale(4),
+                                alignItems: 'center',
+                                justifyContent: 'center',
                             }}>
-                            {day}
-                        </Text>
+                            <View
+                                style={{
+                                    paddingHorizontal: scale(8),
+                                    paddingVertical: verticalScale(2),
+                                    borderRadius: scale(999),
+                                    backgroundColor:
+                                        todayText === day
+                                            ? tonal.primary15
+                                            : 'transparent',
+                                }}>
+                                <Text
+                                    style={{
+                                        ...uiStyle.defaultText,
+                                        color:
+                                            todayText === day
+                                                ? themeColor
+                                                : black.third,
+                                        fontSize: scale(11),
+                                        fontWeight: 'bold',
+                                        textAlign: 'center',
+                                    }}>
+                                    {day}
+                                </Text>
+                            </View>
+                        </View>
                     ))}
                 </View>
                 <View
@@ -2912,7 +2974,7 @@ E11-0000
                                     day === overviewDays[0]
                                         ? 0
                                         : StyleSheet.hairlineWidth,
-                                borderColor: themeColorUltraLight,
+                                borderColor: featuresScreen.divider,
                             }}>
                             {overviewRows.map(row => (
                                 <View
@@ -2926,7 +2988,7 @@ E11-0000
                                         width: '100%',
                                         borderTopWidth:
                                             StyleSheet.hairlineWidth,
-                                        borderColor: themeColorUltraLight,
+                                        borderColor: featuresScreen.divider,
                                     }}
                                 />
                             ))}
@@ -2941,7 +3003,7 @@ E11-0000
                             )}
                         </View>
                     ))}
-                    {renderDepartingCards(scale(7))}
+                    {renderDepartingCards(scale(8))}
                 </View>
             </View>
         );
