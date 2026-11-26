@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useCallback } from 'react';
+import { View } from 'react-native';
 
 import { trigger } from '../../../utils/trigger';
 import { useTheme } from '../../../components/ThemeContext';
@@ -7,9 +8,9 @@ import HomePage from './home/index';
 import ClubPage from './ClubPage';
 import CampusPage from './CampusPage';
 
-import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
+import { createMaterialTopTabNavigator, MaterialTopTabBar } from '@react-navigation/material-top-tabs';
 import { moderateScale } from 'react-native-size-matters';
-import { SafeAreaView } from 'react-native-screens/experimental';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
 const Tab = createMaterialTopTabNavigator();
@@ -23,16 +24,29 @@ export default function NewsScreen() {
     const { theme } = useTheme();
     const { bg_color, black, themeColor } = theme;
     const { t } = useTranslation(['common', 'home']);
+    const { top } = useSafeAreaInsets();
+    const topChromeHeight = top + TAB_BAR_HEIGHT;
+    const renderTopTabBar = useCallback(props => (
+        <View
+            pointerEvents="box-none"
+            style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 2, paddingTop: top }}>
+            <MaterialTopTabBar {...props} />
+        </View>
+    ), [top]);
 
     return (
-        <SafeAreaView style={{ backgroundColor: bg_color, flex: 1 }} edges={{ top: true }}>
+        <View style={{ backgroundColor: bg_color, flex: 1 }}>
             <Tab.Navigator
+                tabBar={renderTopTabBar}
                 screenOptions={{
+                    sceneStyle: { backgroundColor: bg_color },
                     tabBarLabel: TopTabLabel,
                     tabBarStyle: {
-                        backgroundColor: bg_color,
+                        backgroundColor: 'transparent',
                         height: TAB_BAR_HEIGHT,
                         overflow: 'hidden',
+                        elevation: 0,
+                        shadowOpacity: 0,
                     },
                     tabBarItemStyle: {
                         minHeight: TAB_BAR_HEIGHT,
@@ -56,29 +70,29 @@ export default function NewsScreen() {
                 initialRouteName="HomePage">
                 <Tab.Screen
                     name="ClubPage"
-                    component={ClubPage}
                     options={{ title: t('TOPTAB_CLUB') }}
                     listeners={() => ({
                         tabPress: () => trigger(),
-                    })}
-                />
+                    })}>
+                    {props => <ClubPage {...props} topChromeHeight={topChromeHeight} />}
+                </Tab.Screen>
                 <Tab.Screen
                     name="HomePage"
-                    component={HomePage}
                     options={{ title: t('TOPTAB_MAIN') }}
                     listeners={() => ({
                         tabPress: () => trigger(),
-                    })}
-                />
+                    })}>
+                    {props => <HomePage {...props} topChromeHeight={topChromeHeight} />}
+                </Tab.Screen>
                 <Tab.Screen
                     name="CampusPage"
-                    component={CampusPage}
                     options={{ title: t('TOPTAB_CAMPUS') }}
                     listeners={() => ({
                         tabPress: () => trigger(),
-                    })}
-                />
+                    })}>
+                    {props => <CampusPage {...props} topChromeHeight={topChromeHeight} />}
+                </Tab.Screen>
             </Tab.Navigator>
-        </SafeAreaView>
+        </View>
     );
 }

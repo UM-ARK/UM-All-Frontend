@@ -19,6 +19,8 @@ import NewsPage from './NewsPage';
 const TOP_TAB_SCALE_FACTOR = 0.1;
 const SEGMENT_TRACK_PADDING = scale(2.5);
 const SEGMENT_ITEM_HEIGHT = moderateScale(22, TOP_TAB_SCALE_FACTOR);
+const SEGMENT_BAR_PADDING_TOP = verticalScale(4);
+const SEGMENT_BAR_PADDING_BOTTOM = verticalScale(2);
 const SEGMENT_CAPSULE_WIDTH = scale(140);
 const SEGMENT_LABEL_FONT_SIZE = moderateScale(10, 0.25);
 const TopTabTrackContainer = isLiquidGlassSupported ? GlassView : View;
@@ -28,11 +30,13 @@ const AnimatedPagerView = Animated.createAnimatedComponent(PagerView);
  * 校園資訊頁：活動 / 新聞合併為單一 Top Tab。
  * 分段切換器對齊服務頁膠囊；左右滑仍由 PagerView 換頁。
  */
-const CampusPage = () => {
+const CampusPage = ({ topChromeHeight }) => {
     const { theme } = useTheme();
     const { bg_color, isLight, white, black, featuresScreen, pressOverlay, viewShadow } = theme;
     const { t } = useTranslation('common');
     const reducedMotion = useAppReducedMotion();
+    const topHeaderHeight = topChromeHeight + SEGMENT_BAR_PADDING_TOP + SEGMENT_ITEM_HEIGHT +
+        SEGMENT_TRACK_PADDING * 2 + SEGMENT_BAR_PADDING_BOTTOM;
 
     const pagerRef = useRef(null);
     const eventPageRef = useRef(null);
@@ -136,7 +140,7 @@ const CampusPage = () => {
 
     return (
         <View style={[styles.container, { backgroundColor: bg_color }]}>
-            <View style={styles.segmentBar}>
+            <View pointerEvents="box-none" style={[styles.segmentBar, { top: topChromeHeight }]}>
                 <TopTabTrackContainer
                     {...(isLiquidGlassSupported ? { isInteractive: true } : {})}
                     onLayout={event => setTrackWidth(event.nativeEvent.layout.width)}
@@ -195,20 +199,22 @@ const CampusPage = () => {
                 offscreenPageLimit={1}>
                 <View key="event" style={styles.page} collapsable={false}>
                     {mountedPages[0] ? (
-                        <UMEventPage ref={eventPageRef} />
+                        <UMEventPage ref={eventPageRef} topHeaderHeight={topHeaderHeight} />
                     ) : null}
                 </View>
                 <View key="news" style={styles.page} collapsable={false}>
                     {mountedPages[1] ? (
-                        <NewsPage ref={newsPageRef} />
+                        <NewsPage ref={newsPageRef} topHeaderHeight={topHeaderHeight} />
                     ) : null}
                 </View>
             </AnimatedPagerView>
 
-            <ScrollToTopButton
-                onScrollToTop={onScrollToTopPress}
-                style={styles.scrollTopButton}
-            />
+            <View pointerEvents="box-none" style={[styles.scrollTopOverlay, { top: topChromeHeight }]}>
+                <ScrollToTopButton
+                    onScrollToTop={onScrollToTopPress}
+                    style={styles.scrollTopButton}
+                />
+            </View>
         </View>
     );
 };
@@ -218,13 +224,15 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     segmentBar: {
+        position: 'absolute',
+        zIndex: 2,
         width: '100%',
         maxWidth: TOP_TAB_STRIP_MAX_WIDTH,
         alignSelf: 'center',
         alignItems: 'center',
         paddingHorizontal: scale(12),
-        paddingTop: verticalScale(4),
-        paddingBottom: verticalScale(2),
+        paddingTop: SEGMENT_BAR_PADDING_TOP,
+        paddingBottom: SEGMENT_BAR_PADDING_BOTTOM,
     },
     segmentTrack: {
         width: SEGMENT_CAPSULE_WIDTH,
@@ -255,6 +263,10 @@ const styles = StyleSheet.create({
     },
     segmentLabelActive: {
         fontWeight: '600',
+    },
+    scrollTopOverlay: {
+        ...StyleSheet.absoluteFillObject,
+        zIndex: 30,
     },
     scrollTopButton: {
         zIndex: 30,

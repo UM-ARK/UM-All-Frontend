@@ -1,7 +1,9 @@
 import React, { memo, useCallback, useContext, useEffect, useMemo, useRef, useState, } from 'react';
-import { View, RefreshControl, TouchableOpacity, Alert, SectionList, Dimensions, FlatList, Platform, } from 'react-native';
+import { View, RefreshControl, TouchableOpacity, Alert, SectionList, Dimensions, FlatList, Platform, Animated, } from 'react-native';
 
 import Text from '../../../components/AppText';
+import TopScrollEdgeBackdrop from '../../../components/TopScrollEdgeBackdrop';
+import { SEARCH_FIELD_MIN_HEIGHT } from '../../../components/searchFieldStyles';
 import { uiStyle, ThemeContext, } from '../../../components/ThemeContext';
 import { BASE_URI, BASE_HOST, GET, USUAL_Q } from '../../../utils/pathMap';
 import { clubTagList, clubTagMap } from '../../../utils/clubMap';
@@ -95,7 +97,7 @@ const buildSections = (clubDataList) => {
     return sections;
 };
 
-function ClubPage() {
+function ClubPage({ topChromeHeight }) {
     const { theme } = useContext(ThemeContext);
     const { themeColor, black, white } = theme;
     const insets = useSafeAreaInsets();
@@ -106,6 +108,10 @@ function ClubPage() {
     const [searchQuery, setSearchQuery] = useState('');
     const [isLoading, setIsLoading] = useState(true);
     const [isOtherViewVisible, setIsOtherViewVisible] = useState(true);
+    const [searchHeaderHeight, setSearchHeaderHeight] = useState(SEARCH_FIELD_MIN_HEIGHT + scale(16));
+    const [scrollY] = useState(() => new Animated.Value(0));
+    const headerHeight = topChromeHeight + searchHeaderHeight;
+    const nativeTopInset = Platform.OS === 'ios' ? headerHeight : 0;
     const sectionListRef = useRef(null);
     const firstSectionHeaderHeightRef = useRef(0);
     const clubRowHeightRef = useRef(0);
@@ -125,9 +131,13 @@ function ClubPage() {
         setIsOtherViewVisible(true);
     }, []);
 
+    const handleScroll = useCallback(event => {
+        scrollY.setValue(event.nativeEvent.contentOffset.y + nativeTopInset);
+    }, [nativeTopInset, scrollY]);
+
     const scrollToSection = useCallback((sectionIndex) => {
         if (sectionIndex === 0) {
-            sectionListRef.current?.getScrollResponder()?.scrollTo({ y: 0, animated: true });
+            sectionListRef.current?.getScrollResponder()?.scrollTo({ y: -nativeTopInset, animated: true });
             return;
         }
 
@@ -147,10 +157,10 @@ function ClubPage() {
             ), 0);
 
         sectionListRef.current?.getScrollResponder()?.scrollTo({
-            y: offset,
+            y: offset - nativeTopInset,
             animated: true,
         });
-    }, [sections]);
+    }, [nativeTopInset, sections]);
 
     const getData = useCallback(async () => {
         handleScrollStart();
@@ -298,19 +308,6 @@ function ClubPage() {
 
     return (
         <View style={{ flex: 1, backgroundColor: theme.bg_color }}>
-            <ClubSearchBar
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-                loading={isLoading}
-                onFocus={handleSearchFocus}
-                onCancel={() => setSearchQuery('')}
-                containerStyle={{
-                    backgroundColor: theme.bg_color,
-                    borderTopWidth: 0,
-                    borderBottomWidth: 0,
-                }}
-            />
-
             {sections.length > 0 && isOtherViewVisible && !isLoading ? (
                 <View style={{
                     position: 'absolute',
@@ -361,7 +358,11 @@ function ClubPage() {
             <SectionList
                 ref={sectionListRef}
                 style={{ flex: 1, width: '100%' }}
-                contentInsetAdjustmentBehavior="automatic"
+                contentInsetAdjustmentBehavior="never"
+                // ScrollView 依 contentInset 計算置頂分類位置。Android 另用 padding 預留頂部空間。
+                contentInset={{ top: headerHeight }}
+                contentOffset={{ x: 0, y: -nativeTopInset }}
+                contentContainerStyle={{ paddingTop: headerHeight - nativeTopInset }}
                 sections={sections}
                 keyExtractor={(item, index) => {
                     const firstId = item[0]?._id;
@@ -431,12 +432,15 @@ function ClubPage() {
                         colors={[themeColor]}
                         tintColor={themeColor}
                         refreshing={isLoading}
+                        progressViewOffset={headerHeight}
                         onRefresh={() => {
                             getData();
                             handleScrollStart();
                         }}
                     />
                 }
+                onScroll={handleScroll}
+                scrollEventThrottle={16}
                 onScrollBeginDrag={handleScrollStart}
                 onMomentumScrollEnd={handleScrollEnd}
                 ListEmptyComponent={isLoading ? renderClubSkeleton() : null}
@@ -449,6 +453,18 @@ function ClubPage() {
                 // Android + Fabric：removeClippedSubviews 與 sticky 區段標題會導致掛載索引錯亂而閃退（addViewAt / IndexOutOfBounds）
                 removeClippedSubviews={Platform.OS === 'ios'}
             />
+            <TopScrollEdgeBackdrop headerHeight={headerHeight} scrollY={scrollY} />
+            <View
+                onLayout={event => setSearchHeaderHeight(event.nativeEvent.layout.height)}
+                style={{ position: 'absolute', top: topChromeHeight, left: 0, right: 0, zIndex: 2 }}>
+                <ClubSearchBar
+                    value={searchQuery}
+                    onChangeText={setSearchQuery}
+                    loading={isLoading}
+                    onFocus={handleSearchFocus}
+                    onCancel={() => setSearchQuery('')}
+                />
+            </View>
         </View>
     );
 }

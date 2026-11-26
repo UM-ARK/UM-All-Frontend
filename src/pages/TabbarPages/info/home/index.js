@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import {
+    Animated,
     ScrollView,
     View,
     Pressable,
@@ -57,6 +58,7 @@ import lodash from 'lodash';
 import { useTranslation } from 'react-i18next';
 import { BottomSheetScrollView, BottomSheetFlatList } from '@gorhom/bottom-sheet';
 import ScrollToTopButton from '../../../../components/ScrollToTopButton';
+import TopScrollEdgeBackdrop from '../../../../components/TopScrollEdgeBackdrop';
 import TouchableScale from '../../../../components/TouchableScale';
 import FeatureIcon from './search/components/FeatureIcon';
 import Ionicons from '@react-native-vector-icons/ionicons';
@@ -101,13 +103,14 @@ const iconTypes = {
     materialCommunityIcons: 'MaterialCommunityIcons',
 };
 
-const HomeScreen = ({ navigation }) => {
+const HomeScreen = ({ navigation, topChromeHeight }) => {
     const { theme } = useTheme();
     const { white, bg_color, black, themeColor, themeColorLight, themeColorUltraLight, viewShadow, TIME_TABLE_COLOR } = theme;
     const { t, i18n } = useTranslation(['common', 'home']);
     const { programmeLevel } = useProgrammeLevel();
     const isTc = i18n.language === 'tc';
     const featureFontSize = isTc ? verticalScale(8) : verticalScale(7);
+    const [scrollY] = useState(() => new Animated.Value(0));
 
     // 狀態
     const functionArray = useMemo(() => [
@@ -407,6 +410,7 @@ const HomeScreen = ({ navigation }) => {
     // 處理 Scroll：觸底加載更多數據
     const handleScroll = (event) => {
         const {layoutMeasurement, contentOffset, contentSize} = event.nativeEvent;
+        scrollY.setValue(contentOffset.y);
 
         if (isLoading || isLoadMore) {return;}
         // 僅 ARK 活動時瀑布流較短，提前約一屏觸發預載，避免滑到底才開始請求
@@ -510,12 +514,14 @@ const HomeScreen = ({ navigation }) => {
         <View style={{ flex: 1, backgroundColor: bg_color, alignItems: 'center', justifyContent: 'center' }}>
             <ScrollView
                 style={{ width: '100%' }}
-                contentInsetAdjustmentBehavior="automatic"
+                contentInsetAdjustmentBehavior="never"
+                scrollIndicatorInsets={{ top: topChromeHeight }}
                 refreshControl={
                     <RefreshControl
                         colors={[themeColor]}
                         tintColor={themeColor}
                         refreshing={isRefreshing}
+                        progressViewOffset={topChromeHeight}
                         onRefresh={handleRefresh}
                     />
                 }
@@ -526,7 +532,7 @@ const HomeScreen = ({ navigation }) => {
                 scrollEventThrottle={16}
                 keyboardDismissMode={Platform.OS === 'android' ? 'none' : 'on-drag'}
                 keyboardShouldPersistTaps={Platform.OS === 'android' ? 'always' : 'handled'}
-                contentContainerStyle={{ width: '100%', alignItems: 'center' }}
+                contentContainerStyle={{ width: '100%', alignItems: 'center', paddingTop: topChromeHeight }}
             >
 
                 <SearchBar navigation={navigation} />
@@ -758,6 +764,7 @@ const HomeScreen = ({ navigation }) => {
                 {/* 活動瀑布流，預留間距避免遮擋上方快捷入口 */}
                 <EventPage ref={eventPage} style={{ marginTop: verticalScale(3) }} />
             </ScrollView>
+            <TopScrollEdgeBackdrop headerHeight={topChromeHeight} scrollY={scrollY} />
 
             {/* Modal */}
             {isShowModal && (

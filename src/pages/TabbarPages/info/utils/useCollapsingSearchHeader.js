@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { Animated } from 'react-native';
 import { scale } from 'react-native-size-matters';
 import {
     Easing,
@@ -24,6 +25,7 @@ const SEARCH_BAR_EASE_OUT = Easing.bezier(0.23, 1, 0.32, 1);
  * progress：0 完全展開，1 完全收起。
  */
 export function useCollapsingSearchHeader() {
+    const [scrollY] = useState(() => new Animated.Value(0));
     const searchProgress = useSharedValue(0);
     const barHeightSV = useSharedValue(FALLBACK_SEARCH_HEADER_HEIGHT);
     const heightRef = useRef(FALLBACK_SEARCH_HEADER_HEIGHT);
@@ -98,6 +100,7 @@ export function useCollapsingSearchHeader() {
 
     const onScroll = useCallback(event => {
         const offset = event.nativeEvent.contentOffset.y;
+        scrollY.setValue(offset);
         const previous = lastScrollYRef.current ?? offset;
         lastScrollYRef.current = offset;
         const progress = nextHarborSearchBarProgress(
@@ -116,7 +119,7 @@ export function useCollapsingSearchHeader() {
             return;
         }
         scheduleSettle();
-    }, [cancelSettle, scheduleSettle, searchProgress]);
+    }, [cancelSettle, scheduleSettle, scrollY, searchProgress]);
 
     const onScrollEndDrag = useCallback(() => {
         fingerDownRef.current = false;
@@ -135,6 +138,7 @@ export function useCollapsingSearchHeader() {
     });
 
     return {
+        scrollY,
         onScroll,
         onScrollBeginDrag,
         onScrollEndDrag,

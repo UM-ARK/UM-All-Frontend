@@ -12,6 +12,7 @@ import { Platform, View, RefreshControl } from 'react-native';
 import { AnimatedFlashList } from '@shopify/flash-list';
 
 import { ThemeContext } from '../../../components/ThemeContext';
+import TopScrollEdgeBackdrop from '../../../components/TopScrollEdgeBackdrop';
 import { UM_API_EVENT, UM_API_TOKEN } from '../../../utils/pathMap';
 import { trigger } from '../../../utils/trigger';
 import {
@@ -80,7 +81,7 @@ const orderEventData = result => {
 /**
  * 澳大活動列表
  */
-const UMEventPage = forwardRef(function UMEventPage(_props, ref) {
+const UMEventPage = forwardRef(function UMEventPage({ topHeaderHeight }, ref) {
     const scrollViewRef = useRef(null);
     const mountedRef = useRef(true);
     const hasVisibleDataRef = useRef(false);
@@ -101,6 +102,7 @@ const UMEventPage = forwardRef(function UMEventPage(_props, ref) {
     const [searchQuery, setSearchQuery] = useState('');
     const [isLoading, setIsLoading] = useState(true);
     const {
+        scrollY,
         onScroll: onSearchScroll,
         onScrollBeginDrag: onSearchScrollBeginDrag,
         onScrollEndDrag: onSearchScrollEndDrag,
@@ -237,7 +239,7 @@ const UMEventPage = forwardRef(function UMEventPage(_props, ref) {
                     style={{ flex: 1, width: '100%' }}
                     data={filteredData}
                     contentContainerStyle={{
-                        paddingTop: searchBarHeight,
+                        paddingTop: topHeaderHeight + searchBarHeight,
                         paddingBottom: listBottomPad,
                     }}
                     onScroll={onSearchScroll}
@@ -251,6 +253,7 @@ const UMEventPage = forwardRef(function UMEventPage(_props, ref) {
                     contentInsetAdjustmentBehavior="never"
                     automaticallyAdjustsScrollIndicatorInsets={false}
                     scrollIndicatorInsets={{
+                        top: topHeaderHeight,
                         bottom: tabBarHeight,
                         right: 1,
                     }}
@@ -263,40 +266,41 @@ const UMEventPage = forwardRef(function UMEventPage(_props, ref) {
                             colors={[themeColor]}
                             tintColor={themeColor}
                             refreshing={isRefreshing}
-                            progressViewOffset={searchBarHeight}
+                            progressViewOffset={topHeaderHeight + searchBarHeight}
                             onRefresh={() => {
                                 getData({ refreshing: true });
                             }}
                         />
                     }
                 />
-                <Reanimated.View
+                <TopScrollEdgeBackdrop headerHeight={topHeaderHeight} scrollY={scrollY} />
+                <View
                     onLayout={onSearchBarLayout}
                     pointerEvents={searchCollapsed ? 'none' : 'auto'}
                     accessibilityElementsHidden={searchCollapsed}
                     importantForAccessibility={
                         searchCollapsed ? 'no-hide-descendants' : 'auto'
                     }
-                    style={[
-                        {
-                            position: 'absolute',
-                            top: 0,
-                            left: 0,
-                            right: 0,
-                            zIndex: 2,
-                        },
-                        searchBarAnimatedStyle,
-                    ]}>
-                    <ClubSearchBar
-                        value={searchQuery}
-                        onChangeText={setSearchQuery}
-                        loading={isRefreshing}
-                        onFocus={handleSearchFocus}
-                        placeholder={t('搜索澳大活動')}
-                        cancelLabel={t('取消')}
-                        clearAccessibilityLabel={t('清除搜尋')}
-                    />
-                </Reanimated.View>
+                    style={{
+                        position: 'absolute',
+                        top: topHeaderHeight,
+                        left: 0,
+                        right: 0,
+                        zIndex: 2,
+                        overflow: 'hidden',
+                    }}>
+                    <Reanimated.View style={searchBarAnimatedStyle}>
+                        <ClubSearchBar
+                            value={searchQuery}
+                            onChangeText={setSearchQuery}
+                            loading={isRefreshing}
+                            onFocus={handleSearchFocus}
+                            placeholder={t('搜索澳大活動')}
+                            cancelLabel={t('取消')}
+                            clearAccessibilityLabel={t('清除搜尋')}
+                        />
+                    </Reanimated.View>
+                </View>
             </View>
         );
     };
@@ -312,7 +316,7 @@ const UMEventPage = forwardRef(function UMEventPage(_props, ref) {
                 backgroundColor: bg_color,
             }}>
             {isLoading ? (
-                <NewsListSkeleton />
+                <NewsListSkeleton contentTopInset={topHeaderHeight} />
             ) : (
                 data != undefined && renderPage()
             )}
