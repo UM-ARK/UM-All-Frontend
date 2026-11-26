@@ -21,6 +21,8 @@ export default function SegmentedTabControl({
     position,
     onChange,
     compact = false,
+    compactItemWidth = COMPACT_ITEM_WIDTH,
+    raisedTrack = false,
 }) {
     const { theme } = useTheme();
     const { isLight, white, black, featuresScreen, pressOverlay, viewShadow } = theme;
@@ -32,9 +34,11 @@ export default function SegmentedTabControl({
         return null;
     }
 
+    const Track = raisedTrack ? View : TrackContainer;
+    const showTrackSurface = raisedTrack || !isLiquidGlassSupported;
     const trackPadding = compact ? COMPACT_TRACK_PADDING : TRACK_PADDING;
     const segmentWidth = compact
-        ? COMPACT_ITEM_WIDTH
+        ? compactItemWidth
         : Math.max(0, (trackWidth - trackPadding * 2) / optionCount);
     // 滑塊跟分頁進度；文字色用 selected 靜態切換（AppText 無法可靠吃 Animated color）。
     const animatedPosition = reducedMotion || optionCount === 1 ? null : position;
@@ -45,13 +49,14 @@ export default function SegmentedTabControl({
     }) ?? selectedIndex * segmentWidth;
 
     return (
-        <TrackContainer
+        <Track
             onLayout={compact ? undefined : event => setTrackWidth(event.nativeEvent.layout.width)}
             style={[
                 styles.track,
                 compact ? styles.compactTrack : styles.regularTrack,
-                !isLiquidGlassSupported && { backgroundColor: white },
-                !isLiquidGlassSupported && isLight && viewShadow,
+                showTrackSurface && { backgroundColor: white },
+                showTrackSurface && (isLight || raisedTrack) && viewShadow,
+                raisedTrack && styles.raisedTrack,
             ]}>
             {segmentWidth > 0 ? (
                 <Animated.View
@@ -81,7 +86,7 @@ export default function SegmentedTabControl({
                         onPress={() => onChange(index)}
                         style={({ pressed }) => [
                             styles.button,
-                            compact ? styles.compactButton : styles.regularButton,
+                            compact ? [styles.compactButton, { width: segmentWidth }] : styles.regularButton,
                             pressed && styles.buttonPressed,
                         ]}>
                         <View style={styles.labelRow}>
@@ -100,7 +105,7 @@ export default function SegmentedTabControl({
                     </Pressable>
                 );
             })}
-        </TrackContainer>
+        </Track>
     );
 }
 
@@ -110,6 +115,9 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         borderRadius: scale(999),
         overflow: 'hidden',
+    },
+    raisedTrack: {
+        overflow: 'visible',
     },
     regularTrack: {
         width: scale(172),
@@ -138,7 +146,6 @@ const styles = StyleSheet.create({
         height: ITEM_HEIGHT,
     },
     compactButton: {
-        width: COMPACT_ITEM_WIDTH,
         height: moderateScale(28, 0.1),
     },
     labelRow: {
