@@ -353,38 +353,42 @@ const Nav = () => {
                             android: 'card',
                             ios: Platform.isPad ? 'card' : 'modal',
                         }),
-                        headerLeft: props =>
-                            Platform.OS === 'android' ? (
-                                <TouchableOpacity
-                                    onPress={() => {
-                                        trigger();
-                                        navigation.goBack();
-                                    }}
-                                    style={{
-                                        width: 36,
-                                        height: 36,
-                                        borderRadius: 18,
-                                        backgroundColor:
-                                            theme.black.main + '14',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                    }}>
-                                    <Ionicons
-                                        name="chevron-back"
-                                        size={22}
-                                        color={black.main}
-                                    />
-                                </TouchableOpacity>
-                            ) : (
-                                <HeaderBackButton
-                                    {...props}
-                                    onPress={() => {
-                                        trigger();
-                                        navigation.goBack();
-                                    }}
-                                    label=""
-                                />
-                            ),
+                        headerLeft:
+                            Platform.OS === 'android'
+                                ? () => (
+                                    <TouchableOpacity
+                                        onPress={() => {
+                                            trigger();
+                                            navigation.goBack();
+                                        }}
+                                        style={{
+                                            width: 36,
+                                            height: 36,
+                                            borderRadius: 18,
+                                            backgroundColor:
+                                                theme.black.main + '14',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                        }}>
+                                        <Ionicons
+                                            name="chevron-back"
+                                            size={22}
+                                            color={black.main}
+                                        />
+                                    </TouchableOpacity>
+                                )
+                                : Platform.isPad
+                                    ? undefined
+                                    : props => (
+                                        <HeaderBackButton
+                                            {...props}
+                                            onPress={() => {
+                                                trigger();
+                                                navigation.goBack();
+                                            }}
+                                            label=""
+                                        />
+                                    ),
                     })}>
                     {/* 服務頁 */}
                     <Stack.Screen
@@ -392,8 +396,11 @@ const Nav = () => {
                         component={Bus}
                         options={{
                             headerTitle: t('校園巴士'),
-                            // 巴士頁改為全屏堆疊跳轉，不再使用 iOS Modal
+                            // 巴士頁改為全屏堆疊跳轉，不再使用 iOS Modal；iOS 走原生返回鈕（含液態玻璃），避免 iPad 上自訂 headerLeft 卸載閃退
                             presentation: 'card',
+                            ...(Platform.OS === 'ios'
+                                ? { headerLeft: undefined }
+                                : {}),
                         }}
                     />
                     <Stack.Screen
