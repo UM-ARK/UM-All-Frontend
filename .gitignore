@@ -109,6 +109,8 @@ web-build/
 .env.local
 .mcp.json
 .cursor/mcp.json
+.agents/mcp_config.json
+.codex/
 
 .omc
 
