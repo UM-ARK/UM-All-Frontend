@@ -106,8 +106,10 @@ import { Info } from 'phosphor-react-native/src/icons/Info';
 import { Link } from 'phosphor-react-native/src/icons/Link';
 import { List } from 'phosphor-react-native/src/icons/List';
 import { MapPin } from 'phosphor-react-native/src/icons/MapPin';
+import { Microphone } from 'phosphor-react-native/src/icons/Microphone';
 import { PaperPlaneTilt } from 'phosphor-react-native/src/icons/PaperPlaneTilt';
 import { PencilSimple } from 'phosphor-react-native/src/icons/PencilSimple';
+import { Phone } from 'phosphor-react-native/src/icons/Phone';
 import { Plus } from 'phosphor-react-native/src/icons/Plus';
 import { PushPin } from 'phosphor-react-native/src/icons/PushPin';
 import { ShareNetwork } from 'phosphor-react-native/src/icons/ShareNetwork';
@@ -117,6 +119,7 @@ import { SlidersHorizontal } from 'phosphor-react-native/src/icons/SlidersHorizo
 import { SpeakerSlash } from 'phosphor-react-native/src/icons/SpeakerSlash';
 import { Star } from 'phosphor-react-native/src/icons/Star';
 import { Trash } from 'phosphor-react-native/src/icons/Trash';
+import { TreeStructure } from 'phosphor-react-native/src/icons/TreeStructure';
 import { User } from 'phosphor-react-native/src/icons/User';
 import { WarningCircle } from 'phosphor-react-native/src/icons/WarningCircle';
 import { XCircle } from 'phosphor-react-native/src/icons/XCircle';
@@ -266,6 +269,9 @@ export const phosphorFeatureIcons = {
     'corners-out': CornersOut,
     'arrow-square-out': ArrowSquareOut,
     'map-pin': MapPin,
+    microphone: Microphone,
+    phone: Phone,
+    'tree-structure': TreeStructure,
     'sliders-horizontal': SlidersHorizontal,
     funnel: Funnel,
     image: Image,
