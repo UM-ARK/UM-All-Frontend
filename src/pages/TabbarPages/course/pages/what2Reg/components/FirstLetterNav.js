@@ -15,37 +15,44 @@ const FirstLetterNav = ({ firstLetterList, scrollData, theme, onScrollTo }) => {
         return null;
     }
 
+    const borderRadius = scale(8);
+
     return (
-        <FirstLetterNavContainer style={{
+        <View style={{
             position: 'absolute',
             right: scale(8),
-            justifyContent: 'center',
-            alignItems: 'center',
-            borderRadius: scale(8),
-            padding: scale(3),
-            ...(isLiquidGlassSupported ? {
-                overflow: 'hidden',
-            } : {
-                backgroundColor: theme.white,
-                ...theme.floatingShadow,
-            }),
+            borderRadius,
+            ...(isLiquidGlassSupported ? theme.viewShadow : {}),
         }}>
-            {firstLetterList.map(letter => (
-                <Pressable
-                    key={letter}
-                    style={{ padding: scale(3) }}
-                    onPress={() => onScrollTo(letter)}
-                >
-                    <Text style={{
-                        ...uiStyle.defaultText,
-                        fontSize: scale(15),
-                        color: theme.themeColor,
-                    }}>
-                        {letter}
-                    </Text>
-                </Pressable>
-            ))}
-        </FirstLetterNavContainer>
+            <FirstLetterNavContainer style={{
+                justifyContent: 'center',
+                alignItems: 'center',
+                borderRadius,
+                padding: scale(3),
+                ...(isLiquidGlassSupported ? {
+                    overflow: 'hidden',
+                } : {
+                    backgroundColor: theme.white,
+                    ...theme.floatingShadow,
+                }),
+            }}>
+                {firstLetterList.map(letter => (
+                    <Pressable
+                        key={letter}
+                        style={{ padding: scale(3) }}
+                        onPress={() => onScrollTo(letter)}
+                    >
+                        <Text style={{
+                            ...uiStyle.defaultText,
+                            fontSize: scale(15),
+                            color: theme.black.third,
+                        }}>
+                            {letter}
+                        </Text>
+                    </Pressable>
+                ))}
+            </FirstLetterNavContainer>
+        </View>
     );
 };
 
