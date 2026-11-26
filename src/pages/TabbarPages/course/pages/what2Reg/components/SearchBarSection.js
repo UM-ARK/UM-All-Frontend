@@ -1,8 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Keyboard, Pressable, StyleSheet, View } from 'react-native';
-import Ionicons from "@react-native-vector-icons/ionicons";
+import PhosphorFeatureIcon from '../../../../info/home/search/components/PhosphorFeatureIcon';
 import Text from '../../../../../../components/AppText';
 import TextInput from '../../../../../../components/AppTextInput';
+import searchFieldStyles, {
+    SEARCH_FIELD_CLEAR_ICON_SIZE,
+    SEARCH_FIELD_ICON_SIZE,
+    SEARCH_FIELD_MAX_FONT_SIZE_MULTIPLIER,
+} from '../../../../../../components/searchFieldStyles';
 import { scale, verticalScale } from 'react-native-size-matters';
 import { t } from 'i18next';
 import { uiStyle } from '../../../../../../components/ThemeContext';
@@ -21,28 +26,29 @@ const SearchBarSection = ({
     showOfficial = true,
     trigger,
 }) => {
-    const { themeColor, black, white, bg_color } = theme;
+    const { themeColor, black, white } = theme;
+    const [isFocused, setIsFocused] = useState(false);
 
     const searchActions = [
         {
             id: 'harbor-discuss',
             title: t('討論', { ns: 'catalog' }),
-            icon: 'chatbubbles-outline',
+            icon: 'messages-square',
         },
         {
             id: 'wiki',
             title: 'Wiki',
-            icon: 'book-outline',
+            icon: 'book-open',
         },
         {
             id: 'what2reg',
             title: t('選咩課', { ns: 'catalog' }),
-            icon: 'star-outline',
+            icon: 'star',
         },
         {
             id: 'official',
             title: t('官方', { ns: 'catalog' }),
-            icon: 'school-outline',
+            icon: 'graduation-cap',
         },
     ].filter(action => showOfficial || action.id !== 'official');
 
@@ -52,34 +58,30 @@ const SearchBarSection = ({
                 width: '100%',
                 paddingTop: scale(5),
                 paddingHorizontal: scale(10),
-                backgroundColor: bg_color,
             }}>
             <View
-                style={{
-                    backgroundColor: white,
-                    borderWidth: StyleSheet.hairlineWidth,
-                    borderColor: `${black.third}33`,
-                    borderRadius: scale(10),
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    paddingHorizontal: scale(8),
-                    width: '100%',
-                }}>
-                <Ionicons
-                    name={'search'}
-                    size={scale(15)}
+                style={[
+                    searchFieldStyles.field,
+                    {
+                        backgroundColor: white,
+                        borderWidth: StyleSheet.hairlineWidth,
+                        borderColor: isFocused ? themeColor : `${black.third}33`,
+                        width: '100%',
+                    },
+                ]}>
+                <PhosphorFeatureIcon
+                    name="search"
+                    weight="regular"
+                    size={SEARCH_FIELD_ICON_SIZE}
                     color={black.third}
                 />
                 <TextInput
-                    style={{
-                        ...uiStyle.defaultText,
-                        minHeight: 44,
-                        paddingVertical: verticalScale(8),
-                        paddingHorizontal: scale(5),
-                        color: black.main,
-                        fontSize: scale(12),
-                        flex: 1,
-                    }}
+                    style={[
+                        searchFieldStyles.text,
+                        searchFieldStyles.input,
+                        searchFieldStyles.inputNoWebOutline,
+                        { color: black.main },
+                    ]}
                     onChangeText={onChangeText}
                     value={inputText}
                     selectTextOnFocus
@@ -88,7 +90,12 @@ const SearchBarSection = ({
                     })}
                     placeholderTextColor={black.third}
                     ref={textInputRef}
-                    onFocus={() => trigger()}
+                    onFocus={() => {
+                        setIsFocused(true);
+                        trigger();
+                    }}
+                    onBlur={() => setIsFocused(false)}
+                    maxFontSizeMultiplier={SEARCH_FIELD_MAX_FONT_SIZE_MULTIPLIER}
                     returnKeyType={'search'}
                     selectionColor={themeColor}
                     blurOnSubmit
@@ -97,10 +104,12 @@ const SearchBarSection = ({
                 {inputText.length > 0 ? (
                     <Pressable
                         onPress={onClear}
-                        style={{ padding: scale(3), marginLeft: 'auto' }}>
-                        <Ionicons
-                            name={'close-circle'}
-                            size={scale(15)}
+                        hitSlop={6}
+                        style={searchFieldStyles.clearButton}>
+                        <PhosphorFeatureIcon
+                            name="x-circle"
+                            weight="fill"
+                            size={SEARCH_FIELD_CLEAR_ICON_SIZE}
                             color={themeColor}
                         />
                     </Pressable>
@@ -133,7 +142,7 @@ const SearchBarSection = ({
                                 backgroundColor: white,
                                 opacity: pressed ? 0.7 : 1,
                             })}>
-                            <Ionicons
+                            <PhosphorFeatureIcon
                                 name={action.icon}
                                 size={scale(14)}
                                 color={themeColor}

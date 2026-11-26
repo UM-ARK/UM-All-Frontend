@@ -84,8 +84,8 @@ const TeamScheduleEventHeader = ({
                 styles.card,
                 {
                     backgroundColor: theme.white,
-                    borderColor: theme.themeColorUltraLight,
                 },
+                theme.viewShadow,
             ]}>
             <View style={styles.metaRow}>
                 <Text
@@ -113,12 +113,7 @@ const TeamScheduleEventHeader = ({
                                 trigger();
                                 onSharePress();
                             }}
-                            style={[
-                                styles.shareButton,
-                                {
-                                    backgroundColor: theme.tonal.primary15,
-                                },
-                            ]}>
+                            style={styles.shareButton}>
                             <Ionicons
                                 name="share-outline"
                                 color={theme.themeColor}
@@ -162,7 +157,7 @@ const TeamScheduleEventHeader = ({
                 <View
                     style={[
                         styles.reasonBox,
-                        {backgroundColor: theme.tonal.primary08},
+                        {backgroundColor: theme.bg_color},
                     ]}>
                     <Text
                         style={[
@@ -180,7 +175,6 @@ const TeamScheduleEventHeader = ({
 const styles = StyleSheet.create({
     card: {
         borderRadius: scale(14),
-        borderWidth: StyleSheet.hairlineWidth,
         paddingHorizontal: scale(14),
         paddingVertical: verticalScale(12),
     },

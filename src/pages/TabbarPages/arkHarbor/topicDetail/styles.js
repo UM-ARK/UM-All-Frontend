@@ -478,10 +478,6 @@ const styles = StyleSheet.create({
         borderRadius: scale(18),
         alignItems: 'center',
         justifyContent: 'center',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.35,
-        shadowRadius: scale(4),
-        elevation: 6,
     },
     iframeFullscreenModal: {
         flex: 1,
@@ -498,10 +494,6 @@ const styles = StyleSheet.create({
         borderRadius: scale(22),
         alignItems: 'center',
         justifyContent: 'center',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.35,
-        shadowRadius: scale(4),
-        elevation: 6,
     },
     imageGrid: {
         flexDirection: 'row',
@@ -515,6 +507,61 @@ const styles = StyleSheet.create({
     imageGridImage: {
         width: '100%',
         height: '100%',
+    },
+    oneboxCard: {
+        borderRadius: scale(12),
+        paddingHorizontal: scale(12),
+        paddingVertical: verticalScale(10),
+        marginVertical: verticalScale(8),
+    },
+    oneboxHeaderRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    oneboxIconWrap: {
+        width: scale(32),
+        height: scale(32),
+        borderRadius: scale(8),
+        alignItems: 'center',
+        justifyContent: 'center',
+        overflow: 'hidden',
+        flexShrink: 0,
+    },
+    oneboxIconImage: {
+        width: scale(22),
+        height: scale(22),
+    },
+    oneboxHeaderText: {
+        flex: 1,
+        minWidth: 0,
+        marginLeft: scale(10),
+        marginRight: scale(8),
+    },
+    oneboxTitle: {
+        ...uiStyle.defaultText,
+        fontSize: scale(14),
+        lineHeight: scale(19),
+        fontWeight: '600',
+    },
+    oneboxDomain: {
+        ...uiStyle.defaultText,
+        fontSize: scale(11.5),
+        lineHeight: scale(16),
+        marginTop: verticalScale(1),
+    },
+    oneboxCopyButton: {
+        width: scale(34),
+        height: scale(34),
+        borderRadius: scale(9),
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexShrink: 0,
+    },
+    oneboxDescription: {
+        ...uiStyle.defaultText,
+        fontSize: scale(12),
+        lineHeight: scale(17),
+        marginTop: verticalScale(6),
     },
     interactiveFallback: {
         alignSelf: 'flex-start',

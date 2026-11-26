@@ -39,6 +39,16 @@ describe('extractPostImages', () => {
             'https://assert.umall.one/original/1X/b27fa981.jpeg',
         ]);
     });
+
+    it('略過 onebox 網站預覽內的圖標與縮圖', () => {
+        expect(
+            extractPostImages(
+                '<aside class="onebox allowlistedgeneric" data-onebox-src="https://campusmatch.com.cn">' +
+                '<header class="source"><img src="https://campusmatch.com.cn/logo.svg" class="site-icon"></header>' +
+                '</aside>',
+            ),
+        ).toEqual([]);
+    });
 });
 
 describe('getHarborImagePressAction', () => {
@@ -86,10 +96,10 @@ describe('getHarborTopicStatuses', () => {
         expect(getHarborTopicStatuses(null)).toEqual([]);
         expect(getHarborTopicStatuses({})).toEqual([]);
         expect(getHarborTopicStatuses({ closed: true })).toEqual([
-            { key: 'closed', icon: 'lock-outline', label: '已關閉' },
+            { key: 'closed', icon: 'lock', label: '已關閉' },
         ]);
         expect(getHarborTopicStatuses({ archived: true })).toEqual([
-            { key: 'archived', icon: 'archive-outline', label: '已封存' },
+            { key: 'archived', icon: 'archive', label: '已封存' },
         ]);
         expect(
             getHarborTopicStatuses({ closed: true, archived: true }).map(

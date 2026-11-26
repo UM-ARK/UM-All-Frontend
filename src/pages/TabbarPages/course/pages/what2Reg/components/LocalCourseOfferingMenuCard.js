@@ -4,7 +4,7 @@ import { View, Platform, useWindowDimensions } from 'react-native';
 // 反寫 Fabric ShadowTree 並 abort）。改用 @react-native-menu/menu（原生 UIButton）。
 // Teacher 分類橫滑靠固定 cardWidth；時段每行最多兩天，避免多天撐破寬度。
 import { MenuView } from '@react-native-menu/menu';
-import Ionicons from '@react-native-vector-icons/ionicons';
+import PhosphorFeatureIcon from '../../../../info/home/search/components/PhosphorFeatureIcon';
 import Animated, {
     useAnimatedStyle,
     useSharedValue,
@@ -550,8 +550,9 @@ const LocalCourseOfferingMenuCard = ({
                                 paddingHorizontal: scale(7),
                                 paddingVertical: scale(2),
                             }}>
-                            <Ionicons
-                                name="checkmark-circle"
+                            <PhosphorFeatureIcon
+                                name="check-circle"
+                                weight="fill"
                                 color={themeColor}
                                 size={scale(12)}
                             />

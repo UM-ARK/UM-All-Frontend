@@ -11,7 +11,6 @@ import {
 
 import { Image } from 'expo-image';
 import moment from 'moment-timezone';
-import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import { scale } from 'react-native-size-matters';
 import { useTranslation } from 'react-i18next';
 
@@ -23,6 +22,7 @@ import {
     ARK_HARBOR_TOPIC_URL,
 } from '../../../../utils/pathMap';
 import { trigger } from '../../../../utils/trigger';
+import PhosphorFeatureIcon from '../../info/home/search/components/PhosphorFeatureIcon';
 import HarborCategoryIcon from '../components/HarborCategoryIcon';
 import HarborLikeFeedback, {
     useHarborLikeFeedback,
@@ -87,10 +87,11 @@ const MetaItem = ({ icon, value, color, style }) => {
     }
     return (
         <View style={[styles.metaItem, style]}>
-            <MaterialCommunityIcons
+            <PhosphorFeatureIcon
                 name={icon}
                 size={scale(15)}
                 color={color}
+                weight="regular"
             />
             <Text style={[styles.metaText, { color }]}>{value}</Text>
         </View>
@@ -271,19 +272,19 @@ const HarborPostCard = memo(
                 {
                     id: 'copyContent',
                     title: t('複製'),
-                    icon: 'content-copy',
+                    icon: 'copy',
                 },
             ];
             if (isFirstPost) {
                 actions.push({
                     id: 'openOriginal',
                     title: t('查看 Web 原文'),
-                    icon: 'web',
+                    icon: 'globe',
                 });
                 actions.push({
                     id: 'notifications',
                     title: t('通知設定'),
-                    icon: 'bell-outline',
+                    icon: 'bell',
                     attributes: {
                         disabled: Boolean(pendingNotification),
                     },
@@ -294,21 +295,21 @@ const HarborPostCard = memo(
                 actions.push({
                     id: 'reply',
                     title: t('回覆'),
-                    icon: 'reply-outline',
+                    icon: 'arrow-bend-up-left',
                 });
             }
             if (post.can_edit) {
                 actions.push({
                     id: 'edit',
                     title: t('編輯'),
-                    icon: 'pencil-outline',
+                    icon: 'pencil-simple',
                 });
             }
             if (canDeleteHarborPost(post, topic)) {
                 actions.push({
                     id: 'delete',
                     title: t('刪除'),
-                    icon: 'delete-outline',
+                    icon: 'trash',
                     attributes: {
                         destructive: true,
                         disabled: Boolean(pendingDelete),
@@ -320,9 +321,7 @@ const HarborPostCard = memo(
                 actions.push({
                     id: 'bookmark',
                     title: post.bookmarked ? t('已收藏') : t('收藏'),
-                    icon: post.bookmarked
-                        ? 'bookmark'
-                        : 'bookmark-outline',
+                    icon: 'bookmark',
                     attributes: {
                         disabled: Boolean(pendingBookmark),
                     },
@@ -331,13 +330,13 @@ const HarborPostCard = memo(
             actions.push({
                 id: 'copy',
                 title: t('複製連結'),
-                icon: 'link-variant',
+                icon: 'link',
             });
             if (canShowFlag) {
                 actions.push({
                     id: 'flag',
                     title: t('舉報'),
-                    icon: 'flag-outline',
+                    icon: 'flag',
                     attributes: {
                         destructive: true,
                         disabled: Boolean(pendingFlag),
@@ -347,7 +346,7 @@ const HarborPostCard = memo(
             actions.push({
                 id: 'share',
                 title: t('分享'),
-                icon: 'share-variant-outline',
+                icon: 'share-network',
             });
             return actions;
         }, [
@@ -511,14 +510,15 @@ const HarborPostCard = memo(
                             }
                             : null,
                     ]}>
-                    <MaterialCommunityIcons
+                    <PhosphorFeatureIcon
                         name={
                             isFirstPost
-                                ? 'dots-horizontal'
-                                : 'dots-vertical'
+                                ? 'dots-three'
+                                : 'dots-three-vertical'
                         }
                         size={scale(isFirstPost ? 14 : 16)}
                         color={isFirstPost ? themeColor : black.third}
+                        weight="regular"
                     />
                     {isFirstPost ? (
                         <Text
@@ -546,10 +546,11 @@ const HarborPostCard = memo(
                             )} ${reaction.count}`}
                             style={styles.reactionSummaryItem}>
                             {reaction.id === 'heart' ? (
-                                <MaterialCommunityIcons
-                                    name={isHeartActive ? 'heart' : 'heart-outline'}
+                                <PhosphorFeatureIcon
+                                    name="heart"
                                     size={scale(14)}
                                     color={isHeartActive ? themeColor : black.third}
+                                    weight={isHeartActive ? 'fill' : 'regular'}
                                 />
                             ) : (
                                 <HarborReactionIcon
@@ -580,16 +581,18 @@ const HarborPostCard = memo(
         ) : showCurrentReaction ? (
             <HarborReactionIcon name={currentReaction} size={metaIconSize} />
         ) : reactionsEnabled ? (
-            <MaterialCommunityIcons
-                name={currentReaction ? 'heart' : 'heart-outline'}
+            <PhosphorFeatureIcon
+                name="heart"
                 size={metaIconSize}
                 color={currentReaction ? themeColor : black.third}
+                weight={currentReaction ? 'fill' : 'regular'}
             />
         ) : (
-            <MaterialCommunityIcons
-                name={isLiked ? 'heart' : 'heart-outline'}
+            <PhosphorFeatureIcon
+                name="heart"
                 size={metaIconSize}
                 color={isLiked ? themeColor : black.third}
+                weight={isLiked ? 'fill' : 'regular'}
             />
         );
 
@@ -751,10 +754,11 @@ const HarborPostCard = memo(
                     styles.postContentToggle,
                     pressed ? styles.pressedLink : null,
                 ]}>
-                <MaterialCommunityIcons
-                    name={isPostCollapsed ? 'chevron-down' : 'chevron-up'}
+                <PhosphorFeatureIcon
+                    name={isPostCollapsed ? 'caret-down' : 'caret-up'}
                     size={scale(18)}
                     color={themeColor}
+                    weight="regular"
                 />
                 <Text
                     style={[
@@ -777,11 +781,11 @@ const HarborPostCard = memo(
                                 borderColor: dividerColor,
                             },
                         ]}>
-                        <MaterialCommunityIcons
+                        <PhosphorFeatureIcon
                             name={
                                 isHidden
-                                    ? 'eye-off-outline'
-                                    : 'delete-outline'
+                                    ? 'eye-slash'
+                                    : 'trash'
                             }
                             size={scale(18)}
                             color={black.third}
@@ -815,8 +819,8 @@ const HarborPostCard = memo(
                             borderColor: dividerColor,
                         },
                     ]}>
-                    <MaterialCommunityIcons
-                        name="information-outline"
+                    <PhosphorFeatureIcon
+                        name="info"
                         size={scale(18)}
                         color={themeColor}
                     />
@@ -940,10 +944,11 @@ const HarborPostCard = memo(
                                                         tonal.primary15,
                                                 },
                                             ]}>
-                                            <MaterialCommunityIcons
+                                            <PhosphorFeatureIcon
                                                 name={status.icon}
                                                 size={scale(12)}
                                                 color={themeColor}
+                                                weight="regular"
                                             />
                                             <Text
                                                 style={[
@@ -1186,10 +1191,11 @@ const HarborPostCard = memo(
                                                     ? styles.pressedLink
                                                     : null,
                                             ]}>
-                                            <MaterialCommunityIcons
-                                                name="reply-outline"
+                                            <PhosphorFeatureIcon
+                                                name="arrow-bend-up-left"
                                                 size={scale(12)}
                                                 color={themeColor}
+                                                weight="regular"
                                             />
                                             <Text
                                                 style={[

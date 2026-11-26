@@ -15,7 +15,6 @@ import {isLiquidGlassSupported} from '../../../utils/glassEffect';
 import {HeaderHeightContext} from '@react-navigation/elements';
 import {FlashList} from '@shopify/flash-list';
 import {useFocusEffect} from '@react-navigation/native';
-import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import {scale, verticalScale} from 'react-native-size-matters';
 import {useTranslation} from 'react-i18next';
 
@@ -25,6 +24,7 @@ import {uiStyle, useTheme} from '../../../components/ThemeContext';
 import {useHarborSession} from '../../../contexts/HarborSessionContext';
 import {fetchHarborPendingPosts} from '../../../utils/harbor/harborApi';
 import {trigger} from '../../../utils/trigger';
+import PhosphorFeatureIcon from '../info/home/search/components/PhosphorFeatureIcon';
 import {HarborFullState} from './components/HarborListStates';
 
 const getPendingExcerpt = raw =>
@@ -133,8 +133,8 @@ const HarborPendingPostsPage = ({navigation}) => {
                                 styles.pendingIcon,
                                 {backgroundColor: theme.tonal.secondary15},
                             ]}>
-                            <MaterialCommunityIcons
-                                name="clock-outline"
+                            <PhosphorFeatureIcon
+                                name="clock"
                                 size={scale(21)}
                                 color={theme.secondThemeColor}
                             />
@@ -156,10 +156,11 @@ const HarborPendingPostsPage = ({navigation}) => {
                                 {t('審核中')}
                             </Text>
                         </View>
-                        <MaterialCommunityIcons
-                            name="chevron-right"
+                        <PhosphorFeatureIcon
+                            name="caret-right"
                             size={scale(20)}
                             color={theme.black.third}
+                            weight="regular"
                         />
                     </View>
                     <Text
@@ -210,7 +211,7 @@ const HarborPendingPostsPage = ({navigation}) => {
                 <HarborFullState
                     actionLabel={t('重試')}
                     description={loadError}
-                    icon="cloud-alert-outline"
+                    icon="warning-circle"
                     onAction={loadPendingPosts}
                     title={t('無法載入待審內容')}
                 />
@@ -238,8 +239,8 @@ const HarborPendingPostsPage = ({navigation}) => {
                 showsVerticalScrollIndicator={false}
                 ListEmptyComponent={
                     <View style={styles.emptyState}>
-                        <MaterialCommunityIcons
-                            name="check-circle-outline"
+                        <PhosphorFeatureIcon
+                            name="check-circle"
                             size={scale(44)}
                             color={theme.themeColor}
                         />

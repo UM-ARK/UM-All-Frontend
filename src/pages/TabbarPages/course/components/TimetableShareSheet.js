@@ -17,7 +17,9 @@ import {
 } from 'react-native';
 
 import ActionSheet, { ScrollView } from 'react-native-actions-sheet';
-import Ionicons from "@react-native-vector-icons/ionicons";
+import { DownloadSimple } from 'phosphor-react-native/src/icons/DownloadSimple';
+import { Export } from 'phosphor-react-native/src/icons/Export';
+import PhosphorFeatureIcon from '../../info/home/search/components/PhosphorFeatureIcon';
 import * as Clipboard from 'expo-clipboard';
 import { scale, verticalScale } from 'react-native-size-matters';
 import { useTranslation } from 'react-i18next';
@@ -35,7 +37,7 @@ import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
 import Text from '../../../../components/AppText';
 import ScalePressable from '../../../../components/ScalePressable';
 import { useTheme, uiStyle } from '../../../../components/ThemeContext';
-import SegmentControl from '../../../../components/SegmentControl';
+import SegmentedTabControl from '../../../../components/SegmentedTabControl';
 import { logToFirebase } from '../../../../utils/firebaseAnalytics';
 import { trigger } from '../../../../utils/trigger';
 import { useCoursePlan } from '../context/CoursePlanContext';
@@ -138,8 +140,8 @@ const TimetableSharePreview = ({
     const {
         bg_color,
         black,
+        featuresScreen,
         themeColor,
-        themeColorUltraLight,
         unread,
         warning,
         TIME_TABLE_COLOR,
@@ -260,13 +262,13 @@ const TimetableSharePreview = ({
                 },
                 dayColumnDivider: {
                     borderLeftWidth: StyleSheet.hairlineWidth,
-                    borderColor: themeColorUltraLight,
+                    borderColor: featuresScreen.divider,
                 },
                 gridLine: {
                     position: 'absolute',
                     width: '100%',
                     borderTopWidth: StyleSheet.hairlineWidth,
-                    borderColor: themeColorUltraLight,
+                    borderColor: featuresScreen.divider,
                 },
                 courseCard: {
                     position: 'absolute',
@@ -284,30 +286,42 @@ const TimetableSharePreview = ({
                 detailDayTitle: {
                     ...uiStyle.defaultText,
                     color: black.third,
-                    fontSize: scale(25),
+                    fontSize: scale(14),
                     fontWeight: 'bold',
                     textAlign: 'center',
+                    marginBottom: verticalScale(2),
+                },
+                detailReminderRow: {
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginTop: verticalScale(4),
+                    marginBottom: verticalScale(2),
+                },
+                detailReminderIcon: {
+                    marginRight: scale(3),
                 },
                 detailReminder: {
                     ...uiStyle.defaultText,
                     color: black.third,
                     fontSize: scale(11),
-                    fontWeight: 'bold',
+                    fontWeight: '600',
                     textAlign: 'center',
+                    marginVertical: verticalScale(2),
                 },
                 detailCourseCard: {
                     width: DETAIL_COURSE_CARD_WIDTH,
                     margin: DETAIL_COURSE_CARD_MARGIN,
-                    borderRadius: scale(10),
-                    padding: scale(5),
+                    borderRadius: scale(12),
+                    paddingHorizontal: scale(8),
+                    paddingVertical: verticalScale(7),
                     alignItems: 'center',
                     justifyContent: 'center',
                 },
                 detailCourseCode: {
                     ...uiStyle.defaultText,
                     color: black.main,
-                    opacity: 0.7,
-                    fontSize: scale(20),
+                    fontSize: scale(18),
                     lineHeight: scale(20),
                     textAlign: 'center',
                     fontWeight: '700',
@@ -317,42 +331,50 @@ const TimetableSharePreview = ({
                 },
                 detailSection: {
                     ...uiStyle.defaultText,
-                    color: black.main,
-                    opacity: 0.8,
+                    color: black.third,
+                    fontSize: scale(11),
+                    fontWeight: '600',
+                    marginTop: verticalScale(1),
                 },
                 detailTeacher: {
                     ...uiStyle.defaultText,
-                    color: black.main,
+                    color: black.third,
                     textAlign: 'center',
                     alignSelf: 'stretch',
                     fontSize: scale(10),
-                    opacity: 0.45,
+                    marginTop: verticalScale(2),
                 },
                 detailCourseTitle: {
                     ...uiStyle.defaultText,
-                    color: black.main,
+                    color: black.second,
                     textAlign: 'center',
-                    opacity: 0.4,
+                    fontSize: scale(11.5),
+                    lineHeight: scale(15),
+                    marginVertical: verticalScale(2),
                 },
                 detailClassroom: {
                     ...uiStyle.defaultText,
                     color: black.main,
+                    fontSize: scale(11),
                     fontWeight: 'bold',
-                    opacity: 0.5,
                 },
                 detailTimeRow: {
                     flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    alignSelf: 'stretch',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    marginTop: verticalScale(2),
                 },
                 detailTime: {
                     ...uiStyle.defaultText,
-                    color: black.main,
+                    color: black.second,
+                    fontSize: scale(11),
                     fontWeight: '600',
-                    opacity: 0.8,
                 },
-                detailEllipsis: {
-                    opacity: 0.4,
+                detailTimeDash: {
+                    ...uiStyle.defaultText,
+                    color: black.third,
+                    fontSize: scale(11),
+                    marginHorizontal: scale(3),
                 },
                 footer: {
                     paddingTop: verticalScale(8),
@@ -389,13 +411,14 @@ const TimetableSharePreview = ({
         [
             bg_color,
             black.main,
+            black.second,
             black.third,
             dayColumnWidth,
+            featuresScreen.divider,
             height,
             overviewHeight,
             previewWidth,
             themeColor,
-            themeColorUltraLight,
             warning,
         ],
     );
@@ -429,7 +452,7 @@ const TimetableSharePreview = ({
                         width: frame.width,
                         height: frame.height,
                         backgroundColor,
-                        borderRadius: scale(7),
+                        borderRadius: scale(8),
                         paddingHorizontal: scale(compact ? 2 : 3),
                         paddingVertical: verticalScale(compact ? 1 : 3),
                     },
@@ -450,19 +473,19 @@ const TimetableSharePreview = ({
                       toMinutes(dayCourses[index - 1]['Time From']) / 60,
                   )
                 : null;
-        const periodLabel =
+        const periodInfo =
             currentHour > 12 &&
             (index === 0 ||
                 (previousHour <= 12 ||
                     (previousHour < 18 && currentHour >= 18)))
                 ? currentHour >= 18
-                    ? `🌜${t('晚上')}🌛`
-                    : `☕️${t('下午')}☕️`
+                    ? { icon: 'moon', label: t('晚上') }
+                    : { icon: 'sun', label: t('下午') }
                 : null;
         let gapLabel = null;
 
         if (hasConflict) {
-            gapLabel = `🆘${t('課程衝突')}🆘`;
+            gapLabel = t('課程衝突');
         } else if (index > 0) {
             const minuteGap =
                 toMinutes(course['Time From']) -
@@ -484,17 +507,41 @@ const TimetableSharePreview = ({
 
         return (
             <View key={getSlotKey(course)}>
-                {periodLabel ? (
-                    <Text style={styles.detailReminder}>{periodLabel}</Text>
+                {periodInfo ? (
+                    <View style={styles.detailReminderRow}>
+                        <PhosphorFeatureIcon
+                            name={periodInfo.icon}
+                            weight="regular"
+                            size={scale(12)}
+                            color={black.third}
+                            style={styles.detailReminderIcon}
+                        />
+                        <Text style={styles.detailReminder}>
+                            {periodInfo.label}
+                        </Text>
+                    </View>
                 ) : null}
                 {gapLabel ? (
-                    <Text
-                        style={[
-                            styles.detailReminder,
-                            hasConflict ? { color: unread } : null,
-                        ]}>
-                        {gapLabel}
-                    </Text>
+                    hasConflict ? (
+                        <View style={styles.detailReminderRow}>
+                            <PhosphorFeatureIcon
+                                name="warning-circle"
+                                weight="fill"
+                                size={scale(12)}
+                                color={unread}
+                                style={styles.detailReminderIcon}
+                            />
+                            <Text
+                                style={[
+                                    styles.detailReminder,
+                                    { color: unread, fontWeight: 'bold' },
+                                ]}>
+                                {gapLabel}
+                            </Text>
+                        </View>
+                    ) : (
+                        <Text style={styles.detailReminder}>{gapLabel}</Text>
+                    )
                 ) : null}
                 <View
                     style={[
@@ -525,12 +572,7 @@ const TimetableSharePreview = ({
                         <Text style={styles.detailTime}>
                             {course['Time From']}
                         </Text>
-                        <Ionicons
-                            name="ellipsis-horizontal"
-                            size={scale(20)}
-                            color={black.main}
-                            style={styles.detailEllipsis}
-                        />
+                        <Text style={styles.detailTimeDash}>{'–'}</Text>
                         <Text style={styles.detailTime}>
                             {course['Time To']}
                         </Text>
@@ -620,8 +662,8 @@ const TimetableSharePreview = ({
             <View style={styles.footer}>
                 {isHistoricalPeriod && activeCoursePeriod ? (
                     <View style={styles.historyBadge}>
-                        <Ionicons
-                            name="time-outline"
+                        <PhosphorFeatureIcon
+                            name="clock"
                             size={scale(13)}
                             color={warning}
                             style={styles.historyBadgeIcon}
@@ -940,15 +982,23 @@ const TimetableShareSheet = forwardRef(({ catalogMetadata }, ref) => {
             <Text style={styles.heading}>
                 {t('課表分享預覽', { ns: 'timetable' })}
             </Text>
-            <SegmentControl
-                options={shareModeOptions}
-                selectedIndex={shareMode === 'overview' ? 1 : 0}
-                onChange={index =>
-                    setShareMode(index === 0 ? 'detail' : 'overview')
-                }
-                trackBackgroundColor={tonal.primary08}
-                style={styles.modeSwitcher}
-            />
+            <View style={styles.modeSwitcher}>
+                <SegmentedTabControl
+                    options={shareModeOptions}
+                    selectedIndex={shareMode === 'overview' ? 1 : 0}
+                    onChange={index => {
+                        const nextMode =
+                            index === 0 ? 'detail' : 'overview';
+                        trigger(
+                            shareMode === nextMode
+                                ? 'tap'
+                                : 'selection',
+                        );
+                        setShareMode(nextMode);
+                    }}
+                    raisedTrack
+                />
+            </View>
             <ScrollView
                 style={styles.previewScroll}
                 showsVerticalScrollIndicator={false}
@@ -988,8 +1038,8 @@ const TimetableShareSheet = forwardRef(({ catalogMetadata }, ref) => {
                         <ActivityIndicator color={themeColor} />
                     ) : (
                         <>
-                            <Ionicons
-                                name="share-outline"
+                            <Export
+                                weight="duotone"
                                 size={scale(18)}
                                 color={themeColor}
                             />
@@ -1012,8 +1062,8 @@ const TimetableShareSheet = forwardRef(({ catalogMetadata }, ref) => {
                         styles.actionButton,
                         { backgroundColor: tonal.success15 },
                     ]}>
-                    <Ionicons
-                        name="download-outline"
+                    <DownloadSimple
+                        weight="duotone"
                         size={scale(18)}
                         color={success}
                     />
@@ -1029,8 +1079,8 @@ const TimetableShareSheet = forwardRef(({ catalogMetadata }, ref) => {
                 disabled={isGenerating}
                 onPress={handleCopyText}
                 style={styles.textExportButton}>
-                <Ionicons
-                    name="document-text-outline"
+                <PhosphorFeatureIcon
+                    name="file-text"
                     size={scale(18)}
                     color={themeColor}
                 />

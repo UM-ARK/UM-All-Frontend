@@ -6,7 +6,6 @@ import {
 } from 'react-native';
 
 import { Image } from 'expo-image';
-import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import { scale, verticalScale } from 'react-native-size-matters';
 import { useTranslation } from 'react-i18next';
 
@@ -19,6 +18,7 @@ import {
 } from '../../../../utils/pathMap';
 import { isHarborTopicUnseen } from '../../../../utils/harbor/harborTopicUpdates';
 import { trigger } from '../../../../utils/trigger';
+import PhosphorFeatureIcon from '../../info/home/search/components/PhosphorFeatureIcon';
 import HarborCategoryIcon from './HarborCategoryIcon';
 
 const CARD_MARGIN_HORIZONTAL = scale(6);
@@ -34,11 +34,11 @@ const COVER_PORTRAIT_HEIGHT_RATIO = 1 / 3.6;
 const COVER_LANDSCAPE_HEIGHT_RATIO = 1 / 4;
 
 const STATUS_CONFIG = {
-    pinned: { icon: 'pin-outline', label: '置頂' },
-    closed: { icon: 'lock-outline', label: '已關閉' },
-    archived: { icon: 'archive-outline', label: '已封存' },
-    muted: { icon: 'volume-mute', label: '已靜音' },
-    solved: { icon: 'check-decagram-outline', label: '已解決' },
+    pinned: { icon: 'push-pin', label: '置頂' },
+    closed: { icon: 'lock', label: '已關閉' },
+    archived: { icon: 'archive', label: '已封存' },
+    muted: { icon: 'speaker-slash', label: '已靜音' },
+    solved: { icon: 'badge-verified', label: '已解決' },
 };
 
 // ID、分類併成一行，頭像略高於文字行
@@ -56,9 +56,14 @@ const stopAndRun = (event, callback, isPressAllowed) => {
 
 const resolveUserId = (user, fallback) => user?.username || fallback || '';
 
-const Metric = ({ icon, value, color }) => (
+const Metric = ({ icon, value, color, weight = 'regular' }) => (
     <View style={styles.metric}>
-        <MaterialCommunityIcons name={icon} size={scale(14)} color={color} />
+        <PhosphorFeatureIcon
+            name={icon}
+            size={scale(14)}
+            color={color}
+            weight={weight}
+        />
         <Text style={[styles.metricText, { color }]}>{value}</Text>
     </View>
 );
@@ -77,10 +82,11 @@ const StatusChip = ({ status }) => {
                 styles.statusChip,
                 { backgroundColor: theme.tonal.primary15 },
             ]}>
-            <MaterialCommunityIcons
+            <PhosphorFeatureIcon
                 name={config.icon}
                 size={scale(12)}
                 color={theme.themeColor}
+                weight="regular"
             />
             <Text style={[styles.statusText, { color: theme.themeColor }]}>
                 {t(config.label)}
@@ -201,10 +207,11 @@ const HarborTopicCard = ({
                         />
                     ) : (
                         <View style={[styles.avatarFallback, avatarStyle]}>
-                            <MaterialCommunityIcons
-                                name="account-outline"
+                            <PhosphorFeatureIcon
+                                name="user-circle"
                                 size={scale(14)}
                                 color={theme.themeColor}
+                                weight="regular"
                             />
                         </View>
                     )}
@@ -342,17 +349,18 @@ const HarborTopicCard = ({
             <View style={[styles.footer, isRowLayout && styles.rowFooter]}>
                 <View style={styles.metrics}>
                     <Metric
-                        icon="comment-outline"
+                        icon="message-circle"
                         value={replyCount}
                         color={theme.black.third}
                     />
                     <Metric
-                        icon="eye-outline"
+                        icon="eye"
                         value={topic.viewCount || 0}
                         color={theme.black.third}
                     />
                     <Metric
-                        icon={topic.liked ? 'heart' : 'heart-outline'}
+                        icon="heart"
+                        weight={topic.liked ? 'fill' : 'regular'}
                         value={topic.likeCount || 0}
                         color={
                             topic.liked

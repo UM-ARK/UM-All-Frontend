@@ -15,11 +15,11 @@ import {scheduleOnRN} from 'react-native-worklets';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {scale, verticalScale} from 'react-native-size-matters';
 import {useTranslation} from 'react-i18next';
-import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 
 import Text from '../../../../components/AppText';
 import {useTheme} from '../../../../components/ThemeContext';
 import {useAppReducedMotion} from '../../../../contexts/ReducedMotionContext';
+import PhosphorFeatureIcon from '../../info/home/search/components/PhosphorFeatureIcon';
 
 const SNAP_SPRING = {duration: 400, dampingRatio: 1, reduceMotion: ReduceMotion.System};
 
@@ -222,7 +222,7 @@ export function HarborComposerImageDragOverlay({dragState, image, overlayRef, ta
                         },
                         targetStyle,
                     ]}>
-                    <MaterialCommunityIcons name="delete-outline" size={scale(22)} color={theme.trueBlack} />
+                    <PhosphorFeatureIcon name="trash" size={scale(22)} color={theme.trueBlack} />
                     <Text style={[styles.deleteText, {color: theme.trueBlack}]}>
                         {t('拖到此處刪除')}
                     </Text>

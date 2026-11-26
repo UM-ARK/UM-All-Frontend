@@ -13,6 +13,24 @@ export const THEME_MODE = {
     DARK: 2,    // 強制深色
 };
 
+// 將色值混合至底色，用於生成與其他頁面一致的 Tonal 課卡底色
+const mixHex = (baseHex, tintHex, ratio) => {
+    const parse = hex => {
+        const normalized = hex.length === 4
+            ? `#${hex[1]}${hex[1]}${hex[2]}${hex[2]}${hex[3]}${hex[3]}`
+            : hex;
+        return [
+            parseInt(normalized.slice(1, 3), 16),
+            parseInt(normalized.slice(3, 5), 16),
+            parseInt(normalized.slice(5, 7), 16),
+        ];
+    };
+    const [r1, g1, b1] = parse(baseHex);
+    const [r2, g2, b2] = parse(tintHex);
+    const toHex = n => Math.round(n).toString(16).padStart(2, '0');
+    return `#${toHex(r1 + (r2 - r1) * ratio)}${toHex(g1 + (g2 - g1) * ratio)}${toHex(b1 + (b2 - b1) * ratio)}`;
+};
+
 // rgba 輔助函數：將 hex 顏色轉為帶透明度的 rgba 字串
 const rgba = (hex, opacity) => {
     const r = parseInt(hex.slice(1, 3), 16);
@@ -20,6 +38,14 @@ const rgba = (hex, opacity) => {
     const b = parseInt(hex.slice(5, 7), 16);
     return `rgba(${r}, ${g}, ${b}, ${opacity})`;
 };
+
+// Android 9 以下不支援外陰影的 boxShadow。
+const supportsBoxShadow = Platform.OS !== 'android' || Platform.Version >= 28;
+const createShadow = (offsetY, blurRadius, color, elevation) => (
+    supportsBoxShadow
+        ? { boxShadow: [{ offsetX: 0, offsetY, blurRadius, spreadDistance: 0, color }] }
+        : { elevation }
+);
 
 // 定義主題配置
 const getColorDiy = (isLight) => {
@@ -35,9 +61,17 @@ const getColorDiy = (isLight) => {
     const secondThemeColorValue = '#FF8627';
     const successValue = '#27ae60';
     const unreadValue = '#f75353';
+    const warningValue = '#f39c12';
+    const what2regColorValue = '#30548b';
+    const featureGreenValue = isLight ? '#18A957' : '#4ADE80';
+    const featureOrangeValue = isLight ? '#EA7615' : '#FB923C';
+    const featurePinkValue = isLight ? '#E6536C' : '#FB7185';
+    const featureTealValue = isLight ? '#199E9A' : '#2DD4BF';
     const achievementGoldValue = isLight ? '#B77900' : '#F2C14E';
     const achievementSilverValue = isLight ? '#6F7C87' : '#C2CBD3';
     const achievementBronzeValue = isLight ? '#A85D32' : '#D9915B';
+    const timetableSurfaceBase = isLight ? trueWhite : '#1A1C1F';
+    const timetableTintRatio = isLight ? 0.17 : 0.24;
 
     return {
         isLight: isLight,
@@ -102,10 +136,12 @@ const getColorDiy = (isLight) => {
         bg_color: isLight ? '#F5F5F7' : trueBlack,
         pressOverlay: rgba(isLight ? trueBlack : trueWhite, 0.12),
 
+        // 沙灘金（取自 App Logo 沙灘色 #E6AB52，亮色微調深以確保白/灰底對比度）
+        sand: isLight ? '#D48E2A' : '#E6AB52',
         // 綠色，用在Toast上
         success: successValue,
         successForeground: isLight ? '#114D30' : '#78DBAB',
-        warning: '#f39c12',
+        warning: warningValue,
         unread: unreadValue,
         unreadForeground: isLight ? '#AB2935' : '#FF9C9F',
         disabled: isLight ? '#cad5de' : '#3a3d40',
@@ -124,6 +160,38 @@ const getColorDiy = (isLight) => {
         // ARK Wiki配色（與 white 相同）
         wiki_bg_color: whiteColor,
 
+        // 服務頁灰底白卡分組表面與功能性質語義色（嚴格收斂於 4 組低疲勞線性圖標配色）
+        featuresScreen: {
+            bg_color: isLight ? '#F5F5F7' : trueBlack,
+            bgTransparent: rgba(isLight ? '#F5F5F7' : trueBlack, 0),
+            cardBg: whiteColor,
+            searchBg: isLight ? '#FFFFFF' : whiteColor,
+            divider: rgba(isLight ? trueBlack : trueWhite, isLight ? 0.06 : 0.09),
+        },
+        featureIconTones: {
+            // 線性圖標四色語義色盤（亮色確保白卡 >=3:1 對比度；暗色提亮保持柔和通透）
+            // 核心平台、查詢工具與知識資料（主題藍）
+            blue: {
+                foreground: themeColorValue,
+                background: isLight ? rgba(themeColorValue, 0.1) : rgba(themeColorValue, 0.16),
+            },
+            // 實時狀態、出行交通、場地預約與協作（翠綠）
+            green: {
+                foreground: featureGreenValue,
+                background: rgba(featureGreenValue, isLight ? 0.1 : 0.16),
+            },
+            // 餐飲生活、指南攻略、社群與成長（暖橘）
+            orange: {
+                foreground: featureOrangeValue,
+                background: rgba(featureOrangeValue, isLight ? 0.1 : 0.16),
+            },
+            // 截止提醒、官方公告、安全警示與報修（珊瑚紅）
+            pink: {
+                foreground: featurePinkValue,
+                background: rgba(featurePinkValue, isLight ? 0.1 : 0.16),
+            },
+        },
+
         // Harbor頁面配色
         harbor_bg_color: isLight ? '#fbfdff' : '#111111',
         harborSearch: {
@@ -140,52 +208,33 @@ const getColorDiy = (isLight) => {
         },
 
         // What2Reg，選咩課配色
-        what2reg_color: '#30548b',
+        what2reg_color: what2regColorValue,
 
         // 提醒頁顏色
         messageScreenColor: {
             bg_color: isLight ? '#fbfbfb' : trueBlack,
         },
 
-        // 跨平台陰影（RN New Architecture boxShadow，iOS / Android 視覺一致）
-        viewShadow: {
-            boxShadow: [
-                {
-                    offsetX: 0,
-                    offsetY: 2,
-                    blurRadius: 8,
-                    spreadDistance: 0,
-                    // 暗色模式略加深，避免陰影幾乎不可見
-                    color: rgba(trueBlack, isLight ? 0.1 : 0.45),
-                },
-            ],
-        },
+        // 內容卡片、浮動控制與彈層的陰影層次
+        viewShadow: createShadow(2, isLight ? 12 : 8, rgba(trueBlack, isLight ? 0.06 : 0.45), 2),
+        floatingShadow: createShadow(4, 16, rgba(trueBlack, isLight ? 0.14 : 0.55), 6),
+        modalShadow: createShadow(8, 24, rgba(trueBlack, isLight ? 0.18 : 0.6), 12),
+        tabBarShadow: createShadow(-2, 12, rgba(trueBlack, isLight ? 0.1 : 0.45), 8),
 
         barStyle: isLight ? 'dark-content' : 'light-content',
 
-        TIME_TABLE_COLOR: isLight ?
-            [
-                '#D6BEB8',
-                '#8FCACA',
-                '#BEC8D3',
-                '#B6CFB6',
-                '#d5bae3',
-                '#f5b6e0',
-                '#f7cd50',
-                '#6dbed6',
-                '#C6DBDA',
-            ] :
-            [
-                '#786a67',
-                '#486666',
-                '#4e5c6b',
-                '#4f5e4f',
-                '#584861',
-                '#6e5766',
-                '#5e5743',
-                '#30444a',
-                '#4c6160',
-            ],
+        // 沿用全站語義色（主題藍、服務綠/橘/珊瑚、提醒金、選咩課靛藍等）生成一致的 Tonal 課卡底色
+        TIME_TABLE_COLOR: [
+            mixHex(timetableSurfaceBase, themeColorValue, timetableTintRatio),
+            mixHex(timetableSurfaceBase, featureGreenValue, timetableTintRatio),
+            mixHex(timetableSurfaceBase, featureOrangeValue, timetableTintRatio),
+            mixHex(timetableSurfaceBase, featurePinkValue, timetableTintRatio),
+            mixHex(timetableSurfaceBase, warningValue, timetableTintRatio),
+            mixHex(timetableSurfaceBase, what2regColorValue, isLight ? 0.16 : 0.34),
+            mixHex(timetableSurfaceBase, featureTealValue, timetableTintRatio),
+            mixHex(timetableSurfaceBase, achievementSilverValue, isLight ? 0.19 : 0.22),
+            mixHex(timetableSurfaceBase, achievementBronzeValue, isLight ? 0.16 : 0.24),
+        ],
     };
 };
 // 导出主题常量，用于不需要响应式的地方
@@ -290,11 +339,6 @@ export const useTheme = () => {
     return context;
 };
 
-
-export const VERSION_EMOJI = {
-    ve_Left: '⛱️',
-    ve_Right: '🕶️',
-};
 
 export const uiStyle = StyleSheet.create({
     defaultText: {

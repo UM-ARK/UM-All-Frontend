@@ -2,7 +2,7 @@ import React, { memo } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { useTheme } from '../../../../components/ThemeContext';
-import { scale, verticalScale } from 'react-native-size-matters';
+import { moderateScale, scale, verticalScale } from 'react-native-size-matters';
 import { NewsRowSeparator, newsRowStyles } from './NewsCard';
 
 const DEFAULT_ROW_COUNT = 6;
@@ -48,15 +48,12 @@ const NewsRowSkeleton = memo(function NewsRowSkeleton({
 });
 
 /** 新聞頁頭條大圖骨架 */
-const TopNewsSkeleton = memo(function TopNewsSkeleton({ white, tonal, viewShadow }) {
+const TopNewsSkeleton = memo(function TopNewsSkeleton({ white, tonal }) {
     return (
         <View
             style={[
                 styles.topNews,
-                {
-                    backgroundColor: white,
-                    ...viewShadow,
-                },
+                { backgroundColor: white },
             ]}>
             <View
                 style={[
@@ -100,14 +97,14 @@ const NewsListSkeleton = ({
     contentTopInset = 0,
 }) => {
     const { theme } = useTheme();
-    const { white, tonal, viewShadow } = theme;
+    const { white, tonal } = theme;
     const titleWidthSets = [
         ['92%', '78%', '54%'],
-        ['88%', '70%'],
-        ['90%', '82%', '48%'],
-        ['86%', '64%'],
-        ['94%', '76%', '58%'],
-        ['84%', '68%'],
+        ['84%', '48%'],
+        ['90%', '82%', '46%'],
+        ['78%', '56%'],
+        ['94%', '70%', '42%'],
+        ['86%', '62%'],
     ];
 
     return (
@@ -120,7 +117,6 @@ const NewsListSkeleton = ({
                 <TopNewsSkeleton
                     white={white}
                     tonal={tonal}
-                    viewShadow={viewShadow}
                 />
             ) : null}
             {Array.from({ length: count }, (_, index) => (
@@ -145,20 +141,21 @@ const styles = StyleSheet.create({
         alignSelf: 'stretch',
     },
     titleLine: {
-        height: verticalScale(14),
+        height: moderateScale(15),
         borderRadius: scale(4),
     },
     dateLine: {
-        height: verticalScale(13),
-        width: '28%',
+        height: moderateScale(12),
+        width: '22%',
         borderRadius: scale(4),
     },
     topNews: {
-        borderRadius: scale(10),
+        borderRadius: scale(12),
         overflow: 'hidden',
-        marginHorizontal: scale(8),
-        marginVertical: verticalScale(5),
-        height: verticalScale(200),
+        marginHorizontal: scale(16),
+        marginTop: verticalScale(4),
+        marginBottom: verticalScale(2),
+        height: verticalScale(188),
     },
     topNewsFill: {
         ...StyleSheet.absoluteFillObject,
@@ -169,12 +166,10 @@ const styles = StyleSheet.create({
         justifyContent: 'flex-end',
     },
     topNewsBadge: {
-        position: 'absolute',
-        top: verticalScale(10),
-        left: scale(15),
-        height: verticalScale(18),
-        width: '28%',
+        height: verticalScale(12),
+        width: '22%',
         borderRadius: scale(4),
+        marginBottom: verticalScale(6),
     },
     topNewsTitle: {
         height: verticalScale(16),

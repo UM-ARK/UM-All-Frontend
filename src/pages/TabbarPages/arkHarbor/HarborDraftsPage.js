@@ -18,7 +18,6 @@ import {isLiquidGlassSupported} from '../../../utils/glassEffect';
 import {HeaderHeightContext} from '@react-navigation/elements';
 import {FlashList} from '@shopify/flash-list';
 import {useFocusEffect} from '@react-navigation/native';
-import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import {scale, verticalScale} from 'react-native-size-matters';
 import Toast from 'react-native-simple-toast';
 import {useTranslation} from 'react-i18next';
@@ -33,11 +32,12 @@ import {
     getLocalHarborDrafts,
 } from '../../../utils/harbor/harborDrafts';
 import {trigger} from '../../../utils/trigger';
+import PhosphorFeatureIcon from '../info/home/search/components/PhosphorFeatureIcon';
 
 const DRAFT_ICONS = {
-    edit: 'file-edit-outline',
-    newTopic: 'note-plus-outline',
-    reply: 'reply-outline',
+    edit: 'pencil-simple',
+    newTopic: 'plus-square',
+    reply: 'arrow-bend-up-left',
 };
 
 const getDraftLabel = (mode, t) => {
@@ -278,7 +278,7 @@ const HarborDraftsPage = ({
                             styles.draftIcon,
                             {backgroundColor: theme.tonal.primary15},
                         ]}>
-                        <MaterialCommunityIcons
+                        <PhosphorFeatureIcon
                             name={DRAFT_ICONS[item.mode]}
                             size={scale(22)}
                             color={theme.themeColor}
@@ -332,8 +332,8 @@ const HarborDraftsPage = ({
                                 backgroundColor: theme.tonal.unread15,
                             },
                         ]}>
-                        <MaterialCommunityIcons
-                            name="delete-outline"
+                        <PhosphorFeatureIcon
+                            name="trash"
                             size={scale(21)}
                             color={theme.unread}
                         />
@@ -381,8 +381,8 @@ const HarborDraftsPage = ({
                             : theme.bg_color,
                     },
                 ]}>
-                <MaterialCommunityIcons
-                    name="account-lock-outline"
+                <PhosphorFeatureIcon
+                    name="lock"
                     size={scale(42)}
                     color={theme.themeColor}
                 />
@@ -474,8 +474,8 @@ const HarborDraftsPage = ({
                         borderColor: theme.themeColorUltraLight,
                     },
                 ]}>
-                <MaterialCommunityIcons
-                    name="cellphone-information"
+                <PhosphorFeatureIcon
+                    name="device-mobile"
                     size={scale(18)}
                     color={theme.themeColor}
                 />
@@ -516,8 +516,8 @@ const HarborDraftsPage = ({
                 scrollEventThrottle={16}
                 ListEmptyComponent={
                     <View style={styles.emptyState}>
-                        <MaterialCommunityIcons
-                            name="file-document-outline"
+                        <PhosphorFeatureIcon
+                            name="file-text"
                             size={scale(42)}
                             color={theme.black.third}
                         />

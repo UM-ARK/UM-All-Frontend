@@ -29,7 +29,7 @@ const AvailabilityEditorFooter = ({
                 styles.wrap,
                 {
                     backgroundColor: theme.bg_color,
-                    borderTopColor: theme.themeColorUltraLight,
+                    borderTopColor: theme.disabled,
                     paddingBottom: Math.max(insets.bottom, verticalScale(8)),
                 },
             ]}>
@@ -42,12 +42,14 @@ const AvailabilityEditorFooter = ({
                 }}
                 style={[
                     styles.button,
+                    styles.cancel,
                     {
-                        backgroundColor: theme.tonal.primary15,
+                        backgroundColor: theme.white,
+                        borderColor: theme.disabled,
                         opacity: confirming ? 0.5 : 1,
                     },
                 ]}>
-                <Text style={[styles.buttonText, {color: theme.themeColor}]}>
+                <Text style={[styles.buttonText, {color: theme.black.second}]}>
                     {t('取消')}
                 </Text>
             </ScalePressable>
@@ -65,19 +67,17 @@ const AvailabilityEditorFooter = ({
                     styles.button,
                     styles.confirm,
                     {
-                        backgroundColor:
-                            confirming || disabled
-                                ? theme.tonal.primary30
-                                : theme.themeColor,
+                        backgroundColor: theme.tonal.primary15,
+                        opacity: confirming || disabled ? 0.6 : 1,
                     },
                 ]}>
                 {confirming ? (
-                    <ActivityIndicator color={theme.trueWhite} />
+                    <ActivityIndicator color={theme.accentForeground} />
                 ) : (
                     <Text
                         style={[
                             styles.buttonText,
-                            {color: theme.trueWhite},
+                            {color: theme.accentForeground},
                         ]}>
                         {t('確定')}
                     </Text>
@@ -98,17 +98,21 @@ const styles = StyleSheet.create({
     button: {
         alignItems: 'center',
         borderRadius: scale(12),
+        borderCurve: 'continuous',
         flex: 1,
         justifyContent: 'center',
-        minHeight: verticalScale(44),
+        minHeight: verticalScale(42),
         paddingVertical: verticalScale(10),
+    },
+    cancel: {
+        borderWidth: StyleSheet.hairlineWidth,
     },
     confirm: {
         flex: 1.2,
     },
     buttonText: {
         ...uiStyle.defaultText,
-        fontSize: scale(15),
+        fontSize: scale(14),
         fontWeight: '700',
     },
 });

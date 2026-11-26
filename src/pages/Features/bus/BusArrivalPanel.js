@@ -2,13 +2,15 @@ import React, {useCallback, useEffect, useMemo} from 'react';
 import {ScrollView, StyleSheet, View} from 'react-native';
 import {Gesture, GestureDetector} from 'react-native-gesture-handler';
 import Animated, {
+    Extrapolation,
+    interpolate,
     runOnJS,
     useAnimatedStyle,
     useSharedValue,
     withSpring,
 } from 'react-native-reanimated';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
+import PhosphorFeatureIcon from '../../TabbarPages/info/home/search/components/PhosphorFeatureIcon';
 
 import Text from '../../../components/AppText';
 import ScalePressable from '../../../components/ScalePressable';
@@ -24,10 +26,26 @@ import {
     sortVehiclesByDestinationEta,
 } from './busModel';
 
-// 面板高度（不含底部安全區；收合態預留摘要次行，例如 PGH 出發 ETA）
-export const BUS_PANEL_COLLAPSED_EMPTY = 112;
-export const BUS_PANEL_COLLAPSED = 138;
+// 面板高度（不含底部安全區；收合態依實際顯示行數貼合底部）
+const BUS_PANEL_COLLAPSED_EMPTY = 114;
+const BUS_PANEL_COLLAPSED = 116;
+const BUS_PANEL_DESTINATION_HEIGHT = 20;
+const BUS_PANEL_SECONDARY_ETA_HEIGHT = 22;
 export const BUS_PANEL_EXPANDED = 440;
+
+export const getBusPanelCollapsedHeight = (
+    hasVehicles,
+    hasDestination,
+    hasSecondaryEta = false,
+) => {
+    if (!hasDestination) {
+        return BUS_PANEL_COLLAPSED;
+    }
+    return (
+        (hasVehicles ? BUS_PANEL_COLLAPSED_EMPTY + BUS_PANEL_DESTINATION_HEIGHT : BUS_PANEL_COLLAPSED_EMPTY)
+        + (hasSecondaryEta ? BUS_PANEL_SECONDARY_ETA_HEIGHT : 0)
+    );
+};
 
 const PANEL_SPRING = {
     damping: 28,
@@ -89,21 +107,26 @@ const BusArrivalPanel = ({
     const insets = useSafeAreaInsets();
     const {
         black,
-        disabled,
+        featureIconTones,
+        featuresScreen,
+        pressOverlay,
         secondThemeColor,
-        themeColor,
-        tonal,
-        trueWhite,
+        successForeground,
         warning,
         white,
-        viewShadow,
+        floatingShadow,
     } = theme;
     const hasVehicles = (snapshot?.vehicles || []).length > 0;
-    const bottomInset = 10 + insets.bottom;
-    const collapsedHeight = (hasVehicles ? BUS_PANEL_COLLAPSED : BUS_PANEL_COLLAPSED_EMPTY) + insets.bottom;
+    const selectedStopInfo = getBusStop(selectedStop);
+    const vehicles = useMemo(
+        () => sortVehiclesByDestinationEta(snapshot?.vehicles || [], selectedStop),
+        [selectedStop, snapshot?.vehicles],
+    );
+    const headingVehicle = vehicles.find(
+        vehicle => vehicle.vehiclePlateNumber === selectedVehiclePlate,
+    ) || vehicles[0];
+    const bottomInset = 8 + insets.bottom;
     const expandedHeight = BUS_PANEL_EXPANDED + insets.bottom;
-    const panelHeight = useSharedValue(expanded ? expandedHeight : collapsedHeight);
-    const dragStartHeight = useSharedValue(0);
 
     const styles = useMemo(() => StyleSheet.create({
         container: {
@@ -114,7 +137,7 @@ const BusArrivalPanel = ({
             paddingHorizontal: 16,
             paddingBottom: bottomInset,
             overflow: 'hidden',
-            ...viewShadow,
+            ...floatingShadow,
         },
         handleHit: {
             alignItems: 'center',
@@ -124,7 +147,7 @@ const BusArrivalPanel = ({
             width: 38,
             height: 4,
             borderRadius: 2,
-            backgroundColor: disabled,
+            backgroundColor: pressOverlay,
         },
         headingButton: {
             minHeight: 45,
@@ -142,9 +165,8 @@ const BusArrivalPanel = ({
             alignItems: 'center',
         },
         headingAction: {
-            width: 36,
-            height: 36,
-            borderRadius: 18,
+            width: 44,
+            height: 44,
             alignItems: 'center',
             justifyContent: 'center',
         },
@@ -175,9 +197,23 @@ const BusArrivalPanel = ({
         },
         departureText: {
             ...uiStyle.defaultText,
-            color: themeColor,
+            color: black.second,
             fontSize: 12,
             fontWeight: '700',
+        },
+        destinationText: {
+            ...uiStyle.defaultText,
+            flex: 1,
+            color: successForeground,
+            fontSize: 12,
+            lineHeight: 15,
+            fontWeight: '600',
+        },
+        departureSecondaryText: {
+            ...uiStyle.defaultText,
+            color: black.third,
+            fontSize: 12,
+            fontWeight: '400',
         },
         hint: {
             ...uiStyle.defaultText,
@@ -185,6 +221,19 @@ const BusArrivalPanel = ({
             fontSize: 12,
             marginTop: 4,
             marginBottom: 8,
+        },
+        expandableWrap: {
+            flex: 1,
+            position: 'relative',
+        },
+        hintOverlay: {
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+        },
+        expandableContent: {
+            flex: 1,
         },
         stopGrid: {
             flexDirection: 'row',
@@ -194,21 +243,34 @@ const BusArrivalPanel = ({
         },
         stopChip: {
             minHeight: 34,
+            maxWidth: '100%',
             paddingHorizontal: 10,
             borderRadius: 17,
             borderWidth: 1,
+            borderColor: pressOverlay,
             flexDirection: 'row',
             alignItems: 'center',
         },
+        selectedStopChip: {
+            borderColor: featureIconTones.green.foreground,
+            borderWidth: 1.5,
+        },
         stopChipText: {
             ...uiStyle.defaultText,
+            color: black.second,
+            flexShrink: 1,
             fontSize: 12,
+        },
+        selectedStopChipText: {
+            color: successForeground,
+            fontWeight: '700',
         },
         statsButton: {
             minHeight: 46,
-            borderRadius: 14,
-            backgroundColor: tonal.primary08,
-            paddingHorizontal: 12,
+            borderTopWidth: StyleSheet.hairlineWidth,
+            borderBottomWidth: StyleSheet.hairlineWidth,
+            borderColor: featuresScreen.divider,
+            paddingHorizontal: 8,
             flexDirection: 'row',
             alignItems: 'center',
             gap: 9,
@@ -239,7 +301,7 @@ const BusArrivalPanel = ({
         vehicleRow: {
             minHeight: 70,
             borderRadius: 14,
-            paddingHorizontal: 12,
+            paddingHorizontal: 8,
             paddingVertical: 9,
             marginBottom: 8,
             flexDirection: 'row',
@@ -247,9 +309,7 @@ const BusArrivalPanel = ({
             gap: 10,
         },
         vehicleIcon: {
-            width: 38,
-            height: 38,
-            borderRadius: 19,
+            width: 24,
             alignItems: 'center',
             justifyContent: 'center',
         },
@@ -270,7 +330,7 @@ const BusArrivalPanel = ({
         },
         eta: {
             ...uiStyle.defaultText,
-            color: themeColor,
+            color: black.main,
             fontSize: 13,
             fontWeight: '700',
             marginTop: 3,
@@ -291,7 +351,6 @@ const BusArrivalPanel = ({
         empty: {
             minHeight: 42,
             borderRadius: 14,
-            backgroundColor: tonal.primary08,
             alignItems: 'center',
             justifyContent: 'center',
             paddingHorizontal: 18,
@@ -303,16 +362,8 @@ const BusArrivalPanel = ({
             fontSize: 12,
             textAlign: 'center',
         },
-    }), [black.main, black.third, bottomInset, disabled, themeColor, tonal.primary08, viewShadow, warning, white]);
+    }), [black.main, black.second, black.third, bottomInset, featureIconTones.green.foreground, featuresScreen.divider, floatingShadow, pressOverlay, successForeground, warning, white]);
 
-    const selectedStopInfo = getBusStop(selectedStop);
-    const vehicles = useMemo(
-        () => sortVehiclesByDestinationEta(snapshot?.vehicles || [], selectedStop),
-        [selectedStop, snapshot?.vehicles],
-    );
-    const headingVehicle = vehicles.find(
-        vehicle => vehicle.vehiclePlateNumber === selectedVehiclePlate,
-    ) || vehicles[0];
     const officialNextDeparture = getOfficialNextDeparturePresentation(
         snapshot?.officialNextDeparture,
     );
@@ -333,55 +384,6 @@ const BusArrivalPanel = ({
         }
         return translate('官方下一班時間待公布');
     })();
-
-    useEffect(() => {
-        panelHeight.value = withSpring(
-            expanded ? expandedHeight : collapsedHeight,
-            PANEL_SPRING,
-        );
-    }, [collapsedHeight, expanded, expandedHeight, panelHeight]);
-
-    const commitExpanded = useCallback(nextExpanded => {
-        if (nextExpanded === expanded) {
-            panelHeight.value = withSpring(
-                nextExpanded ? expandedHeight : collapsedHeight,
-                PANEL_SPRING,
-            );
-            return;
-        }
-        trigger();
-        onToggleExpanded();
-    }, [collapsedHeight, expanded, expandedHeight, onToggleExpanded, panelHeight]);
-
-    const panGesture = useMemo(() => Gesture.Pan()
-        .activeOffsetY([-8, 8])
-        .failOffsetX([-24, 24])
-        .onStart(() => {
-            dragStartHeight.value = panelHeight.value;
-        })
-        .onUpdate(event => {
-            const next = dragStartHeight.value - event.translationY;
-            panelHeight.value = Math.min(
-                expandedHeight,
-                Math.max(collapsedHeight, next),
-            );
-        })
-        .onEnd(event => {
-            const mid = (collapsedHeight + expandedHeight) / 2;
-            const shouldExpand = event.velocityY < -500
-                || (event.velocityY <= 500 && panelHeight.value > mid);
-            runOnJS(commitExpanded)(shouldExpand);
-        }), [
-        collapsedHeight,
-        commitExpanded,
-        dragStartHeight,
-        expandedHeight,
-        panelHeight,
-    ]);
-
-    const animatedContainerStyle = useAnimatedStyle(() => ({
-        height: panelHeight.value,
-    }));
 
     const renderVehicleEta = vehicle => {
         const eta = getVehicleDestinationEta(vehicle, selectedStop);
@@ -494,6 +496,91 @@ const BusArrivalPanel = ({
     const summaryEtaPresentation = selectedStop && headingVehicle
         ? renderVehicleEta(headingVehicle)
         : null;
+    const collapsedHeight = getBusPanelCollapsedHeight(
+        hasVehicles,
+        Boolean(selectedStopInfo),
+        Boolean(summaryEtaPresentation?.secondary),
+    ) + insets.bottom;
+    const panelHeight = useSharedValue(expanded ? expandedHeight : collapsedHeight);
+    const dragStartHeight = useSharedValue(0);
+
+    useEffect(() => {
+        panelHeight.value = withSpring(
+            expanded ? expandedHeight : collapsedHeight,
+            PANEL_SPRING,
+        );
+    }, [collapsedHeight, expanded, expandedHeight, panelHeight]);
+
+    const commitExpanded = useCallback(nextExpanded => {
+        if (nextExpanded === expanded) {
+            panelHeight.value = withSpring(
+                nextExpanded ? expandedHeight : collapsedHeight,
+                PANEL_SPRING,
+            );
+            return;
+        }
+        trigger();
+        onToggleExpanded();
+    }, [collapsedHeight, expanded, expandedHeight, onToggleExpanded, panelHeight]);
+
+    const panGesture = useMemo(() => Gesture.Pan()
+        .activeOffsetY([-8, 8])
+        .failOffsetX([-24, 24])
+        .onStart(() => {
+            dragStartHeight.value = panelHeight.value;
+        })
+        .onUpdate(event => {
+            const next = dragStartHeight.value - event.translationY;
+            panelHeight.value = Math.min(
+                expandedHeight,
+                Math.max(collapsedHeight, next),
+            );
+        })
+        .onEnd(event => {
+            const mid = (collapsedHeight + expandedHeight) / 2;
+            const shouldExpand = event.velocityY < -500
+                || (event.velocityY <= 500 && panelHeight.value > mid);
+            runOnJS(commitExpanded)(shouldExpand);
+        }), [
+        collapsedHeight,
+        commitExpanded,
+        dragStartHeight,
+        expandedHeight,
+        panelHeight,
+    ]);
+
+    const animatedContainerStyle = useAnimatedStyle(() => ({
+        height: panelHeight.value,
+    }));
+
+    const animatedExpandableStyle = useAnimatedStyle(() => {
+        const progress = interpolate(
+            panelHeight.value,
+            [collapsedHeight, expandedHeight],
+            [0, 1],
+            Extrapolation.CLAMP,
+        );
+        return {
+            opacity: interpolate(progress, [0.04, 0.45], [0, 1], Extrapolation.CLAMP),
+            transform: [
+                {
+                    translateY: interpolate(progress, [0, 0.45], [10, 0], Extrapolation.CLAMP),
+                },
+            ],
+        };
+    }, [collapsedHeight, expandedHeight]);
+
+    const animatedHintStyle = useAnimatedStyle(() => {
+        const progress = interpolate(
+            panelHeight.value,
+            [collapsedHeight, expandedHeight],
+            [0, 1],
+            Extrapolation.CLAMP,
+        );
+        return {
+            opacity: interpolate(progress, [0, 0.14], [1, 0], Extrapolation.CLAMP),
+        };
+    }, [collapsedHeight, expandedHeight]);
 
     return (
         <Animated.View style={[styles.container, animatedContainerStyle]}>
@@ -522,7 +609,7 @@ const BusArrivalPanel = ({
                             }}
                             style={styles.headingContent}>
                             <View style={styles.statusRow}>
-                                <MaterialCommunityIcons
+                                <PhosphorFeatureIcon
                                     name={statusPresentation.icon}
                                     color={statusPresentation.color}
                                     size={13}
@@ -553,9 +640,9 @@ const BusArrivalPanel = ({
                                         onViewStop();
                                     }}
                                     style={styles.headingAction}>
-                                    <MaterialCommunityIcons
-                                        name="image-outline"
-                                        color={themeColor}
+                                    <PhosphorFeatureIcon
+                                        name="image"
+                                        color={featureIconTones.orange.foreground}
                                         size={20}
                                     />
                                 </ScalePressable>
@@ -568,9 +655,9 @@ const BusArrivalPanel = ({
                                     onOpenMap();
                                 }}
                                 style={styles.headingAction}>
-                                <MaterialCommunityIcons
-                                    name="map-outline"
-                                    color={themeColor}
+                                <PhosphorFeatureIcon
+                                    name="map"
+                                    color={featureIconTones.green.foreground}
                                     size={20}
                                 />
                             </ScalePressable>
@@ -580,9 +667,9 @@ const BusArrivalPanel = ({
                                 disabled={refreshing}
                                 onPress={onRefresh}
                                 style={styles.headingAction}>
-                                <MaterialCommunityIcons
-                                    name={refreshing ? 'timer-sand' : 'refresh'}
-                                    color={statusPresentation.color}
+                                <PhosphorFeatureIcon
+                                    name={refreshing ? 'hourglass-medium' : 'arrow-clockwise'}
+                                    color={featureIconTones.blue.foreground}
                                     size={20}
                                 />
                             </ScalePressable>
@@ -595,19 +682,30 @@ const BusArrivalPanel = ({
                                     onToggleExpanded();
                                 }}
                                 style={styles.headingAction}>
-                                <MaterialCommunityIcons
-                                    name={expanded ? 'chevron-down' : 'chevron-up'}
-                                    color={themeColor}
-                                    size={26}
+                                <PhosphorFeatureIcon
+                                    name={expanded ? 'caret-down' : 'caret-up'}
+                                    color={black.second}
+                                    size={20}
+                                    weight="regular"
                                 />
                             </ScalePressable>
                         </View>
                     </View>
+                    {selectedStopInfo ? (
+                        <View style={styles.departureRow}>
+                            <PhosphorFeatureIcon name="map-pin" color={successForeground} size={14} />
+                            <Text style={styles.destinationText} numberOfLines={2}>
+                                {translate('目的站 {{station}}', {
+                                    station: `${selectedStopInfo.code} ${translate(selectedStopInfo.name)}${selectedStopInfo.terminalLabel ? ` (${translate(selectedStopInfo.terminalLabel)})` : ''}`,
+                                })}
+                            </Text>
+                        </View>
+                    ) : null}
                     {summaryEtaPresentation ? (
                         <View style={styles.departureRow}>
-                            <MaterialCommunityIcons
-                                name="map-marker-distance"
-                                color={themeColor}
+                            <PhosphorFeatureIcon
+                                name="path"
+                                color={featureIconTones.green.foreground}
                                 size={14}
                             />
                             <Text style={styles.departureText} numberOfLines={1}>
@@ -617,140 +715,144 @@ const BusArrivalPanel = ({
                     ) : null}
                     {summaryEtaPresentation?.secondary ? (
                         <View style={styles.departureRow}>
-                            <MaterialCommunityIcons
-                                name="bus-clock"
-                                color={themeColor}
+                            <PhosphorFeatureIcon
+                                name="bus"
+                                color={featureIconTones.orange.foreground}
                                 size={14}
                             />
-                            <Text style={styles.departureText} numberOfLines={1}>
+                            <Text style={styles.departureSecondaryText} numberOfLines={1}>
                                 {summaryEtaPresentation.secondary}
                             </Text>
                         </View>
                     ) : null}
                     <View style={styles.departureRow}>
-                        <MaterialCommunityIcons
-                            name="clock-outline"
-                            color={themeColor}
+                        <PhosphorFeatureIcon
+                            name="clock"
+                            color={featureIconTones.blue.foreground}
                             size={14}
                         />
-                        <Text style={styles.departureText} numberOfLines={1}>
+                        <Text style={styles.departureSecondaryText} numberOfLines={1}>
                             {officialNextDepartureText}
                         </Text>
                     </View>
                 </Animated.View>
             </GestureDetector>
 
-            {expanded ? (
-                <View style={styles.stopGrid}>
-                    {BUS_STOPS.map(stop => {
-                        const selected = selectedStop === stop.code;
-                        return (
-                            <ScalePressable
-                                key={stop.code}
-                                accessibilityRole="button"
-                                accessibilityState={{selected}}
-                                onPress={() => {
-                                    trigger();
-                                    onSelectStop(stop.code);
-                                }}
-                                style={[
-                                    styles.stopChip,
-                                    {
-                                        borderColor: selected ? themeColor : tonal.primary50,
-                                        backgroundColor: selected ? themeColor : tonal.primary08,
-                                    },
-                                ]}>
-                                <Text style={[
-                                    styles.stopChipText,
-                                    {color: selected ? trueWhite : themeColor},
-                                ]}>
-                                    {stop.code} {translate(stop.shortName)}
-                                </Text>
-                            </ScalePressable>
-                        );
-                    })}
-                </View>
-            ) : !selectedStop ? (
-                <Text style={styles.hint}>{translate('點選路線上的車站查看預計到站時間')}</Text>
-            ) : null}
+            <View style={styles.expandableWrap}>
+                {!selectedStop ? (
+                    <Animated.View
+                        pointerEvents="none"
+                        accessibilityElementsHidden={expanded}
+                        importantForAccessibility={expanded ? 'no-hide-descendants' : 'auto'}
+                        style={[styles.hintOverlay, animatedHintStyle]}>
+                        <Text style={styles.hint}>{translate('點選路線上的車站查看預計到站時間')}</Text>
+                    </Animated.View>
+                ) : null}
 
-            {expanded && selectedStopInfo ? (
-                <ScalePressable
-                    accessibilityRole="button"
-                    accessibilityLabel={translate('查看到站時間統計')}
-                    onPress={() => {
-                        trigger();
-                        onOpenStats();
-                    }}
-                    style={styles.statsButton}>
-                    <MaterialCommunityIcons name="chart-line" color={themeColor} size={20} />
-                    <View style={styles.statsButtonContent}>
-                        <Text style={styles.statsButtonTitle}>{translate('到站時間統計')}</Text>
-                        <Text style={styles.statsButtonText}>{translate('查看近1天、7天及30天行車參考')}</Text>
-                    </View>
-                    <MaterialCommunityIcons name="chevron-right" color={themeColor} size={22} />
-                </ScalePressable>
-            ) : null}
-
-            {expanded ? (
-                <ScrollView
-                    style={styles.list}
-                    nestedScrollEnabled
-                    showsVerticalScrollIndicator={false}
-                    contentContainerStyle={styles.listContent}>
-                    {vehicles.length > 0 ? vehicles.map(vehicle => {
-                        const selected = selectedVehiclePlate === vehicle.vehiclePlateNumber;
-                        const etaPresentation = renderVehicleEta(vehicle);
-                        return (
-                            <ScalePressable
-                                key={vehicle.vehiclePlateNumber}
-                                accessibilityRole="button"
-                                accessibilityState={{selected}}
-                                onPress={() => {
-                                    trigger();
-                                    onSelectVehicle(vehicle.vehiclePlateNumber);
-                                }}
-                                style={[
-                                    styles.vehicleRow,
-                                    {
-                                        backgroundColor: selected ? tonal.secondary15 : tonal.primary08,
-                                    },
-                                ]}>
-                                <View style={[styles.vehicleIcon, {backgroundColor: secondThemeColor}]}>
-                                    <MaterialCommunityIcons name="bus" color={trueWhite} size={21} />
-                                </View>
-                                <View style={styles.vehicleContent}>
-                                    <Text style={styles.vehicleTitle}>{vehicle.vehiclePlateNumber}</Text>
-                                    <Text style={styles.vehiclePosition}>
-                                        {getPositionLabel(vehicle.positionCode, translate)}
+                <Animated.View
+                    pointerEvents={expanded ? 'auto' : 'none'}
+                    accessibilityElementsHidden={!expanded}
+                    importantForAccessibility={expanded ? 'auto' : 'no-hide-descendants'}
+                    style={[styles.expandableContent, animatedExpandableStyle]}>
+                    <View style={styles.stopGrid}>
+                        {BUS_STOPS.map(stop => {
+                            const selected = selectedStop === stop.code;
+                            return (
+                                <ScalePressable
+                                    key={stop.code}
+                                    accessibilityRole="button"
+                                    accessibilityState={{selected}}
+                                    onPress={() => {
+                                        trigger();
+                                        onSelectStop(stop.code);
+                                    }}
+                                    style={[
+                                        styles.stopChip,
+                                        selected && styles.selectedStopChip,
+                                    ]}>
+                                    <Text style={[
+                                        styles.stopChipText,
+                                        selected && styles.selectedStopChipText,
+                                    ]}>
+                                        {stop.code} {translate(stop.shortName)}
                                     </Text>
-                                    <Text style={styles.eta}>{etaPresentation.primary}</Text>
-                                    {etaPresentation.secondary ? (
-                                        <Text style={styles.etaSecondary}>
-                                            {etaPresentation.secondary}
+                                </ScalePressable>
+                            );
+                        })}
+                    </View>
+
+                    {selectedStopInfo ? (
+                        <ScalePressable
+                            accessibilityRole="button"
+                            accessibilityLabel={translate('查看到站時間統計')}
+                            onPress={() => {
+                                trigger();
+                                onOpenStats();
+                            }}
+                            style={styles.statsButton}>
+                            <PhosphorFeatureIcon name="chart-line-up" color={featureIconTones.blue.foreground} size={20} />
+                            <View style={styles.statsButtonContent}>
+                                <Text style={styles.statsButtonTitle}>{translate('到站時間統計')}</Text>
+                                <Text style={styles.statsButtonText}>{translate('查看近1天、7天及30天行車參考')}</Text>
+                            </View>
+                            <PhosphorFeatureIcon name="caret-right" color={black.third} size={18} weight="regular" />
+                        </ScalePressable>
+                    ) : null}
+
+                    <ScrollView
+                        style={styles.list}
+                        nestedScrollEnabled
+                        showsVerticalScrollIndicator={false}
+                        contentContainerStyle={styles.listContent}>
+                        {vehicles.length > 0 ? vehicles.map(vehicle => {
+                            const selected = selectedVehiclePlate === vehicle.vehiclePlateNumber;
+                            const etaPresentation = renderVehicleEta(vehicle);
+                            return (
+                                <ScalePressable
+                                    key={vehicle.vehiclePlateNumber}
+                                    accessibilityRole="button"
+                                    accessibilityState={{selected}}
+                                    onPress={() => {
+                                        trigger();
+                                        onSelectVehicle(vehicle.vehiclePlateNumber);
+                                    }}
+                                    style={[styles.vehicleRow, selected && {backgroundColor: featuresScreen.divider}]}>
+                                    <View style={styles.vehicleIcon}>
+                                        <PhosphorFeatureIcon name="bus" color={secondThemeColor} size={22} />
+                                    </View>
+                                    <View style={styles.vehicleContent}>
+                                        <Text style={styles.vehicleTitle}>{vehicle.vehiclePlateNumber}</Text>
+                                        <Text style={styles.vehiclePosition}>
+                                            {getPositionLabel(vehicle.positionCode, translate)}
                                         </Text>
-                                    ) : null}
-                                    {etaPresentation.lowConfidence
-                                    || vehicle.stateConfidence === 'low'
-                                    || vehicle.positionOverdue ? (
-                                        <Text style={styles.warning}>{translate('預測信心較低')}</Text>
-                                    ) : null}
-                                </View>
-                            </ScalePressable>
-                        );
-                    }) : (
-                        <View style={styles.empty}>
-                            <Text style={styles.emptyText}>
-                                {snapshot?.serviceStatus === 'stopped'
-                                    ? translate('目前沒有巴士服務')
-                                    : snapshot?.serviceStatus === 'running'
-                                        ? translate('服務時段內，暫未有巴士出現')
-                                        : translate('暫未偵測到行駛中的巴士')}
-                            </Text>
-                        </View>
-                    )}
-                </ScrollView>
-            ) : null}
+                                        <Text style={styles.eta}>{etaPresentation.primary}</Text>
+                                        {etaPresentation.secondary ? (
+                                            <Text style={styles.etaSecondary}>
+                                                {etaPresentation.secondary}
+                                            </Text>
+                                        ) : null}
+                                        {etaPresentation.lowConfidence
+                                        || vehicle.stateConfidence === 'low'
+                                        || vehicle.positionOverdue ? (
+                                            <Text style={styles.warning}>{translate('預測信心較低')}</Text>
+                                        ) : null}
+                                    </View>
+                                </ScalePressable>
+                            );
+                        }) : (
+                            <View style={styles.empty}>
+                                <Text style={styles.emptyText}>
+                                    {snapshot?.serviceStatus === 'stopped'
+                                        ? translate('目前沒有巴士服務')
+                                        : snapshot?.serviceStatus === 'running'
+                                            ? translate('服務時段內，暫未有巴士出現')
+                                            : translate('暫未偵測到行駛中的巴士')}
+                                </Text>
+                            </View>
+                        )}
+                    </ScrollView>
+                </Animated.View>
+            </View>
         </Animated.View>
     );
 };

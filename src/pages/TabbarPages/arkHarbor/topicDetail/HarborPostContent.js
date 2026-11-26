@@ -1,5 +1,6 @@
 import React, {
     memo,
+    useEffect,
     useMemo,
     useRef,
     useState,
@@ -12,6 +13,7 @@ import {
     View,
 } from 'react-native';
 
+import * as Clipboard from 'expo-clipboard';
 import { Image } from 'expo-image';
 import RenderHTML, {
     HTMLContentModel,
@@ -22,7 +24,10 @@ import RenderHTML, {
     useIMGElementState,
     useRendererProps,
 } from '@native-html/render';
-import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
+import { Check } from 'phosphor-react-native/src/icons/Check';
+import { Copy } from 'phosphor-react-native/src/icons/Copy';
+import { Globe } from 'phosphor-react-native/src/icons/Globe';
+import Toast from 'react-native-simple-toast';
 import { WebView } from 'react-native-webview';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { scale, verticalScale } from 'react-native-size-matters';
@@ -35,11 +40,13 @@ import { openLink } from '../../../../utils/browser';
 import {
     groupConsecutiveHarborImages,
     replaceHarborEmojiImages,
+    replaceHarborOneboxes,
     stripTrailingEmptyHarborHtml,
 } from '../../../../utils/harbor/harborHtml';
 import { hasHarborInteractiveContent } from '../../../../utils/harbor/harborPostEvent';
 import { ARK_HARBOR } from '../../../../utils/pathMap';
 import { trigger } from '../../../../utils/trigger';
+import PhosphorFeatureIcon from '../../info/home/search/components/PhosphorFeatureIcon';
 import {
     getHarborImagePressAction,
     normalizeHtmlUrl,
@@ -69,10 +76,17 @@ const harborGridImgModel = HTMLElementModel.fromCustomModel({
     isVoid: true,
 });
 
+const harborOneboxModel = HTMLElementModel.fromCustomModel({
+    tagName: 'harbor-onebox',
+    contentModel: HTMLContentModel.block,
+    isOpaque: true,
+});
+
 const customHTMLElementModels = {
     'harbor-emoji': harborEmojiModel,
     'harbor-grid-img': harborGridImgModel,
     'harbor-image-grid': harborImageGridModel,
+    'harbor-onebox': harborOneboxModel,
     iframe: iframeModel,
 };
 
@@ -132,16 +146,17 @@ const HarborIframeRenderer = ({ tnode }) => {
                     onPress={openFullscreen}
                     style={({ pressed }) => [
                         styles.iframeExpandButton,
+                        theme.floatingShadow,
                         {
                             backgroundColor: theme.trueWhite,
-                            shadowColor: theme.trueBlack,
                             opacity: pressed ? 0.8 : 1,
                         },
                     ]}>
-                    <MaterialCommunityIcons
-                        name="fullscreen"
+                    <PhosphorFeatureIcon
+                        name="corners-out"
                         size={scale(22)}
                         color={theme.trueBlack}
+                        weight="regular"
                     />
                 </Pressable>
             </View>
@@ -175,17 +190,18 @@ const HarborIframeRenderer = ({ tnode }) => {
                         onPress={closeFullscreen}
                         style={({ pressed }) => [
                             styles.iframeFullscreenClose,
+                            theme.floatingShadow,
                             {
                                 top: Math.max(insets.top, verticalScale(12)),
                                 backgroundColor: theme.trueWhite,
-                                shadowColor: theme.trueBlack,
                                 opacity: pressed ? 0.8 : 1,
                             },
                         ]}>
-                        <MaterialCommunityIcons
-                            name="close"
+                        <PhosphorFeatureIcon
+                            name="x"
                             size={scale(22)}
                             color={theme.trueBlack}
+                            weight="regular"
                         />
                     </Pressable>
                 </View>
@@ -327,9 +343,155 @@ const HarborImageGridRenderer = ({ tnode }) => {
     );
 };
 
+const HarborOneboxRenderer = ({ tnode }) => {
+    const { theme } = useTheme();
+    const { t } = useTranslation('harbor');
+    const rendererProps = useRendererProps('harbor-onebox');
+    const onPressLink = rendererProps?.onPressLink;
+    const compact = Boolean(rendererProps?.compact);
+
+    const url = normalizeHtmlUrl(tnode?.attributes?.url);
+    const title = tnode?.attributes?.title || url;
+    const domain = tnode?.attributes?.domain || url;
+    const description = tnode?.attributes?.description || '';
+    const iconUrl = normalizeHtmlUrl(tnode?.attributes?.icon);
+
+    const [iconFailed, setIconFailed] = useState(false);
+    const [copied, setCopied] = useState(false);
+    const copyTimerRef = useRef(null);
+
+    useEffect(() => {
+        setIconFailed(false);
+    }, [iconUrl]);
+
+    useEffect(() => {
+        return () => {
+            if (copyTimerRef.current) {
+                clearTimeout(copyTimerRef.current);
+            }
+        };
+    }, []);
+
+    if (!url) {
+        return null;
+    }
+
+    const handleCopy = event => {
+        event?.stopPropagation?.();
+        Clipboard.setStringAsync(url);
+        trigger('success');
+        Toast.show(t('common:已複製連結'));
+        setCopied(true);
+        if (copyTimerRef.current) {
+            clearTimeout(copyTimerRef.current);
+        }
+        copyTimerRef.current = setTimeout(() => {
+            setCopied(false);
+        }, 1800);
+    };
+
+    const handleOpen = () => {
+        trigger();
+        onPressLink?.(url);
+    };
+
+    return (
+        <ScalePressable
+            accessibilityRole="link"
+            accessibilityLabel={title}
+            onPress={handleOpen}
+            style={[
+                styles.oneboxCard,
+                theme.viewShadow,
+                {
+                    backgroundColor: theme.white,
+                },
+            ]}>
+            <View style={styles.oneboxHeaderRow}>
+                <View
+                    style={[
+                        styles.oneboxIconWrap,
+                        { backgroundColor: theme.tonal.primary08 },
+                    ]}>
+                    {iconUrl && !iconFailed ? (
+                        <Image
+                            source={{ uri: iconUrl }}
+                            style={styles.oneboxIconImage}
+                            contentFit="contain"
+                            onError={() => setIconFailed(true)}
+                        />
+                    ) : (
+                        <Globe
+                            size={scale(18)}
+                            color={theme.themeColor}
+                            weight="duotone"
+                        />
+                    )}
+                </View>
+                <View style={styles.oneboxHeaderText}>
+                    <Text
+                        numberOfLines={2}
+                        style={[
+                            styles.oneboxTitle,
+                            { color: theme.black.main },
+                        ]}>
+                        {title}
+                    </Text>
+                    <Text
+                        numberOfLines={1}
+                        style={[
+                            styles.oneboxDomain,
+                            { color: theme.black.third },
+                        ]}>
+                        {domain}
+                    </Text>
+                </View>
+                <ScalePressable
+                    accessibilityRole="button"
+                    accessibilityLabel={t('複製連結')}
+                    hitSlop={scale(6)}
+                    onPress={handleCopy}
+                    style={[
+                        styles.oneboxCopyButton,
+                        {
+                            backgroundColor: copied
+                                ? theme.tonal.success15
+                                : theme.tonal.primary15,
+                        },
+                    ]}>
+                    {copied ? (
+                        <Check
+                            size={scale(16)}
+                            color={theme.successForeground}
+                            weight="bold"
+                        />
+                    ) : (
+                        <Copy
+                            size={scale(16)}
+                            color={theme.themeColor}
+                            weight="regular"
+                        />
+                    )}
+                </ScalePressable>
+            </View>
+            {!compact && description ? (
+                <Text
+                    numberOfLines={2}
+                    style={[
+                        styles.oneboxDescription,
+                        { color: theme.black.second },
+                    ]}>
+                    {description}
+                </Text>
+            ) : null}
+        </ScalePressable>
+    );
+};
+
 const htmlRenderers = {
     'harbor-emoji': HarborEmojiRenderer,
     'harbor-image-grid': HarborImageGridRenderer,
+    'harbor-onebox': HarborOneboxRenderer,
     iframe: HarborIframeRenderer,
     img: HarborImageRenderer,
 };
@@ -353,7 +515,9 @@ const HarborPostContent = memo(
         const normalizedCooked = useMemo(() => {
             return stripTrailingEmptyHarborHtml(
                 groupConsecutiveHarborImages(
-                    replaceHarborEmojiImages(cooked || ''),
+                    replaceHarborOneboxes(
+                        replaceHarborEmojiImages(cooked || ''),
+                    ),
                 ),
             );
         }, [cooked]);
@@ -571,8 +735,12 @@ const HarborPostContent = memo(
                         }
                     },
                 },
+                'harbor-onebox': {
+                    compact,
+                    onPressLink,
+                },
             }),
-            [contentWidth, imageUrls, onOpenImage, onPressLink],
+            [compact, contentWidth, imageUrls, onOpenImage, onPressLink],
         );
 
         return (
@@ -613,10 +781,11 @@ const HarborPostContent = memo(
                                 backgroundColor: tonal.primary15,
                             },
                         ]}>
-                        <MaterialCommunityIcons
-                            name="open-in-new"
+                        <PhosphorFeatureIcon
+                            name="arrow-square-out"
                             size={scale(15)}
                             color={themeColor}
+                            weight="regular"
                         />
                         <Text
                             style={[

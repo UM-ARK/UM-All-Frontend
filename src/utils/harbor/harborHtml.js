@@ -341,3 +341,107 @@ export const groupConsecutiveHarborImages = html => {
     flushImages();
     return result;
 };
+
+const decodeHarborHtmlText = value =>
+    String(value || '')
+        .replace(/<[^>]*>/g, ' ')
+        .replace(/&nbsp;/gi, ' ')
+        .replace(/&amp;/gi, '&')
+        .replace(/&lt;/gi, '<')
+        .replace(/&gt;/gi, '>')
+        .replace(/&quot;/gi, '"')
+        .replace(/&#39;/gi, "'")
+        .replace(/&#x([0-9a-f]+);/gi, (_, hex) => {
+            const code = Number.parseInt(hex, 16);
+            return Number.isFinite(code) ? String.fromCodePoint(code) : '';
+        })
+        .replace(/&#(\d+);/g, (_, dec) => {
+            const code = Number.parseInt(dec, 10);
+            return Number.isFinite(code) ? String.fromCodePoint(code) : '';
+        })
+        .replace(/\s+/g, ' ')
+        .trim();
+
+const extractOneboxDomainFromUrl = url => {
+    const match = String(url || '').match(/^https?:\/\/([^/?#]+)/i);
+    return match ? match[1].replace(/^www\./i, '') : '';
+};
+
+const extractOneboxIcon = block => {
+    const imageTags = block.match(/<img\b[^>]*>/gi) || [];
+    const nonEmojiTags = imageTags.filter(
+        tag => !hasHtmlClass(tag, 'emoji'),
+    );
+    const siteIconTag = nonEmojiTags.find(tag =>
+        hasHtmlClass(tag, 'site-icon'),
+    );
+    const headerMatch = block.match(/<header\b[^>]*>[\s\S]*?<\/header>/i);
+    const headerImageTag = headerMatch?.[0].match(/<img\b[^>]*>/i)?.[0];
+    const chosenTag =
+        siteIconTag ||
+        (headerImageTag && !hasHtmlClass(headerImageTag, 'emoji')
+            ? headerImageTag
+            : null) ||
+        nonEmojiTags[0];
+
+    return chosenTag ? getHarborHtmlAttribute(chosenTag, 'src') : '';
+};
+
+/**
+ * 將 Discourse onebox 預覽區塊轉為自訂 <harbor-onebox> 標籤，
+ * 避免 RenderHTML 把 site-icon 放大渲染並誤觸相簿檢視。
+ */
+export const replaceHarborOneboxes = html => {
+    if (!html || typeof html !== 'string') {
+        return '';
+    }
+
+    return html.replace(/<aside\b[^>]*>[\s\S]*?<\/aside>/gi, block => {
+        const openingTag = block.match(/^<aside\b[^>]*>/i)?.[0] || '';
+        const className = getHarborHtmlAttribute(openingTag, 'class');
+        if (!className.toLowerCase().split(/\s+/).includes('onebox')) {
+            return block;
+        }
+
+        const sourceUrl = getHarborHtmlAttribute(openingTag, 'data-onebox-src');
+        const headingMatch = block.match(/<h[34]\b[^>]*>([\s\S]*?)<\/h[34]>/i);
+        const headingAnchor = headingMatch?.[1]?.match(/<a\b[^>]*>/i)?.[0] || '';
+        const firstAnchor = block.match(/<a\b[^>]*>/i)?.[0] || '';
+        const url =
+            sourceUrl ||
+            getHarborHtmlAttribute(headingAnchor, 'href') ||
+            getHarborHtmlAttribute(firstAnchor, 'href');
+        if (!url) {
+            return block;
+        }
+
+        const headerMatch = block.match(/<header\b[^>]*>([\s\S]*?)<\/header>/i);
+        const headerAnchorText = headerMatch?.[1]?.match(
+            /<a\b[^>]*>([\s\S]*?)<\/a>/i,
+        )?.[1];
+        const domain =
+            decodeHarborHtmlText(headerAnchorText || headerMatch?.[1] || '') ||
+            extractOneboxDomainFromUrl(url);
+        const title =
+            decodeHarborHtmlText(headingMatch?.[1] || '') || domain || url;
+
+        const articleMatch = block.match(
+            /<article\b[^>]*>([\s\S]*?)<\/article>/i,
+        );
+        const descriptionMatch = (articleMatch?.[1] || block).match(
+            /<p\b[^>]*>([\s\S]*?)<\/p>/i,
+        );
+        const description = decodeHarborHtmlText(descriptionMatch?.[1] || '');
+        const icon = extractOneboxIcon(block);
+
+        return (
+            `<harbor-onebox` +
+            ` url="${escapeHarborHtmlAttribute(url)}"` +
+            ` title="${escapeHarborHtmlAttribute(title)}"` +
+            ` domain="${escapeHarborHtmlAttribute(domain)}"` +
+            ` description="${escapeHarborHtmlAttribute(description)}"` +
+            ` icon="${escapeHarborHtmlAttribute(icon)}"` +
+            `>\u200b</harbor-onebox>`
+        );
+    });
+};

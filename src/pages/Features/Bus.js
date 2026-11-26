@@ -10,7 +10,7 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useTheme} from '../../components/ThemeContext';
 import ARKImageView from '../../components/ARKImageView';
 import ScalePressable from '../../components/ScalePressable';
-import {UM_BUS_LIVE, UM_BUS_LOOP_ZH, UM_BUS_LOOP_EN, UM_BUS_LOOP_SERVICE, UM_MAP} from '../../utils/pathMap';
+import {UM_BUS_LIVE, UM_BUS_LOOP_ZH, UM_BUS_LOOP_EN, UM_BUS_LOOP_SERVICE, UM_BUS_STATS, UM_MAP} from '../../utils/pathMap';
 import {openLink} from '../../utils/browser';
 import {logToFirebase} from '../../utils/firebaseAnalytics';
 import {getLocalStorage, setLocalStorageSilently} from '../../utils/storageKits';
@@ -21,16 +21,19 @@ import axios from 'axios';
 import Toast from 'react-native-simple-toast';
 import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 import BusArrivalPanel, {
-    BUS_PANEL_COLLAPSED,
-    BUS_PANEL_COLLAPSED_EMPTY,
     BUS_PANEL_EXPANDED,
+    getBusPanelCollapsedHeight,
 } from './bus/BusArrivalPanel';
 import BusEtaStatsSheet from './bus/BusEtaStatsSheet';
 import BusRouteMap from './bus/BusRouteMap';
 import {
+    BUS_STATS_CACHE_MS,
+    BUS_STATS_CACHE_PREFIX,
+    BUS_STATS_DEFAULT_DAYS,
     BUS_STOPS,
     createFallbackBusLive,
     extractVehiclePlates,
+    getBusStop,
     isBusLiveSnapshotFresh,
     isCachedBusLiveUsable,
     normalizeBusLive,
@@ -131,22 +134,22 @@ const BusScreen = ({navigation}) => {
     const insets = useSafeAreaInsets();
     const {theme} = useTheme();
     const {
-        bg_color,
         black,
-        success,
+        featuresScreen,
+        successForeground,
         themeColor,
         warning,
     } = theme;
     const s = useMemo(() => StyleSheet.create({
         container: {
             flex: 1,
-            backgroundColor: bg_color,
+            // 與地圖底色一致，透明標題欄下不會露出突兀白邊
+            backgroundColor: featuresScreen.bg_color,
         },
         routeScroll: {
             flex: 1,
         },
         routeContent: {
-            paddingHorizontal: 12,
             paddingTop: 4,
             paddingBottom: 8,
         },
@@ -156,9 +159,10 @@ const BusScreen = ({navigation}) => {
             right: 0,
             bottom: 0,
         },
-    }), [bg_color]);
+    }), [featuresScreen.bg_color]);
 
     const [snapshot, setSnapshot] = useState(null);
+    const [statsDocument, setStatsDocument] = useState(null);
     const [selectedStop, setSelectedStop] = useState(null);
     const [selectedVehiclePlate, setSelectedVehiclePlate] = useState(null);
     const [panelExpanded, setPanelExpanded] = useState(false);
@@ -174,15 +178,19 @@ const BusScreen = ({navigation}) => {
     const requestInFlightRef = useRef(false);
     const snapshotRef = useRef(null);
     const panelBottomInset = insets.bottom;
-    const collapsedPanelReservedHeight = (snapshot?.vehicles?.length > 0
-        ? BUS_PANEL_COLLAPSED
-        : BUS_PANEL_COLLAPSED_EMPTY)
-        + panelBottomInset;
+    const collapsedPanelReservedHeight = getBusPanelCollapsedHeight(
+        snapshot?.vehicles?.length > 0,
+        Boolean(getBusStop(selectedStop)),
+    ) + panelBottomInset;
     const panelReservedHeight = (panelExpanded
         ? BUS_PANEL_EXPANDED
         : collapsedPanelReservedHeight);
+    // 透明標題欄時用 padding 把內容頂在標題下方，恢復「一進來完整環線」取景；
+    // 不再用負 margin 把地圖拉回狀態欄底下。
     const contentTopStyle = useMemo(
-        () => isLiquidGlassSupported ? {paddingTop: headerHeight} : null,
+        () => (isLiquidGlassSupported && headerHeight > 0
+            ? {paddingTop: headerHeight}
+            : null),
         [headerHeight],
     );
     const routePanelInsetStyle = useMemo(
@@ -195,7 +203,7 @@ const BusScreen = ({navigation}) => {
 
     const busUrl = i18n.resolvedLanguage === 'en' ? UM_BUS_LOOP_EN : UM_BUS_LOOP_ZH;
 
-    // 右上角：官方網站 / 服務說明（參考 LocalCourse / DeepLinkShareButton header 模式）
+    // 右上角：官方網站 / 服務說明（iOS 走原生 UIBarButtonItem，保留液態玻璃）
     const openBusOfficialPage = useCallback(() => {
         openLink(busUrl);
     }, [busUrl]);
@@ -299,6 +307,55 @@ const BusScreen = ({navigation}) => {
                 setSelectedStop(value);
             }
         });
+    }, []);
+
+    useEffect(() => {
+        let active = true;
+        const controller = new AbortController();
+        const cacheKey = `${BUS_STATS_CACHE_PREFIX}:${BUS_STATS_DEFAULT_DAYS}`;
+        const loadStats = async () => {
+            let cached = null;
+            try {
+                cached = await getLocalStorage(cacheKey);
+            } catch (_storageError) {
+                cached = null;
+            }
+            if (!active) {
+                return;
+            }
+            const cachedAt = Date.parse(cached?.receivedAt || '');
+            const cachedDocument = cached?.document?.lookbackDays === BUS_STATS_DEFAULT_DAYS
+                ? cached.document
+                : null;
+            if (cachedDocument) {
+                setStatsDocument(cachedDocument);
+                if (Number.isFinite(cachedAt) && Date.now() - cachedAt < BUS_STATS_CACHE_MS) {
+                    return;
+                }
+            }
+            try {
+                const response = await axios.get(UM_BUS_STATS, {
+                    params: {days: BUS_STATS_DEFAULT_DAYS},
+                    signal: controller.signal,
+                    timeout: 8000,
+                });
+                if (!active || response.data?.lookbackDays !== BUS_STATS_DEFAULT_DAYS) {
+                    return;
+                }
+                setStatsDocument(response.data);
+                setLocalStorageSilently(cacheKey, {
+                    receivedAt: new Date().toISOString(),
+                    document: response.data,
+                });
+            } catch (_statsError) {
+                // 統計預載失敗時保留既有快取或改用即時 ETA / 預設值
+            }
+        };
+        loadStats();
+        return () => {
+            active = false;
+            controller.abort();
+        };
     }, []);
 
     const fetchBusInfo = useCallback(async ({manual = false} = {}) => {
@@ -412,7 +469,7 @@ const BusScreen = ({navigation}) => {
 
     useEffect(() => {
         routeScrollRef.current?.scrollTo({y: 0, animated: false});
-    }, [headerHeight, panelExpanded]);
+    }, [panelExpanded]);
 
     // 控制彈出層打開 or 關閉
     const toggleModal = useCallback(index => {
@@ -440,22 +497,22 @@ const BusScreen = ({navigation}) => {
     const statusPresentation = useMemo(() => {
         if (!snapshot) {
             return {
-                color: themeColor,
-                icon: 'bus-clock',
+                color: black.third,
+                icon: 'hourglass-medium',
                 text: isLoading ? t('正在載入巴士資料') : t('暫時無法取得巴士資料'),
             };
         }
         if (snapshot.stale || snapshot.deliverySource === 'stale') {
             return {
                 color: warning,
-                icon: 'alert-circle-outline',
+                icon: 'warning-circle',
                 text: t('資料更新較慢，顯示最後位置'),
             };
         }
         if (snapshot.deliverySource === 'fallback') {
             return {
                 color: warning,
-                icon: 'cloud-alert-outline',
+                icon: 'cloud-slash',
                 text: snapshot.vehicles?.length > 0
                     ? t('即時位置可用，預計時間暫不可用')
                     : t('暫未偵測到行駛中的巴士'),
@@ -464,14 +521,14 @@ const BusScreen = ({navigation}) => {
         if (snapshot.deliverySource === 'cache') {
             return {
                 color: warning,
-                icon: 'history',
+                icon: 'clock-counter-clockwise',
                 text: t('暫時使用最近更新的資料'),
             };
         }
         if (snapshot.serviceStatus === 'stopped') {
             return {
                 color: black.third,
-                icon: 'bus-stop-covered',
+                icon: 'stop-circle',
                 text: snapshot.observerMode === 'scheduled_idle'
                     ? t('目前停駛')
                     : t('巴士服務暫停'),
@@ -480,7 +537,7 @@ const BusScreen = ({navigation}) => {
         if (snapshot.serviceStatus === 'running' && snapshot.vehicles?.length === 0) {
             return {
                 color: black.third,
-                icon: 'bus-clock',
+                icon: 'clock',
                 text: t('服務時段內，暫未有巴士出現'),
             };
         }
@@ -489,13 +546,13 @@ const BusScreen = ({navigation}) => {
             ? Math.max(0, Math.floor((now - observedAt) / 60000))
             : 0;
         return {
-            color: success,
-            icon: 'bus-marker',
+            color: successForeground,
+            icon: 'bus',
             text: elapsedMinutes < 1
                 ? t('服務中 · 剛剛更新')
                 : t('服務中 · 約 {{minutes}} 分鐘前更新', {minutes: elapsedMinutes}),
         };
-    }, [black.third, isLoading, now, snapshot, success, t, themeColor, warning]);
+    }, [black.third, isLoading, now, snapshot, successForeground, t, warning]);
 
     return (
         <View style={[s.container, contentTopStyle]}>
@@ -510,8 +567,8 @@ const BusScreen = ({navigation}) => {
                     <RefreshControl
                         refreshing={isRefreshing}
                         onRefresh={handleRefresh}
-                        tintColor={themeColor}
-                        colors={[themeColor]}
+                        tintColor={black.second}
+                        colors={[black.second]}
                     />
                 }>
                 <BusRouteMap
@@ -524,6 +581,7 @@ const BusScreen = ({navigation}) => {
                         && snapshot.deliverySource !== 'stale'
                     )}
                     maxHeight={routeMapMaxHeight}
+                    motionEnabled={isFocused && isAppActive && !snapshot?.stale}
                     observedAt={snapshot?.observedAt}
                     onSelectStop={handleSelectStop}
                     onSelectVehicle={plate => {
@@ -532,6 +590,7 @@ const BusScreen = ({navigation}) => {
                     }}
                     selectedStop={selectedStop}
                     selectedVehiclePlate={selectedVehiclePlate}
+                    statsDocument={statsDocument}
                     theme={theme}
                     translate={t}
                     vehicles={snapshot?.vehicles || []}

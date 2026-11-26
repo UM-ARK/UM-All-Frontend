@@ -77,33 +77,29 @@ const OverviewCourseCardContent = ({ course, frame }) => {
                 courseCode: {
                     ...uiStyle.defaultText,
                     color: black.main,
-                    opacity: 0.8,
                     textAlign: 'center',
                     fontWeight: 'bold',
                 },
                 sectionText: {
                     ...uiStyle.defaultText,
-                    color: black.main,
-                    opacity: 0.55,
+                    color: black.third,
                     textAlign: 'center',
-                    fontWeight: '700',
+                    fontWeight: '600',
                 },
                 classroomText: {
                     ...uiStyle.defaultText,
-                    color: black.main,
-                    opacity: 0.7,
+                    color: black.second,
                     textAlign: 'center',
                     fontWeight: '600',
                 },
                 timeText: {
                     ...uiStyle.defaultText,
-                    color: black.main,
-                    opacity: 0.75,
+                    color: black.second,
                     textAlign: 'center',
                     fontWeight: '600',
                 },
             }),
-        [black.main],
+        [black.main, black.second, black.third],
     );
 
     return (

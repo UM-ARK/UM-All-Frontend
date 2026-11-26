@@ -8,7 +8,6 @@ import {
 } from 'react-native';
 
 import {KeyboardStickyView} from 'react-native-keyboard-controller';
-import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import {scale, verticalScale} from 'react-native-size-matters';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useTranslation} from 'react-i18next';
@@ -17,6 +16,7 @@ import Text from '../../../../components/AppText';
 import ScalePressable from '../../../../components/ScalePressable';
 import TextInput from '../../../../components/AppTextInput';
 import {useTheme} from '../../../../components/ThemeContext';
+import PhosphorFeatureIcon from '../../info/home/search/components/PhosphorFeatureIcon';
 import HarborComposerImageGrid from './HarborComposerImageGrid';
 import {MAX_IMAGES_PER_POST} from './harborComposerImages';
 
@@ -62,7 +62,7 @@ export const HarborReplyComposerState = ({
                         color={theme.themeColor}
                     />
                 ) : (
-                    <MaterialCommunityIcons
+                    <PhosphorFeatureIcon
                         name={icon}
                         size={scale(28)}
                         color={theme.themeColor}
@@ -243,8 +243,8 @@ const HarborReplyComposerForm = ({
                                     color={theme.themeColor}
                                 />
                             ) : (
-                                <MaterialCommunityIcons
-                                    name="image-outline"
+                                <PhosphorFeatureIcon
+                                    name="image"
                                     size={scale(22)}
                                     color={
                                         hasReachedImageLimit
@@ -278,8 +278,8 @@ const HarborReplyComposerForm = ({
                                             : theme.tonal.secondary15,
                                     },
                                 ]}>
-                                <MaterialCommunityIcons
-                                    name="clock-outline"
+                                <PhosphorFeatureIcon
+                                    name="clock"
                                     size={scale(16)}
                                     color={theme.secondThemeColor}
                                 />
@@ -325,8 +325,8 @@ const HarborReplyComposerForm = ({
                                     color={theme.trueWhite}
                                 />
                             ) : (
-                                <MaterialCommunityIcons
-                                    name="send"
+                                <PhosphorFeatureIcon
+                                    name="paper-plane-tilt"
                                     size={scale(14)}
                                     color={theme.trueWhite}
                                 />
@@ -349,6 +349,11 @@ const HarborReplyComposerForm = ({
         </View>
     );
 };
+
+// 同心圓角：R_inner = R_outer − padding
+const REPLY_SHEET_RADIUS = scale(24);
+const REPLY_SHEET_PADDING = scale(10);
+const REPLY_INPUT_RADIUS = REPLY_SHEET_RADIUS - REPLY_SHEET_PADDING;
 
 const styles = StyleSheet.create({
     backdrop: {
@@ -378,7 +383,7 @@ const styles = StyleSheet.create({
         paddingVertical: scale(1),
     },
     input: {
-        borderRadius: scale(12),
+        borderRadius: REPLY_INPUT_RADIUS,
         fontSize: scale(15),
         lineHeight: scale(21),
         maxHeight: verticalScale(118),
@@ -417,11 +422,11 @@ const styles = StyleSheet.create({
         fontWeight: '700',
     },
     sheet: {
-        borderTopLeftRadius: scale(18),
-        borderTopRightRadius: scale(18),
+        borderTopLeftRadius: REPLY_SHEET_RADIUS,
+        borderTopRightRadius: REPLY_SHEET_RADIUS,
         paddingBottom: verticalScale(4),
-        paddingHorizontal: scale(10),
-        paddingTop: verticalScale(4),
+        paddingHorizontal: REPLY_SHEET_PADDING,
+        paddingTop: REPLY_SHEET_PADDING,
     },
     stateAction: {
         alignItems: 'center',

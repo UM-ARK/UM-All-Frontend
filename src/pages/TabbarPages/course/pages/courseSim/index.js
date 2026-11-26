@@ -8,6 +8,7 @@ import React, {
     useMemo,
 } from 'react';
 import {
+    Animated,
     View,
     TouchableOpacity,
     Alert,
@@ -19,7 +20,8 @@ import {
 } from 'react-native';
 
 import { scale, verticalScale } from 'react-native-size-matters';
-import Ionicons from "@react-native-vector-icons/ionicons";
+import { ClipboardText } from 'phosphor-react-native/src/icons/ClipboardText';
+import { DownloadSimple } from 'phosphor-react-native/src/icons/DownloadSimple';
 import * as Clipboard from 'expo-clipboard';
 import moment from 'moment';
 import Toast from 'react-native-simple-toast';
@@ -34,7 +36,6 @@ import { FlashList } from '@shopify/flash-list';
 import { ScrollView } from 'react-native-gesture-handler';
 import lodash from 'lodash';
 import * as OpenCC from 'opencc-js';
-import { useTranslation } from 'react-i18next';
 import { useFocusEffect } from '@react-navigation/native';
 import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
 import {
@@ -47,9 +48,15 @@ import {
 } from 'react-native-reanimated';
 import { scheduleOnRN } from 'react-native-worklets';
 
+import PhosphorFeatureIcon from '../../../info/home/search/components/PhosphorFeatureIcon';
 import Text from '../../../../../components/AppText';
 import ScalePressable from '../../../../../components/ScalePressable';
 import TextInput from '../../../../../components/AppTextInput';
+import searchFieldStyles, {
+    SEARCH_FIELD_CLEAR_ICON_SIZE,
+    SEARCH_FIELD_ICON_SIZE,
+    SEARCH_FIELD_MAX_FONT_SIZE_MULTIPLIER,
+} from '../../../../../components/searchFieldStyles';
 import { useTheme, uiStyle } from '../../../../../components/ThemeContext';
 import { useAppReducedMotion } from '../../../../../contexts/ReducedMotionContext';
 import { openLink } from '../../../../../utils/browser';
@@ -62,7 +69,11 @@ import {
 } from '../../../../../utils/storageKits';
 import TouchableScale from '../../../../../components/TouchableScale';
 import CustomBottomSheet from '../../../../../utils/BottomSheet';
+import { useCourseChrome } from '../../context/CourseChromeContext';
 import { useCoursePlan } from '../../context/CoursePlanContext';
+import TopScrollEdgeBackdrop, {
+    SCROLL_EDGE_FADE_HEIGHT,
+} from '../../../../../components/TopScrollEdgeBackdrop';
 import {
     getSectionFilterStatus,
     getSlotKey,
@@ -76,7 +87,7 @@ import {
     getCourseInfoMenuActions,
     handleCourseInfoMenuAction,
 } from '../../utils/courseInfoMenu';
-import SegmentControl from '../../../../../components/SegmentControl';
+import SegmentedTabControl from '../../../../../components/SegmentedTabControl';
 import { COURSE_SEARCH_SEGMENT } from '../../../../../utils/courseNavigation';
 import {
     getCourseDisplayTitle,
@@ -168,8 +179,9 @@ function TimetableCourseMenuCard({
             cardStyle={{
                 width: COURSE_CARD_WIDTH,
                 backgroundColor,
-                borderRadius: scale(10),
-                padding: scale(5),
+                borderRadius: scale(12),
+                paddingHorizontal: scale(8),
+                paddingVertical: verticalScale(7),
                 alignItems: 'center',
                 justifyContent: 'center',
             }}>
@@ -350,11 +362,18 @@ function CourseSim({ route, navigation, isSplitPane = false }) {
         success,
         warning,
         TIME_TABLE_COLOR,
+        featuresScreen,
         isLight,
     } = theme;
 
     const insets = useSafeAreaInsets();
     const { width: windowWidth, height: windowHeight } = useWindowDimensions();
+    const { topChromeHeight } = useCourseChrome();
+    const courseSimTopInset = topChromeHeight;
+    const scrollY = useRef(new Animated.Value(0)).current;
+    const handleTopScroll = useCallback(event => {
+        scrollY.setValue(event.nativeEvent.contentOffset.y);
+    }, [scrollY]);
     const tabBarHeight = useContext(BottomTabBarHeightContext) ?? insets.bottom + 49;
     // Android：JS Bottom Tab 與內容分欄，場景底邊已在 Tab Bar 上方，勿再扣 tabBarHeight
     // iOS：原生 Tab 多為半透明疊層，內容延伸至螢幕底，需扣 tabBarHeight 才不會被擋住
@@ -509,7 +528,6 @@ function CourseSim({ route, navigation, isSplitPane = false }) {
         },
     });
 
-    const { i18n } = useTranslation();
     const replacementResult = useMemo(
         () =>
             getReplacementCourses({
@@ -576,6 +594,7 @@ function CourseSim({ route, navigation, isSplitPane = false }) {
             overviewReminderHeight > 0 &&
             viewSwitcherHeight > 0
             ? overviewViewportHeight -
+            courseSimTopInset -
             overviewWeekdayHeight -
             overviewReminderHeight -
             floatingBottom -
@@ -587,7 +606,7 @@ function CourseSim({ route, navigation, isSplitPane = false }) {
         OVERVIEW_HOUR_HEIGHT,
         measuredOverviewMaxHeight ??
         windowHeight -
-        insets.top -
+        (courseSimTopInset || insets.top) -
         tabBarHeight -
         OVERVIEW_RESERVED_HEIGHT,
     );
@@ -798,16 +817,25 @@ function CourseSim({ route, navigation, isSplitPane = false }) {
                                 : null,
                     }}>
                     {/* 星期幾 */}
-                    <Text
+                    <View
                         style={{
-                            ...uiStyle.defaultText,
-                            color: todayText === day ? themeColor : black.third,
-                            fontSize: scale(25),
-                            fontWeight: 'bold',
                             alignSelf: 'center',
+                            paddingHorizontal: scale(10),
+                            paddingVertical: verticalScale(2),
+                            marginBottom: verticalScale(2),
+                            borderRadius: scale(999),
+                            backgroundColor: todayText === day ? tonal.primary15 : 'transparent',
                         }}>
-                        {day}
-                    </Text>
+                        <Text
+                            style={{
+                                ...uiStyle.defaultText,
+                                color: todayText === day ? themeColor : black.third,
+                                fontSize: scale(14),
+                                fontWeight: 'bold',
+                            }}>
+                            {day}
+                        </Text>
+                    </View>
 
                     {/* 渲染單一課程卡片 */}
                     <View style={{ flexDirection: 'column' }}>
@@ -983,16 +1011,31 @@ function CourseSim({ route, navigation, isSplitPane = false }) {
 
         if (timeWarning) {
             timeDiffReminder = (
-                <Text
+                <View
                     style={{
-                        ...uiStyle.defaultText,
-                        alignSelf: 'center',
-                        color: unread,
-                        fontWeight: 'bold',
-                        textAlign: 'center',
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        marginTop: verticalScale(4),
+                        marginBottom: verticalScale(2),
                     }}>
-                    {'🆘' + t('課程衝突', { ns: 'timetable' }) + '🆘'}
-                </Text>
+                    <PhosphorFeatureIcon
+                        name="warning-circle"
+                        weight="fill"
+                        size={scale(12)}
+                        color={unread}
+                        style={{ marginRight: scale(3) }}
+                    />
+                    <Text
+                        style={{
+                            ...uiStyle.defaultText,
+                            color: unread,
+                            fontSize: scale(11),
+                            fontWeight: 'bold',
+                        }}>
+                        {t('課程衝突', { ns: 'timetable' })}
+                    </Text>
+                </View>
             );
         } else if (idx > 0) {
             // 未衝突才有休息時間可言，負數間隔一律由上面的衝突提示接手
@@ -1007,6 +1050,8 @@ function CourseSim({ route, navigation, isSplitPane = false }) {
                         ...uiStyle.defaultText,
                         alignSelf: 'center',
                         color: black.third,
+                        fontSize: scale(11),
+                        marginVertical: verticalScale(2),
                         textAlign: 'center',
                     }}>
                     {t('休息', { ns: 'timetable' })}
@@ -1024,15 +1069,14 @@ function CourseSim({ route, navigation, isSplitPane = false }) {
             );
         }
 
-        // 判斷是否下午
+        // 判斷是否下午／晚上
         let timeHH = moment(course['Time From'], 'HH').format('HH');
-        let timeReminderText = null;
-        timeReminderText =
-            timeHH > 12
-                ? timeHH >= 18
-                    ? `🌜${t('晚上', { ns: 'timetable' })}🌛`
-                    : `☕️${t('下午', { ns: 'timetable' })}☕️`
-                : null;
+        let timePeriod = null;
+        if (timeHH > 12) {
+            timePeriod = timeHH >= 18
+                ? { icon: 'moon', label: t('晚上', { ns: 'timetable' }) }
+                : { icon: 'sun', label: t('下午', { ns: 'timetable' }) };
+        }
 
         if (timeHH > 12 && dayCourseList.length > 1 && idx > 0) {
             let preTimeHH = moment(
@@ -1040,26 +1084,39 @@ function CourseSim({ route, navigation, isSplitPane = false }) {
                 'HH',
             ).format('HH');
             if (preTimeHH >= 18 && timeHH >= 18) {
-                timeReminderText = null;
+                timePeriod = null;
             }
             if (preTimeHH > 12 && preTimeHH < 18 && timeHH < 18) {
-                timeReminderText = null;
+                timePeriod = null;
             }
         }
 
-        afternoonReminder = timeReminderText ? (
-            <Text
+        afternoonReminder = timePeriod ? (
+            <View
                 style={{
-                    ...uiStyle.defaultText,
-                    alignSelf: 'center',
-                    textAlign: 'center',
-                    color: black.third,
-                    fontWeight: 'bold',
-                    fontSize:
-                        i18n.resolvedLanguage == 'en' ? scale(18) : scale(20),
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginTop: verticalScale(6),
+                    marginBottom: verticalScale(2),
                 }}>
-                {timeReminderText}
-            </Text>
+                <PhosphorFeatureIcon
+                    name={timePeriod.icon}
+                    weight="regular"
+                    size={scale(12)}
+                    color={black.third}
+                    style={{ marginRight: scale(3) }}
+                />
+                <Text
+                    style={{
+                        ...uiStyle.defaultText,
+                        color: black.third,
+                        fontWeight: '600',
+                        fontSize: scale(11),
+                    }}>
+                    {timePeriod.label}
+                </Text>
+            </View>
         ) : null;
 
         const courseMenuProps = getTimetableCourseMenuProps(slot);
@@ -1080,15 +1137,15 @@ function CourseSim({ route, navigation, isSplitPane = false }) {
                         style={{
                             ...uiStyle.defaultText,
                             color: black.main,
-                            opacity: 0.7,
-                            fontSize: scale(20),
+                            fontSize: scale(18),
+                            lineHeight: scale(20),
                             textAlign: 'center',
                             fontWeight: '700',
                         }}>
                         {course['Course Code'].substring(0, 4) + '\n'}
                         <Text
                             style={{
-                                fontSize: scale(20),
+                                fontSize: scale(18),
                                 fontWeight: 'bold',
                             }}>
                             {course['Course Code'].substring(4, 8)}
@@ -1099,8 +1156,10 @@ function CourseSim({ route, navigation, isSplitPane = false }) {
                     <Text
                         style={{
                             ...uiStyle.defaultText,
-                            color: black.main,
-                            opacity: 0.8,
+                            color: black.third,
+                            fontSize: scale(11),
+                            fontWeight: '600',
+                            marginTop: verticalScale(1),
                         }}>
                         {course.Section}
                     </Text>
@@ -1110,11 +1169,11 @@ function CourseSim({ route, navigation, isSplitPane = false }) {
                         <Text
                             style={{
                                 ...uiStyle.defaultText,
-                                color: black.main,
+                                color: black.third,
                                 textAlign: 'center',
                                 alignSelf: 'stretch',
                                 fontSize: scale(10),
-                                opacity: 0.45,
+                                marginTop: verticalScale(2),
                             }}>
                             {course['Teacher Information']}
                         </Text>
@@ -1124,9 +1183,11 @@ function CourseSim({ route, navigation, isSplitPane = false }) {
                     <Text
                         style={{
                             ...uiStyle.defaultText,
-                            color: black.main,
+                            color: black.second,
                             textAlign: 'center',
-                            opacity: 0.4,
+                            fontSize: scale(11.5),
+                            lineHeight: scale(15),
+                            marginVertical: verticalScale(2),
                         }}
                         numberOfLines={4}>
                         {course['Course Title']}
@@ -1137,8 +1198,8 @@ function CourseSim({ route, navigation, isSplitPane = false }) {
                         style={{
                             ...uiStyle.defaultText,
                             color: black.main,
+                            fontSize: scale(11),
                             fontWeight: 'bold',
-                            opacity: 0.5,
                         }}>
                         {course.Classroom}
                     </Text>
@@ -1147,30 +1208,34 @@ function CourseSim({ route, navigation, isSplitPane = false }) {
                     <View
                         style={{
                             flexDirection: 'row',
-                            justifyContent: 'space-between',
-                            alignSelf: 'stretch',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            marginTop: verticalScale(2),
                         }}>
                         <Text
                             style={{
                                 ...uiStyle.defaultText,
-                                color: black.main,
+                                color: black.second,
+                                fontSize: scale(11),
                                 fontWeight: '600',
-                                opacity: 0.8,
                             }}>
                             {course['Time From']}
                         </Text>
-                        <Ionicons
-                            name="ellipsis-horizontal"
-                            size={scale(20)}
-                            color={black.main}
-                            style={{ opacity: 0.4 }}
-                        />
                         <Text
                             style={{
                                 ...uiStyle.defaultText,
-                                color: black.main,
+                                color: black.third,
+                                fontSize: scale(11),
+                                marginHorizontal: scale(3),
+                            }}>
+                            {'–'}
+                        </Text>
+                        <Text
+                            style={{
+                                ...uiStyle.defaultText,
+                                color: black.second,
+                                fontSize: scale(11),
                                 fontWeight: '600',
-                                opacity: 0.8,
                             }}>
                             {course['Time To']}
                         </Text>
@@ -1390,8 +1455,8 @@ function CourseSim({ route, navigation, isSplitPane = false }) {
                     </View>
                     <View
                         style={{ flexDirection: 'row', alignItems: 'center' }}>
-                        <Ionicons
-                            name="add-circle-outline"
+                        <PhosphorFeatureIcon
+                            name="plus-circle"
                             size={scale(28)}
                             color={themeColor}
                         />
@@ -1414,8 +1479,9 @@ function CourseSim({ route, navigation, isSplitPane = false }) {
                                 alignItems: 'center',
                                 justifyContent: 'center',
                             }}>
-                            <Ionicons
-                                name="add"
+                            <PhosphorFeatureIcon
+                                name="plus"
+                                weight="regular"
                                 size={scale(16)}
                                 color={themeColor}
                                 style={{ marginRight: scale(6) }}
@@ -1447,8 +1513,8 @@ function CourseSim({ route, navigation, isSplitPane = false }) {
                             alignItems: 'center',
                             marginBottom: scale(12),
                         }}>
-                        <Ionicons
-                            name="clipboard-outline"
+                        <ClipboardText
+                            weight="duotone"
                             size={scale(28)}
                             color={themeColor}
                         />
@@ -1471,8 +1537,9 @@ function CourseSim({ route, navigation, isSplitPane = false }) {
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                 }}>
-                                <Ionicons
-                                    name="open-outline"
+                                <PhosphorFeatureIcon
+                                    name="arrow-square-out"
+                                    weight="regular"
                                     size={scale(16)}
                                     color={themeColor}
                                     style={{ marginRight: scale(6) }}
@@ -1532,8 +1599,8 @@ E11-0000
                                 alignItems: 'center',
                                 justifyContent: 'center',
                             }}>
-                            <Ionicons
-                                name="download-outline"
+                            <DownloadSimple
+                                weight="duotone"
                                 size={scale(18)}
                                 color={canImport ? success : themeColor}
                                 style={{ marginRight: scale(6) }}
@@ -1600,8 +1667,9 @@ E11-0000
                         }}
                         accessibilityRole="button"
                         accessibilityLabel={t('清除', { ns: 'timetable' })}>
-                        <Ionicons
-                            name="close"
+                        <PhosphorFeatureIcon
+                            name="x"
+                            weight="regular"
                             size={scale(14)}
                             color={themeColor}
                         />
@@ -1770,8 +1838,9 @@ E11-0000
                             accessibilityLabel={t('清除', {
                                 ns: 'timetable',
                             })}>
-                            <Ionicons
-                                name="close"
+                            <PhosphorFeatureIcon
+                                name="x"
+                                weight="regular"
                                 size={scale(14)}
                                 color={themeColor}
                             />
@@ -1847,46 +1916,42 @@ E11-0000
                             trigger();
                             onBackPress?.();
                         }}>
-                        <Ionicons
-                            name="chevron-back"
+                        <PhosphorFeatureIcon
+                            name="caret-left"
+                            weight="regular"
                             size={scale(20)}
                             color={themeColor}
                         />
                     </TouchableScale>
                 ) : null}
                 <View
-                    style={{
-                        flex: 1,
-                        minWidth: 0,
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        backgroundColor: searchFieldBg,
-                        borderRadius: scale(9),
-                        minHeight: scale(32),
-                        paddingLeft: scale(6),
-                        paddingRight: scale(6),
-                    }}>
-                    <Ionicons
+                    style={[
+                        searchFieldStyles.field,
+                        {
+                            flex: 1,
+                            minWidth: 0,
+                            backgroundColor: searchFieldBg,
+                        },
+                    ]}>
+                    <PhosphorFeatureIcon
                         name="search"
-                        size={scale(15)}
+                        weight="regular"
+                        size={SEARCH_FIELD_ICON_SIZE}
                         color={black.third}
                     />
                     <BottomSheetTextInput
                         ref={inputRef}
-                        style={{
-                            ...uiStyle.defaultText,
-                            color: black.main,
-                            fontSize: verticalScale(12),
-                            flex: 1,
-                            minWidth: 0,
-                            marginLeft: scale(4),
-                            paddingVertical: scale(6),
-                        }}
+                        style={[
+                            searchFieldStyles.text,
+                            searchFieldStyles.input,
+                            { color: black.main },
+                        ]}
                         onChangeText={onChangeText}
                         value={value ?? ''}
                         selectTextOnFocus
                         placeholder={placeholder}
                         placeholderTextColor={black.third}
+                        maxFontSizeMultiplier={SEARCH_FIELD_MAX_FONT_SIZE_MULTIPLIER}
                         returnKeyType="search"
                         selectionColor={themeColor}
                         blurOnSubmit
@@ -1904,10 +1969,12 @@ E11-0000
                             onPress={() => {
                                 trigger();
                                 onChangeText?.('');
-                            }}>
-                            <Ionicons
-                                name="close-circle"
-                                size={scale(17)}
+                            }}
+                            style={searchFieldStyles.clearButton}>
+                            <PhosphorFeatureIcon
+                                name="x-circle"
+                                weight="fill"
+                                size={SEARCH_FIELD_CLEAR_ICON_SIZE}
                                 color={black.third}
                             />
                         </TouchableScale>
@@ -2035,8 +2102,9 @@ E11-0000
                                     })}
                                 </Text>
                             </View>
-                            <Ionicons
-                                name="chevron-forward"
+                            <PhosphorFeatureIcon
+                                name="caret-right"
+                                weight="regular"
                                 color={black.third}
                                 size={scale(18)}
                             />
@@ -2177,8 +2245,8 @@ E11-0000
                                 </Text>
                             ))}
                         </View>
-                        <Ionicons
-                            name="swap-horizontal"
+                        <PhosphorFeatureIcon
+                            name="arrow-left-right"
                             color={themeColor}
                             size={scale(20)}
                         />
@@ -2212,8 +2280,9 @@ E11-0000
                                 trigger();
                                 setReplacementCourseCode(null);
                             }}>
-                            <Ionicons
-                                name="chevron-back"
+                            <PhosphorFeatureIcon
+                                name="caret-left"
+                                weight="regular"
                                 size={scale(18)}
                                 color={themeColor}
                             />
@@ -2263,8 +2332,9 @@ E11-0000
                             padding: scale(7),
                         }}
                         onPress={closeCourseSearch}>
-                        <Ionicons
-                            name="close"
+                        <PhosphorFeatureIcon
+                            name="x"
+                            weight="regular"
                             size={scale(18)}
                             color={themeColor}
                         />
@@ -2762,6 +2832,7 @@ E11-0000
 
     const handleTimetableViewChange = useCallback(index => {
         const nextView = index === 0 ? 'detail' : 'overview';
+        trigger('selection');
         setTimetableView(nextView);
         setLocalStorage(TIMETABLE_VIEW_STORAGE_KEY, nextView);
     }, []);
@@ -2784,18 +2855,11 @@ E11-0000
                     alignSelf: 'center',
                     zIndex: 10,
                 }}>
-                <SegmentControl
+                <SegmentedTabControl
                     options={viewOptions}
                     selectedIndex={timetableView === 'overview' ? 1 : 0}
                     onChange={handleTimetableViewChange}
-                    trackBackgroundColor={white}
-                    style={{
-                        shadowColor: black.main,
-                        shadowOffset: { width: 0, height: 2 },
-                        shadowOpacity: 0.1,
-                        shadowRadius: 4,
-                        elevation: 3,
-                    }}
+                    compact
                 />
             </View>
         );
@@ -2835,7 +2899,7 @@ E11-0000
                     width: '100%',
                     overflow: 'hidden',
                     backgroundColor: getCardColor(course, visiblePlanCourseCodes, visibleConflictSlotKeys),
-                    borderRadius: scale(7),
+                    borderRadius: scale(8),
                     paddingHorizontal: scale(compact ? 2 : 3),
                     paddingVertical: verticalScale(compact ? 1 : 3),
                     alignItems: 'center',
@@ -2861,22 +2925,39 @@ E11-0000
                     }
                     style={{ flexDirection: 'row' }}>
                     {overviewDays.map(day => (
-                        <Text
+                        <View
                             key={day}
                             style={{
-                                ...uiStyle.defaultText,
                                 width: overviewDayColumnWidth,
-                                paddingVertical: verticalScale(5),
-                                color:
-                                    todayText === day
-                                        ? themeColor
-                                        : black.third,
-                                fontSize: scale(11),
-                                fontWeight: 'bold',
-                                textAlign: 'center',
+                                paddingVertical: verticalScale(4),
+                                alignItems: 'center',
+                                justifyContent: 'center',
                             }}>
-                            {day}
-                        </Text>
+                            <View
+                                style={{
+                                    paddingHorizontal: scale(8),
+                                    paddingVertical: verticalScale(2),
+                                    borderRadius: scale(999),
+                                    backgroundColor:
+                                        todayText === day
+                                            ? tonal.primary15
+                                            : 'transparent',
+                                }}>
+                                <Text
+                                    style={{
+                                        ...uiStyle.defaultText,
+                                        color:
+                                            todayText === day
+                                                ? themeColor
+                                                : black.third,
+                                        fontSize: scale(11),
+                                        fontWeight: 'bold',
+                                        textAlign: 'center',
+                                    }}>
+                                    {day}
+                                </Text>
+                            </View>
+                        </View>
                     ))}
                 </View>
                 <View
@@ -2893,7 +2974,7 @@ E11-0000
                                     day === overviewDays[0]
                                         ? 0
                                         : StyleSheet.hairlineWidth,
-                                borderColor: themeColorUltraLight,
+                                borderColor: featuresScreen.divider,
                             }}>
                             {overviewRows.map(row => (
                                 <View
@@ -2907,7 +2988,7 @@ E11-0000
                                         width: '100%',
                                         borderTopWidth:
                                             StyleSheet.hairlineWidth,
-                                        borderColor: themeColorUltraLight,
+                                        borderColor: featuresScreen.divider,
                                     }}
                                 />
                             ))}
@@ -2922,7 +3003,7 @@ E11-0000
                             )}
                         </View>
                     ))}
-                    {renderDepartingCards(scale(7))}
+                    {renderDepartingCards(scale(8))}
                 </View>
             </View>
         );
@@ -2952,8 +3033,8 @@ E11-0000
                         paddingVertical: verticalScale(3),
                         marginBottom: verticalScale(3),
                     }}>
-                        <Ionicons
-                            name="time-outline"
+                        <PhosphorFeatureIcon
+                            name="clock"
                             size={scale(13)}
                             color={warning}
                             style={{ marginRight: scale(4) }}
@@ -3000,7 +3081,7 @@ E11-0000
     };
 
     return (
-        // 頂欄由 course/index.js 容器統一提供；頂部 insets 亦在容器處理，此處不可重複扣一次
+        // 頂部安全區與切換欄浮於頁面之上，實際預留高度由 CourseChromeContext 的 topChromeHeight 提供
         <View
             onLayout={({ nativeEvent }) => {
                 setOverviewViewportHeight(nativeEvent.layout.height);
@@ -3014,8 +3095,15 @@ E11-0000
                 ref={verScroll}
                 keyboardDismissMode="on-drag"
                 contentInsetAdjustmentBehavior="never"
+                scrollIndicatorInsets={{
+                    top: topChromeHeight,
+                    bottom: floatingBottom,
+                }}
+                scrollEventThrottle={16}
+                onScroll={handleTopScroll}
                 contentContainerStyle={{
-                    // 預留底部 SegmentControl；Android 場景底已在 Tab 上方，勿再扣 tabBarHeight
+                    paddingTop: courseSimTopInset,
+                    // 預留底部分段切換器；Android 場景底已在 Tab 上方，勿再扣 tabBarHeight
                     paddingBottom: floatingBottom + verticalScale(50),
                 }}>
                 {/* 渲染課表或首次使用提示 */}
@@ -3050,6 +3138,13 @@ E11-0000
                 </View>
             </ScrollView>
 
+            <TopScrollEdgeBackdrop
+                headerHeight={topChromeHeight}
+                fadeHeight={SCROLL_EDGE_FADE_HEIGHT}
+                scrollY={scrollY}
+                zIndex={2}
+            />
+
             {/* 有排課時才顯示具體／概覽切換；與 FAB 同層，bottom 見 floatingBottom */}
             {visiblePlanSlots.length > 0 &&
                 timetableView &&
@@ -3074,6 +3169,7 @@ E11-0000
                 ref={bottomSheetRef}
                 page={'courseSim'}
                 index={sheetIndex}
+                topInset={topChromeHeight > 0 ? topChromeHeight + verticalScale(6) : undefined}
                 // Tab 已隱藏，sheet 需延伸至螢幕底部
                 bottomInset={0}
                 onAnimate={(fromIndex, toIndex) => {

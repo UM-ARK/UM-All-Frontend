@@ -1,0 +1,43 @@
+---
+description: 長列表渲染（FlashList）、鍵盤處理、原生選單元件踩坑與 Expo CNG 原生設定原則
+alwaysApply: false
+---
+
+# UI 元件實戰與避坑規範
+
+## 一、長列表渲染：統一使用 `FlashList`
+
+- 新程式碼與重構中，長列表一律使用 `@shopify/flash-list` 的 `FlashList`。
+- **禁止**在新程式碼中使用 `FlatList`、`VirtualizedList` 或 `ScrollView` 搭配 `.map()` 渲染長列表。
+
+## 二、鍵盤處理（`react-native-keyboard-controller`）
+
+- `KeyboardProvider` 已於 `App.js` 根層包裹，**子元件禁止重複添加**。
+- **禁止**在含輸入框的頁面使用原生 `KeyboardAvoidingView`。
+
+| 場景 | 做法 |
+| --- | --- |
+| 含 `TextInput`（即 `AppTextInput`）的滾動頁面 | 使用 `KeyboardAwareScrollView` 取代 `ScrollView`（常用 `bottomOffset={50}`、`keyboardDismissMode="on-drag"`） |
+| 多個輸入框的表單頁面 | 搭配 `<KeyboardToolbar />` 方便焦點切換 |
+| 手動收起鍵盤 | 使用 `Keyboard.dismiss()` |
+| 無輸入框的純展示頁 | 使用一般 `ScrollView` 或 `FlashList` |
+
+參考實作：`src/pages/TabbarPages/course/pages/what2Reg/index.js`、`src/pages/TabbarPages/arkHarbor/composer/HarborComposerForm.js`、`src/pages/TeamSchedule/TeamScheduleCreatePage.js`。
+
+## 三、原生下拉選單踩坑（`@expo/ui` vs `@react-native-menu/menu`）
+
+- **禁止在 Tab 內頁面或動態列表卡片中使用 `@expo/ui/community/menu` 的 `MenuView`**：其 SwiftUI Host `matchContents` 會在 Tab 切換或版面提交時反寫 Fabric ShadowTree 並導致進程 abort。
+- **替代方案**：列表與動態卡片下拉選單一律使用 `@react-native-menu/menu`（原生 `UIButton`，Web 端已有 `src/web-stubs/menu.js` 替身），參考 `src/pages/TabbarPages/course/pages/what2Reg/components/CourseCard.js` 與 `LocalCourseOfferingMenuCard.js`。
+- 若靜態頁面（如 `src/pages/Features/SettingPage.js`）使用 `@expo/ui/community/menu`，必須給予明確寬度避免反向量測塌陷，且 Web 端需提供替代元件（如 `SegmentControl`）。
+
+## 四、Expo CNG 原生擴充原則
+
+本專案採 Expo CNG（Continuous Native Generation），`ios/` 與 `android/` 由設定自動產生。遇到套件 bug 或原生客製需求時：
+
+1. **禁止未經使用者明確同意**直接修改 `node_modules/**` 或新增／執行 `patch-package`、`pnpm patch`。
+2. **優先替代方案**：
+   - 原生權限／設定 → `app.json`
+   - 原生工程客製 → `plugins/` 下新增或維護 Expo Config Plugin（參考 `plugins/withAndroidSigning.js` 等現有實作）
+   - JS 層相容 → 專案內 wrapper 或 `src/web-stubs/` 適配層
+   - 依賴版本調整 → 與使用者確認後透過 `package.json` 升級或更換
+3. 若確無替代方案而必須改動套件或打 patch，先停止並向使用者說明原因與影響範圍，獲得明確同意後再執行。

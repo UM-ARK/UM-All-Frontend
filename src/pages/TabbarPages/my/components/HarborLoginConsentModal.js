@@ -90,7 +90,7 @@ const HarborLoginConsentModal = ({visible, onCancel, onConfirm}) => {
                             backgroundColor: theme.white,
                             borderColor: theme.themeColorUltraLight,
                         },
-                        theme.viewShadow,
+                        theme.modalShadow,
                     ]}>
                     <Text
                         style={[styles.title, {color: theme.black.main}]}>

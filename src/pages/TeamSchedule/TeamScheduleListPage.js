@@ -88,7 +88,6 @@ const TeamScheduleListPage = ({ navigation }) => {
                 style={[
                     styles.rowCard,
                     { backgroundColor: theme.white },
-                    theme.viewShadow,
                 ]}>
                 <TeamScheduleEventRow
                     item={item}
@@ -99,7 +98,7 @@ const TeamScheduleListPage = ({ navigation }) => {
                 />
             </View>
         ),
-        [favoriteEventIds, openDetail, theme.viewShadow, theme.white],
+        [favoriteEventIds, openDetail, theme.white],
     );
 
     const showInitialLoading =

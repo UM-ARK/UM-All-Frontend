@@ -1,13 +1,13 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 
-import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import { scale, verticalScale } from 'react-native-size-matters';
 
 import Text from '../../../../components/AppText';
 import ScalePressable from '../../../../components/ScalePressable';
 import { uiStyle, useTheme } from '../../../../components/ThemeContext';
 import { trigger } from '../../../../utils/trigger';
+import PhosphorFeatureIcon from '../../info/home/search/components/PhosphorFeatureIcon';
 import { harborTopicRowInsets } from './HarborTopicCard';
 
 export const HarborTopicSkeleton = ({ isRowLayout = false }) => {
@@ -84,7 +84,7 @@ export const HarborFullState = ({
                     styles.stateIcon,
                     { backgroundColor: theme.tonal.primary15 },
                 ]}>
-                <MaterialCommunityIcons
+                <PhosphorFeatureIcon
                     name={icon}
                     size={scale(30)}
                     color={theme.themeColor}
@@ -153,8 +153,8 @@ export const HarborInlineRetry = ({
                     borderColor: theme.tonal.unread30,
                 },
             ]}>
-            <MaterialCommunityIcons
-                name="alert-circle-outline"
+            <PhosphorFeatureIcon
+                name="warning-circle"
                 size={scale(18)}
                 color={theme.unread}
             />

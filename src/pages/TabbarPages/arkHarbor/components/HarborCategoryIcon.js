@@ -2,7 +2,6 @@ import React, {memo, useMemo} from 'react';
 import {StyleSheet, View} from 'react-native';
 
 import {Image} from 'expo-image';
-import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import {scale} from 'react-native-size-matters';
 
 import {useTheme} from '../../../../components/ThemeContext';
@@ -10,6 +9,14 @@ import {
     ARK_HARBOR_ABSOLUTE_URL,
     ARK_HARBOR_EMOJI_URL,
 } from '../../../../utils/pathMap';
+import PhosphorFeatureIcon from '../../info/home/search/components/PhosphorFeatureIcon';
+
+// 舊 Material 後備名稱對應到 Phosphor，相容既有呼叫端
+const FALLBACK_ICON_MAP = {
+    folder: 'folder',
+    'folder-outline': 'folder',
+    'folder-multiple-outline': 'folders',
+};
 
 function resolveCategoryImageUrl(category) {
     if (!category || typeof category !== 'object') {
@@ -32,7 +39,7 @@ const HarborCategoryIcon = memo(({
     category,
     size = scale(18),
     color,
-    fallbackIcon = 'folder-outline',
+    fallbackIcon = 'folder',
     style,
 }) => {
     const {theme} = useTheme();
@@ -41,6 +48,8 @@ const HarborCategoryIcon = memo(({
         [category],
     );
     const iconColor = color || theme.themeColor;
+    const phosphorName =
+        FALLBACK_ICON_MAP[fallbackIcon] || fallbackIcon || 'folder';
 
     if (imageUrl) {
         return (
@@ -56,12 +65,13 @@ const HarborCategoryIcon = memo(({
     }
 
     return (
-        <MaterialCommunityIcons
-            color={iconColor}
-            name={fallbackIcon}
-            size={size}
-            style={style}
-        />
+        <View style={style}>
+            <PhosphorFeatureIcon
+                color={iconColor}
+                name={phosphorName}
+                size={size}
+            />
+        </View>
     );
 });
 

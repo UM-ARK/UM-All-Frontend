@@ -7,7 +7,6 @@ import {
     View,
 } from 'react-native';
 
-import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import { scale, verticalScale } from 'react-native-size-matters';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
@@ -16,6 +15,7 @@ import Text from '../../../../components/AppText';
 import ScalePressable from '../../../../components/ScalePressable';
 import { useTheme } from '../../../../components/ThemeContext';
 import { trigger } from '../../../../utils/trigger';
+import PhosphorFeatureIcon from '../../info/home/search/components/PhosphorFeatureIcon';
 import HarborLikeFeedback, {
     useHarborLikeFeedback,
 } from './HarborLikeFeedback';
@@ -84,18 +84,11 @@ const HarborTopicActionBar = memo(
                 ? t('此話題已關閉，暫時無法發布回覆。')
                 : t('回覆話題');
         const composeIconName = archived
-            ? 'archive-outline'
+            ? 'archive'
             : closed
-                ? 'lock-outline'
-                : 'pencil-outline';
+                ? 'lock'
+                : 'pencil-simple';
 
-        const likeIconName = reactionsEnabled
-            ? currentReaction
-                ? 'heart'
-                : 'heart-outline'
-            : liked
-                ? 'heart'
-                : 'heart-outline';
         const likeActive = reactionsEnabled
             ? Boolean(currentReaction)
             : Boolean(liked);
@@ -122,10 +115,11 @@ const HarborTopicActionBar = memo(
                             />
                         )
                     ) : (
-                        <MaterialCommunityIcons
-                            name={likeIconName}
+                        <PhosphorFeatureIcon
+                            name="heart"
                             size={scale(20)}
                             color={likeActive ? themeColor : black.main}
+                            weight={likeActive ? 'fill' : 'regular'}
                         />
                     )}
                 </HarborLikeFeedback>
@@ -176,10 +170,11 @@ const HarborTopicActionBar = memo(
                             opacity: canReply ? 1 : 0.5,
                         },
                     ]}>
-                    <MaterialCommunityIcons
+                    <PhosphorFeatureIcon
                         name={composeIconName}
                         size={scale(14)}
                         color={black.third}
+                        weight="regular"
                     />
                     <Text
                         numberOfLines={1}
@@ -247,16 +242,13 @@ const HarborTopicActionBar = memo(
                                 color={themeColor}
                             />
                         ) : (
-                            <MaterialCommunityIcons
-                                name={
-                                    bookmarked
-                                        ? 'star'
-                                        : 'star-outline'
-                                }
+                            <PhosphorFeatureIcon
+                                name="star"
                                 size={scale(20)}
                                 color={
                                     bookmarked ? themeColor : black.main
                                 }
+                                weight={bookmarked ? 'fill' : 'regular'}
                             />
                         )}
                     </ScalePressable>
@@ -269,10 +261,11 @@ const HarborTopicActionBar = memo(
                             onJumpToComments?.();
                         }}
                         style={styles.topicActionIconButton}>
-                        <MaterialCommunityIcons
-                            name="comment-outline"
+                        <PhosphorFeatureIcon
+                            name="message-circle"
                             size={scale(20)}
                             color={black.main}
+                            weight="regular"
                         />
                         {formatCount(commentCount) ? (
                             <Text

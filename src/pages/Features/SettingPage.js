@@ -29,7 +29,6 @@ import { verticalScale } from 'react-native-size-matters';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { reloadAppAsync } from 'expo';
 import { useTranslation } from 'react-i18next';
-import SegmentControl from '../../components/SegmentControl';
 import { useProgrammeLevel } from '../../contexts/ProgrammeLevelContext';
 import { PROGRAMME_LEVELS } from '../../utils/courseProgramme';
 import {
@@ -42,6 +41,7 @@ import {
     SettingSection,
     SettingSectionCard,
     SettingItem,
+    SettingSegmentControl,
 } from './components/SettingPrimitives';
 import SettingReduceMotionItem from './components/SettingReduceMotionItem';
 
@@ -51,7 +51,7 @@ import SettingReduceMotionItem from './components/SettingReduceMotionItem';
  */
 const SettingPage = ({ navigation }) => {
     const { theme, themeMode, setThemeMode } = useTheme();
-    const { bg_color, black, themeColor } = theme;
+    const { bg_color, black, themeColor, featureIconTones } = theme;
     const { t, i18n } = useTranslation(['setting', 'about', 'common', 'my']);
     const { status, user, login } = useHarborSession();
     const { programmeLevel, setProgrammeLevel } = useProgrammeLevel();
@@ -236,7 +236,7 @@ const SettingPage = ({ navigation }) => {
         { key: 'dark', label: t('setting:Dark') },
     ];
 
-    // 語言選項（與主題列共用 SegmentControl 樣式：灰底容器、選中白底主題色字）
+    // 語言選項
     const languageOptions = [
         { key: 'tc', label: '繁中' },
         { key: 'en', label: 'EN' },
@@ -263,13 +263,13 @@ const SettingPage = ({ navigation }) => {
                     <>
                         <SettingSection
                             title="Harbor"
-                            icon="person-circle"
+                            icon="user-circle"
                         />
 
                         <SettingSectionCard>
                             <SettingItem
                                 grouped
-                                icon="person-circle-outline"
+                                icon="user-circle"
                                 iconColor={themeColor}
                                 title={t('帳戶設定', { ns: 'my' })}
                                 subtitle={`@${user.username}`}
@@ -286,19 +286,19 @@ const SettingPage = ({ navigation }) => {
                 {/* 外觀設置分區 */}
                 <SettingSection
                     title={t('setting:Appearance')}
-                    icon="color-palette"
+                    icon="palette"
                 />
 
                 <SettingSectionCard>
                     <SettingItem
                         grouped
-                        icon="sunny"
-                        iconColor="#FF9500"
+                        icon="sun"
+                        iconColor={featureIconTones.orange.foreground}
                         title={t('setting:Theme')}
                         subtitle={themeOptions[themeMode].label}
                         showArrow={false}
                         rightElement={
-                            <SegmentControl
+                            <SettingSegmentControl
                                 options={themeOptions}
                                 selectedIndex={themeMode}
                                 onChange={handleThemeChange}
@@ -307,16 +307,17 @@ const SettingPage = ({ navigation }) => {
                     />
                     <SettingItem
                         grouped
-                        icon="language"
-                        iconColor="#5856D6"
+                        icon="translate"
+                        iconColor={featureIconTones.blue.foreground}
                         title={t('setting:Language')}
                         subtitle={
                             i18n.language === 'tc' ? '繁體中文' : 'English'
                         }
                         showArrow={false}
                         rightElement={
-                            <SegmentControl
+                            <SettingSegmentControl
                                 options={languageOptions}
+                                optionWidth={38}
                                 selectedIndex={languageIndex}
                                 onChange={index =>
                                     handleLanguageChange(
@@ -329,45 +330,45 @@ const SettingPage = ({ navigation }) => {
                     <SettingReduceMotionItem />
                 </SettingSectionCard>
 
-                <SettingSection title={t('setting:Courses')} icon="school" />
+                <SettingSection title={t('setting:Courses')} icon="graduation-cap" />
 
                 <SettingSectionCard>
                     <SettingItem
                         grouped
-                        icon="school-outline"
+                        icon="graduation-cap"
                         iconColor={themeColor}
                         title={t('setting:Programme Level')}
                         subtitle={programmeLevelOptions[programmeLevelIndex].label}
                         showArrow={false}
                         rightElement={
-                            <SegmentControl
+                            <SettingSegmentControl
                                 options={programmeLevelOptions}
+                                optionWidth={i18n.language === 'en' ? 88 : 54}
                                 selectedIndex={programmeLevelIndex}
                                 onChange={index =>
                                     setProgrammeLevel(
                                         programmeLevelOptions[index].key,
                                     )
                                 }
-                                compact
                             />
                         }
                     />
                 </SettingSectionCard>
 
                 {/* 應用設置分區 */}
-                <SettingSection title={t('setting:Application')} icon="apps" />
+                <SettingSection title={t('setting:Application')} icon="grid" />
 
                 <SettingSectionCard>
                     <SettingItem
                         grouped
                         icon="trash"
-                        iconColor="#FF3B30"
+                        iconColor={featureIconTones.pink.foreground}
                         title={t('setting:Clear Cache')}
                         onPress={handleClearCache}
                     />
                     <SettingItem
                         grouped
-                        icon="globe-outline"
+                        icon="globe"
                         iconColor={themeColor}
                         title={t('setting:Browser Cache Help')}
                         subtitle={t('setting:Browser Cache Help Hint')}
@@ -375,16 +376,16 @@ const SettingPage = ({ navigation }) => {
                     />
                     <SettingItem
                         grouped
-                        icon="cloud-download"
-                        iconColor="#34C759"
+                        icon="cloud-arrow-down"
+                        iconColor={featureIconTones.green.foreground}
                         title={t('setting:Check Update')}
                         subtitle={`v${getLocalAppVersion()}`}
                         onPress={handleCheckUpdate}
                     />
                     <SettingItem
                         grouped
-                        icon="settings-outline"
-                        iconColor="#5856D6"
+                        icon="gear"
+                        iconColor={featureIconTones.blue.foreground}
                         title={t('setting:App Settings')}
                         subtitle={t('setting:App Settings Hint')}
                         onPress={() => Linking.openSettings()}
@@ -394,7 +395,7 @@ const SettingPage = ({ navigation }) => {
                 {/* 關於分區 */}
                 <SettingSection
                     title={t('setting:About')}
-                    icon="information-circle"
+                    icon="info"
                 />
 
                 <SettingSectionCard>
@@ -402,8 +403,8 @@ const SettingPage = ({ navigation }) => {
                         grouped
                         icon={
                             Platform.OS === 'android'
-                                ? 'logo-android'
-                                : 'logo-apple'
+                                ? 'android-logo'
+                                : 'apple-logo'
                         }
                         iconColor={black.main}
                         title={t('setting:Version')}
@@ -412,7 +413,7 @@ const SettingPage = ({ navigation }) => {
                     />
                     <SettingItem
                         grouped
-                        icon="logo-github"
+                        icon="github-logo"
                         iconColor={black.second}
                         title={t('setting:Open Source')}
                         onPress={() => {
@@ -423,7 +424,7 @@ const SettingPage = ({ navigation }) => {
                     <SettingItem
                         grouped
                         icon="help-circle"
-                        iconColor="#007AFF"
+                        iconColor={featureIconTones.blue.foreground}
                         title={t('setting:Common Issues')}
                         onPress={() => {
                             trigger();
@@ -432,8 +433,8 @@ const SettingPage = ({ navigation }) => {
                     />
                     <SettingItem
                         grouped
-                        icon="shield-checkmark"
-                        iconColor="#5856D6"
+                        icon="shield"
+                        iconColor={featureIconTones.blue.foreground}
                         title={t('setting:Privacy Policy')}
                         onPress={() => {
                             trigger();
@@ -443,7 +444,7 @@ const SettingPage = ({ navigation }) => {
                     <SettingItem
                         grouped
                         icon="heart"
-                        iconColor="#FF2D55"
+                        iconColor={featureIconTones.pink.foreground}
                         title={t('setting:Donate')}
                         onPress={() => {
                             trigger();
@@ -453,7 +454,7 @@ const SettingPage = ({ navigation }) => {
                     <SettingItem
                         grouped
                         icon="pulse"
-                        iconColor="#FF9500"
+                        iconColor={featureIconTones.orange.foreground}
                         title={t('setting:Activity')}
                         onPress={() => {
                             trigger();
@@ -462,8 +463,8 @@ const SettingPage = ({ navigation }) => {
                     />
                     <SettingItem
                         grouped
-                        icon="school"
-                        iconColor="#4796d6"
+                        icon="graduation-cap"
+                        iconColor={featureIconTones.blue.foreground}
                         title={`${t('common:ABOUT')} ARK ALL`}
                         onPress={() => {
                             trigger();
@@ -473,7 +474,7 @@ const SettingPage = ({ navigation }) => {
                 </SettingSectionCard>
 
                 {/* 聯繫我們分區 */}
-                <SettingSection title={t('setting:Contact')} icon="mail" />
+                <SettingSection title={t('setting:Contact')} icon="envelope" />
 
                 <SettingSectionCard>
                     <MenuView
@@ -499,15 +500,15 @@ const SettingPage = ({ navigation }) => {
                         style={{ width: '100%' }}>
                         <SettingItem
                             grouped
-                            icon="chatbubble-ellipses"
-                            iconColor="#34C759"
+                            icon="message-circle"
+                            iconColor={featureIconTones.green.foreground}
                             title={t('setting:Feedback')}
                         />
                     </MenuView>
                     <SettingItem
                         grouped
                         icon="globe"
-                        iconColor="#007AFF"
+                        iconColor={featureIconTones.blue.foreground}
                         title={t('setting:Official Website')}
                         subtitle={BASE_HOST}
                         onPress={() => {
@@ -517,8 +518,8 @@ const SettingPage = ({ navigation }) => {
                     />
                     <SettingItem
                         grouped
-                        icon="mail"
-                        iconColor="#5856D6"
+                        icon="envelope"
+                        iconColor={featureIconTones.blue.foreground}
                         title={t('setting:Email')}
                         subtitle={MAIL}
                         onPress={() => {

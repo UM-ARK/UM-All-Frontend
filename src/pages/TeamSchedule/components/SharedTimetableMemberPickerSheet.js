@@ -17,6 +17,11 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import Text from '../../../components/AppText';
 import ScalePressable from '../../../components/ScalePressable';
 import TextInput from '../../../components/AppTextInput';
+import searchFieldStyles, {
+    SEARCH_FIELD_CLEAR_ICON_SIZE,
+    SEARCH_FIELD_ICON_SIZE,
+    SEARCH_FIELD_MAX_FONT_SIZE_MULTIPLIER,
+} from '../../../components/searchFieldStyles';
 import {uiStyle, useTheme} from '../../../components/ThemeContext';
 import {ARK_HARBOR_AVATAR_TEMPLATE} from '../../../utils/pathMap';
 import {trigger} from '../../../utils/trigger';
@@ -103,6 +108,7 @@ const SharedTimetableMemberPickerSheet = ({
                 </View>
                 <View
                     style={[
+                        searchFieldStyles.field,
                         styles.searchBox,
                         {
                             backgroundColor: theme.tonal.primary08,
@@ -112,17 +118,22 @@ const SharedTimetableMemberPickerSheet = ({
                     <Ionicons
                         color={theme.black.third}
                         name="search"
-                        size={scale(18)}
+                        size={SEARCH_FIELD_ICON_SIZE}
                     />
                     <TextInput
                         autoCapitalize="none"
                         autoCorrect={false}
+                        maxFontSizeMultiplier={SEARCH_FIELD_MAX_FONT_SIZE_MULTIPLIER}
                         onChangeText={setQuery}
                         placeholder={t('搜尋 username')}
                         placeholderTextColor={theme.black.third}
                         returnKeyType="search"
                         selectionColor={theme.themeColor}
-                        style={[styles.searchInput, {color: theme.black.main}]}
+                        style={[
+                            searchFieldStyles.text,
+                            searchFieldStyles.input,
+                            {color: theme.black.main},
+                        ]}
                         value={query}
                     />
                     {query ? (
@@ -133,11 +144,12 @@ const SharedTimetableMemberPickerSheet = ({
                             onPress={() => {
                                 trigger();
                                 setQuery('');
-                            }}>
+                            }}
+                            style={searchFieldStyles.clearButton}>
                             <Ionicons
                                 color={theme.black.third}
                                 name="close-circle"
-                                size={scale(18)}
+                                size={SEARCH_FIELD_CLEAR_ICON_SIZE}
                             />
                         </Pressable>
                     ) : null}
@@ -241,8 +253,7 @@ const styles = StyleSheet.create({
     title: {...uiStyle.defaultText, fontSize: scale(18), fontWeight: '700'},
     count: {...uiStyle.defaultText, fontSize: scale(11), marginTop: verticalScale(2)},
     closeButton: {alignItems: 'center', borderRadius: scale(18), height: scale(36), justifyContent: 'center', width: scale(36)},
-    searchBox: {alignItems: 'center', borderRadius: scale(10), borderWidth: StyleSheet.hairlineWidth, flexDirection: 'row', marginTop: verticalScale(12), paddingHorizontal: scale(10)},
-    searchInput: {...uiStyle.defaultText, flex: 1, fontSize: scale(13), height: verticalScale(40), marginHorizontal: scale(7), paddingVertical: 0},
+    searchBox: {borderWidth: StyleSheet.hairlineWidth, marginTop: verticalScale(12)},
     memberList: {flex: 1, marginTop: verticalScale(8)},
     memberListContent: {paddingBottom: verticalScale(8)},
     memberRow: {alignItems: 'center', borderBottomWidth: StyleSheet.hairlineWidth, flexDirection: 'row', minHeight: verticalScale(62), paddingHorizontal: scale(6), paddingVertical: verticalScale(8)},

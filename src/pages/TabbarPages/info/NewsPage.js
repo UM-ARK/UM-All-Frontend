@@ -18,6 +18,7 @@ import {
 } from 'react-native';
 
 import Text from '../../../components/AppText';
+import TopScrollEdgeBackdrop from '../../../components/TopScrollEdgeBackdrop';
 import ScalePressable from '../../../components/ScalePressable';
 import ClubSearchBar from './components/ClubSearchBar';
 import NewsCard, { NewsRowSeparator } from './components/NewsCard';
@@ -39,6 +40,7 @@ import {
 } from '../../../utils/umOpenDataCache';
 
 import { Image } from 'expo-image';
+import { LinearGradient } from 'expo-linear-gradient';
 import { NavigationContext } from '@react-navigation/native';
 import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -79,7 +81,7 @@ const splitNewsData = result => {
 /**
  * 澳大新聞列表
  */
-const NewsPage = forwardRef(function NewsPage(_props, ref) {
+const NewsPage = forwardRef(function NewsPage({ topHeaderHeight }, ref) {
     const { theme } = useContext(ThemeContext);
     const insets = useSafeAreaInsets();
     // 指示器底部要停在底欄之上；原生 Tab 沒給高度時用安全區加底欄估算
@@ -91,37 +93,34 @@ const NewsPage = forwardRef(function NewsPage(_props, ref) {
         : verticalScale(10);
     const { t, i18n } = useTranslation('common');
     const currentLanguage = i18n.resolvedLanguage || i18n.language;
-    const { white, viewShadow, bg_color, black, themeColor, trueWhite, imagePlaceholder } = theme;
+    const { white, bg_color, black, themeColor, trueWhite, trueBlack, imagePlaceholder } = theme;
     const styles = StyleSheet.create({
         topNewsContainer: {
-            borderRadius: scale(10),
+            borderRadius: scale(12),
             overflow: 'hidden',
-            marginHorizontal: scale(8),
-            marginVertical: verticalScale(5),
-            height: verticalScale(200),
+            marginHorizontal: scale(16),
+            marginTop: verticalScale(4),
+            marginBottom: verticalScale(2),
+            height: verticalScale(188),
             backgroundColor: white,
-            ...viewShadow,
         },
         topNewsOverlay: {
-            position: 'absolute', // 【核心】脫離文檔流，覆蓋在 Image 上
+            position: 'absolute',
             top: 0,
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundColor: 'rgba(0,0,0,0.5)', // 50% 透明度的黑
-            padding: verticalScale(15),
+            paddingHorizontal: scale(14),
+            paddingBottom: verticalScale(12),
             justifyContent: 'flex-end',
-        },
-        topNewsPosition: {
-            position: 'absolute',
-            top: verticalScale(10),
-            left: scale(15),
         },
         topNewsText: {
             ...uiStyle.defaultText,
             color: trueWhite,
-            fontWeight: 'bold',
-            fontSize: verticalScale(20),
+            fontWeight: '600',
+            fontSize: verticalScale(12),
+            lineHeight: verticalScale(16),
+            marginBottom: verticalScale(4),
         },
     });
 
@@ -136,6 +135,7 @@ const NewsPage = forwardRef(function NewsPage(_props, ref) {
     const [newsItems, setNewsItems] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
     const {
+        scrollY,
         onScroll: onSearchScroll,
         onScrollBeginDrag: onSearchScrollBeginDrag,
         onScrollEndDrag: onSearchScrollEndDrag,
@@ -295,72 +295,65 @@ const NewsPage = forwardRef(function NewsPage(_props, ref) {
 
         return (
             <View style={{ marginTop: verticalScale(5) }}>
-                <View style={styles.topNewsContainer}>
-                    <ScalePressable
+                <ScalePressable
+                    style={styles.topNewsContainer}
+                    onPress={() => {
+                        trigger();
+                        navigation.navigate('NewsDetail', { data: topNews });
+                    }}>
+                    <Image
+                        source={topNewsImage ? { uri: topNewsImage } : null}
                         style={{ width: '100%', height: '100%' }}
-                        onPress={() => {
-                            trigger();
-                            navigation.navigate('NewsDetail', { data: topNews });
-                        }}>
-                        <Image
-                            source={topNewsImage ? { uri: topNewsImage } : null}
-                            style={{ width: '100%', height: '100%' }}
-                            contentFit="cover"
-                            cachePolicy="memory-disk"
-                            recyclingKey={topNews?._id || 'top-news'}
-                            placeholder={imagePlaceholder}
-                            placeholderContentFit="cover"
-                            transition={200}
-                            priority="high"
-                        />
-                        {/* 塗上50%透明度的黑，讓白色字體能看清 */}
-                        <View style={styles.topNewsOverlay}>
-                            {/* Top Story字樣 */}
-                            <View style={styles.topNewsPosition}>
-                                <Text style={styles.topNewsText}>
-                                    {t('澳大焦點')}
-                                </Text>
-                            </View>
-
-                            {/* 標題 */}
-                            <View style={{
-                                alignSelf: 'center',
-                                justifyContent: 'center',
-                                width: '100%',
-                            }}>
+                        contentFit="cover"
+                        cachePolicy="memory-disk"
+                        recyclingKey={topNews?._id || 'top-news'}
+                        placeholder={imagePlaceholder}
+                        placeholderContentFit="cover"
+                        transition={200}
+                        priority="high"
+                    />
+                    <LinearGradient
+                        colors={[`${trueBlack}00`, `${trueBlack}E0`]}
+                        locations={[0.42, 1]}
+                        style={styles.topNewsOverlay}>
+                        <Text style={styles.topNewsText}>
+                            {t('澳大焦點')}
+                        </Text>
+                        <View style={{ width: '100%' }}>
+                            <SearchHighlightText
+                                text={title}
+                                query={searchQuery}
+                                highlightStyle={heroHighlightStyle}
+                                numberOfLines={2}
+                                style={{
+                                    ...uiStyle.defaultText,
+                                    color: trueWhite,
+                                    fontWeight: 'bold',
+                                    fontSize: verticalScale(17),
+                                    lineHeight: verticalScale(23),
+                                }}
+                            />
+                            {alternateTitle ? (
                                 <SearchHighlightText
-                                    text={title}
+                                    text={alternateTitle}
                                     query={searchQuery}
                                     highlightStyle={heroHighlightStyle}
-                                    numberOfLines={alternateTitle ? 2 : 3}
+                                    numberOfLines={1}
                                     style={{
                                         ...uiStyle.defaultText,
                                         color: trueWhite,
-                                        fontWeight: 'bold',
-                                        fontSize: verticalScale(18),
+                                        fontSize: verticalScale(13),
+                                        lineHeight: verticalScale(18),
+                                        marginTop: verticalScale(4),
                                     }}
                                 />
-                                {alternateTitle ? (
-                                    <SearchHighlightText
-                                        text={alternateTitle}
-                                        query={searchQuery}
-                                        highlightStyle={heroHighlightStyle}
-                                        numberOfLines={2}
-                                        style={{
-                                            ...uiStyle.defaultText,
-                                            color: trueWhite,
-                                            fontSize: verticalScale(13),
-                                            marginTop: verticalScale(4),
-                                        }}
-                                    />
-                                ) : null}
-                            </View>
+                            ) : null}
                         </View>
-                    </ScalePressable>
-                </View>
+                    </LinearGradient>
+                </ScalePressable>
             </View >
         );
-    }, [black.main, imagePlaceholder, navigation, searchQuery, styles.topNewsContainer, styles.topNewsOverlay, styles.topNewsPosition, styles.topNewsText, t, topNews, topNewsContent, topNewsImage, trueWhite]);
+    }, [black.main, imagePlaceholder, navigation, searchQuery, styles.topNewsContainer, styles.topNewsOverlay, styles.topNewsText, t, topNews, topNewsContent, topNewsImage, trueBlack, trueWhite]);
 
     const handleSearchFocus = useCallback(() => {
         trigger();
@@ -379,7 +372,7 @@ const NewsPage = forwardRef(function NewsPage(_props, ref) {
             {/* {isLoading ? null : renderGoTopButton()} */}
 
             {isLoading ? (
-                <NewsListSkeleton showTopNews />
+                <NewsListSkeleton showTopNews contentTopInset={topHeaderHeight} />
             ) : (
                 <View style={{ flex: 1, width: '100%', overflow: 'hidden' }}>
                     <AnimatedVirtualizedList
@@ -397,6 +390,7 @@ const NewsPage = forwardRef(function NewsPage(_props, ref) {
                         contentInsetAdjustmentBehavior="never"
                         automaticallyAdjustsScrollIndicatorInsets={false}
                         scrollIndicatorInsets={{
+                            top: topHeaderHeight,
                             bottom: tabBarHeight,
                             right: 1,
                         }}
@@ -409,7 +403,7 @@ const NewsPage = forwardRef(function NewsPage(_props, ref) {
                         ItemSeparatorComponent={NewsRowSeparator}
                         contentContainerStyle={{
                             width: '100%',
-                            paddingTop: searchBarHeight,
+                            paddingTop: topHeaderHeight + searchBarHeight,
                             paddingBottom: listBottomPad,
                         }}
                         keyExtractor={item => item._id}
@@ -424,7 +418,7 @@ const NewsPage = forwardRef(function NewsPage(_props, ref) {
                                 colors={[themeColor]}
                                 tintColor={themeColor}
                                 refreshing={isRefreshing}
-                                progressViewOffset={searchBarHeight}
+                                progressViewOffset={topHeaderHeight + searchBarHeight}
                                 onRefresh={() => {
                                     getData({ refreshing: true });
                                 }}
@@ -434,34 +428,35 @@ const NewsPage = forwardRef(function NewsPage(_props, ref) {
                         alwaysBounceHorizontal={false}
                         removeClippedSubviews
                     />
-                    <Reanimated.View
+                    <TopScrollEdgeBackdrop headerHeight={topHeaderHeight} scrollY={scrollY} />
+                    <View
                         onLayout={onSearchBarLayout}
                         pointerEvents={searchCollapsed ? 'none' : 'auto'}
                         accessibilityElementsHidden={searchCollapsed}
                         importantForAccessibility={
                             searchCollapsed ? 'no-hide-descendants' : 'auto'
                         }
-                        style={[
-                            {
-                                position: 'absolute',
-                                top: 0,
-                                left: 0,
-                                right: 0,
-                                zIndex: 2,
-                            },
-                            searchBarAnimatedStyle,
-                        ]}>
-                        <ClubSearchBar
-                            value={searchQuery}
-                            onChangeText={setSearchQuery}
-                            loading={isRefreshing}
-                            onFocus={handleSearchFocus}
-                            onCancel={() => setSearchQuery('')}
-                            placeholder={t('搜索澳大新聞')}
-                            cancelLabel={t('取消')}
-                            clearAccessibilityLabel={t('清除搜尋')}
-                        />
-                    </Reanimated.View>
+                        style={{
+                            position: 'absolute',
+                            top: topHeaderHeight,
+                            left: 0,
+                            right: 0,
+                            zIndex: 2,
+                            overflow: 'hidden',
+                        }}>
+                        <Reanimated.View style={searchBarAnimatedStyle}>
+                            <ClubSearchBar
+                                value={searchQuery}
+                                onChangeText={setSearchQuery}
+                                loading={isRefreshing}
+                                onFocus={handleSearchFocus}
+                                onCancel={() => setSearchQuery('')}
+                                placeholder={t('搜索澳大新聞')}
+                                cancelLabel={t('取消')}
+                                clearAccessibilityLabel={t('清除搜尋')}
+                            />
+                        </Reanimated.View>
+                    </View>
                 </View>
             )}
         </View>

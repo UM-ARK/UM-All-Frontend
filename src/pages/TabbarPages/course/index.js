@@ -7,7 +7,7 @@ import React, {
 } from 'react';
 import { Alert, View } from 'react-native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
-import { SafeAreaView } from 'react-native-screens/experimental';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
     useIsFocused,
     useNavigation,
@@ -28,17 +28,16 @@ import {
 } from '../../../utils/courseNavigation';
 import { getLocalStorage, setLocalStorage } from '../../../utils/storageKits';
 import { useWindowSizeClass } from '../../../utils/windowSizeClass';
+import { SEGMENTED_TOP_TAB_BAR_HEIGHT } from '../../../components/SegmentedTopTabBar';
 import What2Reg from './pages/what2Reg';
 import CourseSim from './pages/courseSim';
 import CourseTabBar from './components/CourseTabBar';
 import CoursePaneHeader from './components/CoursePaneHeader';
 import SplitPaneDivider from './components/SplitPaneDivider';
-import TimetableTabLabel from './components/TimetableTabLabel';
+import { TimetableTabBadge } from './components/TimetableTabLabel';
+import { CourseChromeProvider } from './context/CourseChromeContext';
 import { CoursePlanProvider, useCoursePlan } from './context/CoursePlanContext';
 import {
-    TAB_BAR_HEIGHT,
-    TAB_INDICATOR_WIDTH,
-    TAB_LABEL_FONT_SIZE,
     SEARCH_PANE_DEFAULT_WIDTH,
     SEARCH_PANE_MIN_WIDTH,
     TIMETABLE_PANE_MIN_WIDTH,
@@ -54,13 +53,17 @@ const Tab = createMaterialTopTabNavigator();
  */
 const CourseTabContent = () => {
     const { theme } = useTheme();
-    const { bg_color, black, themeColor } = theme;
+    const { bg_color } = theme;
     const { t } = useTranslation(['common', 'catalog', 'timetable']);
     const isFocused = useIsFocused();
     const navigation = useNavigation();
     const route = useRoute();
     // 達到 large（≥ 1200）才分屏：搵課自己在 ≥ 840 已會左右分欄，再窄就是三欄擠在一起
     const { isLarge } = useWindowSizeClass();
+    const insets = useSafeAreaInsets();
+    const [topBarRowHeight, setTopBarRowHeight] = useState(
+        SEGMENTED_TOP_TAB_BAR_HEIGHT,
+    );
     // 分屏左欄寬度：用戶可拖分隔線調整並持久化；右欄吃剩下的空間
     const [searchPaneWidth, setSearchPaneWidth] = useState(
         SEARCH_PANE_DEFAULT_WIDTH,
@@ -230,10 +233,23 @@ const CourseTabContent = () => {
         onClearPress: handleClearPlan,
     };
 
+    const handleTopBarLayout = useCallback(event => {
+        const nextHeight = event.nativeEvent.layout.height;
+        setTopBarRowHeight(current =>
+            Math.abs(current - nextHeight) > 0.5 ? nextHeight : current,
+        );
+    }, []);
+
+    const topChromeHeight =
+        insets.top + (isLarge ? SEGMENTED_TOP_TAB_BAR_HEIGHT : topBarRowHeight);
+
     const renderTabBar = useCallback(
         props => (
             <CourseTabBar
                 {...props}
+                floating
+                topInset={insets.top}
+                onBarLayout={handleTopBarLayout}
                 programmeLevel={programmeLevel}
                 catalogMetadata={catalogMetadata}
                 onManualUpdate={handleManualUpdate}
@@ -248,6 +264,8 @@ const CourseTabContent = () => {
             handleClearPlan,
             handleManualUpdate,
             handleOpenSharePoint,
+            handleTopBarLayout,
+            insets.top,
             canClear,
         ],
     );
@@ -270,105 +288,75 @@ const CourseTabContent = () => {
     );
 
     return (
-        <SafeAreaView
-            style={{ backgroundColor: bg_color, flex: 1 }}
-            edges={{ top: true }}>
-            {isLarge ? (
-                // 寬屏：左挑右看。兩個段落同時掛載，共用 CoursePlanProvider，
-                // 左邊加課右邊課表即時重繪，不需要另外的同步機制。
-                // 左欄寬度由用戶拖分隔線決定，課表吃剩下的；頂欄各自放在欄內，標題自然對齊所在欄
-                <View
-                    style={{ flex: 1, flexDirection: 'row' }}
-                    onLayout={({ nativeEvent }) =>
-                        setSplitContainerWidth(nativeEvent.layout.width)
-                    }>
-                    <View style={{ width: clampSearchPaneWidth(searchPaneWidth) }}>
-                        <CoursePaneHeader segment="search" />
-                        <What2Reg isSplitPane />
-                    </View>
-                    <SplitPaneDivider
-                        onDragStart={handleDividerDragStart}
-                        onDrag={handleDividerDrag}
-                        onDragEnd={handleDividerDragEnd}
-                        onReset={handleDividerReset}
-                    />
+        <View style={{ backgroundColor: bg_color, flex: 1 }}>
+            <CourseChromeProvider topChromeHeight={topChromeHeight}>
+                {isLarge ? (
+                    // 寬屏：左挑右看。兩個段落同時掛載，共用 CoursePlanProvider，
+                    // 左邊加課右邊課表即時重繪，不需要另外的同步機制。
+                    // 左欄寬度由用戶拖分隔線決定，課表吃剩下的；頂欄浮於欄頂，內容可上滑穿過
                     <View
-                        style={{
-                            flex: 1,
-                            minWidth: TIMETABLE_PANE_MIN_WIDTH,
-                        }}>
-                        <CoursePaneHeader
-                            segment="timetable"
-                            menuProps={menuProps}
+                        style={{ flex: 1, flexDirection: 'row' }}
+                        onLayout={({ nativeEvent }) =>
+                            setSplitContainerWidth(nativeEvent.layout.width)
+                        }>
+                        <View style={{ width: clampSearchPaneWidth(searchPaneWidth) }}>
+                            <What2Reg isSplitPane />
+                            <CoursePaneHeader
+                                segment="search"
+                                floating
+                                topInset={insets.top}
+                            />
+                        </View>
+                        <SplitPaneDivider
+                            onDragStart={handleDividerDragStart}
+                            onDrag={handleDividerDrag}
+                            onDragEnd={handleDividerDragEnd}
+                            onReset={handleDividerReset}
                         />
-                        <CourseSim
-                            isSplitPane
-                            route={timetableRoute}
-                            navigation={timetableNavigation}
-                        />
+                        <View
+                            style={{
+                                flex: 1,
+                                minWidth: TIMETABLE_PANE_MIN_WIDTH,
+                            }}>
+                            <CourseSim
+                                isSplitPane
+                                route={timetableRoute}
+                                navigation={timetableNavigation}
+                            />
+                            <CoursePaneHeader
+                                segment="timetable"
+                                menuProps={menuProps}
+                                floating
+                                topInset={insets.top}
+                            />
+                        </View>
                     </View>
-                </View>
-            ) : initialSegment ? (
-                <Tab.Navigator
-                    tabBar={renderTabBar}
-                    screenListeners={{
-                        state: handleTopTabStateChange,
-                    }}
-                    screenOptions={{
-                        tabBarLabelStyle: {
-                            fontSize: TAB_LABEL_FONT_SIZE,
-                            fontWeight: 'bold',
-                        },
-                        tabBarStyle: {
-                            backgroundColor: bg_color,
-                            height: TAB_BAR_HEIGHT,
-                            overflow: 'hidden',
-                            // TabBar 預設 elevation:4；本頁 Tab 僅佔左側 flex，
-                            // Android 會在右側 ⋯ 交界投下垂直陰影，需關掉
-                            elevation: 0,
-                            shadowOpacity: 0,
-                        },
-                        tabBarItemStyle: {
-                            minHeight: TAB_BAR_HEIGHT,
-                            paddingVertical: 0,
-                        },
-                        tabBarContentContainerStyle: {
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                        },
-                        tabBarBounces: false,
-                        tabBarActiveTintColor: themeColor,
-                        tabBarInactiveTintColor: black.third,
-                        tabBarPressColor: bg_color,
-                        tabBarIndicatorStyle: {
-                            backgroundColor: themeColor,
-                            width: TAB_INDICATOR_WIDTH,
-                            marginHorizontal: 'auto',
-                        },
-                        lazy: true,
-                    }}
-                    initialRouteName={initialSegment}>
-                    <Tab.Screen
-                        name={COURSE_SEARCH_SEGMENT}
-                        component={What2Reg}
-                        options={{ title: t('搵課') }}
-                        listeners={() => ({
-                            tabPress: () => trigger(),
-                        })}
-                    />
-                    <Tab.Screen
-                        name={COURSE_TIMETABLE_SEGMENT}
-                        component={CourseSim}
-                        options={{
-                            title: t('課表'),
-                            tabBarLabel: TimetableTabLabel,
+                ) : initialSegment ? (
+                    <Tab.Navigator
+                        tabBar={renderTabBar}
+                        screenListeners={{
+                            state: handleTopTabStateChange,
                         }}
-                        listeners={() => ({
-                            tabPress: () => trigger(),
-                        })}
-                    />
-                </Tab.Navigator>
-            ) : null}
+                        screenOptions={{
+                            lazy: true,
+                        }}
+                        initialRouteName={initialSegment}>
+                        <Tab.Screen
+                            name={COURSE_SEARCH_SEGMENT}
+                            component={What2Reg}
+                            options={{ title: t('搵課') }}
+                        />
+                        <Tab.Screen
+                            name={COURSE_TIMETABLE_SEGMENT}
+                            component={CourseSim}
+                            options={{
+                                title: t('課表'),
+                                tabBarBadge: () => <TimetableTabBadge />,
+                            }}
+                        />
+                    </Tab.Navigator>
+                ) : null}
+            </CourseChromeProvider>
 
             <Dialog
                 isVisible={isUpdating}
@@ -376,7 +364,7 @@ const CourseTabContent = () => {
                 overlayStyle={{ backgroundColor: bg_color }}>
                 <Dialog.Loading />
             </Dialog>
-        </SafeAreaView>
+        </View>
     );
 };
 

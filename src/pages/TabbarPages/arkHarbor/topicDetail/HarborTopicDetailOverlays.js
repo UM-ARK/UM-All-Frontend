@@ -10,7 +10,6 @@ import {
 // TODO: 暫時關閉收藏提醒日期選擇，待收藏提醒通知完整後再開啟
 // import moment from 'moment-timezone';
 // import DateTimePickerModal from 'react-native-modal-datetime-picker';
-import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import { scale } from 'react-native-size-matters';
 import { useTranslation } from 'react-i18next';
 
@@ -20,6 +19,7 @@ import TextInput from '../../../../components/AppTextInput';
 import ARKImageView from '../../../../components/ARKImageView';
 import { useTheme } from '../../../../components/ThemeContext';
 import { trigger } from '../../../../utils/trigger';
+import PhosphorFeatureIcon from '../../info/home/search/components/PhosphorFeatureIcon';
 import styles from './styles';
 
 const stripHarborHtml = value => {
@@ -363,12 +363,13 @@ const HarborTopicDetailOverlays = ({
                                                 borderTopColor: disabled,
                                             },
                                         ]}>
-                                        <MaterialCommunityIcons
-                                            name="flag-outline"
+                                        <PhosphorFeatureIcon
+                                            name="flag"
                                             size={scale(19)}
                                             color={
                                                 selected ? unread : themeColor
                                             }
+                                            weight={selected ? 'duotone' : 'regular'}
                                         />
                                         <View style={styles.notificationContent}>
                                             <Text
@@ -389,10 +390,11 @@ const HarborTopicDetailOverlays = ({
                                             ) : null}
                                         </View>
                                         {selected ? (
-                                            <MaterialCommunityIcons
+                                            <PhosphorFeatureIcon
                                                 name="check"
                                                 size={scale(18)}
                                                 color={themeColor}
+                                                weight="regular"
                                             />
                                         ) : null}
                                     </ScalePressable>
@@ -531,7 +533,7 @@ const HarborTopicDetailOverlays = ({
                                             borderTopColor: disabled,
                                         },
                                     ]}>
-                                    <MaterialCommunityIcons
+                                    <PhosphorFeatureIcon
                                         name={option.icon}
                                         size={scale(19)}
                                         color={themeColor}
@@ -553,10 +555,11 @@ const HarborTopicDetailOverlays = ({
                                         </Text>
                                     </View>
                                     {selected ? (
-                                        <MaterialCommunityIcons
+                                        <PhosphorFeatureIcon
                                             name="check"
                                             size={scale(18)}
                                             color={themeColor}
+                                            weight="regular"
                                         />
                                     ) : null}
                                 </ScalePressable>

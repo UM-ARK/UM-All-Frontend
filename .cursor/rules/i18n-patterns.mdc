@@ -1,6 +1,6 @@
 ---
-description: 國際化 (i18n) 使用規範與翻譯檔維護策略
-globs: src/i18n/**/*,**/*.{js,jsx}
+description: 國際化 (i18n) 使用規範、港澳繁體中文用語與翻譯檔維護策略
+globs: "src/i18n/**/*"
 alwaysApply: false
 ---
 
@@ -57,16 +57,23 @@ t('settings')
 
 **原則**：不要為 identity map（key === value）徒增 `zh-hk.js` 條目；英文模式缺譯會露出中文 key，故 `en-us.json` 不可省。
 
-## 命名空間分組
+## 命名空間分組（對齊 `src/i18n/i18n.js`）
 
 | 命名空間 | 用途 |
-|---------|------|
-| `common` | 通用（按鈕、提示） |
-| `home` | 主頁 |
-| `harbor` | 職涯港 |
-| `my` | 我的 / Harbor 個人中心 |
-| `setting` | 設定（多為英文 key，需寫 zh-hk） |
-| `catalog` | 課表 |
-| `club` | 組織 |
-| `features` | 功能服務 |
-| `wiki` / `about` / `timetable` | 對應模組 |
+| --- | --- |
+| `common` | 預設命名空間：通用按鈕、提示、狀態 |
+| `home` | 主頁、底部 Tab、校園資訊與新聞 |
+| `harbor` | ARK Harbor 校園論壇與聊天 |
+| `my` | 我的／Harbor 個人中心與信箱 |
+| `catalog` | 選課／搵課目錄 |
+| `timetable` | 課表模擬與排課 |
+| `club` | 學生組織與活動 |
+| `features` | 校園服務功能（校巴、停車場、餐飲、組隊排班等） |
+| `wiki` | ARK Wiki 校園百科 |
+| `about` | 關於 ARK 與版本資訊 |
+| `setting` | 設定頁（歷史多為英文 key，新增或修改時注意同步 `zh-hk.js`） |
+
+## 語言與用語習慣
+
+- APP 中文介面文案與程式碼註釋一律使用**繁體中文**（例外：技術術語、品牌名稱、API 原始回傳資料）。
+- 文案語氣親切精簡，符合澳門／港澳校園日常用語（例如「搵課」「選課」「課表」「校巴」「論壇」），避免生硬直譯或簡體書面語。

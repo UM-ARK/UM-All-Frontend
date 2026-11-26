@@ -15,6 +15,7 @@ import {useHeaderHeight} from '@react-navigation/elements';
 import {usePreventRemove} from '@react-navigation/native';
 import moment from 'moment-timezone';
 import {useTranslation} from 'react-i18next';
+import Ionicons from '@react-native-vector-icons/ionicons';
 import {
     KeyboardAwareScrollView,
     KeyboardToolbar,
@@ -26,6 +27,7 @@ import Text from '../../components/AppText';
 import ScalePressable from '../../components/ScalePressable';
 import TextInput from '../../components/AppTextInput';
 import {uiStyle, useTheme} from '../../components/ThemeContext';
+import PhosphorFeatureIcon from '../TabbarPages/info/home/search/components/PhosphorFeatureIcon';
 import {logToFirebase} from '../../utils/firebaseAnalytics';
 import {createTeamEvent} from '../../utils/scheduling/schedulingApi';
 import {normalizeSchedulingError} from '../../utils/scheduling/schedulingErrors';
@@ -105,6 +107,7 @@ const TeamScheduleCreatePage = ({navigation}) => {
     );
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isPainting, setIsPainting] = useState(false);
+    const [gridReady, setGridReady] = useState(false);
     const [coursePrefillEnabled, setCoursePrefillEnabled] = useState(true);
     const [coursePrefillLoading, setCoursePrefillLoading] = useState(false);
     const [coursePrefillError, setCoursePrefillError] = useState(null);
@@ -135,6 +138,11 @@ const TeamScheduleCreatePage = ({navigation}) => {
 
     useEffect(() => {
         logToFirebase('screen_view', {screen_name: 'TeamScheduleCreate'});
+        // 延遲一拍掛載重型週視圖，避免阻塞導航推入動畫與觸覺回饋
+        const timer = setTimeout(() => {
+            setGridReady(true);
+        }, 120);
+        return () => clearTimeout(timer);
     }, []);
 
     const loadCoursePrefill = useCallback(async () => {
@@ -410,9 +418,16 @@ const TeamScheduleCreatePage = ({navigation}) => {
                 contentInsetAdjustmentBehavior={
                     isLiquidGlassSupported ? undefined : 'automatic'
                 }>
-                <Text style={[styles.sectionTitle, {color: theme.black.main}]}>
-                    {t('基本資料')}
-                </Text>
+                <View style={styles.sectionHeaderRow}>
+                    <PhosphorFeatureIcon
+                        name="note"
+                        size={scale(19)}
+                        color={theme.themeColor}
+                    />
+                    <Text style={[styles.sectionTitle, {color: theme.black.main}]}>
+                        {t('基本資料')}
+                    </Text>
+                </View>
 
                 <Text style={[styles.label, {color: theme.black.second}]}>
                     {t('活動名稱')}
@@ -426,10 +441,10 @@ const TeamScheduleCreatePage = ({navigation}) => {
                     style={[
                         styles.input,
                         {
-                            backgroundColor: theme.tonal.primary08,
-                            borderColor: theme.themeColorUltraLight,
+                            backgroundColor: theme.white,
                             color: theme.black.main,
                         },
+                        theme.viewShadow,
                     ]}
                 />
                 <Text style={[styles.counter, {color: theme.black.third}]}>
@@ -451,86 +466,161 @@ const TeamScheduleCreatePage = ({navigation}) => {
                         styles.input,
                         styles.multiline,
                         {
-                            backgroundColor: theme.tonal.primary08,
-                            borderColor: theme.themeColorUltraLight,
+                            backgroundColor: theme.white,
                             color: theme.black.main,
                         },
+                        theme.viewShadow,
                     ]}
                 />
                 <Text style={[styles.counter, {color: theme.black.third}]}>
                     {description.length}/{DESCRIPTION_MAX}
                 </Text>
 
-                <View style={styles.metaRow}>
-                    <Text style={[styles.label, {color: theme.black.second}]}>
-                        {t('時區')}
-                    </Text>
-                    <Text style={[styles.metaValue, {color: theme.black.main}]}>
-                        {t('澳門時間')}
-                    </Text>
+                <View
+                    style={[
+                        styles.optionsCard,
+                        {backgroundColor: theme.white},
+                        theme.viewShadow,
+                    ]}>
+                    <View style={styles.optionRow}>
+                        <View style={styles.optionLabelRow}>
+                            <PhosphorFeatureIcon
+                                name="globe"
+                                size={scale(17)}
+                                color={theme.themeColor}
+                            />
+                            <Text
+                                style={[
+                                    styles.optionLabel,
+                                    {color: theme.black.main},
+                                ]}>
+                                {t('時區')}
+                            </Text>
+                        </View>
+                        <Text
+                            style={[
+                                styles.metaValue,
+                                {color: theme.black.second},
+                            ]}>
+                            {t('澳門時間')}
+                        </Text>
+                    </View>
+
+                    <View
+                        style={[
+                            styles.optionDivider,
+                            {backgroundColor: theme.disabled},
+                        ]}
+                    />
+
+                    <View style={styles.optionRow}>
+                        <ScalePressable
+                            accessibilityRole="button"
+                            onPress={() => {
+                                trigger();
+                                setDeadlinePickerVisible(true);
+                            }}
+                            style={styles.deadlinePressArea}>
+                            <View style={styles.optionLabelRow}>
+                                <PhosphorFeatureIcon
+                                    name="calendar"
+                                    size={scale(17)}
+                                    color={theme.themeColor}
+                                />
+                                <Text
+                                    style={[
+                                        styles.optionLabel,
+                                        {color: theme.black.main},
+                                    ]}>
+                                    {t('回覆截止（選填）')}
+                                </Text>
+                            </View>
+                            <View style={styles.deadlineValueRow}>
+                                <Text
+                                    numberOfLines={1}
+                                    style={[
+                                        styles.deadlineButtonText,
+                                        {
+                                            color: responseDeadlineAt
+                                                ? theme.accentForeground
+                                                : theme.themeColor,
+                                        },
+                                    ]}>
+                                    {deadlineDisplay}
+                                </Text>
+                                <Ionicons
+                                    name="chevron-forward"
+                                    size={scale(15)}
+                                    color={theme.black.third}
+                                />
+                            </View>
+                        </ScalePressable>
+                        {responseDeadlineAt ? (
+                            <ScalePressable
+                                accessibilityRole="button"
+                                onPress={() => {
+                                    trigger();
+                                    setResponseDeadlineAt(null);
+                                }}
+                                style={[
+                                    styles.clearButton,
+                                    {backgroundColor: theme.bg_color},
+                                ]}>
+                                <Text
+                                    style={[
+                                        styles.clearButtonText,
+                                        {color: theme.black.second},
+                                    ]}>
+                                    {t('清除')}
+                                </Text>
+                            </ScalePressable>
+                        ) : null}
+                    </View>
                 </View>
 
-                <Text style={[styles.label, {color: theme.black.second}]}>
-                    {t('回覆截止（選填）')}
-                </Text>
-                <View style={styles.deadlineRow}>
-                    <ScalePressable
-                        onPress={() => {
-                            trigger();
-                            setDeadlinePickerVisible(true);
-                        }}
+                <View style={[styles.sectionHeaderRow, styles.sectionSpacing]}>
+                    <PhosphorFeatureIcon
+                        name="calendar-check"
+                        size={scale(19)}
+                        color={theme.featureIconTones.green.foreground}
+                    />
+                    <Text
                         style={[
-                            styles.deadlineButton,
+                            styles.sectionTitle,
+                            styles.sectionTitleFlex,
+                            {color: theme.black.main},
+                        ]}>
+                        {t('我的每週可用時間')}
+                    </Text>
+                    <View
+                        style={[
+                            styles.countPill,
                             {
-                                backgroundColor: theme.tonal.primary15,
+                                backgroundColor:
+                                    selectedCount > 0
+                                        ? theme.tonal.primary15
+                                        : theme.white,
                             },
+                            selectedCount === 0 && theme.viewShadow,
                         ]}>
                         <Text
                             style={[
-                                styles.deadlineButtonText,
-                                {color: theme.themeColor},
-                            ]}>
-                            {deadlineDisplay}
-                        </Text>
-                    </ScalePressable>
-                    {responseDeadlineAt ? (
-                        <ScalePressable
-                            onPress={() => {
-                                trigger();
-                                setResponseDeadlineAt(null);
-                            }}
-                            style={[
-                                styles.clearButton,
+                                styles.countPillText,
                                 {
-                                    backgroundColor: theme.tonal.primary08,
+                                    color:
+                                        selectedCount > 0
+                                            ? theme.accentForeground
+                                            : theme.black.second,
                                 },
                             ]}>
-                            <Text
-                                style={[
-                                    styles.clearButtonText,
-                                    {color: theme.black.second},
-                                ]}>
-                                {t('清除')}
-                            </Text>
-                        </ScalePressable>
-                    ) : null}
+                            {t('已選 {{count}} 格', {count: selectedCount})}
+                        </Text>
+                    </View>
                 </View>
-
-                <Text
-                    style={[
-                        styles.sectionTitle,
-                        styles.sectionSpacing,
-                        {color: theme.black.main},
-                    ]}>
-                    {t('我的每週可用時間')}
-                </Text>
                 <Text style={[styles.hint, {color: theme.black.third}]}>
                     {t(
                         '選出你每週可以開會的時間；隊員加入後，會在這些時間中填寫自己的時間。',
                     )}
-                </Text>
-                <Text style={[styles.hint, {color: theme.black.third}]}>
-                    {t('已選 {{count}} 格', {count: selectedCount})}
                 </Text>
 
                 <View style={styles.coursePrefillRow}>
@@ -546,28 +636,40 @@ const TeamScheduleCreatePage = ({navigation}) => {
                             accessibilityState={{
                                 checked: coursePrefillEnabled,
                             }}
+                            style={styles.previewSwitch}
                             value={coursePrefillEnabled}
                             onValueChange={handleCoursePrefillChange}
                             trackColor={{
-                                false: theme.tonal.primary15,
-                                true: theme.tonal.primary50,
+                                false: theme.disabled,
+                                true: theme.themeColor,
                             }}
                             thumbColor={theme.trueWhite}
-                            ios_backgroundColor={theme.tonal.primary15}
+                            ios_backgroundColor={theme.disabled}
                         />
                     )}
                 </View>
 
                 <ScheduleTimeRangeInsert onInsert={handleInsertRange} />
-                <ScheduleWeekGrid
-                    mode="candidate"
-                    slotMinutes={EDIT_SLOT_MINUTES}
-                    draft={draft}
-                    courseConflictKeys={courseConflictKeys}
-                    onDraftChange={setDraft}
-                    onPaintingChange={setIsPainting}
-                    scrollToStartMinute={scrollToStartMinute}
-                />
+                {gridReady ? (
+                    <ScheduleWeekGrid
+                        mode="candidate"
+                        slotMinutes={EDIT_SLOT_MINUTES}
+                        draft={draft}
+                        courseConflictKeys={courseConflictKeys}
+                        onDraftChange={setDraft}
+                        onPaintingChange={setIsPainting}
+                        scrollToStartMinute={scrollToStartMinute}
+                    />
+                ) : (
+                    <View
+                        style={[
+                            styles.gridPlaceholder,
+                            {backgroundColor: theme.white},
+                            theme.viewShadow,
+                        ]}>
+                        <ActivityIndicator color={theme.themeColor} />
+                    </View>
+                )}
 
                 <ScalePressable
                     disabled={isSubmitting}
@@ -575,20 +677,28 @@ const TeamScheduleCreatePage = ({navigation}) => {
                     style={[
                         styles.submitButton,
                         {
-                            backgroundColor: theme.themeColor,
+                            backgroundColor: theme.white,
                             opacity: isSubmitting ? 0.7 : 1,
                         },
+                        theme.viewShadow,
                     ]}>
                     {isSubmitting ? (
-                        <ActivityIndicator color={theme.trueWhite} />
+                        <ActivityIndicator color={theme.accentForeground} />
                     ) : (
-                        <Text
-                            style={[
-                                styles.submitButtonText,
-                                {color: theme.trueWhite},
-                            ]}>
-                            {t('建立組隊')}
-                        </Text>
+                        <>
+                            <PhosphorFeatureIcon
+                                name="plus-circle"
+                                size={scale(18)}
+                                color={theme.themeColor}
+                            />
+                            <Text
+                                style={[
+                                    styles.submitButtonText,
+                                    {color: theme.accentForeground},
+                                ]}>
+                                {t('建立組隊')}
+                            </Text>
+                        </>
                     )}
                 </ScalePressable>
             </KeyboardAwareScrollView>
@@ -625,14 +735,23 @@ const styles = StyleSheet.create({
         paddingHorizontal: scale(16),
         paddingTop: verticalScale(12),
     },
+    sectionHeaderRow: {
+        alignItems: 'center',
+        flexDirection: 'row',
+        gap: scale(8),
+        marginBottom: verticalScale(8),
+    },
     sectionTitle: {
         ...uiStyle.defaultText,
         fontSize: scale(16),
         fontWeight: '700',
-        marginBottom: verticalScale(10),
+    },
+    sectionTitleFlex: {
+        flex: 1,
+        minWidth: 0,
     },
     sectionSpacing: {
-        marginTop: verticalScale(20),
+        marginTop: verticalScale(22),
     },
     label: {
         ...uiStyle.defaultText,
@@ -643,11 +762,11 @@ const styles = StyleSheet.create({
     },
     input: {
         ...uiStyle.defaultText,
-        borderRadius: scale(10),
-        borderWidth: StyleSheet.hairlineWidth,
+        borderRadius: scale(12),
+        borderCurve: 'continuous',
         fontSize: scale(14),
-        paddingHorizontal: scale(12),
-        paddingVertical: verticalScale(10),
+        paddingHorizontal: scale(14),
+        paddingVertical: verticalScale(11),
     },
     multiline: {
         minHeight: verticalScale(88),
@@ -658,48 +777,84 @@ const styles = StyleSheet.create({
         marginTop: verticalScale(4),
         textAlign: 'right',
     },
-    metaRow: {
+    optionsCard: {
+        borderRadius: scale(14),
+        borderCurve: 'continuous',
+        marginTop: verticalScale(12),
+        paddingHorizontal: scale(14),
+    },
+    optionRow: {
         alignItems: 'center',
         flexDirection: 'row',
+        gap: scale(8),
         justifyContent: 'space-between',
-        marginTop: verticalScale(12),
+        minHeight: verticalScale(44),
+        paddingVertical: verticalScale(10),
+    },
+    optionLabelRow: {
+        alignItems: 'center',
+        flexDirection: 'row',
+        gap: scale(8),
+    },
+    optionLabel: {
+        ...uiStyle.defaultText,
+        fontSize: scale(13),
+        fontWeight: '600',
+    },
+    optionDivider: {
+        height: StyleSheet.hairlineWidth,
     },
     metaValue: {
         ...uiStyle.defaultText,
         fontSize: scale(13),
         fontWeight: '600',
     },
-    deadlineRow: {
+    deadlinePressArea: {
+        alignItems: 'center',
+        flex: 1,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        minWidth: 0,
+    },
+    deadlineValueRow: {
         alignItems: 'center',
         flexDirection: 'row',
-        gap: scale(8),
-    },
-    deadlineButton: {
-        borderRadius: scale(10),
-        flex: 1,
-        paddingHorizontal: scale(12),
-        paddingVertical: verticalScale(10),
+        flexShrink: 1,
+        gap: scale(4),
+        marginLeft: scale(8),
     },
     deadlineButtonText: {
         ...uiStyle.defaultText,
+        flexShrink: 1,
         fontSize: scale(13),
         fontWeight: '600',
     },
     clearButton: {
-        borderRadius: scale(10),
-        paddingHorizontal: scale(12),
-        paddingVertical: verticalScale(10),
+        borderRadius: scale(8),
+        borderCurve: 'continuous',
+        paddingHorizontal: scale(10),
+        paddingVertical: verticalScale(6),
     },
     clearButtonText: {
         ...uiStyle.defaultText,
-        fontSize: scale(13),
+        fontSize: scale(12),
         fontWeight: '600',
+    },
+    countPill: {
+        borderRadius: scale(999),
+        paddingHorizontal: scale(10),
+        paddingVertical: verticalScale(4),
+    },
+    countPillText: {
+        ...uiStyle.defaultText,
+        fontSize: scale(11),
+        fontWeight: '700',
     },
     hint: {
         ...uiStyle.defaultText,
         fontSize: scale(12),
         lineHeight: verticalScale(18),
-        marginBottom: verticalScale(4),
+        marginBottom: verticalScale(6),
     },
     coursePrefillRow: {
         alignItems: 'center',
@@ -709,17 +864,31 @@ const styles = StyleSheet.create({
         marginTop: verticalScale(8),
         minHeight: scale(34),
     },
+    previewSwitch: {
+        alignSelf: 'center',
+        transform: [{scale: 0.82}],
+    },
+    gridPlaceholder: {
+        alignItems: 'center',
+        borderRadius: scale(12),
+        borderCurve: 'continuous',
+        height: verticalScale(385),
+        justifyContent: 'center',
+    },
     submitButton: {
         alignItems: 'center',
         borderRadius: scale(12),
+        borderCurve: 'continuous',
+        flexDirection: 'row',
+        gap: scale(6),
         justifyContent: 'center',
-        marginTop: verticalScale(24),
-        minHeight: verticalScale(48),
-        paddingVertical: verticalScale(12),
+        marginTop: verticalScale(20),
+        minHeight: verticalScale(44),
+        paddingVertical: verticalScale(10),
     },
     submitButtonText: {
         ...uiStyle.defaultText,
-        fontSize: scale(15),
+        fontSize: scale(14),
         fontWeight: '700',
     },
 });

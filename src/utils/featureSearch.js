@@ -17,6 +17,7 @@ export const getFeatureSearchText = (item, category) =>
             item.keywords,
             item.key_name,
             category,
+            item.searchCategoryAlias,
         ]
             .filter(Boolean)
             .join(' '),

@@ -119,6 +119,7 @@ const HarborTopicList = ({
     isTwoColumn = false,
     isActive = true,
     preserveItemsUntilRefresh = false,
+    onUnseenChange,
 }) => {
     const { theme } = useTheme();
     const { isCompact } = useWindowSizeClass();
@@ -140,6 +141,8 @@ const HarborTopicList = ({
     const rateLimitRef = useRef(null);
     const sourceRef = useRef(source);
     sourceRef.current = source;
+    const onUnseenChangeRef = useRef(onUnseenChange);
+    onUnseenChangeRef.current = onUnseenChange;
     const [items, setItems] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
@@ -168,6 +171,7 @@ const HarborTopicList = ({
     const replaceItems = useCallback(nextItems => {
         itemsRef.current = nextItems;
         setItems(nextItems);
+        onUnseenChangeRef.current?.(nextItems.some(isHarborTopicUnseen));
     }, []);
 
     const replaceRecommendationItems = useCallback(nextItems => {
@@ -876,7 +880,7 @@ const HarborTopicList = ({
 
     const emptyState = firstPageError ? (
         <HarborFullState
-            icon={needsLogin ? 'account-lock-outline' : 'alert-circle-outline'}
+            icon={needsLogin ? 'lock' : 'warning-circle'}
             title={
                 needsLogin
                     ? t('登入後查看此內容')
@@ -920,7 +924,7 @@ const HarborTopicList = ({
         />
     ) : (
         <HarborFullState
-            icon="forum-outline"
+            icon="messages-square"
             title={emptyTitle || t('這裡暫時沒有話題')}
             description={
                 emptyDescription || t('稍後再來看看，或切換到其他話題視圖。')

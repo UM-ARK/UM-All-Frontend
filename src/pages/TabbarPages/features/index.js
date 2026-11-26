@@ -1,12 +1,21 @@
 import React, { useState, useRef, useCallback, useContext, useMemo, useEffect } from 'react';
 import {
+    Animated as RNAnimated,
     Platform,
     ScrollView,
+    StyleSheet,
     View,
 } from 'react-native';
 
 import Text from '../../../components/AppText';
 import ScalePressable from '../../../components/ScalePressable';
+import SegmentedTopTabBar, {
+    SEGMENTED_TOP_TAB_BAR_HEIGHT,
+} from '../../../components/SegmentedTopTabBar';
+import TopScrollEdgeBackdrop, {
+    SCROLL_EDGE_FADE_HEIGHT,
+} from '../../../components/TopScrollEdgeBackdrop';
+import { SEARCH_FIELD_MIN_HEIGHT } from '../../../components/searchFieldStyles';
 import { useTheme, uiStyle } from '../../../components/ThemeContext';
 import { useHarborSession } from '../../../contexts/HarborSessionContext';
 import { logToFirebase } from '../../../utils/firebaseAnalytics';
@@ -18,11 +27,19 @@ import {
 } from '../../../utils/courseNavigation';
 import { canNavigateTo } from '../../../utils/routeAvailability';
 import {
-    FREQUENT_FEATURES_DISPLAY_LIMIT,
-    buildFrequentFeatures,
-    getFeatureRecentUsage,
-    recordFeatureUsage,
-} from '../../../utils/featureRecentUsage';
+    addCustomFrequentFeatureKey,
+    getCustomFrequentFeatureKeys,
+    removeCustomFrequentFeatureKey,
+    reorderCustomFrequentFeatureKeys,
+    resolveCustomFrequentFeatures,
+    saveCustomFrequentFeatureKeys,
+} from '../../../utils/customFrequentFeatures';
+import { GlassView, isLiquidGlassSupported } from '../../../utils/glassEffect';
+import { SEGMENTED_TAB_CONTROL_HEIGHT } from '../../../components/SegmentedTabControl';
+import FrequentFeaturesGrid, {
+    FeatureCornerBadge,
+    WiggleIconWrapper,
+} from './FrequentFeaturesGrid';
 import {
     getFeatureSearchText,
     getUmWebSearchUrl,
@@ -30,7 +47,6 @@ import {
 } from '../../../utils/featureSearch';
 import { addSearchHistory } from '../../../utils/searchHistory';
 import {
-    TOP_TAB_STRIP_MAX_WIDTH,
     WIDE_CONTENT_MAX_WIDTH,
     useWindowSizeClass,
 } from '../../../utils/windowSizeClass';
@@ -38,33 +54,30 @@ import { balanceColumns } from '../../../utils/balanceColumns';
 import CustomBottomSheet from '../../../utils/BottomSheet';
 import { getFunctionArr } from './FeatureList';
 import FeatureSearchBar from './FeatureSearchBar';
+import { FeaturesChromeProvider, useFeaturesChrome } from './FeaturesChromeContext';
 import FeatureIcon from '../info/home/search/components/FeatureIcon';
 import WikiHome from '../arkwiki';
 
 import { FlatGrid } from 'react-native-super-grid';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import * as Clipboard from 'expo-clipboard';
-import { LinearGradient } from 'expo-linear-gradient';
 import Ionicons from '@react-native-vector-icons/ionicons';
-import { moderateScale, scale, verticalScale } from 'react-native-size-matters';
+import { scale, verticalScale } from 'react-native-size-matters';
+import { Check } from 'phosphor-react-native/src/icons/Check';
+import { SlidersHorizontal } from 'phosphor-react-native/src/icons/SlidersHorizontal';
 import Toast from 'react-native-simple-toast';
 import TouchableScale from '../../../components/TouchableScale';
 import { useTranslation } from 'react-i18next';
 import { useFocusEffect } from '@react-navigation/native';
 import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { SafeAreaView } from 'react-native-screens/experimental';
 import Animated, { cubicBezier } from 'react-native-reanimated';
 import { useAppReducedMotion } from '../../../contexts/ReducedMotionContext';
 
 const Tab = createMaterialTopTabNavigator();
 
-const TOP_TAB_SCALE_FACTOR = 0.1;
-const TAB_INDICATOR_WIDTH = moderateScale(25, TOP_TAB_SCALE_FACTOR);
-const TAB_BAR_HEIGHT = moderateScale(30, TOP_TAB_SCALE_FACTOR);
-const TAB_LABEL_FONT_SIZE = moderateScale(11, 0.3);
-// 功能詳情內容精簡；最高檔供長按一次彈滿
-const FEATURE_SHEET_SNAP_POINTS = ['32%', '48%'];
+// 功能詳情內容精簡；預設檔需高於底部懸浮 Tab Bar 避免遮擋按鈕，長說明可再上拉
+const FEATURE_SHEET_SNAP_POINTS = ['44%', '56%'];
 /** 分類卡欄數：expanded 兩欄、large 三欄；手機與 medium 維持單欄 */
 const CARD_COLUMN_COUNT = {
     compact: 1,
@@ -72,8 +85,8 @@ const CARD_COLUMN_COUNT = {
     expanded: 2,
     large: 3,
 };
-/** 每行圖標上限：手機 5 個剛好填滿；寬屏放寬到 8 個，避免 5 個圖標被拉開成大間距 */
-const COMPACT_GRID_MAX_ITEMS_PER_ROW = 5;
+/** 每行圖標上限：手機 4 個保持舒展留白；寬屏放寬到 8 個 */
+const COMPACT_GRID_MAX_ITEMS_PER_ROW = 4;
 const WIDE_GRID_MAX_ITEMS_PER_ROW = 8;
 const SEARCH_HEADER_FADE_HEIGHT = verticalScale(12);
 const SEARCH_HIGHLIGHT_ANIMATION = {
@@ -84,6 +97,17 @@ const SEARCH_HIGHLIGHT_ANIMATION = {
 
 const getGridItemsPerRow = (width, itemDimension, spacing, maxItemsPerRow) =>
     Math.max(1, Math.min(maxItemsPerRow, Math.floor((width - spacing) / (itemDimension + spacing))));
+
+const getUrlHost = url => {
+    if (!url || typeof url !== 'string') {
+        return '';
+    }
+    try {
+        return new URL(url).hostname.replace(/^www\./, '');
+    } catch {
+        return '';
+    }
+};
 
 function FeatureSectionGrid({ data, matchedFeatures, ...gridProps }) {
     const [width, setWidth] = useState(0);
@@ -120,21 +144,41 @@ function FeatureSectionGrid({ data, matchedFeatures, ...gridProps }) {
 
 function FeatureListPage({ navigation }) {
     const { theme } = useTheme();
-    const { themeColor, white, black, bg_color, tonal } = theme;
+    const { isLight, white, trueWhite, black, trueBlack, featuresScreen, viewShadow, pressOverlay } = theme;
     const { status: harborStatus, user: harborUser, login } = useHarborSession();
     const { t, i18n } = useTranslation(['common', 'home', 'features']);
     const functionArr = useMemo(() => getFunctionArr(t), [t]);
     const { width: windowWidth, sizeClass, isCompact } = useWindowSizeClass();
     const isTc = i18n.language === 'tc';
-    const fontSize = isTc ? verticalScale(10) : verticalScale(8);
+    const fontSize = isTc ? verticalScale(11) : verticalScale(9);
     const [bottomSheetInfo, setBottomSheetInfo] = useState(null);
-    const [usageRecords, setUsageRecords] = useState([]);
+    const [frequentKeys, setFrequentKeys] = useState([]);
+    const [isDraggingFrequent, setIsDraggingFrequent] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const bottomSheetRef = useRef(null);
     const searchInputRef = useRef(null);
     const listRef = useRef(null);
     const reducedMotion = useAppReducedMotion();
     const insets = useSafeAreaInsets();
+    const {
+        topChromeHeight,
+        isEditingFrequent,
+        setIsEditingFrequent,
+    } = useFeaturesChrome();
+    const scrollY = useRef(new RNAnimated.Value(0)).current;
+    const [searchHeaderHeight, setSearchHeaderHeight] = useState(
+        SEARCH_FIELD_MIN_HEIGHT + 2 + verticalScale(10),
+    );
+    const totalSearchHeaderHeight = topChromeHeight + searchHeaderHeight;
+    const handleSearchChromeScroll = useCallback(event => {
+        scrollY.setValue(event.nativeEvent.contentOffset.y);
+    }, [scrollY]);
+    const handleSearchHeaderLayout = useCallback(event => {
+        const nextHeight = event.nativeEvent.layout.height;
+        setSearchHeaderHeight(current => (
+            Math.abs(current - nextHeight) > 0.5 ? nextHeight : current
+        ));
+    }, []);
     const tabBarHeight =
         useContext(BottomTabBarHeightContext) ?? insets.bottom + 49;
     // 同 courseSim：Android 場景底已在 Tab 上方；iOS 浮動 Tab 需自行預留
@@ -162,8 +206,12 @@ function FeatureListPage({ navigation }) {
     }, [functionArr]);
 
     const frequentFeatures = useMemo(
-        () => buildFrequentFeatures(featureByKey, usageRecords),
-        [featureByKey, usageRecords],
+        () => resolveCustomFrequentFeatures(featureByKey, frequentKeys),
+        [featureByKey, frequentKeys],
+    );
+    const frequentKeySet = useMemo(
+        () => new Set(frequentFeatures.map(item => item.key_name || item.fn_name)),
+        [frequentFeatures],
     );
 
     const searchTextByFeature = useMemo(() => new Map(
@@ -194,6 +242,9 @@ function FeatureListPage({ navigation }) {
     );
 
     const handleChangeSearchQuery = value => {
+        if (isEditingFrequent) {
+            setIsEditingFrequent(false);
+        }
         setSearchQuery(value);
         listRef.current?.scrollTo({ y: 0, animated: false });
     };
@@ -214,23 +265,76 @@ function FeatureListPage({ navigation }) {
         addSearchHistory(query);
     };
 
-    const refreshUsage = useCallback(async () => {
-        const nextUsage = await getFeatureRecentUsage();
-        setUsageRecords(nextUsage);
+    const refreshFrequentKeys = useCallback(async () => {
+        const nextKeys = await getCustomFrequentFeatureKeys();
+        setFrequentKeys(nextKeys);
     }, []);
 
     useEffect(() => {
-        refreshUsage();
-    }, [refreshUsage]);
+        refreshFrequentKeys();
+    }, [refreshFrequentKeys]);
+
+    useEffect(() => {
+        if (isEditingFrequent) {
+            searchInputRef.current?.blur();
+            setSearchQuery('');
+        } else {
+            setIsDraggingFrequent(false);
+        }
+    }, [isEditingFrequent]);
 
     useFocusEffect(
         useCallback(() => {
-            refreshUsage();
+            refreshFrequentKeys();
             return () => {
                 searchInputRef.current?.blur();
+                setIsEditingFrequent(false);
             };
-        }, [refreshUsage]),
+        }, [refreshFrequentKeys, setIsEditingFrequent]),
     );
+
+    const handleAddFrequent = useCallback(item => {
+        const key = item.key_name || item.fn_name;
+        if (!key) {
+            return;
+        }
+        trigger('tap');
+        setFrequentKeys(current => {
+            const next = addCustomFrequentFeatureKey(current, key);
+            if (next !== current) {
+                saveCustomFrequentFeatureKeys(next);
+            }
+            return next;
+        });
+    }, []);
+
+    const handleRemoveFrequent = useCallback(item => {
+        const key = item.key_name || item.fn_name;
+        if (!key) {
+            return;
+        }
+        trigger('tap');
+        setFrequentKeys(current => {
+            const next = removeCustomFrequentFeatureKey(current, key);
+            saveCustomFrequentFeatureKeys(next);
+            return next;
+        });
+    }, []);
+
+    const handleReorderFrequent = useCallback((fromIndex, toIndex) => {
+        setFrequentKeys(current => {
+            const next = reorderCustomFrequentFeatureKeys(current, fromIndex, toIndex);
+            saveCustomFrequentFeatureKeys(next);
+            return next;
+        });
+    }, []);
+
+    const handleFeatureLongPress = useCallback(item => {
+        trigger('longPress');
+        searchInputRef.current?.blur();
+        setBottomSheetInfo(item);
+        bottomSheetRef.current?.snapToIndex(0);
+    }, []);
 
     const handleFeaturePress = useCallback(
         item => {
@@ -239,10 +343,6 @@ function FeatureListPage({ navigation }) {
             logToFirebase('funcUse', {
                 funcName: item.fn_name,
             });
-            // 異步寫入常用紀錄，不阻塞導航
-            recordFeatureUsage(item.key_name || item.fn_name).then(
-                setUsageRecords,
-            );
 
             const { go_where, webview_param, needLogin, loginRoute } = item;
             // web 端只掛了部分頁面（見 Nav.web.js），站內路由未註冊時提示改用 APP；
@@ -299,37 +399,124 @@ function FeatureListPage({ navigation }) {
     );
 
     // 繁中標籤按單行高度排版，英文預留兩行讓每列圖標對齊
-    const featureLabelLineHeight = fontSize * 1.25;
+    const featureLabelLineHeight = fontSize * 1.3;
     const featureLabelHeight = isTc ? undefined : featureLabelLineHeight * 2;
     // FlatGrid 末列會再加 marginBottom: spacing，與 row paddingBottom 重疊，需抵銷
     const gridSpacing = scale(10);
     const gridBottomTrim = -gridSpacing;
-    const gridItemDimension = scale(50);
+    const gridItemDimension = scale(64);
+    const cardHorizontalMargin = scale(12);
+    const cardHorizontalPadding = scale(6);
     const gridMaxItemsPerRow = isCompact
         ? COMPACT_GRID_MAX_ITEMS_PER_ROW
         : WIDE_GRID_MAX_ITEMS_PER_ROW;
-    // 寬屏時常用服務只佔「4 個圖標 + 左右各一個間距」的寬度，不再被拉到整行
-    const frequentGridMaxWidth = isCompact
-        ? undefined
-        : FREQUENT_FEATURES_DISPLAY_LIMIT * (gridItemDimension + gridSpacing * 2) + gridSpacing;
     const cardColumnCount = CARD_COLUMN_COUNT[sizeClass] || 1;
 
-    // 分類卡分欄：用估算的每行圖標數換算行數作平衡權重（標題約半行），
-    // 只決定卡片落在哪一欄；實際每行圖標數仍由 FlatGrid 量測後自行決定
-    const cardColumns = useMemo(() => {
-        const columnWidth = Math.min(windowWidth, WIDE_CONTENT_MAX_WIDTH) / cardColumnCount - gridSpacing * 2;
+    // 相鄰分類可透過 groupKey 共用卡片，組內以細線分隔
+    const sectionBlocks = useMemo(() => {
+        const blocks = [];
+        visibleSections.forEach(section => {
+            const lastBlock = blocks[blocks.length - 1];
+            if (section.groupKey && lastBlock?.groupKey === section.groupKey) {
+                lastBlock.sections.push(section);
+            } else {
+                blocks.push({
+                    key: section.groupKey || section.title,
+                    groupKey: section.groupKey || null,
+                    sections: [section],
+                });
+            }
+        });
+        return blocks;
+    }, [visibleSections]);
+
+    // 分類區塊分欄：用估算的每行圖標數換算行數作平衡權重（標題約 0.4 行），
+    // 只決定區塊落在哪一欄；實際每行圖標數仍由 FlatGrid 量測後自行決定
+    const sectionColumns = useMemo(() => {
+        const columnWidth = Math.min(windowWidth, WIDE_CONTENT_MAX_WIDTH) / cardColumnCount - (cardHorizontalMargin + cardHorizontalPadding) * 2;
         const itemsPerRow = getGridItemsPerRow(columnWidth, gridItemDimension, gridSpacing, gridMaxItemsPerRow);
         return balanceColumns(
-            visibleSections,
+            sectionBlocks,
             cardColumnCount,
-            section => Math.ceil(section.fn.length / itemsPerRow) + 0.5,
+            block => block.sections.reduce(
+                (sum, section) => sum + Math.ceil(section.fn.length / itemsPerRow) + 0.4,
+                0,
+            ),
         );
-    }, [cardColumnCount, visibleSections, gridItemDimension, gridMaxItemsPerRow, gridSpacing, windowWidth]);
+    }, [cardColumnCount, cardHorizontalMargin, cardHorizontalPadding, sectionBlocks, gridItemDimension, gridMaxItemsPerRow, gridSpacing, windowWidth]);
 
     const renderFeatureItem = useCallback(
-        item => {
+        (item, index = 0) => {
+            const itemKey = item.key_name || item.fn_name;
             const isMatch = matchedFeatures?.has(item);
             const isMuted = isMatch === false;
+            const isInFrequent = frequentKeySet.has(itemKey);
+
+            if (isEditingFrequent) {
+                return (
+                    <WiggleIconWrapper
+                        key={itemKey}
+                        active={!isInFrequent}
+                        phaseIndex={index}
+                        reducedMotion={reducedMotion}
+                        style={{
+                            width: '100%',
+                            opacity: isInFrequent ? 0.52 : 1,
+                        }}>
+                        <TouchableScale
+                            accessibilityRole="button"
+                            accessibilityLabel={
+                                isInFrequent
+                                    ? item.fn_name
+                                    : `${t('添加到常用服務', { ns: 'features' })} ${item.fn_name}`
+                            }
+                            disabled={isInFrequent}
+                            style={{
+                                width: '100%',
+                                justifyContent: 'flex-start',
+                                alignItems: 'center',
+                                paddingTop: verticalScale(2),
+                            }}
+                            activeOpacity={0.7}
+                            onPress={() => handleAddFrequent(item)}>
+                            <View
+                                style={{
+                                    width: scale(30),
+                                    height: scale(30),
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    position: 'relative',
+                                }}>
+                                <FeatureIcon
+                                    item={item}
+                                    size={scale(26)}
+                                    muted={isInFrequent}
+                                    showBackground={false}
+                                />
+                                <FeatureCornerBadge
+                                    variant={isInFrequent ? 'added' : 'add'}
+                                    accessibilityLabel={t('添加到常用服務', { ns: 'features' })}
+                                    onPress={isInFrequent ? undefined : () => handleAddFrequent(item)}
+                                />
+                            </View>
+                            <Text
+                                numberOfLines={isTc ? 1 : 2}
+                                style={{
+                                    ...uiStyle.defaultText,
+                                    fontSize: fontSize,
+                                    lineHeight: featureLabelLineHeight,
+                                    height: featureLabelHeight,
+                                    color: isInFrequent ? black.third : black.second,
+                                    textAlign: 'center',
+                                    marginTop: verticalScale(6),
+                                }}>
+                                {item.fn_name}
+                            </Text>
+                        </TouchableScale>
+                    </WiggleIconWrapper>
+                );
+            }
+
             return <TouchableScale
                 accessibilityRole="button"
                 style={{
@@ -339,16 +526,8 @@ function FeatureListPage({ navigation }) {
                 }}
                 activeOpacity={0.7}
                 onPress={() => handleFeaturePress(item)}
-                onLongPress={() => {
-                    trigger();
-                    searchInputRef.current?.blur();
-                    setBottomSheetInfo(item);
-                    // 一開始觸發即彈最高檔（同 courseSim 展開搜索）
-                    bottomSheetRef.current?.snapToIndex(
-                        FEATURE_SHEET_SNAP_POINTS.length - 1,
-                    );
-                }}
-                key={item.key_name || item.fn_name}>
+                onLongPress={() => handleFeatureLongPress(item)}
+                key={itemKey}>
                 {isMatch ? (
                     <Animated.View
                         pointerEvents="none"
@@ -360,13 +539,16 @@ function FeatureListPage({ navigation }) {
                             bottom: -verticalScale(2),
                             left: -scale(2),
                             borderRadius: scale(12),
-                            borderWidth: 1.5,
-                            borderColor: themeColor,
-                            backgroundColor: tonal.primary30,
+                            ...viewShadow,
                         }}
                     />
                 ) : null}
-                <FeatureIcon item={item} size={scale(22)} muted={isMuted} />
+                <FeatureIcon
+                    item={item}
+                    size={scale(26)}
+                    muted={isMuted}
+                    showBackground={false}
+                />
                 <Text
                     numberOfLines={isTc ? 1 : 2}
                     style={{
@@ -376,7 +558,7 @@ function FeatureListPage({ navigation }) {
                         height: featureLabelHeight,
                         color: isMuted ? black.third : black.second,
                         textAlign: 'center',
-                        marginTop: verticalScale(4),
+                        marginTop: verticalScale(6),
                     }}>
                     {item.fn_name}
                 </Text>
@@ -388,147 +570,248 @@ function FeatureListPage({ navigation }) {
             featureLabelHeight,
             featureLabelLineHeight,
             fontSize,
+            frequentKeySet,
+            handleAddFrequent,
+            handleFeatureLongPress,
             handleFeaturePress,
+            isEditingFrequent,
             isTc,
             matchedFeatures,
             reducedMotion,
-            themeColor,
-            tonal.primary30,
+            t,
+            viewShadow,
         ],
     );
 
-    // 功能卡片渲染，useCallback避免不必要的重渲染
-    const GetFunctionCard = useCallback(
-        (title, fn_list, options = {}) => {
-            const { marginTop = verticalScale(10) } = options;
-            return (
+    // 圓角白卡分類區塊，標題視覺退後讓彩色雙色圖標成為焦點
+    const renderSectionBlock = useCallback(
+        (block, blockIndex) => (
             <View
-                key={title}
+                key={block.key}
                 style={{
-                    backgroundColor: white,
-                    borderRadius: scale(10),
-                    marginHorizontal: scale(10),
-                    marginTop,
+                    backgroundColor: featuresScreen.cardBg,
+                    borderRadius: scale(14),
+                    marginTop: blockIndex === 0 ? verticalScale(2) : verticalScale(10),
+                    paddingTop: verticalScale(12),
+                    paddingBottom: verticalScale(12),
+                    paddingHorizontal: cardHorizontalPadding,
                 }}>
-                <View
-                    style={{
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        paddingHorizontal: scale(10),
-                        paddingTop: verticalScale(10),
-                        paddingBottom: verticalScale(8),
-                        borderBottomWidth: verticalScale(2),
-                        borderBottomColor: bg_color,
-                    }}>
-                    <Text
+                {block.sections.map((section, sectionIndex) => (
+                    <View
+                        key={section.title}
                         style={{
-                            ...uiStyle.defaultText,
-                            fontSize: verticalScale(13),
-                            color: black.main,
-                            fontWeight: '500',
+                            marginTop: sectionIndex === 0 ? 0 : verticalScale(10),
                         }}>
-                        {title}
-                    </Text>
-                </View>
+                        {sectionIndex > 0 ? (
+                            <View
+                                style={{
+                                    height: StyleSheet.hairlineWidth,
+                                    backgroundColor: featuresScreen.divider,
+                                    marginHorizontal: scale(10),
+                                    marginBottom: verticalScale(10),
+                                }}
+                            />
+                        ) : null}
+                        <Text
+                            style={{
+                                ...uiStyle.defaultText,
+                                fontSize: verticalScale(11.5),
+                                color: black.third,
+                                fontWeight: '500',
+                                paddingHorizontal: scale(10),
+                                paddingBottom: verticalScale(4),
+                            }}>
+                            {section.title}
+                        </Text>
 
-                <FeatureSectionGrid
-                    maxItemsPerRow={gridMaxItemsPerRow}
-                    itemDimension={gridItemDimension}
-                    spacing={gridSpacing}
-                    style={{ marginBottom: gridBottomTrim }}
-                    itemContainerStyle={{
-                        alignItems: 'center',
-                        justifyContent: 'flex-start',
-                    }}
-                    data={fn_list}
-                    matchedFeatures={matchedFeatures}
-                    renderItem={({ item }) => renderFeatureItem(item)}
-                    showsVerticalScrollIndicator={false}
-                    scrollEnabled={false}
-                />
+                        <FeatureSectionGrid
+                            maxItemsPerRow={gridMaxItemsPerRow}
+                            itemDimension={gridItemDimension}
+                            spacing={gridSpacing}
+                            style={{ marginBottom: gridBottomTrim }}
+                            itemContainerStyle={{
+                                alignItems: 'center',
+                                justifyContent: 'flex-start',
+                            }}
+                            data={section.fn}
+                            matchedFeatures={matchedFeatures}
+                            renderItem={({ item, index }) => renderFeatureItem(item, index)}
+                            showsVerticalScrollIndicator={false}
+                            scrollEnabled={false}
+                        />
+                    </View>
+                ))}
             </View>
-            );
-        },
-        [white, bg_color, black.main, renderFeatureItem, gridSpacing, gridBottomTrim, gridItemDimension, gridMaxItemsPerRow, matchedFeatures],
+        ),
+        [
+            black.third,
+            cardHorizontalPadding,
+            featuresScreen.cardBg,
+            featuresScreen.divider,
+            gridBottomTrim,
+            gridItemDimension,
+            gridMaxItemsPerRow,
+            gridSpacing,
+            matchedFeatures,
+            renderFeatureItem,
+        ],
     );
 
-    // BottomSheet內容渲染
+    // BottomSheet內容渲染：左圖右文無底色資訊頭 + 墨黑極簡主按鈕
     const renderBottomSheet = () => {
         if (!bottomSheetInfo) {
             return null;
         }
         const { go_where, webview_param, describe, fn_name } = bottomSheetInfo;
-        const haveLink = go_where === 'Webview' || go_where === 'Linking';
+        const haveLink = (go_where === 'Webview' || go_where === 'Linking') && Boolean(webview_param?.url);
+        const urlHost = haveLink ? getUrlHost(webview_param.url) : '';
+        const primaryButtonForeground = isLight ? trueWhite : trueBlack;
+        const secondaryButtonBackground = isLight ? featuresScreen.bg_color : pressOverlay;
         return (
             <View
                 style={{
-                    alignItems: 'center',
                     backgroundColor: white,
                     paddingHorizontal: scale(20),
-                    paddingTop: verticalScale(4),
+                    paddingTop: verticalScale(6),
                     paddingBottom: sheetContentBottomPad,
                 }}>
-                <FeatureIcon item={bottomSheetInfo} size={scale(26)} />
-                <Text
+                <View
                     style={{
-                        ...uiStyle.defaultText,
-                        color: black.main,
-                        fontSize: verticalScale(15),
-                        fontWeight: '600',
-                        textAlign: 'center',
-                        marginTop: verticalScale(12),
+                        flexDirection: 'row',
+                        alignItems: 'flex-start',
+                        columnGap: scale(12),
                     }}>
-                    {fn_name}
-                </Text>
-                {describe ? (
-                    <Text
-                        style={{
-                            ...uiStyle.defaultText,
-                            color: black.third,
-                            fontSize: verticalScale(12),
-                            lineHeight: verticalScale(18),
-                            textAlign: 'center',
-                            marginTop: verticalScale(6),
-                        }}
-                        selectable>
-                        {describe}
-                    </Text>
-                ) : null}
-                {haveLink ? (
-                    <ScalePressable
-                        style={{
-                            flexDirection: 'row',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            width: '100%',
-                            marginTop: verticalScale(16),
-                            paddingVertical: verticalScale(11),
-                            paddingHorizontal: scale(14),
-                            borderRadius: scale(12),
-                            backgroundColor: themeColor,
-                        }}
-                        onPress={() => {
-                            trigger();
-                            Clipboard.setStringAsync(webview_param.url);
-                            Toast.show(t('已複製Link到剪貼板！'));
-                        }}>
-                        <Ionicons
-                            name="link-outline"
-                            size={scale(16)}
-                            color={white}
-                            style={{ marginRight: scale(6) }}
+                    <View style={{ paddingTop: verticalScale(1) }}>
+                        <FeatureIcon
+                            item={bottomSheetInfo}
+                            size={scale(28)}
+                            showBackground={false}
                         />
+                    </View>
+                    <View style={{ flex: 1, paddingTop: verticalScale(1) }}>
                         <Text
                             style={{
                                 ...uiStyle.defaultText,
-                                color: white,
+                                color: black.main,
+                                fontSize: verticalScale(15),
+                                fontWeight: '600',
+                            }}>
+                            {fn_name}
+                        </Text>
+                        {describe ? (
+                            <Text
+                                style={{
+                                    ...uiStyle.defaultText,
+                                    color: black.third,
+                                    fontSize: verticalScale(12),
+                                    lineHeight: verticalScale(17),
+                                    marginTop: verticalScale(4),
+                                }}
+                                selectable>
+                                {describe}
+                            </Text>
+                        ) : null}
+                        {urlHost ? (
+                            <View
+                                style={{
+                                    flexDirection: 'row',
+                                    alignItems: 'center',
+                                    columnGap: scale(4),
+                                    marginTop: verticalScale(4),
+                                }}>
+                                <Ionicons
+                                    name="link-outline"
+                                    size={scale(12)}
+                                    color={black.third}
+                                />
+                                <Text
+                                    numberOfLines={1}
+                                    style={{
+                                        ...uiStyle.defaultText,
+                                        flex: 1,
+                                        color: black.third,
+                                        fontSize: verticalScale(11),
+                                    }}>
+                                    {urlHost}
+                                </Text>
+                            </View>
+                        ) : null}
+                    </View>
+                </View>
+
+                <View
+                    style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        columnGap: scale(10),
+                        marginTop: verticalScale(16),
+                    }}>
+                    {haveLink ? (
+                        <ScalePressable
+                            style={{
+                                flex: 1,
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                paddingVertical: verticalScale(11),
+                                paddingHorizontal: scale(12),
+                                borderRadius: scale(14),
+                                backgroundColor: secondaryButtonBackground,
+                            }}
+                            onPress={() => {
+                                Clipboard.setStringAsync(webview_param.url);
+                                trigger('success');
+                                Toast.show(t('已複製Link到剪貼板！'));
+                            }}>
+                            <Ionicons
+                                name="link-outline"
+                                size={scale(15)}
+                                color={black.second}
+                                style={{ marginRight: scale(5) }}
+                            />
+                            <Text
+                                style={{
+                                    ...uiStyle.defaultText,
+                                    color: black.second,
+                                    fontSize: verticalScale(13),
+                                    fontWeight: '500',
+                                }}>
+                                {t('複製連結')}
+                            </Text>
+                        </ScalePressable>
+                    ) : null}
+                    <ScalePressable
+                        style={{
+                            flex: haveLink ? 1.2 : 1,
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            paddingVertical: verticalScale(11),
+                            paddingHorizontal: scale(12),
+                            borderRadius: scale(14),
+                            backgroundColor: black.second,
+                        }}
+                        onPress={() => {
+                            bottomSheetRef.current?.close();
+                            handleFeaturePress(bottomSheetInfo);
+                        }}>
+                        <Text
+                            style={{
+                                ...uiStyle.defaultText,
+                                color: primaryButtonForeground,
                                 fontSize: verticalScale(13),
                                 fontWeight: '600',
                             }}>
-                            {t('複製功能Link', { ns: 'features' })}
+                            {t('開啟服務', { ns: 'features' })}
                         </Text>
+                        <Ionicons
+                            name={haveLink ? 'open-outline' : 'arrow-forward-outline'}
+                            size={scale(15)}
+                            color={primaryButtonForeground}
+                            style={{ marginLeft: scale(5) }}
+                        />
                     </ScalePressable>
-                ) : null}
+                </View>
             </View>
         );
     };
@@ -537,89 +820,102 @@ function FeatureListPage({ navigation }) {
         <View
             style={{
                 flex: 1,
-                backgroundColor: bg_color,
+                backgroundColor: featuresScreen.bg_color,
             }}>
-            <View style={{ zIndex: 1 }}>
-                <FeatureSearchBar
-                    inputRef={searchInputRef}
-                    query={searchQuery}
-                    onChangeQuery={handleChangeSearchQuery}
-                    onWebSearch={handleWebSearch}
-                    hasQuery={isSearching}
-                    matchCount={matchedFeatures?.size ?? 0}
-                />
-                <LinearGradient
-                    pointerEvents="none"
-                    colors={[bg_color, `${bg_color}00`]}
-                    style={{
-                        position: 'absolute',
-                        top: '100%',
-                        left: 0,
-                        right: 0,
-                        height: SEARCH_HEADER_FADE_HEIGHT,
-                    }}
-                />
-            </View>
             <ScrollView
                 ref={listRef}
+                scrollEnabled={!isDraggingFrequent}
                 showsVerticalScrollIndicator={true}
-                contentInsetAdjustmentBehavior="automatic"
+                contentInsetAdjustmentBehavior="never"
                 automaticallyAdjustKeyboardInsets
                 keyboardShouldPersistTaps="handled"
+                scrollIndicatorInsets={{
+                    top: totalSearchHeaderHeight,
+                    bottom: listBottomPad,
+                }}
+                scrollEventThrottle={16}
+                onScroll={handleSearchChromeScroll}
                 contentContainerStyle={{
-                    paddingTop: SEARCH_HEADER_FADE_HEIGHT,
+                    paddingTop: totalSearchHeaderHeight + SEARCH_HEADER_FADE_HEIGHT,
                     paddingBottom: listBottomPad,
                 }}>
-                {/* 超寬屏內容居中封頂，分類卡再按尺寸等級分成 1／2／3 欄 */}
+                {/* 超寬屏內容居中封頂，分類區塊再按尺寸等級分成 1／2／3 欄 */}
                 <View
                     style={{
                         width: '100%',
                         maxWidth: WIDE_CONTENT_MAX_WIDTH,
                         alignSelf: 'center',
+                        paddingHorizontal: cardHorizontalMargin,
                     }}>
-                {!isSearching && frequentFeatures.length > 0 ? (
+                {!isSearching && (frequentFeatures.length > 0 || isEditingFrequent) ? (
                     <View
                         style={{
                             width: '100%',
-                            marginTop: verticalScale(8),
+                            backgroundColor: featuresScreen.cardBg,
+                            borderRadius: scale(14),
+                            marginTop: verticalScale(2),
+                            marginBottom: verticalScale(8),
+                            paddingTop: verticalScale(12),
+                            paddingBottom: verticalScale(12),
+                            paddingHorizontal: cardHorizontalPadding,
                         }}>
-                        <Text
+                        <View
                             style={{
-                                ...uiStyle.defaultText,
-                                fontSize: verticalScale(13),
-                                color: black.main,
-                                fontWeight: '600',
-                                paddingHorizontal: scale(16),
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                paddingHorizontal: scale(10),
                                 paddingBottom: verticalScale(4),
                             }}>
-                            {t('常用服務', { ns: 'features' })}
-                        </Text>
-                        <FlatGrid
-                            maxItemsPerRow={FREQUENT_FEATURES_DISPLAY_LIMIT}
-                            maxDimension={frequentGridMaxWidth}
+                            <Text
+                                style={{
+                                    ...uiStyle.defaultText,
+                                    fontSize: verticalScale(11.5),
+                                    color: black.third,
+                                    fontWeight: '500',
+                                }}>
+                                {t('常用服務', { ns: 'features' })}
+                            </Text>
+                            {isEditingFrequent && frequentFeatures.length > 1 ? (
+                                <Text
+                                    style={{
+                                        ...uiStyle.defaultText,
+                                        fontSize: verticalScale(10.5),
+                                        color: black.third,
+                                    }}>
+                                    {t('長按並拖拽調整順序', { ns: 'features' })}
+                                </Text>
+                            ) : null}
+                        </View>
+                        <FrequentFeaturesGrid
+                            items={frequentFeatures}
+                            isEditing={isEditingFrequent}
                             itemDimension={gridItemDimension}
                             spacing={gridSpacing}
-                            style={{ marginBottom: gridBottomTrim }}
-                            itemContainerStyle={{
-                                alignItems: 'center',
-                                justifyContent: 'flex-start',
-                            }}
-                            data={frequentFeatures}
-                            renderItem={({ item }) => renderFeatureItem(item)}
-                            showsVerticalScrollIndicator={false}
-                            scrollEnabled={false}
+                            maxItemsPerRow={gridMaxItemsPerRow}
+                            fontSize={fontSize}
+                            featureLabelLineHeight={featureLabelLineHeight}
+                            featureLabelHeight={featureLabelHeight}
+                            isTc={isTc}
+                            onPressItem={handleFeaturePress}
+                            onLongPressItem={handleFeatureLongPress}
+                            onRemoveItem={handleRemoveFrequent}
+                            onReorder={handleReorderFrequent}
+                            onDragActiveChange={setIsDraggingFrequent}
                         />
                     </View>
                 ) : null}
 
-                <View style={{ flexDirection: 'row', alignItems: 'flex-start' }}>
-                    {cardColumns.map((sections, columnIndex) => (
+                <View
+                    style={{
+                        flexDirection: 'row',
+                        alignItems: 'flex-start',
+                        columnGap: cardColumnCount > 1 ? scale(12) : 0,
+                    }}>
+                    {sectionColumns.map((blocks, columnIndex) => (
                         <View key={columnIndex} style={{ flex: 1 }}>
-                            {sections.map((fn_card, index) =>
-                                GetFunctionCard(fn_card.title, fn_card.fn, {
-                                    // 每欄第一張分類卡貼近上方常用服務
-                                    marginTop: index === 0 ? verticalScale(2) : verticalScale(10),
-                                }),
+                            {blocks.map((block, index) =>
+                                renderSectionBlock(block, index),
                             )}
                         </View>
                     ))}
@@ -633,11 +929,48 @@ function FeatureListPage({ navigation }) {
                 </View>
             </ScrollView>
 
+            <View
+                pointerEvents="box-none"
+                style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    zIndex: 2,
+                }}>
+                <TopScrollEdgeBackdrop
+                    headerHeight={totalSearchHeaderHeight}
+                    fadeHeight={SCROLL_EDGE_FADE_HEIGHT}
+                    scrollY={scrollY}
+                    backgroundColor={featuresScreen.bg_color}
+                />
+                <View
+                    pointerEvents="box-none"
+                    style={{ paddingTop: topChromeHeight, zIndex: 2 }}>
+                    <View pointerEvents="box-none" onLayout={handleSearchHeaderLayout}>
+                        <FeatureSearchBar
+                            inputRef={searchInputRef}
+                            query={searchQuery}
+                            onChangeQuery={handleChangeSearchQuery}
+                            onWebSearch={handleWebSearch}
+                            hasQuery={isSearching}
+                            matchCount={matchedFeatures?.size ?? 0}
+                        />
+                    </View>
+                </View>
+            </View>
+
             <CustomBottomSheet
                 ref={bottomSheetRef}
                 page={'features'}
                 // 同 courseSim：sheet 延伸至螢幕底部，避免 Tab 上方露出 bg_color
                 bottomInset={0}
+                topCornerRadius={scale(26)}
+                handleIndicatorStyle={{
+                    backgroundColor: pressOverlay,
+                    width: scale(34),
+                    height: verticalScale(3.5),
+                }}
                 snapPoints={FEATURE_SHEET_SNAP_POINTS}>
                 {renderBottomSheet()}
             </CustomBottomSheet>
@@ -647,65 +980,154 @@ function FeatureListPage({ navigation }) {
 
 export default function Index() {
     const { theme } = useTheme();
-    const { bg_color, black, themeColor } = theme;
-    const { t } = useTranslation('common');
+    const {
+        isLight,
+        white,
+        trueWhite,
+        black,
+        themeColor,
+        featuresScreen,
+        viewShadow,
+    } = theme;
+    const { t } = useTranslation(['common', 'features']);
+    const insets = useSafeAreaInsets();
+    const [isEditingFrequent, setIsEditingFrequent] = useState(false);
+    const [topBarRowHeight, setTopBarRowHeight] = useState(
+        SEGMENTED_TOP_TAB_BAR_HEIGHT,
+    );
+    const handleTopBarLayout = useCallback(event => {
+        const nextHeight = event.nativeEvent.layout.height;
+        setTopBarRowHeight(current =>
+            Math.abs(current - nextHeight) > 0.5 ? nextHeight : current,
+        );
+    }, []);
+    const handleToggleEditFrequent = useCallback(() => {
+        trigger('selection');
+        setIsEditingFrequent(current => !current);
+    }, []);
+    const topChromeHeight = insets.top + topBarRowHeight;
+    const renderTopTabBar = useCallback(
+        props => {
+            const activeRouteName = props.state.routes[props.state.index]?.name;
+            const showEditButton = activeRouteName === 'FeatureList';
+            const EditButtonSurface =
+                isLiquidGlassSupported && !isEditingFrequent ? GlassView : View;
+
+            return (
+                <View
+                    pointerEvents="box-none"
+                    style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        zIndex: 10,
+                        paddingTop: insets.top,
+                    }}>
+                    <View
+                        pointerEvents="box-none"
+                        onLayout={handleTopBarLayout}
+                        style={{
+                            width: '100%',
+                            justifyContent: 'center',
+                        }}>
+                        <SegmentedTopTabBar {...props} backgroundColor="transparent" />
+                        {showEditButton ? (
+                            <View
+                                pointerEvents="box-none"
+                                style={{
+                                    position: 'absolute',
+                                    top: 0,
+                                    right: scale(12),
+                                    bottom: 0,
+                                    justifyContent: 'center',
+                                }}>
+                                <ScalePressable
+                                    accessibilityRole="button"
+                                    accessibilityLabel={
+                                        isEditingFrequent
+                                            ? t('完成', { ns: 'features' })
+                                            : t('調整', { ns: 'features' })
+                                    }
+                                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                                    onPress={handleToggleEditFrequent}>
+                                    <EditButtonSurface
+                                        style={[
+                                            {
+                                                width: SEGMENTED_TAB_CONTROL_HEIGHT,
+                                                height: SEGMENTED_TAB_CONTROL_HEIGHT,
+                                                borderRadius: scale(999),
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                overflow: 'hidden',
+                                            },
+                                            isEditingFrequent
+                                                ? { backgroundColor: themeColor }
+                                                : !isLiquidGlassSupported && [
+                                                    { backgroundColor: white },
+                                                    isLight && viewShadow,
+                                                ],
+                                        ]}>
+                                        {isEditingFrequent ? (
+                                            <Check
+                                                size={scale(17)}
+                                                color={trueWhite}
+                                                weight="bold"
+                                            />
+                                        ) : (
+                                            <SlidersHorizontal
+                                                size={scale(17)}
+                                                color={black.second}
+                                                weight="duotone"
+                                            />
+                                        )}
+                                    </EditButtonSurface>
+                                </ScalePressable>
+                            </View>
+                        ) : null}
+                    </View>
+                </View>
+            );
+        },
+        [
+            black.second,
+            handleToggleEditFrequent,
+            handleTopBarLayout,
+            insets.top,
+            isEditingFrequent,
+            isLight,
+            t,
+            themeColor,
+            trueWhite,
+            viewShadow,
+            white,
+        ],
+    );
 
     return (
-        <SafeAreaView
-            style={{ backgroundColor: bg_color, flex: 1 }}
-            edges={{ top: true }}>
-            <Tab.Navigator
-                screenOptions={{
-                    tabBarLabelStyle: {
-                        fontSize: TAB_LABEL_FONT_SIZE,
-                        fontWeight: 'bold',
-                    },
-                    tabBarStyle: {
-                        backgroundColor: bg_color,
-                        height: TAB_BAR_HEIGHT,
-                        overflow: 'hidden',
-                        // 寬屏時兩個 Tab 不再被拉到左右兩端，手機寬度小於此值不受影響
-                        width: '100%',
-                        maxWidth: TOP_TAB_STRIP_MAX_WIDTH,
-                        alignSelf: 'center',
-                    },
-                    tabBarItemStyle: {
-                        minHeight: TAB_BAR_HEIGHT,
-                        paddingVertical: 0,
-                    },
-                    tabBarContentContainerStyle: {
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                    },
-                    tabBarBounces: false,
-                    tabBarActiveTintColor: themeColor,
-                    tabBarInactiveTintColor: black.third,
-                    tabBarPressColor: bg_color,
-                    tabBarIndicatorStyle: {
-                        backgroundColor: themeColor,
-                        width: TAB_INDICATOR_WIDTH,
-                        marginHorizontal: 'auto',
-                    },
-                    lazy: true,
-                }}
-                initialRouteName="FeatureList">
-                <Tab.Screen
-                    name="FeatureList"
-                    component={FeatureListPage}
-                    options={{ title: t('服務') }}
-                    listeners={() => ({
-                        tabPress: () => trigger(),
-                    })}
-                />
-                <Tab.Screen
-                    name="WikiHome"
-                    component={WikiHome}
-                    options={{ title: t('百科') }}
-                    listeners={() => ({
-                        tabPress: () => trigger(),
-                    })}
-                />
-            </Tab.Navigator>
-        </SafeAreaView>
+        <View style={{ flex: 1, backgroundColor: featuresScreen.bg_color }}>
+            <FeaturesChromeProvider
+                topChromeHeight={topChromeHeight}
+                isEditingFrequent={isEditingFrequent}
+                setIsEditingFrequent={setIsEditingFrequent}>
+                <Tab.Navigator
+                    tabBar={renderTopTabBar}
+                    screenOptions={{
+                        lazy: true,
+                    }}
+                    initialRouteName="FeatureList">
+                    <Tab.Screen
+                        name="FeatureList"
+                        component={FeatureListPage}
+                        options={{ title: t('服務') }}
+                    />
+                    <Tab.Screen
+                        name="WikiHome"
+                        component={WikiHome}
+                        options={{ title: t('百科') }}
+                    />
+                </Tab.Navigator>
+            </FeaturesChromeProvider>
+        </View>
     );
 }

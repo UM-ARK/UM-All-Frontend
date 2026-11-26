@@ -1,6 +1,6 @@
 import React from 'react';
 import { View } from 'react-native';
-import Ionicons from "@react-native-vector-icons/ionicons";
+import PhosphorFeatureIcon from '../../info/home/search/components/PhosphorFeatureIcon';
 import { scale, verticalScale } from 'react-native-size-matters';
 import {
     GlassView,
@@ -25,7 +25,8 @@ import { useCoursePlan } from '../context/CoursePlanContext';
  */
 const PlanCapsule = ({ bottom, onPress }) => {
     const { theme } = useTheme();
-    const { themeColor, black, white, unread } = theme;
+    const { black, white, unread, viewShadow, floatingShadow } = theme;
+    const borderRadius = scale(20);
 
     const { planList, conflictCount } = useCoursePlan();
 
@@ -41,6 +42,7 @@ const PlanCapsule = ({ bottom, onPress }) => {
                 alignSelf: 'center',
             }}>
             <TouchableScale
+                style={isLiquidGlassSupported ? { borderRadius, ...viewShadow } : undefined}
                 onPress={() => {
                     trigger();
                     onPress?.();
@@ -52,28 +54,20 @@ const PlanCapsule = ({ bottom, onPress }) => {
                         alignItems: 'center',
                         paddingHorizontal: scale(14),
                         paddingVertical: verticalScale(7),
-                        borderRadius: scale(20),
+                        borderRadius,
                         overflow: 'hidden',
                         backgroundColor: isLiquidGlassSupported ? null : white,
-                        ...(isLiquidGlassSupported
-                            ? {}
-                            : {
-                                shadowColor: black.main,
-                                shadowOffset: { width: 0, height: 2 },
-                                shadowOpacity: 0.1,
-                                shadowRadius: 4,
-                                elevation: 3,
-                            }),
+                        ...(isLiquidGlassSupported ? {} : floatingShadow),
                     }}>
-                    <Ionicons
-                        name="calendar-outline"
+                    <PhosphorFeatureIcon
+                        name="calendar"
                         size={scale(15)}
-                        color={themeColor}
+                        color={black.third}
                     />
                     <Text
                         style={{
                             ...uiStyle.defaultText,
-                            color: themeColor,
+                            color: black.third,
                             fontWeight: 'bold',
                             fontSize: scale(12),
                             marginLeft: scale(5),

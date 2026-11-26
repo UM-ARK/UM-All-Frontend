@@ -1,5 +1,5 @@
-import React, { useContext } from 'react';
-import { Dimensions, Pressable } from 'react-native';
+import React, { useContext, useLayoutEffect, useMemo } from 'react';
+import { Pressable } from 'react-native';
 import { GestureDetector, Gesture } from 'react-native-gesture-handler';
 import Animated, {
     useSharedValue,
@@ -13,8 +13,6 @@ import Ionicons from "@react-native-vector-icons/ionicons";
 import { scale, verticalScale } from 'react-native-size-matters';
 import { GlassView, isLiquidGlassSupported } from '../utils/glassEffect';
 
-const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
-
 /**
  * 懸浮可拖動回頂按鈕組件
  * 功能：顯示/隱藏控制、回頂功能、拖動功能、吸附功能
@@ -22,13 +20,15 @@ const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
  *
  * @param {Object} props - 組件屬性
  * @param {boolean} [props.visible=true] - 控制組件顯示/隱藏
+ * @param {{ width: number, height: number }} props.viewport - 按鈕所在分頁的實際尺寸
+ * @param {number} [props.topInset=0] - 分頁頂部浮層佔用的高度
  * @param {Function} [props.onScrollToTop] - 回頂後的回調函數
  * @param {Object} props.virtualizedListRef - 虛擬列表的 ref，用於調用 scrollToOffset 方法
  * @param {number} [props.initialSnapPointIndex=5] - 初始吸附點索引，默認為右下位置
  *                                                 0: 左上, 1: 左中, 2: 左下, 3: 右上, 4: 右中, 5: 右下
  * @param {Object} [props.style] - 附加在按鈕容器上的樣式，例如層級
  */
-const ScrollToTopButton = ({ visible = true, onScrollToTop, virtualizedListRef, initialSnapPointIndex = 5, style }) => {
+const ScrollToTopButton = ({ viewport, topInset = 0, visible = true, onScrollToTop, virtualizedListRef, initialSnapPointIndex = 5, style }) => {
     // 獲取主題上下文
     const { theme } = useContext(ThemeContext);
 
@@ -36,22 +36,25 @@ const ScrollToTopButton = ({ visible = true, onScrollToTop, virtualizedListRef, 
     const buttonSize = scale(50);
     const buttonRadius = buttonSize / 2;
 
-    // 定義 6 個吸附點坐標（屏幕絕對坐標）
-    const snapPoints = [
-        // 左上
-        { x: scale(20) + buttonRadius, y: verticalScale(80) + buttonRadius },
-        // 左中
-        { x: scale(20) + buttonRadius, y: screenHeight / 2 },
-        // 左下 - 調整位置，避免被底部導航欄遮擋
-        { x: scale(20) + buttonRadius, y: screenHeight - verticalScale(160) - buttonRadius },
+    // 透明頁頭移出排版後，將原本的吸附位置換算為分頁內坐標。
+    const { width, height } = viewport;
+    const snapPoints = useMemo(() => {
+        const left = Math.min(scale(20) + buttonRadius, width / 2);
+        const right = width - left;
+        const bottomMargin = Math.max(scale(20), verticalScale(160) - topInset);
+        const bottom = Math.max(buttonRadius, height - bottomMargin - buttonRadius);
+        const top = Math.min(topInset + verticalScale(80) + buttonRadius, bottom);
+        const middle = Math.min(Math.max(topInset + height / 2, top), bottom);
 
-        // 右上
-        { x: screenWidth - scale(20) - buttonRadius, y: verticalScale(80) + buttonRadius },
-        // 右中 - 調整為真正的屏幕中間位置
-        { x: screenWidth - scale(20) - buttonRadius, y: screenHeight / 2 },
-        // 右下 - 調整位置，避免被底部導航欄遮擋
-        { x: screenWidth - scale(20) - buttonRadius, y: screenHeight - verticalScale(160) - buttonRadius },
-    ];
+        return [
+            { x: left, y: top },
+            { x: left, y: middle },
+            { x: left, y: bottom },
+            { x: right, y: top },
+            { x: right, y: middle },
+            { x: right, y: bottom },
+        ];
+    }, [buttonRadius, height, topInset, width]);
 
     // 根據傳入的索引設置初始位置，默認為右下位置
     const initialPosition = snapPoints[initialSnapPointIndex];
@@ -61,9 +64,16 @@ const ScrollToTopButton = ({ visible = true, onScrollToTop, virtualizedListRef, 
     // 按鈕當前位置（左上角），必須用 shared value 供 UI thread 手勢讀寫
     const translateX = useSharedValue(initialLeft);
     const translateY = useSharedValue(initialTop);
+    const snapPointIndex = useSharedValue(initialSnapPointIndex);
     // 每次手勢開始時鎖定的基準位置
     const startX = useSharedValue(initialLeft);
     const startY = useSharedValue(initialTop);
+
+    useLayoutEffect(() => {
+        const { x, y } = snapPoints[snapPointIndex.get()];
+        translateX.set(x - buttonRadius);
+        translateY.set(y - buttonRadius);
+    }, [buttonRadius, snapPointIndex, snapPoints, translateX, translateY]);
 
     // 回頂功能
     const handleScrollToTop = () => {
@@ -111,12 +121,13 @@ const ScrollToTopButton = ({ visible = true, onScrollToTop, virtualizedListRef, 
                 !isFinite(currentAbsoluteX) ||
                 !isFinite(currentAbsoluteY)
             ) {
+                snapPointIndex.value = initialSnapPointIndex;
                 translateX.value = withSpring(initialLeft, springConfig);
                 translateY.value = withSpring(initialTop, springConfig);
                 return;
             }
 
-            let nearestPoint = snapPoints[0];
+            let nearestIndex = 0;
             let minDistance = Infinity;
 
             for (let i = 0; i < snapPoints.length; i++) {
@@ -127,12 +138,13 @@ const ScrollToTopButton = ({ visible = true, onScrollToTop, virtualizedListRef, 
                 );
                 if (distance < minDistance) {
                     minDistance = distance;
-                    nearestPoint = point;
+                    nearestIndex = i;
                 }
             }
 
-            const offsetX = nearestPoint.x - buttonRadius;
-            const offsetY = nearestPoint.y - buttonRadius;
+            snapPointIndex.value = nearestIndex;
+            const offsetX = snapPoints[nearestIndex].x - buttonRadius;
+            const offsetY = snapPoints[nearestIndex].y - buttonRadius;
 
             translateX.value = withSpring(offsetX, springConfig);
             translateY.value = withSpring(offsetY, springConfig);
@@ -166,7 +178,8 @@ const ScrollToTopButton = ({ visible = true, onScrollToTop, virtualizedListRef, 
                             width: buttonSize,
                             height: buttonSize,
                             justifyContent: 'center',
-                            alignItems: 'center'
+                            alignItems: 'center',
+                            ...(isLiquidGlassSupported ? {} : theme.floatingShadow),
                         }}
                     >
                         <Ionicons name="arrow-up" size={scale(24)} color={theme.themeColor} />

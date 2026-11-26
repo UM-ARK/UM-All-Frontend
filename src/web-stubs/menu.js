@@ -4,6 +4,7 @@
 import React, { useCallback, useState } from 'react';
 import { Modal, Pressable, StyleSheet, View } from 'react-native';
 import Text from '../components/AppText';
+import { themes } from '../components/ThemeContext';
 
 const flattenActions = actions =>
     (actions || []).flatMap(action =>
@@ -102,8 +103,7 @@ const styles = StyleSheet.create({
         paddingVertical: 6,
         borderRadius: 10,
         backgroundColor: '#fff',
-        // RN 0.86 起 shadow* 已廢棄，web 端直接用 CSS 語法的 boxShadow
-        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.18)',
+        ...themes.light.floatingShadow,
     },
     item: {
         paddingHorizontal: 16,

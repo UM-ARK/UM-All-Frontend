@@ -1,7 +1,10 @@
 import React, { memo, useCallback, useContext, useEffect, useMemo, useRef, useState, } from 'react';
-import { View, RefreshControl, TouchableOpacity, Alert, SectionList, Dimensions, FlatList, Platform, } from 'react-native';
+import { View, RefreshControl, TouchableOpacity, Alert, SectionList, Dimensions, FlatList, Platform, Animated, StyleSheet, } from 'react-native';
+import { BlurView } from 'expo-blur';
 
 import Text from '../../../components/AppText';
+import TopScrollEdgeBackdrop from '../../../components/TopScrollEdgeBackdrop';
+import { SEARCH_FIELD_MIN_HEIGHT } from '../../../components/searchFieldStyles';
 import { uiStyle, ThemeContext, } from '../../../components/ThemeContext';
 import { BASE_URI, BASE_HOST, GET, USUAL_Q } from '../../../utils/pathMap';
 import { clubTagList, clubTagMap } from '../../../utils/clubMap';
@@ -95,7 +98,7 @@ const buildSections = (clubDataList) => {
     return sections;
 };
 
-function ClubPage() {
+function ClubPage({ topChromeHeight }) {
     const { theme } = useContext(ThemeContext);
     const { themeColor, black, white } = theme;
     const insets = useSafeAreaInsets();
@@ -105,7 +108,12 @@ function ClubPage() {
     const [allClubs, setAllClubs] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [isLoading, setIsLoading] = useState(true);
+    const [isRefreshing, setIsRefreshing] = useState(false);
     const [isOtherViewVisible, setIsOtherViewVisible] = useState(true);
+    const [searchHeaderHeight, setSearchHeaderHeight] = useState(SEARCH_FIELD_MIN_HEIGHT + scale(16));
+    const [scrollY] = useState(() => new Animated.Value(0));
+    const headerHeight = topChromeHeight + searchHeaderHeight;
+    const nativeTopInset = Platform.OS === 'ios' ? headerHeight : 0;
     const sectionListRef = useRef(null);
     const firstSectionHeaderHeightRef = useRef(0);
     const clubRowHeightRef = useRef(0);
@@ -125,9 +133,13 @@ function ClubPage() {
         setIsOtherViewVisible(true);
     }, []);
 
+    const handleScroll = useCallback(event => {
+        scrollY.setValue(event.nativeEvent.contentOffset.y + nativeTopInset);
+    }, [nativeTopInset, scrollY]);
+
     const scrollToSection = useCallback((sectionIndex) => {
         if (sectionIndex === 0) {
-            sectionListRef.current?.getScrollResponder()?.scrollTo({ y: 0, animated: true });
+            sectionListRef.current?.getScrollResponder()?.scrollTo({ y: -nativeTopInset, animated: true });
             return;
         }
 
@@ -147,14 +159,15 @@ function ClubPage() {
             ), 0);
 
         sectionListRef.current?.getScrollResponder()?.scrollTo({
-            y: offset,
+            y: offset - nativeTopInset,
             animated: true,
         });
-    }, [sections]);
+    }, [nativeTopInset, sections]);
 
-    const getData = useCallback(async () => {
+    const getData = useCallback(async ({ refreshing = false } = {}) => {
         handleScrollStart();
         setIsLoading(true);
+        setIsRefreshing(refreshing);
         const URL = BASE_URI + GET.CLUB_INFO_ALL;
         try {
             await axios.get(URL).then(res => {
@@ -165,18 +178,18 @@ function ClubPage() {
                         itm.logo_url = BASE_HOST + itm.logo_url;
                     });
                     setAllClubs(clubDataList);
-                    setIsLoading(false);
-                    handleScrollEnd();
                 } else {
                     Alert.alert('Warning:', String(json.message ?? ''));
                 }
             });
         } catch (error) {
-            if (error.code == 'ERR_NETWORK' || error.code == 'ECONNABORTED') {
-                setIsLoading(false);
-            } else {
+            if (error.code !== 'ERR_NETWORK' && error.code !== 'ECONNABORTED') {
                 Alert.alert('組織頁，未知錯誤，請聯繫開發者！\n也可能是國內網絡屏蔽所導致！');
             }
+        } finally {
+            setIsLoading(false);
+            setIsRefreshing(false);
+            handleScrollEnd();
         }
     }, [handleScrollStart, handleScrollEnd]);
 
@@ -298,19 +311,6 @@ function ClubPage() {
 
     return (
         <View style={{ flex: 1, backgroundColor: theme.bg_color }}>
-            <ClubSearchBar
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-                loading={isLoading}
-                onFocus={handleSearchFocus}
-                onCancel={() => setSearchQuery('')}
-                containerStyle={{
-                    backgroundColor: theme.bg_color,
-                    borderTopWidth: 0,
-                    borderBottomWidth: 0,
-                }}
-            />
-
             {sections.length > 0 && isOtherViewVisible && !isLoading ? (
                 <View style={{
                     position: 'absolute',
@@ -361,7 +361,11 @@ function ClubPage() {
             <SectionList
                 ref={sectionListRef}
                 style={{ flex: 1, width: '100%' }}
-                contentInsetAdjustmentBehavior="automatic"
+                contentInsetAdjustmentBehavior="never"
+                // ScrollView 依 contentInset 計算置頂分類位置。Android 另用 padding 預留頂部空間。
+                contentInset={{ top: headerHeight }}
+                contentOffset={{ x: 0, y: -nativeTopInset }}
+                contentContainerStyle={{ paddingTop: headerHeight - nativeTopInset }}
                 sections={sections}
                 keyExtractor={(item, index) => {
                     const firstId = item[0]?._id;
@@ -369,6 +373,9 @@ function ClubPage() {
                 }}
                 renderSectionHeader={({ section }) => {
                     const isFirstSection = section.title === sections[0]?.title;
+                    const blurTint = theme.isLight
+                        ? 'systemUltraThinMaterialLight'
+                        : 'systemUltraThinMaterialDark';
                     return (
                         <View
                             onLayout={({ nativeEvent }) => {
@@ -377,34 +384,47 @@ function ClubPage() {
                                 }
                             }}
                             style={{
-                                flexDirection: 'row',
-                                alignItems: 'center',
+                                overflow: 'hidden',
                                 paddingHorizontal: CLUB_GRID_HORIZONTAL_PADDING,
                                 paddingTop: isFirstSection ? scale(6) : scale(18),
                                 paddingBottom: scale(8),
-                                backgroundColor: theme.bg_color,
                             }}>
+                            {/* 與頂部 TopScrollEdgeBackdrop 對齊的 sticky 毛玻璃，避免實色標題切斷透光層 */}
+                            <BlurView
+                                intensity={42}
+                                tint={blurTint}
+                                style={[
+                                    StyleSheet.absoluteFill,
+                                    { backgroundColor: theme.glassBg },
+                                ]}
+                            />
                             <View
                                 style={{
-                                    width: scale(3),
-                                    height: verticalScale(15),
-                                    borderRadius: scale(2),
-                                    backgroundColor: theme.themeColor,
-                                    marginRight: scale(10),
-                                }}
-                            />
-                            <Text
-                                style={{
-                                    ...uiStyle.defaultText,
-                                    flex: 1,
-                                    color: black.second,
-                                    fontSize: verticalScale(16),
-                                    fontWeight: '700',
-                                    letterSpacing: -0.25,
-                                }}
-                                numberOfLines={1}>
-                                {clubTagMap(section.title) || section.title}
-                            </Text>
+                                    flexDirection: 'row',
+                                    alignItems: 'center',
+                                }}>
+                                <View
+                                    style={{
+                                        width: scale(3),
+                                        height: verticalScale(15),
+                                        borderRadius: scale(2),
+                                        backgroundColor: theme.themeColor,
+                                        marginRight: scale(10),
+                                    }}
+                                />
+                                <Text
+                                    style={{
+                                        ...uiStyle.defaultText,
+                                        flex: 1,
+                                        color: black.second,
+                                        fontSize: verticalScale(16),
+                                        fontWeight: '700',
+                                        letterSpacing: -0.25,
+                                    }}
+                                    numberOfLines={1}>
+                                    {clubTagMap(section.title) || section.title}
+                                </Text>
+                            </View>
                         </View>
                     );
                 }}
@@ -430,13 +450,17 @@ function ClubPage() {
                     <RefreshControl
                         colors={[themeColor]}
                         tintColor={themeColor}
-                        refreshing={isLoading}
+                        refreshing={isRefreshing}
+                        progressViewOffset={headerHeight - nativeTopInset}
                         onRefresh={() => {
-                            getData();
-                            handleScrollStart();
+                            if (!isLoading) {
+                                getData({ refreshing: true });
+                            }
                         }}
                     />
                 }
+                onScroll={handleScroll}
+                scrollEventThrottle={16}
                 onScrollBeginDrag={handleScrollStart}
                 onMomentumScrollEnd={handleScrollEnd}
                 ListEmptyComponent={isLoading ? renderClubSkeleton() : null}
@@ -449,6 +473,18 @@ function ClubPage() {
                 // Android + Fabric：removeClippedSubviews 與 sticky 區段標題會導致掛載索引錯亂而閃退（addViewAt / IndexOutOfBounds）
                 removeClippedSubviews={Platform.OS === 'ios'}
             />
+            <TopScrollEdgeBackdrop headerHeight={headerHeight} scrollY={scrollY} />
+            <View
+                onLayout={event => setSearchHeaderHeight(event.nativeEvent.layout.height)}
+                style={{ position: 'absolute', top: topChromeHeight, left: 0, right: 0, zIndex: 2 }}>
+                <ClubSearchBar
+                    value={searchQuery}
+                    onChangeText={setSearchQuery}
+                    loading={isLoading}
+                    onFocus={handleSearchFocus}
+                    onCancel={() => setSearchQuery('')}
+                />
+            </View>
         </View>
     );
 }

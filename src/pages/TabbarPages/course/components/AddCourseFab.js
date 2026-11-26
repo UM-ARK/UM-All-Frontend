@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import Ionicons from "@react-native-vector-icons/ionicons";
+import { Books } from 'phosphor-react-native/src/icons/Books';
+import PhosphorFeatureIcon from '../../info/home/search/components/PhosphorFeatureIcon';
 import { scale, verticalScale } from 'react-native-size-matters';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import {
@@ -53,7 +54,7 @@ const AddCourseFab = ({
     visible = true,
 }) => {
     const { theme } = useTheme();
-    const { themeColor, black, white } = theme;
+    const { black, white, floatingShadow } = theme;
     // 從隱藏恢復顯示時 remount 玻璃，避免曾被 opacity:0 弄壞後無法自癒
     const [glassKey, setGlassKey] = useState(0);
     const wasVisibleRef = useRef(visible);
@@ -178,16 +179,6 @@ const AddCourseFab = ({
     );
 
     const styles = useMemo(() => {
-        const fallbackShadow = isLiquidGlassSupported
-            ? {}
-            : {
-                shadowColor: black.main,
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.1,
-                shadowRadius: 4,
-                elevation: 3,
-            };
-
         return {
             stack: {
                 position: 'absolute',
@@ -204,10 +195,10 @@ const AddCourseFab = ({
                 borderRadius: FAB_SIZE / 2,
                 overflow: 'hidden',
                 backgroundColor: isLiquidGlassSupported ? null : white,
-                ...fallbackShadow,
+                ...(isLiquidGlassSupported ? {} : floatingShadow),
             },
         };
-    }, [black.main, bottom, white]);
+    }, [bottom, floatingShadow, white]);
 
     return (
         <View
@@ -249,10 +240,11 @@ const AddCourseFab = ({
                             key={`add-${glassKey}`}
                             isInteractive
                             style={styles.pill}>
-                            <Ionicons
-                                name="add"
+                            <PhosphorFeatureIcon
+                                name="plus"
+                                weight="regular"
                                 size={scale(24)}
-                                color={themeColor}
+                                color={black.third}
                             />
                         </GlassView>
                     </TouchableScale>
@@ -270,10 +262,10 @@ const AddCourseFab = ({
                                 key={`search-${glassKey}`}
                                 isInteractive
                                 style={styles.pill}>
-                                <Ionicons
-                                    name="library-outline"
+                                <Books
+                                    weight="duotone"
                                     size={scale(21)}
-                                    color={themeColor}
+                                    color={black.third}
                                 />
                             </GlassView>
                         </TouchableScale>

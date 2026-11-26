@@ -224,11 +224,11 @@ const HarborAccountSettingsPage = ({navigation}) => {
                 }
                 contentContainerStyle={styles.content}
                 showsVerticalScrollIndicator={false}>
-                <SettingSection title={t('個人資料')} icon="person-circle" />
+                <SettingSection title={t('個人資料')} icon="user-circle" />
                 <SettingSectionCard>
                     <SettingItem
                         grouped
-                        icon="person-circle-outline"
+                        icon="user-circle"
                         iconColor={theme.themeColor}
                         title={hasDisplayName ? displayName : accountHandle}
                         subtitle={hasDisplayName ? accountHandle : undefined}
@@ -236,7 +236,7 @@ const HarborAccountSettingsPage = ({navigation}) => {
                     />
                     <SettingItem
                         grouped
-                        icon="create-outline"
+                        icon="pencil-simple"
                         iconColor={theme.themeColor}
                         title={t('編輯個人資料')}
                         onPress={() =>
@@ -245,18 +245,18 @@ const HarborAccountSettingsPage = ({navigation}) => {
                     />
                     <SettingItem
                         grouped
-                        icon="open-outline"
+                        icon="arrow-square-out"
                         iconColor={theme.themeColor}
                         title={t('網頁版個人主頁')}
                         onPress={() => openHarborPath(`/u/${username}/summary`)}
                     />
                 </SettingSectionCard>
 
-                <SettingSection title={t('通知')} icon="notifications" />
+                <SettingSection title={t('通知')} icon="bell" />
                 <SettingSectionCard>
                     <SettingItem
                         grouped
-                        icon="notifications-outline"
+                        icon="bell"
                         iconColor={theme.secondThemeColor}
                         title={t('推送通知')}
                         subtitle={currentPushCopy.title}
@@ -306,7 +306,7 @@ const HarborAccountSettingsPage = ({navigation}) => {
                     {harborDisplayStatus === 'silent' ? (
                         <SettingItem
                             grouped
-                            icon="settings-outline"
+                            icon="gear"
                             iconColor={theme.themeColor}
                             title={t('前往設定')}
                             onPress={() => Linking.openSettings()}
@@ -314,7 +314,7 @@ const HarborAccountSettingsPage = ({navigation}) => {
                     ) : null}
                     <SettingItem
                         grouped
-                        icon="mail-outline"
+                        icon="envelope"
                         iconColor={theme.themeColor}
                         title={t('站內及電郵通知')}
                         onPress={() =>
@@ -326,18 +326,18 @@ const HarborAccountSettingsPage = ({navigation}) => {
                     {currentPushCopy.description}
                 </Text>
 
-                <SettingSection title={t('帳戶連接')} icon="shield-checkmark" />
+                <SettingSection title={t('帳戶連接')} icon="shield" />
                 <SettingSectionCard>
                     <SettingItem
                         grouped
-                        icon="key-outline"
+                        icon="key"
                         iconColor={theme.black.third}
                         title={t('重新授權')}
                         onPress={handleReauthorize}
                     />
                     <SettingItem
                         grouped
-                        icon="unlink-outline"
+                        icon="link-break"
                         iconColor={theme.unread}
                         title={t('解除連接')}
                         onPress={handleDisconnect}

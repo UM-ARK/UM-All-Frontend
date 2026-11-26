@@ -1,6 +1,5 @@
 ---
 description: 寬屏（iPad／Web／桌面）響應式佈局方案 — 斷點、縮放封頂、殼子與內容分離
-globs: "**/*.js"
 alwaysApply: false
 ---
 
@@ -139,8 +138,12 @@ const cardColumns = useMemo(
 
 ## `.web.js` 的用途邊界
 
-只在**平台 API 不同**時用 `.web.js`：路由殼子（`Nav.web.js`、`Tabbar.web.js`）、原生模塊替身（`src/web-stubs/`）。
-頁面與業務組件**不分叉**；寬屏差異一律走 `useWindowSizeClass()` + 殼子分支。
+只在**平台 API 或原生元件不支援 Web**時才用 `.web.js`：
+- 路由殼子（`src/Nav.web.js`、`src/Tabbar.web.js`）
+- 原生模組替身（`src/web-stubs/`）
+- 少數重度依賴純原生元件且無 Web 實作的頁面（如 `src/pages/Features/SettingPage.web.js`，因手機端使用 `@expo/ui/community/menu` 而 Web 改用 `SegmentControl`）
+
+除此之外，頁面與業務元件**不分叉 `.web.js`**；所有寬屏與手機的排版差異一律走 `useWindowSizeClass()` + 殼子分支。
 
 ## 已完成與待推廣
 

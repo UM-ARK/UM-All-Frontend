@@ -110,9 +110,9 @@ const ScheduleTimeRangeInsert = ({onClear, onInsert, emptyRangeMessage}) => {
             style={[
                 styles.container,
                 {
-                    backgroundColor: theme.tonal.primary08,
-                    borderColor: theme.themeColorUltraLight,
+                    backgroundColor: theme.white,
                 },
+                theme.viewShadow,
             ]}>
             <MenuView
                 actions={weekdayActions}
@@ -191,10 +191,14 @@ const ScheduleTimeRangeInsert = ({onClear, onInsert, emptyRangeMessage}) => {
                 style={[
                     styles.insertButton,
                     {
-                        backgroundColor: theme.themeColor,
+                        backgroundColor: theme.tonal.primary15,
                     },
                 ]}>
-                <Text style={[styles.insertText, {color: theme.trueWhite}]}>
+                <Text
+                    style={[
+                        styles.insertText,
+                        {color: theme.accentForeground},
+                    ]}>
                     {t('插入')}
                 </Text>
             </ScalePressable>
@@ -220,11 +224,11 @@ const ScheduleTimeRangeInsert = ({onClear, onInsert, emptyRangeMessage}) => {
 const styles = StyleSheet.create({
     container: {
         alignItems: 'center',
-        borderRadius: scale(8),
-        borderWidth: StyleSheet.hairlineWidth,
+        borderRadius: scale(10),
+        borderCurve: 'continuous',
         flexDirection: 'row',
         marginBottom: verticalScale(8),
-        minHeight: verticalScale(34),
+        minHeight: verticalScale(36),
         paddingHorizontal: scale(8),
         paddingVertical: verticalScale(2),
     },

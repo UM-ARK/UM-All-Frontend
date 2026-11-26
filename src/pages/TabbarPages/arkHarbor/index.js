@@ -10,9 +10,8 @@ import {
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { useIsFocused } from '@react-navigation/native';
 import PagerView from 'react-native-pager-view';
-import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
-import { moderateScale, scale, verticalScale } from 'react-native-size-matters';
-import { SafeAreaView } from 'react-native-screens/experimental';
+import { scale, verticalScale } from 'react-native-size-matters';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import Reanimated, {
     Easing,
@@ -26,6 +25,10 @@ import { scheduleOnRN } from 'react-native-worklets';
 
 import Text from '../../../components/AppText';
 import ScalePressable from '../../../components/ScalePressable';
+import SegmentedTabControl from '../../../components/SegmentedTabControl';
+import TopScrollEdgeBackdrop, {
+    SCROLL_EDGE_FADE_HEIGHT,
+} from '../../../components/TopScrollEdgeBackdrop';
 import { uiStyle, useTheme } from '../../../components/ThemeContext';
 import { useHarborSession } from '../../../contexts/HarborSessionContext';
 import { logToFirebase } from '../../../utils/firebaseAnalytics';
@@ -36,10 +39,16 @@ import {
 } from '../../../utils/harbor/harborApi';
 import { trigger } from '../../../utils/trigger';
 import HarborLoginConsentModal from '../my/components/HarborLoginConsentModal';
+import PhosphorFeatureIcon from '../info/home/search/components/PhosphorFeatureIcon';
 import HarborDrawerContent from './components/HarborDrawerContent';
 import { harborTopicRowInsets } from './components/HarborTopicCard';
 import HarborTopicList from './components/HarborTopicList';
 import HarborTopicDetail from './HarborTopicDetail';
+import searchFieldStyles, {
+    SEARCH_FIELD_ICON_SIZE,
+    SEARCH_FIELD_MAX_FONT_SIZE_MULTIPLIER,
+    SEARCH_FIELD_MIN_HEIGHT,
+} from '../../../components/searchFieldStyles';
 import { nextHarborSearchBarProgress } from './harborSearchBarProgress';
 
 const VIEW_CONFIG = {
@@ -47,95 +56,14 @@ const VIEW_CONFIG = {
     top: { label: '熱門', analytics: 'top' },
     unread: { label: '未讀', analytics: 'unread' },
 };
-// 對齊資訊頁 Top Tab（~30）。往下瀏覽時搜尋列收進工具列；
+// 對齊服務頁頂部液態玻璃膠囊高度。往下瀏覽時搜尋列收進工具列；
 // 往回滑時用較長距離展開，不必回到列表頂部。
-const STICKY_TOOLBAR_HEIGHT = verticalScale(36);
-const SEARCH_BAR_ROW_HEIGHT = verticalScale(38);
+const STICKY_TOOLBAR_HEIGHT = verticalScale(38);
+const SEARCH_BAR_ROW_HEIGHT = SEARCH_FIELD_MIN_HEIGHT + verticalScale(8);
 const SEARCH_BAR_SETTLE_MS = 180;
 const SEARCH_BAR_EASE_OUT = Easing.bezier(0.23, 1, 0.32, 1);
-const HARBOR_TAB_INDICATOR_WIDTH = moderateScale(25, 0.1);
 const Drawer = createDrawerNavigator();
 const AnimatedPagerView = Animated.createAnimatedComponent(PagerView);
-
-const HarborFeedTabs = ({ options, selectedIndex, position, onChange }) => {
-    const { theme } = useTheme();
-    const [indicatorOffsets, setIndicatorOffsets] = useState({});
-    const hasMeasuredAllOptions = options.every(
-        option => indicatorOffsets[option.key] !== undefined,
-    );
-    const indicatorInputRange =
-        options.length > 1 ? options.map((option, index) => index) : [0, 1];
-    const indicatorOutputRange =
-        options.length > 1
-            ? options.map(option => indicatorOffsets[option.key] ?? 0)
-            : [
-                indicatorOffsets[options[0]?.key] ?? 0,
-                indicatorOffsets[options[0]?.key] ?? 0,
-            ];
-    const translateX = position.interpolate({
-        inputRange: indicatorInputRange,
-        outputRange: indicatorOutputRange,
-        extrapolate: 'clamp',
-    });
-
-    const handleOptionLayout = useCallback((key, event) => {
-        const { x, width } = event.nativeEvent.layout;
-        const nextOffset = x + (width - HARBOR_TAB_INDICATOR_WIDTH) / 2;
-        setIndicatorOffsets(current =>
-            current[key] === nextOffset
-                ? current
-                : { ...current, [key]: nextOffset },
-        );
-    }, []);
-
-    return (
-        <View style={styles.feedTabs}>
-            {options.map((option, index) => {
-                const isSelected = selectedIndex === index;
-
-                return (
-                    <ScalePressable
-                        key={option.key}
-                        accessibilityRole="tab"
-                        accessibilityState={{ selected: isSelected }}
-                        onLayout={event => handleOptionLayout(option.key, event)}
-                        onPress={() => {
-                            trigger();
-                            onChange(index);
-                        }}
-                        style={styles.feedTab}>
-                        <Text
-                            numberOfLines={1}
-                            style={[
-                                styles.feedTabLabel,
-                                {
-                                    color: isSelected
-                                        ? theme.themeColor
-                                        : theme.black.third,
-                                },
-                                isSelected && styles.feedTabLabelSelected,
-                            ]}>
-                            {option.label}
-                        </Text>
-                    </ScalePressable>
-                );
-            })}
-            <Animated.View
-                pointerEvents="none"
-                style={[
-                    styles.feedTabIndicator,
-                    hasMeasuredAllOptions
-                        ? styles.feedTabIndicatorVisible
-                        : styles.feedTabIndicatorHidden,
-                    {
-                        backgroundColor: theme.themeColor,
-                        transform: [{ translateX }],
-                    },
-                ]}
-            />
-        </View>
-    );
-};
 
 const HarborStickyToolbar = ({
     segmentOptions,
@@ -152,6 +80,9 @@ const HarborStickyToolbar = ({
     chatUnreadCount,
     chatVisible,
     onToolbarLayout,
+    toolbarHeight,
+    topInset,
+    scrollY,
     searchProgress,
     searchCollapsed,
     backgroundColor,
@@ -183,12 +114,23 @@ const HarborStickyToolbar = ({
     }));
 
     return (
-        <View style={styles.stickyHeader}>
+        <View pointerEvents="box-none" style={styles.stickyHeader}>
+            <TopScrollEdgeBackdrop
+                headerHeight={toolbarHeight}
+                fadeHeight={SCROLL_EDGE_FADE_HEIGHT}
+                scrollY={scrollY}
+                backgroundColor={backgroundColor}
+                zIndex={1}
+            />
             <View
+                pointerEvents="box-none"
                 onLayout={onToolbarLayout}
                 style={[
                     styles.stickyToolbar,
-                    { backgroundColor },
+                    {
+                        paddingTop: topInset,
+                        minHeight: topInset + STICKY_TOOLBAR_HEIGHT,
+                    },
                 ]}>
                 <View style={[styles.toolbarSide, styles.toolbarLeft]}>
                     <ScalePressable
@@ -200,10 +142,11 @@ const HarborStickyToolbar = ({
                             onMenuPress();
                         }}
                         style={styles.toolbarIconButton}>
-                        <MaterialCommunityIcons
-                            name="menu"
+                        <PhosphorFeatureIcon
+                            name="list"
                             size={scale(20)}
-                            color={theme.themeColor}
+                            color={theme.black.second}
+                            weight="regular"
                         />
                     </ScalePressable>
                     {/* 搜尋放左側與選單並排，右側未登入時已有「登入」文字按鈕；
@@ -224,20 +167,25 @@ const HarborStickyToolbar = ({
                                 onSearchPress();
                             }}
                             style={styles.toolbarIconButton}>
-                            <MaterialCommunityIcons
-                                name="magnify"
+                            <PhosphorFeatureIcon
+                                name="search"
                                 size={scale(20)}
-                                color={theme.themeColor}
+                                color={theme.black.second}
+                                weight="regular"
                             />
                         </ScalePressable>
                     </Reanimated.View>
                 </View>
 
-                <HarborFeedTabs
+                <SegmentedTabControl
                     options={segmentOptions}
                     selectedIndex={currentIndex}
                     position={tabPosition}
-                    onChange={onChange}
+                    onChange={index => {
+                        trigger(currentIndex === index ? 'tap' : 'selection');
+                        onChange(index);
+                    }}
+                    compact
                 />
 
                 <View style={[styles.toolbarSide, styles.toolbarRight]}>
@@ -255,16 +203,17 @@ const HarborStickyToolbar = ({
                                     onSessionPress();
                                 }}
                                 style={styles.sessionButton}>
-                                <MaterialCommunityIcons
-                                    name="login"
+                                <PhosphorFeatureIcon
+                                    name="sign-in"
                                     size={scale(14)}
-                                    color={theme.themeColor}
+                                    color={theme.black.second}
+                                    weight="regular"
                                 />
                                 <Text
                                     numberOfLines={1}
                                     style={[
                                         styles.sessionText,
-                                        { color: theme.themeColor },
+                                        { color: theme.black.second },
                                     ]}>
                                     {sessionLabel}
                                 </Text>
@@ -289,10 +238,11 @@ const HarborStickyToolbar = ({
                                     onChatPress();
                                 }}
                                 style={styles.toolbarIconButton}>
-                                <MaterialCommunityIcons
-                                    name="chat-outline"
+                                <PhosphorFeatureIcon
+                                    name="message-circle"
                                     size={scale(19)}
-                                    color={theme.themeColor}
+                                    color={theme.black.second}
+                                    weight="regular"
                                 />
                                 {chatUnreadCount > 0 ? (
                                     <View
@@ -322,10 +272,11 @@ const HarborStickyToolbar = ({
                                 onComposePress();
                             }}
                             style={styles.toolbarIconButton}>
-                            <MaterialCommunityIcons
+                            <PhosphorFeatureIcon
                                 name="plus"
                                 size={scale(20)}
-                                color={theme.themeColor}
+                                color={theme.black.second}
+                                weight="regular"
                             />
                         </ScalePressable>
                     </View>
@@ -340,7 +291,6 @@ const HarborStickyToolbar = ({
                 style={[
                     styles.searchBarRow,
                     isCompact && styles.compactSearchBarRow,
-                    { backgroundColor },
                     searchBarStyle,
                 ]}>
                 <ScalePressable
@@ -351,7 +301,7 @@ const HarborStickyToolbar = ({
                         onSearchPress();
                     }}
                     style={[
-                        styles.searchBar,
+                        searchFieldStyles.field,
                         {
                             backgroundColor: isCompact
                                 ? theme.harborSearch.background
@@ -360,15 +310,17 @@ const HarborStickyToolbar = ({
                             borderWidth: isCompact ? 0 : StyleSheet.hairlineWidth,
                         },
                     ]}>
-                    <MaterialCommunityIcons
-                        name="magnify"
-                        size={scale(16)}
+                    <PhosphorFeatureIcon
+                        name="search"
+                        size={SEARCH_FIELD_ICON_SIZE}
                         color={searchBarForeground}
+                        weight="regular"
                     />
                     <Text
                         numberOfLines={1}
+                        maxFontSizeMultiplier={SEARCH_FIELD_MAX_FONT_SIZE_MULTIPLIER}
                         style={[
-                            styles.searchBarText,
+                            searchFieldStyles.text,
                             { color: searchBarForeground },
                         ]}>
                         {t('搜尋 Harbor')}
@@ -391,6 +343,7 @@ const HarborFeedPane = ({
     onScrollOffset,
     onScrollBeginDrag,
     onScrollSettle,
+    onUnseenChange,
 }) => {
     const source = useMemo(
         () =>
@@ -428,6 +381,7 @@ const HarborFeedPane = ({
                 onScrollEndDrag={handleScrollSettle}
                 onMomentumScrollEnd={handleScrollSettle}
                 isActive={isActive}
+                onUnseenChange={onUnseenChange}
             />
         </View>
     );
@@ -439,6 +393,7 @@ const HarborFeedPane = ({
 const ForumPage = ({ navigation }) => {
     const { theme } = useTheme();
     const { isCompact, isExpanded } = useWindowSizeClass();
+    const insets = useSafeAreaInsets();
     const backgroundColor = isCompact ? theme.harbor_bg_color : theme.bg_color;
     const { t } = useTranslation('harbor');
     const {
@@ -451,6 +406,7 @@ const ForumPage = ({ navigation }) => {
     const pagerRef = useRef(null);
     const pageScrollOffset = useRef(new Animated.Value(0)).current;
     const pageScrollPosition = useRef(new Animated.Value(0)).current;
+    const scrollY = useRef(new Animated.Value(0)).current;
     const searchProgress = useSharedValue(0);
     const scrollOffsetsRef = useRef({});
     const searchProgressByViewRef = useRef({});
@@ -466,7 +422,9 @@ const ForumPage = ({ navigation }) => {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [selectedTopic, setSelectedTopic] = useState(null);
     const [detailPaneWidth, setDetailPaneWidth] = useState(0);
-    const [toolbarHeight, setToolbarHeight] = useState(STICKY_TOOLBAR_HEIGHT);
+    const [toolbarHeight, setToolbarHeight] = useState(
+        insets.top + STICKY_TOOLBAR_HEIGHT,
+    );
     const [capabilities, setCapabilities] = useState(null);
     const [capabilitiesUnavailable, setCapabilitiesUnavailable] = useState(false);
     const [mountedViews, setMountedViews] = useState({
@@ -476,6 +434,10 @@ const ForumPage = ({ navigation }) => {
     });
     const [consentVisible, setConsentVisible] = useState(false);
     const [searchCollapsed, setSearchCollapsed] = useState(false);
+    const [hasUnseenLatest, setHasUnseenLatest] = useState(false);
+    const [hasUnseenPane, setHasUnseenPane] = useState(false);
+    const hasUnreadTopics =
+        status === 'signedIn' && (hasUnseenLatest || hasUnseenPane);
 
     useEffect(() => {
         // 僅在首次聚焦時打點；iOS Native Tabs 會預先掛載，
@@ -552,8 +514,14 @@ const ForumPage = ({ navigation }) => {
             enabledViews.map(view => ({
                 key: view,
                 label: t(VIEW_CONFIG[view].label),
+                badge: view === 'unread' && hasUnreadTopics ? (
+                    <View
+                        pointerEvents="none"
+                        style={[styles.feedTabDot, { backgroundColor: theme.unread }]}
+                    />
+                ) : null,
             })),
-        [enabledViews, t],
+        [enabledViews, hasUnreadTopics, t, theme.unread],
     );
     const tabPosition = useMemo(
         () => Animated.add(pageScrollPosition, pageScrollOffset),
@@ -570,7 +538,9 @@ const ForumPage = ({ navigation }) => {
                         },
                     },
                 ],
-                { useNativeDriver: true },
+                {
+                    useNativeDriver: true,
+                },
             ),
         [pageScrollOffset, pageScrollPosition],
     );
@@ -607,9 +577,10 @@ const ForumPage = ({ navigation }) => {
             const progress = offset <= 0 ? 0 : (stored ?? 1);
             searchProgressByViewRef.current[view] = progress;
             searchProgress.set(progress);
+            scrollY.setValue(Math.max(0, offset));
             setSearchCollapsed(progress > 0.5);
         },
-        [cancelSearchSettle, searchProgress],
+        [cancelSearchSettle, scrollY, searchProgress],
     );
     // 手指放開且列表停下後收到展開或收起，避免停在半截
     const settleSearchBar = useCallback(view => {
@@ -676,6 +647,7 @@ const ForumPage = ({ navigation }) => {
         if (view !== currentViewRef.current) {
             return;
         }
+        scrollY.setValue(Math.max(0, offset));
         searchProgress.set(progress);
         const collapsed = progress > 0.5;
         setSearchCollapsed(current =>
@@ -686,7 +658,7 @@ const ForumPage = ({ navigation }) => {
             return;
         }
         scheduleSearchSettle(view);
-    }, [cancelSearchSettle, scheduleSearchSettle, searchProgress]);
+    }, [cancelSearchSettle, scheduleSearchSettle, scrollY, searchProgress]);
     const handleSearchScrollEnd = useCallback(view => {
         if (view !== currentViewRef.current) {
             return;
@@ -864,9 +836,7 @@ const ForumPage = ({ navigation }) => {
         navigation;
 
     return (
-        <SafeAreaView
-            style={[styles.page, { backgroundColor }]}
-            edges={{ top: true }}>
+        <View style={[styles.page, { backgroundColor }]}>
             <View
                 style={[
                     styles.contentClip,
@@ -908,6 +878,13 @@ const ForumPage = ({ navigation }) => {
                                     onScrollOffset={handleScrollOffset}
                                     onScrollBeginDrag={handleSearchScrollBegin}
                                     onScrollSettle={handleSearchScrollEnd}
+                                    onUnseenChange={
+                                        view === 'latest'
+                                            ? setHasUnseenLatest
+                                            : view === 'unread'
+                                                ? setHasUnseenPane
+                                                : undefined
+                                    }
                                 />
                             ) : null}
                         </View>
@@ -938,6 +915,9 @@ const ForumPage = ({ navigation }) => {
                         chatUnreadCount={chatUnreadCount}
                         chatVisible={capabilities?.chat !== false}
                         onToolbarLayout={handleToolbarLayout}
+                        toolbarHeight={toolbarHeight}
+                        topInset={insets.top}
+                        scrollY={scrollY}
                         searchProgress={searchProgress}
                         searchCollapsed={searchCollapsed}
                         backgroundColor={backgroundColor}
@@ -946,7 +926,7 @@ const ForumPage = ({ navigation }) => {
                 </View>
                 {isExpanded ? (
                     <View
-                        style={styles.detailPane}
+                        style={[styles.detailPane, { paddingTop: insets.top }]}
                         onLayout={event =>
                             setDetailPaneWidth(event.nativeEvent.layout.width)
                         }>
@@ -971,7 +951,7 @@ const ForumPage = ({ navigation }) => {
                 onCancel={() => setConsentVisible(false)}
                 onConfirm={handleLoginConfirm}
             />
-        </SafeAreaView>
+        </View>
     );
 };
 
@@ -1074,39 +1054,10 @@ const styles = StyleSheet.create({
         height: scale(6),
         borderRadius: scale(3),
     },
-    feedTabs: {
-        height: verticalScale(22),
-        flexDirection: 'row',
-        flexShrink: 0,
-        marginHorizontal: scale(2),
-        position: 'relative',
-    },
-    feedTab: {
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingHorizontal: scale(8),
-    },
-    feedTabLabel: {
-        ...uiStyle.defaultText,
-        fontSize: scale(11),
-        fontWeight: '400',
-    },
-    feedTabLabelSelected: {
-        fontWeight: '600',
-    },
-    feedTabIndicator: {
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        width: HARBOR_TAB_INDICATOR_WIDTH,
-        height: verticalScale(2),
-        borderRadius: scale(1),
-    },
-    feedTabIndicatorVisible: {
-        opacity: 1,
-    },
-    feedTabIndicatorHidden: {
-        opacity: 0,
+    feedTabDot: {
+        width: scale(5),
+        height: scale(5),
+        borderRadius: scale(2.5),
     },
     searchBarRow: {
         height: SEARCH_BAR_ROW_HEIGHT,
@@ -1115,19 +1066,6 @@ const styles = StyleSheet.create({
     },
     compactSearchBarRow: {
         paddingHorizontal: harborTopicRowInsets.paddingHorizontal,
-    },
-    searchBar: {
-        minHeight: verticalScale(30),
-        borderRadius: scale(9),
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: scale(10),
-    },
-    searchBarText: {
-        ...uiStyle.defaultText,
-        flex: 1,
-        fontSize: scale(12),
-        marginLeft: scale(6),
     },
     sharedHeader: {
         position: 'absolute',

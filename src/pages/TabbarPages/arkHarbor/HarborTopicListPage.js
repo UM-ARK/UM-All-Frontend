@@ -3,7 +3,6 @@ import { Platform, Pressable, StyleSheet, View } from 'react-native';
 
 import { isLiquidGlassSupported } from '../../../utils/glassEffect';
 import { useHeaderHeight } from '@react-navigation/elements';
-import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import { scale, verticalScale } from 'react-native-size-matters';
 import { useTranslation } from 'react-i18next';
 
@@ -11,6 +10,7 @@ import { useTheme } from '../../../components/ThemeContext';
 import { openHarborComposer } from '../../../utils/harbor/harborNavigation';
 import { trigger } from '../../../utils/trigger';
 import { useWindowSizeClass } from '../../../utils/windowSizeClass';
+import PhosphorFeatureIcon from '../info/home/search/components/PhosphorFeatureIcon';
 import HarborTopicList from './components/HarborTopicList';
 
 const HarborComposeButton = ({
@@ -26,10 +26,11 @@ const HarborComposeButton = ({
             onPress();
         }}
         style={styles.headerComposeButton}>
-        <MaterialCommunityIcons
+        <PhosphorFeatureIcon
             name="plus"
             size={scale(22)}
             color={themeColor}
+            weight="regular"
         />
     </Pressable>
 );

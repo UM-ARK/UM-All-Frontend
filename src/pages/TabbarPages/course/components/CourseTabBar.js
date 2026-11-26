@@ -1,17 +1,13 @@
-import React, { useMemo } from 'react';
-import { View } from 'react-native';
-import { MaterialTopTabBar } from '@react-navigation/material-top-tabs';
+import React from 'react';
+import { StyleSheet, View } from 'react-native';
+import { verticalScale } from 'react-native-size-matters';
 
+import SegmentedTopTabBar from '../../../../components/SegmentedTopTabBar';
 import { useTheme } from '../../../../components/ThemeContext';
-import { TOP_TAB_STRIP_MAX_WIDTH } from '../../../../utils/windowSizeClass';
-import { COURSE_TOP_BAR_HEIGHT } from '../constants';
 import CourseMoreMenu from './CourseMoreMenu';
 
 /**
- * 選課頁頂欄：段落 Tab（搵課／課表）+ 右側 ⋯。
- *
- * 與「資訊」頁一樣走正常文檔流 + 實色底，保證可讀性；
- * 不疊在內容上（全透明會讓 Tab／搜尋列與課表卡片搶在一起）。
+ * 選課頁頂欄：置中的分段切換器（搵課／課表）與右側 ⋯ 選單。
  */
 const CourseTabBar = ({
     programmeLevel,
@@ -20,54 +16,71 @@ const CourseTabBar = ({
     onOpenSharePoint,
     canClear,
     onClearPress,
+    topInset = 0,
+    floating = false,
+    onBarLayout,
     ...tabBarProps
 }) => {
     const { theme } = useTheme();
     const { bg_color } = theme;
-
-    const styles = useMemo(
-        () => ({
-            wrapper: {
-                height: COURSE_TOP_BAR_HEIGHT,
-                backgroundColor: bg_color,
-            },
-            row: {
-                flex: 1,
-                flexDirection: 'row',
-                alignItems: 'center',
-            },
-            tabs: {
-                flex: 1,
-            },
-            tabStrip: {
-                width: '100%',
-                // 寬屏時兩個 Tab 不再被拉到左右兩端，手機寬度小於此值不受影響
-                maxWidth: TOP_TAB_STRIP_MAX_WIDTH,
-                alignSelf: 'center',
-            },
-        }),
-        [bg_color],
-    );
+    const isFloating = floating || topInset > 0;
 
     return (
-        <View style={styles.wrapper}>
-            <View style={styles.row}>
-                <View style={styles.tabs}>
-                    <View style={styles.tabStrip}>
-                        <MaterialTopTabBar {...tabBarProps} />
-                    </View>
-                </View>
-                <CourseMoreMenu
-                    programmeLevel={programmeLevel}
-                    catalogMetadata={catalogMetadata}
-                    onManualUpdate={onManualUpdate}
-                    onOpenSharePoint={onOpenSharePoint}
-                    canClear={canClear}
-                    onClearPress={onClearPress}
+        <View
+            pointerEvents="box-none"
+            style={[
+                styles.wrapper,
+                {
+                    paddingTop: topInset,
+                    backgroundColor: isFloating ? 'transparent' : bg_color,
+                },
+                isFloating && styles.floatingWrapper,
+            ]}>
+            <View
+                pointerEvents="box-none"
+                onLayout={onBarLayout}
+                style={styles.barRow}>
+                <SegmentedTopTabBar
+                    {...tabBarProps}
+                    backgroundColor={isFloating ? 'transparent' : bg_color}
                 />
+                <View pointerEvents="box-none" style={styles.menu}>
+                    <CourseMoreMenu
+                        programmeLevel={programmeLevel}
+                        catalogMetadata={catalogMetadata}
+                        onManualUpdate={onManualUpdate}
+                        onOpenSharePoint={onOpenSharePoint}
+                        canClear={canClear}
+                        onClearPress={onClearPress}
+                    />
+                </View>
             </View>
         </View>
     );
 };
+
+const styles = StyleSheet.create({
+    floatingWrapper: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 10,
+    },
+    wrapper: {
+        width: '100%',
+    },
+    barRow: {
+        paddingHorizontal: verticalScale(42),
+        justifyContent: 'center',
+    },
+    menu: {
+        position: 'absolute',
+        top: 0,
+        right: 0,
+        bottom: 0,
+        justifyContent: 'center',
+    },
+});
 
 export default CourseTabBar;

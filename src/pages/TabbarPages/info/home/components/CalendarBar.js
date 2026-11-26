@@ -4,12 +4,18 @@ import moment from 'moment';
 import { moderateScale, scale, verticalScale } from 'react-native-size-matters';
 
 import Text from '../../../../../components/AppText';
+import { SEARCH_FIELD_BORDER_RADIUS } from '../../../../../components/searchFieldStyles';
 import { useTheme } from '../../../../../components/ThemeContext';
-import { uiStyle, VERSION_EMOJI } from '../../../../../components/ThemeContext';
+import { uiStyle } from '../../../../../components/ThemeContext';
 import { getWeek } from '../../../../../static/UMCalendar/CalendarConst';
 import { UMCalendar } from '../../../../../static/UMCalendar/UMCalendar';
 import { trigger } from '../../../../../utils/trigger';
 import TouchableScale from '../../../../../components/TouchableScale';
+import PhosphorFeatureIcon from '../search/components/PhosphorFeatureIcon';
+
+// 與首頁搜尋框左右邊距／圓角對齊（同寬同圓角＝視覺同心）
+const HOME_EDGE_INSET = scale(20);
+const HOME_SURFACE_RADIUS = SEARCH_FIELD_BORDER_RADIUS;
 
 const calItemWidth = Math.max(scale(40), verticalScale(40));
 const calRangeItemWidth = Math.max(scale(70), verticalScale(40));
@@ -29,7 +35,7 @@ const getCalItemWidth = item => moment(item.endDate).diff(item.startDate, 'day')
 
 const CalendarBar = ({ refreshTrigger = 0 }) => {
     const { theme } = useTheme();
-    const { bg_color, black, themeColor, themeColorUltraLight } = theme;
+    const { bg_color, black, themeColor, sand, white, viewShadow } = theme;
 
     const calScrollRef = useRef(null);
     const [selectDay, setSelectDay] = useState(0);
@@ -97,7 +103,7 @@ const CalendarBar = ({ refreshTrigger = 0 }) => {
         const isThisDateSelected = selectDay === index;
         const isEssencial = item.summary.toUpperCase().indexOf('EXAM') !== -1 ||
             (item.summary.toUpperCase().indexOf('SEMESTER') !== -1 && item.summary.toUpperCase().indexOf('BREAK') === -1);
-        const backgroundColor = isThisDateSelected ? `${themeColor}15` : 'transparent';
+        const backgroundColor = isThisDateSelected ? white : 'transparent';
         const textStyle = {
             ...uiStyle.defaultText,
             color: isThisDateSelected ? themeColor : black.third,
@@ -122,13 +128,12 @@ const CalendarBar = ({ refreshTrigger = 0 }) => {
                 <View
                     style={{
                         backgroundColor,
-                        borderRadius: verticalScale(5),
+                        borderRadius: HOME_SURFACE_RADIUS,
                         paddingHorizontal: scale(5),
                         paddingVertical: verticalScale(2),
                         height: '100%',
                         justifyContent: 'center',
-                        borderWidth: 1,
-                        borderColor: isThisDateSelected ? themeColorUltraLight : 'transparent',
+                        ...(isThisDateSelected ? viewShadow : null),
                     }}
                 >
                     <View style={{ alignItems: 'center', justifyContent: 'center' }}>
@@ -181,8 +186,10 @@ const CalendarBar = ({ refreshTrigger = 0 }) => {
                 getItem={getItem}
                 getItemCount={getItemCount}
                 keyExtractor={(item, index) => item.startDate + index}
-                ListHeaderComponent={<View style={{ marginLeft: scale(20) }} />}
-                ListFooterComponent={<View style={{ marginRight: scale(20) }} />}
+                // 預留陰影空間，避免選中態 viewShadow 被裁切
+                contentContainerStyle={{ paddingVertical: verticalScale(4) }}
+                ListHeaderComponent={<View style={{ marginLeft: HOME_EDGE_INSET }} />}
+                ListFooterComponent={<View style={{ marginRight: HOME_EDGE_INSET }} />}
             />
 
             {cal[selectDay] && 'summary' in cal[selectDay] ? (
@@ -195,41 +202,36 @@ const CalendarBar = ({ refreshTrigger = 0 }) => {
                         paddingHorizontal: scale(4),
                     }}
                 >
-                    {/* 側邊裝飾：用 margin 錯位，避免 \n\n 撐高整列 */}
-                    <Text
-                        style={{
-                            ...uiStyle.defaultText,
-                            fontSize: verticalScale(12),
-                            marginRight: scale(2),
-                            marginBottom: verticalScale(10),
-                        }}
-                    >
-                        {VERSION_EMOJI.ve_Left}
-                    </Text>
+                    {/* 側邊裝飾：用 margin 錯位，避免撐高整列 */}
+                    <View style={{ marginRight: scale(2), marginBottom: verticalScale(10) }}>
+                        <PhosphorFeatureIcon
+                            name="umbrella"
+                            size={verticalScale(14)}
+                            color={themeColor}
+                        />
+                    </View>
 
                     <View
                         style={{
                             paddingVertical: verticalScale(6),
                             paddingHorizontal: scale(8),
                             width: '80%',
-                            backgroundColor: `${themeColor}15`,
-                            borderRadius: scale(10),
-                            borderWidth: 1,
-                            borderColor: themeColorUltraLight,
+                            backgroundColor: white,
+                            borderRadius: HOME_SURFACE_RADIUS,
                         }}
                     >
                         <Text
                             selectable
                             style={{
                                 ...uiStyle.defaultText,
-                                color: themeColor,
+                                color: black.second,
                                 textAlign: 'center',
                                 fontSize: verticalScale(10),
                                 lineHeight: verticalScale(14),
                             }}
                         >
                             {moment(cal[selectDay].endDate).diff(cal[selectDay].startDate, 'day') > 1 ? (
-                                <Text style={{ fontWeight: 'bold' }}>
+                                <Text style={{ color: black.third, fontWeight: 'bold' }}>
                                     {`${moment(cal[selectDay].startDate).format('YYYY-MM-DD')} ~ ${moment(cal[selectDay].endDate).subtract(1, 'days').format('YYYY-MM-DD')}\n`}
                                 </Text>
                             ) : null}
@@ -238,16 +240,13 @@ const CalendarBar = ({ refreshTrigger = 0 }) => {
                         </Text>
                     </View>
 
-                    <Text
-                        style={{
-                            ...uiStyle.defaultText,
-                            fontSize: verticalScale(12),
-                            marginLeft: scale(2),
-                            marginTop: verticalScale(10),
-                        }}
-                    >
-                        {VERSION_EMOJI.ve_Right}
-                    </Text>
+                    <View style={{ marginLeft: scale(2), marginTop: verticalScale(10) }}>
+                        <PhosphorFeatureIcon
+                            name="sunglasses"
+                            size={verticalScale(14)}
+                            color={sand}
+                        />
+                    </View>
                 </View>
             ) : null}
         </View>

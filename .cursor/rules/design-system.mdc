@@ -1,0 +1,154 @@
+---
+description: 視覺設計系統、主題與 Tonal 配色、文字元件、按壓回饋、iOS 26 液態玻璃、觸覺回饋與減少動態效果規範
+alwaysApply: false
+---
+
+# 設計系統與樣式風格指南
+
+## 一、產品氣質與設計原則
+
+ARK ALL 面向澳門大學學生與校園社群，視覺風格定位為**清爽、高辨識、低疲勞的現代校園工具**：
+
+1. **藍白主調與 Tonal 層級**：以主題藍為品牌識別，日常按鈕／容器改用淺色調底（`theme.tonal`）配原色前景，減少大面積高飽和色造成的視覺疲勞。
+2. **原生優先與跨平台優雅降級**：iOS 擁抱原生導覽與 iOS 26 液態玻璃點綴，Android 遵循 Material Design 3，不支援的平台維持清晰實色與柔和陰影。
+3. **留白與一致節奏**：卡片圓角常用 `scale(12)`–`scale(16)`，跨平台陰影優先使用 `theme.viewShadow`（New Architecture `boxShadow`），取代舊版手寫 `shadowColor`／`elevation`。
+4. **無障礙與減少動態效果**：所有動效與按壓縮放須尊重系統及應用內的「減少動態效果」設定（`src/contexts/ReducedMotionContext.js`）。
+
+### 改動尺度分級
+
+| 級別 | 範例 | 執行方式 |
+| --- | --- | --- |
+| 小幅優化 | 調整間距、圓角、字重、對齊 | 直接實施 |
+| 元件重構 | 重寫列表項、卡片、按鈕樣式 | 簡要說明意圖後實施 |
+| 配色調整 | 新增語義色或修改現有配色 | **先發起討論**，確認後於 `ThemeContext.js` 新增 |
+| 佈局重構 | 整頁結構或資訊架構調整 | **先發起討論** |
+
+---
+
+## 二、文字、輸入框與縮放
+
+### 強制使用 `AppText` 與 `AppTextInput`（ESLint 強制攔截）
+
+`.eslintrc.js` 已禁止從 `react-native` 直接 import `Text` 與 `TextInput`，以確保 Android 統一使用 `NotoSansTC` 並關閉 `includeFontPadding`：
+
+```javascript
+import Text from '../../components/AppText';
+import TextInput from '../../components/AppTextInput';
+import { uiStyle, useTheme } from '../../components/ThemeContext';
+import { scale } from 'react-native-size-matters';
+
+<Text style={{ ...uiStyle.defaultText, fontSize: scale(14), color: theme.black.main }}>
+    內容
+</Text>
+```
+
+- 參考實作：`src/components/AppText.js`、`src/components/AppTextInput.js`。
+- 所有文字元件應套用 `uiStyle.defaultText`（或同等字型基線）。
+
+### 尺寸縮放（`react-native-size-matters`）
+
+- 水平尺寸用 `scale()`、垂直尺寸用 `verticalScale()`、字號可用 `scale()` 或 `moderateScale()`。
+- `metro.config.js` 在全平台將 `react-native-size-matters` 指向 `src/utils/scaling.js`（短邊 ≥ 600 時係數鎖定 1.15，避免 iPad／桌面放大過度）。
+- 元件照常從 `'react-native-size-matters'` 匯入，**不要直接 import `scaling.js`**。
+- `scale()` 只負責尺寸，不可拿來做寬屏佈局判斷；分欄與欄數一律用 `useWindowSizeClass()`（詳見 `responsive-layout.mdc`）。
+
+---
+
+## 三、主題與 Tonal Color System
+
+所有顏色一律透過 `useTheme()`（`src/components/ThemeContext.js`）取得，**禁止硬編碼 `'#fff'`、`'rgba(...)'` 等色值**。
+
+### 核心語義色
+
+| 鍵名 | 用途 |
+| --- | --- |
+| `theme.themeColor` / `secondThemeColor` | 主／副主題原色（前景文字、圖示、最高優先 CTA 實色底） |
+| `theme.themeColorLight` / `themeColorUltraLight` | 次級主題色、淺色邊框與分割線 |
+| `theme.accentForeground` / `successForeground` / `unreadForeground` | 高對比度前景色（淺底上文字） |
+| `theme.black.main` / `second` / `third` | 主標題、次標題、輔助說明文字 |
+| `theme.bg_color` / `white` / `trueWhite` / `trueBlack` | 頁面底色、卡片表面色、純白／純黑 |
+| `theme.glass` / `glassBg` / `glassBorder` | 半透明玻璃態降級色與邊框 |
+| `theme.pressOverlay` | 第三方元件需沿用中性按壓底色／波紋時使用 |
+| `theme.viewShadow` | 跨平台標準陰影（`boxShadow`） |
+| `theme.imagePlaceholder` | `expo-image` 亮／暗模式佔位 `blurhash` |
+
+### Tonal 透明度分級（`theme.tonal`）
+
+背景用淺色調、前景（文字／圖示）用原色；`theme.tonal` 已隨亮／暗模式自動適配，無需手動處理深色模式：
+
+| 級別 | 鍵名 | 透明度 | 適用場景 |
+| --- | --- | --- | --- |
+| 極淺底 | `tonal.primary08` | ~3% | 大面積輸入區域、提示區塊底色（可搭 `themeColorUltraLight` 邊框） |
+| 淺色底 | `tonal.primary15` | ~8% | 一般按鈕、標籤、卡片內操作區（最常用） |
+| 中等底 | `tonal.primary30` | ~19% | 重點按鈕、次級 CTA |
+| 較深底 | `tonal.primary50` | ~31% | 高強調容器 |
+| 實色 | `themeColor` | 100% | 最高優先 CTA（搭 `trueWhite` 文字）、選中態 |
+
+- 同樣提供副色與語義色：`tonal.secondary08/15/30/50`、`tonal.success15/30`、`tonal.unread15/30`。
+- 新增顏色前先確認需求與亮／暗對比，確認後於 `ThemeContext.js` 的 `getColorDiy(isLight)` 同步加入亮／暗色值。
+
+---
+
+## 四、按壓回饋與動效
+
+- **一般按鈕、圖示按鈕、可點列表列、側欄操作**：統一使用 `src/components/ScalePressable.js`（按下微縮至 98%、放開回彈；減少動態效果開啟時自動降級為輕微淡化）。
+- **自訂縮放需求**：使用底層 `src/components/TouchableScale.js`（支援 `activeScale` 與 `springConfig`）。
+- **禁止**：
+  - 新程式碼引入 `TouchableOpacity`、`TouchableHighlight`、`TouchableWithoutFeedback`、`TouchableNativeFeedback`（存量重構時順帶替換）。
+  - 按下時在 `pressed`／`onPressIn`／ripple 鋪淺藍底或切換主題底色（持續的選取／展開／未讀狀態除外）。
+- **例外**：導覽列原生按鈕沿用 React Navigation 原生回饋；第三方元件需要底色／波紋時用中性 `theme.pressOverlay`。
+- **減少動態效果**：自訂 Reanimated 動畫或頁面過渡需讀取 `useAppReducedMotion()`（`src/contexts/ReducedMotionContext.js`）做簡化或退化。
+
+---
+
+## 五、iOS 26 液態玻璃規範
+
+### 唯一匯入來源
+
+統一透過 `src/utils/glassEffect.js`（底層為 `expo-glass-effect`）匯入，**禁止引用已移除的 `@callstack/liquid-glass`，也禁止手寫 `Platform.Version >= 26`**：
+
+```javascript
+import { GlassView, isLiquidGlassSupported } from '../../utils/glassEffect';
+```
+
+### 使用原則（高光點綴，非全面覆蓋）
+
+- **每頁控制在 2–4 個關鍵懸浮點**：導覽列（`Nav.js`）、底部標籤列（`Tabbar.js`）、懸浮按鈕 FAB（`ScrollToTopButton.js`、`AddCourseFab.js`、`PlanCapsule.js`）、圖片檢視器疊加按鈕（`ARKImageView.js`）。
+- **不適用場景**：列表卡片內部、小型 Badge／標籤、輸入框、整頁背景、已有明確實色背景的區塊。
+- **強制降級**：`isLiquidGlassSupported` 為 `false`（iOS < 26、Android、Web）時，必須手動提供實色或半透明背景（`theme.white`／`theme.glass`）與 `theme.viewShadow`；參考實作見 `src/components/ScrollToTopButton.js` 與 `src/pages/TabbarPages/course/components/PlanCapsule.js`。
+
+---
+
+## 六、觸覺回饋標準
+
+所有觸覺回饋統一透過 `src/utils/trigger.js` 的 `trigger()` 呼叫，**頁面與元件禁止直接 import `expo-haptics`**。
+
+| 語意 | 使用時機 | iOS／Web | Android |
+| --- | --- | --- | --- |
+| `trigger()`／`tap` | 一般按鈕、卡片、返回、重試 | Soft impact | Virtual key |
+| `selection` | 分段控制、篩選條件、單次選項變更 | Selection | Segment tick |
+| `tick` | 滑桿、時間格等連續且高頻的刻度變更 | Selection | Segment frequent tick |
+| `context` | 選單、操作表或其他上下文操作正式開啟 | Rigid impact | Context click |
+| `longPress` | 長按手勢達到觸發門檻 | Rigid impact | Long press |
+| `dragStart` | 可拖曳項目被拾起或開始批量拖選 | Medium impact | Drag start |
+| `gestureStart`／`gestureEnd` | 有明確開始與結束狀態的手勢 | Light／Soft impact | Gesture start／end |
+| `toggleOn`／`toggleOff` | Switch 或二態功能完成切換 | Selection | Toggle on／off |
+| `success` | 後端或本地操作已確認成功 | Success notification | Confirm |
+| `warning` | 操作完成但需注意，或只完成部分內容 | Warning notification | Warning notification |
+| `error` | 操作實際失敗且需要使用者處理 | Error notification | Reject |
+
+使用規則：
+- 所有可互動元件皆應有觸覺回饋；一般操作用 `trigger()`，語意明確時才傳入分類。
+- `success`／`warning`／`error` 僅於**結果確定後**觸發，勿在送出按鈕按下瞬間誤用。
+- 破壞性操作本身不是 `error`：確認按鈕用 `tap`，刪除成功後用 `success`，失敗才用 `error`。
+- 高頻互動只用 `tick` 且避免逐幀觸發；`soft`／`rigid` 僅為舊呼叫相容，新程式碼改用語意名稱。
+- 觸覺失敗不得阻斷主流程，不可取代文字／Toast／無障礙提示，且須尊重系統觸覺設定。
+
+---
+
+## 七、圖標系統規範（Phosphor Icons）
+
+新頁面與元件重構統一優先使用 `phosphor-react-native`（透過 `src/pages/TabbarPages/info/home/search/components/PhosphorFeatureIcon.js` 按需靜態匯入），並搭配 `theme.featureIconTones`（藍／綠／橘／珊瑚紅）低疲勞語義色盤：
+
+- **功能／語義圖標（預設 `weight="duotone"`）**：用於功能格子、快捷按鈕、列表首部徽章與條目 Chip，以線性描邊＋雙色微填底提供層次感。
+- **簡單指示器（強制 `weight="regular"`）**：列表右側箭頭、折疊展開／收起等純指示性圖標（如 `caret-right`、`caret-up`、`caret-down`），統一傳入 `weight="regular"` 保持純淨單線造型，避免 `duotone` 模式將箭頭渲染為封閉填充三角形。

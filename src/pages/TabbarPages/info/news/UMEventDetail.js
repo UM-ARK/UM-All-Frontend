@@ -12,7 +12,6 @@ import {
     View,
 } from 'react-native';
 import { Image } from 'expo-image';
-import Ionicons from "@react-native-vector-icons/ionicons";
 import moment from 'moment-timezone';
 import Animated, {
     Extrapolation,
@@ -21,7 +20,6 @@ import Animated, {
     useAnimatedScrollHandler,
     useAnimatedStyle,
     useSharedValue,
-    withSpring,
 } from 'react-native-reanimated';
 import {
     moderateScale,
@@ -33,20 +31,16 @@ import { isLiquidGlassSupported } from '../../../../utils/glassEffect';
 import Text from '../../../../components/AppText';
 import ARKImageView from '../../../../components/ARKImageView';
 import HyperlinkText from '../../../../components/HyperlinkText';
+import SegmentedTabControl from '../../../../components/SegmentedTabControl';
 import {
     uiStyle,
     useTheme,
 } from '../../../../components/ThemeContext';
+import PhosphorFeatureIcon from '../home/search/components/PhosphorFeatureIcon';
 import { logToFirebase } from '../../../../utils/firebaseAnalytics';
 import { trigger } from '../../../../utils/trigger';
 
 const HERO_HEIGHT = verticalScale(340);
-
-const ANIMATION_CONFIG = {
-    damping: 18,
-    stiffness: 180,
-    mass: 0.8,
-};
 
 const LANGUAGE_LABELS = {
     detailTitle: ['活動詳情', 'Event details', 'Detalhes do evento'],
@@ -59,50 +53,50 @@ const LANGUAGE_LABELS = {
 const DETAIL_CONFIG = [
     {
         key: 'speaker',
-        icon: 'mic-outline',
+        icon: 'microphone',
         labels: ['講者', 'Speaker', 'Orador'],
         hyperlink: false,
     },
     {
         key: 'venue',
-        icon: 'location-outline',
+        icon: 'map-pin',
         labels: ['地點', 'Venue', 'Local'],
         hyperlink: true,
     },
     {
         key: 'language',
-        icon: 'language-outline',
+        icon: 'translate',
         labels: ['語言', 'Language', 'Língua'],
         tags: true,
     },
     {
         key: 'targetAudience',
-        icon: 'people-outline',
+        icon: 'users',
         labels: ['對象', 'Target audience', 'Audiência-alvo'],
         hyperlink: false,
     },
     {
         key: 'organiser',
-        icon: 'business-outline',
+        icon: 'building',
         labels: ['主辦單位', 'Organiser', 'Organizador'],
         hyperlink: false,
     },
     {
         key: 'coorganiser',
-        icon: 'git-network-outline',
+        icon: 'tree-structure',
         labels: ['協辦單位', 'Co-organiser', 'Co-organizador'],
         hyperlink: false,
     },
     {
         key: 'content',
-        icon: 'document-text-outline',
+        icon: 'file-text',
         labels: ['詳情', 'Details', 'Detalhes'],
         hyperlink: true,
         expanded: true,
     },
     {
         key: 'remark',
-        icon: 'information-circle-outline',
+        icon: 'info',
         labels: ['備註', 'Remarks', 'Observação'],
         hyperlink: false,
         expanded: true,
@@ -112,25 +106,25 @@ const DETAIL_CONFIG = [
 const CONTACT_CONFIG = [
     {
         key: 'contactName',
-        icon: 'person-outline',
+        icon: 'user',
         labels: ['名稱', 'Name', 'Nome'],
         hyperlink: false,
     },
     {
         key: 'contactPhone',
-        icon: 'call-outline',
+        icon: 'phone',
         labels: ['電話', 'Phone', 'Telefone'],
         hyperlink: false,
     },
     {
         key: 'contactFax',
-        icon: 'print-outline',
+        icon: 'printer',
         labels: ['傳真', 'Fax', 'Fax'],
         hyperlink: false,
     },
     {
         key: 'contactMail',
-        icon: 'mail-outline',
+        icon: 'envelope',
         labels: ['電郵', 'E-mail', 'E-mail'],
         hyperlink: true,
     },
@@ -210,33 +204,6 @@ const createStyles = theme => {
             fontWeight: '700',
             lineHeight: moderateScale(29),
         },
-        languageTrack: {
-            position: 'relative',
-            flexDirection: 'row',
-            padding: scale(3),
-            borderRadius: scale(12),
-            backgroundColor: tonal.primary15,
-        },
-        languageIndicator: {
-            position: 'absolute',
-            top: scale(3),
-            bottom: scale(3),
-            borderRadius: scale(9),
-            backgroundColor: themeColor,
-        },
-        languageButton: {
-            minWidth: scale(40),
-            paddingHorizontal: scale(9),
-            paddingVertical: verticalScale(6),
-            alignItems: 'center',
-            justifyContent: 'center',
-            borderRadius: scale(9),
-        },
-        languageText: {
-            ...uiStyle.defaultText,
-            fontSize: moderateScale(11),
-            fontWeight: '700',
-        },
         scheduleCard: {
             flexDirection: 'row',
             marginTop: verticalScale(12),
@@ -254,13 +221,10 @@ const createStyles = theme => {
             backgroundColor: theme.themeColorUltraLight,
         },
         scheduleIcon: {
-            width: scale(36),
-            height: scale(36),
-            marginRight: scale(9),
+            width: scale(28),
+            marginRight: scale(8),
             alignItems: 'center',
             justifyContent: 'center',
-            borderRadius: scale(11),
-            backgroundColor: tonal.primary15,
         },
         scheduleText: {
             flex: 1,
@@ -291,13 +255,9 @@ const createStyles = theme => {
             paddingBottom: verticalScale(13),
         },
         sectionIcon: {
-            width: scale(32),
-            height: scale(32),
-            marginRight: scale(10),
+            marginRight: scale(8),
             alignItems: 'center',
             justifyContent: 'center',
-            borderRadius: scale(10),
-            backgroundColor: tonal.primary15,
         },
         sectionTitle: {
             ...uiStyle.defaultText,
@@ -313,7 +273,7 @@ const createStyles = theme => {
             paddingBottom: verticalScale(15),
         },
         rowIcon: {
-            width: scale(30),
+            width: scale(28),
             paddingTop: verticalScale(1),
             alignItems: 'flex-start',
         },
@@ -340,7 +300,7 @@ const createStyles = theme => {
         },
         separator: {
             height: StyleSheet.hairlineWidth,
-            marginLeft: scale(30),
+            marginLeft: scale(28),
             backgroundColor: theme.themeColorUltraLight,
         },
         tagContainer: {
@@ -436,77 +396,6 @@ const HeroSection = React.memo(
     },
 );
 
-const LanguageSelector = React.memo(
-    ({ languageMode, onSelect, selectedIndex }) => {
-        const { theme } = useTheme();
-        const styles = useMemo(() => createStyles(theme), [theme]);
-        const [buttonLayouts, setButtonLayouts] = useState({});
-
-        const indicatorStyle = useAnimatedStyle(() => {
-            const selectedLayout = buttonLayouts[selectedIndex];
-            if (!selectedLayout) {
-                return {};
-            }
-
-            return {
-                width: withSpring(
-                    selectedLayout.width,
-                    ANIMATION_CONFIG,
-                ),
-                transform: [
-                    {
-                        translateX: withSpring(
-                            selectedLayout.x,
-                            ANIMATION_CONFIG,
-                        ),
-                    },
-                ],
-            };
-        });
-
-        const handleLayout = useCallback(
-            index => event => {
-                const { width, x } = event.nativeEvent.layout;
-                setButtonLayouts(previous => ({
-                    ...previous,
-                    [index]: { width, x },
-                }));
-            },
-            [],
-        );
-
-        return (
-            <View style={styles.languageTrack}>
-                <Animated.View
-                    pointerEvents="none"
-                    style={[styles.languageIndicator, indicatorStyle]}
-                />
-                {languageMode.map((item, index) => (
-                    item.available ? (
-                        <Pressable
-                            key={item.locale}
-                            onLayout={handleLayout(index)}
-                            onPress={() => onSelect(index)}
-                            style={styles.languageButton}>
-                            <Text
-                                style={[
-                                    styles.languageText,
-                                    {
-                                        color: selectedIndex === index
-                                            ? theme.trueWhite
-                                            : theme.themeColor,
-                                    },
-                                ]}>
-                                {item.name}
-                            </Text>
-                        </Pressable>
-                    ) : null
-                ))}
-            </View>
-        );
-    },
-);
-
 const ScheduleCard = React.memo(
     ({ dateFrom, dateTo, mode, timeFrom, timeTo }) => {
         const { theme } = useTheme();
@@ -522,10 +411,10 @@ const ScheduleCard = React.memo(
             <SurfaceCard style={styles.scheduleCard}>
                 <View style={styles.scheduleItem}>
                     <View style={styles.scheduleIcon}>
-                        <Ionicons
+                        <PhosphorFeatureIcon
                             color={theme.themeColor}
-                            name="calendar-clear-outline"
-                            size={scale(18)}
+                            name="calendar"
+                            size={scale(20)}
                         />
                     </View>
                     <View style={styles.scheduleText}>
@@ -540,10 +429,10 @@ const ScheduleCard = React.memo(
                 <View style={styles.scheduleDivider} />
                 <View style={styles.scheduleItem}>
                     <View style={styles.scheduleIcon}>
-                        <Ionicons
+                        <PhosphorFeatureIcon
                             color={theme.themeColor}
-                            name="time-outline"
-                            size={scale(19)}
+                            name="clock"
+                            size={scale(20)}
                         />
                     </View>
                     <View style={styles.scheduleText}>
@@ -571,10 +460,10 @@ const SectionCard = React.memo(
                 <SurfaceCard style={[styles.sectionCard, style]}>
                     <View style={styles.sectionHeader}>
                         <View style={styles.sectionIcon}>
-                            <Ionicons
+                            <PhosphorFeatureIcon
                                 color={theme.themeColor}
                                 name={icon}
-                                size={scale(18)}
+                                size={scale(20)}
                             />
                         </View>
                         <Text style={styles.sectionTitle}>{title}</Text>
@@ -639,10 +528,10 @@ const InfoRow = React.memo(
                         expanded && styles.infoRowExpanded,
                     ]}>
                     <View style={styles.rowIcon}>
-                        <Ionicons
+                        <PhosphorFeatureIcon
                             color={theme.themeColor}
                             name={icon}
-                            size={scale(17)}
+                            size={scale(18)}
                         />
                     </View>
                     <View style={styles.rowContent}>
@@ -748,6 +637,18 @@ const UMEventDetail = ({ navigation, route }) => {
         },
     ], [parsedData]);
 
+    // 僅含可用語言；保留 langIndex 對應 labels／資料索引
+    const languageSegmentOptions = useMemo(() => (
+        languageMode
+            .map((item, langIndex) => ({ ...item, langIndex }))
+            .filter(item => item.available)
+            .map(item => ({
+                key: item.locale,
+                label: item.name,
+                langIndex: item.langIndex,
+            }))
+    ), [languageMode]);
+
     const firstAvailableLanguage = useMemo(() => {
         const index = languageMode.findIndex(item => item.available);
         return index < 0 ? 0 : index;
@@ -758,6 +659,13 @@ const UMEventDetail = ({ navigation, route }) => {
     );
     const [imageLoading, setImageLoading] = useState(true);
     const locale = languageMode[selectedLanguage]?.locale || 'cn';
+
+    const languageSegmentSelectedIndex = useMemo(() => {
+        const i = languageSegmentOptions.findIndex(
+            o => o.langIndex === selectedLanguage,
+        );
+        return i >= 0 ? i : 0;
+    }, [languageSegmentOptions, selectedLanguage]);
 
     const details = useMemo(() => DETAIL_CONFIG
         .map(item => ({
@@ -786,10 +694,14 @@ const UMEventDetail = ({ navigation, route }) => {
         },
     });
 
-    const handleLanguageSelect = useCallback(index => {
-        trigger();
-        setSelectedLanguage(index);
-    }, []);
+    const handleLanguageSelect = useCallback(segIdx => {
+        const opt = languageSegmentOptions[segIdx];
+        if (!opt || opt.langIndex === selectedLanguage) {
+            return;
+        }
+        trigger('selection');
+        setSelectedLanguage(opt.langIndex);
+    }, [languageSegmentOptions, selectedLanguage]);
 
     const handleImagePress = useCallback(() => {
         trigger();
@@ -829,11 +741,18 @@ const UMEventDetail = ({ navigation, route }) => {
                                 <Text style={styles.eyebrow}>
                                     {LANGUAGE_LABELS.event[selectedLanguage]}
                                 </Text>
-                                <LanguageSelector
-                                    languageMode={languageMode}
-                                    onSelect={handleLanguageSelect}
-                                    selectedIndex={selectedLanguage}
-                                />
+                                {languageSegmentOptions.length > 0 ? (
+                                    <SegmentedTabControl
+                                        compact
+                                        compactItemWidth={scale(40)}
+                                        onChange={handleLanguageSelect}
+                                        options={languageSegmentOptions}
+                                        raisedTrack
+                                        selectedIndex={
+                                            languageSegmentSelectedIndex
+                                        }
+                                    />
+                                ) : null}
                             </View>
                             <Text selectable style={styles.title}>
                                 {parsedData[`title_${locale}`]}
@@ -855,7 +774,7 @@ const UMEventDetail = ({ navigation, route }) => {
                     {details.length > 0 ? (
                         <SectionCard
                             delay={200}
-                            icon="list-outline"
+                            icon="list"
                             title={
                                 LANGUAGE_LABELS.detailTitle[selectedLanguage]
                             }>
@@ -878,7 +797,7 @@ const UMEventDetail = ({ navigation, route }) => {
                     {contacts.length > 0 ? (
                         <SectionCard
                             delay={260}
-                            icon="person-circle-outline"
+                            icon="user-circle"
                             style={styles.contactCard}
                             title={
                                 LANGUAGE_LABELS.contactTitle[selectedLanguage]

@@ -10,12 +10,13 @@ import { useAnimatedStyle, withTiming } from 'react-native-reanimated';
 
 const CustomBottomSheet = forwardRef((props, ref) => {
     const { theme } = useTheme();
-    const { white, black } = theme;
+    const { white, black, modalShadow } = theme;
     const insets = useSafeAreaInsets();
     // 讓 sheet 底部停在 Tab Bar 上方，避免最低檔卡在 Tab 位置
     const tabBarHeight =
         useContext(BottomTabBarHeightContext) ?? insets.bottom + 49;
     const bottomInset = props.bottomInset ?? tabBarHeight;
+    const topCornerRadius = props.topCornerRadius ?? scale(50);
 
     const styles = StyleSheet.create({
         contentContainer: {
@@ -31,16 +32,25 @@ const CustomBottomSheet = forwardRef((props, ref) => {
     );
     const [currentIdx, setIdx] = useState(-1);
 
-    const shadowRadiusValue = currentIdx !== -1 ? verticalScale(12) : 0;
     const animatedStyles = useAnimatedStyle(() => {
+        if (modalShadow.elevation !== undefined) {
+            return {
+                elevation: withTiming(currentIdx !== -1 ? modalShadow.elevation : 0, {
+                    duration: 300,
+                }),
+            };
+        }
+
+        const [shadow] = modalShadow.boxShadow;
         return {
-            shadowOpacity: withTiming(currentIdx !== -1 ? 0.58 : 0, {
-                duration: 300,
-            }),
-            shadowRadius: withTiming(shadowRadiusValue, { duration: 300 }),
-            elevation: withTiming(currentIdx !== -1 ? 24 : 0, {
-                duration: 300,
-            }), // 適用於 Android
+            boxShadow: [
+                {
+                    ...shadow,
+                    color: withTiming(currentIdx !== -1 ? shadow.color : 'transparent', {
+                        duration: 300,
+                    }),
+                },
+            ],
         };
     });
 
@@ -53,7 +63,7 @@ const CustomBottomSheet = forwardRef((props, ref) => {
             index={props.index ?? -1}
             snapPoints={snapPoints}
             enableDynamicSizing={false} // 修復v5無法snapToIndex問題
-            topInset={insets.top + verticalScale(10)}
+            topInset={props.topInset ?? insets.top + verticalScale(10)}
             bottomInset={bottomInset}
             keyboardBehavior={'extend'}
             keyboardBlurBehavior="restore"
@@ -64,17 +74,21 @@ const CustomBottomSheet = forwardRef((props, ref) => {
                 ['features', 'home', 'courseSim'].includes(props?.page)
             }
             backgroundStyle={{ backgroundColor: 'transparent' }}
-            handleIndicatorStyle={{ backgroundColor: black.third }}
+            handleIndicatorStyle={[
+                { backgroundColor: black.third },
+                props.handleIndicatorStyle,
+            ]}
             style={[
                 {
-                    shadowOffset: { width: 0, height: verticalScale(12) },
+                    borderTopLeftRadius: topCornerRadius,
+                    borderTopRightRadius: topCornerRadius,
                 },
                 animatedStyles,
             ]}
             handleStyle={{
                 backgroundColor: white,
-                borderTopLeftRadius: scale(50),
-                borderTopRightRadius: scale(50),
+                borderTopLeftRadius: topCornerRadius,
+                borderTopRightRadius: topCornerRadius,
             }}
             onAnimate={(fromIndex, toIndex) => {
                 props.onAnimate?.(fromIndex, toIndex);

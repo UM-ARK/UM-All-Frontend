@@ -6,13 +6,12 @@ import React, {
     useRef,
     useState,
 } from 'react';
-import { Alert, Platform, ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, Animated, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { KeyboardAwareScrollView, KeyboardToolbar } from 'react-native-keyboard-controller';
 import { useNavigation } from '@react-navigation/native';
 import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { scale, verticalScale } from 'react-native-size-matters';
-import { LinearGradient } from 'expo-linear-gradient';
 import { t } from 'i18next';
 import lodash from 'lodash';
 
@@ -29,8 +28,12 @@ import {
     WINDOW_BREAKPOINTS,
     useWindowSizeClass,
 } from '../../../../../utils/windowSizeClass';
+import { useCourseChrome } from '../../context/CourseChromeContext';
 import { useCoursePlan } from '../../context/CoursePlanContext';
 import PlanCapsule from '../../components/PlanCapsule';
+import TopScrollEdgeBackdrop, {
+    SCROLL_EDGE_FADE_HEIGHT,
+} from '../../../../../components/TopScrollEdgeBackdrop';
 
 import CourseCard from './components/CourseCard';
 import useCourseFiltering, {
@@ -40,6 +43,7 @@ import useCourseSearch from './hooks/useCourseSearch';
 import useFirstLetterNav from './hooks/useFirstLetterNav';
 import FilterPanel from './components/FilterPanel';
 import SearchBarSection from './components/SearchBarSection';
+import { SEARCH_FIELD_MIN_HEIGHT } from '../../../../../components/searchFieldStyles';
 import FirstLetterNav from './components/FirstLetterNav';
 import { unitMap, depaMap, geClassMap } from './constants/maps';
 import { adpeMap, CMGEList, dayList, defaultFilterOptions, defaultTimeFilter, modeENStr } from './constants/options';
@@ -58,7 +62,6 @@ import {
 const itemHeight = scale(75);
 const COURSE_CARD_GAP = scale(10);
 const COURSE_GRID_HORIZONTAL_PADDING = scale(10);
-const SEARCH_HEADER_FADE_HEIGHT = verticalScale(8);
 /** 寬屏左欄寬度：固定一台手機的寬度，讓篩選面板沿用手機排版 */
 const FILTER_PANE_WIDTH = 360;
 
@@ -142,6 +145,11 @@ const What2Reg = ({ isSplitPane = false }) => {
 
     const textInputRef = useRef(null);
     const scrollViewRef = useRef(null);
+    const scrollY = useRef(new Animated.Value(0)).current;
+    const rightScrollY = useRef(new Animated.Value(0)).current;
+    const [searchHeaderHeight, setSearchHeaderHeight] = useState(SEARCH_FIELD_MIN_HEIGHT + scale(5));
+    const { topChromeHeight } = useCourseChrome();
+    const totalSearchHeaderHeight = topChromeHeight + searchHeaderHeight;
 
     const insets = useSafeAreaInsets();
     // 與課表頁一致：優先讀 Tab Bar 實際高度，否則回退 safe area + 預設高度
@@ -153,7 +161,7 @@ const What2Reg = ({ isSplitPane = false }) => {
         Platform.OS === 'android'
             ? verticalScale(10)
             : tabBarHeight + verticalScale(10);
-    // 頂部 insets 由 course/index.js 容器的 SafeAreaView + 頂欄統一處理，段落不可重複扣一次
+    // 頂部安全區與切換欄浮於頁面之上，實際預留高度由 CourseChromeContext 的 topChromeHeight 提供
 
     // 課程資料、模擬課表與衝突狀態一律取自容器的 CoursePlanProvider，
     // 段落不再自行持有 useCourseData，避免與課表段落各自抓一份而不同步
@@ -461,30 +469,55 @@ const What2Reg = ({ isSplitPane = false }) => {
     // 搜尋結果不套用星期／時段篩選：此時 FilterPanel 不渲染，使用者既看不到也無法清除該篩選
     const hasSearchResult = searchFilterCourse?.length > 0;
 
-    // 以下內容在緊湊（單欄滾動）與寬屏（左右分欄）兩種殼子之間共用，不因佈局分叉
+    const handleSearchChromeScroll = useCallback(event => {
+        scrollY.setValue(event.nativeEvent.contentOffset.y);
+    }, [scrollY]);
+
+    const handleRightGridScroll = useCallback(event => {
+        rightScrollY.setValue(event.nativeEvent.contentOffset.y);
+    }, [rightScrollY]);
+
+    const handleSearchHeaderLayout = useCallback(event => {
+        const nextHeight = event.nativeEvent.layout.height;
+        setSearchHeaderHeight(current => (
+            Math.abs(current - nextHeight) > 0.5 ? nextHeight : current
+        ));
+    }, []);
+
+    // 頂部 sticky 區域統一涵蓋狀態列、切換欄與搜尋欄：上滑時毛玻璃與底緣 Scroll Edge 柔和顯現
     const searchBar = (
-        <View pointerEvents="box-none" style={{ zIndex: 1 }}>
-            <SearchBarSection
-                theme={theme}
-                inputText={inputText}
-                inputOK={inputOK}
-                textInputRef={textInputRef}
-                onChangeText={setInputText}
-                onClear={onClearInput}
-                onPressAction={onPressSearchAction}
-                trigger={trigger}
+        <View
+            pointerEvents="box-none"
+            style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                zIndex: 2,
+            }}
+        >
+            <TopScrollEdgeBackdrop
+                headerHeight={totalSearchHeaderHeight}
+                fadeHeight={SCROLL_EDGE_FADE_HEIGHT}
+                scrollY={scrollY}
             />
-            <LinearGradient
-                pointerEvents="none"
-                colors={[bg_color, `${bg_color}00`]}
-                style={{
-                    position: 'absolute',
-                    top: '100%',
-                    left: 0,
-                    right: 0,
-                    height: SEARCH_HEADER_FADE_HEIGHT,
-                }}
-            />
+            <View
+                pointerEvents="box-none"
+                style={{ paddingTop: topChromeHeight, zIndex: 2 }}
+            >
+                <View pointerEvents="box-none" onLayout={handleSearchHeaderLayout}>
+                    <SearchBarSection
+                        theme={theme}
+                        inputText={inputText}
+                        inputOK={inputOK}
+                        textInputRef={textInputRef}
+                        onChangeText={setInputText}
+                        onClear={onClearInput}
+                        onPressAction={onPressSearchAction}
+                        trigger={trigger}
+                    />
+                </View>
+            </View>
         </View>
     );
 
@@ -629,45 +662,75 @@ const What2Reg = ({ isSplitPane = false }) => {
                             borderRightWidth: StyleSheet.hairlineWidth,
                             borderRightColor: black.third + '33',
                         }}>
-                        {searchBar}
                         <ScrollView
                             style={{ flex: 1 }}
+                            scrollIndicatorInsets={{
+                                top: totalSearchHeaderHeight,
+                                bottom: floatingBottom,
+                            }}
                             contentContainerStyle={{
-                                paddingTop: SEARCH_HEADER_FADE_HEIGHT,
+                                paddingTop: totalSearchHeaderHeight + COURSE_CARD_GAP,
                                 paddingBottom: floatingBottom + verticalScale(20),
                             }}
-                            keyboardDismissMode="on-drag">
+                            keyboardDismissMode="on-drag"
+                            scrollEventThrottle={16}
+                            onScroll={handleSearchChromeScroll}>
                             {filterOrHint}
                         </ScrollView>
+                        {searchBar}
                     </View>
+                    <View style={{ flex: 1 }}>
+                        <KeyboardAwareScrollView
+                            {...courseScrollProps}
+                            scrollIndicatorInsets={{
+                                top: topChromeHeight,
+                                bottom: floatingBottom,
+                            }}
+                            ref={scrollViewRef}
+                            style={{ flex: 1 }}
+                            contentContainerStyle={{
+                                paddingTop: topChromeHeight + COURSE_CARD_GAP,
+                                paddingBottom: floatingBottom + verticalScale(50),
+                            }}
+                            scrollEventThrottle={16}
+                            onScroll={handleRightGridScroll}
+                        >
+                            {courseGrid}
+                            {footer}
+                        </KeyboardAwareScrollView>
+                        <TopScrollEdgeBackdrop
+                            headerHeight={topChromeHeight}
+                            fadeHeight={SCROLL_EDGE_FADE_HEIGHT}
+                            scrollY={rightScrollY}
+                            zIndex={2}
+                        />
+                    </View>
+                </View>
+            ) : (
+                <View style={{ width: '100%', flex: 1 }}>
                     <KeyboardAwareScrollView
                         {...courseScrollProps}
+                        scrollIndicatorInsets={{
+                            top: totalSearchHeaderHeight,
+                            bottom: floatingBottom,
+                        }}
                         ref={scrollViewRef}
                         style={{ flex: 1 }}
                         contentContainerStyle={{
-                            paddingTop: COURSE_CARD_GAP,
+                            paddingTop: totalSearchHeaderHeight + COURSE_CARD_GAP,
                             paddingBottom: floatingBottom + verticalScale(50),
                         }}
+                        scrollEventThrottle={16}
+                        onScroll={handleSearchChromeScroll}
                     >
-                        {courseGrid}
+                        <View style={{ rowGap: COURSE_CARD_GAP }}>
+                            {filterOrHint}
+                            {courseGrid}
+                        </View>
                         {footer}
                     </KeyboardAwareScrollView>
-                </View>
-            ) : (
-                <KeyboardAwareScrollView
-                    {...courseScrollProps}
-                    ref={scrollViewRef}
-                    style={{ width: '100%', flex: 1 }}
-                    contentContainerStyle={{ paddingBottom: floatingBottom + verticalScale(50) }}
-                    stickyHeaderIndices={[0]}
-                >
                     {searchBar}
-                    <View style={{ paddingTop: SEARCH_HEADER_FADE_HEIGHT, rowGap: COURSE_CARD_GAP }}>
-                        {filterOrHint}
-                        {courseGrid}
-                    </View>
-                    {footer}
-                </KeyboardAwareScrollView>
+                </View>
             )}
 
             <KeyboardToolbar />

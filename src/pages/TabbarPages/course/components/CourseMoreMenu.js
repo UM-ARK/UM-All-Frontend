@@ -1,14 +1,19 @@
 import React, { useCallback, useMemo, useRef } from 'react';
-import { View } from 'react-native';
-import Ionicons from "@react-native-vector-icons/ionicons";
+import { StyleSheet, View } from 'react-native';
 import ActionSheet from 'react-native-actions-sheet';
 import { scale, verticalScale } from 'react-native-size-matters';
 import { t } from 'i18next';
+import { ArrowsClockwise } from 'phosphor-react-native/src/icons/ArrowsClockwise';
+import { CaretRight } from 'phosphor-react-native/src/icons/CaretRight';
+import { Cloud } from 'phosphor-react-native/src/icons/Cloud';
+import { DotsThree } from 'phosphor-react-native/src/icons/DotsThree';
+import { Export } from 'phosphor-react-native/src/icons/Export';
+import { Trash } from 'phosphor-react-native/src/icons/Trash';
 
 import Text from '../../../../components/AppText';
+import ScalePressable from '../../../../components/ScalePressable';
 import { useTheme, uiStyle } from '../../../../components/ThemeContext';
 import { trigger } from '../../../../utils/trigger';
-import TouchableScale from '../../../../components/TouchableScale';
 import TimetableShareSheet from './TimetableShareSheet';
 import { PROGRAMME_LEVELS } from '../../../../utils/courseProgramme';
 
@@ -34,7 +39,15 @@ const CourseMoreMenu = ({
     onClearPress,
 }) => {
     const { theme } = useTheme();
-    const { themeColor, tonal, black, bg_color, unread } = theme;
+    const {
+        themeColor,
+        black,
+        bg_color,
+        white,
+        unread,
+        pressOverlay,
+        featuresScreen,
+    } = theme;
 
     const actionSheetRef = useRef(null);
     const shareSheetRef = useRef(null);
@@ -54,87 +67,151 @@ const CourseMoreMenu = ({
                 marginRight: verticalScale(10),
             },
             sheetContainer: {
-                borderRadius: scale(10),
-                padding: scale(10),
+                borderTopLeftRadius: scale(24),
+                borderTopRightRadius: scale(24),
                 backgroundColor: bg_color,
             },
-            versionText: {
-                ...uiStyle.defaultText,
-                fontSize: scale(12),
-                color: black.third,
-                textAlign: 'center',
-                marginBottom: scale(15),
+            sheetIndicator: {
+                backgroundColor: pressOverlay,
+                width: scale(34),
+                height: verticalScale(3.5),
+                marginTop: verticalScale(8),
             },
-            dualRow: {
+            sheetContent: {
+                paddingHorizontal: scale(14),
+                paddingTop: verticalScale(6),
+                paddingBottom: verticalScale(14),
+            },
+            groupCard: {
+                backgroundColor: white,
+                borderRadius: scale(14),
+                overflow: 'hidden',
+                marginBottom: verticalScale(10),
+            },
+            metaCardRow: {
                 flexDirection: 'row',
-                gap: scale(10),
-                marginBottom: scale(10),
-            },
-            actionButton: backgroundColor => ({
-                backgroundColor,
-                borderRadius: scale(8),
-                paddingVertical: verticalScale(10),
-                paddingHorizontal: scale(8),
                 alignItems: 'center',
-                justifyContent: 'center',
-                flexDirection: 'row',
-                gap: scale(6),
-                marginBottom: scale(10),
-            }),
-            dualButton: backgroundColor => ({
+                backgroundColor: white,
+                borderRadius: scale(14),
+                paddingHorizontal: scale(14),
+                paddingVertical: verticalScale(10),
+                marginBottom: verticalScale(10),
+            },
+            metaColumn: {
                 flex: 1,
-                backgroundColor,
-                borderRadius: scale(8),
+            },
+            metaVerticalDivider: {
+                width: StyleSheet.hairlineWidth,
+                alignSelf: 'stretch',
+                backgroundColor: featuresScreen.divider,
+                marginHorizontal: scale(12),
+            },
+            metaLabel: {
+                ...uiStyle.defaultText,
+                fontSize: scale(11),
+                color: black.third,
+            },
+            metaDate: {
+                ...uiStyle.defaultText,
+                fontSize: scale(12.5),
+                fontWeight: '500',
+                color: black.second,
+                marginTop: verticalScale(2),
+            },
+            metaSingleRow: {
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                backgroundColor: white,
+                borderRadius: scale(14),
+                paddingHorizontal: scale(14),
                 paddingVertical: verticalScale(10),
-                paddingHorizontal: scale(6),
+                marginBottom: verticalScale(10),
+            },
+            rowItem: {
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                paddingHorizontal: scale(14),
+                paddingVertical: verticalScale(12),
+            },
+            rowLeft: {
+                flexDirection: 'row',
+                alignItems: 'center',
+                flex: 1,
+                columnGap: scale(12),
+            },
+            rowLabel: color => ({
+                ...uiStyle.defaultText,
+                color,
+                fontWeight: '500',
+                fontSize: scale(14),
+                flexShrink: 1,
+            }),
+            rowDivider: {
+                height: StyleSheet.hairlineWidth,
+                backgroundColor: featuresScreen.divider,
+                marginLeft: scale(44),
+            },
+            cancelButton: {
+                backgroundColor: white,
+                borderRadius: scale(14),
+                paddingVertical: verticalScale(12),
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: scale(4),
-            }),
-            actionButtonText: color => ({
+            },
+            cancelText: {
                 ...uiStyle.defaultText,
-                color,
-                fontWeight: 'bold',
-                fontSize: scale(15),
-            }),
-            dualButtonText: color => ({
-                ...uiStyle.defaultText,
-                color,
-                fontWeight: 'bold',
-                fontSize: scale(13),
-                textAlign: 'center',
-            }),
+                color: black.third,
+                fontWeight: '600',
+                fontSize: scale(14),
+            },
         }),
-        [bg_color, black.third],
+        [
+            bg_color,
+            black.second,
+            black.third,
+            featuresScreen.divider,
+            pressOverlay,
+            white,
+        ],
     );
 
-    const metadataSummary = useMemo(() => {
+    const versionItems = useMemo(() => {
         if (programmeLevel === PROGRAMME_LEVELS.postgraduate) {
             const postgraduate = catalogMetadata?.postgraduate;
             if (!postgraduate) {
-                return '';
+                return [];
             }
             return [
-                `${t('研究生課表數據日期版本: ', { ns: 'about' })}${postgraduate.updateTime}`,
-                `${postgraduate.academicYear} - Sem ${postgraduate.sem}`,
-            ].join('\n');
+                {
+                    key: 'postgraduate',
+                    label: `${t('研究生', { ns: 'catalog' })} · ${postgraduate.academicYear} S${postgraduate.sem}`,
+                    date: postgraduate.updateTime,
+                },
+            ];
         }
         const adddrop = catalogMetadata?.adddrop;
         const pre = catalogMetadata?.pre;
         if (!adddrop || !pre) {
-            return '';
+            return [];
         }
         return [
-            `${t('Add Drop Data Version', { ns: 'about' })}${adddrop.updateTime}`,
-            `${adddrop.academicYear} - Sem ${adddrop.sem}`,
-            '',
-            `${t('PreEnroll Data Version', { ns: 'about' })}${pre.updateTime}`,
-            `${pre.academicYear} - Sem ${pre.sem}`,
-        ].join('\n');
+            {
+                key: 'adddrop',
+                label: `Add Drop · ${adddrop.academicYear} S${adddrop.sem}`,
+                date: adddrop.updateTime,
+            },
+            {
+                key: 'pre',
+                label: `${t('預選', { ns: 'catalog' })} · ${pre.academicYear} S${pre.sem}`,
+                date: pre.updateTime,
+            },
+        ];
     }, [catalogMetadata, programmeLevel]);
 
     const handleOpenSheet = useCallback(() => {
-        trigger();
+        trigger('context');
         actionSheetRef.current?.show();
     }, []);
 
@@ -157,102 +234,151 @@ const CourseMoreMenu = ({
 
     return (
         <>
-            <TouchableScale
+            <ScalePressable
                 style={styles.moreButton}
                 onPress={handleOpenSheet}
                 hitSlop={verticalScale(8)}>
-                <Ionicons
-                    name="ellipsis-horizontal"
-                    size={verticalScale(16)}
-                    color={themeColor}
+                <DotsThree
+                    size={verticalScale(20)}
+                    color={black.main}
+                    weight="bold"
                 />
-            </TouchableScale>
+            </ScalePressable>
 
             <ActionSheet
                 ref={actionSheetRef}
+                gestureEnabled={true}
                 containerStyle={styles.sheetContainer}
+                indicatorStyle={styles.sheetIndicator}
                 onClose={handleSheetClose}>
-                <View style={{ padding: scale(10) }}>
-                    {metadataSummary ? (
-                        <Text style={styles.versionText}>{metadataSummary}</Text>
+                <View style={styles.sheetContent}>
+                    {versionItems.length === 1 ? (
+                        <View style={styles.metaSingleRow}>
+                            <Text style={styles.metaLabel}>
+                                {versionItems[0].label}
+                            </Text>
+                            <Text style={styles.metaDate}>
+                                {versionItems[0].date}
+                            </Text>
+                        </View>
+                    ) : versionItems.length === 2 ? (
+                        <View style={styles.metaCardRow}>
+                            <View style={styles.metaColumn}>
+                                <Text style={styles.metaLabel} numberOfLines={1}>
+                                    {versionItems[0].label}
+                                </Text>
+                                <Text style={styles.metaDate} numberOfLines={1}>
+                                    {versionItems[0].date}
+                                </Text>
+                            </View>
+                            <View style={styles.metaVerticalDivider} />
+                            <View style={styles.metaColumn}>
+                                <Text style={styles.metaLabel} numberOfLines={1}>
+                                    {versionItems[1].label}
+                                </Text>
+                                <Text style={styles.metaDate} numberOfLines={1}>
+                                    {versionItems[1].date}
+                                </Text>
+                            </View>
+                        </View>
                     ) : null}
 
-                    {canClear ? (
-                        <View style={styles.dualRow}>
-                            <TouchableScale
-                                style={styles.dualButton(tonal.unread15)}
-                                onPress={() => runAction(onClearPress)}>
-                                <Ionicons
-                                    name="trash-outline"
+                    <View style={styles.groupCard}>
+                        <ScalePressable
+                            style={styles.rowItem}
+                            onPress={() => runAction(onManualUpdate)}>
+                            <View style={styles.rowLeft}>
+                                <ArrowsClockwise
                                     size={scale(18)}
-                                    color={unread}
+                                    color={themeColor}
+                                    weight="duotone"
                                 />
-                                <Text
-                                    style={styles.dualButtonText(unread)}
-                                    numberOfLines={1}>
-                                    {t('清空模擬課表', { ns: 'timetable' })}
+                                <Text style={styles.rowLabel(black.main)}>
+                                    {t('手動檢查課表數據更新', { ns: 'catalog' })}
                                 </Text>
-                            </TouchableScale>
-                            <TouchableScale
-                                style={styles.dualButton(tonal.primary15)}
+                            </View>
+                        </ScalePressable>
+
+                        {programmeLevel === PROGRAMME_LEVELS.postgraduate ? null : (
+                            <>
+                                <View style={styles.rowDivider} />
+                                <ScalePressable
+                                    style={styles.rowItem}
+                                    onPress={() => runAction(onOpenSharePoint)}>
+                                    <View style={styles.rowLeft}>
+                                        <Cloud
+                                            size={scale(18)}
+                                            color={themeColor}
+                                            weight="duotone"
+                                        />
+                                        <Text style={styles.rowLabel(black.main)}>
+                                            {t('檢查官方SharePoint版本', { ns: 'catalog' })}
+                                        </Text>
+                                    </View>
+                                    <CaretRight
+                                        size={scale(14)}
+                                        color={black.third}
+                                        weight="bold"
+                                    />
+                                </ScalePressable>
+                            </>
+                        )}
+                    </View>
+
+                    {canClear ? (
+                        <View style={styles.groupCard}>
+                            <ScalePressable
+                                style={styles.rowItem}
                                 onPress={() =>
                                     runAction(() =>
                                         shareSheetRef.current?.show(),
                                     )
                                 }>
-                                <Ionicons
-                                    name="share-outline"
-                                    size={scale(18)}
-                                    color={themeColor}
+                                <View style={styles.rowLeft}>
+                                    <Export
+                                        size={scale(18)}
+                                        color={themeColor}
+                                        weight="duotone"
+                                    />
+                                    <Text style={styles.rowLabel(black.main)}>
+                                        {t('分享課表', { ns: 'timetable' })}
+                                    </Text>
+                                </View>
+                                <CaretRight
+                                    size={scale(14)}
+                                    color={black.third}
+                                    weight="bold"
                                 />
-                                <Text
-                                    style={styles.dualButtonText(themeColor)}
-                                    numberOfLines={1}>
-                                    {t('分享課表', { ns: 'timetable' })}
-                                </Text>
-                            </TouchableScale>
+                            </ScalePressable>
+                            <View style={styles.rowDivider} />
+                            <ScalePressable
+                                style={styles.rowItem}
+                                onPress={() => runAction(onClearPress)}>
+                                <View style={styles.rowLeft}>
+                                    <Trash
+                                        size={scale(18)}
+                                        color={unread}
+                                        weight="duotone"
+                                    />
+                                    <Text style={styles.rowLabel(unread)}>
+                                        {t('清空模擬課表', { ns: 'timetable' })}
+                                    </Text>
+                                </View>
+                            </ScalePressable>
                         </View>
                     ) : null}
 
-                    <TouchableScale
-                        style={styles.actionButton(tonal.primary30)}
-                        onPress={() => runAction(onManualUpdate)}>
-                        <Ionicons
-                            name="refresh-outline"
-                            size={scale(18)}
-                            color={themeColor}
-                        />
-                        <Text style={styles.actionButtonText(themeColor)}>
-                            {t('手動檢查課表數據更新', { ns: 'catalog' })}
-                        </Text>
-                    </TouchableScale>
-
-                    {programmeLevel === PROGRAMME_LEVELS.postgraduate ? null : (
-                        <TouchableScale
-                            style={styles.actionButton(tonal.primary15)}
-                            onPress={() => runAction(onOpenSharePoint)}>
-                            <Ionicons
-                                name="cloud-outline"
-                                size={scale(18)}
-                                color={themeColor}
-                            />
-                            <Text style={styles.actionButtonText(themeColor)}>
-                                {t('檢查官方SharePoint版本', { ns: 'catalog' })}
-                            </Text>
-                        </TouchableScale>
-                    )}
-
-                    <TouchableScale
-                        style={styles.actionButton(tonal.primary08)}
+                    <ScalePressable
+                        style={styles.cancelButton}
                         onPress={() => {
                             trigger();
                             pendingActionRef.current = null;
                             actionSheetRef.current?.hide();
                         }}>
-                        <Text style={styles.actionButtonText(black.third)}>
+                        <Text style={styles.cancelText}>
                             {t('Cancel')}
                         </Text>
-                    </TouchableScale>
+                    </ScalePressable>
                 </View>
             </ActionSheet>
             <TimetableShareSheet

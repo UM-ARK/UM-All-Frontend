@@ -2,6 +2,7 @@ import {getLocalStorage, setLocalStorage} from './storageKits';
 
 export const FEATURE_RECENT_USAGE_STORAGE_KEY = 'ARK_Features_Recent_Usage';
 export const FEATURE_RECENT_USAGE_LIMIT = 20;
+// TODO：評估讓使用者自訂釘選哪些功能到「常用服務」。
 export const FREQUENT_FEATURES_DISPLAY_LIMIT = 4;
 
 // 預設高頻入口（以 FeatureList key_name 為準）
@@ -9,7 +10,7 @@ export const DEFAULT_FREQUENT_FEATURE_KEYS = [
     '校園巴士',
     '校曆',
     '圖書館',
-    '打印餘額',
+    'Moodle',
 ];
 
 const normalizeTimestamp = usedAt =>

@@ -12,7 +12,6 @@ import {
     KeyboardAwareScrollView,
     KeyboardToolbar,
 } from 'react-native-keyboard-controller';
-import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import { useAnimatedRef, useSharedValue } from 'react-native-reanimated';
 import { scale, verticalScale } from 'react-native-size-matters';
 import { useTranslation } from 'react-i18next';
@@ -21,6 +20,7 @@ import Text from '../../../../components/AppText';
 import ScalePressable from '../../../../components/ScalePressable';
 import TextInput from '../../../../components/AppTextInput';
 import { useTheme } from '../../../../components/ThemeContext';
+import PhosphorFeatureIcon from '../../info/home/search/components/PhosphorFeatureIcon';
 import HarborCategoryIcon from '../components/HarborCategoryIcon';
 import HarborCategoryPickerSheet from './HarborCategoryPickerSheet';
 import { HarborComposerImageDragOverlay } from './HarborComposerImageDrag';
@@ -137,8 +137,8 @@ const HarborComposerForm = ({
                                 borderColor: theme.themeColorUltraLight,
                             },
                         ]}>
-                        <MaterialCommunityIcons
-                            name={isEdit ? 'pencil-outline' : 'reply-outline'}
+                        <PhosphorFeatureIcon
+                            name={isEdit ? 'pencil-simple' : 'arrow-bend-up-left'}
                             size={scale(21)}
                             color={theme.themeColor}
                         />
@@ -173,10 +173,11 @@ const HarborComposerForm = ({
                                         : t('回覆這個話題')}
                             </Text>
                         </View>
-                        <MaterialCommunityIcons
-                            name="chevron-right"
+                        <PhosphorFeatureIcon
+                            name="caret-right"
                             size={scale(20)}
                             color={theme.black.third}
+                            weight="regular"
                         />
                     </ScalePressable>
                 ) : null}
@@ -197,8 +198,8 @@ const HarborComposerForm = ({
                                     : theme.tonal.secondary15,
                             },
                         ]}>
-                        <MaterialCommunityIcons
-                            name="clock-outline"
+                        <PhosphorFeatureIcon
+                            name="clock"
                             size={scale(20)}
                             color={theme.secondThemeColor}
                         />
@@ -220,10 +221,11 @@ const HarborComposerForm = ({
                                 {t('點擊查看待審話題或回覆')}
                             </Text>
                         </View>
-                        <MaterialCommunityIcons
-                            name="chevron-right"
+                        <PhosphorFeatureIcon
+                            name="caret-right"
                             size={scale(20)}
                             color={theme.secondThemeColor}
+                            weight="regular"
                         />
                     </Pressable>
                 ) : null}
@@ -341,10 +343,11 @@ const HarborComposerForm = ({
                             ]}>
                             {t('支援 Markdown')}
                         </Text>
-                        <MaterialCommunityIcons
-                            name="information-outline"
+                        <PhosphorFeatureIcon
+                            name="info"
                             size={scale(15)}
                             color={theme.black.third}
+                            weight="regular"
                         />
                     </Pressable>
                 </View>
@@ -390,10 +393,11 @@ const HarborComposerForm = ({
                                     {selectedCategory?.name ||
                                         t('選擇分類')}
                                 </Text>
-                                <MaterialCommunityIcons
-                                    name="chevron-down"
+                                <PhosphorFeatureIcon
+                                    name="caret-down"
                                     size={scale(20)}
                                     color={theme.black.third}
+                                    weight="regular"
                                 />
                             </ScalePressable>
                         </View>
@@ -448,10 +452,11 @@ const HarborComposerForm = ({
                                             .join('  ')
                                         : t('選擇標籤（可多選）')}
                                 </Text>
-                                <MaterialCommunityIcons
-                                    name="chevron-down"
+                                <PhosphorFeatureIcon
+                                    name="caret-down"
                                     size={scale(20)}
                                     color={theme.black.third}
+                                    weight="regular"
                                 />
                             </ScalePressable>
                         </View>
@@ -512,8 +517,8 @@ const HarborComposerForm = ({
                                                 theme.themeColorUltraLight,
                                         },
                                     ]}>
-                                    <MaterialCommunityIcons
-                                        name="image-plus-outline"
+                                    <PhosphorFeatureIcon
+                                        name="image"
                                         size={scale(21)}
                                         color={theme.themeColor}
                                     />
@@ -538,10 +543,11 @@ const HarborComposerForm = ({
                                 accessibilityRole="link"
                                 onPress={onOpenWebComposer}
                                 style={styles.webComposerButton}>
-                                <MaterialCommunityIcons
-                                    name="open-in-new"
+                                <PhosphorFeatureIcon
+                                    name="arrow-square-out"
                                     size={scale(17)}
                                     color={theme.black.third}
+                                    weight="regular"
                                 />
                                 <Text
                                     style={[
@@ -564,8 +570,8 @@ const HarborComposerForm = ({
                                 borderColor: theme.unread,
                             },
                         ]}>
-                        <MaterialCommunityIcons
-                            name="alert-circle-outline"
+                        <PhosphorFeatureIcon
+                            name="warning-circle"
                             size={scale(20)}
                             color={theme.unread}
                         />
@@ -604,8 +610,8 @@ const HarborComposerForm = ({
                                 color={theme.unread}
                             />
                         ) : (
-                            <MaterialCommunityIcons
-                                name="delete-outline"
+                            <PhosphorFeatureIcon
+                                name="trash"
                                 size={scale(20)}
                                 color={theme.unread}
                             />

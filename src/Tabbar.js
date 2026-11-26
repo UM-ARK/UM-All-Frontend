@@ -4,7 +4,7 @@ import { AppState, Platform, useWindowDimensions, View } from 'react-native';
 import { useTheme } from './components/ThemeContext';
 
 import { scale, verticalScale } from 'react-native-size-matters';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaInsetsContext, SafeAreaListener, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SafeAreaView } from 'react-native-screens/experimental';
 
 import { useTranslation } from 'react-i18next';
@@ -19,7 +19,11 @@ import ForumPage from './pages/TabbarPages/arkHarbor';
 import CourseTab from './pages/TabbarPages/course';
 import MyScreen from './pages/TabbarPages/my';
 
-import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
+import { BookBookmark } from 'phosphor-react-native/src/icons/BookBookmark';
+import { ChatCircleDots } from 'phosphor-react-native/src/icons/ChatCircleDots';
+import { Newspaper } from 'phosphor-react-native/src/icons/Newspaper';
+import { SquaresFour } from 'phosphor-react-native/src/icons/SquaresFour';
+import { UserCircle } from 'phosphor-react-native/src/icons/UserCircle';
 import { trigger } from './utils/trigger';
 import { uiStyle } from './components/ThemeContext';
 import { isLiquidGlassSupported } from './utils/glassEffect';
@@ -58,30 +62,73 @@ const tabScreen = {
 
 const IOSNativeTabScreen = props => {
     const Screen = tabScreen[props.route.name];
+    const parentInsets = useSafeAreaInsets();
+    const [tabTopInset, setTabTopInset] = useState(parentInsets.top);
+
+    // iPadOS 原生浮動頂部 Tab Bar（tabSidebar）只反映在 Tab 子視圖的
+    // safeAreaInsets.top；只合併頂部安全區，保留外層 bottom 與水平 inset 避免與底欄高度疊加
+    const handleSafeAreaChange = useCallback(({ insets: nextInsets }) => {
+        const nextTop = nextInsets?.top ?? 0;
+        setTabTopInset(currentTop =>
+            Math.abs(currentTop - nextTop) > 0.5 ? nextTop : currentTop,
+        );
+    }, []);
+
+    const mergedInsets = useMemo(() => {
+        const top = Math.max(parentInsets.top, tabTopInset);
+        if (top === parentInsets.top) {
+            return parentInsets;
+        }
+        return {
+            ...parentInsets,
+            top,
+        };
+    }, [parentInsets, tabTopInset]);
 
     return (
         <SafeAreaView style={{ flex: 1 }} edges={{ left: true, right: true }}>
-            <Screen {...props} />
+            <SafeAreaListener
+                style={{ flex: 1 }}
+                onChange={handleSafeAreaChange}>
+                <SafeAreaInsetsContext.Provider value={mergedInsets}>
+                    <Screen {...props} />
+                </SafeAreaInsetsContext.Provider>
+            </SafeAreaListener>
         </SafeAreaView>
     );
 };
 
-// iOS SF Symbols 設定
+// iOS 原生 Tab Bar 使用 Phosphor 模板圖（未選中 regular / 選中 duotone），保留原生液態玻璃與系統著色
 const iosTabIconConfig = {
-    NewsTabbar: 'newspaper',
-    ForumTabbar: 'ellipsis.bubble',
-    CourseTab: 'text.book.closed',
-    FeaturesTabbar: 'square.grid.2x2',
-    MyTabbar: 'person.crop.circle',
+    NewsTabbar: {
+        regular: require('./static/img/tabbar/news-regular.png'),
+        duotone: require('./static/img/tabbar/news-duotone.png'),
+    },
+    ForumTabbar: {
+        regular: require('./static/img/tabbar/forum-regular.png'),
+        duotone: require('./static/img/tabbar/forum-duotone.png'),
+    },
+    CourseTab: {
+        regular: require('./static/img/tabbar/course-regular.png'),
+        duotone: require('./static/img/tabbar/course-duotone.png'),
+    },
+    FeaturesTabbar: {
+        regular: require('./static/img/tabbar/features-regular.png'),
+        duotone: require('./static/img/tabbar/features-duotone.png'),
+    },
+    MyTabbar: {
+        regular: require('./static/img/tabbar/my-regular.png'),
+        duotone: require('./static/img/tabbar/my-duotone.png'),
+    },
 };
 
-// Android MaterialCommunityIcons 名稱映射
+// Android Phosphor 圖標映射（未選中 regular / 選中 duotone）
 const androidTabIconConfig = {
-    NewsTabbar: 'newspaper-variant',
-    ForumTabbar: 'message',
-    CourseTab: 'book-open-page-variant',
-    FeaturesTabbar: 'view-grid',
-    MyTabbar: 'account-circle',
+    NewsTabbar: Newspaper,
+    ForumTabbar: ChatCircleDots,
+    CourseTab: BookBookmark,
+    FeaturesTabbar: SquaresFour,
+    MyTabbar: UserCircle,
 };
 
 // 論壇更新角標一般刷新間隔
@@ -120,7 +167,9 @@ const getTabBarStyle = (theme, insets) => {
             ? 'rgba(0,0,0,0.1)'
             : 'rgba(255,255,255,0.1)',
         borderTopWidth: 0.5,
-        elevation: 8,
+        elevation: 0,
+        zIndex: 1,
+        ...theme.tabBarShadow,
         // 高度只加一次 bottomInset；icon/文字緊湊靠 item 樣式，不靠加高內容區
         height: ANDROID_TAB_BAR_CONTENT_HEIGHT + bottomInset,
         paddingBottom: bottomInset,
@@ -145,13 +194,17 @@ class IOSTabbar {
         this.badges = badges || {};
         this.badgeListeners = badgeListeners || {};
         this.getTabbarIcon = (routeName, focused) => {
-            let baseName = iosTabIconConfig[routeName] || 'questionmark.circle';
-            if (focused) {
-                baseName += '.fill';
+            const iconSet = iosTabIconConfig[routeName];
+            if (!iconSet) {
+                return {
+                    type: 'sfSymbol',
+                    name: 'questionmark.circle',
+                };
             }
             return {
-                type: 'sfSymbol',
-                name: baseName,
+                type: 'image',
+                source: focused ? iconSet.duotone : iconSet.regular,
+                tinted: true,
             };
         };
         this.createTabScreen = name => {
@@ -223,15 +276,12 @@ class AndroidTabbar {
         this.badgeListeners = badgeListeners || {};
 
         this.getTabbarIcon = (routeName, focused, color) => {
-            let baseName = androidTabIconConfig[routeName] || 'help-circle';
-            if (!focused) {
-                baseName += '-outline';
-            }
+            const IconComponent = androidTabIconConfig[routeName] || SquaresFour;
             return (
-                <MaterialCommunityIcons
-                    name={baseName}
+                <IconComponent
                     size={ANDROID_TAB_ICON_SIZE}
-                    color={focused ? color : '#222'}
+                    color={color}
+                    weight={focused ? 'duotone' : 'regular'}
                 />
             );
         };

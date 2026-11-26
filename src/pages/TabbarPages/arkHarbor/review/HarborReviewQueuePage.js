@@ -19,7 +19,6 @@ import {
 import {isLiquidGlassSupported} from '../../../../utils/glassEffect';
 import {useHeaderHeight} from '@react-navigation/elements';
 import {FlashList} from '@shopify/flash-list';
-import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 import {scale, verticalScale} from 'react-native-size-matters';
 import Toast from 'react-native-simple-toast';
 import {useTranslation} from 'react-i18next';
@@ -41,6 +40,7 @@ import {
     performHarborReviewAction,
 } from '../../../../utils/harbor/harborReview';
 import {trigger} from '../../../../utils/trigger';
+import PhosphorFeatureIcon from '../../info/home/search/components/PhosphorFeatureIcon';
 import {HarborFullState, HarborInlineRetry} from '../components/HarborListStates';
 import HarborPostContent from '../topicDetail/HarborPostContent';
 import {extractPostImages} from '../topicDetail/harborTopicModels';
@@ -219,12 +219,12 @@ const isDestructiveAction = action => {
 const getActionIcon = action => {
     const value = `${action?.actionId || ''} ${getClientAction(action)} ${action?.name || ''} ${action?.label || ''}`.toLowerCase();
     if (/approve|agree|restore|check|批准|同意|還原/.test(value)) {
-        return 'check-circle-outline';
+        return 'check-circle';
     }
     if (/delete|reject|hide|silence|suspend|ban|刪除|拒絕|隱藏|禁言/.test(value)) {
-        return 'alert-octagon-outline';
+        return 'warning-circle';
     }
-    return 'gesture-tap-button';
+    return 'shield-warning';
 };
 
 const ReviewQueueRow = ({item, onPress}) => {
@@ -256,9 +256,9 @@ const ReviewQueueRow = ({item, onPress}) => {
                     styles.queueTypeIcon,
                     {backgroundColor: theme.tonal.unread15},
                 ]}>
-                <MaterialCommunityIcons
+                <PhosphorFeatureIcon
                     color={theme.unread}
-                    name="shield-alert-outline"
+                    name="shield-warning"
                     size={scale(21)}
                 />
             </View>
@@ -300,10 +300,11 @@ const ReviewQueueRow = ({item, onPress}) => {
                     ) : null}
                 </View>
             </View>
-            <MaterialCommunityIcons
+            <PhosphorFeatureIcon
                 color={theme.black.third}
-                name="chevron-right"
+                name="caret-right"
                 size={scale(21)}
+                weight="regular"
             />
         </ScalePressable>
     );
@@ -347,9 +348,9 @@ const ReviewDetailHeader = ({
                     styles.detailType,
                     {backgroundColor: theme.tonal.unread15},
                 ]}>
-                <MaterialCommunityIcons
+                <PhosphorFeatureIcon
                     color={theme.unread}
-                    name="shield-alert-outline"
+                    name="shield-warning"
                     size={scale(21)}
                 />
                 <Text style={[styles.detailTypeText, {color: theme.unread}]}>
@@ -1019,7 +1020,7 @@ const HarborReviewQueuePage = ({navigation, route}) => {
                             opacity: activeActionId != null && !isSubmitting ? 0.55 : 1,
                         },
                     ]}>
-                    <MaterialCommunityIcons
+                    <PhosphorFeatureIcon
                         color={isDestructive ? theme.unread : theme.themeColor}
                         name={getActionIcon(action)}
                         size={scale(21)}
@@ -1044,10 +1045,11 @@ const HarborReviewQueuePage = ({navigation, route}) => {
                     {isSubmitting ? (
                         <ActivityIndicator color={theme.themeColor} size="small" />
                     ) : (
-                        <MaterialCommunityIcons
+                        <PhosphorFeatureIcon
                             color={theme.black.third}
-                            name="chevron-right"
+                            name="caret-right"
                             size={scale(20)}
+                            weight="regular"
                         />
                     )}
                 </ScalePressable>
@@ -1134,7 +1136,7 @@ const HarborReviewQueuePage = ({navigation, route}) => {
         return (
             <View style={[styles.page, {backgroundColor: theme.bg_color}]}>
                 <HarborFullState
-                    icon="shield-lock-outline"
+                    icon="lock"
                     title={t('沒有審核權限')}
                     description={t('只有 Harbor 版主與管理員可以查看待審案件。')}
                     actionLabel={t('重新檢查')}
@@ -1165,7 +1167,7 @@ const HarborReviewQueuePage = ({navigation, route}) => {
                 ListEmptyComponent={
                     loadError ? (
                         <HarborFullState
-                            icon="cloud-alert-outline"
+                            icon="warning-circle"
                             title={t('待審案件載入失敗')}
                             description={t('請檢查網絡後再試。')}
                             actionLabel={t('重新載入')}
@@ -1173,7 +1175,7 @@ const HarborReviewQueuePage = ({navigation, route}) => {
                         />
                     ) : (
                         <HarborFullState
-                            icon="shield-check-outline"
+                            icon="shield"
                             title={t('暫時沒有待審案件')}
                             description={t('新的案件會顯示在這裡。')}
                         />

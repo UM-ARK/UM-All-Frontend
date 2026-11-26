@@ -19,6 +19,7 @@ import {scale, verticalScale} from 'react-native-size-matters';
 import Text from '../../../components/AppText';
 import ScalePressable from '../../../components/ScalePressable';
 import {uiStyle, useTheme} from '../../../components/ThemeContext';
+import PhosphorFeatureIcon from '../../TabbarPages/info/home/search/components/PhosphorFeatureIcon';
 import {logToFirebase} from '../../../utils/firebaseAnalytics';
 import {openTeamInviteDetail} from '../../../utils/scheduling/teamInviteLink';
 import {trigger} from '../../../utils/trigger';
@@ -98,7 +99,10 @@ const TeamSchedulePreviewSection = forwardRef(
 
         const openCreate = useCallback(() => {
             trigger();
-            navigation.navigate('TeamScheduleCreate');
+            // 讓觸覺回饋先送出，避免同步掛載重型週視圖拖慢震動時機
+            requestAnimationFrame(() => {
+                navigation.navigate('TeamScheduleCreate');
+            });
         }, [navigation]);
 
         const openJoin = useCallback(() => {
@@ -149,17 +153,11 @@ const TeamSchedulePreviewSection = forwardRef(
                     }}
                     style={myCardStyles.heading}>
                     <View style={myCardStyles.iconColumn}>
-                        <View
-                            style={[
-                                myCardStyles.headingIcon,
-                                {backgroundColor: theme.tonal.primary15},
-                            ]}>
-                            <Ionicons
-                                name="calendar-outline"
-                                size={scale(19)}
-                                color={theme.themeColor}
-                            />
-                        </View>
+                        <PhosphorFeatureIcon
+                            name="calendar-check"
+                            size={scale(22)}
+                            color={theme.featureIconTones.green.foreground}
+                        />
                     </View>
                     <Text
                         style={[
@@ -178,19 +176,24 @@ const TeamSchedulePreviewSection = forwardRef(
                 </ScalePressable>
 
                 <View style={[styles.actionRow, !expanded && styles.collapsed]}>
-                    <View style={myCardStyles.column} />
                     <View style={styles.primaryActions}>
                         <ScalePressable
                             accessibilityRole="button"
                             accessibilityLabel={t('新建組隊')}
                             onPress={openCreate}
-                            style={styles.actionButton}>
-                            <Ionicons
-                                name="add-circle-outline"
-                                size={scale(16)}
+                            hitSlop={{top: 4, bottom: 4}}
+                            style={[
+                                styles.actionButton,
+                                {backgroundColor: theme.white},
+                                theme.viewShadow,
+                            ]}>
+                            <PhosphorFeatureIcon
+                                name="plus-circle"
+                                size={scale(17)}
                                 color={theme.themeColor}
                             />
                             <Text
+                                numberOfLines={1}
                                 style={[
                                     styles.actionButtonText,
                                     {color: theme.accentForeground},
@@ -202,13 +205,19 @@ const TeamSchedulePreviewSection = forwardRef(
                             accessibilityRole="button"
                             accessibilityLabel={t('加入隊伍')}
                             onPress={openJoin}
-                            style={styles.actionButton}>
-                            <Ionicons
-                                name="enter-outline"
-                                size={scale(16)}
+                            hitSlop={{top: 4, bottom: 4}}
+                            style={[
+                                styles.actionButton,
+                                {backgroundColor: theme.white},
+                                theme.viewShadow,
+                            ]}>
+                            <PhosphorFeatureIcon
+                                name="user-plus"
+                                size={scale(17)}
                                 color={theme.themeColor}
                             />
                             <Text
+                                numberOfLines={1}
                                 style={[
                                     styles.actionButtonText,
                                     {color: theme.accentForeground},
@@ -227,7 +236,7 @@ const TeamSchedulePreviewSection = forwardRef(
                         ]}>
                         <Ionicons
                             name="information-circle-outline"
-                            size={scale(17)}
+                            size={scale(18)}
                             color={theme.black.third}
                         />
                     </ScalePressable>
@@ -280,10 +289,10 @@ const TeamSchedulePreviewSection = forwardRef(
                             chevronContainerStyle={myCardStyles.iconColumn}
                             leadingAccessory={
                                 <View style={myCardStyles.iconColumn}>
-                                    <Ionicons
-                                        name="people-outline"
-                                        size={scale(17)}
-                                        color={theme.black.third}
+                                    <PhosphorFeatureIcon
+                                        name="users"
+                                        size={scale(20)}
+                                        color={theme.featureIconTones.green.foreground}
                                     />
                                 </View>
                             }
@@ -293,16 +302,17 @@ const TeamSchedulePreviewSection = forwardRef(
                         accessibilityRole="button"
                         accessibilityLabel={t('全部組隊約時間')}
                         onPress={openList}
+                        hitSlop={{top: 4, bottom: 4}}
                         style={[
                             styles.listLink,
                             {borderTopColor: theme.disabled},
                         ]}>
                         <Text
                             style={[
-                                styles.actionButtonText,
+                                styles.listLinkText,
                                 {color: theme.accentForeground},
                             ]}>
-                            {t('查看全部')}
+                            {t('全部')}
                         </Text>
                         <View style={myCardStyles.iconColumn}>
                             <Ionicons
@@ -340,27 +350,33 @@ const styles = StyleSheet.create({
     actionRow: {
         flexDirection: 'row',
         alignItems: 'center',
+        paddingLeft: scale(10),
+        gap: scale(6),
     },
     primaryActions: {
         flex: 1,
         minWidth: 0,
         flexDirection: 'row',
-        flexWrap: 'wrap',
         alignItems: 'center',
-        justifyContent: 'flex-start',
-        columnGap: scale(24),
+        gap: scale(8),
     },
     actionButton: {
+        flex: 1,
+        minWidth: 0,
         flexDirection: 'row',
         alignItems: 'center',
-        minHeight: 44,
-        flexShrink: 1,
-        gap: scale(4),
+        justifyContent: 'center',
+        minHeight: verticalScale(38),
+        paddingHorizontal: scale(12),
+        paddingVertical: verticalScale(7),
+        borderRadius: scale(10),
+        borderCurve: 'continuous',
+        gap: scale(6),
     },
     actionButtonText: {
         ...uiStyle.defaultText,
         flexShrink: 1,
-        fontSize: scale(12),
+        fontSize: scale(13),
         fontWeight: '600',
     },
     listWrap: {
@@ -371,8 +387,13 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'flex-end',
-        minHeight: 44,
+        minHeight: verticalScale(38),
         borderTopWidth: StyleSheet.hairlineWidth,
+    },
+    listLinkText: {
+        ...uiStyle.defaultText,
+        fontSize: scale(13),
+        fontWeight: '600',
     },
     listInner: {
         paddingVertical: verticalScale(12),

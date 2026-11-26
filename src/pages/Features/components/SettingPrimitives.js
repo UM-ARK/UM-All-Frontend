@@ -2,12 +2,13 @@
 // 主設置頁與各設置子頁共用
 import React from 'react';
 import { View } from 'react-native';
-import Ionicons from '@react-native-vector-icons/ionicons';
 import { scale, verticalScale } from 'react-native-size-matters';
 import Text from '../../../components/AppText';
 import ScalePressable from '../../../components/ScalePressable';
+import SegmentedTabControl from '../../../components/SegmentedTabControl';
 import { useTheme, uiStyle } from '../../../components/ThemeContext';
 import { trigger } from '../../../utils/trigger';
+import PhosphorFeatureIcon from '../../TabbarPages/info/home/search/components/PhosphorFeatureIcon';
 
 /**
  * 同一分區內多個設置項的容器：單一圓角卡片；項間分隔與功能頁卡片標題底線相同（bg_color、verticalScale(2)）
@@ -48,7 +49,7 @@ export const SettingSectionCard = ({ children }) => {
 /**
  * 設置分區標題元件
  * @param {string} title - 分區標題文字
- * @param {string} icon - Ionicons 圖標名稱
+ * @param {string} icon - Phosphor 圖標名稱
  */
 export const SettingSection = ({ title, icon }) => {
     const { theme } = useTheme();
@@ -64,7 +65,7 @@ export const SettingSection = ({ title, icon }) => {
                 marginBottom: verticalScale(6),
             }}>
             {icon && (
-                <Ionicons
+                <PhosphorFeatureIcon
                     name={icon}
                     size={scale(14)}
                     color={black.third}
@@ -86,9 +87,28 @@ export const SettingSection = ({ title, icon }) => {
     );
 };
 
+export const SettingSegmentControl = ({
+    options,
+    selectedIndex,
+    onChange,
+    optionWidth = 54,
+}) => (
+    <SegmentedTabControl
+        options={options}
+        selectedIndex={selectedIndex}
+        onChange={index => {
+            trigger('selection');
+            onChange(index);
+        }}
+        compact
+        compactItemWidth={scale(optionWidth)}
+        raisedTrack
+    />
+);
+
 /**
  * 基礎設置項目元件
- * @param {string} icon - Ionicons 圖標名稱
+ * @param {string} icon - Phosphor 圖標名稱
  * @param {string} iconColor - 圖標顏色
  * @param {string} title - 項目標題
  * @param {string} subtitle - 項目副標題（可選）
@@ -144,13 +164,11 @@ export const SettingItem = ({
                     style={{
                         width: scale(32),
                         height: scale(32),
-                        borderRadius: scale(12),
-                        backgroundColor: `${iconColor}15`,
                         justifyContent: 'center',
                         alignItems: 'center',
                         marginRight: scale(12),
                     }}>
-                    <Ionicons name={icon} size={scale(18)} color={iconColor} />
+                    <PhosphorFeatureIcon name={icon} size={scale(18)} color={iconColor} />
                 </View>
             )}
 
@@ -183,10 +201,11 @@ export const SettingItem = ({
 
             {/* 箭頭 */}
             {showArrow && (
-                <Ionicons
-                    name="chevron-forward"
+                <PhosphorFeatureIcon
+                    name="caret-right"
                     size={scale(18)}
                     color={black.third}
+                    weight="regular"
                     style={{ marginLeft: scale(8) }}
                 />
             )}

@@ -2,13 +2,13 @@ import React, { useEffect, useMemo, useRef } from 'react';
 import { Dimensions, Pressable, StyleSheet, View } from 'react-native';
 
 import ActionSheet, { ScrollView } from 'react-native-actions-sheet';
-import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import { scale, verticalScale } from 'react-native-size-matters';
 
 import Text from '../../../../components/AppText';
 import ScalePressable from '../../../../components/ScalePressable';
 import { uiStyle, useTheme } from '../../../../components/ThemeContext';
 import { trigger } from '../../../../utils/trigger';
+import PhosphorFeatureIcon from '../../info/home/search/components/PhosphorFeatureIcon';
 
 const PRIMARY_ACTION_IDS = new Set([
     'copyContent',
@@ -109,10 +109,10 @@ const HarborPostMoreSheet = ({ menu, onClose }) => {
                                                     theme.white,
                                             },
                                         ]}>
-                                        <MaterialCommunityIcons
+                                        <PhosphorFeatureIcon
                                             name={
                                                 action.icon ||
-                                                'dots-horizontal'
+                                                'dots-three'
                                             }
                                             size={scale(24)}
                                             color={
@@ -176,10 +176,10 @@ const HarborPostMoreSheet = ({ menu, onClose }) => {
                                             opacity: disabled ? 0.4 : 1,
                                         },
                                     ]}>
-                                    <MaterialCommunityIcons
+                                    <PhosphorFeatureIcon
                                         name={
                                             action.icon ||
-                                            'dots-horizontal'
+                                            'dots-three'
                                         }
                                         size={scale(21)}
                                         color={
@@ -199,10 +199,11 @@ const HarborPostMoreSheet = ({ menu, onClose }) => {
                                         ]}>
                                         {action.title}
                                     </Text>
-                                    <MaterialCommunityIcons
-                                        name="chevron-right"
+                                    <PhosphorFeatureIcon
+                                        name="caret-right"
                                         size={scale(20)}
                                         color={theme.black.third}
+                                        weight="regular"
                                     />
                                 </ScalePressable>
                             );

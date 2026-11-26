@@ -15,7 +15,6 @@ import {
 
 import { FlashList } from '@shopify/flash-list';
 import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
-import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import { scale, verticalScale } from 'react-native-size-matters';
 import {
     SafeAreaView,
@@ -39,16 +38,20 @@ import {
 } from '../../../../utils/harbor/harborCategories';
 import { ARK_HARBOR } from '../../../../utils/pathMap';
 import { trigger } from '../../../../utils/trigger';
+import PhosphorFeatureIcon from '../../info/home/search/components/PhosphorFeatureIcon';
 import { HarborInlineRetry } from './HarborListStates';
 import HarborCategoryIcon from './HarborCategoryIcon';
 
 const DrawerMenuItem = ({
     icon,
+    iconTone = 'blue',
     label,
     active = false,
     onPress,
 }) => {
     const { theme } = useTheme();
+    const tone =
+        theme.featureIconTones[iconTone] || theme.featureIconTones.blue;
 
     return (
         <ScalePressable
@@ -66,10 +69,10 @@ const DrawerMenuItem = ({
                         : theme.bg_color,
                 },
             ]}>
-            <MaterialCommunityIcons
+            <PhosphorFeatureIcon
                 name={icon}
                 size={scale(20)}
-                color={active ? theme.themeColor : theme.black.third}
+                color={tone.foreground}
             />
             <Text
                 numberOfLines={1}
@@ -104,15 +107,11 @@ const AllCategoriesRow = ({ onPress }) => {
                     backgroundColor: theme.bg_color,
                 },
             ]}>
-            <View
-                style={[
-                    styles.categoryIcon,
-                    { backgroundColor: theme.tonal.primary15 },
-                ]}>
-                <MaterialCommunityIcons
-                    name="view-grid-outline"
-                    size={scale(17)}
-                    color={theme.themeColor}
+            <View style={styles.categoryIcon}>
+                <PhosphorFeatureIcon
+                    name="grid"
+                    size={scale(20)}
+                    color={theme.featureIconTones.blue.foreground}
                 />
             </View>
             <Text
@@ -124,10 +123,11 @@ const AllCategoriesRow = ({ onPress }) => {
                 ]}>
                 {t('所有分類')}
             </Text>
-            <MaterialCommunityIcons
-                name="chevron-right"
-                size={scale(17)}
+            <PhosphorFeatureIcon
+                name="caret-right"
+                size={scale(16)}
                 color={theme.black.third}
+                weight="regular"
             />
         </ScalePressable>
     );
@@ -152,15 +152,7 @@ const CategoryRow = ({ item, onPress, onToggle }) => {
                     backgroundColor: theme.bg_color,
                 },
             ]}>
-            <View
-                style={[
-                    styles.categoryIcon,
-                    {
-                        backgroundColor: isSubcategory
-                            ? theme.tonal.secondary15
-                            : theme.tonal.primary15,
-                    },
-                ]}>
+            <View style={styles.categoryIcon}>
                 <HarborCategoryIcon
                     category={item}
                     color={
@@ -168,10 +160,8 @@ const CategoryRow = ({ item, onPress, onToggle }) => {
                             ? theme.secondThemeColor
                             : theme.themeColor
                     }
-                    fallbackIcon={
-                        isSubcategory ? 'folder-outline' : 'folder'
-                    }
-                    size={scale(isSubcategory ? 15 : 17)}
+                    fallbackIcon={isSubcategory ? 'folder' : 'folders'}
+                    size={scale(isSubcategory ? 18 : 20)}
                 />
             </View>
             <Text
@@ -190,10 +180,11 @@ const CategoryRow = ({ item, onPress, onToggle }) => {
                 {item.name}
             </Text>
             {item.readRestricted ? (
-                <MaterialCommunityIcons
-                    name="lock-outline"
+                <PhosphorFeatureIcon
+                    name="lock"
                     size={scale(13)}
                     color={theme.unread}
+                    weight="regular"
                 />
             ) : null}
             {item.hasChildren ? (
@@ -213,21 +204,23 @@ const CategoryRow = ({ item, onPress, onToggle }) => {
                         onToggle(item);
                     }}
                     style={styles.categoryToggle}>
-                    <MaterialCommunityIcons
+                    <PhosphorFeatureIcon
                         name={
                             item.isExpanded
-                                ? 'chevron-up'
-                                : 'chevron-down'
+                                ? 'caret-up'
+                                : 'caret-down'
                         }
-                        size={scale(18)}
+                        size={scale(16)}
                         color={theme.themeColor}
+                        weight="regular"
                     />
                 </ScalePressable>
             ) : null}
-            <MaterialCommunityIcons
-                name="chevron-right"
-                size={scale(17)}
+            <PhosphorFeatureIcon
+                name="caret-right"
+                size={scale(16)}
                 color={theme.black.third}
+                weight="regular"
             />
         </ScalePressable>
     );
@@ -247,20 +240,21 @@ const DrawerSectionTitle = ({
 
     const content = (
         <>
-            <MaterialCommunityIcons
+            <PhosphorFeatureIcon
                 name={
                     isCollapsible
                         ? isExpanded
-                            ? 'chevron-down'
-                            : 'chevron-right'
+                            ? 'caret-down'
+                            : 'caret-right'
                         : icon
                 }
-                size={scale(17)}
+                size={scale(16)}
                 color={
                     isCollapsible && !isExpanded
                         ? theme.themeColor
                         : theme.black.third
                 }
+                weight="regular"
             />
             <Text
                 style={[
@@ -514,22 +508,25 @@ const HarborDrawerContent = ({ navigation }) => {
                                 backgroundColor: theme.white,
                             },
                         ]}>
-                        <MaterialCommunityIcons
-                            name="close"
-                            size={scale(19)}
+                        <PhosphorFeatureIcon
+                            name="x"
+                            size={scale(18)}
                             color={theme.themeColor}
+                            weight="regular"
                         />
                     </ScalePressable>
                 </View>
 
                 <View style={styles.menuGroup}>
                     <DrawerMenuItem
-                        icon="layers-triple-outline"
+                        icon="stack"
+                        iconTone="blue"
                         label={t('討論話題')}
                         active
                     />
                     <DrawerMenuItem
-                        icon="plus-box-outline"
+                        icon="plus-square"
+                        iconTone="green"
                         label={t('發佈話題')}
                         onPress={() =>
                             navigateFromDrawer('HarborComposer', {
@@ -538,17 +535,20 @@ const HarborDrawerContent = ({ navigation }) => {
                         }
                     />
                     <DrawerMenuItem
-                        icon="account-outline"
+                        icon="user-circle"
+                        iconTone="orange"
                         label={t('個人中心')}
                         onPress={handleMyPress}
                     />
                     <DrawerMenuItem
-                        icon="chat-outline"
+                        icon="message-circle"
+                        iconTone="pink"
                         label={t('即時聊天')}
                         onPress={handleChatPress}
                     />
                     <DrawerMenuItem
-                        icon="file-document-edit-outline"
+                        icon="note"
+                        iconTone="green"
                         label={t('草稿箱')}
                         onPress={() => navigateFromDrawer('HarborDrafts')}
                     />
@@ -622,10 +622,11 @@ const HarborDrawerContent = ({ navigation }) => {
     const listFooter = useMemo(
         () => (
             <View style={styles.drawerFooter}>
-                <DrawerSectionTitle icon="chevron-down" title={t('標籤')} />
+                <DrawerSectionTitle icon="caret-down" title={t('標籤')} />
                 <View style={styles.footerMenuGroup}>
                     <DrawerMenuItem
-                        icon="tag-multiple-outline"
+                        icon="tag"
+                        iconTone="orange"
                         label={t('熱門標籤')}
                         onPress={() => navigateFromDrawer('HarborTagList')}
                     />
@@ -795,9 +796,8 @@ const styles = StyleSheet.create({
         marginLeft: scale(30),
     },
     categoryIcon: {
-        width: scale(31),
-        height: scale(31),
-        borderRadius: scale(10),
+        width: scale(22),
+        height: scale(22),
         alignItems: 'center',
         justifyContent: 'center',
     },
@@ -806,7 +806,7 @@ const styles = StyleSheet.create({
         flex: 1,
         minWidth: 0,
         fontSize: scale(12),
-        marginLeft: scale(9),
+        marginLeft: scale(10),
     },
     rootCategoryName: {
         fontWeight: '700',

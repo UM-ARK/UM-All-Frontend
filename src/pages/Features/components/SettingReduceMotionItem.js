@@ -17,7 +17,7 @@ export default function SettingReduceMotionItem() {
     return (
         <SettingItem
             grouped
-            icon="sparkles-outline"
+            icon="sparkles"
             iconColor={theme.themeColor}
             title={title}
             subtitle={saveFailed ? t('無法儲存設定，請再試一次。') : description}
@@ -27,6 +27,8 @@ export default function SettingReduceMotionItem() {
                     accessibilityLabel={title}
                     accessibilityHint={description}
                     disabled={preference === null}
+                    hitSlop={8}
+                    style={{ alignSelf: 'center', transform: [{ scale: 0.82 }] }}
                     ios_backgroundColor={theme.disabled}
                     trackColor={{ false: theme.disabled, true: theme.themeColor }}
                     value={preference === true}

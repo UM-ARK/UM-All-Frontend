@@ -12,14 +12,19 @@ import { useFocusEffect } from '@react-navigation/native';
 import { isLiquidGlassSupported } from '../../../../../utils/glassEffect';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { scale, verticalScale } from 'react-native-size-matters';
-import Ionicons from "@react-native-vector-icons/ionicons";
 import { useTranslation } from 'react-i18next';
 
 import { getFunctionArr } from '../../../features/FeatureList';
 import Text from '../../../../../components/AppText';
 import ScalePressable from '../../../../../components/ScalePressable';
 import TextInput from '../../../../../components/AppTextInput';
+import searchFieldStyles, {
+    SEARCH_FIELD_CLEAR_ICON_SIZE,
+    SEARCH_FIELD_ICON_SIZE,
+    SEARCH_FIELD_MAX_FONT_SIZE_MULTIPLIER,
+} from '../../../../../components/searchFieldStyles';
 import FeatureIcon from './components/FeatureIcon';
+import PhosphorFeatureIcon from './components/PhosphorFeatureIcon';
 import { useTheme, uiStyle } from '../../../../../components/ThemeContext';
 import { openLink } from '../../../../../utils/browser';
 import { logToFirebase } from '../../../../../utils/firebaseAnalytics';
@@ -106,9 +111,8 @@ const SearchScreen = ({ navigation }) => {
     const {
         bg_color,
         black,
+        featuresScreen,
         themeColor,
-        themeColorUltraLight,
-        tonal,
         viewShadow,
         white,
     } = theme;
@@ -388,17 +392,17 @@ const SearchScreen = ({ navigation }) => {
                         styles.emptyWelcome,
                         {
                             backgroundColor: white,
-                            borderColor: themeColorUltraLight,
+                            borderColor: featuresScreen.divider,
                         },
                         viewShadow,
                     ]}>
                     <View
                         style={[
                             styles.emptyIcon,
-                            { backgroundColor: tonal.primary15 },
+                            { backgroundColor: bg_color },
                         ]}>
-                        <Ionicons
-                            name="sparkles-outline"
+                        <PhosphorFeatureIcon
+                            name="sparkles"
                             size={scale(27)}
                             color={themeColor}
                         />
@@ -455,7 +459,10 @@ const SearchScreen = ({ navigation }) => {
                             key={record.query.toLowerCase()}
                             style={[
                                 styles.chip,
-                                { backgroundColor: tonal.primary15 },
+                                {
+                                    backgroundColor: white,
+                                    borderColor: featuresScreen.divider,
+                                },
                             ]}>
                             <Pressable
                                 onPress={() => handleHistoryPress(record)}
@@ -466,17 +473,18 @@ const SearchScreen = ({ navigation }) => {
                                         opacity: 0.55,
                                     },
                                 ]}>
-                                <Ionicons
-                                    name="time-outline"
+                                <PhosphorFeatureIcon
+                                    name="clock-counter-clockwise"
                                     size={scale(14)}
-                                    color={themeColor}
+                                    color={black.third}
+                                    weight="regular"
                                 />
                                 <Text
                                     numberOfLines={1}
                                     style={[
                                         uiStyle.defaultText,
                                         styles.chipText,
-                                        { color: themeColor },
+                                        { color: black.main },
                                     ]}>
                                     {record.query}
                                 </Text>
@@ -493,10 +501,11 @@ const SearchScreen = ({ navigation }) => {
                                     },
                                 )}
                                 style={styles.historyChipRemove}>
-                                <Ionicons
-                                    name="close"
+                                <PhosphorFeatureIcon
+                                    name="x"
                                     size={scale(14)}
                                     color={black.third}
+                                    weight="regular"
                                 />
                             </ScalePressable>
                         </View>
@@ -518,11 +527,12 @@ const SearchScreen = ({ navigation }) => {
                         style={[
                             styles.chip,
                             {
-                                backgroundColor: tonal.primary15,
+                                backgroundColor: white,
+                                borderColor: featuresScreen.divider,
                             },
                         ]}>
-                        <Ionicons
-                            name="search-outline"
+                        <PhosphorFeatureIcon
+                            name={item.phosphorIcon || 'search'}
                             size={scale(14)}
                             color={themeColor}
                         />
@@ -531,7 +541,7 @@ const SearchScreen = ({ navigation }) => {
                             style={[
                                 uiStyle.defaultText,
                                 styles.chipText,
-                                { color: themeColor },
+                                { color: black.main },
                             ]}>
                             {item.fn_name}
                         </Text>
@@ -566,17 +576,18 @@ const SearchScreen = ({ navigation }) => {
                         ],
                     )}
                 </View>
-                <Ionicons
-                    name="chevron-forward"
-                    size={scale(18)}
+                <PhosphorFeatureIcon
+                    name="caret-right"
+                    size={scale(16)}
                     color={black.third}
+                    weight="regular"
                 />
             </ScalePressable>
             {index < localResults.length - 1 ? (
                 <View
                     style={[
                         styles.divider,
-                        { backgroundColor: themeColorUltraLight },
+                        { backgroundColor: featuresScreen.divider },
                     ]}
                 />
             ) : null}
@@ -591,18 +602,20 @@ const SearchScreen = ({ navigation }) => {
                 style={[
                     styles.webSearchButton,
                     {
-                        backgroundColor: tonal.primary15,
+                        backgroundColor: white,
+                        borderColor: featuresScreen.divider,
                     },
+                    viewShadow,
                 ]}>
                 <View
                     style={[
                         styles.webSearchIcon,
-                        { backgroundColor: themeColor },
+                        { backgroundColor: bg_color },
                     ]}>
-                    <Ionicons
-                        name="globe-outline"
-                        size={scale(19)}
-                        color={white}
+                    <PhosphorFeatureIcon
+                        name="globe"
+                        size={scale(20)}
+                        color={themeColor}
                     />
                 </View>
                 <Text
@@ -610,17 +623,18 @@ const SearchScreen = ({ navigation }) => {
                     style={[
                         uiStyle.defaultText,
                         styles.webSearchText,
-                        { color: themeColor },
+                        { color: black.main },
                     ]}>
                     {t('在澳大網頁搜索「{{query}}」', {
                         ns: 'home',
                         query: query.trim(),
                     })}
                 </Text>
-                <Ionicons
-                    name="open-outline"
+                <PhosphorFeatureIcon
+                    name="arrow-square-out"
                     size={scale(18)}
-                    color={themeColor}
+                    color={black.third}
+                    weight="regular"
                 />
             </ScalePressable>
             {renderSectionHeader(t('相關服務', { ns: 'home' }))}
@@ -632,10 +646,10 @@ const SearchScreen = ({ navigation }) => {
                         <View
                             style={[
                                 styles.emptyIcon,
-                                { backgroundColor: tonal.primary15 },
+                                { backgroundColor: bg_color },
                             ]}>
-                            <Ionicons
-                                name="search-outline"
+                            <PhosphorFeatureIcon
+                                name="search"
                                 size={scale(25)}
                                 color={themeColor}
                             />
@@ -676,16 +690,18 @@ const SearchScreen = ({ navigation }) => {
             <View style={styles.searchHeader}>
                 <View
                     style={[
+                        searchFieldStyles.field,
                         styles.inputContainer,
                         {
-                            backgroundColor: tonal.primary08,
-                            borderColor: themeColorUltraLight,
+                            backgroundColor: featuresScreen.searchBg,
+                            borderColor: featuresScreen.divider,
                         },
                     ]}>
-                    <Ionicons
+                    <PhosphorFeatureIcon
                         name="search"
-                        size={scale(19)}
+                        size={SEARCH_FIELD_ICON_SIZE}
                         color={themeColor}
+                        weight="regular"
                     />
                     <TextInput
                         ref={inputRef}
@@ -698,10 +714,11 @@ const SearchScreen = ({ navigation }) => {
                         returnKeyType="search"
                         autoCapitalize="none"
                         autoCorrect={false}
+                        maxFontSizeMultiplier={SEARCH_FIELD_MAX_FONT_SIZE_MULTIPLIER}
                         accessibilityLabel={t('搜索', { ns: 'common' })}
                         style={[
-                            uiStyle.defaultText,
-                            styles.input,
+                            searchFieldStyles.text,
+                            searchFieldStyles.input,
                             { color: black.main },
                         ]}
                     />
@@ -718,9 +735,9 @@ const SearchScreen = ({ navigation }) => {
                                 ns: 'home',
                             })}
                             style={styles.clearInputButton}>
-                            <Ionicons
-                                name="close-circle"
-                                size={scale(19)}
+                            <PhosphorFeatureIcon
+                                name="x-circle"
+                                size={SEARCH_FIELD_CLEAR_ICON_SIZE}
                                 color={black.third}
                             />
                         </ScalePressable>
@@ -751,25 +768,13 @@ const styles = StyleSheet.create({
         paddingBottom: verticalScale(8),
     },
     inputContainer: {
-        minHeight: verticalScale(44),
-        borderRadius: scale(15),
         borderWidth: StyleSheet.hairlineWidth,
-        paddingLeft: scale(13),
         paddingRight: scale(8),
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: scale(8),
-    },
-    input: {
-        flex: 1,
-        minHeight: verticalScale(44),
-        paddingVertical: 0,
-        fontSize: scale(14),
     },
     clearInputButton: {
-        width: scale(36),
-        height: scale(36),
-        borderRadius: scale(18),
+        width: 36,
+        height: 36,
+        borderRadius: 18,
         alignItems: 'center',
         justifyContent: 'center',
     },
@@ -865,6 +870,7 @@ const styles = StyleSheet.create({
         minHeight: verticalScale(34),
         maxWidth: '100%',
         borderRadius: scale(17),
+        borderWidth: StyleSheet.hairlineWidth,
         paddingHorizontal: scale(12),
         flexDirection: 'row',
         alignItems: 'center',
@@ -902,6 +908,7 @@ const styles = StyleSheet.create({
         minHeight: verticalScale(58),
         marginBottom: verticalScale(4),
         borderRadius: scale(18),
+        borderWidth: StyleSheet.hairlineWidth,
         paddingHorizontal: scale(12),
         paddingVertical: verticalScale(9),
         flexDirection: 'row',

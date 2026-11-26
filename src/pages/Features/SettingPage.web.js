@@ -1,7 +1,6 @@
 // Web / 桌面版設置頁：Metro 在 web 平台自動優先選用 .web.js，手機端仍走 SettingPage.js。
 // 只保留網頁用得上的項：外觀（主題、語言）、課程（課表模式、選咩課入口）、
 // 本機數據、關於與聯繫。Harbor 帳戶、檢查更新、系統設定、瀏覽器快取說明等純手機能力不掛。
-// 手機端用 @expo/ui MenuView 做下拉，web 沒有原生實現，這裡一律改用 SegmentControl
 import React, { useCallback } from 'react';
 import { View, ScrollView, Linking } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -10,7 +9,6 @@ import { scale, verticalScale } from 'react-native-size-matters';
 
 import Text from '../../components/AppText';
 import { useTheme, uiStyle } from '../../components/ThemeContext';
-import SegmentControl from '../../components/SegmentControl';
 import { useProgrammeLevel } from '../../contexts/ProgrammeLevelContext';
 import { PROGRAMME_LEVELS } from '../../utils/courseProgramme';
 import { openLink } from '../../utils/browser';
@@ -32,6 +30,7 @@ import {
     SettingSection,
     SettingSectionCard,
     SettingItem,
+    SettingSegmentControl,
 } from './components/SettingPrimitives';
 import SettingReduceMotionItem from './components/SettingReduceMotionItem';
 import appConfig from '../../../app.json';
@@ -41,7 +40,7 @@ const SETTINGS_CONTENT_MAX_WIDTH = 720;
 
 const SettingPage = () => {
     const { theme, themeMode, setThemeMode } = useTheme();
-    const { bg_color, black, themeColor } = theme;
+    const { bg_color, black, themeColor, featureIconTones } = theme;
     const { t, i18n } = useTranslation(['setting', 'common']);
     const { programmeLevel, setProgrammeLevel } = useProgrammeLevel();
     const { isCompact } = useWindowSizeClass();
@@ -109,18 +108,18 @@ const SettingPage = () => {
                 {/* 外觀 */}
                 <SettingSection
                     title={t('setting:Appearance')}
-                    icon="color-palette"
+                    icon="palette"
                 />
                 <SettingSectionCard>
                     <SettingItem
                         grouped
-                        icon="sunny"
-                        iconColor="#FF9500"
+                        icon="sun"
+                        iconColor={featureIconTones.orange.foreground}
                         title={t('setting:Theme')}
                         subtitle={themeOptions[themeMode].label}
                         showArrow={false}
                         rightElement={
-                            <SegmentControl
+                            <SettingSegmentControl
                                 options={themeOptions}
                                 selectedIndex={themeMode}
                                 onChange={setThemeMode}
@@ -129,16 +128,17 @@ const SettingPage = () => {
                     />
                     <SettingItem
                         grouped
-                        icon="language"
-                        iconColor="#5856D6"
+                        icon="translate"
+                        iconColor={featureIconTones.blue.foreground}
                         title={t('setting:Language')}
                         subtitle={
                             i18n.language === 'tc' ? '繁體中文' : 'English'
                         }
                         showArrow={false}
                         rightElement={
-                            <SegmentControl
+                            <SettingSegmentControl
                                 options={languageOptions}
+                                optionWidth={38}
                                 selectedIndex={languageIndex}
                                 onChange={index =>
                                     i18n.changeLanguage(
@@ -152,11 +152,11 @@ const SettingPage = () => {
                 </SettingSectionCard>
 
                 {/* 課程 */}
-                <SettingSection title={t('setting:Courses')} icon="school" />
+                <SettingSection title={t('setting:Courses')} icon="graduation-cap" />
                 <SettingSectionCard>
                     <SettingItem
                         grouped
-                        icon="school-outline"
+                        icon="graduation-cap"
                         iconColor={themeColor}
                         title={t('setting:Programme Level')}
                         subtitle={
@@ -164,22 +164,22 @@ const SettingPage = () => {
                         }
                         showArrow={false}
                         rightElement={
-                            <SegmentControl
+                            <SettingSegmentControl
                                 options={programmeLevelOptions}
+                                optionWidth={i18n.language === 'en' ? 88 : 54}
                                 selectedIndex={programmeLevelIndex}
                                 onChange={index =>
                                     setProgrammeLevel(
                                         programmeLevelOptions[index].key,
                                     )
                                 }
-                                compact
                             />
                         }
                     />
                     <SettingItem
                         grouped
-                        icon="open-outline"
-                        iconColor="#007AFF"
+                        icon="arrow-square-out"
+                        iconColor={featureIconTones.blue.foreground}
                         title={t('setting:Open What2Reg')}
                         subtitle={`${WHAT_2_REG}\n${t('setting:選咩課和ARK是兩個獨立項目')}`}
                         onPress={() => openLink(WHAT_2_REG)}
@@ -187,19 +187,19 @@ const SettingPage = () => {
                 </SettingSectionCard>
 
                 {/* 本機數據 */}
-                <SettingSection title={t('setting:Application')} icon="apps" />
+                <SettingSection title={t('setting:Application')} icon="grid" />
                 <SettingSectionCard>
                     <SettingItem
                         grouped
                         icon="trash"
-                        iconColor="#FF3B30"
+                        iconColor={featureIconTones.pink.foreground}
                         title={t('setting:Clear Cache')}
                         onPress={handleClearCache}
                     />
                     <SettingItem
                         grouped
-                        icon="phone-portrait-outline"
-                        iconColor="#34C759"
+                        icon="device-mobile"
+                        iconColor={featureIconTones.green.foreground}
                         title={t('setting:Get the App')}
                         subtitle={t('setting:Get the App Hint')}
                         onPress={() => openLink(ARK_APP_LINK)}
@@ -209,7 +209,7 @@ const SettingPage = () => {
                 {/* 關於 */}
                 <SettingSection
                     title={t('setting:About')}
-                    icon="information-circle"
+                    icon="info"
                 />
                 <SettingSectionCard>
                     <SettingItem
@@ -222,7 +222,7 @@ const SettingPage = () => {
                     />
                     <SettingItem
                         grouped
-                        icon="logo-github"
+                        icon="github-logo"
                         iconColor={black.second}
                         title={t('setting:Open Source')}
                         onPress={() => openLink(GITHUB_PAGE)}
@@ -230,47 +230,47 @@ const SettingPage = () => {
                     <SettingItem
                         grouped
                         icon="help-circle"
-                        iconColor="#007AFF"
+                        iconColor={featureIconTones.blue.foreground}
                         title={t('setting:Common Issues')}
                         onPress={() => openLink(USUAL_Q)}
                     />
                     <SettingItem
                         grouped
-                        icon="shield-checkmark"
-                        iconColor="#5856D6"
+                        icon="shield"
+                        iconColor={featureIconTones.blue.foreground}
                         title={t('setting:Privacy Policy')}
                         onPress={() => openLink(USER_AGREE)}
                     />
                     <SettingItem
                         grouped
                         icon="heart"
-                        iconColor="#FF2D55"
+                        iconColor={featureIconTones.pink.foreground}
                         title={t('setting:Donate')}
                         onPress={() => openLink(GITHUB_DONATE)}
                     />
                     <SettingItem
                         grouped
                         icon="pulse"
-                        iconColor="#FF9500"
+                        iconColor={featureIconTones.orange.foreground}
                         title={t('setting:Activity')}
                         onPress={() => openLink(GITHUB_ACTIVITY)}
                     />
                     <SettingItem
                         grouped
-                        icon="school"
-                        iconColor="#4796d6"
+                        icon="graduation-cap"
+                        iconColor={featureIconTones.blue.foreground}
                         title={`${t('common:ABOUT')} ARK ALL`}
                         onPress={() => openLink(ARK_WIKI_ABOUT_ARK)}
                     />
                 </SettingSectionCard>
 
                 {/* 聯繫我們：web 端無 Harbor 登入，反饋只走 GitHub Issues */}
-                <SettingSection title={t('setting:Contact')} icon="mail" />
+                <SettingSection title={t('setting:Contact')} icon="envelope" />
                 <SettingSectionCard>
                     <SettingItem
                         grouped
-                        icon="chatbubble-ellipses"
-                        iconColor="#34C759"
+                        icon="message-circle"
+                        iconColor={featureIconTones.green.foreground}
                         title={t('setting:Feedback')}
                         subtitle={t('setting:GitHub Issues')}
                         onPress={() => openLink(GITHUB_UPDATE_PLAN)}
@@ -278,15 +278,15 @@ const SettingPage = () => {
                     <SettingItem
                         grouped
                         icon="globe"
-                        iconColor="#007AFF"
+                        iconColor={featureIconTones.blue.foreground}
                         title={t('setting:Official Website')}
                         subtitle={BASE_HOST}
                         onPress={() => openLink(BASE_HOST)}
                     />
                     <SettingItem
                         grouped
-                        icon="mail"
-                        iconColor="#5856D6"
+                        icon="envelope"
+                        iconColor={featureIconTones.blue.foreground}
                         title={t('setting:Email')}
                         subtitle={MAIL}
                         onPress={() => Linking.openURL('mailto:' + MAIL)}

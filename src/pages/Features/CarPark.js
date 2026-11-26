@@ -7,7 +7,6 @@ import {
     StyleSheet,
     View,
 } from 'react-native';
-import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import axios from 'axios';
 import moment from 'moment-timezone';
 import {
@@ -17,10 +16,11 @@ import {
 } from 'react-native-size-matters';
 
 import Text from '../../components/AppText';
-import SegmentControl from '../../components/SegmentControl';
+import SegmentedTabControl from '../../components/SegmentedTabControl';
 import {uiStyle, useTheme} from '../../components/ThemeContext';
 import {UM_API_CAR_PARK, UM_API_TOKEN} from '../../utils/pathMap';
 import {trigger} from '../../utils/trigger';
+import PhosphorFeatureIcon from '../TabbarPages/info/home/search/components/PhosphorFeatureIcon';
 
 const CAR_PARK_SORT_VALUES = ['All', 'Staff', 'Monthly Pass', 'Visitor'];
 const CAR_PARK_TYPE_VALUES = ['All', 'Light Vehicle', 'Motorcycle'];
@@ -36,7 +36,7 @@ const CAR_PARK_LOCATIONS = {
 };
 
 const getVehicleIcon = vehicleType =>
-    vehicleType === 'Motorcycle' ? 'motorbike' : 'car-outline';
+    vehicleType === 'Motorcycle' ? 'motorcycle' : 'car';
 
 const CarParkSkeleton = ({styles}) => (
     <View style={styles.container}>
@@ -121,7 +121,7 @@ const CarParkSkeleton = ({styles}) => (
 const CarPark = () => {
     const {theme} = useTheme();
     const styles = useMemo(() => getStyles(theme), [theme]);
-    const {black, themeColor, secondThemeColor, bg_color} = theme;
+    const {black, themeColor} = theme;
 
     const [data, setData] = useState([]);
     const [sort, setSort] = useState('All');
@@ -226,10 +226,10 @@ const CarPark = () => {
                 ]}>
                 <View style={styles.recordIdentity}>
                     <View style={styles.vehicleIcon}>
-                        <MaterialCommunityIcons
+                        <PhosphorFeatureIcon
                             name={getVehicleIcon(record.vehicleType)}
                             size={scale(20)}
-                            color={secondThemeColor}
+                            color={black.second}
                         />
                     </View>
                     <View style={styles.recordLabels}>
@@ -254,14 +254,11 @@ const CarPark = () => {
                             styles.statusBadge,
                             {backgroundColor: statusBackground},
                         ]}>
-                        <MaterialCommunityIcons
-                            name={
-                                isTight
-                                    ? 'alert-circle-outline'
-                                    : 'check-circle-outline'
-                            }
+                        <PhosphorFeatureIcon
+                            name={isTight ? 'warning-circle' : 'check-circle'}
                             size={scale(12)}
                             color={statusColor}
+                            weight="regular"
                         />
                         <Text style={[styles.statusText, {color: statusColor}]}>
                             {isTight ? '餘位緊張' : '尚有車位'}
@@ -292,8 +289,8 @@ const CarPark = () => {
                 }>
                 <View style={styles.updateCard}>
                     <View style={styles.updateIcon}>
-                        <MaterialCommunityIcons
-                            name="database-clock-outline"
+                        <PhosphorFeatureIcon
+                            name="database"
                             size={scale(22)}
                             color={themeColor}
                         />
@@ -313,47 +310,53 @@ const CarPark = () => {
 
                 <View style={styles.filterCard}>
                     <View style={styles.filterHeading}>
-                        <MaterialCommunityIcons
-                            name="filter-variant"
-                            size={scale(19)}
+                        <PhosphorFeatureIcon
+                            name="funnel"
+                            size={scale(18)}
                             color={black.second}
                         />
                         <Text style={styles.filterTitle}>篩選車位</Text>
                     </View>
 
                     <Text style={styles.filterLabel}>泊車身份</Text>
-                    <SegmentControl
-                        wrap
-                        style={styles.segmentControl}
-                        options={sortOptions}
-                        selectedIndex={Math.max(
-                            0,
-                            CAR_PARK_SORT_VALUES.indexOf(sort),
-                        )}
-                        onChange={index =>
-                            setSort(CAR_PARK_SORT_VALUES[index])
-                        }
-                        accentColor={themeColor}
-                        trackBackgroundColor={bg_color}
-                        fontSize={moderateScale(11)}
-                    />
+                    <View style={styles.segmentControl}>
+                        <SegmentedTabControl
+                            options={sortOptions}
+                            selectedIndex={Math.max(
+                                0,
+                                CAR_PARK_SORT_VALUES.indexOf(sort),
+                            )}
+                            onChange={index => {
+                                const nextSort = CAR_PARK_SORT_VALUES[index];
+                                if (nextSort === sort) return;
+                                trigger('selection');
+                                setSort(nextSort);
+                            }}
+                            compact
+                            fullWidth
+                            raisedTrack
+                        />
+                    </View>
 
                     <Text style={styles.filterLabel}>車輛類型</Text>
-                    <SegmentControl
-                        wrap
-                        style={styles.segmentControl}
-                        options={typeOptions}
-                        selectedIndex={Math.max(
-                            0,
-                            CAR_PARK_TYPE_VALUES.indexOf(type),
-                        )}
-                        onChange={index =>
-                            setType(CAR_PARK_TYPE_VALUES[index])
-                        }
-                        accentColor={secondThemeColor}
-                        trackBackgroundColor={bg_color}
-                        fontSize={moderateScale(11)}
-                    />
+                    <View style={styles.segmentControl}>
+                        <SegmentedTabControl
+                            options={typeOptions}
+                            selectedIndex={Math.max(
+                                0,
+                                CAR_PARK_TYPE_VALUES.indexOf(type),
+                            )}
+                            onChange={index => {
+                                const nextType = CAR_PARK_TYPE_VALUES[index];
+                                if (nextType === type) return;
+                                trigger('selection');
+                                setType(nextType);
+                            }}
+                            compact
+                            fullWidth
+                            raisedTrack
+                        />
+                    </View>
                 </View>
 
                 {filteredData.length > 0 ? (
@@ -363,9 +366,9 @@ const CarPark = () => {
                             style={styles.carParkCard}>
                             <View style={styles.carParkHeader}>
                                 <View style={styles.carParkCodeBadge}>
-                                    <MaterialCommunityIcons
-                                        name="car-brake-parking"
-                                        size={scale(20)}
+                                    <PhosphorFeatureIcon
+                                        name="parking"
+                                        size={scale(22)}
                                         color={themeColor}
                                     />
                                     <Text style={styles.carParkCode}>
@@ -374,10 +377,11 @@ const CarPark = () => {
                                 </View>
                                 <View style={styles.locationContent}>
                                     <View style={styles.locationTitleRow}>
-                                        <MaterialCommunityIcons
-                                            name="map-marker-outline"
-                                            size={scale(15)}
+                                        <PhosphorFeatureIcon
+                                            name="map-pin"
+                                            size={scale(14)}
                                             color={black.third}
+                                            weight="regular"
                                         />
                                         <Text style={styles.locationTitle}>
                                             停車場位置
@@ -404,10 +408,10 @@ const CarPark = () => {
                 ) : (
                     <View style={styles.emptyCard}>
                         <View style={styles.emptyIcon}>
-                            <MaterialCommunityIcons
-                                name="car-off"
+                            <PhosphorFeatureIcon
+                                name="car"
                                 size={scale(30)}
-                                color={themeColor}
+                                color={black.third}
                             />
                         </View>
                         <Text style={styles.emptyTitle}>沒有符合條件的車位</Text>
@@ -435,20 +439,19 @@ const getStyles = theme =>
         updateCard: {
             flexDirection: 'row',
             alignItems: 'center',
-            backgroundColor: theme.tonal.primary15,
+            backgroundColor: theme.white,
             borderRadius: scale(16),
             paddingHorizontal: scale(14),
             paddingVertical: verticalScale(13),
             marginBottom: verticalScale(12),
+            ...theme.viewShadow,
         },
         updateIcon: {
-            width: scale(42),
-            height: scale(42),
-            borderRadius: scale(13),
+            width: scale(32),
+            height: scale(32),
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: theme.tonal.primary30,
-            marginRight: scale(12),
+            marginRight: scale(10),
         },
         updateContent: {
             flex: 1,
@@ -519,18 +522,15 @@ const getStyles = theme =>
             paddingVertical: verticalScale(14),
         },
         carParkCodeBadge: {
-            width: scale(68),
-            minHeight: scale(66),
+            width: scale(52),
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: theme.tonal.primary15,
-            borderRadius: scale(14),
             marginRight: scale(12),
         },
         carParkCode: {
             ...uiStyle.defaultText,
-            color: theme.themeColor,
-            fontSize: moderateScale(21),
+            color: theme.black.main,
+            fontSize: moderateScale(20),
             fontWeight: '800',
             marginTop: verticalScale(2),
         },
@@ -557,11 +557,12 @@ const getStyles = theme =>
             fontWeight: '600',
         },
         recordsContainer: {
-            backgroundColor: theme.tonal.primary08,
+            borderTopWidth: StyleSheet.hairlineWidth,
+            borderTopColor: theme.featuresScreen.divider,
             paddingHorizontal: scale(14),
         },
         recordRow: {
-            minHeight: verticalScale(68),
+            minHeight: verticalScale(64),
             flexDirection: 'row',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -569,7 +570,7 @@ const getStyles = theme =>
         },
         recordDivider: {
             borderBottomWidth: StyleSheet.hairlineWidth,
-            borderBottomColor: theme.themeColorUltraLight,
+            borderBottomColor: theme.featuresScreen.divider,
         },
         recordIdentity: {
             flex: 1,
@@ -578,12 +579,10 @@ const getStyles = theme =>
             paddingRight: scale(8),
         },
         vehicleIcon: {
-            width: scale(36),
-            height: scale(36),
-            borderRadius: scale(11),
+            width: scale(28),
+            height: scale(28),
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: theme.tonal.secondary15,
             marginRight: scale(10),
         },
         recordLabels: {
@@ -643,13 +642,11 @@ const getStyles = theme =>
             ...theme.viewShadow,
         },
         emptyIcon: {
-            width: scale(58),
-            height: scale(58),
-            borderRadius: scale(20),
+            width: scale(44),
+            height: scale(44),
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: theme.tonal.primary15,
-            marginBottom: verticalScale(12),
+            marginBottom: verticalScale(10),
         },
         emptyTitle: {
             ...uiStyle.defaultText,
@@ -666,11 +663,11 @@ const getStyles = theme =>
             marginTop: verticalScale(5),
         },
         skeletonBlock: {
-            backgroundColor: theme.tonal.primary15,
+            backgroundColor: theme.featuresScreen.divider,
             borderRadius: scale(4),
         },
         skeletonUpdateBlock: {
-            backgroundColor: theme.tonal.primary30,
+            backgroundColor: theme.featuresScreen.divider,
             borderRadius: scale(4),
         },
         skeletonUpdateTitle: {
@@ -705,38 +702,39 @@ const getStyles = theme =>
         skeletonSegmentControl: {
             flexDirection: 'row',
             alignItems: 'center',
-            height: verticalScale(34),
-            borderRadius: scale(18),
-            backgroundColor: theme.bg_color,
-            paddingHorizontal: scale(5),
+            height: verticalScale(32),
+            borderRadius: scale(999),
+            backgroundColor: theme.white,
+            paddingHorizontal: scale(4),
             marginBottom: verticalScale(9),
+            ...theme.viewShadow,
         },
         skeletonSegmentSelected: {
             flex: 1,
-            height: verticalScale(26),
-            borderRadius: scale(14),
-            backgroundColor: theme.tonal.primary15,
-            marginHorizontal: scale(3),
+            height: verticalScale(24),
+            borderRadius: scale(999),
+            backgroundColor: theme.featuresScreen.divider,
+            marginHorizontal: scale(2),
         },
         skeletonSegmentSelectedSecondary: {
             flex: 1,
-            height: verticalScale(26),
-            borderRadius: scale(14),
-            backgroundColor: theme.tonal.secondary15,
-            marginHorizontal: scale(3),
+            height: verticalScale(24),
+            borderRadius: scale(999),
+            backgroundColor: theme.featuresScreen.divider,
+            marginHorizontal: scale(2),
         },
         skeletonSegmentItem: {
             flex: 1,
             height: verticalScale(9),
             borderRadius: scale(4),
-            backgroundColor: theme.tonal.primary08,
+            backgroundColor: theme.bg_color,
             marginHorizontal: scale(8),
         },
         skeletonSegmentItemWide: {
             flex: 1.5,
             height: verticalScale(9),
             borderRadius: scale(4),
-            backgroundColor: theme.tonal.primary08,
+            backgroundColor: theme.bg_color,
             marginHorizontal: scale(8),
         },
         skeletonParkIcon: {
