@@ -2,6 +2,7 @@ import React, { useCallback } from 'react';
 import { View } from 'react-native';
 
 import { trigger } from '../../../utils/trigger';
+import { TOP_TAB_STRIP_MAX_WIDTH } from '../../../utils/windowSizeClass';
 import { useTheme } from '../../../components/ThemeContext';
 import TopTabLabel from '../../../components/TopTabLabel';
 import HomePage from './home/index';
@@ -30,7 +31,11 @@ export default function NewsScreen() {
         <View
             pointerEvents="box-none"
             style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 2, paddingTop: top }}>
-            <MaterialTopTabBar {...props} />
+            <View
+                pointerEvents="box-none"
+                style={{ width: '100%', maxWidth: TOP_TAB_STRIP_MAX_WIDTH, alignSelf: 'center' }}>
+                <MaterialTopTabBar {...props} />
+            </View>
         </View>
     ), [top]);
 

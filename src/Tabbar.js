@@ -4,7 +4,7 @@ import { AppState, Platform, useWindowDimensions, View } from 'react-native';
 import { useTheme } from './components/ThemeContext';
 
 import { scale, verticalScale } from 'react-native-size-matters';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaInsetsContext, SafeAreaListener, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SafeAreaView } from 'react-native-screens/experimental';
 
 import { useTranslation } from 'react-i18next';
@@ -62,10 +62,38 @@ const tabScreen = {
 
 const IOSNativeTabScreen = props => {
     const Screen = tabScreen[props.route.name];
+    const parentInsets = useSafeAreaInsets();
+    const [tabTopInset, setTabTopInset] = useState(parentInsets.top);
+
+    // iPadOS 原生浮動頂部 Tab Bar（tabSidebar）只反映在 Tab 子視圖的
+    // safeAreaInsets.top；只合併頂部安全區，保留外層 bottom 與水平 inset 避免與底欄高度疊加
+    const handleSafeAreaChange = useCallback(({ insets: nextInsets }) => {
+        const nextTop = nextInsets?.top ?? 0;
+        setTabTopInset(currentTop =>
+            Math.abs(currentTop - nextTop) > 0.5 ? nextTop : currentTop,
+        );
+    }, []);
+
+    const mergedInsets = useMemo(() => {
+        const top = Math.max(parentInsets.top, tabTopInset);
+        if (top === parentInsets.top) {
+            return parentInsets;
+        }
+        return {
+            ...parentInsets,
+            top,
+        };
+    }, [parentInsets, tabTopInset]);
 
     return (
         <SafeAreaView style={{ flex: 1 }} edges={{ left: true, right: true }}>
-            <Screen {...props} />
+            <SafeAreaListener
+                style={{ flex: 1 }}
+                onChange={handleSafeAreaChange}>
+                <SafeAreaInsetsContext.Provider value={mergedInsets}>
+                    <Screen {...props} />
+                </SafeAreaInsetsContext.Provider>
+            </SafeAreaListener>
         </SafeAreaView>
     );
 };
