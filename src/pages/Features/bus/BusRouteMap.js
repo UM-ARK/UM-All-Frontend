@@ -35,55 +35,55 @@ const WEST_WING = 'M0 0 H91 V18 H100 V78 H77 V100 H0 V67 H9 V28 H0 Z';
 const EAST_WING = 'M9 0 H100 V28 H91 V67 H100 V100 H23 V78 H0 V18 H9 Z';
 const COURTYARD = 'M0 0 H100 V100 H0 Z M32 30 H68 V70 H32 Z';
 const WEST_CAMPUS_BLOCKS = [
-    {labels: [['W12', 'CKYC']], x: 0.04, y: 149, width: 0.44, height: 54, outline: WEST_WING},
-    {labels: [['W11', 'MCMC']], x: 0.54, y: 153, width: 0.46, height: 53, outline: EAST_WING},
-    {labels: [['W14', 'FPJC']], x: 0.02, y: 210, width: 0.45, height: 56, outline: EAST_WING},
-    {labels: [['W13', 'SEAC']], x: 0.52, y: 214, width: 0.46, height: 56, outline: WEST_WING},
+    {labels: [['W12', 'CKYC']], x: 0.02, y: 150, width: 0.45, height: 54, outline: WEST_WING},
+    {labels: [['W11', 'MCMC']], x: 0.53, y: 150, width: 0.45, height: 54, outline: EAST_WING},
+    {labels: [['W14', 'FPJC']], x: 0.02, y: 212, width: 0.45, height: 55, outline: EAST_WING},
+    {labels: [['W13', 'SEAC']], x: 0.53, y: 212, width: 0.45, height: 55, outline: WEST_WING},
     {
         labels: [['W22', 'LCWC'], ['W21', 'CKPC']],
-        x: 0.02, y: 292, width: 0.94, height: 57,
+        x: 0.02, y: 292, width: 0.96, height: 57,
         outline: 'M0 0 H100 V33 H89 V49 H97 V87 H63 V100 H2 V62 H12 V47 H0 Z',
     },
     {
         labels: [['W23', 'CYTC']],
-        x: 0, y: 357, width: 0.88, height: 54,
+        x: 0.02, y: 357, width: 0.88, height: 54,
         outline: 'M0 0 H88 V17 H100 V80 H70 V100 H5 V63 H15 V32 H0 Z',
     },
-    {labels: [['W32']], x: 0, y: 435, width: 0.47, height: 44, outline: WEST_WING},
-    {labels: [['W31']], x: 0.52, y: 441, width: 0.45, height: 45, outline: EAST_WING},
-    {labels: [['W34', 'CKLC']], x: 0.02, y: 486, width: 0.46, height: 55, outline: EAST_WING},
-    {labels: [['W33', 'MLC']], x: 0.53, y: 493, width: 0.46, height: 54, outline: WEST_WING},
+    {labels: [['W32']], x: 0.02, y: 436, width: 0.45, height: 44, outline: WEST_WING},
+    {labels: [['W31']], x: 0.53, y: 436, width: 0.45, height: 44, outline: EAST_WING},
+    {labels: [['W34', 'CKLC']], x: 0.02, y: 488, width: 0.45, height: 55, outline: EAST_WING},
+    {labels: [['W33', 'MLC']], x: 0.53, y: 488, width: 0.45, height: 55, outline: WEST_WING},
 ];
 const CAMPUS_BUILDINGS = [
-    {code: 'N25', x: 145, y: 12, width: 27, height: 19},
-    {code: 'N24', x: 184, y: 8, width: 43, height: 21},
-    {code: 'N23', x: 229, y: 23, width: 38, height: 16},
-    {code: 'N22', x: 116, y: 35, width: 36, height: 23},
-    {code: 'N21', x: 214, y: 43, width: 43, height: 14},
+    {code: 'N25', x: 156, y: 12, width: 26, height: 19},
+    {code: 'N24', x: 197, y: 12, width: 44, height: 22, outline: WEST_WING},
+    {code: 'N23', x: 247, y: 12, width: 42, height: 18},
+    {code: 'N22', x: 121, y: 31, width: 34, height: 24, outline: COURTYARD},
+    {code: 'N21', x: 247, y: 35, width: 42, height: 17},
     {code: 'N8', x: 114, y: 64, width: 39, height: 37, outline: EAST_WING},
     {code: 'N6', x: 174, y: 110, width: 39, height: 27, outline: WEST_WING, station: true},
     {code: 'N2', x: 232, y: 87, width: 53, height: 35, outline: EAST_WING, station: true},
-    {code: 'N1', x: 230, y: 130, width: 48, height: 20},
+    {code: 'N1', x: 232, y: 130, width: 48, height: 20},
     {code: 'E11', x: 122, y: 174, width: 48, height: 42, outline: COURTYARD, station: true},
     {code: 'E12', x: 114, y: 228, width: 42, height: 43, outline: WEST_WING},
     {code: 'E1', x: 240, y: 258, width: 26, height: 22},
-    {code: 'E21A', x: 127, y: 287, width: 36, height: 27, outline: EAST_WING},
-    {code: 'E21B', x: 121, y: 322, width: 36, height: 25, outline: EAST_WING},
+    {code: 'E21A', x: 124, y: 287, width: 36, height: 27, outline: EAST_WING},
+    {code: 'E21B', x: 121, y: 321, width: 36, height: 25, outline: EAST_WING},
     {code: 'E22', x: 122, y: 355, width: 49, height: 38, outline: WEST_WING},
-    {code: 'E7', x: 195, y: 321, width: 39, height: 19},
-    {code: 'E3', x: 238, y: 326, width: 39, height: 17},
-    {code: 'E6', x: 190, y: 347, width: 34, height: 24, outline: WEST_WING},
-    {code: 'E4', x: 247, y: 348, width: 32, height: 17, station: true},
-    {code: 'E5', x: 225, y: 373, width: 61, height: 26, outline: EAST_WING},
+    {code: 'E7', x: 198, y: 321, width: 38, height: 19},
+    {code: 'E3', x: 242, y: 321, width: 38, height: 19},
+    {code: 'E6', x: 198, y: 347, width: 36, height: 24, outline: WEST_WING},
+    {code: 'E4', x: 242, y: 347, width: 34, height: 19, station: true},
+    {code: 'E5', x: 222, y: 375, width: 60, height: 26, outline: EAST_WING},
     {code: 'E31', x: 150, y: 417, width: 61, height: 23, outline: EAST_WING},
     {code: 'E32', x: 126, y: 448, width: 50, height: 25, station: true},
     {code: 'E33', x: 162, y: 477, width: 47, height: 34, outline: WEST_WING},
     {code: 'E34', x: 113, y: 487, width: 35, height: 39, outline: EAST_WING},
-    {code: 'S1', x: 246, y: 518, width: 29, height: 26},
-    {code: 'S2', x: 207, y: 531, width: 30, height: 25},
-    {code: 'S8', x: 161, y: 555, width: 33, height: 24},
-    {code: 'S4', x: 202, y: 565, width: 37, height: 27, outline: EAST_WING, station: true},
-    {code: 'S3', x: 245, y: 560, width: 31, height: 26},
+    {code: 'S1', x: 245, y: 518, width: 29, height: 26},
+    {code: 'S2', x: 202, y: 528, width: 32, height: 24},
+    {code: 'S8', x: 158, y: 558, width: 33, height: 24},
+    {code: 'S4', x: 202, y: 558, width: 37, height: 27, outline: EAST_WING, station: true},
+    {code: 'S3', x: 245, y: 558, width: 31, height: 26},
 ];
 const AnimatedPath = Animated.createAnimatedComponent(Path);
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
@@ -773,7 +773,7 @@ const BusRouteMap = ({
                     : stop.labelSide === 'bottom'
                         ? {left: x - 26, top: y - 8}
                         : stop.labelSide === 'top'
-                            ? {left: x - 26, top: y - 36}
+                            ? {left: x - 26, top: y - 48, zIndex: 2}
                             : {right: mapDisplayWidth - x - 8, top: y - 22};
                 const labelAlignment = stop.labelSide === 'right'
                     ? {alignItems: 'flex-end'}
