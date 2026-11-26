@@ -9,7 +9,6 @@ import {
 } from 'react-native';
 
 import Ionicons from '@react-native-vector-icons/ionicons';
-import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 import { FlashList } from '@shopify/flash-list';
 import { isLiquidGlassSupported } from '../../../utils/glassEffect';
 import { useHeaderHeight } from '@react-navigation/elements';
@@ -25,6 +24,7 @@ import TopScrollEdgeBackdrop, {
     SCROLL_EDGE_FADE_HEIGHT,
 } from '../../../components/TopScrollEdgeBackdrop';
 import { useFeaturesChrome } from '../features/FeaturesChromeContext';
+import PhosphorFeatureIcon from '../info/home/search/components/PhosphorFeatureIcon';
 import searchFieldStyles, {
     SEARCH_FIELD_ICON_SIZE,
     SEARCH_FIELD_MAX_FONT_SIZE_MULTIPLIER,
@@ -35,46 +35,47 @@ import { logToFirebase } from '../../../utils/firebaseAnalytics';
 import { ARK_WIKI } from '../../../utils/pathMap';
 import { trigger } from '../../../utils/trigger';
 import { fetchRandomWikiTitle, fetchWikiRecentChanges } from '../../../utils/wikiApi';
+import { WIDE_CONTENT_MAX_WIDTH } from '../../../utils/windowSizeClass';
 
 const CURATED_CATEGORIES = [
     {
         key: 'campus',
         title: 'ARK 與校園',
         articles: [
-            {title: 'ARK捐贈榜'},
-            {title: '澳大大事'},
-            {title: '常用口語黑話'},
-            {title: 'ARK ALL', label: '關於 ARK ALL'},
-            {title: '更換學分'},
-            {title: '常用工具'},
-            {title: '三院', label: '光明三院'},
-            {title: 'ARK ALL開發踩坑指北', label: 'ARK ALL 開發踩坑指北'},
-            {title: 'ICTO 資訊及通訊科技部', label: 'ICTO'},
-            {title: '2FA 雙重認證'},
-            {title: '澳門大學金融攻略'},
+            {title: 'ARK捐贈榜', icon: 'hand-heart', tone: 'pink'},
+            {title: '澳大大事', icon: 'sparkles', tone: 'orange'},
+            {title: '常用口語黑話', icon: 'messages-square', tone: 'orange'},
+            {title: 'ARK ALL', label: '關於 ARK ALL', icon: 'compass', tone: 'blue'},
+            {title: '更換學分', icon: 'arrow-left-right', tone: 'blue'},
+            {title: '常用工具', icon: 'wrench', tone: 'blue'},
+            {title: '三院', label: '光明三院', icon: 'building', tone: 'green'},
+            {title: 'ARK ALL開發踩坑指北', label: 'ARK ALL 開發踩坑指北', icon: 'code', tone: 'blue'},
+            {title: 'ICTO 資訊及通訊科技部', label: 'ICTO', icon: 'desktop', tone: 'blue'},
+            {title: '2FA 雙重認證', icon: 'shield', tone: 'pink'},
+            {title: '澳門大學金融攻略', icon: 'landmark', tone: 'orange'},
         ],
     },
     {
         key: 'organizations',
         title: '學生組織',
         articles: [
-            {title: '學生組織'},
-            {title: '電腦學會'},
-            {title: 'IET 英國機械工程師學會澳門大學學生分部', label: 'IET'},
-            {title: '攝影學會'},
+            {title: '學生組織', icon: 'users', tone: 'orange'},
+            {title: '電腦學會', icon: 'desktop', tone: 'blue'},
+            {title: 'IET 英國機械工程師學會澳門大學學生分部', label: 'IET', icon: 'gear', tone: 'green'},
+            {title: '攝影學會', icon: 'camera', tone: 'orange'},
         ],
     },
     {
         key: 'courses',
         title: '課程與學系',
         articles: [
-            {title: 'CIS 計算機'},
-            {title: 'ECEN1000 ECEN1011 Digital System', label: 'ECEN1000 Digital System'},
-            {title: 'ACCT 會計'},
-            {title: 'CISC1000'},
-            {title: 'CS/SP點', label: 'CS/SP 點'},
-            {title: 'ECE 電機及電腦工程系', label: 'ECE 電機'},
-            {title: 'GELH2001 Sex and the Arts'},
+            {title: 'CIS 計算機', icon: 'code', tone: 'blue'},
+            {title: 'ECEN1000 ECEN1011 Digital System', label: 'ECEN1000 Digital System', icon: 'cpu', tone: 'green'},
+            {title: 'ACCT 會計', icon: 'calculator', tone: 'orange'},
+            {title: 'CISC1000', icon: 'desktop', tone: 'blue'},
+            {title: 'CS/SP點', label: 'CS/SP 點', icon: 'graduation-cap', tone: 'blue'},
+            {title: 'ECE 電機及電腦工程系', label: 'ECE 電機', icon: 'gear', tone: 'green'},
+            {title: 'GELH2001 Sex and the Arts', icon: 'book-open', tone: 'pink'},
         ],
     },
 ];
@@ -119,32 +120,35 @@ const WikiHome = ({navigation}) => {
         return () => controller.abort();
     }, [navigation]);
 
-    const items = useMemo(() => [
-        {
-            type: 'heading',
-            section: 'recent',
-            title: t('最近更新'),
-            action: recentChanges.length > RECENT_PREVIEW_LIMIT
-                ? showAllRecent ? t('收起') : t('查看全部')
-                : null,
-        },
-        {
-            type: 'recentList',
-            articles: recentChanges.slice(
-                0,
-                showAllRecent ? recentChanges.length : RECENT_PREVIEW_LIMIT,
-            ),
-        },
-        {type: 'heading', title: t('精選文章')},
-        ...CURATED_CATEGORIES.map(category => ({...category, type: 'category'})),
-    ], [recentChanges, showAllRecent, t]);
+    const items = useMemo(() => {
+        const nextItems = [];
+        if (isLoadingRecent || recentChanges.length > 0) {
+            nextItems.push({
+                type: 'recentCard',
+                title: t('最近更新'),
+                action: recentChanges.length > RECENT_PREVIEW_LIMIT
+                    ? showAllRecent ? t('收起') : t('查看全部')
+                    : null,
+                articles: recentChanges.slice(
+                    0,
+                    showAllRecent ? recentChanges.length : RECENT_PREVIEW_LIMIT,
+                ),
+            });
+        }
+        nextItems.push({type: 'heading', title: t('精選文章')});
+        CURATED_CATEGORIES.forEach(category => {
+            nextItems.push({...category, type: 'category'});
+        });
+        return nextItems;
+    }, [isLoadingRecent, recentChanges, showAllRecent, t]);
+    const { featuresScreen, featureIconTones } = theme;
     const pageStyle = useMemo(() => [
         styles.page,
         {
-            backgroundColor: theme.bg_color,
+            backgroundColor: featuresScreen.bg_color,
             paddingTop: !hasFloatingChrome && isLiquidGlassSupported ? headerHeight : 0,
         },
-    ], [hasFloatingChrome, headerHeight, theme.bg_color]);
+    ], [featuresScreen.bg_color, hasFloatingChrome, headerHeight]);
 
     const openArticle = title => {
         trigger();
@@ -196,7 +200,7 @@ const WikiHome = ({navigation}) => {
                 <View
                     style={[
                         styles.category,
-                        {backgroundColor: theme.white, borderColor: theme.disabled},
+                        {backgroundColor: featuresScreen.cardBg},
                     ]}>
                     <ScalePressable
                         accessibilityState={{expanded: !isCollapsed}}
@@ -210,35 +214,35 @@ const WikiHome = ({navigation}) => {
                                 {item.articles.length}
                             </Text>
                         </View>
-                        <MaterialCommunityIcons
-                            name={isCollapsed ? 'chevron-down' : 'chevron-up'}
-                            size={scale(20)}
+                        <PhosphorFeatureIcon
+                            name={isCollapsed ? 'caret-down' : 'caret-up'}
+                            size={scale(16)}
                             color={theme.black.third}
                         />
                     </ScalePressable>
                     {!isCollapsed ? (
                         <View style={styles.articleChips}>
-                            {item.articles.map(article => (
-                                <ScalePressable
-                                    key={article.title}
-                                    onPress={() => openArticle(article.title)}
-                                    style={[
-                                        styles.articleChip,
-                                        {
-                                            backgroundColor: theme.tonal.primary08,
-                                            borderColor: theme.disabled,
-                                        },
-                                    ]}>
-                                    <MaterialCommunityIcons
-                                        name="book-open-page-variant-outline"
-                                        size={scale(15)}
-                                        color={theme.themeColor}
-                                    />
-                                    <Text style={[styles.articleChipText, {color: theme.black.main}]}>
-                                        {article.label || article.title}
-                                    </Text>
-                                </ScalePressable>
-                            ))}
+                            {item.articles.map(article => {
+                                const chipTone = featureIconTones[article.tone] || featureIconTones.blue;
+                                return (
+                                    <ScalePressable
+                                        key={article.title}
+                                        onPress={() => openArticle(article.title)}
+                                        style={[
+                                            styles.articleChip,
+                                            {backgroundColor: featuresScreen.bg_color},
+                                        ]}>
+                                        <PhosphorFeatureIcon
+                                            name={article.icon || 'book-open'}
+                                            size={scale(15)}
+                                            color={chipTone.foreground}
+                                        />
+                                        <Text style={[styles.articleChipText, {color: theme.black.main}]}>
+                                            {article.label || article.title}
+                                        </Text>
+                                    </ScalePressable>
+                                );
+                            })}
                         </View>
                     ) : null}
                 </View>
@@ -247,31 +251,33 @@ const WikiHome = ({navigation}) => {
         if (item.type === 'heading') {
             return (
                 <View style={styles.headingRow}>
-                    <Text style={[styles.heading, {color: theme.black.main}]}>{item.title}</Text>
-                    {item.section === 'recent' && isLoadingRecent ? (
-                        <ActivityIndicator size="small" color={theme.themeColor} />
-                    ) : item.action ? (
-                        <ScalePressable
-                            accessibilityRole="button"
-                            hitSlop={scale(8)}
-                            onPress={() => {
-                                trigger();
-                                setShowAllRecent(currentValue => !currentValue);
-                            }}>
-                            <Text style={[styles.headingAction, {color: theme.themeColor}]}>
-                                {item.action}
-                            </Text>
-                        </ScalePressable>
-                    ) : null}
+                    <Text style={[styles.heading, {color: theme.black.third}]}>{item.title}</Text>
                 </View>
             );
         }
-        if (item.type === 'recentList') {
-            if (!item.articles.length) {
-                return null;
-            }
+        if (item.type === 'recentCard') {
             return (
-                <View style={styles.recentList}>
+                <View style={[styles.recentCard, {backgroundColor: featuresScreen.cardBg}]}>
+                    <View style={styles.recentCardHeader}>
+                        <Text style={[styles.recentCardTitle, {color: theme.black.third}]}>
+                            {item.title}
+                        </Text>
+                        {isLoadingRecent ? (
+                            <ActivityIndicator size="small" color={theme.themeColor} />
+                        ) : item.action ? (
+                            <ScalePressable
+                                accessibilityRole="button"
+                                hitSlop={scale(8)}
+                                onPress={() => {
+                                    trigger();
+                                    setShowAllRecent(currentValue => !currentValue);
+                                }}>
+                                <Text style={[styles.headingAction, {color: theme.themeColor}]}>
+                                    {item.action}
+                                </Text>
+                            </ScalePressable>
+                        ) : null}
+                    </View>
                     {item.articles.map((article, index) => (
                         <ScalePressable
                             key={`${article.title}-${article.timestamp || index}`}
@@ -280,14 +286,20 @@ const WikiHome = ({navigation}) => {
                                 styles.recentRow,
                                 index < item.articles.length - 1 && {
                                     borderBottomWidth: StyleSheet.hairlineWidth,
-                                    borderBottomColor: theme.disabled,
+                                    borderBottomColor: featuresScreen.divider,
                                 },
                             ]}>
-                            <MaterialCommunityIcons
-                                name="history"
-                                size={scale(18)}
-                                color={theme.themeColor}
-                            />
+                            <View
+                                style={[
+                                    styles.recentIconBadge,
+                                    {backgroundColor: featureIconTones.blue.background},
+                                ]}>
+                                <PhosphorFeatureIcon
+                                    name="clock-counter-clockwise"
+                                    size={scale(16)}
+                                    color={featureIconTones.blue.foreground}
+                                />
+                            </View>
                             <View style={styles.articleText}>
                                 <Text style={[styles.articleTitle, {color: theme.black.main}]}>
                                     {article.label || article.title}
@@ -298,9 +310,9 @@ const WikiHome = ({navigation}) => {
                                     </Text>
                                 ) : null}
                             </View>
-                            <MaterialCommunityIcons
-                                name="chevron-right"
-                                size={scale(20)}
+                            <PhosphorFeatureIcon
+                                name="caret-right"
+                                size={scale(16)}
                                 color={theme.black.third}
                             />
                         </ScalePressable>
@@ -312,10 +324,7 @@ const WikiHome = ({navigation}) => {
     };
 
     const listHeader = (
-        <View>
-            <Text style={[styles.intro, {color: theme.black.second}]}>
-                {t('探索澳大資訊、攻略與學習經驗')}
-            </Text>
+        <View style={styles.headerContainer}>
             <ScalePressable
                 accessibilityRole="button"
                 onPress={() => {
@@ -325,7 +334,7 @@ const WikiHome = ({navigation}) => {
                 style={[
                     searchFieldStyles.field,
                     searchFieldStyles.borderedField,
-                    {backgroundColor: theme.white, borderColor: theme.white},
+                    {backgroundColor: featuresScreen.searchBg, borderColor: featuresScreen.searchBg},
                 ]}>
                 <Ionicons name="search" size={SEARCH_FIELD_ICON_SIZE} color={theme.black.third} />
                 <Text
@@ -338,18 +347,42 @@ const WikiHome = ({navigation}) => {
             <View style={styles.quickActions}>
                 <ScalePressable
                     onPress={openRandomArticle}
-                    style={[styles.quickButton, {backgroundColor: theme.tonal.primary30}]}>
-                    <MaterialCommunityIcons name="shuffle-variant" size={scale(20)} color={theme.themeColor} />
-                    <Text style={[styles.quickText, {color: theme.themeColor}]}>{t('隨機條目')}</Text>
+                    style={[styles.quickButton, {backgroundColor: featuresScreen.cardBg}]}>
+                    <View
+                        style={[
+                            styles.quickIconBadge,
+                            {backgroundColor: featureIconTones.blue.background},
+                        ]}>
+                        <PhosphorFeatureIcon
+                            name="shuffle"
+                            size={scale(17)}
+                            color={featureIconTones.blue.foreground}
+                        />
+                    </View>
+                    <Text numberOfLines={1} style={[styles.quickText, {color: theme.black.main}]}>
+                        {t('隨機條目')}
+                    </Text>
                 </ScalePressable>
                 <ScalePressable
                     onPress={() => {
                         trigger();
                         openLink(ARK_WIKI);
                     }}
-                    style={[styles.quickButton, {backgroundColor: theme.tonal.secondary30}]}>
-                    <MaterialCommunityIcons name="pencil-outline" size={scale(20)} color={theme.secondThemeColor} />
-                    <Text style={[styles.quickText, {color: theme.secondThemeColor}]}>{t('前往 Wiki 貢獻')}</Text>
+                    style={[styles.quickButton, {backgroundColor: featuresScreen.cardBg}]}>
+                    <View
+                        style={[
+                            styles.quickIconBadge,
+                            {backgroundColor: featureIconTones.orange.background},
+                        ]}>
+                        <PhosphorFeatureIcon
+                            name="note"
+                            size={scale(17)}
+                            color={featureIconTones.orange.foreground}
+                        />
+                    </View>
+                    <Text numberOfLines={1} style={[styles.quickText, {color: theme.black.main}]}>
+                        {t('前往 Wiki 貢獻')}
+                    </Text>
                 </ScalePressable>
             </View>
         </View>
@@ -362,8 +395,8 @@ const WikiHome = ({navigation}) => {
                 extraData={collapsedCategoryKeys}
                 renderItem={renderItem}
                 keyExtractor={(item, index) =>
-                    item.type === 'recentList'
-                        ? `recentList-${item.articles.length}-${showAllRecent}`
+                    item.type === 'recentCard'
+                        ? `recentCard-${item.articles.length}-${showAllRecent}`
                         : `${item.type}-${item.key || item.title}-${index}`
                 }
                 ListHeaderComponent={listHeader}
@@ -396,62 +429,71 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     content: {
-        paddingHorizontal: scale(14),
+        width: '100%',
+        maxWidth: WIDE_CONTENT_MAX_WIDTH,
+        alignSelf: 'center',
+        paddingHorizontal: scale(12),
         paddingBottom: verticalScale(28),
     },
-    intro: {
-        ...uiStyle.defaultText,
-        fontSize: scale(14),
-        lineHeight: scale(21),
-        marginTop: verticalScale(12),
-        marginBottom: verticalScale(10),
+    headerContainer: {
+        marginTop: verticalScale(10),
     },
     quickActions: {
         flexDirection: 'row',
-        gap: scale(9),
+        gap: scale(10),
         marginTop: verticalScale(10),
+        marginBottom: verticalScale(10),
     },
     quickButton: {
         flex: 1,
-        minHeight: verticalScale(42),
+        minHeight: verticalScale(46),
         borderRadius: scale(14),
-        paddingHorizontal: scale(10),
+        paddingHorizontal: scale(12),
+        paddingVertical: verticalScale(9),
         flexDirection: 'row',
         alignItems: 'center',
+        gap: scale(10),
+    },
+    quickIconBadge: {
+        width: scale(32),
+        height: scale(32),
+        borderRadius: scale(10),
+        alignItems: 'center',
         justifyContent: 'center',
-        gap: scale(6),
+        flexShrink: 0,
     },
     quickText: {
         ...uiStyle.defaultText,
-        fontSize: scale(12),
+        flex: 1,
+        fontSize: scale(13),
         fontWeight: '600',
     },
     headingRow: {
-        marginTop: verticalScale(17),
-        marginBottom: verticalScale(8),
+        marginTop: verticalScale(8),
+        marginBottom: verticalScale(6),
+        paddingHorizontal: scale(4),
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
     },
     heading: {
         ...uiStyle.defaultText,
-        fontSize: scale(17),
-        fontWeight: '700',
+        fontSize: verticalScale(11.5),
+        fontWeight: '500',
     },
     headingAction: {
         ...uiStyle.defaultText,
-        fontSize: scale(13),
+        fontSize: scale(12.5),
         fontWeight: '600',
     },
     category: {
-        borderWidth: StyleSheet.hairlineWidth,
-        borderRadius: scale(13),
-        marginBottom: verticalScale(9),
+        borderRadius: scale(14),
+        marginBottom: verticalScale(8),
         overflow: 'hidden',
     },
     categoryHeader: {
         minHeight: verticalScale(42),
-        paddingHorizontal: scale(12),
+        paddingHorizontal: scale(14),
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -471,8 +513,8 @@ const styles = StyleSheet.create({
         fontSize: scale(11),
     },
     articleChips: {
-        paddingHorizontal: scale(10),
-        paddingBottom: verticalScale(10),
+        paddingHorizontal: scale(12),
+        paddingBottom: verticalScale(12),
         flexDirection: 'row',
         flexWrap: 'wrap',
         gap: scale(7),
@@ -480,13 +522,12 @@ const styles = StyleSheet.create({
     articleChip: {
         maxWidth: '100%',
         minHeight: verticalScale(31),
-        borderWidth: StyleSheet.hairlineWidth,
         borderRadius: scale(10),
-        paddingHorizontal: scale(9),
+        paddingHorizontal: scale(10),
         paddingVertical: verticalScale(6),
         flexDirection: 'row',
         alignItems: 'center',
-        gap: scale(5),
+        gap: scale(6),
     },
     articleChipText: {
         ...uiStyle.defaultText,
@@ -494,12 +535,35 @@ const styles = StyleSheet.create({
         fontSize: scale(12),
         fontWeight: '600',
     },
-    recentList: {
-        marginBottom: verticalScale(2),
+    recentCard: {
+        borderRadius: scale(14),
+        paddingHorizontal: scale(14),
+        paddingTop: verticalScale(12),
+        paddingBottom: verticalScale(4),
+        marginBottom: verticalScale(6),
+    },
+    recentCardHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingBottom: verticalScale(4),
+    },
+    recentCardTitle: {
+        ...uiStyle.defaultText,
+        fontSize: verticalScale(11.5),
+        fontWeight: '500',
+    },
+    recentIconBadge: {
+        width: scale(28),
+        height: scale(28),
+        borderRadius: scale(9),
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexShrink: 0,
     },
     recentRow: {
         minHeight: verticalScale(44),
-        paddingVertical: verticalScale(8),
+        paddingVertical: verticalScale(9),
         flexDirection: 'row',
         alignItems: 'center',
         gap: scale(10),

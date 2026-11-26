@@ -13,15 +13,24 @@ import { Briefcase } from 'phosphor-react-native/src/icons/Briefcase';
 import { BuildingApartment } from 'phosphor-react-native/src/icons/BuildingApartment';
 import { BuildingOffice } from 'phosphor-react-native/src/icons/BuildingOffice';
 import { Bus } from 'phosphor-react-native/src/icons/Bus';
+import { Calculator } from 'phosphor-react-native/src/icons/Calculator';
 import { CalendarCheck } from 'phosphor-react-native/src/icons/CalendarCheck';
 import { CalendarDots } from 'phosphor-react-native/src/icons/CalendarDots';
+import { Camera } from 'phosphor-react-native/src/icons/Camera';
+import { CaretDown } from 'phosphor-react-native/src/icons/CaretDown';
+import { CaretRight } from 'phosphor-react-native/src/icons/CaretRight';
+import { CaretUp } from 'phosphor-react-native/src/icons/CaretUp';
 import { ChatCircleDots } from 'phosphor-react-native/src/icons/ChatCircleDots';
 import { ChatsCircle } from 'phosphor-react-native/src/icons/ChatsCircle';
 import { ClipboardText } from 'phosphor-react-native/src/icons/ClipboardText';
 import { Clock } from 'phosphor-react-native/src/icons/Clock';
+import { ClockCounterClockwise } from 'phosphor-react-native/src/icons/ClockCounterClockwise';
+import { Code } from 'phosphor-react-native/src/icons/Code';
 import { Compass } from 'phosphor-react-native/src/icons/Compass';
+import { Cpu } from 'phosphor-react-native/src/icons/Cpu';
 import { Desktop } from 'phosphor-react-native/src/icons/Desktop';
 import { ForkKnife } from 'phosphor-react-native/src/icons/ForkKnife';
+import { Gear } from 'phosphor-react-native/src/icons/Gear';
 import { GlobeHemisphereWest } from 'phosphor-react-native/src/icons/GlobeHemisphereWest';
 import { GraduationCap } from 'phosphor-react-native/src/icons/GraduationCap';
 import { Hamburger } from 'phosphor-react-native/src/icons/Hamburger';
@@ -43,6 +52,7 @@ import { ProjectorScreen } from 'phosphor-react-native/src/icons/ProjectorScreen
 import { Question } from 'phosphor-react-native/src/icons/Question';
 import { SealCheck } from 'phosphor-react-native/src/icons/SealCheck';
 import { ShieldCheck } from 'phosphor-react-native/src/icons/ShieldCheck';
+import { Shuffle } from 'phosphor-react-native/src/icons/Shuffle';
 import { Sparkle } from 'phosphor-react-native/src/icons/Sparkle';
 import { SquaresFour } from 'phosphor-react-native/src/icons/SquaresFour';
 import { SuitcaseRolling } from 'phosphor-react-native/src/icons/SuitcaseRolling';
@@ -145,6 +155,18 @@ export const phosphorFeatureIcons = {
     pulse: Pulse,
     'plus-circle': PlusCircle,
     'user-plus': UserPlus,
+
+    // ARK Wiki
+    shuffle: Shuffle,
+    'clock-counter-clockwise': ClockCounterClockwise,
+    'caret-right': CaretRight,
+    'caret-down': CaretDown,
+    'caret-up': CaretUp,
+    code: Code,
+    gear: Gear,
+    camera: Camera,
+    cpu: Cpu,
+    calculator: Calculator,
 };
 
 export default function PhosphorFeatureIcon({
