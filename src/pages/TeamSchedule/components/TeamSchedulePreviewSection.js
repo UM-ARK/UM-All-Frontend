@@ -173,19 +173,24 @@ const TeamSchedulePreviewSection = forwardRef(
                 </ScalePressable>
 
                 <View style={[styles.actionRow, !expanded && styles.collapsed]}>
-                    <View style={myCardStyles.column} />
                     <View style={styles.primaryActions}>
                         <ScalePressable
                             accessibilityRole="button"
                             accessibilityLabel={t('新建組隊')}
                             onPress={openCreate}
-                            style={styles.actionButton}>
+                            hitSlop={{top: 4, bottom: 4}}
+                            style={[
+                                styles.actionButton,
+                                {backgroundColor: theme.white},
+                                theme.viewShadow,
+                            ]}>
                             <PhosphorFeatureIcon
                                 name="plus-circle"
-                                size={scale(16)}
+                                size={scale(17)}
                                 color={theme.themeColor}
                             />
                             <Text
+                                numberOfLines={1}
                                 style={[
                                     styles.actionButtonText,
                                     {color: theme.accentForeground},
@@ -197,13 +202,19 @@ const TeamSchedulePreviewSection = forwardRef(
                             accessibilityRole="button"
                             accessibilityLabel={t('加入隊伍')}
                             onPress={openJoin}
-                            style={styles.actionButton}>
+                            hitSlop={{top: 4, bottom: 4}}
+                            style={[
+                                styles.actionButton,
+                                {backgroundColor: theme.white},
+                                theme.viewShadow,
+                            ]}>
                             <PhosphorFeatureIcon
                                 name="user-plus"
-                                size={scale(16)}
+                                size={scale(17)}
                                 color={theme.themeColor}
                             />
                             <Text
+                                numberOfLines={1}
                                 style={[
                                     styles.actionButtonText,
                                     {color: theme.accentForeground},
@@ -222,7 +233,7 @@ const TeamSchedulePreviewSection = forwardRef(
                         ]}>
                         <Ionicons
                             name="information-circle-outline"
-                            size={scale(17)}
+                            size={scale(18)}
                             color={theme.black.third}
                         />
                     </ScalePressable>
@@ -277,7 +288,7 @@ const TeamSchedulePreviewSection = forwardRef(
                                 <View style={myCardStyles.iconColumn}>
                                     <PhosphorFeatureIcon
                                         name="users"
-                                        size={scale(18)}
+                                        size={scale(20)}
                                         color={theme.featureIconTones.green.foreground}
                                     />
                                 </View>
@@ -288,13 +299,14 @@ const TeamSchedulePreviewSection = forwardRef(
                         accessibilityRole="button"
                         accessibilityLabel={t('全部組隊約時間')}
                         onPress={openList}
+                        hitSlop={{top: 4, bottom: 4}}
                         style={[
                             styles.listLink,
                             {borderTopColor: theme.disabled},
                         ]}>
                         <Text
                             style={[
-                                styles.actionButtonText,
+                                styles.listLinkText,
                                 {color: theme.accentForeground},
                             ]}>
                             {t('全部')}
@@ -335,27 +347,33 @@ const styles = StyleSheet.create({
     actionRow: {
         flexDirection: 'row',
         alignItems: 'center',
+        paddingLeft: scale(10),
+        gap: scale(6),
     },
     primaryActions: {
         flex: 1,
         minWidth: 0,
         flexDirection: 'row',
-        flexWrap: 'wrap',
         alignItems: 'center',
-        justifyContent: 'flex-start',
-        columnGap: scale(24),
+        gap: scale(8),
     },
     actionButton: {
+        flex: 1,
+        minWidth: 0,
         flexDirection: 'row',
         alignItems: 'center',
-        minHeight: 44,
-        flexShrink: 1,
-        gap: scale(4),
+        justifyContent: 'center',
+        minHeight: verticalScale(38),
+        paddingHorizontal: scale(12),
+        paddingVertical: verticalScale(7),
+        borderRadius: scale(10),
+        borderCurve: 'continuous',
+        gap: scale(6),
     },
     actionButtonText: {
         ...uiStyle.defaultText,
         flexShrink: 1,
-        fontSize: scale(12),
+        fontSize: scale(13),
         fontWeight: '600',
     },
     listWrap: {
@@ -366,8 +384,13 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'flex-end',
-        minHeight: 44,
+        minHeight: verticalScale(38),
         borderTopWidth: StyleSheet.hairlineWidth,
+    },
+    listLinkText: {
+        ...uiStyle.defaultText,
+        fontSize: scale(13),
+        fontWeight: '600',
     },
     listInner: {
         paddingVertical: verticalScale(12),

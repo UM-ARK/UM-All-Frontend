@@ -19,6 +19,7 @@ import Text from '../../../components/AppText';
 import ScalePressable from '../../../components/ScalePressable';
 import TextInput from '../../../components/AppTextInput';
 import {uiStyle, useTheme} from '../../../components/ThemeContext';
+import PhosphorFeatureIcon from '../../TabbarPages/info/home/search/components/PhosphorFeatureIcon';
 import {parseTeamInviteLink} from '../../../utils/scheduling/teamInviteLink';
 import {trigger} from '../../../utils/trigger';
 
@@ -114,32 +115,51 @@ const JoinTeamSheet = ({visible, onClose, onSubmit}) => {
                                 Math.max(insets.bottom, verticalScale(8)),
                         },
                     ]}>
-                    <Text style={[styles.title, {color: theme.black.main}]}>
-                        {t('加入隊伍')}
-                    </Text>
+                    <View style={styles.titleRow}>
+                        <PhosphorFeatureIcon
+                            name="user-plus"
+                            size={scale(22)}
+                            color={theme.themeColor}
+                        />
+                        <Text style={[styles.title, {color: theme.black.main}]}>
+                            {t('加入隊伍')}
+                        </Text>
+                    </View>
                     <Text style={[styles.hint, {color: theme.black.third}]}>
                         {t(
                             '貼上朋友分享的邀請連結，即可加入組隊約時間。',
                         )}
                     </Text>
 
-                    <TextInput
-                        value={linkText}
-                        onChangeText={setLinkText}
-                        placeholder={t('貼上邀請連結')}
-                        placeholderTextColor={theme.black.third}
-                        autoCapitalize="none"
-                        autoCorrect={false}
-                        multiline
+                    <View
                         style={[
-                            styles.input,
+                            styles.inputBox,
                             {
-                                backgroundColor: theme.tonal.primary08,
-                                borderColor: theme.themeColorUltraLight,
-                                color: theme.black.main,
+                                backgroundColor: theme.white,
+                                borderColor: theme.disabled,
                             },
-                        ]}
-                    />
+                        ]}>
+                        <View style={styles.inputIcon}>
+                            <PhosphorFeatureIcon
+                                name="link"
+                                size={scale(18)}
+                                color={theme.black.third}
+                            />
+                        </View>
+                        <TextInput
+                            value={linkText}
+                            onChangeText={setLinkText}
+                            placeholder={t('貼上邀請連結')}
+                            placeholderTextColor={theme.black.third}
+                            autoCapitalize="none"
+                            autoCorrect={false}
+                            multiline
+                            style={[
+                                styles.input,
+                                {color: theme.black.main},
+                            ]}
+                        />
+                    </View>
 
                     <ScalePressable
                         accessibilityRole="button"
@@ -147,13 +167,19 @@ const JoinTeamSheet = ({visible, onClose, onSubmit}) => {
                         style={[
                             styles.secondary,
                             {
-                                backgroundColor: theme.tonal.primary15,
+                                backgroundColor: theme.white,
+                                borderColor: theme.disabled,
                             },
                         ]}>
+                        <PhosphorFeatureIcon
+                            name="clipboard-check"
+                            size={scale(18)}
+                            color={theme.themeColor}
+                        />
                         <Text
                             style={[
                                 styles.actionText,
-                                {color: theme.themeColor},
+                                {color: theme.accentForeground},
                             ]}>
                             {t('從剪貼板貼上')}
                         </Text>
@@ -165,13 +191,18 @@ const JoinTeamSheet = ({visible, onClose, onSubmit}) => {
                         style={[
                             styles.primary,
                             {
-                                backgroundColor: theme.themeColor,
+                                backgroundColor: theme.tonal.primary15,
                             },
                         ]}>
+                        <PhosphorFeatureIcon
+                            name="sign-in"
+                            size={scale(18)}
+                            color={theme.themeColor}
+                        />
                         <Text
                             style={[
                                 styles.actionText,
-                                {color: theme.trueWhite},
+                                {color: theme.accentForeground},
                             ]}>
                             {t('加入')}
                         </Text>
@@ -183,17 +214,11 @@ const JoinTeamSheet = ({visible, onClose, onSubmit}) => {
                             trigger();
                             sheetRef.current?.hide();
                         }}
-                        style={[
-                            styles.cancel,
-                            {
-                                backgroundColor: theme.white,
-                                borderColor: theme.themeColorUltraLight,
-                            },
-                        ]}>
+                        style={styles.cancel}>
                         <Text
                             style={[
-                                styles.actionText,
-                                {color: theme.black.second},
+                                styles.cancelText,
+                                {color: theme.black.third},
                             ]}>
                             {t('取消')}
                         </Text>
@@ -209,6 +234,11 @@ const styles = StyleSheet.create({
         paddingHorizontal: scale(16),
         paddingTop: verticalScale(12),
     },
+    titleRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: scale(8),
+    },
     title: {
         ...uiStyle.defaultText,
         fontSize: scale(16),
@@ -221,34 +251,60 @@ const styles = StyleSheet.create({
         marginTop: verticalScale(6),
         marginBottom: verticalScale(12),
     },
-    input: {
-        ...uiStyle.defaultText,
+    inputBox: {
+        flexDirection: 'row',
+        alignItems: 'flex-start',
         minHeight: verticalScale(88),
         borderRadius: scale(12),
+        borderCurve: 'continuous',
         borderWidth: StyleSheet.hairlineWidth,
-        fontSize: scale(13),
         paddingHorizontal: scale(12),
         paddingVertical: verticalScale(10),
+        gap: scale(8),
+    },
+    inputIcon: {
+        paddingTop: verticalScale(2),
+    },
+    input: {
+        ...uiStyle.defaultText,
+        flex: 1,
+        minHeight: verticalScale(68),
+        fontSize: scale(13),
+        padding: 0,
         textAlignVertical: 'top',
     },
     primary: {
+        flexDirection: 'row',
         alignItems: 'center',
+        justifyContent: 'center',
         borderRadius: scale(12),
+        borderCurve: 'continuous',
         marginTop: verticalScale(8),
         paddingVertical: verticalScale(12),
+        gap: scale(6),
     },
     secondary: {
+        flexDirection: 'row',
         alignItems: 'center',
+        justifyContent: 'center',
         borderRadius: scale(12),
+        borderCurve: 'continuous',
+        borderWidth: StyleSheet.hairlineWidth,
         marginTop: verticalScale(10),
         paddingVertical: verticalScale(12),
+        gap: scale(6),
     },
     cancel: {
         alignItems: 'center',
-        borderRadius: scale(12),
-        borderWidth: StyleSheet.hairlineWidth,
-        marginTop: verticalScale(8),
-        paddingVertical: verticalScale(12),
+        justifyContent: 'center',
+        minHeight: 44,
+        marginTop: verticalScale(6),
+        paddingVertical: verticalScale(10),
+    },
+    cancelText: {
+        ...uiStyle.defaultText,
+        fontSize: scale(14),
+        fontWeight: '600',
     },
     actionText: {
         ...uiStyle.defaultText,
