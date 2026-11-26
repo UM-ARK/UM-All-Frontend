@@ -13,6 +13,7 @@ import { Briefcase } from 'phosphor-react-native/src/icons/Briefcase';
 import { BuildingApartment } from 'phosphor-react-native/src/icons/BuildingApartment';
 import { BuildingOffice } from 'phosphor-react-native/src/icons/BuildingOffice';
 import { Bus } from 'phosphor-react-native/src/icons/Bus';
+import { Car } from 'phosphor-react-native/src/icons/Car';
 import { Calculator } from 'phosphor-react-native/src/icons/Calculator';
 import { CalendarCheck } from 'phosphor-react-native/src/icons/CalendarCheck';
 import { CalendarDots } from 'phosphor-react-native/src/icons/CalendarDots';
@@ -28,6 +29,7 @@ import { ClockCounterClockwise } from 'phosphor-react-native/src/icons/ClockCoun
 import { Code } from 'phosphor-react-native/src/icons/Code';
 import { Compass } from 'phosphor-react-native/src/icons/Compass';
 import { Cpu } from 'phosphor-react-native/src/icons/Cpu';
+import { Database } from 'phosphor-react-native/src/icons/Database';
 import { Desktop } from 'phosphor-react-native/src/icons/Desktop';
 import { Folder } from 'phosphor-react-native/src/icons/Folder';
 import { Folders } from 'phosphor-react-native/src/icons/Folders';
@@ -108,6 +110,7 @@ import { List } from 'phosphor-react-native/src/icons/List';
 import { MapPin } from 'phosphor-react-native/src/icons/MapPin';
 import { Moon } from 'phosphor-react-native/src/icons/Moon';
 import { Microphone } from 'phosphor-react-native/src/icons/Microphone';
+import { Motorcycle } from 'phosphor-react-native/src/icons/Motorcycle';
 import { PaperPlaneTilt } from 'phosphor-react-native/src/icons/PaperPlaneTilt';
 import { PencilSimple } from 'phosphor-react-native/src/icons/PencilSimple';
 import { Phone } from 'phosphor-react-native/src/icons/Phone';
@@ -141,9 +144,12 @@ import { Coffee } from 'phosphor-react-native/src/icons/Coffee';
 export const phosphorFeatureIcons = {
     // 出行
     bus: Bus,
+    car: Car,
+    motorcycle: Motorcycle,
     map: MapTrifold,
     parking: LetterCircleP,
     ticket: Ticket,
+    database: Database,
 
     // 餐飲
     utensils: ForkKnife,

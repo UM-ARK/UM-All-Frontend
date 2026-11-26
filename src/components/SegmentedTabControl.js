@@ -23,6 +23,7 @@ export default function SegmentedTabControl({
     compact = false,
     compactItemWidth = COMPACT_ITEM_WIDTH,
     raisedTrack = false,
+    fullWidth = false,
 }) {
     const { theme } = useTheme();
     const { isLight, white, black, featuresScreen, pressOverlay, viewShadow } = theme;
@@ -37,7 +38,8 @@ export default function SegmentedTabControl({
     const Track = raisedTrack ? View : TrackContainer;
     const showTrackSurface = raisedTrack || !isLiquidGlassSupported;
     const trackPadding = compact ? COMPACT_TRACK_PADDING : TRACK_PADDING;
-    const segmentWidth = compact
+    const isFixedCompact = compact && !fullWidth;
+    const segmentWidth = isFixedCompact
         ? compactItemWidth
         : Math.max(0, (trackWidth - trackPadding * 2) / optionCount);
     // 滑塊跟分頁進度；文字色用 selected 靜態切換（AppText 無法可靠吃 Animated color）。
@@ -50,10 +52,11 @@ export default function SegmentedTabControl({
 
     return (
         <Track
-            onLayout={compact ? undefined : event => setTrackWidth(event.nativeEvent.layout.width)}
+            onLayout={isFixedCompact ? undefined : event => setTrackWidth(event.nativeEvent.layout.width)}
             style={[
                 styles.track,
                 compact ? styles.compactTrack : styles.regularTrack,
+                fullWidth && styles.fullWidthTrack,
                 showTrackSurface && { backgroundColor: white },
                 showTrackSurface && (isLight || raisedTrack) && viewShadow,
                 raisedTrack && styles.raisedTrack,
@@ -86,7 +89,11 @@ export default function SegmentedTabControl({
                         onPress={() => onChange(index)}
                         style={({ pressed }) => [
                             styles.button,
-                            compact ? [styles.compactButton, { width: segmentWidth }] : styles.regularButton,
+                            isFixedCompact
+                                ? [styles.compactButton, { width: segmentWidth }]
+                                : compact
+                                    ? [styles.compactButton, styles.fullWidthButton]
+                                    : styles.regularButton,
                             pressed && styles.buttonPressed,
                         ]}>
                         <View style={styles.labelRow}>
@@ -128,6 +135,13 @@ const styles = StyleSheet.create({
         flexShrink: 0,
         marginHorizontal: scale(2),
         padding: COMPACT_TRACK_PADDING,
+    },
+    fullWidthTrack: {
+        width: '100%',
+        marginHorizontal: 0,
+    },
+    fullWidthButton: {
+        flex: 1,
     },
     thumb: {
         position: 'absolute',
