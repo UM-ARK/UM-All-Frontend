@@ -218,6 +218,7 @@ const WikiHome = ({navigation}) => {
                             name={isCollapsed ? 'caret-down' : 'caret-up'}
                             size={scale(16)}
                             color={theme.black.third}
+                            weight="regular"
                         />
                     </ScalePressable>
                     {!isCollapsed ? (
@@ -312,8 +313,9 @@ const WikiHome = ({navigation}) => {
                             </View>
                             <PhosphorFeatureIcon
                                 name="caret-right"
-                                size={scale(16)}
+                                size={scale(15)}
                                 color={theme.black.third}
+                                weight="regular"
                             />
                         </ScalePressable>
                     ))}

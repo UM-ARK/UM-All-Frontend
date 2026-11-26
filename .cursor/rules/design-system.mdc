@@ -143,3 +143,12 @@ import { GlassView, isLiquidGlassSupported } from '../../utils/glassEffect';
 - 破壞性操作本身不是 `error`：確認按鈕用 `tap`，刪除成功後用 `success`，失敗才用 `error`。
 - 高頻互動只用 `tick` 且避免逐幀觸發；`soft`／`rigid` 僅為舊呼叫相容，新程式碼改用語意名稱。
 - 觸覺失敗不得阻斷主流程，不可取代文字／Toast／無障礙提示，且須尊重系統觸覺設定。
+
+---
+
+## 七、圖標系統規範（Phosphor Icons）
+
+新頁面與元件重構統一優先使用 `phosphor-react-native`（透過 `src/pages/TabbarPages/info/home/search/components/PhosphorFeatureIcon.js` 按需靜態匯入），並搭配 `theme.featureIconTones`（藍／綠／橘／珊瑚紅）低疲勞語義色盤：
+
+- **功能／語義圖標（預設 `weight="duotone"`）**：用於功能格子、快捷按鈕、列表首部徽章與條目 Chip，以線性描邊＋雙色微填底提供層次感。
+- **簡單指示器（強制 `weight="regular"`）**：列表右側箭頭、折疊展開／收起等純指示性圖標（如 `caret-right`、`caret-up`、`caret-down`），統一傳入 `weight="regular"` 保持純淨單線造型，避免 `duotone` 模式將箭頭渲染為封閉填充三角形。
