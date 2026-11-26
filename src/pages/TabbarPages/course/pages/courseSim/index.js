@@ -20,7 +20,8 @@ import {
 } from 'react-native';
 
 import { scale, verticalScale } from 'react-native-size-matters';
-import Ionicons from "@react-native-vector-icons/ionicons";
+import { ClipboardText } from 'phosphor-react-native/src/icons/ClipboardText';
+import { DownloadSimple } from 'phosphor-react-native/src/icons/DownloadSimple';
 import * as Clipboard from 'expo-clipboard';
 import moment from 'moment';
 import Toast from 'react-native-simple-toast';
@@ -48,6 +49,7 @@ import {
 } from 'react-native-reanimated';
 import { scheduleOnRN } from 'react-native-worklets';
 
+import PhosphorFeatureIcon from '../../../info/home/search/components/PhosphorFeatureIcon';
 import Text from '../../../../../components/AppText';
 import ScalePressable from '../../../../../components/ScalePressable';
 import TextInput from '../../../../../components/AppTextInput';
@@ -86,8 +88,7 @@ import {
     getCourseInfoMenuActions,
     handleCourseInfoMenuAction,
 } from '../../utils/courseInfoMenu';
-import SegmentControl from '../../../../../components/SegmentControl';
-import { GlassView, isLiquidGlassSupported } from '../../../../../utils/glassEffect';
+import SegmentedTabControl from '../../../../../components/SegmentedTabControl';
 import { COURSE_SEARCH_SEGMENT } from '../../../../../utils/courseNavigation';
 import {
     getCourseDisplayTitle,
@@ -113,7 +114,6 @@ import OverviewCourseCardContent from './components/OverviewCourseCardContent';
 import TimetableCourseCard, { DepartingCourseCard, getTimetableParticlesPerCard } from './components/TimetableCourseCard';
 
 const converter = OpenCC.Converter({ from: 'cn', to: 'tw' }); // 簡體轉繁體
-const ViewSwitcherContainer = isLiquidGlassSupported ? GlassView : View;
 
 /** 課表單一星期欄寬 */
 const DAY_COLUMN_WIDTH = scale(135);
@@ -1178,8 +1178,9 @@ function CourseSim({ route, navigation, isSplitPane = false }) {
                             }}>
                             {course['Time From']}
                         </Text>
-                        <Ionicons
-                            name="ellipsis-horizontal"
+                        <PhosphorFeatureIcon
+                            name="dots-three"
+                            weight="regular"
                             size={scale(20)}
                             color={black.main}
                             style={{ opacity: 0.4 }}
@@ -1409,8 +1410,8 @@ function CourseSim({ route, navigation, isSplitPane = false }) {
                     </View>
                     <View
                         style={{ flexDirection: 'row', alignItems: 'center' }}>
-                        <Ionicons
-                            name="add-circle-outline"
+                        <PhosphorFeatureIcon
+                            name="plus-circle"
                             size={scale(28)}
                             color={themeColor}
                         />
@@ -1433,8 +1434,9 @@ function CourseSim({ route, navigation, isSplitPane = false }) {
                                 alignItems: 'center',
                                 justifyContent: 'center',
                             }}>
-                            <Ionicons
-                                name="add"
+                            <PhosphorFeatureIcon
+                                name="plus"
+                                weight="regular"
                                 size={scale(16)}
                                 color={themeColor}
                                 style={{ marginRight: scale(6) }}
@@ -1466,8 +1468,8 @@ function CourseSim({ route, navigation, isSplitPane = false }) {
                             alignItems: 'center',
                             marginBottom: scale(12),
                         }}>
-                        <Ionicons
-                            name="clipboard-outline"
+                        <ClipboardText
+                            weight="duotone"
                             size={scale(28)}
                             color={themeColor}
                         />
@@ -1490,8 +1492,9 @@ function CourseSim({ route, navigation, isSplitPane = false }) {
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                 }}>
-                                <Ionicons
-                                    name="open-outline"
+                                <PhosphorFeatureIcon
+                                    name="arrow-square-out"
+                                    weight="regular"
                                     size={scale(16)}
                                     color={themeColor}
                                     style={{ marginRight: scale(6) }}
@@ -1551,8 +1554,8 @@ E11-0000
                                 alignItems: 'center',
                                 justifyContent: 'center',
                             }}>
-                            <Ionicons
-                                name="download-outline"
+                            <DownloadSimple
+                                weight="duotone"
                                 size={scale(18)}
                                 color={canImport ? success : themeColor}
                                 style={{ marginRight: scale(6) }}
@@ -1619,8 +1622,9 @@ E11-0000
                         }}
                         accessibilityRole="button"
                         accessibilityLabel={t('清除', { ns: 'timetable' })}>
-                        <Ionicons
-                            name="close"
+                        <PhosphorFeatureIcon
+                            name="x"
+                            weight="regular"
                             size={scale(14)}
                             color={themeColor}
                         />
@@ -1789,8 +1793,9 @@ E11-0000
                             accessibilityLabel={t('清除', {
                                 ns: 'timetable',
                             })}>
-                            <Ionicons
-                                name="close"
+                            <PhosphorFeatureIcon
+                                name="x"
+                                weight="regular"
                                 size={scale(14)}
                                 color={themeColor}
                             />
@@ -1866,8 +1871,9 @@ E11-0000
                             trigger();
                             onBackPress?.();
                         }}>
-                        <Ionicons
-                            name="chevron-back"
+                        <PhosphorFeatureIcon
+                            name="caret-left"
+                            weight="regular"
                             size={scale(20)}
                             color={themeColor}
                         />
@@ -1882,8 +1888,9 @@ E11-0000
                             backgroundColor: searchFieldBg,
                         },
                     ]}>
-                    <Ionicons
+                    <PhosphorFeatureIcon
                         name="search"
+                        weight="regular"
                         size={SEARCH_FIELD_ICON_SIZE}
                         color={black.third}
                     />
@@ -1919,8 +1926,9 @@ E11-0000
                                 onChangeText?.('');
                             }}
                             style={searchFieldStyles.clearButton}>
-                            <Ionicons
-                                name="close-circle"
+                            <PhosphorFeatureIcon
+                                name="x-circle"
+                                weight="fill"
                                 size={SEARCH_FIELD_CLEAR_ICON_SIZE}
                                 color={black.third}
                             />
@@ -2049,8 +2057,9 @@ E11-0000
                                     })}
                                 </Text>
                             </View>
-                            <Ionicons
-                                name="chevron-forward"
+                            <PhosphorFeatureIcon
+                                name="caret-right"
+                                weight="regular"
                                 color={black.third}
                                 size={scale(18)}
                             />
@@ -2191,8 +2200,8 @@ E11-0000
                                 </Text>
                             ))}
                         </View>
-                        <Ionicons
-                            name="swap-horizontal"
+                        <PhosphorFeatureIcon
+                            name="arrow-left-right"
                             color={themeColor}
                             size={scale(20)}
                         />
@@ -2226,8 +2235,9 @@ E11-0000
                                 trigger();
                                 setReplacementCourseCode(null);
                             }}>
-                            <Ionicons
-                                name="chevron-back"
+                            <PhosphorFeatureIcon
+                                name="caret-left"
+                                weight="regular"
                                 size={scale(18)}
                                 color={themeColor}
                             />
@@ -2277,8 +2287,9 @@ E11-0000
                             padding: scale(7),
                         }}
                         onPress={closeCourseSearch}>
-                        <Ionicons
-                            name="close"
+                        <PhosphorFeatureIcon
+                            name="x"
+                            weight="regular"
                             size={scale(18)}
                             color={themeColor}
                         />
@@ -2776,6 +2787,7 @@ E11-0000
 
     const handleTimetableViewChange = useCallback(index => {
         const nextView = index === 0 ? 'detail' : 'overview';
+        trigger('selection');
         setTimetableView(nextView);
         setLocalStorage(TIMETABLE_VIEW_STORAGE_KEY, nextView);
     }, []);
@@ -2788,7 +2800,7 @@ E11-0000
         ];
 
         return (
-            <ViewSwitcherContainer
+            <View
                 onLayout={({ nativeEvent }) =>
                     setViewSwitcherHeight(nativeEvent.layout.height)
                 }
@@ -2797,19 +2809,14 @@ E11-0000
                     bottom: floatingBottom,
                     alignSelf: 'center',
                     zIndex: 10,
-                    ...(isLiquidGlassSupported ? {
-                        borderRadius: scale(999),
-                        overflow: 'hidden',
-                    } : {}),
                 }}>
-                <SegmentControl
+                <SegmentedTabControl
                     options={viewOptions}
                     selectedIndex={timetableView === 'overview' ? 1 : 0}
                     onChange={handleTimetableViewChange}
-                    trackBackgroundColor={isLiquidGlassSupported ? 'transparent' : white}
-                    style={isLiquidGlassSupported ? undefined : theme.viewShadow}
+                    compact
                 />
-            </ViewSwitcherContainer>
+            </View>
         );
     };
 
@@ -2964,8 +2971,8 @@ E11-0000
                         paddingVertical: verticalScale(3),
                         marginBottom: verticalScale(3),
                     }}>
-                        <Ionicons
-                            name="time-outline"
+                        <PhosphorFeatureIcon
+                            name="clock"
                             size={scale(13)}
                             color={warning}
                             style={{ marginRight: scale(4) }}
@@ -3034,7 +3041,7 @@ E11-0000
                 onScroll={handleTopScroll}
                 contentContainerStyle={{
                     paddingTop: courseSimTopInset,
-                    // 預留底部 SegmentControl；Android 場景底已在 Tab 上方，勿再扣 tabBarHeight
+                    // 預留底部分段切換器；Android 場景底已在 Tab 上方，勿再扣 tabBarHeight
                     paddingBottom: floatingBottom + verticalScale(50),
                 }}>
                 {/* 渲染課表或首次使用提示 */}

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { ActivityIndicator, FlatList, LayoutAnimation, Platform, Switch, View } from 'react-native';
 import { scale, verticalScale } from 'react-native-size-matters';
 import { t } from 'i18next';
-import Ionicons from "@react-native-vector-icons/ionicons";
+import PhosphorFeatureIcon from '../../../../info/home/search/components/PhosphorFeatureIcon';
 import { MenuView } from '@react-native-menu/menu';
 import Text from '../../../../../../components/AppText';
 import { uiStyle } from '../../../../../../components/ThemeContext';
@@ -117,8 +117,9 @@ const FilterPanel = ({
             }}>
                 {programmeLevelLabel}
             </Text>
-            <Ionicons
-                name="chevron-forward"
+            <PhosphorFeatureIcon
+                name="caret-right"
+                weight="regular"
                 size={scale(12)}
                 color={themeColor}
                 style={{ marginLeft: scale(1) }}
@@ -160,8 +161,8 @@ const FilterPanel = ({
                         style={{ marginRight: scale(3), transform: [{ scale: 0.7 }] }}
                     />
                 ) : (
-                    <Ionicons
-                        name={isHistorical ? 'time-outline' : 'calendar-outline'}
+                    <PhosphorFeatureIcon
+                        name={isHistorical ? 'clock' : 'calendar'}
                         size={scale(12)}
                         color={accentColor}
                         style={{ marginRight: scale(3) }}
@@ -176,8 +177,9 @@ const FilterPanel = ({
                     {periodLabel}
                 </Text>
                 {interactive ? (
-                    <Ionicons
-                        name="chevron-down"
+                    <PhosphorFeatureIcon
+                        name="caret-down"
+                        weight="regular"
                         size={scale(11)}
                         color={accentColor}
                         style={{ marginLeft: scale(2) }}
@@ -457,8 +459,9 @@ const FilterPanel = ({
                     accessibilityRole="button"
                     accessibilityLabel={t('清除', { ns: 'timetable' })}
                 >
-                    <Ionicons
-                        name="close"
+                    <PhosphorFeatureIcon
+                        name="x"
+                        weight="regular"
                         size={scale(14)}
                         color={themeColor}
                     />
@@ -604,8 +607,9 @@ const FilterPanel = ({
                             accessibilityRole="button"
                             accessibilityLabel={t('清除', { ns: 'timetable' })}
                         >
-                            <Ionicons
-                                name="close"
+                            <PhosphorFeatureIcon
+                                name="x"
+                                weight="regular"
                                 size={scale(14)}
                                 color={themeColor}
                             />

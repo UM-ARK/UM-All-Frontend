@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Keyboard, Pressable, StyleSheet, View } from 'react-native';
-import Ionicons from "@react-native-vector-icons/ionicons";
+import PhosphorFeatureIcon from '../../../../info/home/search/components/PhosphorFeatureIcon';
 import Text from '../../../../../../components/AppText';
 import TextInput from '../../../../../../components/AppTextInput';
 import searchFieldStyles, {
@@ -33,22 +33,22 @@ const SearchBarSection = ({
         {
             id: 'harbor-discuss',
             title: t('討論', { ns: 'catalog' }),
-            icon: 'chatbubbles-outline',
+            icon: 'messages-square',
         },
         {
             id: 'wiki',
             title: 'Wiki',
-            icon: 'book-outline',
+            icon: 'book-open',
         },
         {
             id: 'what2reg',
             title: t('選咩課', { ns: 'catalog' }),
-            icon: 'star-outline',
+            icon: 'star',
         },
         {
             id: 'official',
             title: t('官方', { ns: 'catalog' }),
-            icon: 'school-outline',
+            icon: 'graduation-cap',
         },
     ].filter(action => showOfficial || action.id !== 'official');
 
@@ -69,8 +69,9 @@ const SearchBarSection = ({
                         width: '100%',
                     },
                 ]}>
-                <Ionicons
-                    name={'search'}
+                <PhosphorFeatureIcon
+                    name="search"
+                    weight="regular"
                     size={SEARCH_FIELD_ICON_SIZE}
                     color={black.third}
                 />
@@ -105,8 +106,9 @@ const SearchBarSection = ({
                         onPress={onClear}
                         hitSlop={6}
                         style={searchFieldStyles.clearButton}>
-                        <Ionicons
-                            name={'close-circle'}
+                        <PhosphorFeatureIcon
+                            name="x-circle"
+                            weight="fill"
                             size={SEARCH_FIELD_CLEAR_ICON_SIZE}
                             color={themeColor}
                         />
@@ -140,7 +142,7 @@ const SearchBarSection = ({
                                 backgroundColor: white,
                                 opacity: pressed ? 0.7 : 1,
                             })}>
-                            <Ionicons
+                            <PhosphorFeatureIcon
                                 name={action.icon}
                                 size={scale(14)}
                                 color={themeColor}

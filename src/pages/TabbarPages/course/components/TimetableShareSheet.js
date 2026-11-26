@@ -17,7 +17,9 @@ import {
 } from 'react-native';
 
 import ActionSheet, { ScrollView } from 'react-native-actions-sheet';
-import Ionicons from "@react-native-vector-icons/ionicons";
+import { DownloadSimple } from 'phosphor-react-native/src/icons/DownloadSimple';
+import { Export } from 'phosphor-react-native/src/icons/Export';
+import PhosphorFeatureIcon from '../../info/home/search/components/PhosphorFeatureIcon';
 import * as Clipboard from 'expo-clipboard';
 import { scale, verticalScale } from 'react-native-size-matters';
 import { useTranslation } from 'react-i18next';
@@ -525,8 +527,9 @@ const TimetableSharePreview = ({
                         <Text style={styles.detailTime}>
                             {course['Time From']}
                         </Text>
-                        <Ionicons
-                            name="ellipsis-horizontal"
+                        <PhosphorFeatureIcon
+                            name="dots-three"
+                            weight="regular"
                             size={scale(20)}
                             color={black.main}
                             style={styles.detailEllipsis}
@@ -620,8 +623,8 @@ const TimetableSharePreview = ({
             <View style={styles.footer}>
                 {isHistoricalPeriod && activeCoursePeriod ? (
                     <View style={styles.historyBadge}>
-                        <Ionicons
-                            name="time-outline"
+                        <PhosphorFeatureIcon
+                            name="clock"
                             size={scale(13)}
                             color={warning}
                             style={styles.historyBadgeIcon}
@@ -988,8 +991,8 @@ const TimetableShareSheet = forwardRef(({ catalogMetadata }, ref) => {
                         <ActivityIndicator color={themeColor} />
                     ) : (
                         <>
-                            <Ionicons
-                                name="share-outline"
+                            <Export
+                                weight="duotone"
                                 size={scale(18)}
                                 color={themeColor}
                             />
@@ -1012,8 +1015,8 @@ const TimetableShareSheet = forwardRef(({ catalogMetadata }, ref) => {
                         styles.actionButton,
                         { backgroundColor: tonal.success15 },
                     ]}>
-                    <Ionicons
-                        name="download-outline"
+                    <DownloadSimple
+                        weight="duotone"
                         size={scale(18)}
                         color={success}
                     />
@@ -1029,8 +1032,8 @@ const TimetableShareSheet = forwardRef(({ catalogMetadata }, ref) => {
                 disabled={isGenerating}
                 onPress={handleCopyText}
                 style={styles.textExportButton}>
-                <Ionicons
-                    name="document-text-outline"
+                <PhosphorFeatureIcon
+                    name="file-text"
                     size={scale(18)}
                     color={themeColor}
                 />

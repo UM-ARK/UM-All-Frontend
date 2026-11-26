@@ -1,6 +1,6 @@
 import React from 'react';
 import { View } from 'react-native';
-import Ionicons from "@react-native-vector-icons/ionicons";
+import PhosphorFeatureIcon from '../../info/home/search/components/PhosphorFeatureIcon';
 import { scale, verticalScale } from 'react-native-size-matters';
 import {
     GlassView,
@@ -57,8 +57,8 @@ const PlanCapsule = ({ bottom, onPress }) => {
                         backgroundColor: isLiquidGlassSupported ? null : white,
                         ...(isLiquidGlassSupported ? {} : floatingShadow),
                     }}>
-                    <Ionicons
-                        name="calendar-outline"
+                    <PhosphorFeatureIcon
+                        name="calendar"
                         size={scale(15)}
                         color={themeColor}
                     />

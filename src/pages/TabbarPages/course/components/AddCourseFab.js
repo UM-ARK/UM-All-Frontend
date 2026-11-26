@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import Ionicons from "@react-native-vector-icons/ionicons";
+import { Books } from 'phosphor-react-native/src/icons/Books';
+import PhosphorFeatureIcon from '../../info/home/search/components/PhosphorFeatureIcon';
 import { scale, verticalScale } from 'react-native-size-matters';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import {
@@ -53,7 +54,7 @@ const AddCourseFab = ({
     visible = true,
 }) => {
     const { theme } = useTheme();
-    const { themeColor, white, floatingShadow } = theme;
+    const { black, white, floatingShadow } = theme;
     // 從隱藏恢復顯示時 remount 玻璃，避免曾被 opacity:0 弄壞後無法自癒
     const [glassKey, setGlassKey] = useState(0);
     const wasVisibleRef = useRef(visible);
@@ -239,10 +240,11 @@ const AddCourseFab = ({
                             key={`add-${glassKey}`}
                             isInteractive
                             style={styles.pill}>
-                            <Ionicons
-                                name="add"
+                            <PhosphorFeatureIcon
+                                name="plus"
+                                weight="regular"
                                 size={scale(24)}
-                                color={themeColor}
+                                color={black.third}
                             />
                         </GlassView>
                     </TouchableScale>
@@ -260,10 +262,10 @@ const AddCourseFab = ({
                                 key={`search-${glassKey}`}
                                 isInteractive
                                 style={styles.pill}>
-                                <Ionicons
-                                    name="library-outline"
+                                <Books
+                                    weight="duotone"
                                     size={scale(21)}
-                                    color={themeColor}
+                                    color={black.third}
                                 />
                             </GlassView>
                         </TouchableScale>
