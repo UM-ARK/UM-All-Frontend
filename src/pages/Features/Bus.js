@@ -10,7 +10,7 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useTheme} from '../../components/ThemeContext';
 import ARKImageView from '../../components/ARKImageView';
 import ScalePressable from '../../components/ScalePressable';
-import {UM_BUS_LIVE, UM_BUS_LOOP_ZH, UM_BUS_LOOP_EN, UM_BUS_LOOP_SERVICE, UM_MAP} from '../../utils/pathMap';
+import {UM_BUS_LIVE, UM_BUS_LOOP_ZH, UM_BUS_LOOP_EN, UM_BUS_LOOP_SERVICE, UM_BUS_STATS, UM_MAP} from '../../utils/pathMap';
 import {openLink} from '../../utils/browser';
 import {logToFirebase} from '../../utils/firebaseAnalytics';
 import {getLocalStorage, setLocalStorageSilently} from '../../utils/storageKits';
@@ -27,6 +27,9 @@ import BusArrivalPanel, {
 import BusEtaStatsSheet from './bus/BusEtaStatsSheet';
 import BusRouteMap from './bus/BusRouteMap';
 import {
+    BUS_STATS_CACHE_MS,
+    BUS_STATS_CACHE_PREFIX,
+    BUS_STATS_DEFAULT_DAYS,
     BUS_STOPS,
     createFallbackBusLive,
     extractVehiclePlates,
@@ -157,6 +160,7 @@ const BusScreen = ({navigation}) => {
     }), [bg_color]);
 
     const [snapshot, setSnapshot] = useState(null);
+    const [statsDocument, setStatsDocument] = useState(null);
     const [selectedStop, setSelectedStop] = useState(null);
     const [selectedVehiclePlate, setSelectedVehiclePlate] = useState(null);
     const [panelExpanded, setPanelExpanded] = useState(false);
@@ -267,6 +271,55 @@ const BusScreen = ({navigation}) => {
                 setSelectedStop(value);
             }
         });
+    }, []);
+
+    useEffect(() => {
+        let active = true;
+        const controller = new AbortController();
+        const cacheKey = `${BUS_STATS_CACHE_PREFIX}:${BUS_STATS_DEFAULT_DAYS}`;
+        const loadStats = async () => {
+            let cached = null;
+            try {
+                cached = await getLocalStorage(cacheKey);
+            } catch (_storageError) {
+                cached = null;
+            }
+            if (!active) {
+                return;
+            }
+            const cachedAt = Date.parse(cached?.receivedAt || '');
+            const cachedDocument = cached?.document?.lookbackDays === BUS_STATS_DEFAULT_DAYS
+                ? cached.document
+                : null;
+            if (cachedDocument) {
+                setStatsDocument(cachedDocument);
+                if (Number.isFinite(cachedAt) && Date.now() - cachedAt < BUS_STATS_CACHE_MS) {
+                    return;
+                }
+            }
+            try {
+                const response = await axios.get(UM_BUS_STATS, {
+                    params: {days: BUS_STATS_DEFAULT_DAYS},
+                    signal: controller.signal,
+                    timeout: 8000,
+                });
+                if (!active || response.data?.lookbackDays !== BUS_STATS_DEFAULT_DAYS) {
+                    return;
+                }
+                setStatsDocument(response.data);
+                setLocalStorageSilently(cacheKey, {
+                    receivedAt: new Date().toISOString(),
+                    document: response.data,
+                });
+            } catch (_statsError) {
+                // 統計預載失敗時保留既有快取或改用即時 ETA / 預設值
+            }
+        };
+        loadStats();
+        return () => {
+            active = false;
+            controller.abort();
+        };
     }, []);
 
     const fetchBusInfo = useCallback(async ({manual = false} = {}) => {
@@ -501,6 +554,7 @@ const BusScreen = ({navigation}) => {
                     }}
                     selectedStop={selectedStop}
                     selectedVehiclePlate={selectedVehiclePlate}
+                    statsDocument={statsDocument}
                     theme={theme}
                     translate={t}
                     vehicles={snapshot?.vehicles || []}

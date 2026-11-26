@@ -2,6 +2,8 @@ import React, {useCallback, useEffect, useMemo} from 'react';
 import {ScrollView, StyleSheet, View} from 'react-native';
 import {Gesture, GestureDetector} from 'react-native-gesture-handler';
 import Animated, {
+    Extrapolation,
+    interpolate,
     runOnJS,
     useAnimatedStyle,
     useSharedValue,
@@ -24,16 +26,26 @@ import {
     sortVehiclesByDestinationEta,
 } from './busModel';
 
-// 面板高度（不含底部安全區；收合態預留摘要次行，例如 PGH 出發 ETA）
-const BUS_PANEL_COLLAPSED_EMPTY = 112;
-const BUS_PANEL_COLLAPSED = 138;
-const BUS_PANEL_DESTINATION_HEIGHT = 32;
+// 面板高度（不含底部安全區；收合態依實際顯示行數貼合底部）
+const BUS_PANEL_COLLAPSED_EMPTY = 114;
+const BUS_PANEL_COLLAPSED = 116;
+const BUS_PANEL_DESTINATION_HEIGHT = 20;
+const BUS_PANEL_SECONDARY_ETA_HEIGHT = 22;
 export const BUS_PANEL_EXPANDED = 440;
 
-export const getBusPanelCollapsedHeight = (hasVehicles, hasDestination) => (
-    (hasVehicles ? BUS_PANEL_COLLAPSED : BUS_PANEL_COLLAPSED_EMPTY)
-    + (hasDestination ? BUS_PANEL_DESTINATION_HEIGHT : 0)
-);
+export const getBusPanelCollapsedHeight = (
+    hasVehicles,
+    hasDestination,
+    hasSecondaryEta = false,
+) => {
+    if (!hasDestination) {
+        return BUS_PANEL_COLLAPSED;
+    }
+    return (
+        (hasVehicles ? BUS_PANEL_COLLAPSED_EMPTY + BUS_PANEL_DESTINATION_HEIGHT : BUS_PANEL_COLLAPSED_EMPTY)
+        + (hasSecondaryEta ? BUS_PANEL_SECONDARY_ETA_HEIGHT : 0)
+    );
+};
 
 const PANEL_SPRING = {
     damping: 28,
@@ -106,11 +118,15 @@ const BusArrivalPanel = ({
     } = theme;
     const hasVehicles = (snapshot?.vehicles || []).length > 0;
     const selectedStopInfo = getBusStop(selectedStop);
-    const bottomInset = 10 + insets.bottom;
-    const collapsedHeight = getBusPanelCollapsedHeight(hasVehicles, Boolean(selectedStopInfo)) + insets.bottom;
+    const vehicles = useMemo(
+        () => sortVehiclesByDestinationEta(snapshot?.vehicles || [], selectedStop),
+        [selectedStop, snapshot?.vehicles],
+    );
+    const headingVehicle = vehicles.find(
+        vehicle => vehicle.vehiclePlateNumber === selectedVehiclePlate,
+    ) || vehicles[0];
+    const bottomInset = 8 + insets.bottom;
     const expandedHeight = BUS_PANEL_EXPANDED + insets.bottom;
-    const panelHeight = useSharedValue(expanded ? expandedHeight : collapsedHeight);
-    const dragStartHeight = useSharedValue(0);
 
     const styles = useMemo(() => StyleSheet.create({
         container: {
@@ -205,6 +221,19 @@ const BusArrivalPanel = ({
             fontSize: 12,
             marginTop: 4,
             marginBottom: 8,
+        },
+        expandableWrap: {
+            flex: 1,
+            position: 'relative',
+        },
+        hintOverlay: {
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+        },
+        expandableContent: {
+            flex: 1,
         },
         stopGrid: {
             flexDirection: 'row',
@@ -335,13 +364,6 @@ const BusArrivalPanel = ({
         },
     }), [black.main, black.second, black.third, bottomInset, featureIconTones.green.foreground, featuresScreen.divider, floatingShadow, pressOverlay, successForeground, warning, white]);
 
-    const vehicles = useMemo(
-        () => sortVehiclesByDestinationEta(snapshot?.vehicles || [], selectedStop),
-        [selectedStop, snapshot?.vehicles],
-    );
-    const headingVehicle = vehicles.find(
-        vehicle => vehicle.vehiclePlateNumber === selectedVehiclePlate,
-    ) || vehicles[0];
     const officialNextDeparture = getOfficialNextDeparturePresentation(
         snapshot?.officialNextDeparture,
     );
@@ -362,55 +384,6 @@ const BusArrivalPanel = ({
         }
         return translate('官方下一班時間待公布');
     })();
-
-    useEffect(() => {
-        panelHeight.value = withSpring(
-            expanded ? expandedHeight : collapsedHeight,
-            PANEL_SPRING,
-        );
-    }, [collapsedHeight, expanded, expandedHeight, panelHeight]);
-
-    const commitExpanded = useCallback(nextExpanded => {
-        if (nextExpanded === expanded) {
-            panelHeight.value = withSpring(
-                nextExpanded ? expandedHeight : collapsedHeight,
-                PANEL_SPRING,
-            );
-            return;
-        }
-        trigger();
-        onToggleExpanded();
-    }, [collapsedHeight, expanded, expandedHeight, onToggleExpanded, panelHeight]);
-
-    const panGesture = useMemo(() => Gesture.Pan()
-        .activeOffsetY([-8, 8])
-        .failOffsetX([-24, 24])
-        .onStart(() => {
-            dragStartHeight.value = panelHeight.value;
-        })
-        .onUpdate(event => {
-            const next = dragStartHeight.value - event.translationY;
-            panelHeight.value = Math.min(
-                expandedHeight,
-                Math.max(collapsedHeight, next),
-            );
-        })
-        .onEnd(event => {
-            const mid = (collapsedHeight + expandedHeight) / 2;
-            const shouldExpand = event.velocityY < -500
-                || (event.velocityY <= 500 && panelHeight.value > mid);
-            runOnJS(commitExpanded)(shouldExpand);
-        }), [
-        collapsedHeight,
-        commitExpanded,
-        dragStartHeight,
-        expandedHeight,
-        panelHeight,
-    ]);
-
-    const animatedContainerStyle = useAnimatedStyle(() => ({
-        height: panelHeight.value,
-    }));
 
     const renderVehicleEta = vehicle => {
         const eta = getVehicleDestinationEta(vehicle, selectedStop);
@@ -523,6 +496,91 @@ const BusArrivalPanel = ({
     const summaryEtaPresentation = selectedStop && headingVehicle
         ? renderVehicleEta(headingVehicle)
         : null;
+    const collapsedHeight = getBusPanelCollapsedHeight(
+        hasVehicles,
+        Boolean(selectedStopInfo),
+        Boolean(summaryEtaPresentation?.secondary),
+    ) + insets.bottom;
+    const panelHeight = useSharedValue(expanded ? expandedHeight : collapsedHeight);
+    const dragStartHeight = useSharedValue(0);
+
+    useEffect(() => {
+        panelHeight.value = withSpring(
+            expanded ? expandedHeight : collapsedHeight,
+            PANEL_SPRING,
+        );
+    }, [collapsedHeight, expanded, expandedHeight, panelHeight]);
+
+    const commitExpanded = useCallback(nextExpanded => {
+        if (nextExpanded === expanded) {
+            panelHeight.value = withSpring(
+                nextExpanded ? expandedHeight : collapsedHeight,
+                PANEL_SPRING,
+            );
+            return;
+        }
+        trigger();
+        onToggleExpanded();
+    }, [collapsedHeight, expanded, expandedHeight, onToggleExpanded, panelHeight]);
+
+    const panGesture = useMemo(() => Gesture.Pan()
+        .activeOffsetY([-8, 8])
+        .failOffsetX([-24, 24])
+        .onStart(() => {
+            dragStartHeight.value = panelHeight.value;
+        })
+        .onUpdate(event => {
+            const next = dragStartHeight.value - event.translationY;
+            panelHeight.value = Math.min(
+                expandedHeight,
+                Math.max(collapsedHeight, next),
+            );
+        })
+        .onEnd(event => {
+            const mid = (collapsedHeight + expandedHeight) / 2;
+            const shouldExpand = event.velocityY < -500
+                || (event.velocityY <= 500 && panelHeight.value > mid);
+            runOnJS(commitExpanded)(shouldExpand);
+        }), [
+        collapsedHeight,
+        commitExpanded,
+        dragStartHeight,
+        expandedHeight,
+        panelHeight,
+    ]);
+
+    const animatedContainerStyle = useAnimatedStyle(() => ({
+        height: panelHeight.value,
+    }));
+
+    const animatedExpandableStyle = useAnimatedStyle(() => {
+        const progress = interpolate(
+            panelHeight.value,
+            [collapsedHeight, expandedHeight],
+            [0, 1],
+            Extrapolation.CLAMP,
+        );
+        return {
+            opacity: interpolate(progress, [0.04, 0.45], [0, 1], Extrapolation.CLAMP),
+            transform: [
+                {
+                    translateY: interpolate(progress, [0, 0.45], [10, 0], Extrapolation.CLAMP),
+                },
+            ],
+        };
+    }, [collapsedHeight, expandedHeight]);
+
+    const animatedHintStyle = useAnimatedStyle(() => {
+        const progress = interpolate(
+            panelHeight.value,
+            [collapsedHeight, expandedHeight],
+            [0, 1],
+            Extrapolation.CLAMP,
+        );
+        return {
+            opacity: interpolate(progress, [0, 0.14], [1, 0], Extrapolation.CLAMP),
+        };
+    }, [collapsedHeight, expandedHeight]);
 
     return (
         <Animated.View style={[styles.container, animatedContainerStyle]}>
@@ -680,109 +738,121 @@ const BusArrivalPanel = ({
                 </Animated.View>
             </GestureDetector>
 
-            {expanded ? (
-                <View style={styles.stopGrid}>
-                    {BUS_STOPS.map(stop => {
-                        const selected = selectedStop === stop.code;
-                        return (
-                            <ScalePressable
-                                key={stop.code}
-                                accessibilityRole="button"
-                                accessibilityState={{selected}}
-                                onPress={() => {
-                                    trigger();
-                                    onSelectStop(stop.code);
-                                }}
-                                style={[
-                                    styles.stopChip,
-                                    selected && styles.selectedStopChip,
-                                ]}>
-                                <Text style={[
-                                    styles.stopChipText,
-                                    selected && styles.selectedStopChipText,
-                                ]}>
-                                    {stop.code} {translate(stop.shortName)}
-                                </Text>
-                            </ScalePressable>
-                        );
-                    })}
-                </View>
-            ) : !selectedStop ? (
-                <Text style={styles.hint}>{translate('點選路線上的車站查看預計到站時間')}</Text>
-            ) : null}
+            <View style={styles.expandableWrap}>
+                {!selectedStop ? (
+                    <Animated.View
+                        pointerEvents="none"
+                        accessibilityElementsHidden={expanded}
+                        importantForAccessibility={expanded ? 'no-hide-descendants' : 'auto'}
+                        style={[styles.hintOverlay, animatedHintStyle]}>
+                        <Text style={styles.hint}>{translate('點選路線上的車站查看預計到站時間')}</Text>
+                    </Animated.View>
+                ) : null}
 
-            {expanded && selectedStopInfo ? (
-                <ScalePressable
-                    accessibilityRole="button"
-                    accessibilityLabel={translate('查看到站時間統計')}
-                    onPress={() => {
-                        trigger();
-                        onOpenStats();
-                    }}
-                    style={styles.statsButton}>
-                    <PhosphorFeatureIcon name="chart-line-up" color={featureIconTones.blue.foreground} size={20} />
-                    <View style={styles.statsButtonContent}>
-                        <Text style={styles.statsButtonTitle}>{translate('到站時間統計')}</Text>
-                        <Text style={styles.statsButtonText}>{translate('查看近1天、7天及30天行車參考')}</Text>
-                    </View>
-                    <PhosphorFeatureIcon name="caret-right" color={black.third} size={18} weight="regular" />
-                </ScalePressable>
-            ) : null}
-
-            {expanded ? (
-                <ScrollView
-                    style={styles.list}
-                    nestedScrollEnabled
-                    showsVerticalScrollIndicator={false}
-                    contentContainerStyle={styles.listContent}>
-                    {vehicles.length > 0 ? vehicles.map(vehicle => {
-                        const selected = selectedVehiclePlate === vehicle.vehiclePlateNumber;
-                        const etaPresentation = renderVehicleEta(vehicle);
-                        return (
-                            <ScalePressable
-                                key={vehicle.vehiclePlateNumber}
-                                accessibilityRole="button"
-                                accessibilityState={{selected}}
-                                onPress={() => {
-                                    trigger();
-                                    onSelectVehicle(vehicle.vehiclePlateNumber);
-                                }}
-                                style={[styles.vehicleRow, selected && {backgroundColor: featuresScreen.divider}]}>
-                                <View style={styles.vehicleIcon}>
-                                    <PhosphorFeatureIcon name="bus" color={secondThemeColor} size={22} />
-                                </View>
-                                <View style={styles.vehicleContent}>
-                                    <Text style={styles.vehicleTitle}>{vehicle.vehiclePlateNumber}</Text>
-                                    <Text style={styles.vehiclePosition}>
-                                        {getPositionLabel(vehicle.positionCode, translate)}
+                <Animated.View
+                    pointerEvents={expanded ? 'auto' : 'none'}
+                    accessibilityElementsHidden={!expanded}
+                    importantForAccessibility={expanded ? 'auto' : 'no-hide-descendants'}
+                    style={[styles.expandableContent, animatedExpandableStyle]}>
+                    <View style={styles.stopGrid}>
+                        {BUS_STOPS.map(stop => {
+                            const selected = selectedStop === stop.code;
+                            return (
+                                <ScalePressable
+                                    key={stop.code}
+                                    accessibilityRole="button"
+                                    accessibilityState={{selected}}
+                                    onPress={() => {
+                                        trigger();
+                                        onSelectStop(stop.code);
+                                    }}
+                                    style={[
+                                        styles.stopChip,
+                                        selected && styles.selectedStopChip,
+                                    ]}>
+                                    <Text style={[
+                                        styles.stopChipText,
+                                        selected && styles.selectedStopChipText,
+                                    ]}>
+                                        {stop.code} {translate(stop.shortName)}
                                     </Text>
-                                    <Text style={styles.eta}>{etaPresentation.primary}</Text>
-                                    {etaPresentation.secondary ? (
-                                        <Text style={styles.etaSecondary}>
-                                            {etaPresentation.secondary}
+                                </ScalePressable>
+                            );
+                        })}
+                    </View>
+
+                    {selectedStopInfo ? (
+                        <ScalePressable
+                            accessibilityRole="button"
+                            accessibilityLabel={translate('查看到站時間統計')}
+                            onPress={() => {
+                                trigger();
+                                onOpenStats();
+                            }}
+                            style={styles.statsButton}>
+                            <PhosphorFeatureIcon name="chart-line-up" color={featureIconTones.blue.foreground} size={20} />
+                            <View style={styles.statsButtonContent}>
+                                <Text style={styles.statsButtonTitle}>{translate('到站時間統計')}</Text>
+                                <Text style={styles.statsButtonText}>{translate('查看近1天、7天及30天行車參考')}</Text>
+                            </View>
+                            <PhosphorFeatureIcon name="caret-right" color={black.third} size={18} weight="regular" />
+                        </ScalePressable>
+                    ) : null}
+
+                    <ScrollView
+                        style={styles.list}
+                        nestedScrollEnabled
+                        showsVerticalScrollIndicator={false}
+                        contentContainerStyle={styles.listContent}>
+                        {vehicles.length > 0 ? vehicles.map(vehicle => {
+                            const selected = selectedVehiclePlate === vehicle.vehiclePlateNumber;
+                            const etaPresentation = renderVehicleEta(vehicle);
+                            return (
+                                <ScalePressable
+                                    key={vehicle.vehiclePlateNumber}
+                                    accessibilityRole="button"
+                                    accessibilityState={{selected}}
+                                    onPress={() => {
+                                        trigger();
+                                        onSelectVehicle(vehicle.vehiclePlateNumber);
+                                    }}
+                                    style={[styles.vehicleRow, selected && {backgroundColor: featuresScreen.divider}]}>
+                                    <View style={styles.vehicleIcon}>
+                                        <PhosphorFeatureIcon name="bus" color={secondThemeColor} size={22} />
+                                    </View>
+                                    <View style={styles.vehicleContent}>
+                                        <Text style={styles.vehicleTitle}>{vehicle.vehiclePlateNumber}</Text>
+                                        <Text style={styles.vehiclePosition}>
+                                            {getPositionLabel(vehicle.positionCode, translate)}
                                         </Text>
-                                    ) : null}
-                                    {etaPresentation.lowConfidence
-                                    || vehicle.stateConfidence === 'low'
-                                    || vehicle.positionOverdue ? (
-                                        <Text style={styles.warning}>{translate('預測信心較低')}</Text>
-                                    ) : null}
-                                </View>
-                            </ScalePressable>
-                        );
-                    }) : (
-                        <View style={styles.empty}>
-                            <Text style={styles.emptyText}>
-                                {snapshot?.serviceStatus === 'stopped'
-                                    ? translate('目前沒有巴士服務')
-                                    : snapshot?.serviceStatus === 'running'
-                                        ? translate('服務時段內，暫未有巴士出現')
-                                        : translate('暫未偵測到行駛中的巴士')}
-                            </Text>
-                        </View>
-                    )}
-                </ScrollView>
-            ) : null}
+                                        <Text style={styles.eta}>{etaPresentation.primary}</Text>
+                                        {etaPresentation.secondary ? (
+                                            <Text style={styles.etaSecondary}>
+                                                {etaPresentation.secondary}
+                                            </Text>
+                                        ) : null}
+                                        {etaPresentation.lowConfidence
+                                        || vehicle.stateConfidence === 'low'
+                                        || vehicle.positionOverdue ? (
+                                            <Text style={styles.warning}>{translate('預測信心較低')}</Text>
+                                        ) : null}
+                                    </View>
+                                </ScalePressable>
+                            );
+                        }) : (
+                            <View style={styles.empty}>
+                                <Text style={styles.emptyText}>
+                                    {snapshot?.serviceStatus === 'stopped'
+                                        ? translate('目前沒有巴士服務')
+                                        : snapshot?.serviceStatus === 'running'
+                                            ? translate('服務時段內，暫未有巴士出現')
+                                            : translate('暫未偵測到行駛中的巴士')}
+                                </Text>
+                            </View>
+                        )}
+                    </ScrollView>
+                </Animated.View>
+            </View>
         </Animated.View>
     );
 };

@@ -7,8 +7,10 @@ import {
     getEtaDisplay,
     getOfficialNextDeparturePresentation,
     getPositionLabel,
+    getPositionMedianDurationSeconds,
     getVehicleDestinationEta,
     getVehicleDestinationProgress,
+    getVehicleTransitMotionPlan,
     isBusLiveSnapshotFresh,
     isCachedBusLiveUsable,
     normalizeBusLive,
@@ -243,6 +245,77 @@ describe('busModel', () => {
         }, 'PGH', 'E4')).toMatchObject({
             kind: 'insufficient',
             missingPositionCodes: ['PGH', 'PGH_TO_E4'],
+        });
+    });
+
+    test('resolves median leg duration and builds a stats-driven transit motion plan', () => {
+        const statsDocument = {
+            positionDurations: [{
+                positionCode: 'N2_TO_N6',
+                sampleCount: 25,
+                p50Seconds: 50,
+                p75Seconds: 65,
+                p90Seconds: 80,
+                breakdowns: [{
+                    dayType: 'weekday',
+                    timeBucket: 'morning',
+                    sampleCount: 10,
+                    p50Seconds: 40,
+                    p75Seconds: 55,
+                    p90Seconds: 70,
+                }],
+            }],
+        };
+        const observedAt = '2026-08-10T23:30:00.000Z';
+
+        expect(getPositionMedianDurationSeconds(statsDocument, 'N2_TO_N6', observedAt)).toBe(40);
+
+        // 剛從 N2 出發進入 N2_TO_N6（positionIndex = 5, legIndex = 2）
+        expect(getVehicleTransitMotionPlan({
+            vehicle: {},
+            positionIndex: 5,
+            previousPositionIndex: 4,
+            statsDocument,
+            observedAt,
+            now: Date.parse(observedAt),
+        })).toMatchObject({
+            startLocation: 2,
+            targetLocation: 2.85,
+            durationMs: 40000,
+            creepTargetLocation: expect.closeTo(2.97, 5),
+            creepDurationMs: 60000,
+        });
+
+        // 初次進入頁面時已在路上，依剩餘 ETA 與統計時間推算進度
+        expect(getVehicleTransitMotionPlan({
+            vehicle: {nextStopEta: {p50Seconds: 20}},
+            positionIndex: 5,
+            previousPositionIndex: null,
+            statsDocument,
+            observedAt,
+            now: Date.parse(observedAt),
+        })).toMatchObject({
+            startLocation: 2.5,
+            targetLocation: 2.85,
+            durationMs: 20000,
+            creepTargetLocation: expect.closeTo(2.97, 5),
+            creepDurationMs: 60000,
+        });
+
+        // 無統計與無 ETA 時使用預設 30 秒整段基準
+        expect(getVehicleTransitMotionPlan({
+            vehicle: {},
+            positionIndex: 5,
+            previousPositionIndex: 4,
+            statsDocument: null,
+            observedAt,
+            now: Date.parse(observedAt),
+        })).toMatchObject({
+            startLocation: 2,
+            targetLocation: 2.85,
+            durationMs: 30000,
+            creepTargetLocation: expect.closeTo(2.97, 5),
+            creepDurationMs: 60000,
         });
     });
 });

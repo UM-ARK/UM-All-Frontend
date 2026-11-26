@@ -22,6 +22,7 @@ import {
     getBusStop,
     getVehicleDestinationEta,
     getVehicleDestinationProgress,
+    getVehicleTransitMotionPlan,
     sortVehiclesByDestinationEta,
 } from './busModel';
 import {getBusRouteLegPath, getBusRoutePath, getBusRoutePoint} from './busRouteGeometry';
@@ -88,8 +89,7 @@ const CAMPUS_BUILDINGS = [
 const AnimatedPath = Animated.createAnimatedComponent(Path);
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 const SHUTTLE_IMAGE = require('../../../static/img/Bus/campus-shuttle-marker.png');
-const VEHICLE_GLIDE_MS = 10000;
-const VEHICLE_GLIDE_EASING = Easing.bezier(0.3, 0.16, 0.68, 0.9);
+const VEHICLE_GLIDE_EASING = Easing.linear;
 
 const CountdownBorder = ({arrived, color, countdownKey, deadlineAt, initialProgress, radius, visible}) => {
     const [layout, setLayout] = useState({width: 0, height: 0});
@@ -172,7 +172,7 @@ const CountdownBorder = ({arrived, color, countdownKey, deadlineAt, initialProgr
     );
 };
 
-const VehicleMarker = ({accentColor, motionEnabled, onSelect, positionIndex, selected, styles, svgScale, xOrigin, xScale, vehicle}) => {
+const VehicleMarker = ({accentColor, motionEnabled, observedAt, onSelect, positionIndex, selected, statsDocument, styles, svgScale, xOrigin, xScale, vehicle}) => {
     const legIndex = Math.floor(positionIndex / 2);
     const inTransit = positionIndex % 2 === 1;
     const reportedLocation = positionIndex / 2;
@@ -180,6 +180,12 @@ const VehicleMarker = ({accentColor, motionEnabled, onSelect, positionIndex, sel
     const roadAccent = useSharedValue(0);
     const arrival = useSharedValue(1);
     const lastPositionIndex = useRef(null);
+    const latestVehicleRef = useRef(vehicle);
+    const latestObservedAtRef = useRef(observedAt);
+    const latestStatsRef = useRef(statsDocument);
+    latestVehicleRef.current = vehicle;
+    latestObservedAtRef.current = observedAt;
+    latestStatsRef.current = statsDocument;
     const offset = vehicle.offset;
     const stop = BUS_STOPS[legIndex];
     const facingRight = BUS_STOPS[(legIndex + 1) % BUS_STOPS.length].x > stop.x;
@@ -198,22 +204,31 @@ const VehicleMarker = ({accentColor, motionEnabled, onSelect, positionIndex, sel
             return;
         }
 
-        // 來源只回報路段。車標停在站前，待下一次更新確認到站。
-        location.set(previous === positionIndex - 1 ? legIndex : reportedLocation);
+        // 依據路段平均統計與即時 ETA 勻速推進；到達站前緩衝點後持續緩慢移動並保留尾跡，直到確認到站。
+        const plan = getVehicleTransitMotionPlan({
+            vehicle: latestVehicleRef.current,
+            positionIndex,
+            previousPositionIndex: previous,
+            statsDocument: latestStatsRef.current,
+            observedAt: latestObservedAtRef.current,
+        });
+        location.set(plan.startLocation);
         roadAccent.set(withTiming(1, {duration: 180}));
-        location.set(withTiming(legIndex + 0.78, {
-            duration: VEHICLE_GLIDE_MS,
-            easing: VEHICLE_GLIDE_EASING,
-        }, finished => {
-            if (finished) {
-                roadAccent.set(withTiming(0, {duration: 240}));
-            }
-        }));
+        location.set(withSequence(
+            withTiming(plan.targetLocation, {
+                duration: plan.durationMs,
+                easing: VEHICLE_GLIDE_EASING,
+            }),
+            withTiming(plan.creepTargetLocation, {
+                duration: plan.creepDurationMs,
+                easing: VEHICLE_GLIDE_EASING,
+            }),
+        ));
         return () => {
             cancelAnimation(location);
             cancelAnimation(roadAccent);
         };
-    }, [arrival, inTransit, legIndex, location, motionEnabled, positionIndex, reportedLocation, roadAccent]);
+    }, [arrival, inTransit, location, motionEnabled, positionIndex, reportedLocation, roadAccent]);
 
     const animatedPosition = useAnimatedStyle(() => {
         const point = getBusRoutePoint(location.get());
@@ -240,15 +255,15 @@ const VehicleMarker = ({accentColor, motionEnabled, onSelect, positionIndex, sel
         return {transform: [{rotate: `${tilt}deg`}, {scaleX: facingRight ? -1 : 1}]};
     });
     const animatedRoadAccent = useAnimatedProps(() => {
-        const opacity = roadAccent.get() * 0.64;
+        const opacity = roadAccent.get() * 0.9;
         if (opacity === 0) {
             return {d: 'M0 0', opacity};
         }
         const progress = location.get();
         let path = '';
-        for (let distance = -24; distance <= 0; distance += 4) {
+        for (let distance = -52; distance <= 0; distance += 4) {
             const point = getBusRoutePoint(progress, distance);
-            path += `${distance === -24 ? 'M' : 'L'}${xOrigin + point.x * xScale} ${point.y * svgScale} `;
+            path += `${distance === -52 ? 'M' : 'L'}${xOrigin + point.x * xScale} ${point.y * svgScale} `;
         }
         return {d: path, opacity};
     });
@@ -264,11 +279,12 @@ const VehicleMarker = ({accentColor, motionEnabled, onSelect, positionIndex, sel
                     {inTransit ? (
                         <AnimatedPath
                             animatedProps={animatedRoadAccent}
+                            d="M0 0"
                             fill="none"
                             stroke={accentColor}
                             strokeLinecap="round"
                             strokeLinejoin="round"
-                            strokeWidth={5 * svgScale}
+                            strokeWidth={6.5 * svgScale}
                         />
                     ) : (
                         <AnimatedCircle
@@ -321,6 +337,7 @@ const BusRouteMap = ({
     onSelectVehicle,
     selectedStop,
     selectedVehiclePlate,
+    statsDocument,
     theme,
     translate,
     vehicles,
@@ -834,9 +851,11 @@ const BusRouteMap = ({
                         key={vehicle.vehiclePlateNumber}
                         accentColor={secondThemeColor}
                         motionEnabled={motionEnabled && !reducedMotion}
+                        observedAt={observedAt}
                         onSelect={onSelectVehicle}
                         positionIndex={vehicle.positionIndex}
                         selected={selectedVehiclePlate === vehicle.vehiclePlateNumber}
+                        statsDocument={statsDocument}
                         styles={styles}
                         svgScale={svgScale}
                         vehicle={vehicle}

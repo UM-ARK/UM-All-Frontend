@@ -8,12 +8,15 @@ import axios from 'axios';
 
 import Text from '../../../components/AppText';
 import ScalePressable from '../../../components/ScalePressable';
-import SegmentControl from '../../../components/SegmentControl';
+import SegmentedTabControl from '../../../components/SegmentedTabControl';
 import {uiStyle, useTheme} from '../../../components/ThemeContext';
 import {UM_BUS_STATS} from '../../../utils/pathMap';
 import {getLocalStorage, setLocalStorageSilently} from '../../../utils/storageKits';
 import {trigger} from '../../../utils/trigger';
 import {
+    BUS_STATS_CACHE_MS,
+    BUS_STATS_CACHE_PREFIX,
+    BUS_STATS_DEFAULT_DAYS,
     BUS_STATS_LOOKBACK_DAYS,
     getBusStatsRoutePresentation,
     getBusStop,
@@ -22,8 +25,6 @@ import {
 } from './busModel';
 
 const BUS_STATS_DAYS_KEY = 'busEtaStatsDays';
-const BUS_STATS_CACHE_PREFIX = 'busEtaStatsSnapshot';
-const BUS_STATS_CACHE_MS = 5 * 60 * 1000;
 
 const BusEtaStatsSheet = ({visible, onClose, selectedStop, selectedVehiclePlate, snapshot}) => {
     const {t} = useTranslation('features');
@@ -32,7 +33,7 @@ const BusEtaStatsSheet = ({visible, onClose, selectedStop, selectedVehiclePlate,
     const sheetRef = useRef(null);
     const controllerRef = useRef(null);
     const requestIdRef = useRef(0);
-    const [selectedDays, setSelectedDays] = useState(30);
+    const [selectedDays, setSelectedDays] = useState(BUS_STATS_DEFAULT_DAYS);
     const [preferenceLoaded, setPreferenceLoaded] = useState(false);
     const [document, setDocument] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -79,7 +80,6 @@ const BusEtaStatsSheet = ({visible, onClose, selectedStop, selectedVehiclePlate,
             marginTop: 2,
         },
         segment: {
-            alignSelf: 'flex-start',
             marginTop: 14,
         },
         explanation: {
@@ -281,6 +281,10 @@ const BusEtaStatsSheet = ({visible, onClose, selectedStop, selectedVehiclePlate,
 
     const selectDays = index => {
         const nextDays = BUS_STATS_LOOKBACK_DAYS[index];
+        if (nextDays === selectedDays) {
+            return;
+        }
+        trigger('selection');
         setDocument(null);
         setError(false);
         setUsingStaleCache(false);
@@ -330,13 +334,16 @@ const BusEtaStatsSheet = ({visible, onClose, selectedStop, selectedVehiclePlate,
                         ? `${getPositionLabel(vehicle.positionCode, t)} → ${destination.code} ${t(destination.name)}`
                         : t('暫時沒有巴士位置')}
                 </Text>
-                <SegmentControl
-                    compact
-                    style={styles.segment}
-                    options={options}
-                    selectedIndex={BUS_STATS_LOOKBACK_DAYS.indexOf(selectedDays)}
-                    onChange={selectDays}
-                />
+                <View style={styles.segment}>
+                    <SegmentedTabControl
+                        options={options}
+                        selectedIndex={BUS_STATS_LOOKBACK_DAYS.indexOf(selectedDays)}
+                        onChange={selectDays}
+                        compact
+                        fullWidth
+                        raisedTrack
+                    />
+                </View>
                 <Text style={styles.explanation}>
                     {t('以下為近{{days}}天各路段歷史行車時間的合計參考，不會改變上方正式預計到站時間。', {days: selectedDays})}
                 </Text>

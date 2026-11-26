@@ -31,7 +31,16 @@ export const BUS_POSITIONS = [
 export const BUS_POSITION_CODES = BUS_POSITIONS.map(item => item.code);
 const BUS_ETA_PROGRESS_TIME_CONSTANT_SECONDS = 240;
 export const BUS_STATS_LOOKBACK_DAYS = [1, 7, 30];
+export const BUS_STATS_DEFAULT_DAYS = 30;
+export const BUS_STATS_CACHE_PREFIX = 'busEtaStatsSnapshot';
+export const BUS_STATS_CACHE_MS = 5 * 60 * 1000;
 const BUS_STATS_MINIMUM_SAMPLES = 5;
+const DEFAULT_TRANSIT_LEG_SECONDS = 30;
+const TRANSIT_TARGET_PROGRESS = 0.85;
+const TRANSIT_CREEP_TARGET_PROGRESS = 0.97;
+const MIN_TRANSIT_GLIDE_MS = 3000;
+const MAX_TRANSIT_GLIDE_MS = 180000;
+const MIN_TRANSIT_CREEP_MS = 60000;
 
 const STOP_BY_CODE = BUS_STOPS.reduce((result, stop) => {
     result[stop.code] = stop;
@@ -232,6 +241,100 @@ function getStatsTimeContext(value) {
     };
 }
 
+function resolvePositionStats(position, dayType, timeBucket) {
+    const exact = position?.breakdowns?.find(item =>
+        item.dayType === dayType && item.timeBucket === timeBucket,
+    );
+    if (
+        exact?.sampleCount >= BUS_STATS_MINIMUM_SAMPLES
+        && Number.isFinite(exact.p50Seconds)
+        && Number.isFinite(exact.p75Seconds)
+        && Number.isFinite(exact.p90Seconds)
+    ) {
+        return {stats: exact, usedFallback: false};
+    }
+    if (
+        position?.sampleCount >= BUS_STATS_MINIMUM_SAMPLES
+        && Number.isFinite(position.p50Seconds)
+        && Number.isFinite(position.p75Seconds)
+        && Number.isFinite(position.p90Seconds)
+    ) {
+        return {stats: position, usedFallback: true};
+    }
+    return null;
+}
+
+export function getPositionMedianDurationSeconds(document, positionCode, at) {
+    const positions = Array.isArray(document?.positionDurations)
+        ? document.positionDurations
+        : [];
+    const position = positions.find(item => item.positionCode === positionCode);
+    if (!position) {
+        return null;
+    }
+    const {dayType, timeBucket} = getStatsTimeContext(at || document?.generatedAt);
+    const resolved = resolvePositionStats(position, dayType, timeBucket);
+    const seconds = resolved?.stats?.p50Seconds;
+    return Number.isFinite(seconds) && seconds > 0 ? seconds : null;
+}
+
+export function getVehicleTransitMotionPlan({
+    vehicle,
+    positionIndex,
+    previousPositionIndex,
+    statsDocument,
+    observedAt,
+    now = Date.now(),
+}) {
+    const legIndex = Math.floor(positionIndex / 2);
+    const positionCode = BUS_POSITION_CODES[positionIndex];
+    const referenceTime = observedAt || now;
+    const statsDurationSeconds = getPositionMedianDurationSeconds(
+        statsDocument,
+        positionCode,
+        referenceTime,
+    );
+    const observedTime = Date.parse(observedAt || '');
+    const elapsedSinceObserved = Number.isFinite(observedTime)
+        ? Math.max(0, (now - observedTime) / 1000)
+        : 0;
+    const rawNextStopEta = vehicle?.nextStopEta?.p50Seconds;
+    const remainingEtaSeconds = Number.isFinite(rawNextStopEta) && rawNextStopEta > 0
+        ? Math.max(0, rawNextStopEta - elapsedSinceObserved)
+        : null;
+
+    let startProgress = 0.45;
+    if (previousPositionIndex === positionIndex - 1) {
+        startProgress = 0;
+    } else if (statsDurationSeconds && remainingEtaSeconds !== null) {
+        const estimatedProgress = 1 - remainingEtaSeconds / statsDurationSeconds;
+        startProgress = Math.max(0.15, Math.min(0.72, estimatedProgress));
+    }
+
+    let durationSeconds;
+    if (remainingEtaSeconds !== null) {
+        durationSeconds = remainingEtaSeconds;
+    } else if (statsDurationSeconds) {
+        durationSeconds = statsDurationSeconds * (1 - startProgress);
+    } else {
+        durationSeconds = DEFAULT_TRANSIT_LEG_SECONDS * (1 - startProgress);
+    }
+
+    const durationMs = Math.max(
+        MIN_TRANSIT_GLIDE_MS,
+        Math.min(MAX_TRANSIT_GLIDE_MS, Math.round(durationSeconds * 1000)),
+    );
+    const creepDurationMs = Math.max(MIN_TRANSIT_CREEP_MS, durationMs);
+
+    return {
+        startLocation: legIndex + startProgress,
+        targetLocation: legIndex + TRANSIT_TARGET_PROGRESS,
+        durationMs,
+        creepTargetLocation: legIndex + TRANSIT_CREEP_TARGET_PROGRESS,
+        creepDurationMs,
+    };
+}
+
 export function getBusStatsRoutePresentation(document, fromPositionCode, destinationCode, at) {
     const startIndex = BUS_POSITION_CODES.indexOf(fromPositionCode);
     if (startIndex < 0 || !getBusStop(destinationCode)) {
@@ -252,27 +355,14 @@ export function getBusStatsRoutePresentation(document, fromPositionCode, destina
     let usedFallback = false;
     const routeStats = routeCodes.map(code => {
         const position = positions.find(item => item.positionCode === code);
-        const exact = position?.breakdowns?.find(item =>
-            item.dayType === dayType && item.timeBucket === timeBucket,
-        );
-        if (
-            exact?.sampleCount >= BUS_STATS_MINIMUM_SAMPLES
-            && Number.isFinite(exact.p50Seconds)
-            && Number.isFinite(exact.p75Seconds)
-            && Number.isFinite(exact.p90Seconds)
-        ) {
-            return exact;
+        const resolved = resolvePositionStats(position, dayType, timeBucket);
+        if (!resolved) {
+            return null;
         }
-        if (
-            position?.sampleCount >= BUS_STATS_MINIMUM_SAMPLES
-            && Number.isFinite(position.p50Seconds)
-            && Number.isFinite(position.p75Seconds)
-            && Number.isFinite(position.p90Seconds)
-        ) {
+        if (resolved.usedFallback) {
             usedFallback = true;
-            return position;
         }
-        return null;
+        return resolved.stats;
     });
     if (routeStats.some(item => item === null)) {
         return {
