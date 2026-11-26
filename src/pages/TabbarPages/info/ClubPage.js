@@ -1,5 +1,6 @@
 import React, { memo, useCallback, useContext, useEffect, useMemo, useRef, useState, } from 'react';
-import { View, RefreshControl, TouchableOpacity, Alert, SectionList, Dimensions, FlatList, Platform, Animated, } from 'react-native';
+import { View, RefreshControl, TouchableOpacity, Alert, SectionList, Dimensions, FlatList, Platform, Animated, StyleSheet, } from 'react-native';
+import { BlurView } from 'expo-blur';
 
 import Text from '../../../components/AppText';
 import TopScrollEdgeBackdrop from '../../../components/TopScrollEdgeBackdrop';
@@ -372,6 +373,9 @@ function ClubPage({ topChromeHeight }) {
                 }}
                 renderSectionHeader={({ section }) => {
                     const isFirstSection = section.title === sections[0]?.title;
+                    const blurTint = theme.isLight
+                        ? 'systemUltraThinMaterialLight'
+                        : 'systemUltraThinMaterialDark';
                     return (
                         <View
                             onLayout={({ nativeEvent }) => {
@@ -380,34 +384,47 @@ function ClubPage({ topChromeHeight }) {
                                 }
                             }}
                             style={{
-                                flexDirection: 'row',
-                                alignItems: 'center',
+                                overflow: 'hidden',
                                 paddingHorizontal: CLUB_GRID_HORIZONTAL_PADDING,
                                 paddingTop: isFirstSection ? scale(6) : scale(18),
                                 paddingBottom: scale(8),
-                                backgroundColor: theme.bg_color,
                             }}>
+                            {/* 與頂部 TopScrollEdgeBackdrop 對齊的 sticky 毛玻璃，避免實色標題切斷透光層 */}
+                            <BlurView
+                                intensity={42}
+                                tint={blurTint}
+                                style={[
+                                    StyleSheet.absoluteFill,
+                                    { backgroundColor: theme.glassBg },
+                                ]}
+                            />
                             <View
                                 style={{
-                                    width: scale(3),
-                                    height: verticalScale(15),
-                                    borderRadius: scale(2),
-                                    backgroundColor: theme.themeColor,
-                                    marginRight: scale(10),
-                                }}
-                            />
-                            <Text
-                                style={{
-                                    ...uiStyle.defaultText,
-                                    flex: 1,
-                                    color: black.second,
-                                    fontSize: verticalScale(16),
-                                    fontWeight: '700',
-                                    letterSpacing: -0.25,
-                                }}
-                                numberOfLines={1}>
-                                {clubTagMap(section.title) || section.title}
-                            </Text>
+                                    flexDirection: 'row',
+                                    alignItems: 'center',
+                                }}>
+                                <View
+                                    style={{
+                                        width: scale(3),
+                                        height: verticalScale(15),
+                                        borderRadius: scale(2),
+                                        backgroundColor: theme.themeColor,
+                                        marginRight: scale(10),
+                                    }}
+                                />
+                                <Text
+                                    style={{
+                                        ...uiStyle.defaultText,
+                                        flex: 1,
+                                        color: black.second,
+                                        fontSize: verticalScale(16),
+                                        fontWeight: '700',
+                                        letterSpacing: -0.25,
+                                    }}
+                                    numberOfLines={1}>
+                                    {clubTagMap(section.title) || section.title}
+                                </Text>
+                            </View>
                         </View>
                     );
                 }}
