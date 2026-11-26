@@ -26,15 +26,13 @@ const HarborProfileCard = ({
     const {theme} = useTheme();
     const {t, i18n} = useTranslation('my');
     const joinedAt = formatJoinedAt(user.joinedAt, i18n.language);
-    const onAvatarPress = onEditProfilePress || onProfilePress;
+    const onAvatarPress = onProfilePress || onEditProfilePress;
 
     return (
         <View style={styles.container}>
             <ScalePressable
                 accessibilityRole="button"
-                accessibilityLabel={t(
-                    onEditProfilePress ? '編輯個人資料' : 'Harbor 個人資料',
-                )}
+                accessibilityLabel={t('Harbor 個人資料')}
                 disabled={!onAvatarPress}
                 style={styles.avatarButton}
                 onPress={() => {
@@ -48,22 +46,6 @@ const HarborProfileCard = ({
                     style={styles.avatar}
                     contentFit="cover"
                 />
-                {onEditProfilePress ? (
-                    <View
-                        style={[
-                            styles.avatarEditBadge,
-                            {
-                                backgroundColor: theme.themeColor,
-                                borderColor: theme.white,
-                            },
-                        ]}>
-                        <Ionicons
-                            name="pencil"
-                            size={scale(11)}
-                            color={theme.white}
-                        />
-                    </View>
-                ) : null}
             </ScalePressable>
 
             <ScalePressable
