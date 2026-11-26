@@ -12,7 +12,7 @@ import { useIsFocused } from '@react-navigation/native';
 import PagerView from 'react-native-pager-view';
 import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import { scale, verticalScale } from 'react-native-size-matters';
-import { SafeAreaView } from 'react-native-screens/experimental';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import Reanimated, {
     Easing,
@@ -27,6 +27,9 @@ import { scheduleOnRN } from 'react-native-worklets';
 import Text from '../../../components/AppText';
 import ScalePressable from '../../../components/ScalePressable';
 import SegmentedTabControl from '../../../components/SegmentedTabControl';
+import TopScrollEdgeBackdrop, {
+    SCROLL_EDGE_FADE_HEIGHT,
+} from '../../../components/TopScrollEdgeBackdrop';
 import { uiStyle, useTheme } from '../../../components/ThemeContext';
 import { useHarborSession } from '../../../contexts/HarborSessionContext';
 import { logToFirebase } from '../../../utils/firebaseAnalytics';
@@ -77,6 +80,9 @@ const HarborStickyToolbar = ({
     chatUnreadCount,
     chatVisible,
     onToolbarLayout,
+    toolbarHeight,
+    topInset,
+    scrollY,
     searchProgress,
     searchCollapsed,
     backgroundColor,
@@ -108,12 +114,23 @@ const HarborStickyToolbar = ({
     }));
 
     return (
-        <View style={styles.stickyHeader}>
+        <View pointerEvents="box-none" style={styles.stickyHeader}>
+            <TopScrollEdgeBackdrop
+                headerHeight={toolbarHeight}
+                fadeHeight={SCROLL_EDGE_FADE_HEIGHT}
+                scrollY={scrollY}
+                backgroundColor={backgroundColor}
+                zIndex={1}
+            />
             <View
+                pointerEvents="box-none"
                 onLayout={onToolbarLayout}
                 style={[
                     styles.stickyToolbar,
-                    { backgroundColor },
+                    {
+                        paddingTop: topInset,
+                        minHeight: topInset + STICKY_TOOLBAR_HEIGHT,
+                    },
                 ]}>
                 <View style={[styles.toolbarSide, styles.toolbarLeft]}>
                     <ScalePressable
@@ -269,7 +286,6 @@ const HarborStickyToolbar = ({
                 style={[
                     styles.searchBarRow,
                     isCompact && styles.compactSearchBarRow,
-                    { backgroundColor },
                     searchBarStyle,
                 ]}>
                 <ScalePressable
@@ -371,6 +387,7 @@ const HarborFeedPane = ({
 const ForumPage = ({ navigation }) => {
     const { theme } = useTheme();
     const { isCompact, isExpanded } = useWindowSizeClass();
+    const insets = useSafeAreaInsets();
     const backgroundColor = isCompact ? theme.harbor_bg_color : theme.bg_color;
     const { t } = useTranslation('harbor');
     const {
@@ -383,6 +400,7 @@ const ForumPage = ({ navigation }) => {
     const pagerRef = useRef(null);
     const pageScrollOffset = useRef(new Animated.Value(0)).current;
     const pageScrollPosition = useRef(new Animated.Value(0)).current;
+    const scrollY = useRef(new Animated.Value(0)).current;
     const searchProgress = useSharedValue(0);
     const scrollOffsetsRef = useRef({});
     const searchProgressByViewRef = useRef({});
@@ -398,7 +416,9 @@ const ForumPage = ({ navigation }) => {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [selectedTopic, setSelectedTopic] = useState(null);
     const [detailPaneWidth, setDetailPaneWidth] = useState(0);
-    const [toolbarHeight, setToolbarHeight] = useState(STICKY_TOOLBAR_HEIGHT);
+    const [toolbarHeight, setToolbarHeight] = useState(
+        insets.top + STICKY_TOOLBAR_HEIGHT,
+    );
     const [capabilities, setCapabilities] = useState(null);
     const [capabilitiesUnavailable, setCapabilitiesUnavailable] = useState(false);
     const [mountedViews, setMountedViews] = useState({
@@ -551,9 +571,10 @@ const ForumPage = ({ navigation }) => {
             const progress = offset <= 0 ? 0 : (stored ?? 1);
             searchProgressByViewRef.current[view] = progress;
             searchProgress.set(progress);
+            scrollY.setValue(Math.max(0, offset));
             setSearchCollapsed(progress > 0.5);
         },
-        [cancelSearchSettle, searchProgress],
+        [cancelSearchSettle, scrollY, searchProgress],
     );
     // 手指放開且列表停下後收到展開或收起，避免停在半截
     const settleSearchBar = useCallback(view => {
@@ -620,6 +641,7 @@ const ForumPage = ({ navigation }) => {
         if (view !== currentViewRef.current) {
             return;
         }
+        scrollY.setValue(Math.max(0, offset));
         searchProgress.set(progress);
         const collapsed = progress > 0.5;
         setSearchCollapsed(current =>
@@ -630,7 +652,7 @@ const ForumPage = ({ navigation }) => {
             return;
         }
         scheduleSearchSettle(view);
-    }, [cancelSearchSettle, scheduleSearchSettle, searchProgress]);
+    }, [cancelSearchSettle, scheduleSearchSettle, scrollY, searchProgress]);
     const handleSearchScrollEnd = useCallback(view => {
         if (view !== currentViewRef.current) {
             return;
@@ -808,9 +830,7 @@ const ForumPage = ({ navigation }) => {
         navigation;
 
     return (
-        <SafeAreaView
-            style={[styles.page, { backgroundColor }]}
-            edges={{ top: true }}>
+        <View style={[styles.page, { backgroundColor }]}>
             <View
                 style={[
                     styles.contentClip,
@@ -889,6 +909,9 @@ const ForumPage = ({ navigation }) => {
                         chatUnreadCount={chatUnreadCount}
                         chatVisible={capabilities?.chat !== false}
                         onToolbarLayout={handleToolbarLayout}
+                        toolbarHeight={toolbarHeight}
+                        topInset={insets.top}
+                        scrollY={scrollY}
                         searchProgress={searchProgress}
                         searchCollapsed={searchCollapsed}
                         backgroundColor={backgroundColor}
@@ -897,7 +920,7 @@ const ForumPage = ({ navigation }) => {
                 </View>
                 {isExpanded ? (
                     <View
-                        style={styles.detailPane}
+                        style={[styles.detailPane, { paddingTop: insets.top }]}
                         onLayout={event =>
                             setDetailPaneWidth(event.nativeEvent.layout.width)
                         }>
@@ -922,7 +945,7 @@ const ForumPage = ({ navigation }) => {
                 onCancel={() => setConsentVisible(false)}
                 onConfirm={handleLoginConfirm}
             />
-        </SafeAreaView>
+        </View>
     );
 };
 
