@@ -99,7 +99,10 @@ const TeamSchedulePreviewSection = forwardRef(
 
         const openCreate = useCallback(() => {
             trigger();
-            navigation.navigate('TeamScheduleCreate');
+            // 讓觸覺回饋先送出，避免同步掛載重型週視圖拖慢震動時機
+            requestAnimationFrame(() => {
+                navigation.navigate('TeamScheduleCreate');
+            });
         }, [navigation]);
 
         const openJoin = useCallback(() => {

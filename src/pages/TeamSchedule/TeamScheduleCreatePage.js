@@ -26,6 +26,7 @@ import Text from '../../components/AppText';
 import ScalePressable from '../../components/ScalePressable';
 import TextInput from '../../components/AppTextInput';
 import {uiStyle, useTheme} from '../../components/ThemeContext';
+import PhosphorFeatureIcon from '../TabbarPages/info/home/search/components/PhosphorFeatureIcon';
 import {logToFirebase} from '../../utils/firebaseAnalytics';
 import {createTeamEvent} from '../../utils/scheduling/schedulingApi';
 import {normalizeSchedulingError} from '../../utils/scheduling/schedulingErrors';
@@ -105,6 +106,7 @@ const TeamScheduleCreatePage = ({navigation}) => {
     );
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isPainting, setIsPainting] = useState(false);
+    const [gridReady, setGridReady] = useState(false);
     const [coursePrefillEnabled, setCoursePrefillEnabled] = useState(true);
     const [coursePrefillLoading, setCoursePrefillLoading] = useState(false);
     const [coursePrefillError, setCoursePrefillError] = useState(null);
@@ -135,6 +137,11 @@ const TeamScheduleCreatePage = ({navigation}) => {
 
     useEffect(() => {
         logToFirebase('screen_view', {screen_name: 'TeamScheduleCreate'});
+        // 延遲一拍掛載重型週視圖，避免阻塞導航推入動畫與觸覺回饋
+        const timer = setTimeout(() => {
+            setGridReady(true);
+        }, 120);
+        return () => clearTimeout(timer);
     }, []);
 
     const loadCoursePrefill = useCallback(async () => {
@@ -426,8 +433,8 @@ const TeamScheduleCreatePage = ({navigation}) => {
                     style={[
                         styles.input,
                         {
-                            backgroundColor: theme.tonal.primary08,
-                            borderColor: theme.themeColorUltraLight,
+                            backgroundColor: theme.white,
+                            borderColor: theme.disabled,
                             color: theme.black.main,
                         },
                     ]}
@@ -451,8 +458,8 @@ const TeamScheduleCreatePage = ({navigation}) => {
                         styles.input,
                         styles.multiline,
                         {
-                            backgroundColor: theme.tonal.primary08,
-                            borderColor: theme.themeColorUltraLight,
+                            backgroundColor: theme.white,
+                            borderColor: theme.disabled,
                             color: theme.black.main,
                         },
                     ]}
@@ -482,13 +489,27 @@ const TeamScheduleCreatePage = ({navigation}) => {
                         style={[
                             styles.deadlineButton,
                             {
-                                backgroundColor: theme.tonal.primary15,
+                                backgroundColor: theme.white,
+                                borderColor: theme.disabled,
                             },
                         ]}>
+                        <PhosphorFeatureIcon
+                            name="calendar"
+                            size={scale(16)}
+                            color={
+                                responseDeadlineAt
+                                    ? theme.themeColor
+                                    : theme.black.third
+                            }
+                        />
                         <Text
                             style={[
                                 styles.deadlineButtonText,
-                                {color: theme.themeColor},
+                                {
+                                    color: responseDeadlineAt
+                                        ? theme.black.main
+                                        : theme.black.third,
+                                },
                             ]}>
                             {deadlineDisplay}
                         </Text>
@@ -502,7 +523,8 @@ const TeamScheduleCreatePage = ({navigation}) => {
                             style={[
                                 styles.clearButton,
                                 {
-                                    backgroundColor: theme.tonal.primary08,
+                                    backgroundColor: theme.white,
+                                    borderColor: theme.disabled,
                                 },
                             ]}>
                             <Text
@@ -546,28 +568,42 @@ const TeamScheduleCreatePage = ({navigation}) => {
                             accessibilityState={{
                                 checked: coursePrefillEnabled,
                             }}
+                            style={styles.previewSwitch}
                             value={coursePrefillEnabled}
                             onValueChange={handleCoursePrefillChange}
                             trackColor={{
-                                false: theme.tonal.primary15,
-                                true: theme.tonal.primary50,
+                                false: theme.disabled,
+                                true: theme.themeColor,
                             }}
                             thumbColor={theme.trueWhite}
-                            ios_backgroundColor={theme.tonal.primary15}
+                            ios_backgroundColor={theme.disabled}
                         />
                     )}
                 </View>
 
                 <ScheduleTimeRangeInsert onInsert={handleInsertRange} />
-                <ScheduleWeekGrid
-                    mode="candidate"
-                    slotMinutes={EDIT_SLOT_MINUTES}
-                    draft={draft}
-                    courseConflictKeys={courseConflictKeys}
-                    onDraftChange={setDraft}
-                    onPaintingChange={setIsPainting}
-                    scrollToStartMinute={scrollToStartMinute}
-                />
+                {gridReady ? (
+                    <ScheduleWeekGrid
+                        mode="candidate"
+                        slotMinutes={EDIT_SLOT_MINUTES}
+                        draft={draft}
+                        courseConflictKeys={courseConflictKeys}
+                        onDraftChange={setDraft}
+                        onPaintingChange={setIsPainting}
+                        scrollToStartMinute={scrollToStartMinute}
+                    />
+                ) : (
+                    <View
+                        style={[
+                            styles.gridPlaceholder,
+                            {
+                                backgroundColor: theme.white,
+                                borderColor: theme.disabled,
+                            },
+                        ]}>
+                        <ActivityIndicator color={theme.themeColor} />
+                    </View>
+                )}
 
                 <ScalePressable
                     disabled={isSubmitting}
@@ -575,20 +611,27 @@ const TeamScheduleCreatePage = ({navigation}) => {
                     style={[
                         styles.submitButton,
                         {
-                            backgroundColor: theme.themeColor,
+                            backgroundColor: theme.tonal.primary15,
                             opacity: isSubmitting ? 0.7 : 1,
                         },
                     ]}>
                     {isSubmitting ? (
-                        <ActivityIndicator color={theme.trueWhite} />
+                        <ActivityIndicator color={theme.accentForeground} />
                     ) : (
-                        <Text
-                            style={[
-                                styles.submitButtonText,
-                                {color: theme.trueWhite},
-                            ]}>
-                            {t('建立組隊')}
-                        </Text>
+                        <>
+                            <PhosphorFeatureIcon
+                                name="plus-circle"
+                                size={scale(18)}
+                                color={theme.themeColor}
+                            />
+                            <Text
+                                style={[
+                                    styles.submitButtonText,
+                                    {color: theme.accentForeground},
+                                ]}>
+                                {t('建立組隊')}
+                            </Text>
+                        </>
                     )}
                 </ScalePressable>
             </KeyboardAwareScrollView>
@@ -675,8 +718,13 @@ const styles = StyleSheet.create({
         gap: scale(8),
     },
     deadlineButton: {
+        alignItems: 'center',
         borderRadius: scale(10),
+        borderCurve: 'continuous',
+        borderWidth: StyleSheet.hairlineWidth,
         flex: 1,
+        flexDirection: 'row',
+        gap: scale(8),
         paddingHorizontal: scale(12),
         paddingVertical: verticalScale(10),
     },
@@ -687,6 +735,8 @@ const styles = StyleSheet.create({
     },
     clearButton: {
         borderRadius: scale(10),
+        borderCurve: 'continuous',
+        borderWidth: StyleSheet.hairlineWidth,
         paddingHorizontal: scale(12),
         paddingVertical: verticalScale(10),
     },
@@ -709,17 +759,31 @@ const styles = StyleSheet.create({
         marginTop: verticalScale(8),
         minHeight: scale(34),
     },
+    previewSwitch: {
+        alignSelf: 'center',
+        transform: [{scale: 0.82}],
+    },
+    gridPlaceholder: {
+        alignItems: 'center',
+        borderRadius: scale(12),
+        borderWidth: StyleSheet.hairlineWidth,
+        height: verticalScale(385),
+        justifyContent: 'center',
+    },
     submitButton: {
         alignItems: 'center',
         borderRadius: scale(12),
+        borderCurve: 'continuous',
+        flexDirection: 'row',
+        gap: scale(6),
         justifyContent: 'center',
-        marginTop: verticalScale(24),
-        minHeight: verticalScale(48),
-        paddingVertical: verticalScale(12),
+        marginTop: verticalScale(20),
+        minHeight: verticalScale(42),
+        paddingVertical: verticalScale(10),
     },
     submitButtonText: {
         ...uiStyle.defaultText,
-        fontSize: scale(15),
+        fontSize: scale(14),
         fontWeight: '700',
     },
 });

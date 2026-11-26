@@ -31,7 +31,8 @@ import {useSchedulingSession} from '../../contexts/SchedulingSessionContext';
 import Text from '../../components/AppText';
 import ScalePressable from '../../components/ScalePressable';
 import {uiStyle, useTheme} from '../../components/ThemeContext';
-import SegmentControl from '../../components/SegmentControl';
+import SegmentedTabControl from '../../components/SegmentedTabControl';
+import PhosphorFeatureIcon from '../TabbarPages/info/home/search/components/PhosphorFeatureIcon';
 import {
     getCourseCatalog,
     getPostgraduateCatalog,
@@ -1471,20 +1472,32 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                 />
 
                 <View style={styles.scheduleModeControl}>
-                    <SegmentControl
+                    <SegmentedTabControl
                         options={[
                             {key: 'availability', label: t('共同空檔')},
                             {
                                 key: 'shared',
                                 label: t('小組課表'),
-                                showDot: isSharedTimetableOutdated,
+                                badge: isSharedTimetableOutdated ? (
+                                    <View
+                                        style={[
+                                            styles.scheduleModeDot,
+                                            {backgroundColor: theme.unread},
+                                        ]}
+                                    />
+                                ) : null,
                             },
                         ]}
-                        selectedIndex={
-                            scheduleMode === 'shared' ? 1 : 0
-                        }
-                        onChange={handleScheduleModeChange}
-                        trackBackgroundColor={theme.tonal.primary08}
+                        selectedIndex={scheduleMode === 'shared' ? 1 : 0}
+                        onChange={index => {
+                            trigger(
+                                (scheduleMode === 'shared' ? 1 : 0) === index
+                                    ? 'tap'
+                                    : 'selection',
+                            );
+                            handleScheduleModeChange(index);
+                        }}
+                        raisedTrack
                     />
                 </View>
 
@@ -1522,13 +1535,15 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                                 style={[
                                     styles.suggestRow,
                                     {
-                                        backgroundColor: theme.tonal.primary15,
+                                        backgroundColor: theme.white,
                                     },
                                 ]}>
                                 <Text
                                     style={[
                                         styles.suggestBadge,
-                                        {color: theme.themeColor},
+                                        {
+                                            color: theme.themeColor,
+                                        },
                                     ]}>
                                     {stats.submittedCount < stats.memberCount
                                         ? t('暫時最佳')
@@ -1565,44 +1580,33 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                                     ]}>
                                     {t('顯示粒度')}
                                 </Text>
-                                <View style={styles.displaySlotOptions}>
-                                    {ALLOWED_SLOT_MINUTES.map(value => {
-                                        const selected =
-                                            value === displaySlotMinutes;
-                                        return (
-                                            <ScalePressable
-                                                key={value}
-                                                accessibilityRole="radio"
-                                                accessibilityState={{selected}}
-                                                onPress={() =>
-                                                    handleDisplaySlotMinutesChange(
-                                                        value,
-                                                    )
-                                                }
-                                                style={[
-                                                    styles.displaySlotOption,
-                                                    {
-                                                        backgroundColor: selected
-                                                            ? theme.themeColor
-                                                            : theme.tonal.primary15,
-                                                    },
-                                                ]}>
-                                                <Text
-                                                    style={[
-                                                        styles.displaySlotOptionText,
-                                                        {
-                                                            color: selected
-                                                                ? theme.trueWhite
-                                                                : theme.themeColor,
-                                                        },
-                                                    ]}>
-                                                    {value}
-                                                    {t('分鐘')}
-                                                </Text>
-                                            </ScalePressable>
-                                        );
-                                    })}
-                                </View>
+                                <SegmentedTabControl
+                                    options={ALLOWED_SLOT_MINUTES.map(value => ({
+                                        key: String(value),
+                                        label: `${value}${t('分鐘')}`,
+                                    }))}
+                                    selectedIndex={Math.max(
+                                        0,
+                                        ALLOWED_SLOT_MINUTES.indexOf(
+                                            displaySlotMinutes,
+                                        ),
+                                    )}
+                                    onChange={index => {
+                                        const nextValue =
+                                            ALLOWED_SLOT_MINUTES[index];
+                                        if (
+                                            nextValue != null &&
+                                            nextValue !== displaySlotMinutes
+                                        ) {
+                                            handleDisplaySlotMinutesChange(
+                                                nextValue,
+                                            );
+                                        }
+                                    }}
+                                    compact
+                                    compactItemWidth={scale(54)}
+                                    raisedTrack
+                                />
                             </View>
                         ) : null}
                         {editor.isEditing ? (
@@ -1622,18 +1626,17 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                                             checked:
                                                 editor.isCoursePrefillEnabled,
                                         }}
+                                        style={styles.previewSwitch}
                                         value={editor.isCoursePrefillEnabled}
                                         onValueChange={
                                             handleCoursePrefillChange
                                         }
                                         trackColor={{
-                                            false: theme.tonal.primary15,
-                                            true: theme.tonal.primary50,
+                                            false: theme.disabled,
+                                            true: theme.themeColor,
                                         }}
                                         thumbColor={theme.trueWhite}
-                                        ios_backgroundColor={
-                                            theme.tonal.primary15
-                                        }
+                                        ios_backgroundColor={theme.disabled}
                                     />
                                 )}
                             </View>
@@ -1699,21 +1702,10 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                             style={[
                                 styles.sharedTimetableCta,
                                 {
-                                    backgroundColor: isSharedTimetableOutdated
-                                      ? theme.tonal.unread15
-                                      : theme.tonal.primary15,
+                                    backgroundColor: theme.white,
                                 },
                             ]}>
-                            <View
-                                style={[
-                                    styles.sharedTimetableStatusIcon,
-                                    {
-                                        backgroundColor:
-                                            isSharedTimetableOutdated
-                                                ? theme.tonal.unread30
-                                                : theme.tonal.primary30,
-                                    },
-                                ]}>
+                            <View style={styles.sharedTimetableStatusIcon}>
                                 <Ionicons
                                     name={mySharingStatus.icon}
                                     color={
@@ -1721,7 +1713,7 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                                             ? theme.unread
                                             : theme.themeColor
                                     }
-                                    size={scale(18)}
+                                    size={scale(20)}
                                 />
                             </View>
                             <View style={styles.sharedTimetableStatusContent}>
@@ -1874,7 +1866,6 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                         styles.editCtaBar,
                         {
                             backgroundColor: theme.bg_color,
-                            borderTopColor: theme.themeColorUltraLight,
                             paddingBottom: Math.max(
                                 insets.bottom,
                                 verticalScale(8),
@@ -1890,13 +1881,19 @@ const TeamScheduleDetailPage = ({navigation, route}) => {
                         style={[
                             styles.editCta,
                             {
-                                backgroundColor: theme.themeColor,
+                                backgroundColor: theme.white,
                             },
+                            theme.viewShadow,
                         ]}>
+                        <PhosphorFeatureIcon
+                            name="pencil-simple"
+                            size={scale(17)}
+                            color={theme.themeColor}
+                        />
                         <Text
                             style={[
                                 styles.editCtaText,
-                                {color: theme.trueWhite},
+                                {color: theme.accentForeground},
                             ]}>
                             {hasSubmitted
                                 ? t('修改我的時間')
@@ -1984,6 +1981,11 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginTop: verticalScale(14),
     },
+    scheduleModeDot: {
+        borderRadius: scale(3),
+        height: scale(5),
+        width: scale(5),
+    },
     displaySlotPicker: {
         alignItems: 'center',
         flexDirection: 'row',
@@ -1995,29 +1997,16 @@ const styles = StyleSheet.create({
         fontSize: scale(12),
         fontWeight: '600',
     },
-    displaySlotOptions: {
-        flexDirection: 'row',
-    },
-    displaySlotOption: {
-        alignItems: 'center',
-        borderRadius: scale(6),
-        justifyContent: 'center',
-        marginLeft: scale(6),
-        minWidth: scale(48),
-        paddingHorizontal: scale(8),
-        paddingVertical: verticalScale(6),
-    },
-    displaySlotOptionText: {
-        ...uiStyle.defaultText,
-        fontSize: scale(11),
-        fontWeight: '600',
-    },
     coursePrefillRow: {
         alignItems: 'center',
         flexDirection: 'row',
         justifyContent: 'space-between',
         marginBottom: verticalScale(8),
         minHeight: scale(34),
+    },
+    previewSwitch: {
+        alignSelf: 'center',
+        transform: [{scale: 0.82}],
     },
     sectionTitle: {
         ...uiStyle.defaultText,
@@ -2044,9 +2033,10 @@ const styles = StyleSheet.create({
     suggestRow: {
         alignItems: 'center',
         borderRadius: scale(10),
+        borderCurve: 'continuous',
         flexDirection: 'row',
         marginBottom: verticalScale(6),
-        paddingHorizontal: scale(10),
+        paddingHorizontal: scale(12),
         paddingVertical: verticalScale(10),
     },
     suggestBadge: {
@@ -2066,25 +2056,28 @@ const styles = StyleSheet.create({
         marginLeft: scale(8),
     },
     editCtaBar: {
-        borderTopWidth: StyleSheet.hairlineWidth,
         paddingHorizontal: scale(14),
         paddingTop: verticalScale(10),
     },
     editCta: {
         alignItems: 'center',
         borderRadius: scale(12),
+        borderCurve: 'continuous',
+        flexDirection: 'row',
+        gap: scale(6),
         justifyContent: 'center',
-        minHeight: verticalScale(44),
-        paddingVertical: verticalScale(12),
+        minHeight: verticalScale(42),
+        paddingVertical: verticalScale(10),
     },
     editCtaText: {
         ...uiStyle.defaultText,
-        fontSize: scale(15),
+        fontSize: scale(14),
         fontWeight: '700',
     },
     sharedTimetableCta: {
         alignItems: 'center',
         borderRadius: scale(10),
+        borderCurve: 'continuous',
         flexDirection: 'row',
         marginBottom: verticalScale(12),
         paddingHorizontal: scale(10),

@@ -110,8 +110,8 @@ const ScheduleTimeRangeInsert = ({onClear, onInsert, emptyRangeMessage}) => {
             style={[
                 styles.container,
                 {
-                    backgroundColor: theme.tonal.primary08,
-                    borderColor: theme.themeColorUltraLight,
+                    backgroundColor: theme.white,
+                    borderColor: theme.disabled,
                 },
             ]}>
             <MenuView
@@ -191,10 +191,14 @@ const ScheduleTimeRangeInsert = ({onClear, onInsert, emptyRangeMessage}) => {
                 style={[
                     styles.insertButton,
                     {
-                        backgroundColor: theme.themeColor,
+                        backgroundColor: theme.tonal.primary15,
                     },
                 ]}>
-                <Text style={[styles.insertText, {color: theme.trueWhite}]}>
+                <Text
+                    style={[
+                        styles.insertText,
+                        {color: theme.accentForeground},
+                    ]}>
                     {t('插入')}
                 </Text>
             </ScalePressable>
