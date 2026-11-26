@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useRef } from 'react';
+import React, { memo, useCallback, useRef, useState } from 'react';
 import {
     View,
     ActivityIndicator,
@@ -8,13 +8,13 @@ import Ionicons from "@react-native-vector-icons/ionicons";
 import Animated, {
     useSharedValue,
     useAnimatedStyle,
+    useDerivedValue,
     withTiming,
 } from 'react-native-reanimated';
 import { useTranslation } from 'react-i18next';
 import Text from '../../../../components/AppText';
 import TextInput from '../../../../components/AppTextInput';
 import searchFieldStyles, {
-    SEARCH_FIELD_BORDER_RADIUS,
     SEARCH_FIELD_CLEAR_ICON_SIZE,
     SEARCH_FIELD_ICON_SIZE,
     SEARCH_FIELD_MAX_FONT_SIZE_MULTIPLIER,
@@ -23,6 +23,8 @@ import { useTheme } from '../../../../components/ThemeContext';
 import { trigger } from '../../../../utils/trigger';
 import { scale, verticalScale } from 'react-native-size-matters';
 import TouchableScale from '../../../../components/TouchableScale';
+import ScalePressable from '../../../../components/ScalePressable';
+import { useAppReducedMotion } from '../../../../contexts/ReducedMotionContext';
 
 const TIMING_MS = 220;
 
@@ -43,42 +45,41 @@ function ClubSearchBar({
 }) {
     const { t } = useTranslation(['club']);
     const { theme } = useTheme();
-    const { themeColor, black, white, isLight } = theme;
+    const { themeColor, accentForeground, black, isLight } = theme;
+    const reducedMotion = useAppReducedMotion();
     const inputRef = useRef(null);
 
-    const focused = useSharedValue(0);
+    const [searchActive, setSearchActive] = useState(false);
     const cancelW = useSharedValue(0);
+    const cancelProgress = useDerivedValue(() => {
+        const target = searchActive && cancelW.value > 0 ? 1 : 0;
+        return reducedMotion ? target : withTiming(target, { duration: TIMING_MS });
+    });
 
     /** 對齊 iOS UISearchBar 常見底色（ThemeContext 無對應語義 token） */
     const searchFieldBg = isLight ? '#E5E5EA' : '#3A3A3C';
 
     const inputOuterAnimated = useAnimatedStyle(() => ({
-        marginRight: withTiming(focused.value * cancelW.value, { duration: TIMING_MS }),
+        marginRight: cancelProgress.value * cancelW.value,
     }));
 
     const cancelAnimated = useAnimatedStyle(() => ({
-        opacity: cancelW.value > 1 ? 1 : 0,
-        transform: [
-            {
-                translateX: withTiming((1 - focused.value) * cancelW.value, {
-                    duration: TIMING_MS,
-                }),
-            },
-        ],
+        opacity: cancelProgress.value,
+        transform: [{ translateX: (1 - cancelProgress.value) * cancelW.value }],
     }));
 
     const handleFocus = useCallback(() => {
-        focused.value = 1;
+        setSearchActive(true);
         onFocus?.();
-    }, [focused, onFocus]);
+    }, [onFocus]);
 
     const handleCancel = useCallback(() => {
         trigger();
         inputRef.current?.blur();
-        focused.value = 0;
+        setSearchActive(false);
         onChangeText('');
         onCancel?.();
-    }, [focused, onChangeText, onCancel]);
+    }, [onChangeText, onCancel]);
 
     const handleClear = useCallback(() => {
         trigger();
@@ -135,6 +136,9 @@ function ClubSearchBar({
 
                 <Animated.View
                     style={[styles.cancelWrap, cancelAnimated]}
+                    pointerEvents={searchActive ? 'auto' : 'none'}
+                    accessibilityElementsHidden={!searchActive}
+                    importantForAccessibility={searchActive ? 'auto' : 'no-hide-descendants'}
                     onLayout={(e) => {
                         const w = e.nativeEvent.layout.width;
                         if (w > 0) {
@@ -142,16 +146,17 @@ function ClubSearchBar({
                         }
                     }}
                 >
-                    <TouchableScale
+                    <ScalePressable
                         onPress={handleCancel}
+                        disabled={!searchActive}
                         accessibilityRole="button"
                         hitSlop={scale(6)}
-                        style={[styles.cancelButton, { backgroundColor: white }]}
+                        style={styles.cancelButton}
                     >
-                        <Text style={[styles.cancelText, { color: themeColor }]}>
+                        <Text style={[styles.cancelText, { color: accentForeground }]}>
                             {cancelLabel ?? t('club:CANCEL')}
                         </Text>
-                    </TouchableScale>
+                    </ScalePressable>
                 </Animated.View>
             </View>
         </View>
@@ -163,14 +168,14 @@ const styles = StyleSheet.create({
         width: '100%',
         paddingTop: scale(8),
         paddingBottom: scale(8),
-        paddingLeft: scale(8),
-        paddingRight: scale(14),
+        paddingHorizontal: scale(8),
         overflow: 'hidden',
     },
     row: {
         flexDirection: 'row',
         alignItems: 'center',
         width: '100%',
+        overflow: 'hidden',
     },
     inputOuter: {
         flex: 1,
@@ -193,7 +198,6 @@ const styles = StyleSheet.create({
     },
     cancelButton: {
         height: '100%',
-        borderRadius: SEARCH_FIELD_BORDER_RADIUS,
         paddingHorizontal: scale(10),
         justifyContent: 'center',
         alignItems: 'center',
