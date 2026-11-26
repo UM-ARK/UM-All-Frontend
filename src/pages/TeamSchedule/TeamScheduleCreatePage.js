@@ -15,6 +15,7 @@ import {useHeaderHeight} from '@react-navigation/elements';
 import {usePreventRemove} from '@react-navigation/native';
 import moment from 'moment-timezone';
 import {useTranslation} from 'react-i18next';
+import Ionicons from '@react-native-vector-icons/ionicons';
 import {
     KeyboardAwareScrollView,
     KeyboardToolbar,
@@ -417,9 +418,16 @@ const TeamScheduleCreatePage = ({navigation}) => {
                 contentInsetAdjustmentBehavior={
                     isLiquidGlassSupported ? undefined : 'automatic'
                 }>
-                <Text style={[styles.sectionTitle, {color: theme.black.main}]}>
-                    {t('基本資料')}
-                </Text>
+                <View style={styles.sectionHeaderRow}>
+                    <PhosphorFeatureIcon
+                        name="note"
+                        size={scale(19)}
+                        color={theme.themeColor}
+                    />
+                    <Text style={[styles.sectionTitle, {color: theme.black.main}]}>
+                        {t('基本資料')}
+                    </Text>
+                </View>
 
                 <Text style={[styles.label, {color: theme.black.second}]}>
                     {t('活動名稱')}
@@ -434,9 +442,9 @@ const TeamScheduleCreatePage = ({navigation}) => {
                         styles.input,
                         {
                             backgroundColor: theme.white,
-                            borderColor: theme.disabled,
                             color: theme.black.main,
                         },
+                        theme.viewShadow,
                     ]}
                 />
                 <Text style={[styles.counter, {color: theme.black.third}]}>
@@ -459,100 +467,160 @@ const TeamScheduleCreatePage = ({navigation}) => {
                         styles.multiline,
                         {
                             backgroundColor: theme.white,
-                            borderColor: theme.disabled,
                             color: theme.black.main,
                         },
+                        theme.viewShadow,
                     ]}
                 />
                 <Text style={[styles.counter, {color: theme.black.third}]}>
                     {description.length}/{DESCRIPTION_MAX}
                 </Text>
 
-                <View style={styles.metaRow}>
-                    <Text style={[styles.label, {color: theme.black.second}]}>
-                        {t('時區')}
-                    </Text>
-                    <Text style={[styles.metaValue, {color: theme.black.main}]}>
-                        {t('澳門時間')}
-                    </Text>
-                </View>
-
-                <Text style={[styles.label, {color: theme.black.second}]}>
-                    {t('回覆截止（選填）')}
-                </Text>
-                <View style={styles.deadlineRow}>
-                    <ScalePressable
-                        onPress={() => {
-                            trigger();
-                            setDeadlinePickerVisible(true);
-                        }}
-                        style={[
-                            styles.deadlineButton,
-                            {
-                                backgroundColor: theme.white,
-                                borderColor: theme.disabled,
-                            },
-                        ]}>
-                        <PhosphorFeatureIcon
-                            name="calendar"
-                            size={scale(16)}
-                            color={
-                                responseDeadlineAt
-                                    ? theme.themeColor
-                                    : theme.black.third
-                            }
-                        />
-                        <Text
-                            style={[
-                                styles.deadlineButtonText,
-                                {
-                                    color: responseDeadlineAt
-                                        ? theme.black.main
-                                        : theme.black.third,
-                                },
-                            ]}>
-                            {deadlineDisplay}
-                        </Text>
-                    </ScalePressable>
-                    {responseDeadlineAt ? (
-                        <ScalePressable
-                            onPress={() => {
-                                trigger();
-                                setResponseDeadlineAt(null);
-                            }}
-                            style={[
-                                styles.clearButton,
-                                {
-                                    backgroundColor: theme.white,
-                                    borderColor: theme.disabled,
-                                },
-                            ]}>
+                <View
+                    style={[
+                        styles.optionsCard,
+                        {backgroundColor: theme.white},
+                        theme.viewShadow,
+                    ]}>
+                    <View style={styles.optionRow}>
+                        <View style={styles.optionLabelRow}>
+                            <PhosphorFeatureIcon
+                                name="globe"
+                                size={scale(17)}
+                                color={theme.themeColor}
+                            />
                             <Text
                                 style={[
-                                    styles.clearButtonText,
-                                    {color: theme.black.second},
+                                    styles.optionLabel,
+                                    {color: theme.black.main},
                                 ]}>
-                                {t('清除')}
+                                {t('時區')}
                             </Text>
+                        </View>
+                        <Text
+                            style={[
+                                styles.metaValue,
+                                {color: theme.black.second},
+                            ]}>
+                            {t('澳門時間')}
+                        </Text>
+                    </View>
+
+                    <View
+                        style={[
+                            styles.optionDivider,
+                            {backgroundColor: theme.disabled},
+                        ]}
+                    />
+
+                    <View style={styles.optionRow}>
+                        <ScalePressable
+                            accessibilityRole="button"
+                            onPress={() => {
+                                trigger();
+                                setDeadlinePickerVisible(true);
+                            }}
+                            style={styles.deadlinePressArea}>
+                            <View style={styles.optionLabelRow}>
+                                <PhosphorFeatureIcon
+                                    name="calendar"
+                                    size={scale(17)}
+                                    color={theme.themeColor}
+                                />
+                                <Text
+                                    style={[
+                                        styles.optionLabel,
+                                        {color: theme.black.main},
+                                    ]}>
+                                    {t('回覆截止（選填）')}
+                                </Text>
+                            </View>
+                            <View style={styles.deadlineValueRow}>
+                                <Text
+                                    numberOfLines={1}
+                                    style={[
+                                        styles.deadlineButtonText,
+                                        {
+                                            color: responseDeadlineAt
+                                                ? theme.accentForeground
+                                                : theme.themeColor,
+                                        },
+                                    ]}>
+                                    {deadlineDisplay}
+                                </Text>
+                                <Ionicons
+                                    name="chevron-forward"
+                                    size={scale(15)}
+                                    color={theme.black.third}
+                                />
+                            </View>
                         </ScalePressable>
-                    ) : null}
+                        {responseDeadlineAt ? (
+                            <ScalePressable
+                                accessibilityRole="button"
+                                onPress={() => {
+                                    trigger();
+                                    setResponseDeadlineAt(null);
+                                }}
+                                style={[
+                                    styles.clearButton,
+                                    {backgroundColor: theme.bg_color},
+                                ]}>
+                                <Text
+                                    style={[
+                                        styles.clearButtonText,
+                                        {color: theme.black.second},
+                                    ]}>
+                                    {t('清除')}
+                                </Text>
+                            </ScalePressable>
+                        ) : null}
+                    </View>
                 </View>
 
-                <Text
-                    style={[
-                        styles.sectionTitle,
-                        styles.sectionSpacing,
-                        {color: theme.black.main},
-                    ]}>
-                    {t('我的每週可用時間')}
-                </Text>
+                <View style={[styles.sectionHeaderRow, styles.sectionSpacing]}>
+                    <PhosphorFeatureIcon
+                        name="calendar-check"
+                        size={scale(19)}
+                        color={theme.featureIconTones.green.foreground}
+                    />
+                    <Text
+                        style={[
+                            styles.sectionTitle,
+                            styles.sectionTitleFlex,
+                            {color: theme.black.main},
+                        ]}>
+                        {t('我的每週可用時間')}
+                    </Text>
+                    <View
+                        style={[
+                            styles.countPill,
+                            {
+                                backgroundColor:
+                                    selectedCount > 0
+                                        ? theme.tonal.primary15
+                                        : theme.white,
+                            },
+                            selectedCount === 0 && theme.viewShadow,
+                        ]}>
+                        <Text
+                            style={[
+                                styles.countPillText,
+                                {
+                                    color:
+                                        selectedCount > 0
+                                            ? theme.accentForeground
+                                            : theme.black.second,
+                                },
+                            ]}>
+                            {t('已選 {{count}} 格', {count: selectedCount})}
+                        </Text>
+                    </View>
+                </View>
                 <Text style={[styles.hint, {color: theme.black.third}]}>
                     {t(
                         '選出你每週可以開會的時間；隊員加入後，會在這些時間中填寫自己的時間。',
                     )}
-                </Text>
-                <Text style={[styles.hint, {color: theme.black.third}]}>
-                    {t('已選 {{count}} 格', {count: selectedCount})}
                 </Text>
 
                 <View style={styles.coursePrefillRow}>
@@ -596,10 +664,8 @@ const TeamScheduleCreatePage = ({navigation}) => {
                     <View
                         style={[
                             styles.gridPlaceholder,
-                            {
-                                backgroundColor: theme.white,
-                                borderColor: theme.disabled,
-                            },
+                            {backgroundColor: theme.white},
+                            theme.viewShadow,
                         ]}>
                         <ActivityIndicator color={theme.themeColor} />
                     </View>
@@ -611,9 +677,10 @@ const TeamScheduleCreatePage = ({navigation}) => {
                     style={[
                         styles.submitButton,
                         {
-                            backgroundColor: theme.tonal.primary15,
+                            backgroundColor: theme.white,
                             opacity: isSubmitting ? 0.7 : 1,
                         },
+                        theme.viewShadow,
                     ]}>
                     {isSubmitting ? (
                         <ActivityIndicator color={theme.accentForeground} />
@@ -668,14 +735,23 @@ const styles = StyleSheet.create({
         paddingHorizontal: scale(16),
         paddingTop: verticalScale(12),
     },
+    sectionHeaderRow: {
+        alignItems: 'center',
+        flexDirection: 'row',
+        gap: scale(8),
+        marginBottom: verticalScale(8),
+    },
     sectionTitle: {
         ...uiStyle.defaultText,
         fontSize: scale(16),
         fontWeight: '700',
-        marginBottom: verticalScale(10),
+    },
+    sectionTitleFlex: {
+        flex: 1,
+        minWidth: 0,
     },
     sectionSpacing: {
-        marginTop: verticalScale(20),
+        marginTop: verticalScale(22),
     },
     label: {
         ...uiStyle.defaultText,
@@ -686,11 +762,11 @@ const styles = StyleSheet.create({
     },
     input: {
         ...uiStyle.defaultText,
-        borderRadius: scale(10),
-        borderWidth: StyleSheet.hairlineWidth,
+        borderRadius: scale(12),
+        borderCurve: 'continuous',
         fontSize: scale(14),
-        paddingHorizontal: scale(12),
-        paddingVertical: verticalScale(10),
+        paddingHorizontal: scale(14),
+        paddingVertical: verticalScale(11),
     },
     multiline: {
         minHeight: verticalScale(88),
@@ -701,55 +777,84 @@ const styles = StyleSheet.create({
         marginTop: verticalScale(4),
         textAlign: 'right',
     },
-    metaRow: {
+    optionsCard: {
+        borderRadius: scale(14),
+        borderCurve: 'continuous',
+        marginTop: verticalScale(12),
+        paddingHorizontal: scale(14),
+    },
+    optionRow: {
         alignItems: 'center',
         flexDirection: 'row',
+        gap: scale(8),
         justifyContent: 'space-between',
-        marginTop: verticalScale(12),
+        minHeight: verticalScale(44),
+        paddingVertical: verticalScale(10),
+    },
+    optionLabelRow: {
+        alignItems: 'center',
+        flexDirection: 'row',
+        gap: scale(8),
+    },
+    optionLabel: {
+        ...uiStyle.defaultText,
+        fontSize: scale(13),
+        fontWeight: '600',
+    },
+    optionDivider: {
+        height: StyleSheet.hairlineWidth,
     },
     metaValue: {
         ...uiStyle.defaultText,
         fontSize: scale(13),
         fontWeight: '600',
     },
-    deadlineRow: {
+    deadlinePressArea: {
         alignItems: 'center',
-        flexDirection: 'row',
-        gap: scale(8),
-    },
-    deadlineButton: {
-        alignItems: 'center',
-        borderRadius: scale(10),
-        borderCurve: 'continuous',
-        borderWidth: StyleSheet.hairlineWidth,
         flex: 1,
         flexDirection: 'row',
-        gap: scale(8),
-        paddingHorizontal: scale(12),
-        paddingVertical: verticalScale(10),
+        justifyContent: 'space-between',
+        minWidth: 0,
+    },
+    deadlineValueRow: {
+        alignItems: 'center',
+        flexDirection: 'row',
+        flexShrink: 1,
+        gap: scale(4),
+        marginLeft: scale(8),
     },
     deadlineButtonText: {
         ...uiStyle.defaultText,
+        flexShrink: 1,
         fontSize: scale(13),
         fontWeight: '600',
     },
     clearButton: {
-        borderRadius: scale(10),
+        borderRadius: scale(8),
         borderCurve: 'continuous',
-        borderWidth: StyleSheet.hairlineWidth,
-        paddingHorizontal: scale(12),
-        paddingVertical: verticalScale(10),
+        paddingHorizontal: scale(10),
+        paddingVertical: verticalScale(6),
     },
     clearButtonText: {
         ...uiStyle.defaultText,
-        fontSize: scale(13),
+        fontSize: scale(12),
         fontWeight: '600',
+    },
+    countPill: {
+        borderRadius: scale(999),
+        paddingHorizontal: scale(10),
+        paddingVertical: verticalScale(4),
+    },
+    countPillText: {
+        ...uiStyle.defaultText,
+        fontSize: scale(11),
+        fontWeight: '700',
     },
     hint: {
         ...uiStyle.defaultText,
         fontSize: scale(12),
         lineHeight: verticalScale(18),
-        marginBottom: verticalScale(4),
+        marginBottom: verticalScale(6),
     },
     coursePrefillRow: {
         alignItems: 'center',
@@ -766,7 +871,7 @@ const styles = StyleSheet.create({
     gridPlaceholder: {
         alignItems: 'center',
         borderRadius: scale(12),
-        borderWidth: StyleSheet.hairlineWidth,
+        borderCurve: 'continuous',
         height: verticalScale(385),
         justifyContent: 'center',
     },
@@ -778,7 +883,7 @@ const styles = StyleSheet.create({
         gap: scale(6),
         justifyContent: 'center',
         marginTop: verticalScale(20),
-        minHeight: verticalScale(42),
+        minHeight: verticalScale(44),
         paddingVertical: verticalScale(10),
     },
     submitButtonText: {

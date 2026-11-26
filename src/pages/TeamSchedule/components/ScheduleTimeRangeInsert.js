@@ -111,8 +111,8 @@ const ScheduleTimeRangeInsert = ({onClear, onInsert, emptyRangeMessage}) => {
                 styles.container,
                 {
                     backgroundColor: theme.white,
-                    borderColor: theme.disabled,
                 },
+                theme.viewShadow,
             ]}>
             <MenuView
                 actions={weekdayActions}
@@ -224,11 +224,11 @@ const ScheduleTimeRangeInsert = ({onClear, onInsert, emptyRangeMessage}) => {
 const styles = StyleSheet.create({
     container: {
         alignItems: 'center',
-        borderRadius: scale(8),
-        borderWidth: StyleSheet.hairlineWidth,
+        borderRadius: scale(10),
+        borderCurve: 'continuous',
         flexDirection: 'row',
         marginBottom: verticalScale(8),
-        minHeight: verticalScale(34),
+        minHeight: verticalScale(36),
         paddingHorizontal: scale(8),
         paddingVertical: verticalScale(2),
     },
