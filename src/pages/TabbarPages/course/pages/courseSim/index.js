@@ -368,9 +368,7 @@ function CourseSim({ route, navigation, isSplitPane = false }) {
     const insets = useSafeAreaInsets();
     const { width: windowWidth, height: windowHeight } = useWindowDimensions();
     const { topChromeHeight } = useCourseChrome();
-    const courseSimTopInset = topChromeHeight > 0
-        ? topChromeHeight + SCROLL_EDGE_FADE_HEIGHT
-        : 0;
+    const courseSimTopInset = topChromeHeight;
     const scrollY = useRef(new Animated.Value(0)).current;
     const handleTopScroll = useCallback(event => {
         scrollY.setValue(event.nativeEvent.contentOffset.y);

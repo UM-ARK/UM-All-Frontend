@@ -147,7 +147,7 @@ const What2Reg = ({ isSplitPane = false }) => {
     const scrollViewRef = useRef(null);
     const scrollY = useRef(new Animated.Value(0)).current;
     const rightScrollY = useRef(new Animated.Value(0)).current;
-    const [searchHeaderHeight, setSearchHeaderHeight] = useState(SEARCH_FIELD_MIN_HEIGHT + scale(10));
+    const [searchHeaderHeight, setSearchHeaderHeight] = useState(SEARCH_FIELD_MIN_HEIGHT + scale(5));
     const { topChromeHeight } = useCourseChrome();
     const totalSearchHeaderHeight = topChromeHeight + searchHeaderHeight;
 
@@ -669,7 +669,7 @@ const What2Reg = ({ isSplitPane = false }) => {
                                 bottom: floatingBottom,
                             }}
                             contentContainerStyle={{
-                                paddingTop: totalSearchHeaderHeight + SCROLL_EDGE_FADE_HEIGHT,
+                                paddingTop: totalSearchHeaderHeight + COURSE_CARD_GAP,
                                 paddingBottom: floatingBottom + verticalScale(20),
                             }}
                             keyboardDismissMode="on-drag"
@@ -689,7 +689,7 @@ const What2Reg = ({ isSplitPane = false }) => {
                             ref={scrollViewRef}
                             style={{ flex: 1 }}
                             contentContainerStyle={{
-                                paddingTop: topChromeHeight + SCROLL_EDGE_FADE_HEIGHT + COURSE_CARD_GAP,
+                                paddingTop: topChromeHeight + COURSE_CARD_GAP,
                                 paddingBottom: floatingBottom + verticalScale(50),
                             }}
                             scrollEventThrottle={16}
@@ -717,7 +717,7 @@ const What2Reg = ({ isSplitPane = false }) => {
                         ref={scrollViewRef}
                         style={{ flex: 1 }}
                         contentContainerStyle={{
-                            paddingTop: totalSearchHeaderHeight + SCROLL_EDGE_FADE_HEIGHT,
+                            paddingTop: totalSearchHeaderHeight + COURSE_CARD_GAP,
                             paddingBottom: floatingBottom + verticalScale(50),
                         }}
                         scrollEventThrottle={16}

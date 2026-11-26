@@ -57,7 +57,6 @@ const SearchBarSection = ({
             style={{
                 width: '100%',
                 paddingTop: scale(5),
-                paddingBottom: scale(5),
                 paddingHorizontal: scale(10),
             }}>
             <View

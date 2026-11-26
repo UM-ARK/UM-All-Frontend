@@ -6,7 +6,7 @@ import { verticalScale } from 'react-native-size-matters';
 
 import { useTheme } from '../../../../components/ThemeContext';
 
-export const SCROLL_EDGE_FADE_HEIGHT = verticalScale(16);
+export const SCROLL_EDGE_FADE_HEIGHT = verticalScale(12);
 const SCROLL_EDGE_FADE_DISTANCE = 16;
 
 const withHexAlpha = (hex, alpha) => {
@@ -57,7 +57,6 @@ const TopScrollEdgeBackdrop = ({
     );
 
     const totalHeight = headerHeight + fadeHeight;
-    const featherBlurHeight = Math.max(0, Math.round(fadeHeight * 0.45));
 
     const { gradientColors, gradientLocations } = useMemo(() => {
         if (totalHeight <= 0) {
@@ -67,22 +66,17 @@ const TopScrollEdgeBackdrop = ({
             };
         }
         const midStop = Math.min(0.9, Math.max(0.05, (headerHeight * 0.72) / totalHeight));
-        const headerStop = Math.min(0.95, Math.max(midStop + 0.02, headerHeight / totalHeight));
-        const featherStop = Math.min(
-            0.99,
-            Math.max(headerStop + 0.01, (headerHeight + fadeHeight * 0.5) / totalHeight),
-        );
+        const headerStop = Math.min(0.96, Math.max(midStop + 0.02, headerHeight / totalHeight));
         return {
             gradientColors: [
-                withHexAlpha(bg_color, 0.86),
-                withHexAlpha(bg_color, 0.72),
-                withHexAlpha(bg_color, 0.54),
-                withHexAlpha(bg_color, 0.22),
+                withHexAlpha(bg_color, 0.85),
+                withHexAlpha(bg_color, 0.68),
+                withHexAlpha(bg_color, 0.96),
                 withHexAlpha(bg_color, 0),
             ],
-            gradientLocations: [0, midStop, headerStop, featherStop, 1],
+            gradientLocations: [0, midStop, headerStop, 1],
         };
-    }, [bg_color, fadeHeight, headerHeight, totalHeight]);
+    }, [bg_color, headerHeight, totalHeight]);
 
     if (headerHeight <= 0) {
         return null;
@@ -106,15 +100,6 @@ const TopScrollEdgeBackdrop = ({
                     style={StyleSheet.absoluteFill}
                 />
             </View>
-            {featherBlurHeight > 0 ? (
-                <View style={[styles.blurBand, { top: headerHeight, height: featherBlurHeight }]}>
-                    <BlurView
-                        intensity={16}
-                        tint={blurTint}
-                        style={StyleSheet.absoluteFill}
-                    />
-                </View>
-            ) : null}
             <LinearGradient
                 colors={gradientColors}
                 locations={gradientLocations}
