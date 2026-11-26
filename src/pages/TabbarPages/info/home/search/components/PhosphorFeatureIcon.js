@@ -29,6 +29,8 @@ import { Code } from 'phosphor-react-native/src/icons/Code';
 import { Compass } from 'phosphor-react-native/src/icons/Compass';
 import { Cpu } from 'phosphor-react-native/src/icons/Cpu';
 import { Desktop } from 'phosphor-react-native/src/icons/Desktop';
+import { Folder } from 'phosphor-react-native/src/icons/Folder';
+import { Folders } from 'phosphor-react-native/src/icons/Folders';
 import { ForkKnife } from 'phosphor-react-native/src/icons/ForkKnife';
 import { Gear } from 'phosphor-react-native/src/icons/Gear';
 import { GlobeHemisphereWest } from 'phosphor-react-native/src/icons/GlobeHemisphereWest';
@@ -40,6 +42,7 @@ import { IdentificationCard } from 'phosphor-react-native/src/icons/Identificati
 import { Images } from 'phosphor-react-native/src/icons/Images';
 import { Kanban } from 'phosphor-react-native/src/icons/Kanban';
 import { LetterCircleP } from 'phosphor-react-native/src/icons/LetterCircleP';
+import { Lock } from 'phosphor-react-native/src/icons/Lock';
 import { Lockers } from 'phosphor-react-native/src/icons/Lockers';
 import { MagnifyingGlass } from 'phosphor-react-native/src/icons/MagnifyingGlass';
 import { MagnifyingGlassPlus } from 'phosphor-react-native/src/icons/MagnifyingGlassPlus';
@@ -47,6 +50,7 @@ import { MapTrifold } from 'phosphor-react-native/src/icons/MapTrifold';
 import { Medal } from 'phosphor-react-native/src/icons/Medal';
 import { Megaphone } from 'phosphor-react-native/src/icons/Megaphone';
 import { Package } from 'phosphor-react-native/src/icons/Package';
+import { PlusSquare } from 'phosphor-react-native/src/icons/PlusSquare';
 import { Printer } from 'phosphor-react-native/src/icons/Printer';
 import { ProjectorScreen } from 'phosphor-react-native/src/icons/ProjectorScreen';
 import { Question } from 'phosphor-react-native/src/icons/Question';
@@ -55,14 +59,17 @@ import { ShieldCheck } from 'phosphor-react-native/src/icons/ShieldCheck';
 import { Shuffle } from 'phosphor-react-native/src/icons/Shuffle';
 import { Sparkle } from 'phosphor-react-native/src/icons/Sparkle';
 import { SquaresFour } from 'phosphor-react-native/src/icons/SquaresFour';
+import { Stack } from 'phosphor-react-native/src/icons/Stack';
 import { SuitcaseRolling } from 'phosphor-react-native/src/icons/SuitcaseRolling';
 import { Table } from 'phosphor-react-native/src/icons/Table';
+import { Tag } from 'phosphor-react-native/src/icons/Tag';
 import { Ticket } from 'phosphor-react-native/src/icons/Ticket';
 import { Trophy } from 'phosphor-react-native/src/icons/Trophy';
 import { UserCheck } from 'phosphor-react-native/src/icons/UserCheck';
 import { UsersThree } from 'phosphor-react-native/src/icons/UsersThree';
 import { Wallet } from 'phosphor-react-native/src/icons/Wallet';
 import { Wrench } from 'phosphor-react-native/src/icons/Wrench';
+import { X } from 'phosphor-react-native/src/icons/X';
 import { Bell } from 'phosphor-react-native/src/icons/Bell';
 import { BookmarkSimple } from 'phosphor-react-native/src/icons/BookmarkSimple';
 import { EnvelopeSimple } from 'phosphor-react-native/src/icons/EnvelopeSimple';
@@ -167,6 +174,15 @@ export const phosphorFeatureIcons = {
     camera: Camera,
     cpu: Cpu,
     calculator: Calculator,
+
+    // Harbor 側欄
+    stack: Stack,
+    'plus-square': PlusSquare,
+    tag: Tag,
+    folder: Folder,
+    folders: Folders,
+    lock: Lock,
+    x: X,
 };
 
 export default function PhosphorFeatureIcon({
