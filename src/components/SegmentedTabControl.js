@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
-import { Animated, StyleSheet, View } from 'react-native';
+import { Animated, Pressable, StyleSheet, View } from 'react-native';
 import { moderateScale, scale } from 'react-native-size-matters';
 
 import Text from './AppText';
-import ScalePressable from './ScalePressable';
 import { useTheme, uiStyle } from './ThemeContext';
 import { useAppReducedMotion } from '../contexts/ReducedMotionContext';
 import { GlassView, isLiquidGlassSupported } from '../utils/glassEffect';
@@ -13,7 +12,6 @@ const ITEM_HEIGHT = moderateScale(30, 0.1);
 const COMPACT_TRACK_PADDING = scale(3);
 const COMPACT_ITEM_WIDTH = scale(60);
 const TrackContainer = isLiquidGlassSupported ? GlassView : View;
-const AnimatedText = Animated.createAnimatedComponent(Text);
 
 export const SEGMENTED_TAB_CONTROL_HEIGHT = ITEM_HEIGHT + TRACK_PADDING * 2;
 
@@ -38,7 +36,7 @@ export default function SegmentedTabControl({
     const segmentWidth = compact
         ? COMPACT_ITEM_WIDTH
         : Math.max(0, (trackWidth - trackPadding * 2) / optionCount);
-    // 直接使用分頁容器的進度，滑塊和文字同時跟手。
+    // 滑塊跟分頁進度；文字色用 selected 靜態切換（AppText 無法可靠吃 Animated color）。
     const animatedPosition = reducedMotion || optionCount === 1 ? null : position;
     const thumbTranslateX = animatedPosition?.interpolate({
         inputRange: [0, optionCount - 1],
@@ -48,7 +46,6 @@ export default function SegmentedTabControl({
 
     return (
         <TrackContainer
-            {...(isLiquidGlassSupported ? { isInteractive: true } : {})}
             onLayout={compact ? undefined : event => setTrackWidth(event.nativeEvent.layout.width)}
             style={[
                 styles.track,
@@ -74,34 +71,33 @@ export default function SegmentedTabControl({
             ) : null}
             {options.map(({ key, label, badge }, index) => {
                 const selected = index === selectedIndex;
-                const color = animatedPosition?.interpolate({
-                    inputRange: [index - 1, index, index + 1],
-                    outputRange: [black.third, black.main, black.third],
-                    extrapolate: 'clamp',
-                }) ?? (selected ? black.main : black.third);
 
                 return (
-                    <ScalePressable
+                    <Pressable
                         key={key}
                         accessibilityRole="tab"
                         accessibilityState={{ selected }}
                         accessibilityLabel={label}
                         onPress={() => onChange(index)}
-                        style={[styles.button, compact ? styles.compactButton : styles.regularButton]}>
+                        style={({ pressed }) => [
+                            styles.button,
+                            compact ? styles.compactButton : styles.regularButton,
+                            pressed && styles.buttonPressed,
+                        ]}>
                         <View style={styles.labelRow}>
-                            <AnimatedText
+                            <Text
                                 numberOfLines={1}
                                 style={[
                                     styles.label,
                                     compact && styles.compactLabel,
                                     selected && styles.selectedLabel,
-                                    { color },
+                                    { color: selected ? black.main : black.third },
                                 ]}>
                                 {label}
-                            </AnimatedText>
+                            </Text>
                             {badge}
                         </View>
-                    </ScalePressable>
+                    </Pressable>
                 );
             })}
         </TrackContainer>
@@ -133,6 +129,9 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         borderRadius: scale(999),
+    },
+    buttonPressed: {
+        opacity: 0.72,
     },
     regularButton: {
         flex: 1,
