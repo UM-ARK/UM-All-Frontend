@@ -14,7 +14,6 @@ import {useFocusEffect} from '@react-navigation/native';
 import {useHeaderHeight} from '@react-navigation/elements';
 import {FlashList} from '@shopify/flash-list';
 import {Image} from 'expo-image';
-import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import {scale, verticalScale} from 'react-native-size-matters';
 import {useTranslation} from 'react-i18next';
 
@@ -28,6 +27,7 @@ import {
 } from '../../../utils/harbor/harborApi';
 import {formatHarborChatListTime} from '../../../utils/harbor/harborChat';
 import {trigger} from '../../../utils/trigger';
+import PhosphorFeatureIcon from '../info/home/search/components/PhosphorFeatureIcon';
 import {HarborFullState} from './components/HarborListStates';
 
 const ChatAvatar = ({channel}) => {
@@ -59,9 +59,9 @@ const ChatAvatar = ({channel}) => {
                 styles.avatarFallback,
                 {backgroundColor: theme.tonal.primary15},
             ]}>
-            <MaterialCommunityIcons
+            <PhosphorFeatureIcon
                 color={theme.themeColor}
-                name={channel.isGroup ? 'account-group' : 'account'}
+                name={channel.isGroup ? 'users' : 'user'}
                 size={scale(25)}
             />
         </View>
@@ -254,9 +254,9 @@ const HarborDirectMessageSettingsModal = ({onClose, username, visible}) => {
                                 styles.settingsIcon,
                                 {backgroundColor: theme.tonal.primary15},
                             ]}>
-                            <MaterialCommunityIcons
+                            <PhosphorFeatureIcon
                                 color={theme.themeColor}
-                                name="message-cog-outline"
+                                name="message-circle"
                                 size={scale(22)}
                             />
                         </View>
@@ -285,9 +285,9 @@ const HarborDirectMessageSettingsModal = ({onClose, username, visible}) => {
                         </View>
                     ) : loadError ? (
                         <View style={styles.settingsState}>
-                            <MaterialCommunityIcons
+                            <PhosphorFeatureIcon
                                 color={theme.unread}
-                                name="cloud-alert-outline"
+                                name="warning-circle"
                                 size={scale(25)}
                             />
                             <Text
@@ -459,10 +459,11 @@ const HarborChatListPage = ({navigation}) => {
                             setIsSettingsVisible(true);
                         }}
                         style={styles.headerButton}>
-                        <MaterialCommunityIcons
+                        <PhosphorFeatureIcon
                             color={theme.themeColor}
-                            name="cog-outline"
+                            name="gear"
                             size={scale(22)}
+                            weight="regular"
                         />
                     </ScalePressable>
                     <ScalePressable
@@ -474,10 +475,11 @@ const HarborChatListPage = ({navigation}) => {
                             findSomeone();
                         }}
                         style={styles.headerButton}>
-                        <MaterialCommunityIcons
+                        <PhosphorFeatureIcon
                             color={theme.themeColor}
-                            name="plus-circle-outline"
+                            name="plus-circle"
                             size={scale(23)}
+                            weight="regular"
                         />
                     </ScalePressable>
                 </View>
@@ -562,7 +564,7 @@ const HarborChatListPage = ({navigation}) => {
                 <HarborFullState
                     actionLabel={t('重試')}
                     description={t('暫時無法取得 Chat，請檢查網絡後再試。')}
-                    icon="chat-alert-outline"
+                    icon="warning-circle"
                     onAction={loadChannels}
                     title={t('無法載入 Chat')}
                 />
@@ -581,7 +583,7 @@ const HarborChatListPage = ({navigation}) => {
                     <HarborFullState
                         actionLabel={t('去找人聊聊')}
                         description={t('找到對方的 Harbor 個人資料，就可以開始 Chat。')}
-                        icon="chat-processing-outline"
+                        icon="messages-square"
                         onAction={findSomeone}
                         title={t('暫時沒有聊天')}
                     />

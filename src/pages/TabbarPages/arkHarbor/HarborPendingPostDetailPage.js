@@ -16,7 +16,6 @@ import {
 
 import {isLiquidGlassSupported} from '../../../utils/glassEffect';
 import {HeaderHeightContext} from '@react-navigation/elements';
-import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import {scale, verticalScale} from 'react-native-size-matters';
 import {useTranslation} from 'react-i18next';
 
@@ -25,6 +24,7 @@ import Text from '../../../components/AppText';
 import {uiStyle, useTheme} from '../../../components/ThemeContext';
 import {openLink} from '../../../utils/browser';
 import {fetchHarborUploadUrls} from '../../../utils/harbor/harborApi';
+import PhosphorFeatureIcon from '../info/home/search/components/PhosphorFeatureIcon';
 import HarborPostContent from './topicDetail/HarborPostContent';
 
 const getPendingUploadUrls = raw =>
@@ -158,8 +158,8 @@ const HarborPendingPostDetailPage = ({navigation, route}) => {
                         styles.statusCard,
                         {backgroundColor: theme.tonal.secondary15},
                     ]}>
-                    <MaterialCommunityIcons
-                        name="clock-outline"
+                    <PhosphorFeatureIcon
+                        name="clock"
                         size={scale(20)}
                         color={theme.secondThemeColor}
                     />

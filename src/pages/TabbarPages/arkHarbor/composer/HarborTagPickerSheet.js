@@ -17,7 +17,6 @@ import {
 } from '@gorhom/bottom-sheet';
 import {useTranslation} from 'react-i18next';
 import Toast from 'react-native-simple-toast';
-import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import {scale, verticalScale} from 'react-native-size-matters';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
@@ -31,6 +30,7 @@ import searchFieldStyles, {
 import {uiStyle, useTheme} from '../../../../components/ThemeContext';
 import CustomBottomSheet from '../../../../utils/BottomSheet';
 import {trigger} from '../../../../utils/trigger';
+import PhosphorFeatureIcon from '../../info/home/search/components/PhosphorFeatureIcon';
 
 const HarborTagPickerSheet = React.forwardRef(
     function HarborTagPickerSheet(
@@ -157,10 +157,11 @@ const HarborTagPickerSheet = React.forwardRef(
                                     : '#3A3A3C',
                             },
                         ]}>
-                        <MaterialCommunityIcons
-                            name="magnify"
+                        <PhosphorFeatureIcon
+                            name="search"
                             size={SEARCH_FIELD_ICON_SIZE}
                             color={theme.black.third}
+                            weight="regular"
                         />
                         <BottomSheetTextInput
                             autoCapitalize="none"
@@ -189,10 +190,11 @@ const HarborTagPickerSheet = React.forwardRef(
                                     searchFieldStyles.clearButton,
                                     {opacity: pressed ? 0.6 : 1},
                                 ]}>
-                                <MaterialCommunityIcons
-                                    name="close-circle"
+                                <PhosphorFeatureIcon
+                                    name="x-circle"
                                     size={SEARCH_FIELD_CLEAR_ICON_SIZE}
                                     color={theme.black.third}
+                                    weight="fill"
                                 />
                             </Pressable>
                         ) : null}

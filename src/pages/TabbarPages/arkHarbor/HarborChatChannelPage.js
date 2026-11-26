@@ -13,7 +13,6 @@ import {useHeaderHeight} from '@react-navigation/elements';
 import {FlashList} from '@shopify/flash-list';
 import {Image} from 'expo-image';
 import {useTranslation} from 'react-i18next';
-import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import {
     KeyboardAvoidingView,
     KeyboardController,
@@ -50,6 +49,7 @@ import {
 } from '../../../utils/harbor/harborChatDrafts';
 import {getHarborDraftAccountId} from '../../../utils/harbor/harborDrafts';
 import {trigger} from '../../../utils/trigger';
+import PhosphorFeatureIcon from '../info/home/search/components/PhosphorFeatureIcon';
 import {HarborFullState} from './components/HarborListStates';
 
 const CHAT_POLL_INTERVAL_MS = 8000;
@@ -69,10 +69,11 @@ const HarborChatProfileButton = ({
             onPress();
         }}
         style={styles.headerProfileButton}>
-        <MaterialCommunityIcons
+        <PhosphorFeatureIcon
             color={themeColor}
-            name="account-circle-outline"
+            name="user-circle"
             size={scale(22)}
+            weight="regular"
         />
     </ScalePressable>
 );
@@ -154,9 +155,9 @@ const MessageAvatar = ({user}) => {
                 styles.avatarFallback,
                 {backgroundColor: theme.tonal.primary15},
             ]}>
-            <MaterialCommunityIcons
+            <PhosphorFeatureIcon
                 color={theme.themeColor}
-                name="account"
+                name="user"
                 size={scale(20)}
             />
         </View>
@@ -168,28 +169,28 @@ const getArkAppLinkCardContent = (appLink, t) => {
         case 'course':
             return {
                 description: t('查看課程資料、班別與時間'),
-                icon: 'book-open-page-variant-outline',
+                icon: 'book-open',
                 label: t('ARK ALL · 課程'),
                 title: appLink.params.courseCode,
             };
         case 'club':
             return {
                 description: t('查看社團資料與活動'),
-                icon: 'account-group-outline',
+                icon: 'users',
                 label: t('ARK ALL · 社團'),
                 title: t('社團 #{{id}}', {id: appLink.params.clubNum}),
             };
         case 'event':
             return {
                 description: t('查看校園活動詳情'),
-                icon: 'calendar-star',
+                icon: 'sparkles',
                 label: t('ARK ALL · 活動'),
                 title: t('校園活動'),
             };
         case 'harborTopic':
             return {
                 description: t('查看 Harbor 帖子與回覆'),
-                icon: 'forum-outline',
+                icon: 'messages-square',
                 label: t('ARK ALL · Harbor'),
                 title: t('Harbor 帖子 #{{id}}', {
                     id: appLink.params.topicId,
@@ -198,7 +199,7 @@ const getArkAppLinkCardContent = (appLink, t) => {
         case 'team':
             return {
                 description: t('查看活動詳情與共享課表'),
-                icon: 'calendar-account-outline',
+                icon: 'calendar-check',
                 label: t('ARK ALL · 組隊約時間'),
                 title: t('組隊活動'),
             };
@@ -240,7 +241,7 @@ const ArkAppLinkCard = ({appLink, navigation, title}) => {
                     styles.appLinkIcon,
                     {backgroundColor: theme.tonal.primary15},
                 ]}>
-                <MaterialCommunityIcons
+                <PhosphorFeatureIcon
                     color={theme.themeColor}
                     name={content.icon}
                     size={scale(22)}
@@ -263,10 +264,11 @@ const ArkAppLinkCard = ({appLink, navigation, title}) => {
                     {content.description}
                 </Text>
             </View>
-            <MaterialCommunityIcons
+            <PhosphorFeatureIcon
                 color={theme.black.third}
-                name="chevron-right"
+                name="caret-right"
                 size={scale(19)}
+                weight="regular"
             />
         </ScalePressable>
     );
@@ -854,14 +856,14 @@ const HarborChatChannelPage = ({navigation, route}) => {
                             <HarborFullState
                                 actionLabel={t('重試')}
                                 description={t('暫時無法取得 Chat 訊息。')}
-                                icon="chat-alert-outline"
+                                icon="warning-circle"
                                 onAction={loadLatest}
                                 title={t('無法載入對話')}
                             />
                         ) : (
                             <HarborFullState
                                 description={t('傳送第一則訊息，開始這段 Chat。')}
-                                icon="message-text-outline"
+                                icon="message-circle"
                                 title={t('開始聊聊吧')}
                             />
                         )
@@ -980,9 +982,9 @@ const HarborChatChannelPage = ({navigation, route}) => {
                                 size="small"
                             />
                         ) : (
-                            <MaterialCommunityIcons
+                            <PhosphorFeatureIcon
                                 color={theme.trueWhite}
-                                name="send"
+                                name="paper-plane-tilt"
                                 size={scale(17)}
                             />
                         )}

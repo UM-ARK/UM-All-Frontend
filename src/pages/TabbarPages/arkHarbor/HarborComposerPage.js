@@ -13,7 +13,6 @@ import {
 } from 'react-native';
 
 import Toast from 'react-native-simple-toast';
-import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import {useFocusEffect} from '@react-navigation/native';
 import {scale, verticalScale} from 'react-native-size-matters';
 import {useTranslation} from 'react-i18next';
@@ -33,6 +32,7 @@ import {
     MARKDOWN_BASIC_SYNTAX_URL,
 } from '../../../utils/pathMap';
 import {trigger} from '../../../utils/trigger';
+import PhosphorFeatureIcon from '../info/home/search/components/PhosphorFeatureIcon';
 import HarborComposerForm from './composer/HarborComposerForm';
 import HarborReplyComposerForm, {
     HarborReplyComposerState,
@@ -722,8 +722,8 @@ const HarborComposerPage = ({route, navigation}) => {
                     styles.centeredState,
                     {backgroundColor: theme.bg_color},
                 ]}>
-                <MaterialCommunityIcons
-                    name="account-lock-outline"
+                <PhosphorFeatureIcon
+                    name="lock"
                     size={scale(42)}
                     color={theme.themeColor}
                 />
@@ -807,7 +807,7 @@ const HarborComposerPage = ({route, navigation}) => {
                 <HarborReplyComposerState
                     actionLabel={t('重試')}
                     description={loadError}
-                    icon="cloud-alert-outline"
+                    icon="warning-circle"
                     onAction={() => {
                         trigger();
                         loadComposerData();
@@ -823,8 +823,8 @@ const HarborComposerPage = ({route, navigation}) => {
                     styles.centeredState,
                     {backgroundColor: theme.bg_color},
                 ]}>
-                <MaterialCommunityIcons
-                    name="cloud-alert-outline"
+                <PhosphorFeatureIcon
+                    name="warning-circle"
                     size={scale(42)}
                     color={theme.unread}
                 />
@@ -875,8 +875,8 @@ const HarborComposerPage = ({route, navigation}) => {
                     styles.centeredState,
                     {backgroundColor: theme.bg_color},
                 ]}>
-                <MaterialCommunityIcons
-                    name="open-in-new"
+                <PhosphorFeatureIcon
+                    name="arrow-square-out"
                     size={scale(42)}
                     color={theme.themeColor}
                 />

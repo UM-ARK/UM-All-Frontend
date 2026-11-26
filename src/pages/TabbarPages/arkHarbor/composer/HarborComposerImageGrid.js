@@ -7,7 +7,6 @@ import {
 } from 'react-native';
 
 import {Image} from 'expo-image';
-import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import Animated, {useAnimatedRef} from 'react-native-reanimated';
 import {scale} from 'react-native-size-matters';
 import {useTranslation} from 'react-i18next';
@@ -17,6 +16,7 @@ import ScalePressable from '../../../../components/ScalePressable';
 import ARKImageView from '../../../../components/ARKImageView';
 import {useTheme} from '../../../../components/ThemeContext';
 import {trigger} from '../../../../utils/trigger';
+import PhosphorFeatureIcon from '../../info/home/search/components/PhosphorFeatureIcon';
 import {HarborComposerDraggableImage} from './HarborComposerImageDrag';
 
 const GRID_COLUMNS = 3;
@@ -217,10 +217,11 @@ const HarborComposerImageGrid = ({
                                         styles.removeButton,
                                         {backgroundColor: theme.trueBlack},
                                     ]}>
-                                    <MaterialCommunityIcons
-                                        name="close"
+                                    <PhosphorFeatureIcon
+                                        name="x"
                                         size={scale(14)}
                                         color={theme.trueWhite}
+                                        weight="regular"
                                     />
                                 </Pressable>
                             ) : null}
@@ -241,10 +242,11 @@ const HarborComposerImageGrid = ({
                                         {backgroundColor: theme.trueBlack},
                                     ]}>
                                     {isFailed ? (
-                                        <MaterialCommunityIcons
-                                            name="reload"
+                                        <PhosphorFeatureIcon
+                                            name="arrow-clockwise"
                                             size={scale(22)}
                                             color={theme.trueWhite}
+                                            weight="regular"
                                         />
                                     ) : (
                                         <ActivityIndicator
@@ -274,10 +276,11 @@ const HarborComposerImageGrid = ({
                                                 backgroundColor: theme.trueBlack,
                                             },
                                         ]}>
-                                        <MaterialCommunityIcons
-                                            name="chevron-left"
+                                        <PhosphorFeatureIcon
+                                            name="caret-left"
                                             size={scale(18)}
                                             color={theme.trueWhite}
+                                            weight="regular"
                                         />
                                     </Pressable>
                                     <Pressable
@@ -297,10 +300,11 @@ const HarborComposerImageGrid = ({
                                                 backgroundColor: theme.trueBlack,
                                             },
                                         ]}>
-                                        <MaterialCommunityIcons
-                                            name="chevron-right"
+                                        <PhosphorFeatureIcon
+                                            name="caret-right"
                                             size={scale(18)}
                                             color={theme.trueWhite}
+                                            weight="regular"
                                         />
                                     </Pressable>
                                 </View>
@@ -350,7 +354,12 @@ const HarborComposerImageGrid = ({
                         {isPreparingImages ? (
                             <ActivityIndicator color={theme.themeColor} />
                         ) : (
-                            <MaterialCommunityIcons name="plus" size={scale(29)} color={theme.themeColor} />
+                            <PhosphorFeatureIcon
+                                name="plus"
+                                size={scale(29)}
+                                color={theme.themeColor}
+                                weight="regular"
+                            />
                         )}
                     </ScalePressable>
                 ) : null}

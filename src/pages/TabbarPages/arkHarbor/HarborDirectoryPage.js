@@ -15,7 +15,6 @@ import { isLiquidGlassSupported } from '../../../utils/glassEffect';
 import { useHeaderHeight } from '@react-navigation/elements';
 import { FlashList } from '@shopify/flash-list';
 import PagerView from 'react-native-pager-view';
-import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import { scale, verticalScale } from 'react-native-size-matters';
 import { useTranslation } from 'react-i18next';
 
@@ -34,6 +33,7 @@ import {
     getHarborCategoryKey,
 } from '../../../utils/harbor/harborCategories';
 import { trigger } from '../../../utils/trigger';
+import PhosphorFeatureIcon from '../info/home/search/components/PhosphorFeatureIcon';
 import {
     HarborFullState,
     HarborInlineRetry,
@@ -154,10 +154,11 @@ const CategoryRow = ({ item, onPress, onToggle, isPressAllowed }) => {
                         {item.name}
                     </Text>
                     {item.readRestricted ? (
-                        <MaterialCommunityIcons
-                            name="lock-outline"
+                        <PhosphorFeatureIcon
+                            name="lock"
                             size={scale(13)}
                             color={theme.unread}
+                            weight="regular"
                         />
                     ) : null}
                 </View>
@@ -202,21 +203,23 @@ const CategoryRow = ({ item, onPress, onToggle, isPressAllowed }) => {
                         onToggle(item);
                     }}
                     style={styles.categoryToggle}>
-                    <MaterialCommunityIcons
+                    <PhosphorFeatureIcon
                         name={
                             item.isExpanded
-                                ? 'chevron-up'
-                                : 'chevron-down'
+                                ? 'caret-up'
+                                : 'caret-down'
                         }
                         size={scale(20)}
                         color={theme.themeColor}
+                        weight="regular"
                     />
                 </ScalePressable>
             ) : null}
-            <MaterialCommunityIcons
-                name="chevron-right"
+            <PhosphorFeatureIcon
+                name="caret-right"
                 size={scale(20)}
                 color={theme.black.third}
+                weight="regular"
             />
         </ScalePressable>
     );
@@ -248,8 +251,8 @@ const TagRow = ({ item, onPress, isPressAllowed }) => {
                     styles.directoryIcon,
                     { backgroundColor: theme.tonal.primary15 },
                 ]}>
-                <MaterialCommunityIcons
-                    name="tag-outline"
+                <PhosphorFeatureIcon
+                    name="tag"
                     size={scale(21)}
                     color={theme.themeColor}
                 />
@@ -278,10 +281,11 @@ const TagRow = ({ item, onPress, isPressAllowed }) => {
                     {t('{{count}} 個話題', { count: item.topicCount || 0 })}
                 </Text>
             </View>
-            <MaterialCommunityIcons
-                name="chevron-right"
+            <PhosphorFeatureIcon
+                name="caret-right"
                 size={scale(20)}
                 color={theme.black.third}
+                weight="regular"
             />
         </ScalePressable>
     );
@@ -461,7 +465,7 @@ const HarborDirectoryPane = ({
                 ListEmptyComponent={
                     loadError ? (
                         <HarborFullState
-                            icon="alert-circle-outline"
+                            icon="warning-circle"
                             title={t('探索內容載入失敗')}
                             description={t('請檢查網絡後再試。')}
                             actionLabel={t('重新載入')}
@@ -469,7 +473,7 @@ const HarborDirectoryPane = ({
                         />
                     ) : (
                         <HarborFullState
-                            icon={isCategory ? 'folder-outline' : 'tag-outline'}
+                            icon={isCategory ? 'folder' : 'tag'}
                             title={
                                 isCategory
                                     ? t('暫時沒有可瀏覽的分類')

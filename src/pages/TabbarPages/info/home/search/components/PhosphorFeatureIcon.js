@@ -120,6 +120,15 @@ import { Trash } from 'phosphor-react-native/src/icons/Trash';
 import { User } from 'phosphor-react-native/src/icons/User';
 import { WarningCircle } from 'phosphor-react-native/src/icons/WarningCircle';
 import { XCircle } from 'phosphor-react-native/src/icons/XCircle';
+import { AndroidLogo } from 'phosphor-react-native/src/icons/AndroidLogo';
+import { AppleLogo } from 'phosphor-react-native/src/icons/AppleLogo';
+import { CloudArrowDown } from 'phosphor-react-native/src/icons/CloudArrowDown';
+import { GithubLogo } from 'phosphor-react-native/src/icons/GithubLogo';
+import { Key } from 'phosphor-react-native/src/icons/Key';
+import { LinkBreak } from 'phosphor-react-native/src/icons/LinkBreak';
+import { Palette } from 'phosphor-react-native/src/icons/Palette';
+import { Sun } from 'phosphor-react-native/src/icons/Sun';
+import { Translate } from 'phosphor-react-native/src/icons/Translate';
 
 // 靜態按需匯入 Phosphor Duotone 圖標（線性描邊＋輕量雙色填底），兼顧層次感與打包體積
 export const phosphorFeatureIcons = {
@@ -265,6 +274,17 @@ export const phosphorFeatureIcons = {
     'device-mobile': DeviceMobile,
     'file-text': FileText,
     'shield-warning': ShieldWarning,
+
+    // 設定
+    'android-logo': AndroidLogo,
+    'apple-logo': AppleLogo,
+    'cloud-arrow-down': CloudArrowDown,
+    'github-logo': GithubLogo,
+    key: Key,
+    'link-break': LinkBreak,
+    palette: Palette,
+    sun: Sun,
+    translate: Translate,
 };
 
 export default function PhosphorFeatureIcon({

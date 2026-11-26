@@ -13,7 +13,6 @@ import {
 import {BottomSheetFlatList} from '@gorhom/bottom-sheet';
 import {useTranslation} from 'react-i18next';
 import {scale, verticalScale} from 'react-native-size-matters';
-import MaterialCommunityIcons from "@react-native-vector-icons/material-design-icons";
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 import Text from '../../../../components/AppText';
@@ -25,6 +24,7 @@ import {
     getHarborCategoryKey,
 } from '../../../../utils/harbor/harborCategories';
 import {trigger} from '../../../../utils/trigger';
+import PhosphorFeatureIcon from '../../info/home/search/components/PhosphorFeatureIcon';
 import HarborCategoryIcon from '../components/HarborCategoryIcon';
 
 const HarborCategoryPickerSheet = React.forwardRef(
@@ -145,22 +145,24 @@ const HarborCategoryPickerSheet = React.forwardRef(
                                     handleToggleCategory(item);
                                 }}
                                 style={styles.optionToggle}>
-                                <MaterialCommunityIcons
+                                <PhosphorFeatureIcon
                                     name={
                                         item.isExpanded
-                                            ? 'chevron-up'
-                                            : 'chevron-down'
+                                            ? 'caret-up'
+                                            : 'caret-down'
                                     }
                                     size={scale(20)}
                                     color={theme.themeColor}
+                                    weight="regular"
                                 />
                             </ScalePressable>
                         ) : null}
                         {selected ? (
-                            <MaterialCommunityIcons
+                            <PhosphorFeatureIcon
                                 name="check"
                                 size={scale(20)}
                                 color={theme.themeColor}
+                                weight="regular"
                             />
                         ) : null}
                     </ScalePressable>
