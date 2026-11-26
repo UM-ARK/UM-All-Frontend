@@ -107,6 +107,7 @@ function ClubPage({ topChromeHeight }) {
     const [allClubs, setAllClubs] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [isLoading, setIsLoading] = useState(true);
+    const [isRefreshing, setIsRefreshing] = useState(false);
     const [isOtherViewVisible, setIsOtherViewVisible] = useState(true);
     const [searchHeaderHeight, setSearchHeaderHeight] = useState(SEARCH_FIELD_MIN_HEIGHT + scale(16));
     const [scrollY] = useState(() => new Animated.Value(0));
@@ -162,9 +163,10 @@ function ClubPage({ topChromeHeight }) {
         });
     }, [nativeTopInset, sections]);
 
-    const getData = useCallback(async () => {
+    const getData = useCallback(async ({ refreshing = false } = {}) => {
         handleScrollStart();
         setIsLoading(true);
+        setIsRefreshing(refreshing);
         const URL = BASE_URI + GET.CLUB_INFO_ALL;
         try {
             await axios.get(URL).then(res => {
@@ -175,18 +177,18 @@ function ClubPage({ topChromeHeight }) {
                         itm.logo_url = BASE_HOST + itm.logo_url;
                     });
                     setAllClubs(clubDataList);
-                    setIsLoading(false);
-                    handleScrollEnd();
                 } else {
                     Alert.alert('Warning:', String(json.message ?? ''));
                 }
             });
         } catch (error) {
-            if (error.code == 'ERR_NETWORK' || error.code == 'ECONNABORTED') {
-                setIsLoading(false);
-            } else {
+            if (error.code !== 'ERR_NETWORK' && error.code !== 'ECONNABORTED') {
                 Alert.alert('組織頁，未知錯誤，請聯繫開發者！\n也可能是國內網絡屏蔽所導致！');
             }
+        } finally {
+            setIsLoading(false);
+            setIsRefreshing(false);
+            handleScrollEnd();
         }
     }, [handleScrollStart, handleScrollEnd]);
 
@@ -431,11 +433,12 @@ function ClubPage({ topChromeHeight }) {
                     <RefreshControl
                         colors={[themeColor]}
                         tintColor={themeColor}
-                        refreshing={isLoading}
-                        progressViewOffset={headerHeight}
+                        refreshing={isRefreshing}
+                        progressViewOffset={headerHeight - nativeTopInset}
                         onRefresh={() => {
-                            getData();
-                            handleScrollStart();
+                            if (!isLoading) {
+                                getData({ refreshing: true });
+                            }
                         }}
                     />
                 }
