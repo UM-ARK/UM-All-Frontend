@@ -111,6 +111,7 @@ const HomeScreen = ({ navigation, topChromeHeight }) => {
     const isTc = i18n.language === 'tc';
     const featureFontSize = isTc ? verticalScale(8) : verticalScale(7);
     const [scrollY] = useState(() => new Animated.Value(0));
+    const [viewport, setViewport] = useState(null);
 
     // 狀態
     const functionArray = useMemo(() => [
@@ -511,7 +512,9 @@ const HomeScreen = ({ navigation, topChromeHeight }) => {
 
     // 主渲染
     return (
-        <View style={{ flex: 1, backgroundColor: bg_color, alignItems: 'center', justifyContent: 'center' }}>
+        <View
+            onLayout={event => setViewport(event.nativeEvent.layout)}
+            style={{ flex: 1, backgroundColor: bg_color, alignItems: 'center', justifyContent: 'center' }}>
             <ScrollView
                 style={{ width: '100%' }}
                 contentInsetAdjustmentBehavior="never"
@@ -826,7 +829,14 @@ const HomeScreen = ({ navigation, topChromeHeight }) => {
                 </ModalBottom>
             )}
 
-            <ScrollToTopButton virtualizedListRef={scrollView} />
+            {viewport && (
+                <ScrollToTopButton
+                    viewport={viewport}
+                    topInset={topChromeHeight}
+                    virtualizedListRef={scrollView}
+                    style={{ zIndex: 2 }}
+                />
+            )}
 
             <CustomBottomSheet ref={bottomSheetRef} page={'home'} onSheetIndexChange={(idx) => setSheetIndex(idx)}>
                 {renderBottomSheet()}

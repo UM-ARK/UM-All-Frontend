@@ -48,6 +48,7 @@ const CampusPage = ({ topChromeHeight }) => {
     const tappedIndexRef = useRef(null);
     const [pageIndex, setPageIndex] = useState(0);
     const [trackWidth, setTrackWidth] = useState(0);
+    const [viewport, setViewport] = useState(null);
     // 延遲掛載未造訪分頁，避免進校園就同時打兩支 Open Data API
     const [mountedPages, setMountedPages] = useState({ 0: true, 1: false });
 
@@ -139,7 +140,9 @@ const CampusPage = ({ topChromeHeight }) => {
             });
 
     return (
-        <View style={[styles.container, { backgroundColor: bg_color }]}>
+        <View
+            onLayout={event => setViewport(event.nativeEvent.layout)}
+            style={[styles.container, { backgroundColor: bg_color }]}>
             <View pointerEvents="box-none" style={[styles.segmentBar, { top: topChromeHeight }]}>
                 <TopTabTrackContainer
                     {...(isLiquidGlassSupported ? { isInteractive: true } : {})}
@@ -209,12 +212,14 @@ const CampusPage = ({ topChromeHeight }) => {
                 </View>
             </AnimatedPagerView>
 
-            <View pointerEvents="box-none" style={[styles.scrollTopOverlay, { top: topChromeHeight }]}>
+            {viewport && (
                 <ScrollToTopButton
+                    viewport={viewport}
+                    topInset={topChromeHeight}
                     onScrollToTop={onScrollToTopPress}
                     style={styles.scrollTopButton}
                 />
-            </View>
+            )}
         </View>
     );
 };
@@ -263,10 +268,6 @@ const styles = StyleSheet.create({
     },
     segmentLabelActive: {
         fontWeight: '600',
-    },
-    scrollTopOverlay: {
-        ...StyleSheet.absoluteFillObject,
-        zIndex: 30,
     },
     scrollTopButton: {
         zIndex: 30,
