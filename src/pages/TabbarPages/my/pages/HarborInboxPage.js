@@ -20,7 +20,7 @@ import {scale, verticalScale} from 'react-native-size-matters';
 
 import Text from '../../../../components/AppText';
 import ScalePressable from '../../../../components/ScalePressable';
-import SegmentControl from '../../../../components/SegmentControl';
+import SegmentedTabControl from '../../../../components/SegmentedTabControl';
 import {uiStyle, useTheme} from '../../../../components/ThemeContext';
 import {useHarborSession} from '../../../../contexts/HarborSessionContext';
 import {openLink} from '../../../../utils/browser';
@@ -194,7 +194,16 @@ const HarborInboxPage = ({
         {
             key: 'unread',
             label: t('未讀'),
-            showDot: inboxUnreadCount > 0,
+            badge:
+                inboxUnreadCount > 0 ? (
+                    <View
+                        pointerEvents="none"
+                        style={[
+                            styles.filterDot,
+                            {backgroundColor: theme.unread},
+                        ]}
+                    />
+                ) : null,
         },
     ];
     const notificationFilter =
@@ -838,18 +847,26 @@ const HarborInboxPage = ({
                     ItemSeparatorComponent={ListSeparator}
                     ListHeaderComponent={
                         <View style={styles.listHeader}>
-                            <SegmentControl
-                                compact
-                                options={filterOptions}
-                                selectedIndex={
-                                    notificationFilterIndex
-                                }
-                                onChange={setNotificationFilterIndex}
-                                style={styles.filterSegment}
-                                trackBackgroundColor={
-                                    theme.tonal.primary08
-                                }
-                            />
+                            <View style={styles.filterSegment}>
+                                <SegmentedTabControl
+                                    options={filterOptions}
+                                    selectedIndex={
+                                        notificationFilterIndex
+                                    }
+                                    onChange={index => {
+                                        trigger(
+                                            notificationFilterIndex ===
+                                                index
+                                                ? 'tap'
+                                                : 'selection',
+                                        );
+                                        setNotificationFilterIndex(
+                                            index,
+                                        );
+                                    }}
+                                    raisedTrack
+                                />
+                            </View>
                             {loadError && items.length > 0 ? (
                                 <HarborInlineRetry
                                     message={t(
@@ -926,6 +943,11 @@ const styles = StyleSheet.create({
     },
     filterSegment: {
         alignSelf: 'center',
+    },
+    filterDot: {
+        width: scale(5),
+        height: scale(5),
+        borderRadius: scale(2.5),
     },
     loading: {
         flex: 1,
