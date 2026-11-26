@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect, useLayoutEffect, useMemo } from 'react';
 import { View, Dimensions, ScrollView, StyleSheet, Linking, Platform } from 'react-native';
 
 import Text from '../../../../components/AppText';
@@ -8,14 +8,15 @@ import ARKImageView from '../../../../components/ARKImageView';
 import { logToFirebase } from '../../../../utils/firebaseAnalytics';
 import { openLink } from '../../../../utils/browser';
 import { trigger } from '../../../../utils/trigger';
-import SegmentControl from '../../../../components/SegmentControl';
+import SegmentedTabControl from '../../../../components/SegmentedTabControl';
+import ScalePressable from '../../../../components/ScalePressable';
 
 import { Image } from 'expo-image';
 import { FlatGrid } from 'react-native-super-grid';
 import moment from 'moment-timezone';
 import RenderHTML from '@native-html/render';
-import { scale } from 'react-native-size-matters';
-import TouchableScale from '../../../../components/TouchableScale';
+import { moderateScale, scale, verticalScale } from 'react-native-size-matters';
+import { useTranslation } from 'react-i18next';
 
 // 正文字體：Android 用內置 Noto Sans TC，iOS 保留系統字體
 const BODY_FONT = Platform.select({ android: ANDROID_UI_FONT_FAMILY, default: undefined });
@@ -45,24 +46,37 @@ const { height: PAGE_HEIGHT } = Dimensions.get('window');
 const { width: PAGE_WIDTH } = Dimensions.get('window');
 
 const NewsDetail = ({ route, navigation }) => {
+    const { t } = useTranslation();
     const { theme } = useTheme();
-    const { white, black, viewShadow, bg_color, themeColor, secondThemeColor, imagePlaceholder } = theme;
+    const { white, black, viewShadow, bg_color, themeColor, imagePlaceholder } = theme;
     const styles = StyleSheet.create({
+        // 編輯式標題區：左對齊、緊行距、略收字距；與正文卡水平節奏對齊
+        headerBlock: {
+            paddingHorizontal: scale(16),
+            paddingTop: verticalScale(10),
+            paddingBottom: verticalScale(6),
+        },
         title: {
             ...uiStyle.defaultText,
-            alignSelf: 'center',
-            marginVertical: scale(5),
-            marginHorizontal: scale(10),
-            fontWeight: 'bold',
-            fontSize: scale(20),
-            color: themeColor,
+            color: black.main,
+            fontSize: moderateScale(22),
+            fontWeight: '700',
+            lineHeight: moderateScale(28),
+            letterSpacing: scale(-0.3),
+            textAlign: 'left',
+        },
+        metaRow: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginTop: verticalScale(12),
         },
         date: {
             ...uiStyle.defaultText,
-            color: secondThemeColor,
-            alignSelf: 'flex-end',
-            marginRight: scale(15),
-            fontWeight: '600',
+            color: black.third,
+            fontSize: moderateScale(12),
+            fontWeight: '500',
+            marginLeft: scale(10),
         },
         contentContainer: {
             marginHorizontal: scale(10),
@@ -234,6 +248,10 @@ const NewsDetail = ({ route, navigation }) => {
         logToFirebase('openPage', { page: 'UMNews' });
     }, []);
 
+    useLayoutEffect(() => {
+        navigation.setOptions({ headerTitle: t('澳大新聞') });
+    }, [navigation, t]);
+
     // 判斷語言是否存在，更新 LanguageMode.available
     useEffect(() => {
         setLanguageMode(prev => {
@@ -308,32 +326,39 @@ const NewsDetail = ({ route, navigation }) => {
             <ScrollView
                 // 該頁面是圖片置頂，所以iOS26也無需調整inset
                 contentInsetAdjustmentBehavior={'automatic'}>
-                {/* 文本模式選擇 3語切換 */}
-                {languageSegmentOptions.length > 0 ? (
-                    <View style={{ alignItems: 'center', marginVertical: scale(5) }}>
-                        <SegmentControl
-                            options={languageSegmentOptions}
-                            selectedIndex={languageSegmentSelectedIndex}
-                            onChange={(segIdx) => {
-                                const opt = languageSegmentOptions[segIdx];
-                                if (opt) { setChooseMode(opt.langIndex); }
-                            }}
-                            trackBackgroundColor={white}
-                            fontSize={scale(14)}
-                        />
+                {/* 標題 + 語言／日期（編輯式頭區，自然換行） */}
+                <View style={styles.headerBlock}>
+                    <Text
+                        style={styles.title}
+                        selectable={true}
+                        textBreakStrategy="balanced">
+                        {title[chooseMode]}
+                    </Text>
+                    <View style={styles.metaRow}>
+                        {languageSegmentOptions.length > 0 ? (
+                            <SegmentedTabControl
+                                options={languageSegmentOptions}
+                                selectedIndex={languageSegmentSelectedIndex}
+                                onChange={(segIdx) => {
+                                    const opt = languageSegmentOptions[segIdx];
+                                    if (!opt || opt.langIndex === chooseMode) {
+                                        return;
+                                    }
+                                    trigger('selection');
+                                    setChooseMode(opt.langIndex);
+                                }}
+                                compact
+                            />
+                        ) : (
+                            <View />
+                        )}
+                        <Text style={styles.date}>
+                            {moment
+                                .tz(data.lastModified, 'Asia/Macau')
+                                .format('YYYY/MM/DD')}
+                        </Text>
                     </View>
-                ) : null}
-                {/* 大標題 */}
-                <Text style={styles.title} selectable={true}>
-                    {title[chooseMode]}
-                </Text>
-                {/* 日期 */}
-                <Text style={styles.date}>
-                    {'Update: ' +
-                        moment
-                            .tz(data.lastModified, 'Asia/Macau')
-                            .format('YYYY/MM/DD')}
-                </Text>
+                </View>
 
                 {/* 圖片展示 */}
                 <FlatGrid
@@ -341,9 +366,8 @@ const NewsDetail = ({ route, navigation }) => {
                     data={data.imageUrls}
                     spacing={scale(15)}
                     renderItem={({ item, index }) => (
-                        <TouchableScale
+                        <ScalePressable
                             key={index}
-                            activeOpacity={0.7}
                             style={{
                                 width: COMPONENT_WIDTH,
                                 height: COMPONENT_WIDTH,
@@ -364,7 +388,7 @@ const NewsDetail = ({ route, navigation }) => {
                                 placeholderContentFit="cover"
                                 transition={200}
                             />
-                        </TouchableScale>
+                        </ScalePressable>
                     )}
                     itemContainerStyle={{
                         alignItems: 'center',
