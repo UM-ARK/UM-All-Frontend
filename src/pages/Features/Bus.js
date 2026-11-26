@@ -1,5 +1,5 @@
 import React, {useState, useEffect, useCallback, useMemo, useRef, useLayoutEffect} from 'react';
-import {AppState, Image, RefreshControl, ScrollView, StyleSheet, View} from 'react-native';
+import {AppState, Image, Platform, RefreshControl, ScrollView, StyleSheet, View} from 'react-native';
 import {isLiquidGlassSupported} from '../../utils/glassEffect';
 import {useHeaderHeight} from '@react-navigation/elements';
 import {useIsFocused} from '@react-navigation/native';
@@ -19,7 +19,7 @@ import {DOMParser} from 'react-native-html-parser';
 import {scale} from 'react-native-size-matters';
 import axios from 'axios';
 import Toast from 'react-native-simple-toast';
-import PhosphorFeatureIcon from '../TabbarPages/info/home/search/components/PhosphorFeatureIcon';
+import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 import BusArrivalPanel, {
     BUS_PANEL_EXPANDED,
     getBusPanelCollapsedHeight,
@@ -118,8 +118,9 @@ const staticStyles = StyleSheet.create({
         alignItems: 'center',
     },
     headerButton: {
-        width: 44,
-        height: 44,
+        width: scale(36),
+        height: scale(36),
+        borderRadius: scale(18),
         alignItems: 'center',
         justifyContent: 'center',
     },
@@ -133,16 +134,17 @@ const BusScreen = ({navigation}) => {
     const insets = useSafeAreaInsets();
     const {theme} = useTheme();
     const {
-        bg_color,
         black,
-        featureIconTones,
+        featuresScreen,
         successForeground,
+        themeColor,
         warning,
     } = theme;
     const s = useMemo(() => StyleSheet.create({
         container: {
             flex: 1,
-            backgroundColor: bg_color,
+            // 與地圖底色一致，透明標題欄下不會露出突兀白邊
+            backgroundColor: featuresScreen.bg_color,
         },
         routeScroll: {
             flex: 1,
@@ -157,7 +159,7 @@ const BusScreen = ({navigation}) => {
             right: 0,
             bottom: 0,
         },
-    }), [bg_color]);
+    }), [featuresScreen.bg_color]);
 
     const [snapshot, setSnapshot] = useState(null);
     const [statsDocument, setStatsDocument] = useState(null);
@@ -183,8 +185,12 @@ const BusScreen = ({navigation}) => {
     const panelReservedHeight = (panelExpanded
         ? BUS_PANEL_EXPANDED
         : collapsedPanelReservedHeight);
+    // 透明標題欄時用 padding 把內容頂在標題下方，恢復「一進來完整環線」取景；
+    // 不再用負 margin 把地圖拉回狀態欄底下。
     const contentTopStyle = useMemo(
-        () => isLiquidGlassSupported ? {paddingTop: headerHeight} : null,
+        () => (isLiquidGlassSupported && headerHeight > 0
+            ? {paddingTop: headerHeight}
+            : null),
         [headerHeight],
     );
     const routePanelInsetStyle = useMemo(
@@ -197,7 +203,7 @@ const BusScreen = ({navigation}) => {
 
     const busUrl = i18n.resolvedLanguage === 'en' ? UM_BUS_LOOP_EN : UM_BUS_LOOP_ZH;
 
-    // 右上角：官方網站與服務說明
+    // 右上角：官方網站 / 服務說明（iOS 走原生 UIBarButtonItem，保留液態玻璃）
     const openBusOfficialPage = useCallback(() => {
         openLink(busUrl);
     }, [busUrl]);
@@ -208,46 +214,76 @@ const BusScreen = ({navigation}) => {
 
     useLayoutEffect(() => {
         navigation.setOptions({
-            headerLeftBackgroundVisible: false,
-            headerRightBackgroundVisible: false,
-            headerLeft: ({canGoBack}) => canGoBack ? (
-                <ScalePressable
-                    accessibilityRole="button"
-                    accessibilityLabel={t('返回')}
-                    onPress={() => {
-                        trigger();
-                        navigation.goBack();
-                    }}
-                    style={staticStyles.headerButton}>
-                    <PhosphorFeatureIcon name="caret-left" color={black.main} size={scale(22)} weight="regular" />
-                </ScalePressable>
-            ) : null,
-            headerRight: () => (
-                <View style={staticStyles.headerRightRow}>
-                    <ScalePressable
-                        accessibilityRole="button"
-                        accessibilityLabel={t('官方資訊')}
-                        onPress={() => {
-                            trigger();
-                            openBusServiceInfo();
-                        }}
-                        style={staticStyles.headerButton}>
-                        <PhosphorFeatureIcon name="info" color={featureIconTones.blue.foreground} size={scale(22)} />
-                    </ScalePressable>
-                    <ScalePressable
-                        accessibilityRole="button"
-                        accessibilityLabel={t('官方網站')}
-                        onPress={() => {
-                            trigger();
-                            openBusOfficialPage();
-                        }}
-                        style={staticStyles.headerButton}>
-                        <PhosphorFeatureIcon name="globe" color={featureIconTones.blue.foreground} size={scale(22)} />
-                    </ScalePressable>
-                </View>
-            ),
+            headerRight:
+                Platform.OS === 'ios'
+                    ? undefined
+                    : () => (
+                        <View style={staticStyles.headerRightRow}>
+                            <ScalePressable
+                                accessibilityRole="button"
+                                accessibilityLabel={t('官方網站')}
+                                onPress={() => {
+                                    trigger();
+                                    openBusOfficialPage();
+                                }}
+                                style={staticStyles.headerButton}>
+                                <MaterialCommunityIcons
+                                    name="earth"
+                                    size={scale(20)}
+                                    color={themeColor}
+                                />
+                            </ScalePressable>
+                            <ScalePressable
+                                accessibilityRole="button"
+                                accessibilityLabel={t('官方資訊')}
+                                onPress={() => {
+                                    trigger();
+                                    openBusServiceInfo();
+                                }}
+                                style={staticStyles.headerButton}>
+                                <MaterialCommunityIcons
+                                    name="information-outline"
+                                    size={scale(20)}
+                                    color={themeColor}
+                                />
+                            </ScalePressable>
+                        </View>
+                    ),
+            unstable_headerRightItems:
+                Platform.OS === 'ios'
+                    ? () => [
+                        {
+                            type: 'button',
+                            label: t('官方資訊'),
+                            accessibilityLabel: t('官方資訊'),
+                            icon: {
+                                type: 'sfSymbol',
+                                name: 'info.circle',
+                            },
+                            tintColor: themeColor,
+                            onPress: () => {
+                                trigger();
+                                openBusServiceInfo();
+                            },
+                        },
+                        {
+                            type: 'button',
+                            label: t('官方網站'),
+                            accessibilityLabel: t('官方網站'),
+                            icon: {
+                                type: 'sfSymbol',
+                                name: 'globe',
+                            },
+                            tintColor: themeColor,
+                            onPress: () => {
+                                trigger();
+                                openBusOfficialPage();
+                            },
+                        },
+                    ]
+                    : undefined,
         });
-    }, [black.main, featureIconTones.blue.foreground, navigation, openBusOfficialPage, openBusServiceInfo, t]);
+    }, [navigation, openBusOfficialPage, openBusServiceInfo, t, themeColor]);
 
     // 將 stopImgArr 轉換為 ARKImageView 可用的格式
     const processedStopImages = useMemo(() => {
@@ -433,7 +469,7 @@ const BusScreen = ({navigation}) => {
 
     useEffect(() => {
         routeScrollRef.current?.scrollTo({y: 0, animated: false});
-    }, [headerHeight, panelExpanded]);
+    }, [panelExpanded]);
 
     // 控制彈出層打開 or 關閉
     const toggleModal = useCallback(index => {
