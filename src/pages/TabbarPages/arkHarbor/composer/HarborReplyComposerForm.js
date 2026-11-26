@@ -350,6 +350,11 @@ const HarborReplyComposerForm = ({
     );
 };
 
+// 同心圓角：R_inner = R_outer − padding
+const REPLY_SHEET_RADIUS = scale(24);
+const REPLY_SHEET_PADDING = scale(10);
+const REPLY_INPUT_RADIUS = REPLY_SHEET_RADIUS - REPLY_SHEET_PADDING;
+
 const styles = StyleSheet.create({
     backdrop: {
         opacity: 0.32,
@@ -378,7 +383,7 @@ const styles = StyleSheet.create({
         paddingVertical: scale(1),
     },
     input: {
-        borderRadius: scale(12),
+        borderRadius: REPLY_INPUT_RADIUS,
         fontSize: scale(15),
         lineHeight: scale(21),
         maxHeight: verticalScale(118),
@@ -417,11 +422,11 @@ const styles = StyleSheet.create({
         fontWeight: '700',
     },
     sheet: {
-        borderTopLeftRadius: scale(18),
-        borderTopRightRadius: scale(18),
+        borderTopLeftRadius: REPLY_SHEET_RADIUS,
+        borderTopRightRadius: REPLY_SHEET_RADIUS,
         paddingBottom: verticalScale(4),
-        paddingHorizontal: scale(10),
-        paddingTop: verticalScale(4),
+        paddingHorizontal: REPLY_SHEET_PADDING,
+        paddingTop: REPLY_SHEET_PADDING,
     },
     stateAction: {
         alignItems: 'center',
