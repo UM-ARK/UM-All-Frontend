@@ -9,7 +9,7 @@ import Animated, {
     withSequence,
     withTiming,
 } from 'react-native-reanimated';
-import Svg, {Circle, Ellipse, G, Path, Rect, Text as SvgText} from 'react-native-svg';
+import Svg, {Circle, G, Path, Rect, Text as SvgText} from 'react-native-svg';
 
 import Text from '../../../components/AppText';
 import ScalePressable from '../../../components/ScalePressable';
@@ -644,8 +644,8 @@ const BusRouteMap = ({
                     />
                 </G>
                 <G fill={tonal.success15}>
-                    {/* N9 體育場：南北向橢圓跑道，內嵌足球場比例約 105:68 */}
-                    <Ellipse cx={stadiumX} cy="59" rx="26" ry="36" />
+                    {/* N9 體育場：直道＋兩端半圓的膠囊形跑道（rx=半寬），非純橢圓 */}
+                    <Rect x={stadiumX - 22} y="26" width="44" height="66" rx="22" ry="22" />
                     <Rect x={westBlockLeft + westBlockWidth * 0.09} y="276" width={westBlockWidth * 0.8} height="9" rx="3" />
                     <Rect x={westBlockLeft + westBlockWidth * 0.05} y="417" width={westBlockWidth * 0.85} height="8" rx="3" />
                 </G>
@@ -667,8 +667,8 @@ const BusRouteMap = ({
                 </G>
                 <Rect x={libraryX - 25} y="282" width="50" height="32" rx="5" fill={featuresScreen.divider} stroke={pressOverlay} />
                 <G fill="none" stroke={black.third} strokeWidth="1.3" opacity={0.45}>
-                    <Ellipse cx={stadiumX} cy="59" rx="22" ry="32" />
-                    <Rect x={stadiumX - 11} y="42" width="22" height="34" rx="2" />
+                    <Rect x={stadiumX - 18} y="30" width="36" height="58" rx="18" ry="18" />
+                    <Rect x={stadiumX - 11} y="40" width="22" height="38" rx="1.5" />
                     <Path d={`M${stadiumX - 11} 59 H${stadiumX + 11}`} />
                     <Circle cx={stadiumX} cy="59" r="3.5" />
                     <Circle cx={libraryX + 12} cy="293" r="6" />
@@ -692,7 +692,7 @@ const BusRouteMap = ({
                         </G>
                     );
                 })}
-                <SvgText x={stadiumX} y="63" fill={black.third} opacity={0.65} fontSize="10" fontWeight="600" textAnchor="middle">
+                <SvgText x={stadiumX} y="72" fill={black.third} opacity={0.65} fontSize="10" fontWeight="600" textAnchor="middle">
                     N9
                 </SvgText>
                 {WEST_CAMPUS_BLOCKS.map(({labels, x, y, width, height, outline}) => {
