@@ -1,4 +1,4 @@
-import React, { useState, forwardRef, useImperativeHandle, useCallback, useMemo, useRef } from 'react';
+import React, { useState, useEffect, forwardRef, useImperativeHandle, useCallback, useMemo, useRef } from 'react';
 import { View, StyleSheet, Pressable, Image as RNImage, ActivityIndicator, Alert, Platform } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import { Camera } from 'expo-camera';
@@ -6,7 +6,7 @@ import GalleryPreview from 'react-native-gallery-preview';
 import ActionSheet, { ScrollView } from 'react-native-actions-sheet';
 import { useTranslation } from 'react-i18next';
 import Toast from 'react-native-simple-toast';
-import { Image } from 'expo-image';
+import { Image, useImage } from 'expo-image';
 import Text from './AppText';
 import ScalePressable from './ScalePressable';
 import { useTheme } from './ThemeContext';
@@ -70,12 +70,53 @@ const ViewerChromeButton = ({
 };
 
 /**
+ * Android 專用圖片元件：透過 useImage 走 expo-image 內建 SafeDownsampleStrategy
+ * ≤ 100 MB 的一般圖／論壇長截圖保持 100% 原圖解析度不降質；
+ * 僅在原圖超過 Android Canvas 100 MB 上限時自動等比降採樣，避免繪製閃退
+ */
+const AndroidGalleryExpoImage = ({ source, onLoad, style, imagePlaceholder, trueWhite }) => {
+    const loadedImage = useImage(source, {
+        onError: () => {},
+    });
+
+    useEffect(() => {
+        if (loadedImage?.width && loadedImage?.height) {
+            onLoad(loadedImage.width, loadedImage.height);
+        }
+    }, [loadedImage, onLoad]);
+
+    return (
+        <Image
+            source={loadedImage}
+            style={[style, {backgroundColor: trueWhite}]}
+            contentFit="contain"
+            placeholder={imagePlaceholder}
+            placeholderContentFit="contain"
+            cachePolicy="memory-disk"
+            allowDownscaling={false}
+        />
+    );
+};
+
+/**
  * GalleryPreview 自訂圖片元件：expo-image + blurhash 模糊加載
  * 需回傳真實寬高給庫，才能正確計算縮放邊界
  * 白底：透明 PNG / logo 在黑色查看器背景上才看得清
  * allowDownscaling=false：庫用 transform scale 放大，若依容器縮小解碼，超寬圖會糊
  */
 const GalleryExpoImage = ({ source, onLoad, style, imagePlaceholder, trueWhite }) => {
+    if (Platform.OS === 'android') {
+        return (
+            <AndroidGalleryExpoImage
+                source={source}
+                onLoad={onLoad}
+                style={style}
+                imagePlaceholder={imagePlaceholder}
+                trueWhite={trueWhite}
+            />
+        );
+    }
+
     return (
         <Image
             source={source}
