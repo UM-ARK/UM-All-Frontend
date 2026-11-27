@@ -387,12 +387,18 @@ const BusRouteMap = ({
         disabled,
         featuresScreen,
         floatingShadow,
+        isLight,
         pressOverlay,
         secondThemeColor,
         successForeground,
         tonal,
         white,
     } = theme;
+    // 深色樓宇只當背景脈絡：填色略抬離底色、描邊壓淡，避免搶過線路／站點。
+    const buildingFill = isLight ? featuresScreen.divider : disabled;
+    const buildingStroke = isLight ? pressOverlay : black.third;
+    const buildingStrokeOpacity = isLight ? 1 : 0.22;
+    const westBuildingFill = isLight ? tonal.primary15 : disabled;
     const styles = useMemo(() => StyleSheet.create({
         container: {
             alignSelf: 'center',
@@ -593,26 +599,8 @@ const BusRouteMap = ({
                         strokeLinecap="round"
                         strokeWidth="1.5"
                     />
-                    <Path
-                        d="M325 19 V8 M321 12 L325 8 L329 12"
-                        fill="none"
-                        stroke={black.third}
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="1.4"
-                    />
-                    {/* 巴士圖示與「往橫琴口岸」同一行 */}
-                    <G
-                        fill="none"
-                        stroke={black.third}
-                        strokeWidth="1.4"
-                        strokeLinecap="round"
-                        strokeLinejoin="round">
-                        <Rect x="248" y="6" width="14" height="13" rx="2.5" />
-                        <Path d="M248.5 12 H261.5 M251.5 19 V21 M259.5 19 V21" />
-                    </G>
-                    <SvgText x="316" y="17" fill={black.third} fontSize="10" textAnchor="end">
-                        {translate('往橫琴口岸')}
+                    <SvgText x="332" y="17" fill={black.third} fontSize="10" textAnchor="end">
+                        {translate('橫琴口岸')}
                     </SvgText>
                 </G>
                 <G transform={`translate(${routeX(0)} 0) scale(${horizontalScale} 1)`}>
@@ -665,7 +653,7 @@ const BusRouteMap = ({
                         <Circle cx="82" cy="572" r="3.5" />
                     </G>
                 </G>
-                <Rect x={libraryX - 25} y="282" width="50" height="32" rx="5" fill={featuresScreen.divider} stroke={pressOverlay} />
+                <Rect x={libraryX - 25} y="282" width="50" height="32" rx="5" fill={buildingFill} stroke={buildingStroke} strokeOpacity={buildingStrokeOpacity} />
                 <G fill="none" stroke={black.third} strokeWidth="1.3" opacity={0.45}>
                     <Rect x={stadiumX - 18} y="30" width="36" height="58" rx="18" ry="18" />
                     <Rect x={stadiumX - 11} y="40" width="22" height="38" rx="1.5" />
@@ -678,7 +666,7 @@ const BusRouteMap = ({
                     const blockWidth = width * horizontalScale;
                     const left = centerX - blockWidth / 2;
                     return (
-                        <G key={code} fill={featuresScreen.divider} stroke={pressOverlay}>
+                        <G key={code} fill={buildingFill} stroke={buildingStroke} strokeOpacity={buildingStrokeOpacity}>
                             {outline ? (
                                 <Path d={outline} transform={`translate(${left} ${y}) scale(${blockWidth / 100} ${height / 100})`} fillRule="evenodd" strokeWidth="1.8" strokeLinejoin="round" />
                             ) : (
@@ -704,8 +692,9 @@ const BusRouteMap = ({
                             <Path
                                 d={outline}
                                 transform={`translate(${left} ${y}) scale(${blockWidth / 100} ${height / 100})`}
-                                fill={tonal.primary15}
-                                stroke={pressOverlay}
+                                fill={westBuildingFill}
+                                stroke={buildingStroke}
+                                strokeOpacity={buildingStrokeOpacity}
                                 strokeWidth="1.8"
                                 strokeLinejoin="round"
                             />
@@ -735,7 +724,7 @@ const BusRouteMap = ({
                     );
                 })}
                 <G transform={`translate(${southCollegeX} 0)`}>
-                    <Path d="M-18 542 H9 V549 H18 V584 H-18 V575 H-12 V556 H-18 Z" fill={tonal.primary15} stroke={pressOverlay} />
+                    <Path d="M-18 542 H9 V549 H18 V584 H-18 V575 H-12 V556 H-18 Z" fill={westBuildingFill} stroke={buildingStroke} strokeOpacity={buildingStrokeOpacity} />
                     <SvgText x="0" y="567" fill={black.third} opacity={0.75} fontSize="10" fontWeight="600" textAnchor="middle">
                         S9 SPC
                     </SvgText>
