@@ -5,10 +5,11 @@ import { View } from 'react-native';
 import { scale, verticalScale } from 'react-native-size-matters';
 import Text from '../../../components/AppText';
 import ScalePressable from '../../../components/ScalePressable';
-import SegmentedTabControl from '../../../components/SegmentedTabControl';
 import { useTheme, uiStyle } from '../../../components/ThemeContext';
 import { trigger } from '../../../utils/trigger';
 import PhosphorFeatureIcon from '../../TabbarPages/info/home/search/components/PhosphorFeatureIcon';
+
+export { default as SettingSegmentControl } from './SettingSegmentControl';
 
 /**
  * 同一分區內多個設置項的容器：單一圓角卡片；項間分隔與功能頁卡片標題底線相同（bg_color、verticalScale(2)）
@@ -86,25 +87,6 @@ export const SettingSection = ({ title, icon }) => {
         </View>
     );
 };
-
-export const SettingSegmentControl = ({
-    options,
-    selectedIndex,
-    onChange,
-    optionWidth = 54,
-}) => (
-    <SegmentedTabControl
-        options={options}
-        selectedIndex={selectedIndex}
-        onChange={index => {
-            trigger('selection');
-            onChange(index);
-        }}
-        compact
-        compactItemWidth={scale(optionWidth)}
-        inset
-    />
-);
 
 /**
  * 基礎設置項目元件

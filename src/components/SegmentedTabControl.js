@@ -12,6 +12,7 @@ const TRACK_PADDING = scale(3.5);
 const ITEM_HEIGHT = moderateScale(30, 0.1);
 const COMPACT_TRACK_PADDING = scale(3);
 const COMPACT_ITEM_WIDTH = scale(60);
+const COMPACT_FIT_PADDING_H = scale(10);
 const SMALL_TRACK_PADDING = scale(2.5);
 const SMALL_ITEM_HEIGHT = moderateScale(20, 0.1);
 
@@ -38,6 +39,7 @@ export default function SegmentedTabControl({
     onChange,
     compact = false,
     compactItemWidth = COMPACT_ITEM_WIDTH,
+    fitContent = false,
     raisedTrack = false,
     inset = false,
     fullWidth = false,
@@ -49,6 +51,7 @@ export default function SegmentedTabControl({
     const { isLight, white, black, featuresScreen, viewShadow, settingSegment } = theme;
     const reducedMotion = useAppReducedMotion();
     const [trackWidth, setTrackWidth] = useState(0);
+    const [segmentWidths, setSegmentWidths] = useState([]);
 
     const optionCount = options.length;
     if (!optionCount) {
@@ -59,31 +62,54 @@ export default function SegmentedTabControl({
     const Track = showGlass ? GlassView : View;
     const trackPadding = small ? SMALL_TRACK_PADDING : compact ? COMPACT_TRACK_PADDING : TRACK_PADDING;
     const selectionColor = inset || !isLight ? settingSegment.selection : featuresScreen.divider;
-    const isFixedCompact = compact && !fullWidth && !small;
+    const isFitContentCompact = compact && fitContent && !fullWidth && !small;
+    const isFixedCompact = compact && !fullWidth && !small && !fitContent;
     const segmentWidth = isFixedCompact
         ? compactItemWidth
-        : Math.max(0, (trackWidth - trackPadding * 2) / optionCount);
+        : isFitContentCompact
+            ? 0
+            : Math.max(0, (trackWidth - trackPadding * 2) / optionCount);
+    const fitThumbWidth = isFitContentCompact
+        ? (segmentWidths[selectedIndex] || 0)
+        : 0;
+    const fitThumbOffset = isFitContentCompact
+        ? segmentWidths.slice(0, selectedIndex).reduce((sum, width) => sum + (width || 0), 0)
+        : 0;
     // 滑塊與標籤淡入淡出共用分頁進度。
-    const animatedPosition = reducedMotion || optionCount === 1 ? null : position;
-    const thumbTranslateX = animatedPosition?.interpolate({
-        inputRange: [0, optionCount - 1],
-        outputRange: [0, (optionCount - 1) * segmentWidth],
-        extrapolate: 'clamp',
-    }) ?? selectedIndex * segmentWidth;
+    const animatedPosition = reducedMotion || optionCount === 1 || isFitContentCompact
+        ? null
+        : position;
+    const thumbTranslateX = isFitContentCompact
+        ? fitThumbOffset
+        : animatedPosition?.interpolate({
+            inputRange: [0, optionCount - 1],
+            outputRange: [0, (optionCount - 1) * segmentWidth],
+            extrapolate: 'clamp',
+        }) ?? selectedIndex * segmentWidth;
+    const thumbWidth = isFitContentCompact ? fitThumbWidth : segmentWidth;
     const SegmentButton = small ? ScalePressable : Pressable;
     const buttonStyle = [
         styles.button,
         small
             ? styles.smallButton
             : compact
-                ? [styles.compactButton, isFixedCompact ? { width: segmentWidth } : styles.fullWidthButton]
+                ? [
+                    styles.compactButton,
+                    isFitContentCompact
+                        ? styles.fitContentButton
+                        : isFixedCompact
+                            ? { width: segmentWidth }
+                            : styles.fullWidthButton,
+                ]
                 : styles.regularButton,
     ];
 
     return (
         <Track
             {...(showGlass && glassInteractive ? { isInteractive: true } : {})}
-            onLayout={isFixedCompact ? undefined : event => setTrackWidth(event.nativeEvent.layout.width)}
+            onLayout={isFixedCompact || isFitContentCompact
+                ? undefined
+                : event => setTrackWidth(event.nativeEvent.layout.width)}
             style={[
                 styles.track,
                 small ? styles.smallTrack : compact ? styles.compactTrack : styles.regularTrack,
@@ -93,7 +119,7 @@ export default function SegmentedTabControl({
                 !showGlass && !inset && (isLight || raisedTrack) && viewShadow,
                 raisedTrack && styles.raisedTrack,
             ]}>
-            {segmentWidth > 0 ? (
+            {thumbWidth > 0 ? (
                 <Animated.View
                     pointerEvents="none"
                     style={[
@@ -102,7 +128,7 @@ export default function SegmentedTabControl({
                             top: trackPadding,
                             bottom: trackPadding,
                             left: trackPadding,
-                            width: segmentWidth,
+                            width: thumbWidth,
                             backgroundColor: selectionColor,
                             transform: [{ translateX: thumbTranslateX }],
                         },
@@ -116,7 +142,12 @@ export default function SegmentedTabControl({
                     outputRange: [0, 1, 0],
                     extrapolate: 'clamp',
                 });
-                const labelStyle = [styles.label, compact && styles.compactLabel, small && styles.smallLabel];
+                const labelStyle = [
+                    styles.label,
+                    compact && styles.compactLabel,
+                    small && styles.smallLabel,
+                    isFitContentCompact && styles.fitContentLabel,
+                ];
 
                 return (
                     <SegmentButton
@@ -125,6 +156,21 @@ export default function SegmentedTabControl({
                         accessibilityState={{ selected }}
                         accessibilityLabel={label}
                         onPress={() => onChange(index)}
+                        onLayout={isFitContentCompact
+                            ? event => {
+                                const width = event.nativeEvent.layout.width;
+                                setSegmentWidths(prev => {
+                                    if (prev.length === optionCount && prev[index] === width) {
+                                        return prev;
+                                    }
+                                    const next = prev.length === optionCount
+                                        ? prev.slice()
+                                        : Array(optionCount).fill(0);
+                                    next[index] = width;
+                                    return next;
+                                });
+                            }
+                            : undefined}
                         style={small ? buttonStyle : ({ pressed }) => [buttonStyle, pressed && styles.buttonPressed]}>
                         <View style={styles.labelRow}>
                             {selectedOpacity ? (
@@ -212,6 +258,9 @@ const styles = StyleSheet.create({
     compactButton: {
         height: moderateScale(28, 0.1),
     },
+    fitContentButton: {
+        paddingHorizontal: COMPACT_FIT_PADDING_H,
+    },
     smallButton: {
         flex: 1,
         height: SMALL_ITEM_HEIGHT,
@@ -237,6 +286,9 @@ const styles = StyleSheet.create({
         flexShrink: 1,
         fontSize: moderateScale(12.5, 0.25),
         fontWeight: '500',
+    },
+    fitContentLabel: {
+        flexShrink: 0,
     },
     compactLabel: {
         fontSize: moderateScale(11.5, 0.25),
