@@ -466,16 +466,15 @@ function FeatureListPage({ navigation }) {
                         reducedMotion={reducedMotion}
                         style={{
                             width: '100%',
-                            opacity: isInFrequent ? 0.52 : 1,
+                            opacity: isInFrequent ? 0.72 : 1,
                         }}>
                         <TouchableScale
                             accessibilityRole="button"
                             accessibilityLabel={
                                 isInFrequent
-                                    ? item.fn_name
+                                    ? `${t('移除常用服務', { ns: 'features' })} ${item.fn_name}`
                                     : `${t('添加到常用服務', { ns: 'features' })} ${item.fn_name}`
                             }
-                            disabled={isInFrequent}
                             style={{
                                 width: '100%',
                                 justifyContent: 'flex-start',
@@ -483,7 +482,11 @@ function FeatureListPage({ navigation }) {
                                 paddingTop: verticalScale(2),
                             }}
                             activeOpacity={0.7}
-                            onPress={() => handleAddFrequent(item)}>
+                            onPress={() =>
+                                isInFrequent
+                                    ? handleRemoveFrequent(item)
+                                    : handleAddFrequent(item)
+                            }>
                             <View
                                 style={{
                                     width: scale(30),
@@ -495,13 +498,20 @@ function FeatureListPage({ navigation }) {
                                 <FeatureIcon
                                     item={item}
                                     size={scale(26)}
-                                    muted={isInFrequent}
                                     showBackground={false}
                                 />
                                 <FeatureCornerBadge
-                                    variant={isInFrequent ? 'added' : 'add'}
-                                    accessibilityLabel={t('添加到常用服務', { ns: 'features' })}
-                                    onPress={isInFrequent ? undefined : () => handleAddFrequent(item)}
+                                    variant={isInFrequent ? 'remove' : 'add'}
+                                    accessibilityLabel={
+                                        isInFrequent
+                                            ? t('移除常用服務', { ns: 'features' })
+                                            : t('添加到常用服務', { ns: 'features' })
+                                    }
+                                    onPress={() =>
+                                        isInFrequent
+                                            ? handleRemoveFrequent(item)
+                                            : handleAddFrequent(item)
+                                    }
                                 />
                             </View>
                             <Text
@@ -511,7 +521,7 @@ function FeatureListPage({ navigation }) {
                                     fontSize: fontSize,
                                     lineHeight: featureLabelLineHeight,
                                     height: featureLabelHeight,
-                                    color: isInFrequent ? black.third : black.second,
+                                    color: black.second,
                                     textAlign: 'center',
                                     marginTop: verticalScale(6),
                                 }}>
@@ -582,6 +592,7 @@ function FeatureListPage({ navigation }) {
             handleAddFrequent,
             handleFeatureLongPress,
             handleFeaturePress,
+            handleRemoveFrequent,
             isEditingFrequent,
             isTc,
             matchedFeatures,
