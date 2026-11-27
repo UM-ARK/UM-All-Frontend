@@ -22,6 +22,7 @@ import Toast from 'react-native-simple-toast';
 import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 import BusArrivalPanel, {
     BUS_PANEL_EXPANDED,
+    getBusPanelBottomInset,
     getBusPanelCollapsedHeight,
 } from './bus/BusArrivalPanel';
 import BusEtaStatsSheet from './bus/BusEtaStatsSheet';
@@ -177,13 +178,13 @@ const BusScreen = ({navigation}) => {
     const controllerRef = useRef(null);
     const requestInFlightRef = useRef(false);
     const snapshotRef = useRef(null);
-    const panelBottomInset = insets.bottom;
+    const panelBottomInset = getBusPanelBottomInset(insets.bottom);
     const collapsedPanelReservedHeight = getBusPanelCollapsedHeight(
         snapshot?.vehicles?.length > 0,
         Boolean(getBusStop(selectedStop)),
     ) + panelBottomInset;
     const panelReservedHeight = (panelExpanded
-        ? BUS_PANEL_EXPANDED
+        ? BUS_PANEL_EXPANDED + panelBottomInset
         : collapsedPanelReservedHeight);
     // 透明標題欄時用 padding 把內容頂在標題下方，恢復「一進來完整環線」取景；
     // 不再用負 margin 把地圖拉回狀態欄底下。
