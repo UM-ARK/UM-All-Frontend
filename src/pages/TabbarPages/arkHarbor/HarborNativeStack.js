@@ -91,6 +91,9 @@ export const createHarborNativeStack = HomeComponent => {
                     headerBlurEffect: isLiquidGlassSupported
                         ? null
                         : 'systemThinMaterial',
+                    scrollEdgeEffects: isLiquidGlassSupported
+                        ? { top: 'soft' }
+                        : undefined,
                     headerStyle: {
                         backgroundColor: isLiquidGlassSupported
                             ? 'transparent'

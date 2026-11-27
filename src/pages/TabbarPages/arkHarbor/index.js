@@ -40,6 +40,7 @@ import TopScrollEdgeBackdrop, {
     SCROLL_EDGE_FADE_HEIGHT,
 } from '../../../components/TopScrollEdgeBackdrop';
 import { uiStyle, useTheme } from '../../../components/ThemeContext';
+import { GlassView, isLiquidGlassSupported } from '../../../utils/glassEffect';
 import { useHarborSession } from '../../../contexts/HarborSessionContext';
 import { logToFirebase } from '../../../utils/firebaseAnalytics';
 import { useWindowSizeClass } from '../../../utils/windowSizeClass';
@@ -70,7 +71,7 @@ const VIEW_CONFIG = {
 // 對齊服務頁頂部液態玻璃膠囊高度。往下瀏覽時搜尋列收進工具列；
 // 往回滑時用較長距離展開，不必回到列表頂部。
 const STICKY_TOOLBAR_HEIGHT = verticalScale(38);
-const SEARCH_BAR_ROW_HEIGHT = SEARCH_FIELD_MIN_HEIGHT + verticalScale(8);
+const SEARCH_BAR_ROW_HEIGHT = SEARCH_FIELD_MIN_HEIGHT;
 const SEARCH_BAR_SETTLE_MS = 180;
 const SEARCH_BAR_EASE_OUT = Easing.bezier(0.23, 1, 0.32, 1);
 const Drawer = createDrawerNavigator();
@@ -174,15 +175,18 @@ const HarborStickyToolbar = ({
     );
 
     if (useNativeHeader) {
+        const useLiquidGlassSearch = isLiquidGlassSupported;
         return (
             <View pointerEvents="box-none" style={styles.stickyHeader}>
-                <TopScrollEdgeBackdrop
-                    headerHeight={toolbarHeight + SEARCH_BAR_ROW_HEIGHT}
-                    fadeHeight={SCROLL_EDGE_FADE_HEIGHT}
-                    scrollY={scrollY}
-                    backgroundColor={backgroundColor}
-                    zIndex={1}
-                />
+                {useLiquidGlassSearch ? null : (
+                    <TopScrollEdgeBackdrop
+                        headerHeight={toolbarHeight + SEARCH_BAR_ROW_HEIGHT}
+                        fadeHeight={SCROLL_EDGE_FADE_HEIGHT}
+                        scrollY={scrollY}
+                        backgroundColor={backgroundColor}
+                        zIndex={1}
+                    />
+                )}
                 <View
                     pointerEvents="box-none"
                     style={[
@@ -190,39 +194,79 @@ const HarborStickyToolbar = ({
                         isCompact && styles.compactSearchBarRow,
                         { marginTop: toolbarHeight },
                     ]}>
-                    <ScalePressable
-                        accessibilityRole="button"
-                        accessibilityLabel={t('搜尋 Harbor')}
-                        onPress={() => {
-                            trigger();
-                            onSearchPress();
-                        }}
-                        style={[
-                            searchFieldStyles.field,
-                            {
-                                backgroundColor: isCompact
-                                    ? theme.harborSearch.background
-                                    : theme.white,
-                                borderColor: theme.themeColorUltraLight,
-                                borderWidth: isCompact ? 0 : StyleSheet.hairlineWidth,
-                            },
-                        ]}>
-                        <PhosphorFeatureIcon
-                            name="search"
-                            size={SEARCH_FIELD_ICON_SIZE}
-                            color={searchBarForeground}
-                            weight="regular"
-                        />
-                        <Text
-                            numberOfLines={1}
-                            maxFontSizeMultiplier={SEARCH_FIELD_MAX_FONT_SIZE_MULTIPLIER}
+                    {useLiquidGlassSearch ? (
+                        <ScalePressable
+                            accessibilityRole="button"
+                            accessibilityLabel={t('搜尋 Harbor')}
+                            onPress={() => {
+                                trigger();
+                                onSearchPress();
+                            }}
+                            style={styles.liquidGlassSearchPressable}>
+                            <GlassView
+                                isInteractive
+                                style={[
+                                    searchFieldStyles.field,
+                                    styles.liquidGlassSearchField,
+                                ]}>
+                                <PhosphorFeatureIcon
+                                    name="search"
+                                    size={SEARCH_FIELD_ICON_SIZE}
+                                    color={searchBarForeground}
+                                    weight="regular"
+                                />
+                                <Text
+                                    numberOfLines={1}
+                                    maxFontSizeMultiplier={
+                                        SEARCH_FIELD_MAX_FONT_SIZE_MULTIPLIER
+                                    }
+                                    style={[
+                                        searchFieldStyles.text,
+                                        { color: searchBarForeground },
+                                    ]}>
+                                    {t('搜尋 Harbor')}
+                                </Text>
+                            </GlassView>
+                        </ScalePressable>
+                    ) : (
+                        <ScalePressable
+                            accessibilityRole="button"
+                            accessibilityLabel={t('搜尋 Harbor')}
+                            onPress={() => {
+                                trigger();
+                                onSearchPress();
+                            }}
                             style={[
-                                searchFieldStyles.text,
-                                { color: searchBarForeground },
+                                searchFieldStyles.field,
+                                {
+                                    backgroundColor: isCompact
+                                        ? theme.harborSearch.background
+                                        : theme.white,
+                                    borderColor: theme.themeColorUltraLight,
+                                    borderWidth: isCompact
+                                        ? 0
+                                        : StyleSheet.hairlineWidth,
+                                },
                             ]}>
-                            {t('搜尋 Harbor')}
-                        </Text>
-                    </ScalePressable>
+                            <PhosphorFeatureIcon
+                                name="search"
+                                size={SEARCH_FIELD_ICON_SIZE}
+                                color={searchBarForeground}
+                                weight="regular"
+                            />
+                            <Text
+                                numberOfLines={1}
+                                maxFontSizeMultiplier={
+                                    SEARCH_FIELD_MAX_FONT_SIZE_MULTIPLIER
+                                }
+                                style={[
+                                    searchFieldStyles.text,
+                                    { color: searchBarForeground },
+                                ]}>
+                                {t('搜尋 Harbor')}
+                            </Text>
+                        </ScalePressable>
+                    )}
                 </View>
             </View>
         );
@@ -408,6 +452,7 @@ const HarborFeedPane = ({
     onCapabilities,
     isTopicPressAllowed,
     contentContainerStyle,
+    scrollIndicatorInsets,
     refreshProgressViewOffset,
     onTopicPress,
     isActive,
@@ -445,6 +490,7 @@ const HarborFeedPane = ({
                 onCapabilities={onCapabilities}
                 isTopicPressAllowed={isTopicPressAllowed}
                 contentContainerStyle={contentContainerStyle}
+                scrollIndicatorInsets={scrollIndicatorInsets}
                 refreshProgressViewOffset={refreshProgressViewOffset}
                 onTopicPress={onTopicPress}
                 onScroll={handleScroll}
@@ -465,6 +511,8 @@ const ForumPage = ({ navigation }) => {
     const { theme } = useTheme();
     const { isCompact, isExpanded } = useWindowSizeClass();
     const useNativeHeader = Platform.OS === 'ios' && !isExpanded;
+    const useNativeLiquidGlassHeader =
+        useNativeHeader && isLiquidGlassSupported;
     const nativeHeaderHeight = useContext(HeaderHeightContext) ?? 0;
     const insets = useSafeAreaInsets();
     const backgroundColor = isCompact ? theme.harbor_bg_color : theme.bg_color;
@@ -856,6 +904,13 @@ const ForumPage = ({ navigation }) => {
         }),
         [stickyHeaderHeight],
     );
+    const scrollIndicatorInsets = useMemo(
+        () =>
+            useNativeLiquidGlassHeader
+                ? { top: stickyHeaderHeight }
+                : undefined,
+        [stickyHeaderHeight, useNativeLiquidGlassHeader],
+    );
     const refreshProgressViewOffset = stickyHeaderHeight + verticalScale(8);
 
     const handleToolbarLayout = useCallback(event => {
@@ -1121,6 +1176,7 @@ const ForumPage = ({ navigation }) => {
                                     onCapabilities={handleCapabilities}
                                     isTopicPressAllowed={isTopicPressAllowed}
                                     contentContainerStyle={contentContainerStyle}
+                                    scrollIndicatorInsets={scrollIndicatorInsets}
                                     refreshProgressViewOffset={
                                         refreshProgressViewOffset
                                     }
@@ -1284,6 +1340,14 @@ const styles = StyleSheet.create({
         height: SEARCH_BAR_ROW_HEIGHT,
         justifyContent: 'center',
         paddingHorizontal: scale(6),
+    },
+    liquidGlassSearchPressable: {
+        borderRadius: SEARCH_FIELD_MIN_HEIGHT / 2,
+    },
+    liquidGlassSearchField: {
+        borderRadius: SEARCH_FIELD_MIN_HEIGHT / 2,
+        paddingHorizontal: 14,
+        overflow: 'hidden',
     },
     chatUnreadBadge: {
         position: 'absolute',
