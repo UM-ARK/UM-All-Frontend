@@ -8,15 +8,19 @@ import {
 } from 'react-native';
 
 import Text from '../../../components/AppText';
+import NativeHeaderSegmentControl from '../../../components/NativeHeaderSegmentControl';
 import ScalePressable from '../../../components/ScalePressable';
-import SegmentedTabControl, { SEGMENTED_TAB_CONTROL_HEIGHT } from '../../../components/SegmentedTabControl';
+import { SEGMENTED_TAB_CONTROL_HEIGHT } from '../../../components/SegmentedTabControl';
 import SegmentedTopTabBar, {
     SEGMENTED_TOP_TAB_BAR_HEIGHT,
 } from '../../../components/SegmentedTopTabBar';
 import TopScrollEdgeBackdrop, {
     SCROLL_EDGE_FADE_HEIGHT,
 } from '../../../components/TopScrollEdgeBackdrop';
-import { SEARCH_FIELD_MIN_HEIGHT } from '../../../components/searchFieldStyles';
+import {
+    SEARCH_FIELD_MIN_HEIGHT,
+    TOP_SEGMENT_SEARCH_GAP,
+} from '../../../components/searchFieldStyles';
 import { useTheme, uiStyle } from '../../../components/ThemeContext';
 import { isLiquidGlassSupported } from '../../../utils/glassEffect';
 import { useHarborSession } from '../../../contexts/HarborSessionContext';
@@ -61,7 +65,6 @@ import WikiHome from '../arkwiki';
 import { FlatGrid } from 'react-native-super-grid';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { HeaderHeightContext } from '@react-navigation/elements';
-import SegmentedControl from '@expo/ui/community/segmented-control';
 import * as Clipboard from 'expo-clipboard';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import { scale, verticalScale } from 'react-native-size-matters';
@@ -170,7 +173,7 @@ function FeatureListPage({ navigation }) {
     } = useFeaturesChrome();
     const scrollY = useRef(new RNAnimated.Value(0)).current;
     const [searchHeaderHeight, setSearchHeaderHeight] = useState(
-        SEARCH_FIELD_MIN_HEIGHT + 2 + verticalScale(10),
+        SEARCH_FIELD_MIN_HEIGHT + 2 + TOP_SEGMENT_SEARCH_GAP,
     );
     const totalSearchHeaderHeight = topChromeHeight + searchHeaderHeight;
     const handleSearchChromeScroll = useCallback(event => {
@@ -990,33 +993,15 @@ const FeaturesNativeSegmentTitle = ({
     values,
     options,
     selectedIndex,
-    isLight,
     onSelect,
-}) => {
-    if (isLiquidGlassSupported) {
-        return (
-            <View style={featuresNativeHeaderStyles.segmentInner}>
-                <SegmentedControl
-                    values={values}
-                    selectedIndex={selectedIndex}
-                    onChange={event =>
-                        onSelect(event.nativeEvent.selectedSegmentIndex)
-                    }
-                    appearance={isLight ? 'light' : 'dark'}
-                    style={featuresNativeHeaderStyles.segmentControl}
-                />
-            </View>
-        );
-    }
-
-    return (
-        <SegmentedTabControl
-            options={options}
-            selectedIndex={selectedIndex}
-            onChange={onSelect}
-        />
-    );
-};
+}) => (
+    <NativeHeaderSegmentControl
+        values={values}
+        options={options}
+        selectedIndex={selectedIndex}
+        onChange={onSelect}
+    />
+);
 
 const FeaturesNativeEditButton = ({
     isEditingFrequent,
@@ -1131,7 +1116,6 @@ export default function Index() {
                     values={segmentValues}
                     options={segmentOptions}
                     selectedIndex={activeTabIndex}
-                    isLight={theme.isLight}
                     onSelect={handleSelectNativeSegment}
                 />
             ),
@@ -1302,15 +1286,6 @@ export default function Index() {
 }
 
 const featuresNativeHeaderStyles = StyleSheet.create({
-    segmentInner: {
-        width: scale(172),
-        maxWidth: '100%',
-        justifyContent: 'center',
-    },
-    segmentControl: {
-        width: '100%',
-        height: scale(32),
-    },
     editButton: {
         width: scale(32),
         height: scale(32),

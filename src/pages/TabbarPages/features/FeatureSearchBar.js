@@ -7,14 +7,14 @@ import { useTranslation } from 'react-i18next';
 import Text from '../../../components/AppText';
 import TextInput from '../../../components/AppTextInput';
 import ScalePressable from '../../../components/ScalePressable';
+import SearchFieldContainer from '../../../components/SearchFieldContainer';
 import searchFieldStyles, {
     SEARCH_FIELD_CLEAR_ICON_SIZE,
     SEARCH_FIELD_ICON_SIZE,
     SEARCH_FIELD_MAX_FONT_SIZE_MULTIPLIER,
-    SEARCH_FIELD_MIN_HEIGHT,
+    TOP_SEGMENT_SEARCH_GAP,
 } from '../../../components/searchFieldStyles';
 import { useTheme, uiStyle } from '../../../components/ThemeContext';
-import { GlassView } from '../../../utils/glassEffect';
 import { logToFirebase } from '../../../utils/firebaseAnalytics';
 import { trigger } from '../../../utils/trigger';
 import { WIDE_CONTENT_MAX_WIDTH } from '../../../utils/windowSizeClass';
@@ -33,25 +33,19 @@ export default function FeatureSearchBar({
     const { t } = useTranslation(['features', 'common', 'home']);
     const [isFocused, setIsFocused] = useState(false);
     const searchLabel = t('搜尋服務');
-    const FieldContainer = liquidGlass ? GlassView : View;
 
     return (
         <View style={styles.root}>
-            <FieldContainer
-                {...(liquidGlass ? { isInteractive: true } : {})}
-                style={[
-                    searchFieldStyles.field,
-                    liquidGlass
-                        ? styles.liquidGlassField
-                        : [
-                            searchFieldStyles.borderedField,
-                            {
-                                backgroundColor: featuresScreen.searchBg,
-                                borderColor: isFocused
-                                    ? themeColor
-                                    : featuresScreen.searchBg,
-                            },
-                        ],
+            <SearchFieldContainer
+                liquidGlass={liquidGlass}
+                fieldStyle={[
+                    searchFieldStyles.borderedField,
+                    {
+                        backgroundColor: featuresScreen.searchBg,
+                        borderColor: isFocused
+                            ? themeColor
+                            : featuresScreen.searchBg,
+                    },
                 ]}>
                 <Ionicons name="search" size={SEARCH_FIELD_ICON_SIZE} color={isFocused ? themeColor : black.third} />
                 <TextInput
@@ -91,7 +85,7 @@ export default function FeatureSearchBar({
                         <Ionicons name="close-circle" size={SEARCH_FIELD_CLEAR_ICON_SIZE} color={black.third} />
                     </ScalePressable>
                 ) : null}
-            </FieldContainer>
+            </SearchFieldContainer>
             {hasQuery ? (
                 <View style={styles.statusRow}>
                     <Text
@@ -121,13 +115,8 @@ const styles = StyleSheet.create({
         width: '100%',
         maxWidth: WIDE_CONTENT_MAX_WIDTH,
         alignSelf: 'center',
-        marginTop: verticalScale(10),
+        marginTop: TOP_SEGMENT_SEARCH_GAP,
         paddingHorizontal: scale(12),
-    },
-    liquidGlassField: {
-        borderRadius: SEARCH_FIELD_MIN_HEIGHT / 2,
-        paddingHorizontal: 14,
-        overflow: 'hidden',
     },
     statusRow: {
         flexDirection: 'row',
