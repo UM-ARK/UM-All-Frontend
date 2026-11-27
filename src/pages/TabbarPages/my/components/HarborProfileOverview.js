@@ -16,7 +16,7 @@ import HarborStatsCard from './HarborStatsCard';
 import {myCardStyles} from './myCardStyles';
 
 const QUICK_ACTION_ROUTES = {
-    messages: navigation => navigation.navigate('HarborInbox'),
+    notifications: navigation => navigation.navigate('HarborInbox'),
     bookmarks: (navigation, t) =>
         navigation.navigate('HarborActivity', {
             kind: 'bookmarks',

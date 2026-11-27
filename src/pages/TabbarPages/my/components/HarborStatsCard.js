@@ -13,7 +13,8 @@ import {myCardStyles} from './myCardStyles';
 
 const HarborStatsCard = ({title, items}) => {
     const {theme} = useTheme();
-    const {t} = useTranslation('my');
+    const {t, i18n} = useTranslation('my');
+    const isEnglish = i18n.language === 'en';
 
     if (!items?.length) {
         return null;
@@ -29,6 +30,13 @@ const HarborStatsCard = ({title, items}) => {
             {title ? <HarborSectionHeader title={title} /> : null}
             <View style={styles.statsRow}>
                 {items.map(item => {
+                    const itemStyle = [
+                        styles.item,
+                        myCardStyles.column,
+                        isEnglish &&
+                            (item.key === 'likesReceived' || item.key === 'topicsViewed') &&
+                            styles.widerColumn,
+                    ];
                     const content = (
                         <>
                             <Text
@@ -39,8 +47,10 @@ const HarborStatsCard = ({title, items}) => {
                                 {item.value}
                             </Text>
                             <Text
+                                numberOfLines={1}
                                 style={[
                                     styles.label,
+                                    isEnglish && myCardStyles.englishLabel,
                                     {color: theme.black.third},
                                 ]}>
                                 {t(item.label)}
@@ -59,16 +69,13 @@ const HarborStatsCard = ({title, items}) => {
                                     trigger();
                                     item.onPress();
                                 }}
-                                style={[
-                                    styles.item,
-                                    myCardStyles.column,
-                                ]}>
+                                style={itemStyle}>
                                 {content}
                             </ScalePressable>
                         );
                     }
                     return (
-                        <View key={item.key} style={[styles.item, myCardStyles.column]}>
+                        <View key={item.key} style={itemStyle}>
                             {content}
                         </View>
                     );
@@ -95,6 +102,9 @@ const styles = StyleSheet.create({
         borderRadius: scale(8),
         paddingVertical: verticalScale(4),
     },
+    widerColumn: {
+        flex: 1.15,
+    },
     value: {
         ...uiStyle.defaultText,
         fontSize: scale(18),
@@ -103,6 +113,8 @@ const styles = StyleSheet.create({
     },
     label: {
         ...uiStyle.defaultText,
+        alignSelf: 'stretch',
+        paddingHorizontal: scale(2),
         fontSize: scale(11),
         lineHeight: verticalScale(14),
         textAlign: 'center',

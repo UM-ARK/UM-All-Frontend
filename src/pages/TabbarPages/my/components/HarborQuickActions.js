@@ -12,9 +12,9 @@ import {myCardStyles} from './myCardStyles';
 
 const QUICK_ACTIONS = [
     {
-        key: 'messages',
-        label: '消息',
-        phosphorIcon: 'envelope',
+        key: 'notifications',
+        label: '通知',
+        phosphorIcon: 'bell',
         iconTone: 'blue',
     },
     {
@@ -53,7 +53,7 @@ const HarborQuickActions = ({unreadCount = 0, onSelect}) => {
                 <Pressable
                     key={item.key}
                     accessibilityRole="button"
-                    accessibilityLabel={t(item.label)}
+                    accessibilityLabel={t(item.label, {context: 'shortcut'})}
                     style={({pressed}) => [
                         styles.action,
                         myCardStyles.column,
@@ -71,7 +71,7 @@ const HarborQuickActions = ({unreadCount = 0, onSelect}) => {
                                 theme.featureIconTones[item.iconTone].foreground
                             }
                         />
-                        {item.key === 'messages' && unreadCount > 0 ? (
+                        {item.key === 'notifications' && unreadCount > 0 ? (
                             <View
                                 style={[
                                     styles.badge,
@@ -90,12 +90,12 @@ const HarborQuickActions = ({unreadCount = 0, onSelect}) => {
                         ) : null}
                     </View>
                     <Text
-                        numberOfLines={2}
+                        numberOfLines={1}
                         style={[
                             styles.label,
                             {color: theme.black.second},
                         ]}>
-                        {t(item.label)}
+                        {t(item.label, {context: 'shortcut'})}
                     </Text>
                 </Pressable>
             ))}
@@ -106,10 +106,9 @@ const HarborQuickActions = ({unreadCount = 0, onSelect}) => {
 const styles = StyleSheet.create({
     container: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
+        columnGap: scale(8),
     },
     action: {
-        minWidth: 0,
         minHeight: 44,
         alignItems: 'center',
         gap: verticalScale(4),
@@ -123,7 +122,10 @@ const styles = StyleSheet.create({
     },
     label: {
         ...uiStyle.defaultText,
+        alignSelf: 'stretch',
+        paddingHorizontal: scale(2),
         fontSize: scale(11),
+        lineHeight: verticalScale(14),
         fontWeight: '600',
         textAlign: 'center',
     },

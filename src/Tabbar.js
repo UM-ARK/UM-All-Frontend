@@ -81,7 +81,7 @@ const FeaturesNativeStack = createTabNativeStack({
 const MyNativeStack = createTabNativeStack({
     homeRouteName: 'MyHome',
     HomeComponent: MyScreen,
-    getHomeOptions: () => ({ headerShown: true }),
+    getHomeOptions: () => ({ headerShown: false }),
 });
 
 const iosTabScreen = {

@@ -15,6 +15,69 @@ import {formatJoinedAt} from '../utils/harborUi';
 
 const AVATAR_SOURCE = require('../../../../static/img/logo_round.png');
 
+const HarborProfileActions = ({
+    onChatPress,
+    chatUnreadCount = 0,
+    onSettingsPress,
+}) => {
+    const {theme} = useTheme();
+    const {t} = useTranslation(['my', 'common']);
+
+    return (
+        <View style={styles.actions}>
+            {onChatPress ? (
+                <ScalePressable
+                    accessibilityRole="button"
+                    accessibilityLabel={t('私訊')}
+                    style={styles.actionButton}
+                    onPress={() => {
+                        trigger();
+                        onChatPress();
+                    }}>
+                    <MaterialCommunityIcons
+                        name="chat-outline"
+                        size={scale(18)}
+                        color={theme.black.second}
+                    />
+                    {chatUnreadCount > 0 ? (
+                        <View
+                            style={[
+                                styles.chatUnreadBadge,
+                                {backgroundColor: theme.unreadForeground},
+                            ]}>
+                            <Text
+                                style={[
+                                    styles.chatUnreadText,
+                                    {color: theme.white},
+                                ]}>
+                                {chatUnreadCount > 99
+                                    ? '99+'
+                                    : chatUnreadCount}
+                            </Text>
+                        </View>
+                    ) : null}
+                </ScalePressable>
+            ) : null}
+            {onSettingsPress ? (
+                <ScalePressable
+                    accessibilityRole="button"
+                    accessibilityLabel={t('設置', {ns: 'common'})}
+                    style={styles.actionButton}
+                    onPress={() => {
+                        trigger();
+                        onSettingsPress();
+                    }}>
+                    <Ionicons
+                        name="settings-outline"
+                        size={scale(18)}
+                        color={theme.black.second}
+                    />
+                </ScalePressable>
+            ) : null}
+        </View>
+    );
+};
+
 const HarborProfileCard = ({
     user,
     onProfilePress,
@@ -101,57 +164,11 @@ const HarborProfileCard = ({
             </ScalePressable>
 
             {onChatPress || onSettingsPress ? (
-                <View style={styles.actions}>
-                    {onChatPress ? (
-                        <ScalePressable
-                            accessibilityRole="button"
-                            accessibilityLabel={t('Chat')}
-                            style={styles.actionButton}
-                            onPress={() => {
-                                trigger();
-                                onChatPress();
-                            }}>
-                            <MaterialCommunityIcons
-                                name="chat-outline"
-                                size={scale(18)}
-                                color={theme.black.second}
-                            />
-                            {chatUnreadCount > 0 ? (
-                                <View
-                                    style={[
-                                        styles.chatUnreadBadge,
-                                        {backgroundColor: theme.unreadForeground},
-                                    ]}>
-                                    <Text
-                                        style={[
-                                            styles.chatUnreadText,
-                                            {color: theme.white},
-                                        ]}>
-                                        {chatUnreadCount > 99
-                                            ? '99+'
-                                            : chatUnreadCount}
-                                    </Text>
-                                </View>
-                            ) : null}
-                        </ScalePressable>
-                    ) : null}
-                    {onSettingsPress ? (
-                        <ScalePressable
-                            accessibilityRole="button"
-                            accessibilityLabel={t('設置')}
-                            style={styles.actionButton}
-                            onPress={() => {
-                                trigger();
-                                onSettingsPress();
-                            }}>
-                            <Ionicons
-                                name="settings-outline"
-                                size={scale(18)}
-                                color={theme.black.second}
-                            />
-                        </ScalePressable>
-                    ) : null}
-                </View>
+                <HarborProfileActions
+                    onChatPress={onChatPress}
+                    chatUnreadCount={chatUnreadCount}
+                    onSettingsPress={onSettingsPress}
+                />
             ) : null}
         </View>
     );
