@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Animated, Pressable, StyleSheet, View } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { Animated, Easing, Pressable, StyleSheet, View } from 'react-native';
 import { moderateScale, scale } from 'react-native-size-matters';
 
 import Text from './AppText';
@@ -15,6 +15,8 @@ const COMPACT_ITEM_WIDTH = scale(60);
 const COMPACT_FIT_PADDING_H = scale(10);
 const SMALL_TRACK_PADDING = scale(2.5);
 const SMALL_ITEM_HEIGHT = moderateScale(20, 0.1);
+const TAP_ANIM_DURATION_MS = 220;
+const TAP_ANIM_EASING = Easing.bezier(0.23, 1, 0.32, 1);
 
 export const SEGMENTED_TAB_CONTROL_HEIGHT = ITEM_HEIGHT + TRACK_PADDING * 2;
 export const SMALL_SEGMENTED_TAB_CONTROL_HEIGHT = SMALL_ITEM_HEIGHT + SMALL_TRACK_PADDING * 2;
@@ -52,8 +54,37 @@ export default function SegmentedTabControl({
     const reducedMotion = useAppReducedMotion();
     const [trackWidth, setTrackWidth] = useState(0);
     const [segmentWidths, setSegmentWidths] = useState([]);
-
     const optionCount = options.length;
+    const isFitContentCompact = compact && fitContent && !fullWidth && !small;
+    // 點選切換進度：沒有外部分頁 position 時，由元件自己驅動滑塊／標籤動畫。
+    const tapProgress = useRef(new Animated.Value(selectedIndex)).current;
+
+    useEffect(() => {
+        if (optionCount <= 1 || reducedMotion) {
+            tapProgress.setValue(selectedIndex);
+            return;
+        }
+        // 跟手滑頁由外層 position 負責；此處只同步內部進度，避免之後改為點選模式時錯位。
+        if (position && !isFitContentCompact) {
+            tapProgress.setValue(selectedIndex);
+            return;
+        }
+        Animated.timing(tapProgress, {
+            toValue: selectedIndex,
+            duration: TAP_ANIM_DURATION_MS,
+            easing: TAP_ANIM_EASING,
+            // fitContent 要同時動畫寬度，不能走 native driver。
+            useNativeDriver: !isFitContentCompact,
+        }).start();
+    }, [
+        isFitContentCompact,
+        optionCount,
+        position,
+        reducedMotion,
+        selectedIndex,
+        tapProgress,
+    ]);
+
     if (!optionCount) {
         return null;
     }
@@ -62,7 +93,6 @@ export default function SegmentedTabControl({
     const Track = showGlass ? GlassView : View;
     const trackPadding = small ? SMALL_TRACK_PADDING : compact ? COMPACT_TRACK_PADDING : TRACK_PADDING;
     const selectionColor = inset || !isLight ? settingSegment.selection : featuresScreen.divider;
-    const isFitContentCompact = compact && fitContent && !fullWidth && !small;
     const isFixedCompact = compact && !fullWidth && !small && !fitContent;
     const segmentWidth = isFixedCompact
         ? compactItemWidth
@@ -75,18 +105,48 @@ export default function SegmentedTabControl({
     const fitThumbOffset = isFitContentCompact
         ? segmentWidths.slice(0, selectedIndex).reduce((sum, width) => sum + (width || 0), 0)
         : 0;
-    // 滑塊與標籤淡入淡出共用分頁進度。
-    const animatedPosition = reducedMotion || optionCount === 1 || isFitContentCompact
-        ? null
-        : position;
+    const fitWidthsReady = isFitContentCompact
+        && segmentWidths.length === optionCount
+        && segmentWidths.every(width => width > 0);
+    const fitInputRange = fitWidthsReady
+        ? segmentWidths.map((_, index) => index)
+        : null;
+    const fitOffsetRange = fitWidthsReady
+        ? segmentWidths.reduce((offsets, width, index) => {
+            offsets.push(index === 0 ? 0 : offsets[index - 1] + segmentWidths[index - 1]);
+            return offsets;
+        }, [])
+        : null;
+    // 優先跟手滑頁；否則用內部點選進度（含 fitContent）。
+    const useSwipePosition = Boolean(position) && !reducedMotion && optionCount > 1 && !isFitContentCompact;
+    const animatedPosition = useSwipePosition
+        ? position
+        : (!reducedMotion && optionCount > 1 ? tapProgress : null);
     const thumbTranslateX = isFitContentCompact
-        ? fitThumbOffset
+        ? (animatedPosition && fitWidthsReady
+            ? animatedPosition.interpolate({
+                inputRange: fitInputRange,
+                outputRange: fitOffsetRange,
+                extrapolate: 'clamp',
+            })
+            : fitThumbOffset)
         : animatedPosition?.interpolate({
             inputRange: [0, optionCount - 1],
             outputRange: [0, (optionCount - 1) * segmentWidth],
             extrapolate: 'clamp',
         }) ?? selectedIndex * segmentWidth;
-    const thumbWidth = isFitContentCompact ? fitThumbWidth : segmentWidth;
+    const thumbWidth = isFitContentCompact
+        ? (animatedPosition && fitWidthsReady
+            ? animatedPosition.interpolate({
+                inputRange: fitInputRange,
+                outputRange: segmentWidths,
+                extrapolate: 'clamp',
+            })
+            : fitThumbWidth)
+        : segmentWidth;
+    const showThumb = isFitContentCompact
+        ? (fitWidthsReady || fitThumbWidth > 0)
+        : segmentWidth > 0;
     const SegmentButton = small ? ScalePressable : Pressable;
     const buttonStyle = [
         styles.button,
@@ -119,7 +179,7 @@ export default function SegmentedTabControl({
                 !showGlass && !inset && (isLight || raisedTrack) && viewShadow,
                 raisedTrack && styles.raisedTrack,
             ]}>
-            {thumbWidth > 0 ? (
+            {showThumb ? (
                 <Animated.View
                     pointerEvents="none"
                     style={[
