@@ -24,8 +24,8 @@ const getLabelStyle = (isSelected, accent, inactive) => ({
  * @param {(index: number) => void} onChange - 變更回調
  * @param {object} [style] - 外層容器額外樣式
  * @param {string} [trackBackgroundColor] - 軌道底色（預設 theme.bg_color）
- * @param {string} [accentColor] - 選中態強調色（預設 theme.themeColor）
- * @param {string} [selectedBackgroundColor] - 選中項目底色（預設 accentColor 的 tonal 色）
+ * @param {string} [accentColor] - 選中文字色（淺色模式預設 theme.themeColor，深色模式預設 theme.black.main）
+ * @param {string} [selectedBackgroundColor] - 選中項目底色（淺色模式預設 accentColor 的 tonal 色，深色模式預設 theme.settingSegment.selection）
  * @param {string} [inactiveLabelColor] - 未選中文字色（預設 theme.black.third）
  * @param {number} [fontSize] - 標籤字級（預設 scale(11)）
  * @param {boolean} [wrap] - 是否允許換行（多選項窄螢幕）
@@ -47,10 +47,10 @@ const SegmentControl = ({
     fill,
 }) => {
     const { theme } = useTheme();
-    const { themeColor, bg_color, black, unread } = theme;
-    const accent = accentColor ?? themeColor;
+    const { isLight, themeColor, bg_color, black, unread, settingSegment } = theme;
+    const accent = accentColor ?? (isLight ? themeColor : black.main);
     const track = trackBackgroundColor ?? bg_color;
-    const selectedBackground = selectedBackgroundColor ?? `${accent}15`;
+    const selectedBackground = selectedBackgroundColor ?? (isLight ? `${accent}15` : settingSegment.selection);
     const inactive = inactiveLabelColor ?? black.third;
     const labelSize = fontSize ?? scale(11);
 

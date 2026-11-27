@@ -102,7 +102,7 @@ export const SettingSegmentControl = ({
         }}
         compact
         compactItemWidth={scale(optionWidth)}
-        raisedTrack
+        inset
     />
 );
 

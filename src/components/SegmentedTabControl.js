@@ -3,6 +3,7 @@ import { Animated, Pressable, StyleSheet, View } from 'react-native';
 import { moderateScale, scale } from 'react-native-size-matters';
 
 import Text from './AppText';
+import ScalePressable from './ScalePressable';
 import { useTheme, uiStyle } from './ThemeContext';
 import { useAppReducedMotion } from '../contexts/ReducedMotionContext';
 import { GlassView, isLiquidGlassSupported } from '../utils/glassEffect';
@@ -11,9 +12,11 @@ const TRACK_PADDING = scale(3.5);
 const ITEM_HEIGHT = moderateScale(30, 0.1);
 const COMPACT_TRACK_PADDING = scale(3);
 const COMPACT_ITEM_WIDTH = scale(60);
-const TrackContainer = isLiquidGlassSupported ? GlassView : View;
+const SMALL_TRACK_PADDING = scale(2.5);
+const SMALL_ITEM_HEIGHT = moderateScale(20, 0.1);
 
 export const SEGMENTED_TAB_CONTROL_HEIGHT = ITEM_HEIGHT + TRACK_PADDING * 2;
+export const SMALL_SEGMENTED_TAB_CONTROL_HEIGHT = SMALL_ITEM_HEIGHT + SMALL_TRACK_PADDING * 2;
 
 export default function SegmentedTabControl({
     options,
@@ -23,10 +26,14 @@ export default function SegmentedTabControl({
     compact = false,
     compactItemWidth = COMPACT_ITEM_WIDTH,
     raisedTrack = false,
+    inset = false,
     fullWidth = false,
+    small = false,
+    glass = true,
+    glassInteractive = false,
 }) {
     const { theme } = useTheme();
-    const { isLight, white, black, featuresScreen, pressOverlay, viewShadow } = theme;
+    const { isLight, white, black, featuresScreen, viewShadow, settingSegment } = theme;
     const reducedMotion = useAppReducedMotion();
     const [trackWidth, setTrackWidth] = useState(0);
 
@@ -35,10 +42,11 @@ export default function SegmentedTabControl({
         return null;
     }
 
-    const Track = raisedTrack ? View : TrackContainer;
-    const showTrackSurface = raisedTrack || !isLiquidGlassSupported;
-    const trackPadding = compact ? COMPACT_TRACK_PADDING : TRACK_PADDING;
-    const isFixedCompact = compact && !fullWidth;
+    const showGlass = glass && isLiquidGlassSupported && !inset && !raisedTrack;
+    const Track = showGlass ? GlassView : View;
+    const trackPadding = small ? SMALL_TRACK_PADDING : compact ? COMPACT_TRACK_PADDING : TRACK_PADDING;
+    const selectionColor = inset || !isLight ? settingSegment.selection : featuresScreen.divider;
+    const isFixedCompact = compact && !fullWidth && !small;
     const segmentWidth = isFixedCompact
         ? compactItemWidth
         : Math.max(0, (trackWidth - trackPadding * 2) / optionCount);
@@ -49,16 +57,27 @@ export default function SegmentedTabControl({
         outputRange: [0, (optionCount - 1) * segmentWidth],
         extrapolate: 'clamp',
     }) ?? selectedIndex * segmentWidth;
+    const SegmentButton = small ? ScalePressable : Pressable;
+    const buttonStyle = [
+        styles.button,
+        small
+            ? styles.smallButton
+            : compact
+                ? [styles.compactButton, isFixedCompact ? { width: segmentWidth } : styles.fullWidthButton]
+                : styles.regularButton,
+    ];
 
     return (
         <Track
+            {...(showGlass && glassInteractive ? { isInteractive: true } : {})}
             onLayout={isFixedCompact ? undefined : event => setTrackWidth(event.nativeEvent.layout.width)}
             style={[
                 styles.track,
-                compact ? styles.compactTrack : styles.regularTrack,
+                small ? styles.smallTrack : compact ? styles.compactTrack : styles.regularTrack,
+                { padding: trackPadding },
                 fullWidth && styles.fullWidthTrack,
-                showTrackSurface && { backgroundColor: white },
-                showTrackSurface && (isLight || raisedTrack) && viewShadow,
+                !showGlass && { backgroundColor: inset ? settingSegment.track : white },
+                !showGlass && !inset && (isLight || raisedTrack) && viewShadow,
                 raisedTrack && styles.raisedTrack,
             ]}>
             {segmentWidth > 0 ? (
@@ -71,7 +90,7 @@ export default function SegmentedTabControl({
                             bottom: trackPadding,
                             left: trackPadding,
                             width: segmentWidth,
-                            backgroundColor: isLight ? featuresScreen.divider : pressOverlay,
+                            backgroundColor: selectionColor,
                             transform: [{ translateX: thumbTranslateX }],
                         },
                     ]}
@@ -81,27 +100,20 @@ export default function SegmentedTabControl({
                 const selected = index === selectedIndex;
 
                 return (
-                    <Pressable
+                    <SegmentButton
                         key={key}
                         accessibilityRole="tab"
                         accessibilityState={{ selected }}
                         accessibilityLabel={label}
                         onPress={() => onChange(index)}
-                        style={({ pressed }) => [
-                            styles.button,
-                            isFixedCompact
-                                ? [styles.compactButton, { width: segmentWidth }]
-                                : compact
-                                    ? [styles.compactButton, styles.fullWidthButton]
-                                    : styles.regularButton,
-                            pressed && styles.buttonPressed,
-                        ]}>
+                        style={small ? buttonStyle : ({ pressed }) => [buttonStyle, pressed && styles.buttonPressed]}>
                         <View style={styles.labelRow}>
                             <Text
                                 numberOfLines={1}
                                 style={[
                                     styles.label,
                                     compact && styles.compactLabel,
+                                    small && styles.smallLabel,
                                     selected && styles.selectedLabel,
                                     { color: selected ? black.main : black.third },
                                 ]}>
@@ -109,7 +121,7 @@ export default function SegmentedTabControl({
                             </Text>
                             {badge}
                         </View>
-                    </Pressable>
+                    </SegmentButton>
                 );
             })}
         </Track>
@@ -129,12 +141,14 @@ const styles = StyleSheet.create({
     regularTrack: {
         width: scale(172),
         maxWidth: '100%',
-        padding: TRACK_PADDING,
     },
     compactTrack: {
         flexShrink: 0,
         marginHorizontal: scale(2),
-        padding: COMPACT_TRACK_PADDING,
+    },
+    smallTrack: {
+        width: scale(128),
+        maxWidth: '100%',
     },
     fullWidthTrack: {
         width: '100%',
@@ -162,6 +176,10 @@ const styles = StyleSheet.create({
     compactButton: {
         height: moderateScale(28, 0.1),
     },
+    smallButton: {
+        flex: 1,
+        height: SMALL_ITEM_HEIGHT,
+    },
     labelRow: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -177,6 +195,10 @@ const styles = StyleSheet.create({
     },
     compactLabel: {
         fontSize: moderateScale(11.5, 0.25),
+    },
+    smallLabel: {
+        fontSize: moderateScale(10, 0.25),
+        fontWeight: '400',
     },
     selectedLabel: {
         fontWeight: '600',

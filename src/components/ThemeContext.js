@@ -152,6 +152,11 @@ const getColorDiy = (isLight) => {
             card_color: whiteColor,
         },
 
+        settingSegment: {
+            track: isLight ? '#E8E8ED' : '#1C1C1E',
+            selection: isLight ? trueWhite : '#707076',
+        },
+
         // 組織活動編輯
         eventColor: {
             imageCard: isLight ? '#f0f0f0' : 'gray',
