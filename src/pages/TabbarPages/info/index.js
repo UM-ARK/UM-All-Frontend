@@ -14,20 +14,26 @@ import {
     View,
 } from 'react-native';
 import PagerView from 'react-native-pager-view';
-import { HeaderHeightContext } from '@react-navigation/elements';
+import { getDefaultHeaderHeight, HeaderHeightContext } from '@react-navigation/elements';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Reanimated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 import { scale, verticalScale } from 'react-native-size-matters';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useSafeAreaFrame, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
+import Text from '../../../components/AppText';
 import NativeHeaderSegmentControl from '../../../components/NativeHeaderSegmentControl';
 import ScrollToTopButton from '../../../components/ScrollToTopButton';
+import SearchFieldContainer from '../../../components/SearchFieldContainer';
 import SegmentedTabControl, {
     SEGMENTED_TAB_CONTROL_HEIGHT,
 } from '../../../components/SegmentedTabControl';
-import { SEARCH_FIELD_MIN_HEIGHT } from '../../../components/searchFieldStyles';
+import searchFieldStyles, {
+    SEARCH_FIELD_ICON_SIZE,
+    SEARCH_FIELD_MAX_FONT_SIZE_MULTIPLIER,
+    SEARCH_FIELD_MIN_HEIGHT,
+} from '../../../components/searchFieldStyles';
 import { useTheme } from '../../../components/ThemeContext';
 import { logToFirebase } from '../../../utils/firebaseAnalytics';
 import { isLiquidGlassSupported } from '../../../utils/glassEffect';
@@ -37,6 +43,7 @@ import { TOP_TAB_STRIP_MAX_WIDTH } from '../../../utils/windowSizeClass';
 import InfoSharedSearchBar from './components/InfoSharedSearchBar';
 import ClubPage from './ClubPage';
 import HomePage from './home/index';
+import PhosphorFeatureIcon from './home/search/components/PhosphorFeatureIcon';
 import UMEventPage from './UMEventPage';
 import NewsPage from './NewsPage';
 
@@ -44,8 +51,8 @@ const TAB_KEYS = ['club', 'home', 'event', 'news'];
 const INITIAL_TAB_INDEX = 1; // 預設進入「推薦」
 const AnimatedPagerView = Animated.createAnimatedComponent(PagerView);
 
-// 原生導覽列 + stacked 滿寬搜尋列首次量測前的高度估算
-const NATIVE_HEADER_FALLBACK_HEIGHT = 96;
+// 原生搜尋列尚未回報高度時，先在導覽列下預留 stacked 搜尋列空間。
+const NATIVE_STACKED_SEARCH_FALLBACK_HEIGHT = 60;
 const SEGMENT_BAR_PADDING_TOP = verticalScale(6);
 const DEFAULT_ANDROID_SEGMENT_BAR_HEIGHT =
     SEGMENTED_TAB_CONTROL_HEIGHT + SEGMENT_BAR_PADDING_TOP;
@@ -75,6 +82,7 @@ export default function NewsScreen() {
     const { t } = useTranslation(['common', 'club', 'features']);
     const navigation = useNavigation();
     const insets = useSafeAreaInsets();
+    const frame = useSafeAreaFrame();
 
     const useNativeHeader = Platform.OS === 'ios';
     const useNativeLiquidGlassHeader = useNativeHeader && isLiquidGlassSupported;
@@ -82,6 +90,7 @@ export default function NewsScreen() {
 
     const pagerRef = useRef(null);
     const nativeSearchBarRef = useRef(null);
+    const restoreNativeSearchQueryRef = useRef(false);
     const androidSearchBarRef = useRef(null);
     const homePageRef = useRef(null);
     const eventPageRef = useRef(null);
@@ -98,6 +107,7 @@ export default function NewsScreen() {
     const [pageIndex, setPageIndex] = useState(INITIAL_TAB_INDEX);
     const homeHeaderTint = useSharedValue(1);
     const [viewport, setViewport] = useState(null);
+    const [nativeHeaderMeasurements, setNativeHeaderMeasurements] = useState(null);
     const [androidChromeHeight, setAndroidChromeHeight] = useState(
         insets.top + DEFAULT_ANDROID_SEGMENT_BAR_HEIGHT + DEFAULT_ANDROID_SEARCH_BAR_HEIGHT,
     );
@@ -117,19 +127,46 @@ export default function NewsScreen() {
     const searchQueriesRef = useRef(searchQueries);
 
     const activeTabKey = TAB_KEYS[pageIndex] ?? 'home';
+    const showNativeHomeSearchButton = useNativeHeader && activeTabKey === 'home';
     const headerTransparent = useNativeLiquidGlassHeader || activeTabKey === 'home';
+    const nativeToolbarEstimate = getDefaultHeaderHeight(frame, false, insets.top);
+    // 切頁後原生高度可能仍是上一個分頁的值，依高度辨認導覽列是否含搜尋列。
+    const nativeHeaderKind = nativeHeaderHeight >= nativeToolbarEstimate + SEARCH_FIELD_MIN_HEIGHT / 2
+        ? 'stacked'
+        : 'toolbar';
+    const measurements = nativeHeaderMeasurements?.toolbarEstimate === nativeToolbarEstimate
+        ? nativeHeaderMeasurements
+        : null;
+    const nativeToolbarHeight = (nativeHeaderKind === 'toolbar' && nativeHeaderHeight)
+        || measurements?.toolbar || nativeToolbarEstimate;
+    const nativeStackedHeight = (nativeHeaderKind === 'stacked' && nativeHeaderHeight)
+        || measurements?.stacked || (nativeToolbarHeight + NATIVE_STACKED_SEARCH_FALLBACK_HEIGHT);
+
+    useLayoutEffect(() => {
+        if (!useNativeHeader || !nativeHeaderHeight) {
+            return;
+        }
+        setNativeHeaderMeasurements(previous => ({
+            ...(previous?.toolbarEstimate === nativeToolbarEstimate ? previous : null),
+            toolbarEstimate: nativeToolbarEstimate,
+            [nativeHeaderKind]: nativeHeaderHeight,
+        }));
+    }, [nativeHeaderHeight, nativeHeaderKind, nativeToolbarEstimate, useNativeHeader]);
+
     const homeSeaColor = theme.homeCoast.deep;
     const homeHeaderStyle = useAnimatedStyle(() => ({ opacity: homeHeaderTint.get() }));
 
     const renderHomeHeaderBackground = useCallback(() => (
-        <Reanimated.View pointerEvents="none" style={[StyleSheet.absoluteFill, homeHeaderStyle]}>
+        <Reanimated.View
+            pointerEvents="none"
+            style={[StyleSheet.absoluteFill, { height: nativeToolbarHeight }, homeHeaderStyle]}>
             <LinearGradient
                 colors={[homeSeaColor, homeSeaColor, `${homeSeaColor}00`]}
                 locations={[0, 0.64, 1]}
                 style={StyleSheet.absoluteFill}
             />
         </Reanimated.View>
-    ), [homeHeaderStyle, homeSeaColor]);
+    ), [homeHeaderStyle, homeSeaColor, nativeToolbarHeight]);
 
     const segmentOptions = useMemo(
         () => [
@@ -225,23 +262,19 @@ export default function NewsScreen() {
         }
     }, []);
 
-    const handleNativeSearchFocus = useCallback(() => {
-        if (activeTabKeyRef.current === 'home') {
-            nativeSearchBarRef.current?.cancelSearch();
-            trigger();
-            handleHomeSearchEntry();
-            return;
-        }
+    const handleSearchFocus = useCallback(() => {
         trigger();
+    }, []);
+
+    const handleNativeHomeSearchPress = useCallback(() => {
+        trigger();
+        handleHomeSearchEntry();
     }, [handleHomeSearchEntry]);
 
     const handleNativeSearchChangeText = useCallback(event => {
         const text = event?.nativeEvent?.text ?? '';
         const tabKey = activeTabKeyRef.current;
         if (tabKey === 'home') {
-            if (text) {
-                nativeSearchBarRef.current?.clearText();
-            }
             return;
         }
         updateTabQuery(tabKey, text);
@@ -271,20 +304,24 @@ export default function NewsScreen() {
         updateTabQuery(tabKey, '');
     }, [updateTabQuery]);
 
-    const handleAndroidSearchFocus = useCallback(() => {
-        trigger();
+    const attachNativeSearchBar = useCallback(searchBar => {
+        nativeSearchBarRef.current = searchBar;
+        if (searchBar && restoreNativeSearchQueryRef.current) {
+            restoreNativeSearchQueryRef.current = false;
+            searchBar.setText(searchQueriesRef.current[activeTabKeyRef.current] ?? '');
+        }
     }, []);
 
     const syncSearchBarForTab = useCallback(nextKey => {
         activeTabKeyRef.current = nextKey;
         if (useNativeHeader) {
+            const searchBar = nativeSearchBarRef.current;
+            restoreNativeSearchQueryRef.current = nextKey !== 'home' && !searchBar;
             if (nextKey === 'home') {
-                nativeSearchBarRef.current?.cancelSearch();
+                searchBar?.cancelSearch();
             } else {
-                nativeSearchBarRef.current?.blur();
-                nativeSearchBarRef.current?.setText(
-                    searchQueriesRef.current[nextKey] ?? '',
-                );
+                searchBar?.blur();
+                searchBar?.setText(searchQueriesRef.current[nextKey] ?? '');
             }
             return;
         }
@@ -331,8 +368,8 @@ export default function NewsScreen() {
             headerStyle: { backgroundColor: headerTransparent ? 'transparent' : bg_color },
             headerBackground: activeTabKey === 'home' ? renderHomeHeaderBackground : undefined,
             contentStyle: { backgroundColor: bg_color },
-            headerSearchBarOptions: {
-                ref: nativeSearchBarRef,
+            headerSearchBarOptions: activeTabKey === 'home' ? undefined : {
+                ref: attachNativeSearchBar,
                 placeholder: activeSearchPlaceholder,
                 hideWhenScrolling: false,
                 hideNavigationBar: false,
@@ -342,7 +379,7 @@ export default function NewsScreen() {
                 tintColor: themeColor,
                 textColor: black.main,
                 hintTextColor: black.third,
-                onFocus: handleNativeSearchFocus,
+                onFocus: handleSearchFocus,
                 onChangeText: handleNativeSearchChangeText,
                 onCancelButtonPress: handleNativeSearchCancel,
             },
@@ -350,12 +387,13 @@ export default function NewsScreen() {
     }, [
         activeSearchPlaceholder,
         activeTabKey,
+        attachNativeSearchBar,
         bg_color,
         black.main,
         black.third,
         handleNativeSearchCancel,
         handleNativeSearchChangeText,
-        handleNativeSearchFocus,
+        handleSearchFocus,
         headerTransparent,
         navigation,
         onSegmentPress,
@@ -404,11 +442,11 @@ export default function NewsScreen() {
         pagerRef.current?.setScrollEnabled(!isTouching);
     }, []);
 
-    const effectiveNativeHeaderHeight =
-        nativeHeaderHeight || (insets.top + NATIVE_HEADER_FALLBACK_HEIGHT);
-    const totalTopChromeHeight = useNativeHeader
-        ? effectiveNativeHeaderHeight
+    const homeTopChromeHeight = useNativeHeader
+        ? nativeToolbarHeight + SEARCH_FIELD_MIN_HEIGHT
         : androidChromeHeight;
+    const listTopChromeHeight = useNativeHeader ? nativeStackedHeight : androidChromeHeight;
+    const totalTopChromeHeight = activeTabKey === 'home' ? homeTopChromeHeight : listTopChromeHeight;
 
     const showSharedScrollTop = activeTabKey !== 'club';
 
@@ -439,7 +477,7 @@ export default function NewsScreen() {
                             mode={activeTabKey === 'home' ? 'navigate' : 'input'}
                             value={activeTabKey === 'home' ? '' : (searchQueries[activeTabKey] ?? '')}
                             onChangeText={handleAndroidSearchChangeText}
-                            onFocus={handleAndroidSearchFocus}
+                            onFocus={handleSearchFocus}
                             onCancel={handleAndroidSearchCancel}
                             onNavigatePress={handleHomeSearchEntry}
                             placeholder={activeSearchPlaceholder}
@@ -449,6 +487,32 @@ export default function NewsScreen() {
                     </View>
                 </View>
             )}
+
+            {showNativeHomeSearchButton ? (
+                <View
+                    pointerEvents="box-none"
+                    style={[styles.nativeHomeSearchRow, { top: nativeToolbarHeight }]}>
+                    <SearchFieldContainer
+                        liquidGlass={useNativeLiquidGlassHeader}
+                        accessibilityRole="button"
+                        accessibilityLabel={t('搜索', { ns: 'common' })}
+                        onPress={handleNativeHomeSearchPress}
+                        fieldStyle={{ backgroundColor: theme.white }}>
+                        <PhosphorFeatureIcon
+                            name="search"
+                            size={SEARCH_FIELD_ICON_SIZE}
+                            color={black.third}
+                            weight="regular"
+                        />
+                        <Text
+                            numberOfLines={1}
+                            maxFontSizeMultiplier={SEARCH_FIELD_MAX_FONT_SIZE_MULTIPLIER}
+                            style={[searchFieldStyles.text, { color: black.third }]}>
+                            {activeSearchPlaceholder}
+                        </Text>
+                    </SearchFieldContainer>
+                </View>
+            ) : null}
 
             <AnimatedPagerView
                 ref={pagerRef}
@@ -461,7 +525,7 @@ export default function NewsScreen() {
                 <View key="club" style={styles.page} collapsable={false}>
                     {mountedPages[0] ? (
                         <ClubPage
-                            topChromeHeight={totalTopChromeHeight}
+                            topChromeHeight={listTopChromeHeight}
                             useNativeLiquidGlassHeader={useNativeLiquidGlassHeader}
                             searchQuery={searchQueries.club}
                         />
@@ -472,7 +536,7 @@ export default function NewsScreen() {
                         <HomePage
                             ref={homePageRef}
                             navigation={navigation}
-                            topChromeHeight={totalTopChromeHeight}
+                            topChromeHeight={homeTopChromeHeight}
                             useNativeLiquidGlassHeader={useNativeLiquidGlassHeader}
                             isActive={activeTabKey === 'home'}
                             onCalendarTouchChange={handleCalendarTouchChange}
@@ -484,7 +548,7 @@ export default function NewsScreen() {
                     {mountedPages[2] ? (
                         <UMEventPage
                             ref={eventPageRef}
-                            topHeaderHeight={totalTopChromeHeight}
+                            topHeaderHeight={listTopChromeHeight}
                             useNativeLiquidGlassHeader={useNativeLiquidGlassHeader}
                             searchQuery={searchQueries.event}
                         />
@@ -494,7 +558,7 @@ export default function NewsScreen() {
                     {mountedPages[3] ? (
                         <NewsPage
                             ref={newsPageRef}
-                            topHeaderHeight={totalTopChromeHeight}
+                            topHeaderHeight={listTopChromeHeight}
                             useNativeLiquidGlassHeader={useNativeLiquidGlassHeader}
                             searchQuery={searchQueries.news}
                         />
@@ -535,6 +599,13 @@ const styles = StyleSheet.create({
     androidSegmentWrap: {
         width: '100%',
         paddingTop: SEGMENT_BAR_PADDING_TOP,
+    },
+    nativeHomeSearchRow: {
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        zIndex: 2,
+        paddingHorizontal: scale(12),
     },
     pager: {
         flex: 1,
