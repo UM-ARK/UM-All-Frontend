@@ -24,16 +24,15 @@ import { scale, verticalScale } from 'react-native-size-matters';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
-import SegmentedControl from '@expo/ui/community/segmented-control';
-
 import Text from '../../../components/AppText';
+import NativeHeaderSegmentControl from '../../../components/NativeHeaderSegmentControl';
 import ScalePressable from '../../../components/ScalePressable';
-import SegmentedTabControl from '../../../components/SegmentedTabControl';
+import SearchFieldContainer from '../../../components/SearchFieldContainer';
 import TopScrollEdgeBackdrop, {
     SCROLL_EDGE_FADE_HEIGHT,
 } from '../../../components/TopScrollEdgeBackdrop';
 import { uiStyle, useTheme } from '../../../components/ThemeContext';
-import { GlassView, isLiquidGlassSupported } from '../../../utils/glassEffect';
+import { isLiquidGlassSupported } from '../../../utils/glassEffect';
 import { useHarborSession } from '../../../contexts/HarborSessionContext';
 import { logToFirebase } from '../../../utils/firebaseAnalytics';
 import { useWindowSizeClass } from '../../../utils/windowSizeClass';
@@ -53,6 +52,7 @@ import searchFieldStyles, {
     SEARCH_FIELD_ICON_SIZE,
     SEARCH_FIELD_MAX_FONT_SIZE_MULTIPLIER,
     SEARCH_FIELD_MIN_HEIGHT,
+    TOP_SEGMENT_SEARCH_GAP,
 } from '../../../components/searchFieldStyles';
 
 const VIEW_CONFIG = {
@@ -62,80 +62,30 @@ const VIEW_CONFIG = {
 };
 // 對齊服務頁頂部液態玻璃膠囊高度；搜尋列固定顯示，不再隨滾動收合。
 const STICKY_TOOLBAR_HEIGHT = verticalScale(38);
-const SEARCH_BAR_ROW_HEIGHT = SEARCH_FIELD_MIN_HEIGHT;
-const NATIVE_SEGMENT_ITEM_WIDTH = scale(60);
+const SEARCH_BAR_ROW_HEIGHT = SEARCH_FIELD_MIN_HEIGHT + TOP_SEGMENT_SEARCH_GAP;
 const Drawer = createDrawerNavigator();
 const AnimatedPagerView = Animated.createAnimatedComponent(PagerView);
 
-/**
- * 論壇頂部分段：支援液態玻璃時用原生 SegmentedControl，
- * 否則回退到自訂 SegmentedTabControl（含 Android／Web／舊 iOS）。
- */
 const HarborFeedSegmentControl = ({
     options,
     selectedIndex,
     position,
     onChange,
 }) => {
-    const { theme } = useTheme();
-    const values = useMemo(
-        () => options.map(option => option.label),
+    const unreadBadge = useMemo(
+        () => options.find(option => option.key === 'unread')?.badge ?? null,
         [options],
     );
-    const unreadBadge = useMemo(() => {
-        if (!isLiquidGlassSupported) {
-            return null;
-        }
-        return options.find(option => option.key === 'unread')?.badge ?? null;
-    }, [options]);
-
-    if (isLiquidGlassSupported) {
-        return (
-            <View
-                style={[
-                    styles.nativeSegmentInner,
-                    {
-                        width: Math.max(
-                            options.length,
-                            2,
-                        ) * NATIVE_SEGMENT_ITEM_WIDTH,
-                    },
-                ]}>
-                <SegmentedControl
-                    values={values}
-                    selectedIndex={selectedIndex}
-                    onChange={event => {
-                        const index = event.nativeEvent.selectedSegmentIndex;
-                        if (
-                            typeof index !== 'number' ||
-                            index < 0 ||
-                            index >= options.length
-                        ) {
-                            return;
-                        }
-                        onChange(index);
-                    }}
-                    appearance={theme.isLight ? 'light' : 'dark'}
-                    style={styles.nativeSegmentControl}
-                />
-                {unreadBadge ? (
-                    <View
-                        pointerEvents="none"
-                        style={styles.nativeSegmentBadgeAnchor}>
-                        {unreadBadge}
-                    </View>
-                ) : null}
-            </View>
-        );
-    }
 
     return (
-        <SegmentedTabControl
+        <NativeHeaderSegmentControl
             options={options}
             selectedIndex={selectedIndex}
             position={position}
             onChange={onChange}
             compact
+            badge={unreadBadge}
+            badgeStyle={styles.nativeSegmentBadgeAnchor}
         />
     );
 };
@@ -169,46 +119,47 @@ const HarborStickyToolbar = ({
         status === 'signedOut' || status === 'expired';
     const searchBarForeground = isCompact ? theme.harborSearch.foreground : theme.black.third;
 
+    const renderSearchButton = (liquidGlass = false) => (
+        <SearchFieldContainer
+            liquidGlass={liquidGlass}
+            accessibilityRole="button"
+            accessibilityLabel={t('搜尋 Harbor')}
+            onPress={() => {
+                trigger();
+                onSearchPress();
+            }}
+            fieldStyle={{
+                backgroundColor: isCompact
+                    ? theme.harborSearch.background
+                    : theme.white,
+                borderColor: theme.themeColorUltraLight,
+                borderWidth: isCompact ? 0 : StyleSheet.hairlineWidth,
+            }}>
+            <PhosphorFeatureIcon
+                name="search"
+                size={SEARCH_FIELD_ICON_SIZE}
+                color={searchBarForeground}
+                weight="regular"
+            />
+            <Text
+                numberOfLines={1}
+                maxFontSizeMultiplier={SEARCH_FIELD_MAX_FONT_SIZE_MULTIPLIER}
+                style={[
+                    searchFieldStyles.text,
+                    { color: searchBarForeground },
+                ]}>
+                {t('搜尋 Harbor')}
+            </Text>
+        </SearchFieldContainer>
+    );
+
     const searchBarContent = (
         <View
             style={[
                 styles.searchBarRow,
                 isCompact && styles.compactSearchBarRow,
             ]}>
-            <ScalePressable
-                accessibilityRole="button"
-                accessibilityLabel={t('搜尋 Harbor')}
-                onPress={() => {
-                    trigger();
-                    onSearchPress();
-                }}
-                style={[
-                    searchFieldStyles.field,
-                    {
-                        backgroundColor: isCompact
-                            ? theme.harborSearch.background
-                            : theme.white,
-                        borderColor: theme.themeColorUltraLight,
-                        borderWidth: isCompact ? 0 : StyleSheet.hairlineWidth,
-                        ...theme.viewShadow,
-                    },
-                ]}>
-                <PhosphorFeatureIcon
-                    name="search"
-                    size={SEARCH_FIELD_ICON_SIZE}
-                    color={searchBarForeground}
-                    weight="regular"
-                />
-                <Text
-                    numberOfLines={1}
-                    maxFontSizeMultiplier={SEARCH_FIELD_MAX_FONT_SIZE_MULTIPLIER}
-                    style={[
-                        searchFieldStyles.text,
-                        { color: searchBarForeground },
-                    ]}>
-                    {t('搜尋 Harbor')}
-                </Text>
-            </ScalePressable>
+            {renderSearchButton(false)}
         </View>
     );
 
@@ -232,83 +183,7 @@ const HarborStickyToolbar = ({
                         isCompact && styles.compactSearchBarRow,
                         { marginTop: toolbarHeight },
                     ]}>
-                    {useLiquidGlassSearch ? (
-                        <ScalePressable
-                            accessibilityRole="button"
-                            accessibilityLabel={t('搜尋 Harbor')}
-                            onPress={() => {
-                                trigger();
-                                onSearchPress();
-                            }}
-                            style={[
-                                styles.liquidGlassSearchPressable,
-                                theme.viewShadow,
-                            ]}>
-                            <GlassView
-                                isInteractive
-                                style={[
-                                    searchFieldStyles.field,
-                                    styles.liquidGlassSearchField,
-                                ]}>
-                                <PhosphorFeatureIcon
-                                    name="search"
-                                    size={SEARCH_FIELD_ICON_SIZE}
-                                    color={searchBarForeground}
-                                    weight="regular"
-                                />
-                                <Text
-                                    numberOfLines={1}
-                                    maxFontSizeMultiplier={
-                                        SEARCH_FIELD_MAX_FONT_SIZE_MULTIPLIER
-                                    }
-                                    style={[
-                                        searchFieldStyles.text,
-                                        { color: searchBarForeground },
-                                    ]}>
-                                    {t('搜尋 Harbor')}
-                                </Text>
-                            </GlassView>
-                        </ScalePressable>
-                    ) : (
-                        <ScalePressable
-                            accessibilityRole="button"
-                            accessibilityLabel={t('搜尋 Harbor')}
-                            onPress={() => {
-                                trigger();
-                                onSearchPress();
-                            }}
-                            style={[
-                                searchFieldStyles.field,
-                                {
-                                    backgroundColor: isCompact
-                                        ? theme.harborSearch.background
-                                        : theme.white,
-                                    borderColor: theme.themeColorUltraLight,
-                                    borderWidth: isCompact
-                                        ? 0
-                                        : StyleSheet.hairlineWidth,
-                                    ...theme.viewShadow,
-                                },
-                            ]}>
-                            <PhosphorFeatureIcon
-                                name="search"
-                                size={SEARCH_FIELD_ICON_SIZE}
-                                color={searchBarForeground}
-                                weight="regular"
-                            />
-                            <Text
-                                numberOfLines={1}
-                                maxFontSizeMultiplier={
-                                    SEARCH_FIELD_MAX_FONT_SIZE_MULTIPLIER
-                                }
-                                style={[
-                                    searchFieldStyles.text,
-                                    { color: searchBarForeground },
-                                ]}>
-                                {t('搜尋 Harbor')}
-                            </Text>
-                        </ScalePressable>
-                    )}
+                    {renderSearchButton(useLiquidGlassSearch)}
                 </View>
             </View>
         );
@@ -1228,16 +1103,9 @@ const styles = StyleSheet.create({
     nativeStickySearchRow: {
         zIndex: 2,
         height: SEARCH_BAR_ROW_HEIGHT,
+        paddingTop: TOP_SEGMENT_SEARCH_GAP,
         justifyContent: 'center',
         paddingHorizontal: scale(6),
-    },
-    liquidGlassSearchPressable: {
-        borderRadius: SEARCH_FIELD_MIN_HEIGHT / 2,
-    },
-    liquidGlassSearchField: {
-        borderRadius: SEARCH_FIELD_MIN_HEIGHT / 2,
-        paddingHorizontal: 14,
-        overflow: 'hidden',
     },
     chatUnreadBadge: {
         position: 'absolute',
@@ -1285,23 +1153,14 @@ const styles = StyleSheet.create({
         height: scale(5),
         borderRadius: scale(2.5),
     },
-    nativeSegmentInner: {
-        maxWidth: '100%',
-        justifyContent: 'center',
-    },
-    nativeSegmentControl: {
-        width: '100%',
-        height: scale(32),
-    },
     nativeSegmentBadgeAnchor: {
-        position: 'absolute',
-        top: scale(2),
         right: scale(18),
     },
     searchBarRow: {
         // 與 nativeStickySearchRow／資訊頁一致，避免 Scroll Edge 遮罩蓋住實色搜尋列
         zIndex: 2,
         height: SEARCH_BAR_ROW_HEIGHT,
+        paddingTop: TOP_SEGMENT_SEARCH_GAP,
         justifyContent: 'center',
         paddingHorizontal: scale(6),
     },
