@@ -73,10 +73,6 @@ const MyScreen = ({ navigation }) => {
         navigation.navigate('SettingPage');
     }, [navigation]);
 
-    const handleChatPress = useCallback(() => {
-        navigation.navigate('HarborChatList');
-    }, [navigation]);
-
     // 漸變只改變頁面底色的透明度，避免混入黑色。
     const fadeStartColor = backgroundColor.length === 4
         ? `${backgroundColor}0`
@@ -285,7 +281,6 @@ const MyScreen = ({ navigation }) => {
                             chatUnreadCount={chatUnreadCount}
                             reviewCount={reviewCount}
                             navigation={navigation}
-                            onChatPress={handleChatPress}
                             onSettingsPress={handleSettingsPress}
                             teamSchedule={
                                 <TeamSchedulePreviewSection

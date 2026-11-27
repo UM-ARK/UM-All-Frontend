@@ -192,7 +192,7 @@ const TeamSchedulePreviewSection = forwardRef(
                         <PhosphorFeatureIcon
                             name="plus-circle"
                             size={scale(22)}
-                            color={theme.featureIconTones.green.foreground}
+                            color={theme.featureIconTones.orange.foreground}
                         />
                         <Text
                             numberOfLines={2}
@@ -211,7 +211,7 @@ const TeamSchedulePreviewSection = forwardRef(
                         <PhosphorFeatureIcon
                             name="user-plus"
                             size={scale(22)}
-                            color={theme.featureIconTones.green.foreground}
+                            color={theme.featureIconTones.orange.foreground}
                         />
                         <Text
                             numberOfLines={2}
@@ -274,7 +274,7 @@ const TeamSchedulePreviewSection = forwardRef(
                                     <PhosphorFeatureIcon
                                         name="users"
                                         size={scale(20)}
-                                        color={theme.featureIconTones.green.foreground}
+                                        color={theme.featureIconTones.blue.foreground}
                                     />
                                 </View>
                             }
