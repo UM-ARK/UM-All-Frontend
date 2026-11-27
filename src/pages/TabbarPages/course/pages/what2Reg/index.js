@@ -43,7 +43,10 @@ import useCourseSearch from './hooks/useCourseSearch';
 import useFirstLetterNav from './hooks/useFirstLetterNav';
 import FilterPanel from './components/FilterPanel';
 import SearchBarSection from './components/SearchBarSection';
-import { SEARCH_FIELD_MIN_HEIGHT } from '../../../../../components/searchFieldStyles';
+import {
+    SEARCH_FIELD_MIN_HEIGHT,
+    TOP_SEGMENT_SEARCH_GAP,
+} from '../../../../../components/searchFieldStyles';
 import FirstLetterNav from './components/FirstLetterNav';
 import { unitMap, depaMap, geClassMap } from './constants/maps';
 import { adpeMap, CMGEList, dayList, defaultFilterOptions, defaultTimeFilter, modeENStr } from './constants/options';
@@ -147,7 +150,7 @@ const What2Reg = ({ isSplitPane = false }) => {
     const scrollViewRef = useRef(null);
     const scrollY = useRef(new Animated.Value(0)).current;
     const rightScrollY = useRef(new Animated.Value(0)).current;
-    const [searchHeaderHeight, setSearchHeaderHeight] = useState(SEARCH_FIELD_MIN_HEIGHT + scale(5));
+    const [searchHeaderHeight, setSearchHeaderHeight] = useState(SEARCH_FIELD_MIN_HEIGHT + TOP_SEGMENT_SEARCH_GAP);
     const { topChromeHeight, useNativeLiquidGlassHeader } = useCourseChrome();
     const totalSearchHeaderHeight = topChromeHeight + searchHeaderHeight;
 

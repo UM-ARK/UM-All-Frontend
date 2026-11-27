@@ -10,7 +10,6 @@ import React, {
 import { Alert, Platform, StyleSheet, View } from 'react-native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { HeaderHeightContext } from '@react-navigation/elements';
-import SegmentedControl from '@expo/ui/community/segmented-control';
 import { DotsThree } from 'phosphor-react-native/src/icons/DotsThree';
 import { scale } from 'react-native-size-matters';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -22,8 +21,8 @@ import {
 import { Dialog } from '@rneui/themed';
 import { useTranslation } from 'react-i18next';
 
+import NativeHeaderSegmentControl from '../../../components/NativeHeaderSegmentControl';
 import ScalePressable from '../../../components/ScalePressable';
-import SegmentedTabControl from '../../../components/SegmentedTabControl';
 import { useTheme } from '../../../components/ThemeContext';
 import { isLiquidGlassSupported } from '../../../utils/glassEffect';
 import { trigger } from '../../../utils/trigger';
@@ -63,41 +62,23 @@ const CourseNativeSegmentTitle = ({
     values,
     options,
     selectedIndex,
-    isLight,
     conflictCount,
     planCount,
     onSelect,
-}) => {
-    if (isLiquidGlassSupported) {
-        return (
-            <View style={nativeHeaderStyles.segmentInner}>
-                <SegmentedControl
-                    values={values}
-                    selectedIndex={selectedIndex}
-                    onChange={event =>
-                        onSelect(event.nativeEvent.selectedSegmentIndex)
-                    }
-                    appearance={isLight ? 'light' : 'dark'}
-                    style={nativeHeaderStyles.segmentControl}
-                />
-                <View pointerEvents="none" style={nativeHeaderStyles.badgeAnchor}>
-                    <TimetableTabBadgeView
-                        conflictCount={conflictCount}
-                        planCount={planCount}
-                    />
-                </View>
-            </View>
-        );
-    }
-
-    return (
-        <SegmentedTabControl
-            options={options}
-            selectedIndex={selectedIndex}
-            onChange={onSelect}
-        />
-    );
-};
+}) => (
+    <NativeHeaderSegmentControl
+        values={values}
+        options={options}
+        selectedIndex={selectedIndex}
+        onChange={onSelect}
+        badge={(
+            <TimetableTabBadgeView
+                conflictCount={conflictCount}
+                planCount={planCount}
+            />
+        )}
+    />
+);
 
 const CourseNativeMoreButton = ({ color, label, onPress }) => (
     <ScalePressable
@@ -349,7 +330,6 @@ const CourseTabContent = () => {
                     values={segmentValues}
                     options={segmentOptions}
                     selectedIndex={activeSegmentIndex}
-                    isLight={theme.isLight}
                     conflictCount={conflictCount}
                     planCount={planCount}
                     onSelect={handleSelectNativeSegment}
@@ -538,20 +518,6 @@ const CourseTabContent = () => {
 };
 
 const nativeHeaderStyles = StyleSheet.create({
-    segmentInner: {
-        width: scale(180),
-        maxWidth: '100%',
-        justifyContent: 'center',
-    },
-    segmentControl: {
-        width: '100%',
-        height: scale(32),
-    },
-    badgeAnchor: {
-        position: 'absolute',
-        top: scale(2),
-        right: scale(18),
-    },
     iconButton: {
         width: scale(32),
         height: scale(32),
