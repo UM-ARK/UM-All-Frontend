@@ -34,7 +34,6 @@ import {
     resolveCustomFrequentFeatures,
     saveCustomFrequentFeatureKeys,
 } from '../../../utils/customFrequentFeatures';
-import { GlassView, isLiquidGlassSupported } from '../../../utils/glassEffect';
 import { SEGMENTED_TAB_CONTROL_HEIGHT } from '../../../components/SegmentedTabControl';
 import FrequentFeaturesGrid, {
     FeatureCornerBadge,
@@ -981,13 +980,10 @@ function FeatureListPage({ navigation }) {
 export default function Index() {
     const { theme } = useTheme();
     const {
-        isLight,
-        white,
         trueWhite,
         black,
         themeColor,
         featuresScreen,
-        viewShadow,
     } = theme;
     const { t } = useTranslation(['common', 'features']);
     const insets = useSafeAreaInsets();
@@ -1010,8 +1006,6 @@ export default function Index() {
         props => {
             const activeRouteName = props.state.routes[props.state.index]?.name;
             const showEditButton = activeRouteName === 'FeatureList';
-            const EditButtonSurface =
-                isLiquidGlassSupported && !isEditingFrequent ? GlassView : View;
 
             return (
                 <View
@@ -1051,22 +1045,19 @@ export default function Index() {
                                     }
                                     hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                                     onPress={handleToggleEditFrequent}>
-                                    <EditButtonSurface
+                                    <View
                                         style={[
                                             {
                                                 width: SEGMENTED_TAB_CONTROL_HEIGHT,
                                                 height: SEGMENTED_TAB_CONTROL_HEIGHT,
-                                                borderRadius: scale(999),
                                                 alignItems: 'center',
                                                 justifyContent: 'center',
+                                            },
+                                            isEditingFrequent && {
+                                                borderRadius: scale(999),
+                                                backgroundColor: themeColor,
                                                 overflow: 'hidden',
                                             },
-                                            isEditingFrequent
-                                                ? { backgroundColor: themeColor }
-                                                : !isLiquidGlassSupported && [
-                                                    { backgroundColor: white },
-                                                    isLight && viewShadow,
-                                                ],
                                         ]}>
                                         {isEditingFrequent ? (
                                             <Check
@@ -1081,7 +1072,7 @@ export default function Index() {
                                                 weight="duotone"
                                             />
                                         )}
-                                    </EditButtonSurface>
+                                    </View>
                                 </ScalePressable>
                             </View>
                         ) : null}
@@ -1095,12 +1086,9 @@ export default function Index() {
             handleTopBarLayout,
             insets.top,
             isEditingFrequent,
-            isLight,
             t,
             themeColor,
             trueWhite,
-            viewShadow,
-            white,
         ],
     );
 
