@@ -815,13 +815,13 @@ const EventPage = forwardRef((props, ref) => {
                     style={{ height: cardWidth + scale(5) }}
                 />
             </View>
-            {isLoading ? (
-                renderSkeletonPage()
-            ) : columnsData.some(col => col.length > 0) ? (
+            {columnsData.some(col => col.length > 0) ? (
                 <View>
                     {renderPage()}
                     {renderLoadMoreView()}
                 </View>
+            ) : isLoading ? (
+                renderSkeletonPage()
             ) : (
                 <Text style={{
                     ...uiStyle.defaultText,

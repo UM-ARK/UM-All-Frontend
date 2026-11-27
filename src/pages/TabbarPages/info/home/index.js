@@ -11,8 +11,10 @@ import {
     AppState,
     Keyboard,
     FlatList,
+    StyleSheet,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
+import Reanimated, { useAnimatedReaction, useAnimatedRef, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 
 // 本地工具
 import Text from '../../../../components/AppText';
@@ -107,6 +109,7 @@ const HomeScreen = forwardRef(function HomeScreen({
     useNativeLiquidGlassHeader = false,
     isActive = true,
     onCalendarTouchChange,
+    headerTint,
 }, ref) {
     const { theme } = useTheme();
     const { white, bg_color, black, themeColor, themeColorLight, themeColorUltraLight, viewShadow, TIME_TABLE_COLOR, homeCoast } = theme;
@@ -115,6 +118,27 @@ const HomeScreen = forwardRef(function HomeScreen({
     const isTc = i18n.language === 'tc';
     const featureFontSize = isTc ? verticalScale(8) : verticalScale(7);
     const [scrollY] = useState(() => new Animated.Value(0));
+    const coastScrollY = useSharedValue(0);
+    const deepSeaHeight = useSharedValue(0);
+    const estimatedDeepSeaHeight = topChromeHeight + verticalScale(85);
+    const seaBackdropStyle = useAnimatedStyle(() => {
+        const height = deepSeaHeight.get() || estimatedDeepSeaHeight;
+        const offset = coastScrollY.get();
+        return {
+            height,
+            transform: [
+                { translateY: -Math.max(0, offset) },
+                { scaleY: 1 + Math.max(0, -offset) / height },
+            ],
+        };
+    });
+    useAnimatedReaction(
+        () => {
+            const height = deepSeaHeight.get() || estimatedDeepSeaHeight;
+            return topChromeHeight > 0 ? Math.max(0, Math.min(1, (height - coastScrollY.get()) / topChromeHeight)) : 1;
+        },
+        coverage => { headerTint?.set(coverage); },
+    );
 
     // 狀態
     const functionArray = useMemo(() => [
@@ -205,7 +229,7 @@ const HomeScreen = forwardRef(function HomeScreen({
 
     // ref
     const eventPage = useRef(null);
-    const scrollView = useRef(null);
+    const scrollView = useAnimatedRef();
     const coastLayoutRef = useRef(null);
     const coastVisibleRef = useRef(true);
     const textInputRef = useRef(null);
@@ -366,7 +390,7 @@ const HomeScreen = forwardRef(function HomeScreen({
         //     onPress: () => Toast.hide(),
         // });
 
-        getUpcomingCourse();
+        return getUpcomingCourse();
     }, [getUpcomingCourse]);
 
     const handleRefresh = async () => {
@@ -376,10 +400,10 @@ const HomeScreen = forwardRef(function HomeScreen({
 
         refreshingRef.current = true;
         setIsRefreshing(true);
-        onRefresh();
 
         try {
             await Promise.allSettled([
+                onRefresh(),
                 getAppData(),
                 eventPage.current?.onRefresh(),
                 wait(MIN_REFRESH_DURATION),
@@ -426,6 +450,10 @@ const HomeScreen = forwardRef(function HomeScreen({
     // 打開/關閉底部Modal
     const tiggerModalBottom = () => setIsShowModal(!isShowModal);
 
+    const handleDeepSeaLayout = useCallback(event => {
+        deepSeaHeight.set(event.nativeEvent.layout.height);
+    }, [deepSeaHeight]);
+
     // 處理 Scroll：觸底加載更多數據
     const handleScroll = (event) => {
         const {layoutMeasurement, contentOffset, contentSize} = event.nativeEvent;
@@ -439,7 +467,7 @@ const HomeScreen = forwardRef(function HomeScreen({
             }
         }
 
-        if (isLoading || isLoadMore) {return;}
+        if (isLoading || isLoadMore || refreshingRef.current) {return;}
         // 僅 ARK 活動時瀑布流較短，提前約一屏觸發預載，避免滑到底才開始請求
         const bottomThreshold = Math.max(layoutMeasurement.height, verticalScale(400));
         const isCloseToBottom = layoutMeasurement.height + contentOffset.y >= contentSize.height - bottomThreshold;
@@ -540,8 +568,13 @@ const HomeScreen = forwardRef(function HomeScreen({
     return (
         <View
             style={{ flex: 1, backgroundColor: bg_color, alignItems: 'center', justifyContent: 'center' }}>
-            <View pointerEvents="none" style={{ position: 'absolute', top: 0, left: 0, right: 0, height: topChromeHeight, backgroundColor: homeCoast.deep }} />
-            <ScrollView
+            <View pointerEvents="none" style={[StyleSheet.absoluteFill, { overflow: 'hidden' }]}>
+                <Reanimated.View style={[
+                    { position: 'absolute', top: 0, left: 0, right: 0, backgroundColor: homeCoast.deep, transformOrigin: 'center top' },
+                    seaBackdropStyle,
+                ]} />
+            </View>
+            <Reanimated.ScrollView
                 style={{ width: '100%' }}
                 contentInsetAdjustmentBehavior="never"
                 scrollIndicatorInsets={{ top: topChromeHeight }}
@@ -556,12 +589,13 @@ const HomeScreen = forwardRef(function HomeScreen({
                 }
                 alwaysBounceHorizontal={false}
                 ref={scrollView}
+                scrollViewOffset={coastScrollY}
                 showsVerticalScrollIndicator={true}
                 onScroll={handleScroll}
                 scrollEventThrottle={16}
                 keyboardDismissMode={Platform.OS === 'android' ? 'none' : 'on-drag'}
                 keyboardShouldPersistTaps={Platform.OS === 'android' ? 'always' : 'handled'}
-                contentContainerStyle={{ width: '100%', alignItems: 'center', backgroundColor: homeCoast.beach }}
+                contentContainerStyle={{ width: '100%', alignItems: 'center' }}
             >
 
                 <HomeCoast
@@ -570,6 +604,7 @@ const HomeScreen = forwardRef(function HomeScreen({
                     upcomingCourse={upcomingCourse}
                     motionEnabled={isActive && isCoastVisible && isForeground}
                     onLayout={event => { coastLayoutRef.current = event.nativeEvent.layout; }}
+                    onDeepSeaLayout={handleDeepSeaLayout}
                     onDateTouchChange={onCalendarTouchChange}
                     onOpenTimetable={() => navigateToCourseTab(navigation, { segment: 'timetable' })}>
                     {functionArray.map(item => renderQuickFeature(item))}
@@ -722,7 +757,7 @@ const HomeScreen = forwardRef(function HomeScreen({
                     <Text style={{ alignSelf: 'center', marginTop: verticalScale(3), ...uiStyle.defaultText, color: black.third }}>網絡錯誤，請手動刷新！</Text>
                 ) : null}
                 <EventPage ref={eventPage} />
-            </ScrollView>
+            </Reanimated.ScrollView>
             {useNativeLiquidGlassHeader ? null : (
                 <TopScrollEdgeBackdrop headerHeight={topChromeHeight} scrollY={scrollY} />
             )}

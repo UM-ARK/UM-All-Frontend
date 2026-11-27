@@ -16,6 +16,8 @@ import {
 import PagerView from 'react-native-pager-view';
 import { HeaderHeightContext } from '@react-navigation/elements';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { LinearGradient } from 'expo-linear-gradient';
+import Reanimated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 import { scale, verticalScale } from 'react-native-size-matters';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
@@ -44,9 +46,9 @@ const AnimatedPagerView = Animated.createAnimatedComponent(PagerView);
 
 // 原生導覽列 + stacked 滿寬搜尋列首次量測前的高度估算
 const NATIVE_HEADER_FALLBACK_HEIGHT = 96;
-const SEGMENT_BAR_PADDING_BOTTOM = verticalScale(6);
+const SEGMENT_BAR_PADDING_TOP = verticalScale(6);
 const DEFAULT_ANDROID_SEGMENT_BAR_HEIGHT =
-    SEGMENTED_TAB_CONTROL_HEIGHT + SEGMENT_BAR_PADDING_BOTTOM;
+    SEGMENTED_TAB_CONTROL_HEIGHT + SEGMENT_BAR_PADDING_TOP;
 const DEFAULT_ANDROID_SEARCH_BAR_HEIGHT = SEARCH_FIELD_MIN_HEIGHT + verticalScale(12);
 const SEARCH_NAV_RESET_MS = 600;
 
@@ -94,9 +96,10 @@ export default function NewsScreen() {
     const pageScrollOffset = useRef(new Animated.Value(0)).current;
 
     const [pageIndex, setPageIndex] = useState(INITIAL_TAB_INDEX);
+    const homeHeaderTint = useSharedValue(1);
     const [viewport, setViewport] = useState(null);
     const [androidChromeHeight, setAndroidChromeHeight] = useState(
-        insets.top + DEFAULT_ANDROID_SEARCH_BAR_HEIGHT + DEFAULT_ANDROID_SEGMENT_BAR_HEIGHT,
+        insets.top + DEFAULT_ANDROID_SEGMENT_BAR_HEIGHT + DEFAULT_ANDROID_SEARCH_BAR_HEIGHT,
     );
     // 延遲掛載未造訪分頁，避免進資訊頁就同時發起組織與 Open Data 請求
     const [mountedPages, setMountedPages] = useState({
@@ -114,7 +117,19 @@ export default function NewsScreen() {
     const searchQueriesRef = useRef(searchQueries);
 
     const activeTabKey = TAB_KEYS[pageIndex] ?? 'home';
-    const topBackgroundColor = activeTabKey === 'home' ? theme.homeCoast.deep : bg_color;
+    const headerTransparent = useNativeLiquidGlassHeader || activeTabKey === 'home';
+    const homeSeaColor = theme.homeCoast.deep;
+    const homeHeaderStyle = useAnimatedStyle(() => ({ opacity: homeHeaderTint.get() }));
+
+    const renderHomeHeaderBackground = useCallback(() => (
+        <Reanimated.View pointerEvents="none" style={[StyleSheet.absoluteFill, homeHeaderStyle]}>
+            <LinearGradient
+                colors={[homeSeaColor, homeSeaColor, `${homeSeaColor}00`]}
+                locations={[0, 0.64, 1]}
+                style={StyleSheet.absoluteFill}
+            />
+        </Reanimated.View>
+    ), [homeHeaderStyle, homeSeaColor]);
 
     const segmentOptions = useMemo(
         () => [
@@ -312,8 +327,10 @@ export default function NewsScreen() {
                     onSelect={onSegmentPress}
                 />
             ),
-            ...(!useNativeLiquidGlassHeader ? { headerStyle: { backgroundColor: topBackgroundColor } } : {}),
-            contentStyle: { backgroundColor: topBackgroundColor },
+            headerTransparent,
+            headerStyle: { backgroundColor: headerTransparent ? 'transparent' : bg_color },
+            headerBackground: activeTabKey === 'home' ? renderHomeHeaderBackground : undefined,
+            contentStyle: { backgroundColor: bg_color },
             headerSearchBarOptions: {
                 ref: nativeSearchBarRef,
                 placeholder: activeSearchPlaceholder,
@@ -332,21 +349,23 @@ export default function NewsScreen() {
         });
     }, [
         activeSearchPlaceholder,
+        activeTabKey,
+        bg_color,
         black.main,
         black.third,
         handleNativeSearchCancel,
         handleNativeSearchChangeText,
         handleNativeSearchFocus,
+        headerTransparent,
         navigation,
         onSegmentPress,
         pageIndex,
+        renderHomeHeaderBackground,
         segmentOptions,
         segmentValues,
         tabPosition,
         themeColor,
-        topBackgroundColor,
         useNativeHeader,
-        useNativeLiquidGlassHeader,
     ]);
 
     const onPageSelected = useCallback(event => {
@@ -396,7 +415,7 @@ export default function NewsScreen() {
     return (
         <View
             onLayout={event => setViewport(event.nativeEvent.layout)}
-            style={[styles.container, { backgroundColor: topBackgroundColor }]}>
+            style={[styles.container, { backgroundColor: bg_color }]}>
             {useNativeHeader ? null : (
                 <View
                     pointerEvents="box-none"
@@ -406,6 +425,15 @@ export default function NewsScreen() {
                         { paddingTop: insets.top },
                     ]}>
                     <View style={styles.androidChromeInner}>
+                        <View style={styles.androidSegmentWrap}>
+                            <SegmentedTabControl
+                                options={segmentOptions}
+                                selectedIndex={pageIndex}
+                                position={tabPosition}
+                                onChange={onSegmentPress}
+                                fullWidth
+                            />
+                        </View>
                         <InfoSharedSearchBar
                             ref={androidSearchBarRef}
                             mode={activeTabKey === 'home' ? 'navigate' : 'input'}
@@ -418,15 +446,6 @@ export default function NewsScreen() {
                             cancelLabel={t('取消', { ns: 'common' })}
                             clearAccessibilityLabel={t('清除搜尋', { ns: 'common' })}
                         />
-                        <View style={styles.androidSegmentWrap}>
-                            <SegmentedTabControl
-                                options={segmentOptions}
-                                selectedIndex={pageIndex}
-                                position={tabPosition}
-                                onChange={onSegmentPress}
-                                fullWidth
-                            />
-                        </View>
                     </View>
                 </View>
             )}
@@ -457,6 +476,7 @@ export default function NewsScreen() {
                             useNativeLiquidGlassHeader={useNativeLiquidGlassHeader}
                             isActive={activeTabKey === 'home'}
                             onCalendarTouchChange={handleCalendarTouchChange}
+                            headerTint={useNativeHeader ? homeHeaderTint : undefined}
                         />
                     ) : null}
                 </View>
@@ -514,7 +534,7 @@ const styles = StyleSheet.create({
     },
     androidSegmentWrap: {
         width: '100%',
-        paddingBottom: SEGMENT_BAR_PADDING_BOTTOM,
+        paddingTop: SEGMENT_BAR_PADDING_TOP,
     },
     pager: {
         flex: 1,

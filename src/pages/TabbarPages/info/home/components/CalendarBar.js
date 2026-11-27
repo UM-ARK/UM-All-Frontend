@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { StyleSheet, View, VirtualizedList } from 'react-native';
 import Animated, { Easing, useAnimatedReaction, useAnimatedScrollHandler, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import { scheduleOnRN } from 'react-native-worklets';
 import Svg, { Defs, LinearGradient, Path, Stop } from 'react-native-svg';
 import moment from 'moment';
 import { moderateScale, scale, verticalScale } from 'react-native-size-matters';
@@ -22,6 +23,7 @@ const WAKE_WIDTH = scale(84);
 const MAX_WAKE_STEP = scale(44);
 const WATER_DRIFT = scale(21);
 const WATER_HEIGHT = BOAT_SIZE + verticalScale(8);
+const SHALLOW_WAVE = 'M0 25 C31 29 51 19 83 22 S139 31 170 24 S225 18 254 23 S309 29 340 21 V36 H0 Z';
 const SAIL_EASING = Easing.inOut(Easing.sin);
 const SUMMARY_EASING = Easing.bezier(0.23, 1, 0.32, 1);
 
@@ -40,6 +42,22 @@ const getItemCount = data => data.length;
 const getCalItemWidth = item => moment(item.endDate).diff(item.startDate, 'day') > 1 ? calRangeItemWidth : calItemWidth;
 const getCalItemCenter = layout => layout ? CALENDAR_INSET + layout.offset + layout.length / 2 : 0;
 
+// 依滾動位移找最近的日期格，讓小船停在可見焦點上。
+const findNearestCalIndex = (offset, offsets) => {
+    'worklet';
+    if (!offsets.length) {return 0;}
+    let best = 0;
+    let bestDist = Math.abs(offsets[0] - offset);
+    for (let i = 1; i < offsets.length; i++) {
+        const dist = Math.abs(offsets[i] - offset);
+        if (dist < bestDist) {
+            bestDist = dist;
+            best = i;
+        }
+    }
+    return best;
+};
+
 // 延續校曆原有規則，優先顯示當前或下一個日程。
 const getCurrentSelection = cal => {
     const now = moment();
@@ -49,12 +67,13 @@ const getCurrentSelection = cal => {
     return Math.max(0, cal.findIndex(item => now.isBefore(item.endDate)));
 };
 
-const CalendarBar = ({ refreshTrigger = 0, tide, onDateTouchChange }) => {
+const CalendarBar = ({ topInset, onDeepSeaLayout, refreshTrigger = 0, tide, onDateTouchChange }) => {
     const { theme } = useTheme();
-    const { black, accentForeground, themeColor, trueWhite, warning, sand } = theme;
+    const { black, accentForeground, themeColor, trueWhite, warning, sand, homeCoast } = theme;
     const { t, i18n } = useTranslation('features');
     const reducedMotion = useAppReducedMotion();
     const calScrollRef = useRef(null);
+    const programmaticScrollTimer = useRef(null);
     const cal = useMemo(() => {
         const seenEvents = new Set();
 
@@ -80,10 +99,16 @@ const CalendarBar = ({ refreshTrigger = 0, tide, onDateTouchChange }) => {
     }, [cal]);
 
     const [selectDay, setSelectDay] = useState(() => getCurrentSelection(cal));
+    const [listWidth, setListWidth] = useState(0);
     const initialIndex = useRef(selectDay).current;
+    const lastDefaultIndex = useRef(initialIndex);
     const lastRefresh = useRef(refreshTrigger);
     const boatCenter = useSharedValue(getCalItemCenter(calItemLayouts[initialIndex]));
     const scrollX = useSharedValue(calItemLayouts[initialIndex]?.offset ?? 0);
+    const selectDaySV = useSharedValue(initialIndex);
+    const scrollSelectEnabled = useSharedValue(true);
+    const itemOffsetsSV = useSharedValue(calItemLayouts.map(layout => layout.offset));
+    const itemCentersSV = useSharedValue(calItemLayouts.map(layout => getCalItemCenter(layout)));
     const summaryProgress = useSharedValue(1);
     const wakeStrength = useSharedValue(0);
     const wakeDirection = useSharedValue(1);
@@ -93,9 +118,63 @@ const CalendarBar = ({ refreshTrigger = 0, tide, onDateTouchChange }) => {
         year: 'numeric',
         month: 'short',
     }), [isTc]);
+    const snapOffsets = useMemo(() => calItemLayouts.map(layout => layout.offset), [calItemLayouts]);
+    const dateListContentStyle = useMemo(() => {
+        const lastLayout = calItemLayouts[calItemLayouts.length - 1];
+        // 右側留白讓最後幾個日期也能滾到左焦點，滑停即可選中。
+        const paddingRight = listWidth > 0 && lastLayout
+            ? Math.max(CALENDAR_INSET, listWidth - CALENDAR_INSET - lastLayout.length)
+            : CALENDAR_INSET;
 
-    const handleDateScroll = useAnimatedScrollHandler(event => {
-        scrollX.set(event.contentOffset.x);
+        return [styles.dateListContent, { paddingRight }];
+    }, [calItemLayouts, listWidth]);
+
+    useEffect(() => {
+        itemOffsetsSV.set(calItemLayouts.map(layout => layout.offset));
+        itemCentersSV.set(calItemLayouts.map(layout => getCalItemCenter(layout)));
+    }, [calItemLayouts, itemCentersSV, itemOffsetsSV]);
+
+    const selectDayRef = useRef(selectDay);
+    selectDayRef.current = selectDay;
+
+    const applySelection = useCallback((index, { animateBoat = false, haptic = true } = {}) => {
+        const layout = calItemLayouts[index];
+        if (!layout) {return;}
+
+        const center = getCalItemCenter(layout);
+        selectDaySV.set(index);
+        boatCenter.set(animateBoat && !reducedMotion ? withTiming(center, { duration: 290, easing: SAIL_EASING }) : center);
+
+        if (selectDayRef.current === index) {return;}
+        selectDayRef.current = index;
+        if (haptic) {trigger('selection');}
+        setSelectDay(index);
+        if (!reducedMotion) {
+            summaryProgress.set(0.45);
+            summaryProgress.set(withTiming(1, { duration: 150, easing: SUMMARY_EASING }));
+        }
+    }, [boatCenter, calItemLayouts, reducedMotion, selectDaySV, summaryProgress]);
+
+    const commitScrollSelection = useCallback(index => {
+        applySelection(index, { animateBoat: false, haptic: true });
+    }, [applySelection]);
+
+    const handleDateScroll = useAnimatedScrollHandler({
+        onScroll: event => {
+            const offset = event.contentOffset.x;
+            scrollX.set(offset);
+            if (!scrollSelectEnabled.get()) {return;}
+
+            const offsets = itemOffsetsSV.get();
+            if (!offsets.length) {return;}
+
+            const index = findNearestCalIndex(offset, offsets);
+            if (index === selectDaySV.get()) {return;}
+
+            selectDaySV.set(index);
+            boatCenter.set(itemCentersSV.get()[index] ?? 0);
+            scheduleOnRN(commitScrollSelection, index);
+        },
     });
     useAnimatedReaction(
         () => boatCenter.get() - scrollX.get(),
@@ -137,14 +216,17 @@ const CalendarBar = ({ refreshTrigger = 0, tide, onDateTouchChange }) => {
         if (lastRefresh.current === refreshTrigger) {return;}
         lastRefresh.current = refreshTrigger;
         const index = getCurrentSelection(cal);
+        if (index === lastDefaultIndex.current) {return;}
+        lastDefaultIndex.current = index;
         const layout = calItemLayouts[index];
         if (!layout) {return;}
 
-        setSelectDay(index);
-        boatCenter.set(getCalItemCenter(layout));
+        scrollSelectEnabled.set(false);
+        applySelection(index, { animateBoat: false, haptic: false });
         summaryProgress.set(1);
         calScrollRef.current?.scrollToOffset({ offset: layout.offset, animated: false });
-    }, [boatCenter, cal, calItemLayouts, refreshTrigger, summaryProgress]);
+        scrollSelectEnabled.set(true);
+    }, [applySelection, cal, calItemLayouts, refreshTrigger, scrollSelectEnabled, summaryProgress]);
 
     useEffect(() => {
         if (reducedMotion) {boatCenter.set(getCalItemCenter(calItemLayouts[selectDay]));}
@@ -154,17 +236,57 @@ const CalendarBar = ({ refreshTrigger = 0, tide, onDateTouchChange }) => {
     const handleDateTouchEnd = useCallback(() => onDateTouchChange?.(false), [onDateTouchChange]);
     useEffect(() => handleDateTouchEnd, [handleDateTouchEnd]);
 
-    const selectDate = index => {
-        if (index === selectDay) {return;}
-        trigger('selection');
-        setSelectDay(index);
-        const center = getCalItemCenter(calItemLayouts[index]);
-        boatCenter.set(reducedMotion ? center : withTiming(center, { duration: 290, easing: SAIL_EASING }));
-        if (!reducedMotion) {
-            summaryProgress.set(0.45);
-            summaryProgress.set(withTiming(1, { duration: 150, easing: SUMMARY_EASING }));
+    const finishProgrammaticScroll = useCallback(() => {
+        if (programmaticScrollTimer.current) {
+            clearTimeout(programmaticScrollTimer.current);
+            programmaticScrollTimer.current = null;
         }
+        scrollSelectEnabled.set(true);
+        const index = findNearestCalIndex(scrollX.get(), itemOffsetsSV.get());
+        applySelection(index, { animateBoat: false, haptic: false });
+    }, [applySelection, itemOffsetsSV, scrollSelectEnabled, scrollX]);
+
+    useEffect(() => () => {
+        if (programmaticScrollTimer.current) {
+            clearTimeout(programmaticScrollTimer.current);
+        }
+    }, []);
+
+    const selectDate = index => {
+        const layout = calItemLayouts[index];
+        if (!layout) {return;}
+
+        scrollSelectEnabled.set(false);
+        if (index !== selectDay) {
+            applySelection(index, { animateBoat: true, haptic: true });
+        }
+        calScrollRef.current?.scrollToOffset({
+            offset: layout.offset,
+            animated: !reducedMotion,
+        });
+        if (reducedMotion) {
+            finishProgrammaticScroll();
+            return;
+        }
+        // 部分平台 scrollToOffset 未必觸發 momentum end，超時後恢復滾動選中。
+        if (programmaticScrollTimer.current) {
+            clearTimeout(programmaticScrollTimer.current);
+        }
+        programmaticScrollTimer.current = setTimeout(finishProgrammaticScroll, 360);
     };
+
+    const handleScrollBeginDrag = useCallback(() => {
+        scrollSelectEnabled.set(true);
+    }, [scrollSelectEnabled]);
+
+    const handleScrollEnd = useCallback(() => {
+        finishProgrammaticScroll();
+    }, [finishProgrammaticScroll]);
+
+    const handleListLayout = useCallback(event => {
+        const width = event.nativeEvent.layout.width;
+        setListWidth(prev => (Math.abs(prev - width) < 0.5 ? prev : width));
+    }, []);
 
     const renderCal = (item, index) => {
         const startDate = moment.parseZone(item.startDate);
@@ -205,14 +327,14 @@ const CalendarBar = ({ refreshTrigger = 0, tide, onDateTouchChange }) => {
     const title = isTc ? selected.summary_cn || selected.summary : selected.summary;
     const translation = isTc ? selected.summary : selected.summary_cn;
 
-    return (
-        <View style={styles.calendar}>
+    return [
+        <View key="dates" onLayout={onDeepSeaLayout} style={{ paddingTop: topInset + verticalScale(8) }}>
             <View onTouchStart={handleDateTouchStart} onTouchEnd={handleDateTouchEnd} onTouchCancel={handleDateTouchEnd}>
                 <AnimatedCalendarList
                     data={cal}
                     ref={calScrollRef}
                     style={styles.dateList}
-                    contentContainerStyle={styles.dateListContent}
+                    contentContainerStyle={dateListContentStyle}
                     initialNumToRender={12}
                     windowSize={4}
                     initialScrollIndex={initialIndex}
@@ -222,7 +344,14 @@ const CalendarBar = ({ refreshTrigger = 0, tide, onDateTouchChange }) => {
                     nestedScrollEnabled
                     directionalLockEnabled
                     showsHorizontalScrollIndicator={false}
+                    snapToOffsets={snapOffsets}
+                    decelerationRate="fast"
+                    disableIntervalMomentum
+                    onLayout={handleListLayout}
                     onScroll={handleDateScroll}
+                    onScrollBeginDrag={handleScrollBeginDrag}
+                    onScrollEndDrag={handleScrollEnd}
+                    onMomentumScrollEnd={handleScrollEnd}
                     scrollEventThrottle={16}
                     getItem={getItem}
                     getItemCount={getItemCount}
@@ -235,11 +364,12 @@ const CalendarBar = ({ refreshTrigger = 0, tide, onDateTouchChange }) => {
                         <Defs>
                             <LinearGradient id="calendar-swell" x1="0%" y1="0%" x2="0%" y2="100%">
                                 <Stop offset="0%" stopColor={themeColor} stopOpacity={0.34} />
-                                <Stop offset="100%" stopColor={themeColor} stopOpacity={0} />
+                                <Stop offset="72%" stopColor={themeColor} stopOpacity={0} />
                             </LinearGradient>
                         </Defs>
+                        <Path d={SHALLOW_WAVE} fill={homeCoast.shallow} />
                         <Path d="M0 20 C28 13 54 12 85 19 S140 25 171 17 S225 11 256 18 S311 25 340 17 V36 H0 Z" fill="url(#calendar-swell)" />
-                        <Path d="M0 25 C31 29 51 19 83 22 S139 31 170 24 S225 18 254 23 S309 29 340 21 V36 H0 Z" fill="url(#calendar-swell)" />
+                        <Path d={SHALLOW_WAVE} fill="url(#calendar-swell)" />
                     </Svg>
                 </Animated.View>
                 <Animated.View style={[styles.boat, boatStyle]}>
@@ -260,6 +390,8 @@ const CalendarBar = ({ refreshTrigger = 0, tide, onDateTouchChange }) => {
                     </Animated.View>
                 </Animated.View>
             </View>
+        </View>,
+        <View key="summary" style={[styles.summaryBand, { backgroundColor: homeCoast.shallow }]}>
             <Animated.View style={[styles.summary, summaryStyle]}>
                 <View style={styles.summaryRow}>
                     <Text selectable style={[styles.summaryTitle, { color: black.main }]}>{title}</Text>
@@ -269,12 +401,11 @@ const CalendarBar = ({ refreshTrigger = 0, tide, onDateTouchChange }) => {
                     <Text selectable style={[styles.summaryTranslation, { color: black.second }]}>{translation}</Text>
                 ) : null}
             </Animated.View>
-        </View>
-    );
+        </View>,
+    ];
 };
 
 const styles = StyleSheet.create({
-    calendar: { paddingTop: verticalScale(4), paddingBottom: verticalScale(3) },
     dateList: { flexGrow: 0 },
     dateListContent: { paddingHorizontal: CALENDAR_INSET },
     dateButton: { minHeight: 48, alignItems: 'center', justifyContent: 'center', paddingHorizontal: scale(4) },
@@ -282,11 +413,12 @@ const styles = StyleSheet.create({
     week: { ...uiStyle.defaultText, fontSize: moderateScale(9), marginTop: verticalScale(1) },
     importantDot: { position: 'absolute', top: scale(6), right: scale(5), width: scale(4), height: scale(4), borderRadius: scale(2) },
     water: { height: WATER_HEIGHT, marginTop: -verticalScale(4), overflow: 'hidden' },
-    swell: { position: 'absolute', left: -WATER_DRIFT, right: -WATER_DRIFT, top: 0, bottom: 0 },
+    swell: { position: 'absolute', left: -WATER_DRIFT, right: -WATER_DRIFT, top: 0, bottom: -verticalScale(4) },
     boat: { position: 'absolute', left: 0, top: verticalScale(2.5), width: WAKE_WIDTH },
     wake: { position: 'absolute', top: BOAT_SIZE - verticalScale(4) },
     ripple: { position: 'absolute', left: (WAKE_WIDTH - scale(42)) / 2, top: BOAT_SIZE - verticalScale(3) },
     sail: { alignSelf: 'center' },
+    summaryBand: { paddingBottom: verticalScale(3) },
     summary: { marginHorizontal: CALENDAR_INSET, marginTop: verticalScale(1), gap: verticalScale(1) },
     summaryRow: { flexDirection: 'row', alignItems: 'baseline', gap: scale(8) },
     summaryTitle: { ...uiStyle.defaultText, fontSize: moderateScale(14), fontWeight: '600', flex: 1 },

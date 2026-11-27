@@ -14,28 +14,10 @@ import { trigger } from '../../../../../utils/trigger';
 import PhosphorFeatureIcon from '../search/components/PhosphorFeatureIcon';
 import CalendarBar from './CalendarBar';
 
-const WAVE_HEIGHT = verticalScale(7);
-const WAVE_DRIFT = scale(17);
 const TIDE_HEIGHT = verticalScale(15);
 const TIDE_REACH = verticalScale(7);
 const WATER_EDGE = 'M0 24 C28 21 55 15 83 18 S132 27 163 23 S216 15 247 19 S292 29 320 22';
 const WATER_FILL = `${WATER_EDGE} V0 H0 Z`;
-
-const Shoreline = ({ upper, lower, tide }) => {
-    const drift = useAnimatedStyle(() => ({
-        transform: [{ translateX: tide.get() * WAVE_DRIFT }, { translateY: tide.get() * 1.8 }],
-    }));
-
-    return (
-        <View pointerEvents="none" style={[styles.shoreline, { backgroundColor: lower }]}>
-            <Animated.View style={[styles.waveStrip, drift]}>
-                <Svg width="100%" height="100%" viewBox="0 0 320 38" preserveAspectRatio="none">
-                    <Path d={WATER_FILL} fill={upper} />
-                </Svg>
-            </Animated.View>
-        </View>
-    );
-};
 
 const TidalShoreline = ({ phase, shallow, beach, wetSand, foam }) => {
     const water = useAnimatedStyle(() => {
@@ -67,7 +49,7 @@ const TidalShoreline = ({ phase, shallow, beach, wetSand, foam }) => {
     );
 };
 
-const HomeCoast = ({ topInset, refreshTrigger, upcomingCourse, onOpenTimetable, onDateTouchChange, motionEnabled, onLayout, children }) => {
+const HomeCoast = ({ topInset, refreshTrigger, upcomingCourse, onOpenTimetable, onDateTouchChange, motionEnabled, onLayout, onDeepSeaLayout, children }) => {
     const { theme } = useTheme();
     const { homeCoast, black, accentForeground, trueWhite, themeColorLight } = theme;
     const { t } = useTranslation('timetable');
@@ -88,10 +70,13 @@ const HomeCoast = ({ topInset, refreshTrigger, upcomingCourse, onOpenTimetable, 
 
     return (
         <View style={styles.coast} onLayout={onLayout}>
-            <View style={{ backgroundColor: homeCoast.deep, paddingTop: topInset + verticalScale(4) }}>
-                <CalendarBar refreshTrigger={refreshTrigger} tide={tide} onDateTouchChange={onDateTouchChange} />
-            </View>
-            <Shoreline upper={homeCoast.deep} lower={homeCoast.shallow} tide={tide} />
+            <CalendarBar
+                topInset={topInset}
+                onDeepSeaLayout={onDeepSeaLayout}
+                refreshTrigger={refreshTrigger}
+                tide={tide}
+                onDateTouchChange={onDateTouchChange}
+            />
             {upcomingCourse ? (
                 <ScalePressable
                     accessibilityRole="button"
@@ -126,8 +111,6 @@ const HomeCoast = ({ topInset, refreshTrigger, upcomingCourse, onOpenTimetable, 
 
 const styles = StyleSheet.create({
     coast: { alignSelf: 'stretch' },
-    shoreline: { height: WAVE_HEIGHT, overflow: 'hidden' },
-    waveStrip: { position: 'absolute', top: -verticalScale(8), height: verticalScale(20), left: -WAVE_DRIFT, right: -WAVE_DRIFT },
     tidalShoreline: { height: TIDE_HEIGHT, overflow: 'hidden' },
     tideStrip: { position: 'absolute', top: -verticalScale(11), height: verticalScale(26), left: 0, right: 0 },
     course: {
