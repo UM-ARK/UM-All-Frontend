@@ -70,6 +70,7 @@ const getColorDiy = (isLight) => {
     const achievementGoldValue = isLight ? '#B77900' : '#F2C14E';
     const achievementSilverValue = isLight ? '#6F7C87' : '#C2CBD3';
     const achievementBronzeValue = isLight ? '#A85D32' : '#D9915B';
+    const sandValue = isLight ? '#D48E2A' : '#E6AB52';
     const timetableSurfaceBase = isLight ? trueWhite : '#1A1C1F';
     const timetableTintRatio = isLight ? 0.17 : 0.24;
 
@@ -137,7 +138,13 @@ const getColorDiy = (isLight) => {
         pressOverlay: rgba(isLight ? trueBlack : trueWhite, 0.12),
 
         // 沙灘金（取自 App Logo 沙灘色 #E6AB52，亮色微調深以確保白/灰底對比度）
-        sand: isLight ? '#D48E2A' : '#E6AB52',
+        sand: sandValue,
+        homeCoast: {
+            deep: mixHex(isLight ? trueWhite : trueBlack, themeColorValue, isLight ? 0.27 : 0.30),
+            shallow: mixHex(isLight ? trueWhite : trueBlack, themeColorValue, isLight ? 0.13 : 0.17),
+            beach: mixHex(isLight ? trueWhite : trueBlack, sandValue, isLight ? 0.16 : 0.13),
+            wetSand: mixHex(isLight ? trueWhite : trueBlack, sandValue, isLight ? 0.31 : 0.24),
+        },
         // 綠色，用在Toast上
         success: successValue,
         successForeground: isLight ? '#114D30' : '#78DBAB',

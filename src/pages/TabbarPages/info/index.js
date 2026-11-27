@@ -87,7 +87,6 @@ export default function NewsScreen() {
 
     const pageIndexRef = useRef(INITIAL_TAB_INDEX);
     const activeTabKeyRef = useRef(TAB_KEYS[INITIAL_TAB_INDEX]);
-    const tappedIndexRef = useRef(null);
     const isNavigatingToSearchRef = useRef(false);
     const searchNavResetTimerRef = useRef(null);
 
@@ -288,11 +287,8 @@ export default function NewsScreen() {
             return;
         }
         if (pageIndexRef.current === index) {
-            trigger();
             return;
         }
-        trigger('selection');
-        tappedIndexRef.current = index;
         ensureMounted(index);
         pageIndexRef.current = index;
         syncSearchBarForTab(nextKey);
@@ -356,11 +352,6 @@ export default function NewsScreen() {
         if (!nextKey) {
             return;
         }
-        const fromTap = tappedIndexRef.current === next;
-        tappedIndexRef.current = null;
-        if (!fromTap && pageIndexRef.current !== next) {
-            trigger('selection');
-        }
         ensureMounted(next);
         if (pageIndexRef.current !== next) {
             pageIndexRef.current = next;
@@ -385,6 +376,10 @@ export default function NewsScreen() {
         } else if (activeTabKeyRef.current === 'news') {
             newsPageRef.current?.scrollToTop();
         }
+    }, []);
+
+    const handleCalendarTouchChange = useCallback(isTouching => {
+        pagerRef.current?.setScrollEnabled(!isTouching);
     }, []);
 
     const effectiveNativeHeaderHeight =
@@ -457,6 +452,8 @@ export default function NewsScreen() {
                             navigation={navigation}
                             topChromeHeight={totalTopChromeHeight}
                             useNativeLiquidGlassHeader={useNativeLiquidGlassHeader}
+                            isActive={activeTabKey === 'home'}
+                            onCalendarTouchChange={handleCalendarTouchChange}
                         />
                     ) : null}
                 </View>

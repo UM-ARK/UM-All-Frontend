@@ -63,7 +63,7 @@ export default function SegmentedTabControl({
     const segmentWidth = isFixedCompact
         ? compactItemWidth
         : Math.max(0, (trackWidth - trackPadding * 2) / optionCount);
-    // 滑塊跟分頁進度；文字色用 selected 靜態切換（AppText 無法可靠吃 Animated color）。
+    // 滑塊與標籤淡入淡出共用分頁進度。
     const animatedPosition = reducedMotion || optionCount === 1 ? null : position;
     const thumbTranslateX = animatedPosition?.interpolate({
         inputRange: [0, optionCount - 1],
@@ -111,6 +111,12 @@ export default function SegmentedTabControl({
             ) : null}
             {options.map(({ key, label, badge }, index) => {
                 const selected = index === selectedIndex;
+                const selectedOpacity = animatedPosition?.interpolate({
+                    inputRange: [index - 1, index, index + 1],
+                    outputRange: [0, 1, 0],
+                    extrapolate: 'clamp',
+                });
+                const labelStyle = [styles.label, compact && styles.compactLabel, small && styles.smallLabel];
 
                 return (
                     <SegmentButton
@@ -121,17 +127,34 @@ export default function SegmentedTabControl({
                         onPress={() => onChange(index)}
                         style={small ? buttonStyle : ({ pressed }) => [buttonStyle, pressed && styles.buttonPressed]}>
                         <View style={styles.labelRow}>
-                            <Text
-                                numberOfLines={1}
-                                style={[
-                                    styles.label,
-                                    compact && styles.compactLabel,
-                                    small && styles.smallLabel,
-                                    selected && styles.selectedLabel,
-                                    { color: selected ? black.main : black.third },
-                                ]}>
-                                {label}
-                            </Text>
+                            {selectedOpacity ? (
+                                <View aria-hidden style={styles.animatedLabel}>
+                                    <Animated.View style={{ opacity: selectedOpacity }}>
+                                        <Text
+                                            numberOfLines={1}
+                                            style={[labelStyle, styles.selectedLabel, { color: black.main }]}>
+                                            {label}
+                                        </Text>
+                                    </Animated.View>
+                                    <Animated.View style={[StyleSheet.absoluteFill, styles.inactiveLabelLayer, {
+                                        opacity: Animated.subtract(1, selectedOpacity),
+                                    }]}>
+                                        <Text numberOfLines={1} style={[labelStyle, styles.centeredLabel, { color: black.third }]}>
+                                            {label}
+                                        </Text>
+                                    </Animated.View>
+                                </View>
+                            ) : (
+                                <Text
+                                    numberOfLines={1}
+                                    style={[
+                                        labelStyle,
+                                        selected && styles.selectedLabel,
+                                        { color: selected ? black.main : black.third },
+                                    ]}>
+                                    {label}
+                                </Text>
+                            )}
                             {badge}
                         </View>
                     </SegmentButton>
@@ -199,6 +222,15 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         gap: scale(3),
         maxWidth: '100%',
+    },
+    animatedLabel: {
+        flexShrink: 1,
+    },
+    inactiveLabelLayer: {
+        justifyContent: 'center',
+    },
+    centeredLabel: {
+        textAlign: 'center',
     },
     label: {
         ...uiStyle.defaultText,

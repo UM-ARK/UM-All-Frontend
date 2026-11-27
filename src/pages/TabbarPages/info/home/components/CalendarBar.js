@@ -1,26 +1,32 @@
 import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
-import { View, VirtualizedList } from 'react-native';
+import { StyleSheet, View, VirtualizedList } from 'react-native';
+import Animated, { Easing, useAnimatedReaction, useAnimatedScrollHandler, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import Svg, { Defs, LinearGradient, Path, Stop } from 'react-native-svg';
 import moment from 'moment';
 import { moderateScale, scale, verticalScale } from 'react-native-size-matters';
+import { useTranslation } from 'react-i18next';
+import { SailboatIcon } from 'phosphor-react-native/src/icons/Sailboat';
 
 import Text from '../../../../../components/AppText';
-import { SEARCH_FIELD_BORDER_RADIUS } from '../../../../../components/searchFieldStyles';
-import { useTheme } from '../../../../../components/ThemeContext';
-import { uiStyle } from '../../../../../components/ThemeContext';
+import ScalePressable from '../../../../../components/ScalePressable';
+import { uiStyle, useTheme } from '../../../../../components/ThemeContext';
+import { useAppReducedMotion } from '../../../../../contexts/ReducedMotionContext';
 import { getWeek } from '../../../../../static/UMCalendar/CalendarConst';
 import { UMCalendar } from '../../../../../static/UMCalendar/UMCalendar';
 import { trigger } from '../../../../../utils/trigger';
-import TouchableScale from '../../../../../components/TouchableScale';
-import PhosphorFeatureIcon from '../search/components/PhosphorFeatureIcon';
 
-// 與首頁搜尋框左右邊距／圓角對齊（同寬同圓角＝視覺同心）
-const HOME_EDGE_INSET = scale(20);
-const HOME_SURFACE_RADIUS = SEARCH_FIELD_BORDER_RADIUS;
+const AnimatedCalendarList = Animated.createAnimatedComponent(VirtualizedList);
+const CALENDAR_INSET = scale(12);
+const BOAT_SIZE = scale(19);
+const WAKE_WIDTH = scale(84);
+const MAX_WAKE_STEP = scale(44);
+const WATER_DRIFT = scale(21);
+const WATER_HEIGHT = BOAT_SIZE + verticalScale(8);
+const SAIL_EASING = Easing.inOut(Easing.sin);
+const SUMMARY_EASING = Easing.bezier(0.23, 1, 0.32, 1);
 
-const calItemWidth = Math.max(scale(40), verticalScale(40));
-const calRangeItemWidth = Math.max(scale(70), verticalScale(40));
-const calItemHeight = verticalScale(40);
-const calItemMargin = scale(1);
+const calItemWidth = Math.max(scale(54), 48);
+const calRangeItemWidth = Math.max(scale(83), 83);
 
 const calendarTextProps = {
     adjustsFontSizeToFit: true,
@@ -32,13 +38,23 @@ const calendarTextProps = {
 const getItem = (data, index) => data[index];
 const getItemCount = data => data.length;
 const getCalItemWidth = item => moment(item.endDate).diff(item.startDate, 'day') > 1 ? calRangeItemWidth : calItemWidth;
+const getCalItemCenter = layout => layout ? CALENDAR_INSET + layout.offset + layout.length / 2 : 0;
 
-const CalendarBar = ({ refreshTrigger = 0 }) => {
+// 延續校曆原有規則，優先顯示當前或下一個日程。
+const getCurrentSelection = cal => {
+    const now = moment();
+    const lastIndex = cal.length - 1;
+    if (lastIndex < 0 || now.isBefore(cal[0].startDate)) {return 0;}
+    if (now.isSameOrAfter(cal[lastIndex].startDate)) {return lastIndex;}
+    return Math.max(0, cal.findIndex(item => now.isBefore(item.endDate)));
+};
+
+const CalendarBar = ({ refreshTrigger = 0, tide, onDateTouchChange }) => {
     const { theme } = useTheme();
-    const { bg_color, black, themeColor, sand, white, viewShadow } = theme;
-
+    const { black, accentForeground, themeColor, trueWhite, warning, sand } = theme;
+    const { t, i18n } = useTranslation('features');
+    const reducedMotion = useAppReducedMotion();
     const calScrollRef = useRef(null);
-    const [selectDay, setSelectDay] = useState(0);
     const cal = useMemo(() => {
         const seenEvents = new Set();
 
@@ -55,7 +71,7 @@ const CalendarBar = ({ refreshTrigger = 0 }) => {
         let offset = 0;
 
         return cal.map((item, index) => {
-            const length = getCalItemWidth(item) + calItemMargin * 2;
+            const length = getCalItemWidth(item);
             const layout = { length, offset, index };
 
             offset += length;
@@ -63,194 +79,219 @@ const CalendarBar = ({ refreshTrigger = 0 }) => {
         });
     }, [cal]);
 
-    // 計算應顯示的日期，並滾動到當前/下一個日期
-    const getCal = useCallback(() => {
-        const nowTimeStamp = moment(new Date());
-        const CAL_LENGTH = cal.length;
-        let newSelectDay = 0;
+    const [selectDay, setSelectDay] = useState(() => getCurrentSelection(cal));
+    const initialIndex = useRef(selectDay).current;
+    const lastRefresh = useRef(refreshTrigger);
+    const boatCenter = useSharedValue(getCalItemCenter(calItemLayouts[initialIndex]));
+    const scrollX = useSharedValue(calItemLayouts[initialIndex]?.offset ?? 0);
+    const summaryProgress = useSharedValue(1);
+    const wakeStrength = useSharedValue(0);
+    const wakeDirection = useSharedValue(1);
+    const isTc = i18n.language === 'tc';
+    const monthFormatter = useMemo(() => new Intl.DateTimeFormat(isTc ? 'zh-HK' : 'en', {
+        timeZone: 'Asia/Macau',
+        year: 'numeric',
+        month: 'short',
+    }), [isTc]);
 
-        if (nowTimeStamp.isSameOrAfter(cal[CAL_LENGTH - 1].startDate)) {
-            newSelectDay = CAL_LENGTH - 1;
-        } else if (nowTimeStamp.isSameOrAfter(cal[0].startDate)) {
-            for (let i = 0; i < CAL_LENGTH; i++) {
-                if (nowTimeStamp.isBefore(cal[i].endDate)) {
-                    newSelectDay = i;
-                    break;
-                }
-            }
-        }
-
-        setSelectDay(newSelectDay);
-
-        setTimeout(() => {
-            calScrollRef?.current?.scrollToOffset({
-                offset: calItemLayouts[newSelectDay]?.offset || 0,
-                animated: true,
-            });
-        }, 100);
-    }, [cal, calItemLayouts]);
+    const handleDateScroll = useAnimatedScrollHandler(event => {
+        scrollX.set(event.contentOffset.x);
+    });
+    useAnimatedReaction(
+        () => boatCenter.get() - scrollX.get(),
+        (position, previous) => {
+            if (reducedMotion || previous === null) {return;}
+            const distance = position - previous;
+            // 刷新或初始定位可跳過多個日期，水痕只回應連續位移。
+            if (Math.abs(distance) < 0.4 || Math.abs(distance) > MAX_WAKE_STEP) {return;}
+            wakeDirection.set(distance > 0 ? 1 : -1);
+            wakeStrength.set(Math.max(wakeStrength.get(), Math.min(1, 0.52 + Math.abs(distance) / 16)));
+            wakeStrength.set(withTiming(0, { duration: 540 }));
+        },
+    );
+    const waterStyle = useAnimatedStyle(() => ({
+        transform: [
+            { translateX: tide.get() * WATER_DRIFT },
+            { translateY: tide.get() * 2.2 },
+        ],
+    }));
+    const boatStyle = useAnimatedStyle(() => ({
+        transform: [
+            { translateX: boatCenter.get() - scrollX.get() - WAKE_WIDTH / 2 },
+            { translateY: tide.get() * 2 },
+        ],
+    }));
+    const sailStyle = useAnimatedStyle(() => ({
+        transform: [{ rotate: `${tide.get() * 5}deg` }],
+    }));
+    const wakeStyle = useAnimatedStyle(() => ({
+        opacity: reducedMotion ? 0 : wakeStrength.get(),
+        transform: [{ scaleX: wakeDirection.get() }],
+    }));
+    const summaryStyle = useAnimatedStyle(() => ({
+        opacity: reducedMotion ? 1 : summaryProgress.get(),
+        transform: [{ translateY: reducedMotion ? 0 : (1 - summaryProgress.get()) * 4 }],
+    }));
 
     useEffect(() => {
-        getCal();
-    }, [getCal, refreshTrigger]);
+        if (lastRefresh.current === refreshTrigger) {return;}
+        lastRefresh.current = refreshTrigger;
+        const index = getCurrentSelection(cal);
+        const layout = calItemLayouts[index];
+        if (!layout) {return;}
+
+        setSelectDay(index);
+        boatCenter.set(getCalItemCenter(layout));
+        summaryProgress.set(1);
+        calScrollRef.current?.scrollToOffset({ offset: layout.offset, animated: false });
+    }, [boatCenter, cal, calItemLayouts, refreshTrigger, summaryProgress]);
+
+    useEffect(() => {
+        if (reducedMotion) {boatCenter.set(getCalItemCenter(calItemLayouts[selectDay]));}
+    }, [boatCenter, calItemLayouts, reducedMotion, selectDay]);
+
+    const handleDateTouchStart = useCallback(() => onDateTouchChange?.(true), [onDateTouchChange]);
+    const handleDateTouchEnd = useCallback(() => onDateTouchChange?.(false), [onDateTouchChange]);
+    useEffect(() => handleDateTouchEnd, [handleDateTouchEnd]);
+
+    const selectDate = index => {
+        if (index === selectDay) {return;}
+        trigger('selection');
+        setSelectDay(index);
+        const center = getCalItemCenter(calItemLayouts[index]);
+        boatCenter.set(reducedMotion ? center : withTiming(center, { duration: 290, easing: SAIL_EASING }));
+        if (!reducedMotion) {
+            summaryProgress.set(0.45);
+            summaryProgress.set(withTiming(1, { duration: 150, easing: SUMMARY_EASING }));
+        }
+    };
 
     const renderCal = (item, index) => {
-        const startDate = moment(item.startDate);
-        const lastDate = moment(item.endDate).subtract(1, 'days');
+        const startDate = moment.parseZone(item.startDate);
+        const lastDate = moment.parseZone(item.endDate).subtract(1, 'days');
         const isDateRange = lastDate.isAfter(startDate, 'day');
-        const displayDate = isDateRange ? `${startDate.format('MM.DD')}–${lastDate.format('MM.DD')}` : startDate.format('MM.DD');
-        const displayWeek = isDateRange ? `${getWeek(item.startDate)}–${getWeek(lastDate)}` : getWeek(item.startDate);
+        const endFormat = startDate.isSame(lastDate, 'month') ? 'D' : 'M/D';
+        const displayDate = isDateRange ? `${startDate.format('M/D')}–${lastDate.format(endFormat)}` : startDate.format('M/D');
+        const displayWeek = isDateRange ? `${getWeek(startDate)}–${getWeek(lastDate)}` : getWeek(startDate);
         const isThisDateSelected = selectDay === index;
-        const isEssencial = item.summary.toUpperCase().indexOf('EXAM') !== -1 ||
-            (item.summary.toUpperCase().indexOf('SEMESTER') !== -1 && item.summary.toUpperCase().indexOf('BREAK') === -1);
-        const backgroundColor = isThisDateSelected ? white : 'transparent';
-        const textStyle = {
-            ...uiStyle.defaultText,
-            color: isThisDateSelected ? themeColor : black.third,
-            fontWeight: isThisDateSelected ? 'bold' : 'normal',
-            opacity: !isThisDateSelected && !theme.isLight ? 0.5 : 1,
-            includeFontPadding: false,
-        };
+        const summaryUpper = item.summary.toUpperCase();
+        const isImportant = summaryUpper.includes('EXAM') || (summaryUpper.includes('SEMESTER') && !summaryUpper.includes('BREAK'));
+        const accessibleDate = isDateRange ? `${startDate.format('YYYY-MM-DD')} – ${lastDate.format('YYYY-MM-DD')}` : startDate.format('YYYY-MM-DD');
+        const eventName = isTc ? item.summary_cn || item.summary : item.summary;
+        const textColor = isThisDateSelected ? accentForeground : black.second;
 
         return (
-            <TouchableScale
-                style={{
-                    width: getCalItemWidth(item),
-                    height: calItemHeight,
-                    margin: calItemMargin,
-                    justifyContent: 'center',
-                }}
-                onPress={() => {
-                    trigger();
-                    setSelectDay(index);
-                }}
-            >
-                <View
-                    style={{
-                        backgroundColor,
-                        borderRadius: HOME_SURFACE_RADIUS,
-                        paddingHorizontal: scale(5),
-                        paddingVertical: verticalScale(2),
-                        height: '100%',
-                        justifyContent: 'center',
-                        ...(isThisDateSelected ? viewShadow : null),
-                    }}
-                >
-                    <View style={{ alignItems: 'center', justifyContent: 'center' }}>
-                        <Text {...calendarTextProps} style={{ ...textStyle, fontSize: moderateScale(8) }}>
-                            {startDate.format('YYYY')}
-                        </Text>
-
-                        <Text {...calendarTextProps} style={{ ...textStyle, fontSize: moderateScale(12) }}>
-                            {displayDate}
-                        </Text>
-
-                        <Text {...calendarTextProps} style={{ ...textStyle, fontSize: moderateScale(7) }}>
-                            {displayWeek}
-                        </Text>
-                    </View>
-                </View>
-                {isEssencial ? (
-                    <View
-                        style={{
-                            backgroundColor: theme.warning,
-                            borderRadius: scale(50),
-                            width: verticalScale(8),
-                            height: verticalScale(8),
-                            position: 'absolute',
-                            right: scale(0),
-                            top: scale(0),
-                        }}
-                    />
+            <ScalePressable
+                style={[styles.dateButton, { width: getCalItemWidth(item) }]}
+                accessibilityRole="button"
+                accessibilityState={{ selected: isThisDateSelected }}
+                accessibilityLabel={[accessibleDate, eventName, isImportant ? t('重要日期') : null].filter(Boolean).join(' · ')}
+                onPress={() => selectDate(index)}>
+                <Text {...calendarTextProps} style={[styles.date, { color: textColor, fontWeight: isThisDateSelected ? '700' : '500' }]}>
+                    {displayDate}
+                </Text>
+                <Text {...calendarTextProps} style={[styles.week, { color: textColor }]}>
+                    {displayWeek}
+                </Text>
+                {isImportant ? (
+                    <View style={[styles.importantDot, { backgroundColor: warning }]} />
                 ) : null}
-            </TouchableScale>
+            </ScalePressable>
         );
     };
 
-    if (!cal || cal.length === 0) {return null;}
+    const selected = cal[selectDay];
+    if (!selected) {return null;}
+    const title = isTc ? selected.summary_cn || selected.summary : selected.summary;
+    const translation = isTc ? selected.summary : selected.summary_cn;
 
     return (
-        <View style={{ backgroundColor: bg_color, width: '100%', marginTop: verticalScale(5), justifyContent: 'center' }}>
-            <VirtualizedList
-                data={cal}
-                ref={calScrollRef}
-                initialNumToRender={selectDay <= 11 ? 11 : selectDay}
-                windowSize={4}
-                initialScrollIndex={selectDay < cal.length ? selectDay : 0}
-                getItemLayout={(data, index) => {
-                    return calItemLayouts[index];
-                }}
-                renderItem={({ item, index }) => renderCal(item, index)}
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                getItem={getItem}
-                getItemCount={getItemCount}
-                keyExtractor={(item, index) => item.startDate + index}
-                // 預留陰影空間，避免選中態 viewShadow 被裁切
-                contentContainerStyle={{ paddingVertical: verticalScale(4) }}
-                ListHeaderComponent={<View style={{ marginLeft: HOME_EDGE_INSET }} />}
-                ListFooterComponent={<View style={{ marginRight: HOME_EDGE_INSET }} />}
-            />
-
-            {cal[selectDay] && 'summary' in cal[selectDay] ? (
-                <View
-                    style={{
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        flexDirection: 'row',
-                        marginTop: verticalScale(5),
-                        paddingHorizontal: scale(4),
-                    }}
-                >
-                    {/* 側邊裝飾：用 margin 錯位，避免撐高整列 */}
-                    <View style={{ marginRight: scale(2), marginBottom: verticalScale(10) }}>
-                        <PhosphorFeatureIcon
-                            name="umbrella"
-                            size={verticalScale(14)}
-                            color={themeColor}
-                        />
+        <View style={styles.calendar}>
+            <View onTouchStart={handleDateTouchStart} onTouchEnd={handleDateTouchEnd} onTouchCancel={handleDateTouchEnd}>
+                <AnimatedCalendarList
+                    data={cal}
+                    ref={calScrollRef}
+                    style={styles.dateList}
+                    contentContainerStyle={styles.dateListContent}
+                    initialNumToRender={12}
+                    windowSize={4}
+                    initialScrollIndex={initialIndex}
+                    getItemLayout={(_, index) => calItemLayouts[index]}
+                    renderItem={({ item, index }) => renderCal(item, index)}
+                    horizontal
+                    nestedScrollEnabled
+                    directionalLockEnabled
+                    showsHorizontalScrollIndicator={false}
+                    onScroll={handleDateScroll}
+                    scrollEventThrottle={16}
+                    getItem={getItem}
+                    getItemCount={getItemCount}
+                    keyExtractor={(item, index) => item.startDate + index}
+                />
+            </View>
+            <View pointerEvents="none" importantForAccessibility="no-hide-descendants" accessibilityElementsHidden style={styles.water}>
+                <Animated.View style={[styles.swell, waterStyle]}>
+                    <Svg width="100%" height="100%" viewBox="0 0 340 36" preserveAspectRatio="none">
+                        <Defs>
+                            <LinearGradient id="calendar-swell" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <Stop offset="0%" stopColor={themeColor} stopOpacity={0.34} />
+                                <Stop offset="100%" stopColor={themeColor} stopOpacity={0} />
+                            </LinearGradient>
+                        </Defs>
+                        <Path d="M0 20 C28 13 54 12 85 19 S140 25 171 17 S225 11 256 18 S311 25 340 17 V36 H0 Z" fill="url(#calendar-swell)" />
+                        <Path d="M0 25 C31 29 51 19 83 22 S139 31 170 24 S225 18 254 23 S309 29 340 21 V36 H0 Z" fill="url(#calendar-swell)" />
+                    </Svg>
+                </Animated.View>
+                <Animated.View style={[styles.boat, boatStyle]}>
+                    <Animated.View style={[styles.wake, wakeStyle]}>
+                        <Svg width={WAKE_WIDTH} height={verticalScale(10)} viewBox="0 0 84 12" preserveAspectRatio="none">
+                            <Path d="M6 5 C16 9 25 2 33 3 Q40 3 44 5 M17 9 C26 12 31 7 36 8 Q41 8 45 7" fill="none" stroke={trueWhite} strokeOpacity={0.9} strokeLinecap="round" strokeWidth={1.5} />
+                            <Path d="M3 8 Q8 11 13 9 M24 5 Q28 4 32 5" fill="none" stroke={accentForeground} strokeOpacity={0.48} strokeLinecap="round" strokeWidth={1} />
+                        </Svg>
+                    </Animated.View>
+                    <View style={styles.ripple}>
+                        <Svg width={scale(42)} height={verticalScale(7)} viewBox="0 0 42 9" preserveAspectRatio="none">
+                            <Path d="M4 5 C10 7 16 2 23 3 S33 5 38 3 M12 8 Q19 5 29 7" fill="none" stroke={trueWhite} strokeOpacity={0.8} strokeLinecap="round" strokeWidth={1.4} />
+                        </Svg>
                     </View>
-
-                    <View
-                        style={{
-                            paddingVertical: verticalScale(6),
-                            paddingHorizontal: scale(8),
-                            width: '80%',
-                            backgroundColor: white,
-                            borderRadius: HOME_SURFACE_RADIUS,
-                        }}
-                    >
-                        <Text
-                            selectable
-                            style={{
-                                ...uiStyle.defaultText,
-                                color: black.second,
-                                textAlign: 'center',
-                                fontSize: verticalScale(10),
-                                lineHeight: verticalScale(14),
-                            }}
-                        >
-                            {moment(cal[selectDay].endDate).diff(cal[selectDay].startDate, 'day') > 1 ? (
-                                <Text style={{ color: black.third, fontWeight: 'bold' }}>
-                                    {`${moment(cal[selectDay].startDate).format('YYYY-MM-DD')} ~ ${moment(cal[selectDay].endDate).subtract(1, 'days').format('YYYY-MM-DD')}\n`}
-                                </Text>
-                            ) : null}
-                            {cal[selectDay].summary}
-                            {'summary_cn' in cal[selectDay] ? `\n${cal[selectDay].summary_cn}` : null}
-                        </Text>
-                    </View>
-
-                    <View style={{ marginLeft: scale(2), marginTop: verticalScale(10) }}>
-                        <PhosphorFeatureIcon
-                            name="sunglasses"
-                            size={verticalScale(14)}
-                            color={sand}
-                        />
-                    </View>
+                    <Animated.View style={[styles.sail, sailStyle]}>
+                        <SailboatIcon size={BOAT_SIZE} weight="fill" color={sand} />
+                        <SailboatIcon size={BOAT_SIZE} weight="regular" color={accentForeground} style={StyleSheet.absoluteFill} />
+                    </Animated.View>
+                </Animated.View>
+            </View>
+            <Animated.View style={[styles.summary, summaryStyle]}>
+                <View style={styles.summaryRow}>
+                    <Text selectable style={[styles.summaryTitle, { color: black.main }]}>{title}</Text>
+                    <Text style={[styles.month, { color: black.second }]}>{monthFormatter.format(new Date(selected.startDate))}</Text>
                 </View>
-            ) : null}
+                {translation && translation !== title ? (
+                    <Text selectable style={[styles.summaryTranslation, { color: black.second }]}>{translation}</Text>
+                ) : null}
+            </Animated.View>
         </View>
     );
 };
+
+const styles = StyleSheet.create({
+    calendar: { paddingTop: verticalScale(4), paddingBottom: verticalScale(3) },
+    dateList: { flexGrow: 0 },
+    dateListContent: { paddingHorizontal: CALENDAR_INSET },
+    dateButton: { minHeight: 48, alignItems: 'center', justifyContent: 'center', paddingHorizontal: scale(4) },
+    date: { ...uiStyle.defaultText, fontSize: moderateScale(13), fontVariant: ['tabular-nums'] },
+    week: { ...uiStyle.defaultText, fontSize: moderateScale(9), marginTop: verticalScale(1) },
+    importantDot: { position: 'absolute', top: scale(6), right: scale(5), width: scale(4), height: scale(4), borderRadius: scale(2) },
+    water: { height: WATER_HEIGHT, marginTop: -verticalScale(4), overflow: 'hidden' },
+    swell: { position: 'absolute', left: -WATER_DRIFT, right: -WATER_DRIFT, top: 0, bottom: 0 },
+    boat: { position: 'absolute', left: 0, top: verticalScale(2.5), width: WAKE_WIDTH },
+    wake: { position: 'absolute', top: BOAT_SIZE - verticalScale(4) },
+    ripple: { position: 'absolute', left: (WAKE_WIDTH - scale(42)) / 2, top: BOAT_SIZE - verticalScale(3) },
+    sail: { alignSelf: 'center' },
+    summary: { marginHorizontal: CALENDAR_INSET, marginTop: verticalScale(1), gap: verticalScale(1) },
+    summaryRow: { flexDirection: 'row', alignItems: 'baseline', gap: scale(8) },
+    summaryTitle: { ...uiStyle.defaultText, fontSize: moderateScale(14), fontWeight: '600', flex: 1 },
+    month: { ...uiStyle.defaultText, fontSize: moderateScale(10), textAlign: 'right' },
+    summaryTranslation: { ...uiStyle.defaultText, fontSize: moderateScale(11) },
+});
 
 export default CalendarBar;

@@ -46,7 +46,7 @@ import { recordFeatureUsage } from '../../../../utils/featureRecentUsage';
 import { toastTextArr, toastKaomojiArr } from '../../../../static/UMARK_Assets/EasterEgg.js';
 import CustomBottomSheet from '../../../../utils/BottomSheet';
 import HyperlinkText from '../../../../components/HyperlinkText.js';
-import CalendarBar from './components/CalendarBar';
+import HomeCoastCard from './components/HomeCoastCard';
 import Toast from 'react-native-toast-message';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
@@ -57,11 +57,9 @@ import lodash from 'lodash';
 import { useTranslation } from 'react-i18next';
 import { BottomSheetScrollView, BottomSheetFlatList } from '@gorhom/bottom-sheet';
 import TopScrollEdgeBackdrop from '../../../../components/TopScrollEdgeBackdrop';
-import TouchableScale from '../../../../components/TouchableScale';
+import ScalePressable from '../../../../components/ScalePressable';
 import FeatureIcon from './search/components/FeatureIcon';
-import PhosphorFeatureIcon from './search/components/PhosphorFeatureIcon';
 import Ionicons from '@react-native-vector-icons/ionicons';
-import { SEARCH_FIELD_BORDER_RADIUS } from '../../../../components/searchFieldStyles';
 
 const MIN_REFRESH_DURATION = 800;
 const DONATE_PROBE_TIMEOUT_MS = 2500;
@@ -107,9 +105,11 @@ const HomeScreen = forwardRef(function HomeScreen({
     navigation,
     topChromeHeight,
     useNativeLiquidGlassHeader = false,
+    isActive = true,
+    onCalendarTouchChange,
 }, ref) {
     const { theme } = useTheme();
-    const { white, bg_color, black, themeColor, themeColorLight, themeColorUltraLight, viewShadow, TIME_TABLE_COLOR, featureIconTones } = theme;
+    const { white, bg_color, black, themeColor, themeColorLight, themeColorUltraLight, viewShadow, TIME_TABLE_COLOR } = theme;
     const { t, i18n } = useTranslation(['common', 'home']);
     const { programmeLevel } = useProgrammeLevel();
     const isTc = i18n.language === 'tc';
@@ -185,10 +185,9 @@ const HomeScreen = forwardRef(function HomeScreen({
             },
         },
     ], [navigation, t]);
-    // 快捷項固定寬度 + 固定間距，整組置中，兩側自然留白（不均分視窗寬）
-    const quickFeatureItemWidth = scale(56);
-    const quickFeatureGap = scale(20);
     const [calRefreshKey, setCalRefreshKey] = useState(0);
+    const [isCoastVisible, setIsCoastVisible] = useState(true);
+    const [isForeground, setIsForeground] = useState(() => !['inactive', 'background'].includes(AppState.currentState));
     const [isShowModal, setIsShowModal] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
@@ -207,6 +206,8 @@ const HomeScreen = forwardRef(function HomeScreen({
     // ref
     const eventPage = useRef(null);
     const scrollView = useRef(null);
+    const coastLayoutRef = useRef(null);
+    const coastVisibleRef = useRef(true);
     const textInputRef = useRef(null);
     const toastTimer = useRef(null);
     const appStateListener = useRef(null);
@@ -244,7 +245,8 @@ const HomeScreen = forwardRef(function HomeScreen({
     // App 從背景回到前景時：更新 App 資訊、曆與下節課，但不自動重打活動 API，
     // 否則每次從多工或鎖定回來都會讓活動列表閃爍/重載，體感不佳。活動列表請用下拉重新整理。
     const handleAppStateChange = (nextAppState) => {
-        if (AppState.currentState == 'active') {
+        setIsForeground(nextAppState === 'active');
+        if (nextAppState === 'active') {
             if (navigation?.isFocused()) {
                 setIsLoading(true);
                 getAppData(false);
@@ -391,13 +393,15 @@ const HomeScreen = forwardRef(function HomeScreen({
     // 快捷功能：與服務頁相同的 FeatureIcon + 文字樣式
     const renderQuickFeature = useCallback(
         item => (
-            <TouchableScale
+            <ScalePressable
+                accessibilityRole="button"
                 style={{
-                    width: quickFeatureItemWidth,
+                    flex: 1,
+                    minHeight: 48,
+                    maxWidth: scale(92),
                     justifyContent: 'center',
                     alignItems: 'center',
                 }}
-                activeOpacity={0.7}
                 onPressIn={() => {
                     trigger();
                 }}
@@ -407,16 +411,16 @@ const HomeScreen = forwardRef(function HomeScreen({
                 <Text
                     style={{
                         ...uiStyle.defaultText,
-                        fontSize: featureFontSize,
+                        fontSize: Math.max(featureFontSize, scale(10)),
                         color: black.second,
                         textAlign: 'center',
-                        marginTop: verticalScale(2),
+                        marginTop: -verticalScale(2),
                     }}>
                     {item.function_name}
                 </Text>
-            </TouchableScale>
+            </ScalePressable>
         ),
-        [black.second, featureFontSize, quickFeatureItemWidth],
+        [black.second, featureFontSize],
     );
 
     // 打開/關閉底部Modal
@@ -426,6 +430,14 @@ const HomeScreen = forwardRef(function HomeScreen({
     const handleScroll = (event) => {
         const {layoutMeasurement, contentOffset, contentSize} = event.nativeEvent;
         scrollY.setValue(contentOffset.y);
+        const coastLayout = coastLayoutRef.current;
+        if (coastLayout) {
+            const visible = coastLayout.y + coastLayout.height > contentOffset.y + topChromeHeight;
+            if (visible !== coastVisibleRef.current) {
+                coastVisibleRef.current = visible;
+                setIsCoastVisible(visible);
+            }
+        }
 
         if (isLoading || isLoadMore) {return;}
         // 僅 ARK 活動時瀑布流較短，提前約一屏觸發預載，避免滑到底才開始請求
@@ -551,77 +563,15 @@ const HomeScreen = forwardRef(function HomeScreen({
                 contentContainerStyle={{ width: '100%', alignItems: 'center', paddingTop: topChromeHeight }}
             >
 
-                {/* 校曆列表 */}
-                <CalendarBar refreshTrigger={calRefreshKey} />
-
-                {/** 即將到來的課程：無課時不展示 */}
-                {upcomingCourse ? (
-                    <View style={{
-                        flexDirection: 'row',
-                        alignItems: 'center', justifyContent: 'center',
-                        alignSelf: 'center',
-                        width: '80%',
-                        marginTop: verticalScale(6),
-                    }}>
-                        <TouchableScale
-                            style={{ width: '100%' }}
-                            onPress={() => {
-                                trigger();
-                                navigateToCourseTab(navigation, {
-                                    segment: 'timetable',
-                                });
-                            }}>
-                            <View style={{
-                                flexDirection: 'column', flex: 1,
-                                alignItems: 'center', justifyContent: 'center',
-                                gap: scale(3),
-                                backgroundColor: white,
-                                paddingHorizontal: scale(20),
-                                paddingVertical: verticalScale(6),
-                                borderRadius: SEARCH_FIELD_BORDER_RADIUS,
-                            }}>
-                                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: scale(3) }}>
-                                    <PhosphorFeatureIcon
-                                        name="alarm-clock"
-                                        size={verticalScale(10)}
-                                        color={featureIconTones.green.foreground}
-                                    />
-                                    <Text style={{ ...uiStyle.defaultText, color: featureIconTones.green.foreground, fontWeight: 'bold', fontSize: verticalScale(10), lineHeight: verticalScale(14) }}>{t('下節課：', { ns: 'timetable' })}</Text>
-                                    <Text style={{ ...uiStyle.defaultText, color: black.main, fontWeight: '600', fontSize: verticalScale(10), lineHeight: verticalScale(14) }}>{upcomingCourse['Course Code']}</Text>
-                                    <Text style={{ ...uiStyle.defaultText, color: black.second, fontSize: verticalScale(10), lineHeight: verticalScale(14) }}>{upcomingCourse['Time From']}</Text>
-                                </View>
-                                {upcomingCourse.Classroom?.trim?.() ? (
-                                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: scale(3) }}>
-                                        <PhosphorFeatureIcon
-                                            name="map-pin"
-                                            size={verticalScale(10)}
-                                            color={black.third}
-                                        />
-                                        <Text
-                                            style={{ ...uiStyle.defaultText, color: black.third, fontSize: verticalScale(10), lineHeight: verticalScale(14) }}
-                                            numberOfLines={1}>
-                                            {upcomingCourse.Classroom.trim()}
-                                        </Text>
-                                    </View>
-                                ) : null}
-                            </View>
-                        </TouchableScale>
-                    </View>
-                ) : null}
-
-                {/* 快捷功能圖標（固定寬與間距，整組置中聚攏） */}
-                <View
-                    style={{
-                        width: '100%',
-                        alignSelf: 'center',
-                        marginTop: verticalScale(6),
-                        flexDirection: 'row',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        gap: quickFeatureGap,
-                    }}>
+                <HomeCoastCard
+                    refreshTrigger={calRefreshKey}
+                    upcomingCourse={upcomingCourse}
+                    motionEnabled={isActive && isCoastVisible && isForeground}
+                    onLayout={event => { coastLayoutRef.current = event.nativeEvent.layout; }}
+                    onDateTouchChange={onCalendarTouchChange}
+                    onOpenTimetable={() => navigateToCourseTab(navigation, { segment: 'timetable' })}>
                     {functionArray.map(item => renderQuickFeature(item))}
-                </View>
+                </HomeCoastCard>
 
                 {/* 更新提示 */}
                 {showUpdateInfo ?
