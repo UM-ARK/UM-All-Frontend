@@ -23,15 +23,6 @@ import PagerView from 'react-native-pager-view';
 import { scale, verticalScale } from 'react-native-size-matters';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
-import Reanimated, {
-    Easing,
-    ReduceMotion,
-    interpolate,
-    useAnimatedStyle,
-    useSharedValue,
-    withTiming,
-} from 'react-native-reanimated';
-import { scheduleOnRN } from 'react-native-worklets';
 
 import Text from '../../../components/AppText';
 import ScalePressable from '../../../components/ScalePressable';
@@ -61,19 +52,15 @@ import searchFieldStyles, {
     SEARCH_FIELD_MAX_FONT_SIZE_MULTIPLIER,
     SEARCH_FIELD_MIN_HEIGHT,
 } from '../../../components/searchFieldStyles';
-import { nextHarborSearchBarProgress } from './harborSearchBarProgress';
 
 const VIEW_CONFIG = {
     latest: { label: '最新', analytics: 'latest' },
     top: { label: '熱門', analytics: 'top' },
     unread: { label: '未讀', analytics: 'unread' },
 };
-// 對齊服務頁頂部液態玻璃膠囊高度。往下瀏覽時搜尋列收進工具列；
-// 往回滑時用較長距離展開，不必回到列表頂部。
+// 對齊服務頁頂部液態玻璃膠囊高度；搜尋列固定顯示，不再隨滾動收合。
 const STICKY_TOOLBAR_HEIGHT = verticalScale(38);
 const SEARCH_BAR_ROW_HEIGHT = SEARCH_FIELD_MIN_HEIGHT;
-const SEARCH_BAR_SETTLE_MS = 180;
-const SEARCH_BAR_EASE_OUT = Easing.bezier(0.23, 1, 0.32, 1);
 const Drawer = createDrawerNavigator();
 const AnimatedPagerView = Animated.createAnimatedComponent(PagerView);
 
@@ -95,8 +82,6 @@ const HarborStickyToolbar = ({
     toolbarHeight,
     topInset,
     scrollY,
-    searchProgress,
-    searchCollapsed,
     backgroundColor,
     isCompact,
     useNativeHeader = false,
@@ -107,36 +92,12 @@ const HarborStickyToolbar = ({
     const showLoginPromptBadge =
         status === 'signedOut' || status === 'expired';
     const searchBarForeground = isCompact ? theme.harborSearch.foreground : theme.black.third;
-    // 展開進度跟滾動方向走：往下瀏覽上移淡出，往回滑再滑出來
-    const searchBarStyle = useAnimatedStyle(() => {
-        const progress = searchProgress.get();
-        return {
-            opacity: interpolate(progress, [0, 0.7], [1, 0], 'clamp'),
-            transform: [{
-                translateY: interpolate(
-                    progress,
-                    [0, 1],
-                    [0, -SEARCH_BAR_ROW_HEIGHT],
-                    'clamp',
-                ),
-            }],
-        };
-    });
-    const searchIconStyle = useAnimatedStyle(() => ({
-        opacity: interpolate(searchProgress.get(), [0.35, 1], [0, 1], 'clamp'),
-    }));
 
     const searchBarContent = (
-        <Reanimated.View
-            pointerEvents={searchCollapsed ? 'none' : 'auto'}
-            accessibilityElementsHidden={searchCollapsed}
-            importantForAccessibility={
-                searchCollapsed ? 'no-hide-descendants' : 'auto'
-            }
+        <View
             style={[
                 styles.searchBarRow,
                 isCompact && styles.compactSearchBarRow,
-                searchBarStyle,
             ]}>
             <ScalePressable
                 accessibilityRole="button"
@@ -153,6 +114,7 @@ const HarborStickyToolbar = ({
                             : theme.white,
                         borderColor: theme.themeColorUltraLight,
                         borderWidth: isCompact ? 0 : StyleSheet.hairlineWidth,
+                        ...theme.viewShadow,
                     },
                 ]}>
                 <PhosphorFeatureIcon
@@ -171,7 +133,7 @@ const HarborStickyToolbar = ({
                     {t('搜尋 Harbor')}
                 </Text>
             </ScalePressable>
-        </Reanimated.View>
+        </View>
     );
 
     if (useNativeHeader) {
@@ -202,7 +164,10 @@ const HarborStickyToolbar = ({
                                 trigger();
                                 onSearchPress();
                             }}
-                            style={styles.liquidGlassSearchPressable}>
+                            style={[
+                                styles.liquidGlassSearchPressable,
+                                theme.viewShadow,
+                            ]}>
                             <GlassView
                                 isInteractive
                                 style={[
@@ -246,6 +211,7 @@ const HarborStickyToolbar = ({
                                     borderWidth: isCompact
                                         ? 0
                                         : StyleSheet.hairlineWidth,
+                                    ...theme.viewShadow,
                                 },
                             ]}>
                             <PhosphorFeatureIcon
@@ -275,7 +241,7 @@ const HarborStickyToolbar = ({
     return (
         <View pointerEvents="box-none" style={styles.stickyHeader}>
             <TopScrollEdgeBackdrop
-                headerHeight={toolbarHeight}
+                headerHeight={toolbarHeight + SEARCH_BAR_ROW_HEIGHT}
                 fadeHeight={SCROLL_EDGE_FADE_HEIGHT}
                 scrollY={scrollY}
                 backgroundColor={backgroundColor}
@@ -308,32 +274,6 @@ const HarborStickyToolbar = ({
                             weight="regular"
                         />
                     </ScalePressable>
-                    {/* 搜尋放左側與選單並排，右側未登入時已有「登入」文字按鈕；
-                        搜尋列展開時圖標隱藏且不可點 */}
-                    <Reanimated.View
-                        pointerEvents={searchCollapsed ? 'auto' : 'none'}
-                        accessibilityElementsHidden={!searchCollapsed}
-                        importantForAccessibility={
-                            searchCollapsed ? 'auto' : 'no-hide-descendants'
-                        }
-                        style={searchIconStyle}>
-                        <ScalePressable
-                            accessibilityRole="button"
-                            accessibilityLabel={t('搜尋 Harbor')}
-                            hitSlop={scale(8)}
-                            onPress={() => {
-                                trigger();
-                                onSearchPress();
-                            }}
-                            style={styles.toolbarIconButton}>
-                            <PhosphorFeatureIcon
-                                name="search"
-                                size={scale(20)}
-                                color={theme.black.second}
-                                weight="regular"
-                            />
-                        </ScalePressable>
-                    </Reanimated.View>
                 </View>
 
                 <SegmentedTabControl
@@ -457,8 +397,6 @@ const HarborFeedPane = ({
     onTopicPress,
     isActive,
     onScrollOffset,
-    onScrollBeginDrag,
-    onScrollSettle,
     onUnseenChange,
 }) => {
     const source = useMemo(
@@ -474,12 +412,6 @@ const HarborFeedPane = ({
         },
         [onScrollOffset, view],
     );
-    const handleScrollBeginDrag = useCallback(() => {
-        onScrollBeginDrag(view);
-    }, [onScrollBeginDrag, view]);
-    const handleScrollSettle = useCallback(() => {
-        onScrollSettle(view);
-    }, [onScrollSettle, view]);
 
     return (
         <View style={styles.feedPage}>
@@ -494,9 +426,6 @@ const HarborFeedPane = ({
                 refreshProgressViewOffset={refreshProgressViewOffset}
                 onTopicPress={onTopicPress}
                 onScroll={handleScroll}
-                onScrollBeginDrag={handleScrollBeginDrag}
-                onScrollEndDrag={handleScrollSettle}
-                onMomentumScrollEnd={handleScrollSettle}
                 isActive={isActive}
                 onUnseenChange={onUnseenChange}
             />
@@ -528,13 +457,7 @@ const ForumPage = ({ navigation }) => {
     const pageScrollOffset = useRef(new Animated.Value(0)).current;
     const pageScrollPosition = useRef(new Animated.Value(0)).current;
     const scrollY = useRef(new Animated.Value(0)).current;
-    const searchProgress = useSharedValue(0);
     const scrollOffsetsRef = useRef({});
-    const searchProgressByViewRef = useRef({});
-    const lastScrollYRef = useRef({});
-    const displayedSearchViewRef = useRef('latest');
-    const searchFingerDownRef = useRef(false);
-    const settleTimerRef = useRef(null);
     const currentViewRef = useRef('latest');
     const blockTopicPressUntilRef = useRef(0);
     const capabilitiesRef = useRef(null);
@@ -554,7 +477,6 @@ const ForumPage = ({ navigation }) => {
         unread: false,
     });
     const [consentVisible, setConsentVisible] = useState(false);
-    const [searchCollapsed, setSearchCollapsed] = useState(false);
     const [hasUnseenLatest, setHasUnseenLatest] = useState(false);
     const [hasUnseenPane, setHasUnseenPane] = useState(false);
     const hasUnreadTopics =
@@ -670,123 +592,21 @@ const ForumPage = ({ navigation }) => {
             current[view] ? current : { ...current, [view]: true },
         );
     }, []);
-    const commitSearchProgress = useCallback((view, progress) => {
-        searchProgressByViewRef.current[view] = progress;
-        if (view !== currentViewRef.current) {
-            return;
-        }
-        setSearchCollapsed(progress > 0.5);
-    }, []);
-    const cancelSearchSettle = useCallback(() => {
-        if (settleTimerRef.current != null) {
-            clearTimeout(settleTimerRef.current);
-            settleTimerRef.current = null;
-        }
-    }, []);
-    useEffect(() => cancelSearchSettle, [cancelSearchSettle]);
-    // 各分頁各自記住滾動位置和搜尋列展開程度；切頁時同步到目標分頁
+    // 各分頁各自記住滾動位置；切頁時同步 scrollY 給頂部 Scroll Edge
     const syncSearchScroll = useCallback(
         view => {
-            const previousView = displayedSearchViewRef.current;
-            if (previousView !== view) {
-                searchProgressByViewRef.current[previousView] = searchProgress.get();
-            }
-            displayedSearchViewRef.current = view;
-            cancelSearchSettle();
             const offset = scrollOffsetsRef.current[view] ?? 0;
-            const stored = searchProgressByViewRef.current[view];
-            const progress = offset <= 0 ? 0 : (stored ?? 1);
-            searchProgressByViewRef.current[view] = progress;
-            searchProgress.set(progress);
             scrollY.setValue(Math.max(0, offset));
-            setSearchCollapsed(progress > 0.5);
         },
-        [cancelSearchSettle, scrollY, searchProgress],
+        [scrollY],
     );
-    // 手指放開且列表停下後收到展開或收起，避免停在半截
-    const settleSearchBar = useCallback(view => {
-        if (view !== currentViewRef.current) {
-            return;
-        }
-        const offset = scrollOffsetsRef.current[view] ?? 0;
-        const current = searchProgress.get();
-        // 貼近頂部時維持跟手位置，收起會在內容還沒補上時留空
-        if (offset < SEARCH_BAR_ROW_HEIGHT) {
-            return;
-        }
-        const target = current <= 0.5 ? 0 : 1;
-        if (Math.abs(current - target) < 0.01) {
-            commitSearchProgress(view, target);
-            return;
-        }
-        setSearchCollapsed(target > 0.5);
-        searchProgress.set(withTiming(target, {
-            duration: SEARCH_BAR_SETTLE_MS,
-            easing: SEARCH_BAR_EASE_OUT,
-            reduceMotion: ReduceMotion.System,
-        }, finished => {
-            if (finished) {
-                scheduleOnRN(commitSearchProgress, view, target);
-            }
-        }));
-    }, [commitSearchProgress, searchProgress]);
-    const scheduleSearchSettle = useCallback(view => {
-        if (view !== currentViewRef.current) {
-            return;
-        }
-        cancelSearchSettle();
-        settleTimerRef.current = setTimeout(() => {
-            settleTimerRef.current = null;
-            settleSearchBar(view);
-        }, 70);
-    }, [cancelSearchSettle, settleSearchBar]);
-    const handleSearchScrollBegin = useCallback(view => {
-        if (view !== currentViewRef.current) {
-            return;
-        }
-        searchFingerDownRef.current = true;
-        cancelSearchSettle();
-        const progress = searchProgress.get();
-        searchProgressByViewRef.current[view] = progress;
-        searchProgress.set(progress);
-    }, [cancelSearchSettle, searchProgress]);
     const handleScrollOffset = useCallback((view, offset) => {
-        const previous = lastScrollYRef.current[view] ?? offset;
-        lastScrollYRef.current[view] = offset;
         scrollOffsetsRef.current[view] = offset;
-        const stored = searchProgressByViewRef.current[view] ?? 0;
-        const base = view === currentViewRef.current
-            ? searchProgress.get()
-            : stored;
-        const progress = nextHarborSearchBarProgress(
-            base,
-            offset,
-            offset - previous,
-            SEARCH_BAR_ROW_HEIGHT,
-        );
-        searchProgressByViewRef.current[view] = progress;
         if (view !== currentViewRef.current) {
             return;
         }
         scrollY.setValue(Math.max(0, offset));
-        searchProgress.set(progress);
-        const collapsed = progress > 0.5;
-        setSearchCollapsed(current =>
-            current === collapsed ? current : collapsed,
-        );
-        if (searchFingerDownRef.current) {
-            cancelSearchSettle();
-            return;
-        }
-        scheduleSearchSettle(view);
-    }, [cancelSearchSettle, scheduleSearchSettle, scrollY, searchProgress]);
-    const handleSearchScrollEnd = useCallback(view => {
-        if (view !== currentViewRef.current) {
-            return;
-        }
-        searchFingerDownRef.current = false;
-        scheduleSearchSettle(view);
-    }, [scheduleSearchSettle]);
+    }, [scrollY]);
 
     const handleCapabilities = useCallback(
         nextCapabilities => {
@@ -1189,8 +1009,6 @@ const ForumPage = ({ navigation }) => {
                                         enabledViews[currentIndex] === view
                                     }
                                     onScrollOffset={handleScrollOffset}
-                                    onScrollBeginDrag={handleSearchScrollBegin}
-                                    onScrollSettle={handleSearchScrollEnd}
                                     onUnseenChange={
                                         view === 'latest'
                                             ? setHasUnseenLatest
@@ -1227,8 +1045,6 @@ const ForumPage = ({ navigation }) => {
                         toolbarHeight={effectiveToolbarHeight}
                         topInset={insets.top}
                         scrollY={scrollY}
-                        searchProgress={searchProgress}
-                        searchCollapsed={searchCollapsed}
                         backgroundColor={backgroundColor}
                         isCompact={isCompact}
                         useNativeHeader={useNativeHeader}
@@ -1288,8 +1104,8 @@ const styles = StyleSheet.create({
         zIndex: 2,
     },
     stickyToolbar: {
-        // 蓋在上移中的搜尋列之上
-        zIndex: 1,
+        // 蓋在 TopScrollEdgeBackdrop 之上，避免毛玻璃遮罩把工具列洗白
+        zIndex: 2,
         minHeight: STICKY_TOOLBAR_HEIGHT,
         flexDirection: 'row',
         alignItems: 'center',
@@ -1396,6 +1212,8 @@ const styles = StyleSheet.create({
         borderRadius: scale(2.5),
     },
     searchBarRow: {
+        // 與 nativeStickySearchRow／資訊頁一致，避免 Scroll Edge 遮罩蓋住實色搜尋列
+        zIndex: 2,
         height: SEARCH_BAR_ROW_HEIGHT,
         justifyContent: 'center',
         paddingHorizontal: scale(6),
