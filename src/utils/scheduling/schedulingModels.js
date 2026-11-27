@@ -237,13 +237,13 @@ export function sortTeamEvents(events, favoriteEventIds = []) {
 }
 
 /**
- * 「我的」頁最多顯示五個活動。
+ * 「我的」頁最多顯示三個活動（收藏已由 sortTeamEvents 排在前面）。
  */
 export function takeRecentTeamEvents(events) {
     if (!Array.isArray(events)) {
         return [];
     }
-    return events.slice(0, 5);
+    return events.slice(0, 3);
 }
 
 /**

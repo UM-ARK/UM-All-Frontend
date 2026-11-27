@@ -1,5 +1,5 @@
 /**
- * 「我的」頁組隊約時間預覽：一筆隊伍、全部、新建／加入組隊
+ * 「我的」頁組隊約時間預覽：最多三筆（收藏優先）、全部、新建／加入組隊
  */
 import React, {
     forwardRef,
@@ -139,7 +139,6 @@ const TeamSchedulePreviewSection = forwardRef(
         const showError = status === 'error' && recentEvents.length === 0;
         const showSoftError = status === 'error' && recentEvents.length > 0;
         const showEmpty = status === 'ready' && recentEvents.length === 0;
-        const previewEvent = recentEvents[0];
 
         return (
             <>
@@ -278,8 +277,9 @@ const TeamSchedulePreviewSection = forwardRef(
                         </View>
                     ) : null}
 
-                    {previewEvent ? (
+                    {recentEvents.map(previewEvent => (
                         <TeamScheduleEventRow
+                            key={String(previewEvent.event.eventId)}
                             item={previewEvent}
                             isFavorite={favoriteEventIds.includes(
                                 String(previewEvent.event.eventId),
@@ -297,7 +297,7 @@ const TeamSchedulePreviewSection = forwardRef(
                                 </View>
                             }
                         />
-                    ) : null}
+                    ))}
                     <ScalePressable
                         accessibilityRole="button"
                         accessibilityLabel={t('全部組隊約時間')}

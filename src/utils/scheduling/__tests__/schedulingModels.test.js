@@ -143,7 +143,7 @@ describe('schedulingModels', () => {
         ).toEqual(['a', 'b', 'c']);
     });
 
-    test('我的頁最多取排序後五個活動', () => {
+    test('我的頁最多取排序後三個活動', () => {
         const events = ['a', 'b', 'c', 'd', 'e', 'f'].map(eventId => ({
             event: {eventId},
         }));
@@ -151,8 +151,6 @@ describe('schedulingModels', () => {
             'a',
             'b',
             'c',
-            'd',
-            'e',
         ]);
     });
 
