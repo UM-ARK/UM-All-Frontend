@@ -148,7 +148,7 @@ const What2Reg = ({ isSplitPane = false }) => {
     const scrollY = useRef(new Animated.Value(0)).current;
     const rightScrollY = useRef(new Animated.Value(0)).current;
     const [searchHeaderHeight, setSearchHeaderHeight] = useState(SEARCH_FIELD_MIN_HEIGHT + scale(5));
-    const { topChromeHeight } = useCourseChrome();
+    const { topChromeHeight, useNativeLiquidGlassHeader } = useCourseChrome();
     const totalSearchHeaderHeight = topChromeHeight + searchHeaderHeight;
 
     const insets = useSafeAreaInsets();
@@ -496,11 +496,13 @@ const What2Reg = ({ isSplitPane = false }) => {
                 zIndex: 2,
             }}
         >
-            <TopScrollEdgeBackdrop
-                headerHeight={totalSearchHeaderHeight}
-                fadeHeight={SCROLL_EDGE_FADE_HEIGHT}
-                scrollY={scrollY}
-            />
+            {useNativeLiquidGlassHeader ? null : (
+                <TopScrollEdgeBackdrop
+                    headerHeight={totalSearchHeaderHeight}
+                    fadeHeight={SCROLL_EDGE_FADE_HEIGHT}
+                    scrollY={scrollY}
+                />
+            )}
             <View
                 pointerEvents="box-none"
                 style={{ paddingTop: topChromeHeight, zIndex: 2 }}
@@ -514,6 +516,7 @@ const What2Reg = ({ isSplitPane = false }) => {
                         onChangeText={setInputText}
                         onClear={onClearInput}
                         onPressAction={onPressSearchAction}
+                        liquidGlass={useNativeLiquidGlassHeader}
                         trigger={trigger}
                     />
                 </View>
@@ -698,12 +701,14 @@ const What2Reg = ({ isSplitPane = false }) => {
                             {courseGrid}
                             {footer}
                         </KeyboardAwareScrollView>
-                        <TopScrollEdgeBackdrop
-                            headerHeight={topChromeHeight}
-                            fadeHeight={SCROLL_EDGE_FADE_HEIGHT}
-                            scrollY={rightScrollY}
-                            zIndex={2}
-                        />
+                        {useNativeLiquidGlassHeader ? null : (
+                            <TopScrollEdgeBackdrop
+                                headerHeight={topChromeHeight}
+                                fadeHeight={SCROLL_EDGE_FADE_HEIGHT}
+                                scrollY={rightScrollY}
+                                zIndex={2}
+                            />
+                        )}
                     </View>
                 </View>
             ) : (

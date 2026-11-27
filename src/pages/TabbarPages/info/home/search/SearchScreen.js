@@ -233,7 +233,6 @@ const SearchScreen = ({ navigation }) => {
 
     const executeFeature = useCallback(
         async (item, searchQuery) => {
-            trigger();
             const capturedQuery = searchQuery.trim() || item.fn_name;
             Keyboard.dismiss();
             await saveHistory(capturedQuery, item.key_name || item.fn_name);
@@ -554,6 +553,9 @@ const SearchScreen = ({ navigation }) => {
     const renderResultRow = (item, index) => (
         <View key={item.key_name || item.fn_name}>
             <ScalePressable
+                onPressIn={() => {
+                    trigger();
+                }}
                 onPress={() => executeFeature(item, query)}
                 accessibilityRole="button"
                 style={styles.resultRow}>

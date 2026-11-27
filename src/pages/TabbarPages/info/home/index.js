@@ -105,7 +105,11 @@ const iconTypes = {
     materialCommunityIcons: 'MaterialCommunityIcons',
 };
 
-const HomeScreen = ({ navigation, topChromeHeight }) => {
+const HomeScreen = ({
+    navigation,
+    topChromeHeight,
+    useNativeLiquidGlassHeader = false,
+}) => {
     const { theme } = useTheme();
     const { white, bg_color, black, themeColor, themeColorLight, themeColorUltraLight, viewShadow, TIME_TABLE_COLOR, featureIconTones } = theme;
     const { t, i18n } = useTranslation(['common', 'home']);
@@ -124,10 +128,12 @@ const HomeScreen = ({ navigation, topChromeHeight }) => {
             iconTone: 'transport',
             function_name: t('校園巴士', { ns: 'home' }),
             func: () => {
-                trigger();
                 // 與服務頁共用常用紀錄（key_name 對齊 FeatureList）
                 recordFeatureUsage('校園巴士');
-                navigation.navigate('Bus');
+                // 延後導航，避免 Bus 重頁初始化堵住 onPressIn 已送出的觸覺
+                setTimeout(() => {
+                    navigation.navigate('Bus');
+                }, 50);
             },
         },
         {
@@ -137,7 +143,6 @@ const HomeScreen = ({ navigation, topChromeHeight }) => {
             iconTone: 'academic',
             function_name: t('Moodle', { ns: 'home' }),
             func: () => {
-                trigger();
                 logToFirebase('openPage', { page: 'moodle' });
                 recordFeatureUsage('Moodle');
                 openLink(UM_Moodle);
@@ -148,7 +153,6 @@ const HomeScreen = ({ navigation, topChromeHeight }) => {
         //     icon_type: iconTypes.materialCommunityIcons,
         //     function_name: t('新想法', { ns: 'home' }),
         //     func: () => {
-        //         trigger();
         //         logToFirebase('funcUse', { funcName: 'harbor_new' });
         //         navigation.navigate('HarborComposer', { mode: 'newTopic' });
         //     },
@@ -160,7 +164,6 @@ const HomeScreen = ({ navigation, topChromeHeight }) => {
             iconTone: 'campus',
             function_name: t('支持我們', { ns: 'home' }),
             func: () => {
-                trigger();
                 logToFirebase('funcUse', { funcName: 'donate' });
                 // 愛發電無法連線時改用 GitHub 捐贈頁
                 openDonateLink();
@@ -180,7 +183,6 @@ const HomeScreen = ({ navigation, topChromeHeight }) => {
             iconTone: 'academic',
             function_name: t('常見問題', { ns: 'home' }),
             func: () => {
-                trigger();
                 logToFirebase('funcUse', { funcName: 'usual_q' });
                 openLink(USUAL_Q);
             },
@@ -389,6 +391,9 @@ const HomeScreen = ({ navigation, topChromeHeight }) => {
                     alignItems: 'center',
                 }}
                 activeOpacity={0.7}
+                onPressIn={() => {
+                    trigger();
+                }}
                 onPress={item.func}
                 key={item.function_name}>
                 <FeatureIcon item={item} size={scale(22)} />
@@ -763,7 +768,9 @@ const HomeScreen = ({ navigation, topChromeHeight }) => {
                 {/* 活動瀑布流，預留間距避免遮擋上方快捷入口 */}
                 <EventPage ref={eventPage} style={{ marginTop: verticalScale(3) }} />
             </ScrollView>
-            <TopScrollEdgeBackdrop headerHeight={topChromeHeight} scrollY={scrollY} />
+            {useNativeLiquidGlassHeader ? null : (
+                <TopScrollEdgeBackdrop headerHeight={topChromeHeight} scrollY={scrollY} />
+            )}
 
             {/* Modal */}
             {isShowModal && (

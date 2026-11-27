@@ -222,10 +222,10 @@ const BusScreen = ({navigation}) => {
                             <ScalePressable
                                 accessibilityRole="button"
                                 accessibilityLabel={t('官方網站')}
-                                onPress={() => {
+                                onPressIn={() => {
                                     trigger();
-                                    openBusOfficialPage();
                                 }}
+                                onPress={openBusOfficialPage}
                                 style={staticStyles.headerButton}>
                                 <MaterialCommunityIcons
                                     name="earth"
@@ -236,10 +236,10 @@ const BusScreen = ({navigation}) => {
                             <ScalePressable
                                 accessibilityRole="button"
                                 accessibilityLabel={t('官方資訊')}
-                                onPress={() => {
+                                onPressIn={() => {
                                     trigger();
-                                    openBusServiceInfo();
                                 }}
+                                onPress={openBusServiceInfo}
                                 style={staticStyles.headerButton}>
                                 <MaterialCommunityIcons
                                     name="information-outline"
@@ -485,7 +485,6 @@ const BusScreen = ({navigation}) => {
     }, [selectedStop, toggleModal]);
 
     const handleRefresh = () => {
-        trigger();
         fetchBusInfo({manual: true});
     };
 
@@ -566,7 +565,10 @@ const BusScreen = ({navigation}) => {
                 refreshControl={
                     <RefreshControl
                         refreshing={isRefreshing}
-                        onRefresh={handleRefresh}
+                        onRefresh={() => {
+                            trigger();
+                            handleRefresh();
+                        }}
                         tintColor={black.second}
                         colors={[black.second]}
                     />

@@ -9,16 +9,11 @@ import { useCoursePlan } from '../context/CoursePlanContext';
 import { TAB_LABEL_FONT_SIZE } from '../constants';
 
 /**
- * 課表段落 Tab 角標：
- * - 有衝突 → 顯示衝突數
- * - 尚未選課 → 小紅點提示去排課
- *
- * 分段切換器與寬屏標題都將角標疊加在「課表」文字右上角，維持文字居中。
+ * 純顯示版課表角標，供原生導覽列 headerTitle（位於 CoursePlanProvider 外層）直接傳值渲染。
  */
-export const TimetableTabBadge = () => {
+export const TimetableTabBadgeView = ({ conflictCount = 0, planCount = 0 }) => {
     const { theme } = useTheme();
     const { unread, trueWhite } = theme;
-    const { conflictCount, planList } = useCoursePlan();
 
     if (conflictCount > 0) {
         return (
@@ -48,7 +43,7 @@ export const TimetableTabBadge = () => {
         );
     }
 
-    if (planList.length === 0) {
+    if (planCount === 0) {
         return (
             <View
                 pointerEvents="none"
@@ -66,6 +61,23 @@ export const TimetableTabBadge = () => {
     }
 
     return null;
+};
+
+/**
+ * 課表段落 Tab 角標：
+ * - 有衝突 → 顯示衝突數
+ * - 尚未選課 → 小紅點提示去排課
+ *
+ * 分段切換器與寬屏標題都將角標疊加在「課表」文字右上角，維持文字居中。
+ */
+export const TimetableTabBadge = () => {
+    const { conflictCount, planList } = useCoursePlan();
+    return (
+        <TimetableTabBadgeView
+            conflictCount={conflictCount}
+            planCount={planList.length}
+        />
+    );
 };
 
 /**

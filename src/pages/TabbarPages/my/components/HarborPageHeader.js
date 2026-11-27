@@ -18,6 +18,7 @@ const HarborPageHeader = ({
     compact = false,
     // user,
     // scrollY,
+    hideSettingsButton = false,
     onSettingsPress,
 }) => {
     const {theme} = useTheme();
@@ -66,23 +67,25 @@ const HarborPageHeader = ({
                 </Animated.View>
             ) : null}
             */}
-            <View style={styles.actions}>
-                <TouchableScale
-                    accessibilityRole="button"
-                    accessibilityLabel={t('設置')}
-                    hitSlop={scale(8)}
-                    style={styles.button}
-                    onPress={() => {
-                        trigger();
-                        onSettingsPress();
-                    }}>
-                    <Ionicons
-                        name="settings-outline"
-                        size={verticalScale(18)}
-                        color={theme.black.third}
-                    />
-                </TouchableScale>
-            </View>
+            {hideSettingsButton ? null : (
+                <View style={styles.actions}>
+                    <TouchableScale
+                        accessibilityRole="button"
+                        accessibilityLabel={t('設置')}
+                        hitSlop={scale(8)}
+                        style={styles.button}
+                        onPress={() => {
+                            trigger();
+                            onSettingsPress();
+                        }}>
+                        <Ionicons
+                            name="settings-outline"
+                            size={verticalScale(18)}
+                            color={theme.black.third}
+                        />
+                    </TouchableScale>
+                </View>
+            )}
         </View>
     );
 };

@@ -368,7 +368,7 @@ function CourseSim({ route, navigation, isSplitPane = false }) {
 
     const insets = useSafeAreaInsets();
     const { width: windowWidth, height: windowHeight } = useWindowDimensions();
-    const { topChromeHeight } = useCourseChrome();
+    const { topChromeHeight, useNativeLiquidGlassHeader } = useCourseChrome();
     const courseSimTopInset = topChromeHeight;
     const scrollY = useRef(new Animated.Value(0)).current;
     const handleTopScroll = useCallback(event => {
@@ -3138,12 +3138,14 @@ E11-0000
                 </View>
             </ScrollView>
 
-            <TopScrollEdgeBackdrop
-                headerHeight={topChromeHeight}
-                fadeHeight={SCROLL_EDGE_FADE_HEIGHT}
-                scrollY={scrollY}
-                zIndex={2}
-            />
+            {useNativeLiquidGlassHeader ? null : (
+                <TopScrollEdgeBackdrop
+                    headerHeight={topChromeHeight}
+                    fadeHeight={SCROLL_EDGE_FADE_HEIGHT}
+                    scrollY={scrollY}
+                    zIndex={2}
+                />
+            )}
 
             {/* 有排課時才顯示具體／概覽切換；與 FAB 同層，bottom 見 floatingBottom */}
             {visiblePlanSlots.length > 0 &&

@@ -80,7 +80,10 @@ const orderEventData = result => {
 /**
  * 澳大活動列表
  */
-const UMEventPage = forwardRef(function UMEventPage({ topHeaderHeight }, ref) {
+const UMEventPage = forwardRef(function UMEventPage({
+    topHeaderHeight,
+    useNativeLiquidGlassHeader = false,
+}, ref) {
     const scrollViewRef = useRef(null);
     const mountedRef = useRef(true);
     const hasVisibleDataRef = useRef(false);
@@ -264,10 +267,12 @@ const UMEventPage = forwardRef(function UMEventPage({ topHeaderHeight }, ref) {
                         />
                     }
                 />
-                <TopScrollEdgeBackdrop
-                    headerHeight={topHeaderHeight + searchBarHeight}
-                    scrollY={scrollY}
-                />
+                {useNativeLiquidGlassHeader ? null : (
+                    <TopScrollEdgeBackdrop
+                        headerHeight={topHeaderHeight + searchBarHeight}
+                        scrollY={scrollY}
+                    />
+                )}
                 <View
                     onLayout={onSearchBarLayout}
                     style={{
@@ -286,6 +291,7 @@ const UMEventPage = forwardRef(function UMEventPage({ topHeaderHeight }, ref) {
                         placeholder={t('搜索澳大活動')}
                         cancelLabel={t('取消')}
                         clearAccessibilityLabel={t('清除搜尋')}
+                        liquidGlass={useNativeLiquidGlassHeader}
                     />
                 </View>
             </View>

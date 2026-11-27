@@ -306,8 +306,10 @@ const BusEtaStatsSheet = ({visible, onClose, selectedStop, selectedVehiclePlate,
                             accessibilityRole="button"
                             accessibilityLabel={t('更新到站時間統計')}
                             disabled={loading}
-                            onPress={() => {
+                            onPressIn={() => {
                                 trigger();
+                            }}
+                            onPress={() => {
                                 fetchStats({force: true});
                             }}
                             style={styles.iconButton}>
@@ -320,8 +322,10 @@ const BusEtaStatsSheet = ({visible, onClose, selectedStop, selectedVehiclePlate,
                         <ScalePressable
                             accessibilityRole="button"
                             accessibilityLabel={t('關閉')}
-                            onPress={() => {
+                            onPressIn={() => {
                                 trigger();
+                            }}
+                            onPress={() => {
                                 sheetRef.current?.hide();
                             }}
                             style={styles.iconButton}>

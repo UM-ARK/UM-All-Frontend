@@ -24,6 +24,8 @@ import { scale, verticalScale } from 'react-native-size-matters';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
+import SegmentedControl from '@expo/ui/community/segmented-control';
+
 import Text from '../../../components/AppText';
 import ScalePressable from '../../../components/ScalePressable';
 import SegmentedTabControl from '../../../components/SegmentedTabControl';
@@ -61,8 +63,82 @@ const VIEW_CONFIG = {
 // 對齊服務頁頂部液態玻璃膠囊高度；搜尋列固定顯示，不再隨滾動收合。
 const STICKY_TOOLBAR_HEIGHT = verticalScale(38);
 const SEARCH_BAR_ROW_HEIGHT = SEARCH_FIELD_MIN_HEIGHT;
+const NATIVE_SEGMENT_ITEM_WIDTH = scale(60);
 const Drawer = createDrawerNavigator();
 const AnimatedPagerView = Animated.createAnimatedComponent(PagerView);
+
+/**
+ * 論壇頂部分段：支援液態玻璃時用原生 SegmentedControl，
+ * 否則回退到自訂 SegmentedTabControl（含 Android／Web／舊 iOS）。
+ */
+const HarborFeedSegmentControl = ({
+    options,
+    selectedIndex,
+    position,
+    onChange,
+}) => {
+    const { theme } = useTheme();
+    const values = useMemo(
+        () => options.map(option => option.label),
+        [options],
+    );
+    const unreadBadge = useMemo(() => {
+        if (!isLiquidGlassSupported) {
+            return null;
+        }
+        return options.find(option => option.key === 'unread')?.badge ?? null;
+    }, [options]);
+
+    if (isLiquidGlassSupported) {
+        return (
+            <View
+                style={[
+                    styles.nativeSegmentInner,
+                    {
+                        width: Math.max(
+                            options.length,
+                            2,
+                        ) * NATIVE_SEGMENT_ITEM_WIDTH,
+                    },
+                ]}>
+                <SegmentedControl
+                    values={values}
+                    selectedIndex={selectedIndex}
+                    onChange={event => {
+                        const index = event.nativeEvent.selectedSegmentIndex;
+                        if (
+                            typeof index !== 'number' ||
+                            index < 0 ||
+                            index >= options.length
+                        ) {
+                            return;
+                        }
+                        onChange(index);
+                    }}
+                    appearance={theme.isLight ? 'light' : 'dark'}
+                    style={styles.nativeSegmentControl}
+                />
+                {unreadBadge ? (
+                    <View
+                        pointerEvents="none"
+                        style={styles.nativeSegmentBadgeAnchor}>
+                        {unreadBadge}
+                    </View>
+                ) : null}
+            </View>
+        );
+    }
+
+    return (
+        <SegmentedTabControl
+            options={options}
+            selectedIndex={selectedIndex}
+            position={position}
+            onChange={onChange}
+            compact
+        />
+    );
+};
 
 const HarborStickyToolbar = ({
     segmentOptions,
@@ -276,7 +352,7 @@ const HarborStickyToolbar = ({
                     </ScalePressable>
                 </View>
 
-                <SegmentedTabControl
+                <HarborFeedSegmentControl
                     options={segmentOptions}
                     selectedIndex={currentIndex}
                     position={tabPosition}
@@ -284,7 +360,6 @@ const HarborStickyToolbar = ({
                         trigger(currentIndex === index ? 'tap' : 'selection');
                         onChange(index);
                     }}
-                    compact
                 />
 
                 <View style={[styles.toolbarSide, styles.toolbarRight]}>
@@ -791,7 +866,7 @@ const ForumPage = ({ navigation }) => {
                 </View>
             ),
             headerTitle: () => (
-                <SegmentedTabControl
+                <HarborFeedSegmentControl
                     options={segmentOptions}
                     selectedIndex={currentIndex}
                     position={tabPosition}
@@ -799,7 +874,6 @@ const ForumPage = ({ navigation }) => {
                         trigger(currentIndex === index ? 'tap' : 'selection');
                         selectView(index);
                     }}
-                    compact
                 />
             ),
             headerRight: () => (
@@ -1210,6 +1284,19 @@ const styles = StyleSheet.create({
         width: scale(5),
         height: scale(5),
         borderRadius: scale(2.5),
+    },
+    nativeSegmentInner: {
+        maxWidth: '100%',
+        justifyContent: 'center',
+    },
+    nativeSegmentControl: {
+        width: '100%',
+        height: scale(32),
+    },
+    nativeSegmentBadgeAnchor: {
+        position: 'absolute',
+        top: scale(2),
+        right: scale(18),
     },
     searchBarRow: {
         // 與 nativeStickySearchRow／資訊頁一致，避免 Scroll Edge 遮罩蓋住實色搜尋列

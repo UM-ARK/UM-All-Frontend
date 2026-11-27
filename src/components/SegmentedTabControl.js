@@ -29,7 +29,7 @@ export default function SegmentedTabControl({
     inset = false,
     fullWidth = false,
     small = false,
-    glass = true,
+    glass = false,
     glassInteractive = false,
 }) {
     const { theme } = useTheme();

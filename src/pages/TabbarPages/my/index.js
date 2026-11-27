@@ -1,12 +1,15 @@
-import React from 'react';
+import React, { useCallback, useContext, useLayoutEffect } from 'react';
 import {
     Alert,
+    Platform,
     RefreshControl,
     StyleSheet,
     View,
     useWindowDimensions,
 } from 'react-native';
 
+import Ionicons from '@react-native-vector-icons/ionicons';
+import { HeaderHeightContext } from '@react-navigation/elements';
 import { useFocusEffect } from '@react-navigation/native';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -23,6 +26,7 @@ import { scale, verticalScale } from 'react-native-size-matters';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import Text from '../../../components/AppText';
+import ScalePressable from '../../../components/ScalePressable';
 import { uiStyle, useTheme } from '../../../components/ThemeContext';
 import { useHarborSession } from '../../../contexts/HarborSessionContext';
 import { trigger } from '../../../utils/trigger';
@@ -40,9 +44,22 @@ const PROFILE_BACKDROP_ENTRANCE = FadeInDown
     .withInitialValues({ opacity: 0.7, translateY: verticalScale(10) })
     .reduceMotion(ReduceMotion.System);
 
+const MyNativeSettingsButton = ({ color, label, onPress }) => (
+    <ScalePressable
+        accessibilityRole="button"
+        accessibilityLabel={label}
+        hitSlop={scale(8)}
+        onPress={onPress}
+        style={styles.nativeHeaderIconButton}>
+        <Ionicons name="settings-outline" size={scale(20)} color={color} />
+    </ScalePressable>
+);
+
 const MyScreen = ({ navigation }) => {
     const { theme } = useTheme();
     const { t } = useTranslation(['common', 'my']);
+    const useNativeHeader = Platform.OS === 'ios';
+    const nativeHeaderHeight = useContext(HeaderHeightContext) ?? 0;
     const {
         status,
         user,
@@ -62,12 +79,48 @@ const MyScreen = ({ navigation }) => {
         width - insets.left - insets.right - PAGE_GUTTER * 2,
         scale(680),
     );
-    const contentTopInset = insets.top + verticalScale(8);
+    const contentTopInset = useNativeHeader
+        ? nativeHeaderHeight || insets.top + verticalScale(8)
+        : insets.top + verticalScale(8);
     const profileBackdropHeight = contentTopInset + verticalScale(92);
     const isSignedIn = status === 'signedIn' && !!user;
     const backgroundColor = theme.isLight
         ? (isSignedIn ? theme.bg_color : theme.white)
         : theme.harbor_bg_color;
+
+    const handleSettingsPress = useCallback(() => {
+        trigger();
+        navigation.navigate('SettingPage');
+    }, [navigation]);
+
+    useLayoutEffect(() => {
+        if (!useNativeHeader) {
+            return;
+        }
+        navigation.setOptions({
+            headerShown: true,
+            headerTransparent: true,
+            headerBlurEffect: null,
+            headerShadowVisible: false,
+            headerStyle: { backgroundColor: 'transparent' },
+            contentStyle: { backgroundColor },
+            headerTitle: '',
+            headerRight: () => (
+                <MyNativeSettingsButton
+                    color={theme.black.second}
+                    label={t('設置')}
+                    onPress={handleSettingsPress}
+                />
+            ),
+        });
+    }, [
+        backgroundColor,
+        handleSettingsPress,
+        navigation,
+        t,
+        theme.black.second,
+        useNativeHeader,
+    ]);
     // 漸變只改變頁面底色的透明度，避免混入黑色。
     const fadeStartColor = backgroundColor.length === 4
         ? `${backgroundColor}0`
@@ -241,6 +294,9 @@ const MyScreen = ({ navigation }) => {
             ) : null}
             <Reanimated.ScrollView
                 contentInsetAdjustmentBehavior="never"
+                scrollIndicatorInsets={
+                    useNativeHeader ? { top: contentTopInset } : undefined
+                }
                 showsVerticalScrollIndicator={false}
                 onScroll={handleScroll}
                 scrollEventThrottle={16}
@@ -266,6 +322,7 @@ const MyScreen = ({ navigation }) => {
                     <HarborPageHeader
                         compact={isSignedIn}
                         // user={isSignedIn ? user : undefined}
+                        hideSettingsButton={useNativeHeader}
                         onSettingsPress={() =>
                             navigation.navigate('SettingPage')
                         }
@@ -281,8 +338,10 @@ const MyScreen = ({ navigation }) => {
                             onChatPress={() =>
                                 navigation.navigate('HarborChatList')
                             }
-                            onSettingsPress={() =>
-                                navigation.navigate('SettingPage')
+                            onSettingsPress={
+                                useNativeHeader
+                                    ? undefined
+                                    : () => navigation.navigate('SettingPage')
                             }
                             teamSchedule={
                                 <TeamSchedulePreviewSection
@@ -309,6 +368,13 @@ const MyScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+    },
+    nativeHeaderIconButton: {
+        width: scale(32),
+        height: scale(32),
+        borderRadius: scale(16),
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     scrollContent: {
         alignItems: 'center',

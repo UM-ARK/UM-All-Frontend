@@ -1,4 +1,10 @@
-import React, { useCallback, useMemo, useRef } from 'react';
+import React, {
+    forwardRef,
+    useCallback,
+    useImperativeHandle,
+    useMemo,
+    useRef,
+} from 'react';
 import { StyleSheet, View } from 'react-native';
 import ActionSheet from 'react-native-actions-sheet';
 import { scale, verticalScale } from 'react-native-size-matters';
@@ -30,14 +36,15 @@ import { PROGRAMME_LEVELS } from '../../../../utils/courseProgramme';
  * @param {boolean} canClear 是否已有模擬課表
  * @param {Function} onClearPress 清空模擬課表
  */
-const CourseMoreMenu = ({
+const CourseMoreMenu = forwardRef(({
     programmeLevel,
     catalogMetadata,
     onManualUpdate,
     onOpenSharePoint,
     canClear,
     onClearPress,
-}) => {
+    hideTrigger = false,
+}, ref) => {
     const { theme } = useTheme();
     const {
         themeColor,
@@ -215,6 +222,14 @@ const CourseMoreMenu = ({
         actionSheetRef.current?.show();
     }, []);
 
+    useImperativeHandle(
+        ref,
+        () => ({
+            open: handleOpenSheet,
+        }),
+        [handleOpenSheet],
+    );
+
     // 先收起 sheet，等 onClose 再執行，避免與 WebBrowser PAGE_SHEET / 另一個 sheet 搶 present
     const runAction = useCallback(action => {
         trigger();
@@ -234,16 +249,18 @@ const CourseMoreMenu = ({
 
     return (
         <>
-            <ScalePressable
-                style={styles.moreButton}
-                onPress={handleOpenSheet}
-                hitSlop={verticalScale(8)}>
-                <DotsThree
-                    size={verticalScale(20)}
-                    color={black.main}
-                    weight="bold"
-                />
-            </ScalePressable>
+            {hideTrigger ? null : (
+                <ScalePressable
+                    style={styles.moreButton}
+                    onPress={handleOpenSheet}
+                    hitSlop={verticalScale(8)}>
+                    <DotsThree
+                        size={verticalScale(20)}
+                        color={black.main}
+                        weight="bold"
+                    />
+                </ScalePressable>
+            )}
 
             <ActionSheet
                 ref={actionSheetRef}
@@ -387,6 +404,6 @@ const CourseMoreMenu = ({
             />
         </>
     );
-};
+});
 
 export default CourseMoreMenu;

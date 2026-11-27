@@ -303,8 +303,10 @@ const VehicleMarker = ({accentColor, motionEnabled, observedAt, onSelect, positi
                     accessibilityRole="button"
                     accessibilityLabel={vehicle.accessibilityLabel}
                     accessibilityState={{selected}}
-                    onPress={() => {
+                    onPressIn={() => {
                         trigger();
+                    }}
+                    onPress={() => {
                         onSelect(vehicle.vehiclePlateNumber);
                     }}
                     style={styles.vehicle}>
@@ -807,8 +809,10 @@ const BusRouteMap = ({
                                 station: `${stop.code} ${translate(stop.name)}`,
                             })}
                             accessibilityState={{selected}}
-                            onPress={() => {
+                            onPressIn={() => {
                                 trigger();
+                            }}
+                            onPress={() => {
                                 onSelectStop(stop.code);
                             }}
                             style={[styles.stopLabel, labelAlignment]}>

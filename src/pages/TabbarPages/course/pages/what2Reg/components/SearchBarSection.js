@@ -7,10 +7,12 @@ import searchFieldStyles, {
     SEARCH_FIELD_CLEAR_ICON_SIZE,
     SEARCH_FIELD_ICON_SIZE,
     SEARCH_FIELD_MAX_FONT_SIZE_MULTIPLIER,
+    SEARCH_FIELD_MIN_HEIGHT,
 } from '../../../../../../components/searchFieldStyles';
 import { scale, verticalScale } from 'react-native-size-matters';
 import { t } from 'i18next';
 import { uiStyle } from '../../../../../../components/ThemeContext';
+import { GlassView } from '../../../../../../utils/glassEffect';
 
 /**
  * 搜尋欄區塊
@@ -24,10 +26,12 @@ const SearchBarSection = ({
     onClear,
     onPressAction,
     showOfficial = true,
+    liquidGlass = false,
     trigger,
 }) => {
     const { themeColor, black, white } = theme;
     const [isFocused, setIsFocused] = useState(false);
+    const FieldContainer = liquidGlass ? GlassView : View;
 
     const searchActions = [
         {
@@ -59,15 +63,18 @@ const SearchBarSection = ({
                 paddingTop: scale(5),
                 paddingHorizontal: scale(10),
             }}>
-            <View
+            <FieldContainer
+                {...(liquidGlass ? { isInteractive: true } : {})}
                 style={[
                     searchFieldStyles.field,
-                    {
-                        backgroundColor: white,
-                        borderWidth: StyleSheet.hairlineWidth,
-                        borderColor: isFocused ? themeColor : `${black.third}33`,
-                        width: '100%',
-                    },
+                    liquidGlass
+                        ? styles.liquidGlassField
+                        : {
+                            backgroundColor: white,
+                            borderWidth: StyleSheet.hairlineWidth,
+                            borderColor: isFocused ? themeColor : `${black.third}33`,
+                            width: '100%',
+                        },
                 ]}>
                 <PhosphorFeatureIcon
                     name="search"
@@ -114,7 +121,7 @@ const SearchBarSection = ({
                         />
                     </Pressable>
                 ) : null}
-            </View>
+            </FieldContainer>
 
             {inputOK ? (
                 <View
@@ -165,5 +172,14 @@ const SearchBarSection = ({
         </View>
     );
 };
+
+const styles = StyleSheet.create({
+    liquidGlassField: {
+        width: '100%',
+        borderRadius: SEARCH_FIELD_MIN_HEIGHT / 2,
+        paddingHorizontal: 14,
+        overflow: 'hidden',
+    },
+});
 
 export default SearchBarSection;

@@ -21,7 +21,7 @@ const AnimatedPagerView = Animated.createAnimatedComponent(PagerView);
  * 校園資訊頁：活動 / 新聞合併為單一 Top Tab。
  * 分段切換器對齊服務頁膠囊；左右滑仍由 PagerView 換頁。
  */
-const CampusPage = ({ topChromeHeight }) => {
+const CampusPage = ({ topChromeHeight, useNativeLiquidGlassHeader = false }) => {
     const { theme } = useTheme();
     const { bg_color } = theme;
     const { t } = useTranslation('common');
@@ -125,6 +125,7 @@ const CampusPage = ({ topChromeHeight }) => {
                     position={tabPosition}
                     onChange={onSegmentPress}
                     small
+                    glass={useNativeLiquidGlassHeader}
                     glassInteractive
                 />
             </View>
@@ -138,12 +139,20 @@ const CampusPage = ({ topChromeHeight }) => {
                 offscreenPageLimit={1}>
                 <View key="event" style={styles.page} collapsable={false}>
                     {mountedPages[0] ? (
-                        <UMEventPage ref={eventPageRef} topHeaderHeight={topHeaderHeight} />
+                        <UMEventPage
+                            ref={eventPageRef}
+                            topHeaderHeight={topHeaderHeight}
+                            useNativeLiquidGlassHeader={useNativeLiquidGlassHeader}
+                        />
                     ) : null}
                 </View>
                 <View key="news" style={styles.page} collapsable={false}>
                     {mountedPages[1] ? (
-                        <NewsPage ref={newsPageRef} topHeaderHeight={topHeaderHeight} />
+                        <NewsPage
+                            ref={newsPageRef}
+                            topHeaderHeight={topHeaderHeight}
+                            useNativeLiquidGlassHeader={useNativeLiquidGlassHeader}
+                        />
                     ) : null}
                 </View>
             </AnimatedPagerView>

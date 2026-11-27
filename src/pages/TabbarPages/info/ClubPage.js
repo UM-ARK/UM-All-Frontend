@@ -100,7 +100,7 @@ const buildSections = (clubDataList) => {
     return sections;
 };
 
-function ClubPage({ topChromeHeight }) {
+function ClubPage({ topChromeHeight, useNativeLiquidGlassHeader = false }) {
     const { theme } = useContext(ThemeContext);
     const { themeColor, black, white } = theme;
     const insets = useSafeAreaInsets();
@@ -472,7 +472,9 @@ function ClubPage({ topChromeHeight }) {
                 // Android + Fabric：removeClippedSubviews 與 sticky 區段標題會導致掛載索引錯亂而閃退（addViewAt / IndexOutOfBounds）
                 removeClippedSubviews={Platform.OS === 'ios'}
             />
-            <TopScrollEdgeBackdrop headerHeight={headerHeight} scrollY={scrollY} />
+            {useNativeLiquidGlassHeader ? null : (
+                <TopScrollEdgeBackdrop headerHeight={headerHeight} scrollY={scrollY} />
+            )}
             <View
                 onLayout={event => setSearchHeaderHeight(event.nativeEvent.layout.height)}
                 style={{ position: 'absolute', top: topChromeHeight, left: 0, right: 0, zIndex: 2 }}>
@@ -482,6 +484,7 @@ function ClubPage({ topChromeHeight }) {
                     loading={isLoading}
                     onFocus={handleSearchFocus}
                     onCancel={() => setSearchQuery('')}
+                    liquidGlass={useNativeLiquidGlassHeader}
                 />
             </View>
         </View>

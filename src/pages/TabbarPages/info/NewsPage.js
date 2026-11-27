@@ -80,7 +80,10 @@ const splitNewsData = result => {
 /**
  * 澳大新聞列表
  */
-const NewsPage = forwardRef(function NewsPage({ topHeaderHeight }, ref) {
+const NewsPage = forwardRef(function NewsPage({
+    topHeaderHeight,
+    useNativeLiquidGlassHeader = false,
+}, ref) {
     const { theme } = useContext(ThemeContext);
     const insets = useSafeAreaInsets();
     // 指示器底部要停在底欄之上；原生 Tab 沒給高度時用安全區加底欄估算
@@ -419,10 +422,12 @@ const NewsPage = forwardRef(function NewsPage({ topHeaderHeight }, ref) {
                         alwaysBounceHorizontal={false}
                         removeClippedSubviews
                     />
-                    <TopScrollEdgeBackdrop
-                        headerHeight={topHeaderHeight + searchBarHeight}
-                        scrollY={scrollY}
-                    />
+                    {useNativeLiquidGlassHeader ? null : (
+                        <TopScrollEdgeBackdrop
+                            headerHeight={topHeaderHeight + searchBarHeight}
+                            scrollY={scrollY}
+                        />
+                    )}
                     <View
                         onLayout={onSearchBarLayout}
                         style={{
@@ -442,6 +447,7 @@ const NewsPage = forwardRef(function NewsPage({ topHeaderHeight }, ref) {
                             placeholder={t('搜索澳大新聞')}
                             cancelLabel={t('取消')}
                             clearAccessibilityLabel={t('清除搜尋')}
+                            liquidGlass={useNativeLiquidGlassHeader}
                         />
                     </View>
                 </View>

@@ -2,10 +2,16 @@ import React, { createContext, useContext } from 'react';
 
 const CourseChromeContext = createContext({
     topChromeHeight: 0,
+    useNativeLiquidGlassHeader: false,
 });
 
-export const CourseChromeProvider = ({ topChromeHeight = 0, children }) => (
-    <CourseChromeContext.Provider value={{ topChromeHeight }}>
+export const CourseChromeProvider = ({
+    topChromeHeight = 0,
+    useNativeLiquidGlassHeader = false,
+    children,
+}) => (
+    <CourseChromeContext.Provider
+        value={{ topChromeHeight, useNativeLiquidGlassHeader }}>
         {children}
     </CourseChromeContext.Provider>
 );
