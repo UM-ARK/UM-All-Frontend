@@ -102,7 +102,6 @@ const CalendarBar = ({ topInset, onDeepSeaLayout, refreshTrigger = 0, tide, onDa
     const [selectDay, setSelectDay] = useState(() => getCurrentSelection(cal));
     const [listWidth, setListWidth] = useState(0);
     const initialIndex = useRef(selectDay).current;
-    const lastDefaultIndex = useRef(initialIndex);
     const lastRefresh = useRef(refreshTrigger);
     const boatCenter = useSharedValue(getCalItemCenter(calItemLayouts[initialIndex]));
     const scrollX = useSharedValue(calItemLayouts[initialIndex]?.offset ?? 0);
@@ -217,17 +216,17 @@ const CalendarBar = ({ topInset, onDeepSeaLayout, refreshTrigger = 0, tide, onDa
         if (lastRefresh.current === refreshTrigger) {return;}
         lastRefresh.current = refreshTrigger;
         const index = getCurrentSelection(cal);
-        if (index === lastDefaultIndex.current) {return;}
-        lastDefaultIndex.current = index;
         const layout = calItemLayouts[index];
         if (!layout) {return;}
 
+        // 下拉刷新一律回到當前／下一個日程，即使用戶先前橫滑到其他日子。
         scrollSelectEnabled.set(false);
         applySelection(index, { animateBoat: false, haptic: false });
         summaryProgress.set(1);
+        scrollX.set(layout.offset);
         calScrollRef.current?.scrollToOffset({ offset: layout.offset, animated: false });
         scrollSelectEnabled.set(true);
-    }, [applySelection, cal, calItemLayouts, refreshTrigger, scrollSelectEnabled, summaryProgress]);
+    }, [applySelection, cal, calItemLayouts, refreshTrigger, scrollSelectEnabled, scrollX, summaryProgress]);
 
     useEffect(() => {
         if (reducedMotion) {boatCenter.set(getCalItemCenter(calItemLayouts[selectDay]));}
