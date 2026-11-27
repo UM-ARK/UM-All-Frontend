@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import React, { forwardRef, memo, useState, useRef, useEffect, useCallback, useImperativeHandle, useMemo } from 'react';
 import {
     Animated,
     ScrollView,
@@ -46,7 +46,6 @@ import { recordFeatureUsage } from '../../../../utils/featureRecentUsage';
 import { toastTextArr, toastKaomojiArr } from '../../../../static/UMARK_Assets/EasterEgg.js';
 import CustomBottomSheet from '../../../../utils/BottomSheet';
 import HyperlinkText from '../../../../components/HyperlinkText.js';
-import SearchBar from './components/SearchBar.js';
 import CalendarBar from './components/CalendarBar';
 import Toast from 'react-native-toast-message';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -57,7 +56,6 @@ import moment from 'moment';
 import lodash from 'lodash';
 import { useTranslation } from 'react-i18next';
 import { BottomSheetScrollView, BottomSheetFlatList } from '@gorhom/bottom-sheet';
-import ScrollToTopButton from '../../../../components/ScrollToTopButton';
 import TopScrollEdgeBackdrop from '../../../../components/TopScrollEdgeBackdrop';
 import TouchableScale from '../../../../components/TouchableScale';
 import FeatureIcon from './search/components/FeatureIcon';
@@ -105,11 +103,11 @@ const iconTypes = {
     materialCommunityIcons: 'MaterialCommunityIcons',
 };
 
-const HomeScreen = ({
+const HomeScreen = forwardRef(function HomeScreen({
     navigation,
     topChromeHeight,
     useNativeLiquidGlassHeader = false,
-}) => {
+}, ref) {
     const { theme } = useTheme();
     const { white, bg_color, black, themeColor, themeColorLight, themeColorUltraLight, viewShadow, TIME_TABLE_COLOR, featureIconTones } = theme;
     const { t, i18n } = useTranslation(['common', 'home']);
@@ -117,7 +115,6 @@ const HomeScreen = ({
     const isTc = i18n.language === 'tc';
     const featureFontSize = isTc ? verticalScale(8) : verticalScale(7);
     const [scrollY] = useState(() => new Animated.Value(0));
-    const [viewport, setViewport] = useState(null);
 
     // 狀態
     const functionArray = useMemo(() => [
@@ -216,6 +213,16 @@ const HomeScreen = ({
     const bottomSheetRef = useRef(null);
     const refreshingRef = useRef(false);
     const upcomingCourseRequestRef = useRef(0);
+
+    useImperativeHandle(
+        ref,
+        () => ({
+            scrollToTop: () => {
+                scrollView.current?.scrollTo({ x: 0, y: 0, animated: true });
+            },
+        }),
+        [],
+    );
 
     // 生命週期
     useEffect(() => {
@@ -396,7 +403,7 @@ const HomeScreen = ({
                 }}
                 onPress={item.func}
                 key={item.function_name}>
-                <FeatureIcon item={item} size={scale(22)} />
+                <FeatureIcon item={item} size={scale(22)} showBackground={false} />
                 <Text
                     style={{
                         ...uiStyle.defaultText,
@@ -520,7 +527,6 @@ const HomeScreen = ({
     // 主渲染
     return (
         <View
-            onLayout={event => setViewport(event.nativeEvent.layout)}
             style={{ flex: 1, backgroundColor: bg_color, alignItems: 'center', justifyContent: 'center' }}>
             <ScrollView
                 style={{ width: '100%' }}
@@ -544,8 +550,6 @@ const HomeScreen = ({
                 keyboardShouldPersistTaps={Platform.OS === 'android' ? 'always' : 'handled'}
                 contentContainerStyle={{ width: '100%', alignItems: 'center', paddingTop: topChromeHeight }}
             >
-
-                <SearchBar navigation={navigation} />
 
                 {/* 校曆列表 */}
                 <CalendarBar refreshTrigger={calRefreshKey} />
@@ -832,20 +836,11 @@ const HomeScreen = ({
                 </ModalBottom>
             )}
 
-            {viewport && (
-                <ScrollToTopButton
-                    viewport={viewport}
-                    topInset={topChromeHeight}
-                    virtualizedListRef={scrollView}
-                    style={{ zIndex: 2 }}
-                />
-            )}
-
             <CustomBottomSheet ref={bottomSheetRef} page={'home'} onSheetIndexChange={(idx) => setSheetIndex(idx)}>
                 {renderBottomSheet()}
             </CustomBottomSheet>
         </View>
     );
-};
+});
 
-export default HomeScreen;
+export default memo(HomeScreen);

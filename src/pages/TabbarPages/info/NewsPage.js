@@ -1,5 +1,6 @@
 import React, {
     forwardRef,
+    memo,
     useState,
     useEffect,
     useRef,
@@ -20,7 +21,6 @@ import {
 import Text from '../../../components/AppText';
 import TopScrollEdgeBackdrop from '../../../components/TopScrollEdgeBackdrop';
 import ScalePressable from '../../../components/ScalePressable';
-import ClubSearchBar from './components/ClubSearchBar';
 import NewsCard, { NewsRowSeparator } from './components/NewsCard';
 import NewsListSkeleton from './components/NewsListSkeleton';
 import SearchHighlightText from './components/SearchHighlightText';
@@ -83,6 +83,7 @@ const splitNewsData = result => {
 const NewsPage = forwardRef(function NewsPage({
     topHeaderHeight,
     useNativeLiquidGlassHeader = false,
+    searchQuery = '',
 }, ref) {
     const { theme } = useContext(ThemeContext);
     const insets = useSafeAreaInsets();
@@ -135,12 +136,9 @@ const NewsPage = forwardRef(function NewsPage({
     const [isLoading, setIsLoading] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [newsItems, setNewsItems] = useState([]);
-    const [searchQuery, setSearchQuery] = useState('');
     const {
         scrollY,
         onScroll: onSearchScroll,
-        onBarLayout: onSearchBarLayout,
-        barHeight: searchBarHeight,
     } = useStickySearchHeader();
 
     const filteredNewsItems = useMemo(
@@ -352,10 +350,6 @@ const NewsPage = forwardRef(function NewsPage({
         );
     }, [black.main, imagePlaceholder, navigation, searchQuery, styles.topNewsContainer, styles.topNewsOverlay, styles.topNewsText, t, topNews, topNewsContent, topNewsImage, trueBlack, trueWhite]);
 
-    const handleSearchFocus = useCallback(() => {
-        trigger();
-    }, []);
-
     return (
         <View style={{
             flex: 1,
@@ -384,7 +378,7 @@ const NewsPage = forwardRef(function NewsPage({
                         contentInsetAdjustmentBehavior="never"
                         automaticallyAdjustsScrollIndicatorInsets={false}
                         scrollIndicatorInsets={{
-                            top: topHeaderHeight + searchBarHeight,
+                            top: topHeaderHeight,
                             bottom: tabBarHeight,
                             right: 1,
                         }}
@@ -397,7 +391,7 @@ const NewsPage = forwardRef(function NewsPage({
                         ItemSeparatorComponent={NewsRowSeparator}
                         contentContainerStyle={{
                             width: '100%',
-                            paddingTop: topHeaderHeight + searchBarHeight + verticalScale(8),
+                            paddingTop: topHeaderHeight + verticalScale(8),
                             paddingBottom: listBottomPad,
                         }}
                         keyExtractor={item => item._id}
@@ -412,7 +406,7 @@ const NewsPage = forwardRef(function NewsPage({
                                 colors={[themeColor]}
                                 tintColor={themeColor}
                                 refreshing={isRefreshing}
-                                progressViewOffset={topHeaderHeight + searchBarHeight}
+                                progressViewOffset={topHeaderHeight}
                                 onRefresh={() => {
                                     getData({ refreshing: true });
                                 }}
@@ -424,36 +418,14 @@ const NewsPage = forwardRef(function NewsPage({
                     />
                     {useNativeLiquidGlassHeader ? null : (
                         <TopScrollEdgeBackdrop
-                            headerHeight={topHeaderHeight + searchBarHeight}
+                            headerHeight={topHeaderHeight}
                             scrollY={scrollY}
                         />
                     )}
-                    <View
-                        onLayout={onSearchBarLayout}
-                        style={{
-                            position: 'absolute',
-                            top: topHeaderHeight,
-                            left: 0,
-                            right: 0,
-                            zIndex: 2,
-                        }}>
-                        <ClubSearchBar
-                            value={searchQuery}
-                            onChangeText={setSearchQuery}
-                            loading={isRefreshing}
-                            onFocus={handleSearchFocus}
-                            onCancel={() => setSearchQuery('')}
-                            containerStyle={{ paddingBottom: 0 }}
-                            placeholder={t('搜索澳大新聞')}
-                            cancelLabel={t('取消')}
-                            clearAccessibilityLabel={t('清除搜尋')}
-                            liquidGlass={useNativeLiquidGlassHeader}
-                        />
-                    </View>
                 </View>
             )}
         </View>
     );
 });
 
-export default NewsPage;
+export default memo(NewsPage);

@@ -6,14 +6,12 @@ import Text from '../../../components/AppText';
 import TopScrollEdgeBackdrop, {
     getTopScrollEdgeBlurProps,
 } from '../../../components/TopScrollEdgeBackdrop';
-import { SEARCH_FIELD_MIN_HEIGHT } from '../../../components/searchFieldStyles';
 import { uiStyle, ThemeContext, } from '../../../components/ThemeContext';
 import { BASE_URI, BASE_HOST, GET, USUAL_Q } from '../../../utils/pathMap';
 import { clubTagList, clubTagMap } from '../../../utils/clubMap';
 import { openLink } from '../../../utils/browser';
 import { trigger } from '../../../utils/trigger';
 import ClubCard from './components/ClubCard';
-import ClubSearchBar from './components/ClubSearchBar';
 import { filterClubsBySearchQuery } from './utils/clubSearchFilter';
 import axios from 'axios';
 import { scale, verticalScale } from 'react-native-size-matters';
@@ -100,7 +98,7 @@ const buildSections = (clubDataList) => {
     return sections;
 };
 
-function ClubPage({ topChromeHeight, useNativeLiquidGlassHeader = false }) {
+function ClubPage({ topChromeHeight, useNativeLiquidGlassHeader = false, searchQuery = '' }) {
     const { theme } = useContext(ThemeContext);
     const { themeColor, black, white } = theme;
     const insets = useSafeAreaInsets();
@@ -108,13 +106,11 @@ function ClubPage({ topChromeHeight, useNativeLiquidGlassHeader = false }) {
     const tabBarHeight =
         useContext(BottomTabBarHeightContext) ?? insets.bottom + 49;
     const [allClubs, setAllClubs] = useState([]);
-    const [searchQuery, setSearchQuery] = useState('');
     const [isLoading, setIsLoading] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [isOtherViewVisible, setIsOtherViewVisible] = useState(true);
-    const [searchHeaderHeight, setSearchHeaderHeight] = useState(SEARCH_FIELD_MIN_HEIGHT + scale(16));
     const [scrollY] = useState(() => new Animated.Value(0));
-    const headerHeight = topChromeHeight + searchHeaderHeight;
+    const headerHeight = topChromeHeight;
     const nativeTopInset = Platform.OS === 'ios' ? headerHeight : 0;
     const sectionListRef = useRef(null);
     const firstSectionHeaderHeightRef = useRef(0);
@@ -198,10 +194,6 @@ function ClubPage({ topChromeHeight, useNativeLiquidGlassHeader = false }) {
     useEffect(() => {
         getData();
     }, [getData]);
-
-    const handleSearchFocus = useCallback(() => {
-        trigger();
-    }, []);
 
     const renderBottomInfo = useCallback(() => (
         <View style={{ marginBottom: tabBarHeight + scale(20) }}>
@@ -475,18 +467,6 @@ function ClubPage({ topChromeHeight, useNativeLiquidGlassHeader = false }) {
             {useNativeLiquidGlassHeader ? null : (
                 <TopScrollEdgeBackdrop headerHeight={headerHeight} scrollY={scrollY} />
             )}
-            <View
-                onLayout={event => setSearchHeaderHeight(event.nativeEvent.layout.height)}
-                style={{ position: 'absolute', top: topChromeHeight, left: 0, right: 0, zIndex: 2 }}>
-                <ClubSearchBar
-                    value={searchQuery}
-                    onChangeText={setSearchQuery}
-                    loading={isLoading}
-                    onFocus={handleSearchFocus}
-                    onCancel={() => setSearchQuery('')}
-                    liquidGlass={useNativeLiquidGlassHeader}
-                />
-            </View>
         </View>
     );
 }

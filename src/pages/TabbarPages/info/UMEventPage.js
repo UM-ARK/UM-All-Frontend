@@ -1,5 +1,6 @@
 import React, {
     forwardRef,
+    memo,
     useState,
     useEffect,
     useRef,
@@ -14,7 +15,6 @@ import { AnimatedFlashList } from '@shopify/flash-list';
 import { ThemeContext } from '../../../components/ThemeContext';
 import TopScrollEdgeBackdrop from '../../../components/TopScrollEdgeBackdrop';
 import { UM_API_EVENT, UM_API_TOKEN } from '../../../utils/pathMap';
-import { trigger } from '../../../utils/trigger';
 import {
     readUMOpenDataCache,
     UM_EVENT_CACHE_KEY,
@@ -23,7 +23,6 @@ import {
 
 import NewsCard, { NewsRowSeparator } from './components/NewsCard';
 import NewsListSkeleton from './components/NewsListSkeleton';
-import ClubSearchBar from './components/ClubSearchBar';
 import { filterUMOpenDataItemsBySearchQuery } from './utils/umOpenDataSearch';
 import { useStickySearchHeader } from './utils/useCollapsingSearchHeader';
 
@@ -83,6 +82,7 @@ const orderEventData = result => {
 const UMEventPage = forwardRef(function UMEventPage({
     topHeaderHeight,
     useNativeLiquidGlassHeader = false,
+    searchQuery = '',
 }, ref) {
     const scrollViewRef = useRef(null);
     const mountedRef = useRef(true);
@@ -97,17 +97,14 @@ const UMEventPage = forwardRef(function UMEventPage({
     const listBottomPad = Platform.OS === 'ios'
         ? tabBarHeight + verticalScale(10)
         : verticalScale(10);
-    const { t, i18n } = useTranslation('common');
+    const { i18n } = useTranslation('common');
     const currentLanguage = i18n.resolvedLanguage || i18n.language;
 
     const [data, setData] = useState(undefined);
-    const [searchQuery, setSearchQuery] = useState('');
     const [isLoading, setIsLoading] = useState(true);
     const {
         scrollY,
         onScroll: onSearchScroll,
-        onBarLayout: onSearchBarLayout,
-        barHeight: searchBarHeight,
     } = useStickySearchHeader();
     const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -209,10 +206,6 @@ const UMEventPage = forwardRef(function UMEventPage({
         [data, searchQuery],
     );
 
-    const handleSearchFocus = useCallback(() => {
-        trigger();
-    }, []);
-
     // 渲染列表 Item
     const renderItem = useCallback(
         ({ item }) => (
@@ -236,7 +229,7 @@ const UMEventPage = forwardRef(function UMEventPage({
                     style={{ flex: 1, width: '100%' }}
                     data={filteredData}
                     contentContainerStyle={{
-                        paddingTop: topHeaderHeight + searchBarHeight + verticalScale(8),
+                        paddingTop: topHeaderHeight + verticalScale(8),
                         paddingBottom: listBottomPad,
                     }}
                     onScroll={onSearchScroll}
@@ -247,7 +240,7 @@ const UMEventPage = forwardRef(function UMEventPage({
                     contentInsetAdjustmentBehavior="never"
                     automaticallyAdjustsScrollIndicatorInsets={false}
                     scrollIndicatorInsets={{
-                        top: topHeaderHeight + searchBarHeight,
+                        top: topHeaderHeight,
                         bottom: tabBarHeight,
                         right: 1,
                     }}
@@ -260,7 +253,7 @@ const UMEventPage = forwardRef(function UMEventPage({
                             colors={[themeColor]}
                             tintColor={themeColor}
                             refreshing={isRefreshing}
-                            progressViewOffset={topHeaderHeight + searchBarHeight}
+                            progressViewOffset={topHeaderHeight}
                             onRefresh={() => {
                                 getData({ refreshing: true });
                             }}
@@ -269,31 +262,10 @@ const UMEventPage = forwardRef(function UMEventPage({
                 />
                 {useNativeLiquidGlassHeader ? null : (
                     <TopScrollEdgeBackdrop
-                        headerHeight={topHeaderHeight + searchBarHeight}
+                        headerHeight={topHeaderHeight}
                         scrollY={scrollY}
                     />
                 )}
-                <View
-                    onLayout={onSearchBarLayout}
-                    style={{
-                        position: 'absolute',
-                        top: topHeaderHeight,
-                        left: 0,
-                        right: 0,
-                        zIndex: 2,
-                    }}>
-                    <ClubSearchBar
-                        value={searchQuery}
-                        onChangeText={setSearchQuery}
-                        loading={isRefreshing}
-                        onFocus={handleSearchFocus}
-                        containerStyle={{ paddingBottom: 0 }}
-                        placeholder={t('搜索澳大活動')}
-                        cancelLabel={t('取消')}
-                        clearAccessibilityLabel={t('清除搜尋')}
-                        liquidGlass={useNativeLiquidGlassHeader}
-                    />
-                </View>
             </View>
         );
     };
@@ -317,4 +289,4 @@ const UMEventPage = forwardRef(function UMEventPage({
     );
 });
 
-export default UMEventPage;
+export default memo(UMEventPage);
