@@ -62,7 +62,8 @@ const tabScreen = {
     MyTabbar: MyScreen,
 };
 
-// iOS 每個 Tab 內建獨立 Native Stack，與二級頁共用原生 UINavigationBar（論壇已在 Drawer 內建 Stack）
+// iOS 需要原生 UINavigationBar 的 1 級 Tab 各自包一層單頁 Native Stack（論壇在 Drawer 內建）；
+// 2 級頁統一由外層 Root Stack（src/Nav.js）承接，「我的」頁無原生頂欄直接掛載
 const NewsNativeStack = createTabNativeStack({
     homeRouteName: 'NewsHome',
     HomeComponent: NewsScreen,
@@ -78,18 +79,13 @@ const FeaturesNativeStack = createTabNativeStack({
     HomeComponent: FeaturesScreen,
     getHomeOptions: () => ({ headerShown: true }),
 });
-const MyNativeStack = createTabNativeStack({
-    homeRouteName: 'MyHome',
-    HomeComponent: MyScreen,
-    getHomeOptions: () => ({ headerShown: false }),
-});
 
 const iosTabScreen = {
     NewsTabbar: NewsNativeStack,
     ForumTabbar: ForumPage,
     CourseTab: CourseNativeStack,
     FeaturesTabbar: FeaturesNativeStack,
-    MyTabbar: MyNativeStack,
+    MyTabbar: MyScreen,
 };
 
 const IOSNativeTabScreen = props => {

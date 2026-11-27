@@ -74,8 +74,7 @@ const ModalIosBackButton = ({ navigation, headerBackProps }) => (
 
 /**
  * 全站共用的二級頁路由註冊：
- * 供外層 Root Stack（深度鏈接、推播、Quick Actions 與 Android）
- * 及 iOS 各 Tab 內建 Native Stack 共用，避免重複維護路由表。
+ * 統一掛載於外層 Root Stack（src/Nav.js），供全站各 Tab、深度鏈接、推播與 Quick Actions 共用。
  */
 export const renderSharedStackScreens = (Stack, { theme, t }) => (
     <>
