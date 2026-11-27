@@ -9,7 +9,7 @@ import Animated, {
     withSequence,
     withTiming,
 } from 'react-native-reanimated';
-import Svg, {Circle, G, Path, Rect, Text as SvgText} from 'react-native-svg';
+import Svg, {Circle, Ellipse, G, Path, Rect, Text as SvgText} from 'react-native-svg';
 
 import Text from '../../../components/AppText';
 import ScalePressable from '../../../components/ScalePressable';
@@ -403,17 +403,16 @@ const BusRouteMap = ({
             width: '100%',
             height: '100%',
         },
+        // 標籤槽與偏移一律跟 mapScale，避免固定像素在矮屏／Android 上相對變大而遮建築。
         stopLabel: {
-            width: 52,
-            height: 44,
+            width: 44 * mapScale,
+            height: 36 * mapScale,
             alignItems: 'center',
             justifyContent: 'center',
         },
         stopBadge: {
-            minWidth: 30 * mapScale,
-            minHeight: 22 * mapScale,
-            paddingHorizontal: 6 * mapScale,
-            paddingVertical: 2 * mapScale,
+            width: 34 * mapScale,
+            height: 22 * mapScale,
             borderRadius: 8 * mapScale,
             backgroundColor: white,
             borderWidth: 1,
@@ -427,8 +426,10 @@ const BusRouteMap = ({
         },
         stopLabelText: {
             ...uiStyle.defaultText,
-            fontSize: 12 * mapScale,
+            fontSize: 11 * mapScale,
             fontWeight: '700',
+            textAlign: 'center',
+            includeFontPadding: false,
         },
         vehicleAnchor: {
             position: 'absolute',
@@ -643,7 +644,8 @@ const BusRouteMap = ({
                     />
                 </G>
                 <G fill={tonal.success15}>
-                    <Rect x={stadiumX - 34} y="25" width="68" height="67" rx="28" />
+                    {/* N9 體育場：南北向橢圓跑道，內嵌足球場比例約 105:68 */}
+                    <Ellipse cx={stadiumX} cy="59" rx="26" ry="36" />
                     <Rect x={westBlockLeft + westBlockWidth * 0.09} y="276" width={westBlockWidth * 0.8} height="9" rx="3" />
                     <Rect x={westBlockLeft + westBlockWidth * 0.05} y="417" width={westBlockWidth * 0.85} height="8" rx="3" />
                 </G>
@@ -665,9 +667,10 @@ const BusRouteMap = ({
                 </G>
                 <Rect x={libraryX - 25} y="282" width="50" height="32" rx="5" fill={featuresScreen.divider} stroke={pressOverlay} />
                 <G fill="none" stroke={black.third} strokeWidth="1.3" opacity={0.45}>
-                    <Rect x={stadiumX - 29} y="30" width="58" height="57" rx="24" />
-                    <Rect x={stadiumX - 16} y="37" width="32" height="43" rx="3" />
-                    <Path d={`M${stadiumX - 16} 58.5 H${stadiumX + 16}`} />
+                    <Ellipse cx={stadiumX} cy="59" rx="22" ry="32" />
+                    <Rect x={stadiumX - 11} y="42" width="22" height="34" rx="2" />
+                    <Path d={`M${stadiumX - 11} 59 H${stadiumX + 11}`} />
+                    <Circle cx={stadiumX} cy="59" r="3.5" />
                     <Circle cx={libraryX + 12} cy="293" r="6" />
                 </G>
                 {CAMPUS_BUILDINGS.map(({code, x, y, width, height, outline, station}) => {
@@ -787,20 +790,26 @@ const BusRouteMap = ({
                 const labelForeground = selected ? successForeground : black.main;
                 const x = mapX(stop.x);
                 const y = stop.y * svgScale;
+                const labelSlot = 44 * mapScale;
+                const labelHalf = labelSlot / 2;
+                const labelHeight = 36 * mapScale;
+                // 選中圓半徑 8.5 map 單位，螢幕上再留 2px，避免白底站碼壓住點位。
+                const stopClearance = 8.5 * svgScale + 2;
+                const verticalGap = labelHeight / 2;
                 const anchorStyle = stop.labelSide === 'right'
-                    ? {left: x - 8, top: y - 22}
+                    ? {left: x + stopClearance, top: y - verticalGap}
                     : stop.labelSide === 'bottom'
-                        ? {left: x - 26, top: y - 8}
+                        ? {left: x - labelHalf, top: y + stopClearance}
                         : stop.labelSide === 'top'
-                            ? {left: x - 26, top: y - 48, zIndex: 2}
-                            : {right: mapDisplayWidth - x - 8, top: y - 22};
+                            ? {left: x - labelHalf, top: y - stopClearance - labelHeight, zIndex: 2}
+                            : {right: mapDisplayWidth - x + stopClearance, top: y - verticalGap};
                 const labelAlignment = stop.labelSide === 'right'
-                    ? {alignItems: 'flex-end'}
+                    ? {alignItems: 'flex-start'}
                     : stop.labelSide === 'bottom'
-                        ? {justifyContent: 'flex-end'}
+                        ? {justifyContent: 'flex-start'}
                         : stop.labelSide === 'top'
-                            ? {justifyContent: 'flex-start'}
-                            : {alignItems: 'flex-start'};
+                            ? {justifyContent: 'flex-end'}
+                            : {alignItems: 'flex-end'};
                 return (
                     <View key={stop.code} style={[styles.stopLabelAnchor, anchorStyle]}>
                         <ScalePressable
