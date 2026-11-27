@@ -1,8 +1,9 @@
-import React, { useContext, memo } from 'react';
+import React, { useContext, useEffect, memo } from 'react';
 import { View, StyleSheet, Platform } from 'react-native';
 
 import Text from '../../../../../../components/AppText';
 import { useTheme, uiStyle } from '../../../../../../components/ThemeContext';
+import { useAppReducedMotion } from '../../../../../../contexts/ReducedMotionContext';
 import { getOfficialCourseSearchUrl, WHAT_2_REG } from '../../../../../../utils/pathMap';
 import { logToFirebase } from '../../../../../../utils/firebaseAnalytics';
 import { openLink } from '../../../../../../utils/browser';
@@ -19,9 +20,14 @@ import { NavigationContext } from '@react-navigation/native';
 // 反寫 Fabric ShadowTree 並 abort）。改用 @react-native-menu/menu（原生 UIButton）。
 import { MenuView } from '@react-native-menu/menu';
 import Animated, {
+    cancelAnimation,
+    Easing,
+    ReduceMotion,
     useAnimatedStyle,
     useSharedValue,
+    withSequence,
     withSpring,
+    withTiming,
 } from 'react-native-reanimated';
 import lodash from 'lodash';
 import { t } from 'i18next';
@@ -34,6 +40,11 @@ const COURSE_CARD_SPRING = {
     mass: 0.4,
 };
 
+/** 首字母導航落地回饋：短促水平抖動（約 200ms） */
+const LETTER_SHAKE_EASE_OUT = Easing.bezier(0.23, 1, 0.32, 1);
+const LETTER_SHAKE_EASE_IN_OUT = Easing.bezier(0.77, 0, 0.175, 1);
+const LETTER_SHAKE_TIMING = { reduceMotion: ReduceMotion.System };
+
 const styles = StyleSheet.create({
     menuView: {
         alignSelf: 'flex-start',
@@ -41,19 +52,36 @@ const styles = StyleSheet.create({
 });
 
 const CourseCard = memo(
-    ({ item, mode, prof_info, programmeLevel = PROGRAMME_LEVELS.undergraduate, courseMode = 'ad', isHistoricalPeriod = false, cardWidth, cardHeight, onMeasureHeight, sectionStatuses }) => {
+    ({ item, mode, prof_info, programmeLevel = PROGRAMME_LEVELS.undergraduate, courseMode = 'ad', isHistoricalPeriod = false, cardWidth, cardHeight, onMeasureHeight, sectionStatuses, shakeNonce }) => {
         // const { item, mode, prof_info, courseMode = 'ad' } = props;
         const navigation = useContext(NavigationContext);
         const { theme } = useTheme();
         const { themeColor, black, secondThemeColor, white } = theme;
+        const reducedMotion = useAppReducedMotion();
         const isPostgraduate = programmeLevel === PROGRAMME_LEVELS.postgraduate;
         const isPreEnroll = !isPostgraduate && courseMode === 'preEnroll';
 
         // 原生 UIButton 會吃掉子層 pressIn，故縮放回饋改由選單開合驅動
         const cardScale = useSharedValue(1);
+        const shakeX = useSharedValue(0);
         const animatedStyle = useAnimatedStyle(() => ({
-            transform: [{ scale: cardScale.value }],
+            transform: [{ translateX: shakeX.value }, { scale: cardScale.value }],
         }));
+
+        // 右側首字母跳轉落地後短抖，讓使用者對上目標卡片
+        useEffect(() => {
+            if (!shakeNonce || reducedMotion) {
+                return;
+            }
+            cancelAnimation(shakeX);
+            shakeX.value = 0;
+            shakeX.value = withSequence(
+                withTiming(5, { duration: 45, easing: LETTER_SHAKE_EASE_OUT, ...LETTER_SHAKE_TIMING }),
+                withTiming(-5, { duration: 55, easing: LETTER_SHAKE_EASE_IN_OUT, ...LETTER_SHAKE_TIMING }),
+                withTiming(3, { duration: 50, easing: LETTER_SHAKE_EASE_IN_OUT, ...LETTER_SHAKE_TIMING }),
+                withTiming(0, { duration: 45, easing: LETTER_SHAKE_EASE_OUT, ...LETTER_SHAKE_TIMING }),
+            );
+        }, [shakeNonce, reducedMotion, shakeX]);
 
         // 從 item 中提取課程資訊
         const courseCode =
