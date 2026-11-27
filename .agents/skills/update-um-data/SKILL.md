@@ -42,7 +42,8 @@ node scripts/updateHarborEmojiShortcodes.js
 
 1. 替換 `app.json` 指向的資源檔：
    - 主圖示：`./src/static/img/logo.png`
-   - Android Adaptive Icon 前景：`./src/static/img/ic_launcher_foreground.png`（背景色設定於 `app.json` → `expo.android.adaptiveIcon.backgroundColor`）
+   - Android Adaptive Icon 前景：`./src/static/img/ic_launcher_foreground.png`（logo 置中於 ≤66% safe zone）
+   - Android Adaptive Icon 背景：`./src/static/img/ic_launcher_background.png`（與前景同尺寸；`backgroundColor` 為後備）
    - 開屏圖：`./src/static/img/logo_round.png`
 2. 重新生成原生工程以套用變更：
    ```bash

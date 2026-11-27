@@ -31,6 +31,7 @@
       "versionCode": 97,
       "adaptiveIcon": {
         "foregroundImage": "./src/static/img/ic_launcher_foreground.png",
+        "backgroundImage": "./src/static/img/ic_launcher_background.png",
         "backgroundColor": "#E6AB52"
       },
       "icon": "./src/static/img/logo.png",
