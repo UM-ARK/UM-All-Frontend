@@ -15,7 +15,6 @@ import SearchScreen from '../pages/TabbarPages/info/home/search/SearchScreen';
 import HarborTopicDetail from '../pages/TabbarPages/arkHarbor/HarborTopicDetail';
 import {
     HarborCategoryListPage,
-    HarborExplorePage,
     HarborTagListPage,
 } from '../pages/TabbarPages/arkHarbor/HarborDirectoryPage';
 import HarborSearchPage from '../pages/TabbarPages/arkHarbor/HarborSearchPage';
@@ -147,7 +146,6 @@ export const renderSharedStackScreens = (Stack, { theme, t }) => (
                 name="HarborTopicDetail"
                 component={HarborTopicDetail}
             />
-            <Stack.Screen name="HarborExplore" component={HarborExplorePage} />
             <Stack.Screen
                 name="HarborCategoryList"
                 component={HarborCategoryListPage}
