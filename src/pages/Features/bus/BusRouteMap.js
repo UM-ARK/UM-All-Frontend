@@ -1,5 +1,5 @@
 import React, {useEffect, useLayoutEffect, useMemo, useRef, useState} from 'react';
-import {StyleSheet, useWindowDimensions, View} from 'react-native';
+import {Image, StyleSheet, useWindowDimensions, View} from 'react-native';
 import Animated, {
     cancelAnimation,
     Easing,
@@ -9,7 +9,7 @@ import Animated, {
     withSequence,
     withTiming,
 } from 'react-native-reanimated';
-import Svg, {Circle, G, Path, Rect, Text as SvgText} from 'react-native-svg';
+import Svg, {Circle, G, Path, Polygon, Rect, Text as SvgText} from 'react-native-svg';
 
 import Text from '../../../components/AppText';
 import ScalePressable from '../../../components/ScalePressable';
@@ -32,6 +32,8 @@ const MAP_HEIGHT = 654;
 const MAP_DISPLAY_WIDTH = 310;
 const MAP_MAX_DISPLAY_WIDTH = 420;
 const MAP_MAX_CANVAS_WIDTH = 520;
+const MOVING_VEHICLE_LENGTH = 58;
+const MOVING_VEHICLE_HIT_WIDTH = 68;
 const WEST_WING = 'M0 0 H91 V18 H100 V78 H77 V100 H0 V67 H9 V28 H0 Z';
 const EAST_WING = 'M9 0 H100 V28 H91 V67 H100 V100 H23 V78 H0 V18 H9 Z';
 const COURTYARD = 'M0 0 H100 V100 H0 Z M32 30 H68 V70 H32 Z';
@@ -89,6 +91,7 @@ const CAMPUS_BUILDINGS = [
 const AnimatedPath = Animated.createAnimatedComponent(Path);
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 const SHUTTLE_IMAGE = require('../../../static/img/Bus/campus-shuttle-marker.png');
+const SHUTTLE_MOVING_IMAGE = require('../../../static/img/Bus/campus-shuttle-moving-marker.png');
 const VEHICLE_GLIDE_EASING = Easing.linear;
 
 const CountdownBorder = ({arrived, color, countdownKey, deadlineAt, initialProgress, radius, visible}) => {
@@ -201,7 +204,8 @@ const VehicleMarker = ({
     latestVehicleRef.current = vehicle;
     latestObservedAtRef.current = observedAt;
     latestStatsRef.current = statsDocument;
-    const offset = vehicle.offset;
+    const horizontalOffset = inTransit ? 0 : vehicle.offset;
+    const routeOffset = inTransit ? vehicle.offset : 0;
     const stop = BUS_STOPS[legIndex];
     const facingRight = BUS_STOPS[(legIndex + 1) % BUS_STOPS.length].x > stop.x;
 
@@ -246,17 +250,31 @@ const VehicleMarker = ({
     }, [arrival, inTransit, location, motionEnabled, positionIndex, reportedLocation, roadAccent]);
 
     const animatedPosition = useAnimatedStyle(() => {
-        const point = getBusRoutePoint(location.get());
+        const point = getBusRoutePoint(location.get(), 0, routeOffset);
         return {
             transform: [
-                {translateX: xOrigin + (point.x + offset) * xScale},
+                {translateX: xOrigin + (point.x + horizontalOffset) * xScale},
                 {translateY: point.y * svgScale},
             ],
         };
     });
     const animatedBody = useAnimatedStyle(() => {
-        const strength = roadAccent.get();
         const progress = location.get();
+        // 行駛中改用俯視車頂圖，並沿路線切線旋轉（圖檔預設車頭朝上）。
+        if (inTransit) {
+            const before = getBusRoutePoint(progress, -8, routeOffset);
+            const after = getBusRoutePoint(progress, 8, routeOffset);
+            const heading =
+                Math.atan2(
+                    (after.y - before.y) * svgScale,
+                    (after.x - before.x) * xScale,
+                ) *
+                    (180 / Math.PI) +
+                90;
+            return {transform: [{rotate: `${heading}deg`}]};
+        }
+        // 停站沿用側視圖：左右翻轉對齊下一站，轉彎時微傾。
+        const strength = roadAccent.get();
         let tilt = 0;
         if (strength > 0 && progress % 1 > 0) {
             const point = getBusRoutePoint(progress);
@@ -277,79 +295,61 @@ const VehicleMarker = ({
         const progress = location.get();
         let path = '';
         for (let distance = -52; distance <= 0; distance += 4) {
-            const point = getBusRoutePoint(progress, distance);
+            const point = getBusRoutePoint(progress, distance, routeOffset);
             path += `${distance === -52 ? 'M' : 'L'}${xOrigin + point.x * xScale} ${point.y * svgScale} `;
         }
         return {d: path, opacity};
-    });
-    // 車燈沿路線切線往前取樣，照亮前方路面，而非貼在車身側向翻轉。
-    const animatedHeadlight = useAnimatedProps(() => {
-        const progress = location.get();
-        const reach = roadAccent.get() > 0.05 ? 68 : 40;
-        let path = '';
-        for (let distance = 2; distance <= reach; distance += 3) {
-            const point = getBusRoutePoint(progress, distance);
-            path += `${distance === 2 ? 'M' : 'L'}${xOrigin + (point.x + offset) * xScale} ${point.y * svgScale} `;
-        }
-        return {d: path || 'M0 0'};
     });
     const animatedArrival = useAnimatedProps(() => {
         const progress = arrival.get();
         return {r: (6 + 7 * progress) * svgScale, opacity: (1 - progress) * 0.8};
     });
+    const longHeadlight = inTransit && motionEnabled;
     const headlightStrength = inTransit ? 1 : 0.62;
+    const headlightReach = longHeadlight ? 58 : 34;
+    const headlightHalfSpread = longHeadlight ? 30 : 18;
+    const headlightWidth = inTransit ? 2 * headlightHalfSpread : headlightReach;
+    const headlightHeight = inTransit ? headlightReach : 2 * headlightHalfSpread;
+    const headlightViewBox = inTransit
+        ? `${-headlightHalfSpread} ${-headlightReach} ${headlightWidth} ${headlightHeight}`
+        : `${-headlightReach} ${-headlightHalfSpread} ${headlightWidth} ${headlightHeight}`;
+    const headlightPoints = (reach, halfSpread) => inTransit
+        ? `0,0 ${-halfSpread},${-reach} ${halfSpread},${-reach}`
+        : `0,0 ${-reach},${-halfSpread} ${-reach},${halfSpread}`;
+    const vehicleImageStyle = [styles.vehicleImage, inTransit && styles.vehicleImageMoving];
 
     return (
         <>
-            {!isLight || motionEnabled ? (
+            {motionEnabled ? (
                 <Svg pointerEvents="none" style={StyleSheet.absoluteFill} width="100%" height="100%">
-                    {!isLight ? (
-                        <G stroke={headlightColor} strokeLinecap="round" strokeLinejoin="round" fill="none">
-                            <AnimatedPath
-                                animatedProps={animatedHeadlight}
-                                d="M0 0"
-                                strokeOpacity={0.14 * headlightStrength}
-                                strokeWidth={24 * svgScale}
-                            />
-                            <AnimatedPath
-                                animatedProps={animatedHeadlight}
-                                d="M0 0"
-                                strokeOpacity={0.24 * headlightStrength}
-                                strokeWidth={14 * svgScale}
-                            />
-                            <AnimatedPath
-                                animatedProps={animatedHeadlight}
-                                d="M0 0"
-                                strokeOpacity={0.42 * headlightStrength}
-                                strokeWidth={6 * svgScale}
-                            />
-                        </G>
-                    ) : null}
-                    {motionEnabled ? (
-                        inTransit ? (
-                            <AnimatedPath
-                                animatedProps={animatedRoadAccent}
-                                d="M0 0"
-                                fill="none"
-                                stroke={accentColor}
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={6.5 * svgScale}
-                            />
-                        ) : (
-                            <AnimatedCircle
-                                animatedProps={animatedArrival}
-                                cx={xOrigin + stop.x * xScale}
-                                cy={stop.y * svgScale}
-                                fill="none"
-                                stroke={accentColor}
-                                strokeWidth={2 * svgScale}
-                            />
-                        )
-                    ) : null}
+                    {inTransit ? (
+                        <AnimatedPath
+                            animatedProps={animatedRoadAccent}
+                            d="M0 0"
+                            fill="none"
+                            stroke={accentColor}
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={6.5 * svgScale}
+                        />
+                    ) : (
+                        <AnimatedCircle
+                            animatedProps={animatedArrival}
+                            cx={xOrigin + stop.x * xScale}
+                            cy={stop.y * svgScale}
+                            fill="none"
+                            stroke={accentColor}
+                            strokeWidth={2 * svgScale}
+                        />
+                    )}
                 </Svg>
             ) : null}
-            <Animated.View style={[styles.vehicleAnchor, animatedPosition]}>
+            <Animated.View
+                style={[
+                    styles.vehicleAnchor,
+                    inTransit && styles.vehicleAnchorMoving,
+                    animatedPosition,
+                ]}>
                 <ScalePressable
                     accessibilityRole="button"
                     accessibilityLabel={vehicle.accessibilityLabel}
@@ -360,14 +360,41 @@ const VehicleMarker = ({
                     onPress={() => {
                         onSelect(vehicle.vehiclePlateNumber);
                     }}
-                    style={styles.vehicle}>
-                    <Animated.Image
-                        accessible={false}
-                        resizeMode="contain"
-                        source={SHUTTLE_IMAGE}
-                        style={[styles.vehicleImage, animatedBody]}
-                    />
-                    <View style={[styles.vehiclePin, selected && styles.vehiclePinSelected]} />
+                    style={[styles.vehicle, inTransit && styles.vehicleMoving]}>
+                    <Animated.View style={[vehicleImageStyle, animatedBody]}>
+                        {!isLight ? (
+                            <Svg
+                                pointerEvents="none"
+                                width={headlightWidth * svgScale}
+                                height={headlightHeight * svgScale}
+                                viewBox={headlightViewBox}
+                                style={{
+                                    position: 'absolute',
+                                    // 俯視圖的車頭朝上，側視圖的車頭朝左。光束與車身共用旋轉和翻轉。
+                                    left: inTransit ? '50%' : 3 - headlightWidth * svgScale,
+                                    marginLeft: inTransit ? -headlightHalfSpread * svgScale : 0,
+                                    top: (inTransit ? 2 : 22) - (inTransit ? headlightHeight : headlightHalfSpread) * svgScale,
+                                }}>
+                                <G fill={headlightColor}>
+                                    <Polygon points={headlightPoints(headlightReach, headlightHalfSpread)} opacity={0.1 * headlightStrength} />
+                                    <Polygon points={headlightPoints(longHeadlight ? 52 : 30, longHeadlight ? 18 : 11)} opacity={0.18 * headlightStrength} />
+                                    <Polygon points={headlightPoints(longHeadlight ? 46 : 26, longHeadlight ? 8 : 5)} opacity={0.34 * headlightStrength} />
+                                </G>
+                            </Svg>
+                        ) : null}
+                        <Image
+                            accessible={false}
+                            resizeMode={inTransit ? 'stretch' : 'contain'}
+                            source={inTransit ? SHUTTLE_MOVING_IMAGE : SHUTTLE_IMAGE}
+                            style={vehicleImageStyle}
+                        />
+                        {inTransit && selected ? (
+                            <View style={[styles.vehiclePin, styles.vehiclePinMoving, styles.vehiclePinSelected]} />
+                        ) : null}
+                    </Animated.View>
+                    {!inTransit ? (
+                        <View style={[styles.vehiclePin, selected && styles.vehiclePinSelected]} />
+                    ) : null}
                     {vehicle.countAtPosition > 1 && vehicle.groupIndex === 0 ? (
                         <View style={styles.vehicleCount}>
                             <Text style={styles.vehicleCountText}>
@@ -501,15 +528,27 @@ const BusRouteMap = ({
             top: 0,
             marginLeft: -22,
             marginTop: -34,
+            // 高於站碼標籤，避免 S4 等 top 標籤蓋住車身
+            zIndex: 4,
+        },
+        vehicleAnchorMoving: {
+            marginLeft: -MOVING_VEHICLE_HIT_WIDTH / 2,
+            marginTop: -MOVING_VEHICLE_LENGTH / 2,
         },
         vehicle: {
             width: 44,
-            height: 44,
             alignItems: 'center',
+        },
+        vehicleMoving: {
+            width: MOVING_VEHICLE_HIT_WIDTH,
         },
         vehicleImage: {
             width: 44,
             height: 29,
+        },
+        vehicleImageMoving: {
+            width: 24,
+            height: MOVING_VEHICLE_LENGTH,
         },
         vehiclePin: {
             width: 10,
@@ -518,6 +557,11 @@ const BusRouteMap = ({
             borderWidth: 2,
             borderColor: white,
             backgroundColor: secondThemeColor,
+        },
+        vehiclePinMoving: {
+            position: 'absolute',
+            alignSelf: 'center',
+            bottom: 3,
         },
         vehiclePinSelected: {
             borderColor: black.main,
@@ -964,7 +1008,7 @@ const BusRouteMap = ({
                     : stop.labelSide === 'bottom'
                         ? {left: x - labelHalf, top: y + stopClearance}
                         : stop.labelSide === 'top'
-                            ? {left: x - labelHalf, top: y - stopClearance - labelHeight, zIndex: 2}
+                            ? {left: x - labelHalf, top: y - stopClearance - labelHeight}
                             : {right: mapDisplayWidth - x + stopClearance, top: y - verticalGap};
                 const labelAlignment = stop.labelSide === 'right'
                     ? {alignItems: 'flex-start'}

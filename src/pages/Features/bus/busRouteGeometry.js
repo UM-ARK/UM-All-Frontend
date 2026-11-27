@@ -59,12 +59,13 @@ export function getBusRouteLegPath(legIndex, routeX) {
 }
 
 // 整數代表站點，小數是由這一站出發的路段進度。
-export function getBusRoutePoint(location, distanceOffset = 0) {
+export function getBusRoutePoint(location, distanceOffset = 0, anchorOffset = 0) {
     'worklet';
     const legIndex = Math.floor(location);
     const samples = routeSamples[legIndex];
     const length = samples[samples.length - 1].distance;
-    const distance = Math.max(0, Math.min(length, (location - legIndex) * length + distanceOffset));
+    const anchorDistance = Math.max(0, Math.min(length, (location - legIndex) * length + anchorOffset));
+    const distance = Math.max(0, Math.min(length, anchorDistance + distanceOffset));
     let index = 1;
     while (samples[index].distance < distance) {
         index++;
