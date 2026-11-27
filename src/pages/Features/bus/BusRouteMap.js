@@ -172,7 +172,22 @@ const CountdownBorder = ({arrived, color, countdownKey, deadlineAt, initialProgr
     );
 };
 
-const VehicleMarker = ({accentColor, motionEnabled, observedAt, onSelect, positionIndex, selected, statsDocument, styles, svgScale, xOrigin, xScale, vehicle}) => {
+const VehicleMarker = ({
+    accentColor,
+    headlightColor,
+    isLight,
+    motionEnabled,
+    observedAt,
+    onSelect,
+    positionIndex,
+    selected,
+    statsDocument,
+    styles,
+    svgScale,
+    xOrigin,
+    xScale,
+    vehicle,
+}) => {
     const legIndex = Math.floor(positionIndex / 2);
     const inTransit = positionIndex % 2 === 1;
     const reportedLocation = positionIndex / 2;
@@ -267,35 +282,71 @@ const VehicleMarker = ({accentColor, motionEnabled, observedAt, onSelect, positi
         }
         return {d: path, opacity};
     });
+    // 車燈沿路線切線往前取樣，照亮前方路面，而非貼在車身側向翻轉。
+    const animatedHeadlight = useAnimatedProps(() => {
+        const progress = location.get();
+        const reach = roadAccent.get() > 0.05 ? 68 : 40;
+        let path = '';
+        for (let distance = 2; distance <= reach; distance += 3) {
+            const point = getBusRoutePoint(progress, distance);
+            path += `${distance === 2 ? 'M' : 'L'}${xOrigin + (point.x + offset) * xScale} ${point.y * svgScale} `;
+        }
+        return {d: path || 'M0 0'};
+    });
     const animatedArrival = useAnimatedProps(() => {
         const progress = arrival.get();
         return {r: (6 + 7 * progress) * svgScale, opacity: (1 - progress) * 0.8};
     });
+    const headlightStrength = inTransit ? 1 : 0.62;
 
     return (
         <>
-            {motionEnabled ? (
+            {!isLight || motionEnabled ? (
                 <Svg pointerEvents="none" style={StyleSheet.absoluteFill} width="100%" height="100%">
-                    {inTransit ? (
-                        <AnimatedPath
-                            animatedProps={animatedRoadAccent}
-                            d="M0 0"
-                            fill="none"
-                            stroke={accentColor}
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={6.5 * svgScale}
-                        />
-                    ) : (
-                        <AnimatedCircle
-                            animatedProps={animatedArrival}
-                            cx={xOrigin + stop.x * xScale}
-                            cy={stop.y * svgScale}
-                            fill="none"
-                            stroke={accentColor}
-                            strokeWidth={2 * svgScale}
-                        />
-                    )}
+                    {!isLight ? (
+                        <G stroke={headlightColor} strokeLinecap="round" strokeLinejoin="round" fill="none">
+                            <AnimatedPath
+                                animatedProps={animatedHeadlight}
+                                d="M0 0"
+                                strokeOpacity={0.14 * headlightStrength}
+                                strokeWidth={24 * svgScale}
+                            />
+                            <AnimatedPath
+                                animatedProps={animatedHeadlight}
+                                d="M0 0"
+                                strokeOpacity={0.24 * headlightStrength}
+                                strokeWidth={14 * svgScale}
+                            />
+                            <AnimatedPath
+                                animatedProps={animatedHeadlight}
+                                d="M0 0"
+                                strokeOpacity={0.42 * headlightStrength}
+                                strokeWidth={6 * svgScale}
+                            />
+                        </G>
+                    ) : null}
+                    {motionEnabled ? (
+                        inTransit ? (
+                            <AnimatedPath
+                                animatedProps={animatedRoadAccent}
+                                d="M0 0"
+                                fill="none"
+                                stroke={accentColor}
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={6.5 * svgScale}
+                            />
+                        ) : (
+                            <AnimatedCircle
+                                animatedProps={animatedArrival}
+                                cx={xOrigin + stop.x * xScale}
+                                cy={stop.y * svgScale}
+                                fill="none"
+                                stroke={accentColor}
+                                strokeWidth={2 * svgScale}
+                            />
+                        )
+                    ) : null}
                 </Svg>
             ) : null}
             <Animated.View style={[styles.vehicleAnchor, animatedPosition]}>
@@ -376,11 +427,12 @@ const BusRouteMap = ({
     const southCollegeX = routeX(116);
     const stadiumX = routeX(53);
     const routePath = getBusRoutePath(routeX);
+    // 箭頭略放大，並在虛線之上用路面色底板抠洞，避免與中線虛線重疊難辨方向。
     const routeArrows = [
-        `M${routeX(198)} 62.25 l-3.5 2.75 3.5 2.75`,
-        ...[164, 268, 418].map(y => `M${routeX(77.5) - 2.75} ${y} l2.75 3.5 2.75 -3.5`),
-        `M${routeX(163)} 604.25 l3.5 2.75 -3.5 2.75`,
-        ...[476, 289, 152].map(y => `M${terminalX - 2.75} ${y} l2.75 -3.5 2.75 3.5`),
+        `M${routeX(198)} 62.25 l-4.2 3.2 4.2 3.2`,
+        ...[164, 268, 418].map(y => `M${routeX(77.5) - 3.2} ${y} l3.2 4.2 3.2 -4.2`),
+        `M${routeX(163)} 604.25 l4.2 3.2 -4.2 3.2`,
+        ...[476, 289, 152].map(y => `M${terminalX - 3.2} ${y} l3.2 -4.2 3.2 4.2`),
     ].join(' ');
     const {
         black,
@@ -389,16 +441,22 @@ const BusRouteMap = ({
         floatingShadow,
         isLight,
         pressOverlay,
+        sand,
         secondThemeColor,
         successForeground,
+        themeColor,
         tonal,
+        trueBlack,
+        trueWhite,
         white,
     } = theme;
-    // 深色樓宇只當背景脈絡：填色略抬離底色、描邊壓淡，避免搶過線路／站點。
+    // 深色樓宇只當背景脈絡；淺色略加深描邊並加極淡偏移陰影，仍不搶線路。
     const buildingFill = isLight ? featuresScreen.divider : disabled;
-    const buildingStroke = isLight ? pressOverlay : black.third;
-    const buildingStrokeOpacity = isLight ? 1 : 0.22;
+    const buildingStroke = black.third;
+    const buildingStrokeOpacity = isLight ? 0.18 : 0.22;
     const westBuildingFill = isLight ? tonal.primary15 : disabled;
+    const buildingShadowOpacity = isLight ? 0.06 : 0;
+    const pavementWidth = isLight ? 9.5 : 10.5;
     const styles = useMemo(() => StyleSheet.create({
         container: {
             alignSelf: 'center',
@@ -605,7 +663,7 @@ const BusRouteMap = ({
                 </G>
                 <G transform={`translate(${routeX(0)} 0) scale(${horizontalScale} 1)`}>
                     <Path
-                        d="M35 111 C44 102 56 104 62 108 C68 112 76 106 84 111 C92 117 88 127 79 129 C67 132 63 125 53 125 C44 126 29 123 35 111 Z M153 181 C161 168 183 166 189 177 C192 189 178 194 164 196 C154 198 148 190 153 181 Z M211 171 C221 158 241 157 253 167 C261 176 253 183 257 196 C261 207 248 220 237 214 C227 209 225 197 216 193 C207 189 205 180 211 171 Z M247 451 C255 443 265 454 266 467 C266 480 262 500 251 503 C240 506 245 492 249 478 C252 467 241 458 247 451 Z"
+                        d="M35 111 C44 102 56 104 62 108 C68 112 76 106 84 111 C92 117 88 127 79 129 C67 132 63 125 53 125 C44 126 29 123 35 111 Z M153 181 C161 168 183 166 189 177 C192 189 178 194 164 196 C154 198 148 190 153 181 Z M211 171 C221 158 241 157 253 167 C261 176 253 183 257 196 C261 207 248 220 237 214 C227 209 225 197 216 193 C207 189 205 180 211 171 Z M247 451 C255 443 265 454 266 467 C266 480 262 500 251 503 C240 506 245 492 249 478 C252 467 241 458 247 451 Z M268 520 C276 512 288 516 292 528 C295 540 288 552 276 554 C264 556 260 542 262 530 C264 522 262 516 268 520 Z"
                         fill={tonal.success15}
                     />
                     <G fill={tonal.success30}>
@@ -618,7 +676,11 @@ const BusRouteMap = ({
                         <Circle cx="245" cy="198" r="4.5" />
                         <Circle cx="257" cy="465" r="4" />
                         <Circle cx="255" cy="487" r="3.5" />
+                        <Circle cx="274" cy="528" r="4" />
+                        <Circle cx="286" cy="536" r="3.5" />
+                        <Circle cx="278" cy="544" r="3" />
                     </G>
+                    {/* 中央水道：保留蜿蜒與南段外擴，北寬南曲對齊實景 */}
                     <Path
                         d="M163 203 C179 191 197 198 207 217 C213 227 224 225 228 242 C232 263 215 270 197 269 C183 268 169 269 165 287 C163 302 171 319 168 337 C166 356 169 376 185 394 C203 414 206 427 206 446 C207 460 236 449 243 466 C254 492 231 512 212 507 C193 501 201 481 190 462 C178 444 190 419 177 401 C161 385 154 366 157 344 C160 322 150 307 151 282 C151 261 141 246 147 230 C152 220 158 216 163 203 Z"
                         fill={tonal.primary15}
@@ -631,6 +693,45 @@ const BusRouteMap = ({
                         strokeWidth="1.5"
                     />
                 </G>
+                {/* 水道步行橋：上接 E12→E2，下接 E21B 橫跨（避開圖書館遮擋） */}
+                {[
+                    {x: 152, y: 272, width: 30}, // E12 南 ↔ E2 北
+                    {x: 152, y: 328, width: 26}, // E21B ↔ 東岸
+                ].map(({x, y, width}) => {
+                    const left = routeX(x);
+                    const right = routeX(x + width);
+                    return (
+                        <G key={`bridge-${x}-${y}`}>
+                            <Rect
+                                x={left}
+                                y={y}
+                                width={width * horizontalScale}
+                                height={7}
+                                rx={1.5}
+                                fill={white}
+                                stroke={buildingStroke}
+                                strokeOpacity={buildingStrokeOpacity}
+                                strokeWidth="1"
+                            />
+                            <Path
+                                d={`M${left} ${y + 1.2} H${right} M${left} ${y + 5.8} H${right}`}
+                                fill="none"
+                                stroke={black.third}
+                                strokeOpacity={0.35}
+                                strokeLinecap="round"
+                                strokeWidth="0.9"
+                            />
+                            <Path
+                                d={`M${left} ${y - 1.5} V${y + 7.5} M${right} ${y - 1.5} V${y + 7.5}`}
+                                fill="none"
+                                stroke={black.third}
+                                strokeOpacity={0.4}
+                                strokeLinecap="round"
+                                strokeWidth="1.5"
+                            />
+                        </G>
+                    );
+                })}
                 <G fill={tonal.success15}>
                     {/* N9 體育場：直道＋兩端半圓的膠囊形跑道（rx=半寬），非純橢圓 */}
                     <Rect x={stadiumX - 22} y="26" width="44" height="66" rx="22" ry="22" />
@@ -653,6 +754,9 @@ const BusRouteMap = ({
                         <Circle cx="82" cy="572" r="3.5" />
                     </G>
                 </G>
+                {buildingShadowOpacity > 0 ? (
+                    <Rect x={libraryX - 24.2} y="283.2" width="50" height="32" rx="5" fill={black.main} opacity={buildingShadowOpacity} />
+                ) : null}
                 <Rect x={libraryX - 25} y="282" width="50" height="32" rx="5" fill={buildingFill} stroke={buildingStroke} strokeOpacity={buildingStrokeOpacity} />
                 <G fill="none" stroke={black.third} strokeWidth="1.3" opacity={0.45}>
                     <Rect x={stadiumX - 18} y="30" width="36" height="58" rx="18" ry="18" />
@@ -666,17 +770,32 @@ const BusRouteMap = ({
                     const blockWidth = width * horizontalScale;
                     const left = centerX - blockWidth / 2;
                     return (
-                        <G key={code} fill={buildingFill} stroke={buildingStroke} strokeOpacity={buildingStrokeOpacity}>
-                            {outline ? (
-                                <Path d={outline} transform={`translate(${left} ${y}) scale(${blockWidth / 100} ${height / 100})`} fillRule="evenodd" strokeWidth="1.8" strokeLinejoin="round" />
-                            ) : (
-                                <Rect x={left} y={y} width={blockWidth} height={height} rx="2" />
-                            )}
-                            {station ? null : (
-                                <SvgText x={centerX} y={y + height / 2 + 3.5} fill={black.third} opacity={0.65} stroke="none" fontSize="10" fontWeight="600" textAnchor="middle">
-                                    {code}
-                                </SvgText>
-                            )}
+                        <G key={code}>
+                            {buildingShadowOpacity > 0 ? (
+                                outline ? (
+                                    <Path
+                                        d={outline}
+                                        transform={`translate(${left + 0.8} ${y + 1.2}) scale(${blockWidth / 100} ${height / 100})`}
+                                        fill={black.main}
+                                        fillRule="evenodd"
+                                        opacity={buildingShadowOpacity}
+                                    />
+                                ) : (
+                                    <Rect x={left + 0.8} y={y + 1.2} width={blockWidth} height={height} rx="2" fill={black.main} opacity={buildingShadowOpacity} />
+                                )
+                            ) : null}
+                            <G fill={buildingFill} stroke={buildingStroke} strokeOpacity={buildingStrokeOpacity}>
+                                {outline ? (
+                                    <Path d={outline} transform={`translate(${left} ${y}) scale(${blockWidth / 100} ${height / 100})`} fillRule="evenodd" strokeWidth="1.8" strokeLinejoin="round" />
+                                ) : (
+                                    <Rect x={left} y={y} width={blockWidth} height={height} rx="2" />
+                                )}
+                                {station ? null : (
+                                    <SvgText x={centerX} y={y + height / 2 + 3.5} fill={black.third} opacity={0.65} stroke="none" fontSize="10" fontWeight="600" textAnchor="middle">
+                                        {code}
+                                    </SvgText>
+                                )}
+                            </G>
                         </G>
                     );
                 })}
@@ -689,6 +808,14 @@ const BusRouteMap = ({
                     const centerY = y + height / 2;
                     return (
                         <G key={labels[0][0]}>
+                            {buildingShadowOpacity > 0 ? (
+                                <Path
+                                    d={outline}
+                                    transform={`translate(${left + 0.8} ${y + 1.2}) scale(${blockWidth / 100} ${height / 100})`}
+                                    fill={black.main}
+                                    opacity={buildingShadowOpacity}
+                                />
+                            ) : null}
                             <Path
                                 d={outline}
                                 transform={`translate(${left} ${y}) scale(${blockWidth / 100} ${height / 100})`}
@@ -724,6 +851,9 @@ const BusRouteMap = ({
                     );
                 })}
                 <G transform={`translate(${southCollegeX} 0)`}>
+                    {buildingShadowOpacity > 0 ? (
+                        <Path d="M-18 542 H9 V549 H18 V584 H-18 V575 H-12 V556 H-18 Z" transform="translate(0.8 1.2)" fill={black.main} opacity={buildingShadowOpacity} />
+                    ) : null}
                     <Path d="M-18 542 H9 V549 H18 V584 H-18 V575 H-12 V556 H-18 Z" fill={westBuildingFill} stroke={buildingStroke} strokeOpacity={buildingStrokeOpacity} />
                     <SvgText x="0" y="567" fill={black.third} opacity={0.75} fontSize="10" fontWeight="600" textAnchor="middle">
                         S9 SPC
@@ -733,36 +863,80 @@ const BusRouteMap = ({
                     E2
                 </SvgText>
                 <G fill="none" strokeLinecap="round" strokeLinejoin="round">
-                    <Path d={routePath} stroke={black.main} strokeOpacity={0.08} strokeWidth="15" transform="translate(0 1.5)" />
+                    {isLight ? (
+                        <>
+                            <Path d={routePath} stroke={black.main} strokeOpacity={0.16} strokeWidth="18" transform="translate(0 2.5)" />
+                            <Path d={routePath} stroke={black.second} strokeOpacity={0.28} strokeWidth="14" />
+                            <Path d={routePath} stroke={black.third} strokeOpacity={0.4} strokeWidth="12.5" />
+                        </>
+                    ) : (
+                        <>
+                            {/* 全路線冷色環境光（藍白），與站點暖色／車燈沙色區分 */}
+                            <Path d={routePath} stroke={themeColor} strokeOpacity={0.14} strokeWidth="26" />
+                            <Path d={routePath} stroke={trueWhite} strokeOpacity={0.12} strokeWidth="18" />
+                            <Path d={routePath} stroke={trueBlack} strokeOpacity={0.5} strokeWidth="13.5" />
+                        </>
+                    )}
                     <Path d={routePath} stroke={disabled} strokeWidth="12" />
-                    <Path d={routePath} stroke={white} strokeWidth="9.5" />
+                    <Path d={routePath} stroke={white} strokeWidth={pavementWidth} />
+                    {!isLight ? (
+                        <Path d={routePath} stroke={trueWhite} strokeOpacity={0.1} strokeWidth={pavementWidth - 2.5} />
+                    ) : null}
                     {activeRouteLegs.map(legIndex => (
                         <Path
                             key={legIndex}
                             d={getBusRouteLegPath(legIndex, routeX)}
                             stroke={secondThemeColor}
                             strokeOpacity={0.3}
-                            strokeWidth="9.5"
+                            strokeWidth={pavementWidth}
                         />
                     ))}
-                    <Path d={routePath} stroke={disabled} strokeWidth="1.25" strokeDasharray="4 5" />
-                    <Path d={routeArrows} stroke={white} strokeWidth="3.5" />
-                    <Path d={routeArrows} stroke={black.third} strokeWidth="1.35" opacity={0.75} />
+                    {/* 斑馬線式中線：butt 線帽＋加長間距，避免 round 把短劃收成圓點 */}
+                    <Path
+                        d={routePath}
+                        stroke={isLight ? black.third : trueWhite}
+                        strokeOpacity={isLight ? 0.55 : 0.32}
+                        strokeWidth={isLight ? 1.7 : 1.4}
+                        strokeDasharray={isLight ? '12 10' : '9 8'}
+                        strokeLinecap="butt"
+                    />
+                    {/* 先以路面色寬描邊盖住虛線，再疊高對比箭頭 */}
+                    <Path d={routeArrows} stroke={white} strokeWidth="7" strokeLinecap="round" strokeLinejoin="round" />
+                    <Path
+                        d={routeArrows}
+                        stroke={isLight ? black.second : trueWhite}
+                        strokeOpacity={isLight ? 0.9 : 0.85}
+                        strokeWidth="2.1"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                    />
                 </G>
                 {BUS_STOPS.map(stop => {
                     const selected = selectedStop === stop.code;
                     const arrived = arrivedStopCodes.has(stop.code);
                     const stopColor = arrived ? secondThemeColor : selected ? successForeground : black.second;
+                    const stopRadius = selected || arrived ? 8.5 : 6.5;
+                    const cx = routeX(stop.x);
+                    // 站點暖色光暈，與路線冷色環境光分開
+                    const glowColor = arrived ? secondThemeColor : selected ? successForeground : sand;
                     return (
-                        <Circle
-                            key={stop.code}
-                            cx={routeX(stop.x)}
-                            cy={stop.y}
-                            fill={selected || arrived ? stopColor : white}
-                            r={selected || arrived ? 8.5 : 6.5}
-                            stroke={selected || arrived ? white : stopColor}
-                            strokeWidth={selected || arrived ? 2.5 : 2}
-                        />
+                        <G key={stop.code}>
+                            {!isLight ? (
+                                <>
+                                    <Circle cx={cx} cy={stop.y} r={stopRadius + 11} fill={glowColor} opacity={0.08} />
+                                    <Circle cx={cx} cy={stop.y} r={stopRadius + 7} fill={glowColor} opacity={0.12} />
+                                    <Circle cx={cx} cy={stop.y} r={stopRadius + 3.5} fill={glowColor} opacity={0.2} />
+                                </>
+                            ) : null}
+                            <Circle
+                                cx={cx}
+                                cy={stop.y}
+                                fill={selected || arrived ? stopColor : white}
+                                r={stopRadius}
+                                stroke={selected || arrived ? white : stopColor}
+                                strokeWidth={selected || arrived ? 2.5 : 2}
+                            />
+                        </G>
                     );
                 })}
             </Svg>
@@ -852,6 +1026,8 @@ const BusRouteMap = ({
                     <VehicleMarker
                         key={vehicle.vehiclePlateNumber}
                         accentColor={secondThemeColor}
+                        headlightColor={sand}
+                        isLight={isLight}
                         motionEnabled={motionEnabled && !reducedMotion}
                         observedAt={observedAt}
                         onSelect={onSelectVehicle}
