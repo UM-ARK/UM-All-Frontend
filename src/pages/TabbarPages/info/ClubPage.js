@@ -79,7 +79,6 @@ const buildSections = (clubDataList) => {
     if (arkList.length) {
         sections.push({
             title: 'ARK',
-            count: arkList.length,
             data: chunkIntoRows(arkList, ITEMS_PER_ROW),
         });
     }
@@ -89,7 +88,6 @@ const buildSections = (clubDataList) => {
         if (list.length) {
             sections.push({
                 title: tag,
-                count: list.length,
                 data: chunkIntoRows(list, ITEMS_PER_ROW),
             });
         }
@@ -291,7 +289,6 @@ function ClubPage({ topChromeHeight, useNativeLiquidGlassHeader = false, searchQ
                             style={{
                                 flexDirection: 'row',
                                 alignItems: 'center',
-                                justifyContent: 'space-between',
                                 paddingHorizontal: CLUB_GRID_HORIZONTAL_PADDING + scale(4),
                                 paddingTop: sectionIndex === 0 ? scale(8) : scale(20),
                                 paddingBottom: scale(8),
@@ -302,14 +299,6 @@ function ClubPage({ topChromeHeight, useNativeLiquidGlassHeader = false, searchQ
                                     width: SKELETON_TITLE_WIDTHS[sectionIndex],
                                     borderRadius: scale(4),
                                     backgroundColor: tonal.primary15,
-                                }}
-                            />
-                            <View
-                                style={{
-                                    height: verticalScale(11),
-                                    width: scale(20),
-                                    borderRadius: scale(4),
-                                    backgroundColor: tonal.primary08,
                                 }}
                             />
                         </View>
@@ -417,7 +406,6 @@ function ClubPage({ topChromeHeight, useNativeLiquidGlassHeader = false, searchQ
                             style={{
                                 flexDirection: 'row',
                                 alignItems: 'baseline',
-                                justifyContent: 'space-between',
                                 paddingHorizontal: CLUB_GRID_HORIZONTAL_PADDING + scale(4),
                                 paddingTop: isFirstSection ? scale(8) : scale(20),
                                 paddingBottom: scale(8),
@@ -425,7 +413,6 @@ function ClubPage({ topChromeHeight, useNativeLiquidGlassHeader = false, searchQ
                             <Text
                                 style={{
                                     ...uiStyle.defaultText,
-                                    flex: 1,
                                     color: black.main,
                                     fontSize: verticalScale(16),
                                     fontWeight: '700',
@@ -433,17 +420,6 @@ function ClubPage({ topChromeHeight, useNativeLiquidGlassHeader = false, searchQ
                                 }}
                                 numberOfLines={1}>
                                 {clubTagMap(section.title) || section.title}
-                            </Text>
-                            <Text
-                                style={{
-                                    ...uiStyle.defaultText,
-                                    color: black.third,
-                                    fontSize: verticalScale(12),
-                                    fontWeight: '500',
-                                    fontVariant: ['tabular-nums'],
-                                    marginLeft: scale(8),
-                                }}>
-                                {section.count}
                             </Text>
                         </View>
                     );
