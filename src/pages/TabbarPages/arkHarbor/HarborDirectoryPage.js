@@ -14,13 +14,11 @@ import {
 import { isLiquidGlassSupported } from '../../../utils/glassEffect';
 import { useHeaderHeight } from '@react-navigation/elements';
 import { FlashList } from '@shopify/flash-list';
-import PagerView from 'react-native-pager-view';
 import { scale, verticalScale } from 'react-native-size-matters';
 import { useTranslation } from 'react-i18next';
 
 import Text from '../../../components/AppText';
 import ScalePressable from '../../../components/ScalePressable';
-import SegmentControl from '../../../components/SegmentControl';
 import { uiStyle, useTheme } from '../../../components/ThemeContext';
 import {
     fetchHarborCategories,
@@ -537,126 +535,6 @@ const HarborDirectoryPage = ({ type, navigation }) => {
     );
 };
 
-export const HarborExplorePage = ({ navigation }) => {
-    const { theme } = useTheme();
-    const { t } = useTranslation('harbor');
-    const headerHeight = useHeaderHeight();
-    const pagerRef = useRef(null);
-    const blockPressUntilRef = useRef(0);
-    const [currentIndex, setCurrentIndex] = useState(0);
-    const [mountedPages, setMountedPages] = useState({
-        category: true,
-        tag: false,
-    });
-
-    useEffect(() => {
-        navigation.setOptions({ headerTitle: t('探索') });
-    }, [navigation, t]);
-
-    const options = useMemo(
-        () => [
-            { key: 'category', label: t('分類') },
-            { key: 'tag', label: t('標籤') },
-        ],
-        [t],
-    );
-    const contentContainerStyle = useMemo(
-        () => ({
-            paddingTop: verticalScale(10),
-            paddingBottom: verticalScale(36),
-        }),
-        [],
-    );
-    const headerTopPadding = isLiquidGlassSupported
-        ? headerHeight + verticalScale(8)
-        : verticalScale(8);
-
-    const ensureMounted = useCallback(type => {
-        setMountedPages(current =>
-            current[type] ? current : { ...current, [type]: true },
-        );
-    }, []);
-
-    const selectPage = useCallback(
-        index => {
-            const type = index === 0 ? 'category' : 'tag';
-            ensureMounted(type);
-            setCurrentIndex(index);
-            pagerRef.current?.setPage(index);
-        },
-        [ensureMounted],
-    );
-
-    const handlePageSelected = useCallback(
-        event => {
-            const index = event.nativeEvent.position;
-            ensureMounted(index === 0 ? 'category' : 'tag');
-            setCurrentIndex(index);
-        },
-        [ensureMounted],
-    );
-
-    const handlePageScrollStateChanged = useCallback(event => {
-        const pageScrollState = event.nativeEvent.pageScrollState;
-        const guardDuration = pageScrollState === 'idle' ? 180 : 320;
-        blockPressUntilRef.current = Date.now() + guardDuration;
-    }, []);
-
-    const isPressAllowed = useCallback(
-        () => Date.now() >= blockPressUntilRef.current,
-        [],
-    );
-
-    return (
-        <View style={[styles.page, { backgroundColor: theme.bg_color }]}>
-            <View
-                style={[
-                    styles.exploreHeader,
-                    {
-                        paddingTop: headerTopPadding,
-                        backgroundColor: theme.bg_color,
-                        borderBottomColor: theme.themeColorUltraLight,
-                    },
-                ]}>
-                <SegmentControl
-                    options={options}
-                    selectedIndex={currentIndex}
-                    onChange={selectPage}
-                    trackBackgroundColor={theme.white}
-                    style={styles.segment}
-                />
-            </View>
-            <PagerView
-                ref={pagerRef}
-                style={styles.pager}
-                initialPage={0}
-                onPageSelected={handlePageSelected}
-                onPageScrollStateChanged={handlePageScrollStateChanged}>
-                <View key="category" style={styles.page} collapsable={false}>
-                    {mountedPages.category ? (
-                        <HarborDirectoryPane
-                            type="category"
-                            navigation={navigation}
-                            contentContainerStyle={contentContainerStyle}
-                            isPressAllowed={isPressAllowed}
-                        />
-                    ) : null}
-                </View>
-                <View key="tag" style={styles.page} collapsable={false}>
-                    {mountedPages.tag ? (
-                        <HarborDirectoryPane
-                            type="tag"
-                            navigation={navigation}
-                            contentContainerStyle={contentContainerStyle}
-                            isPressAllowed={isPressAllowed}
-                        />
-                    ) : null}
-                </View>
-            </PagerView>
-        </View>
-    );
-};
-
 export const HarborCategoryListPage = props => (
     <HarborDirectoryPage {...props} type="category" />
 );
@@ -744,16 +622,5 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         marginRight: scale(2),
         width: scale(34),
-    },
-    exploreHeader: {
-        borderBottomWidth: StyleSheet.hairlineWidth,
-        paddingHorizontal: scale(14),
-        paddingBottom: verticalScale(8),
-    },
-    segment: {
-        alignSelf: 'center',
-    },
-    pager: {
-        flex: 1,
     },
 });

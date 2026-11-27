@@ -1,9 +1,11 @@
 import { Platform, StyleSheet } from 'react-native';
+import { scale } from 'react-native-size-matters';
 
 import { uiStyle } from './ThemeContext';
 
-/** 全站搜尋框統一高度、圓角與排版 Token（固定邏輯尺寸，避免隨螢幕長寬比失真或觸發 iOS Web 自動縮放） */
+/** 全站搜尋框統一高度、圓角、間距與排版 Token（固定邏輯尺寸，避免隨螢幕長寬比失真或觸發 iOS Web 自動縮放） */
 export const SEARCH_FIELD_MIN_HEIGHT = 44;
+export const TOP_SEGMENT_SEARCH_GAP = scale(4);
 export const SEARCH_FIELD_BORDER_WIDTH = 1;
 export const SEARCH_FIELD_BORDER_RADIUS = 12;
 export const SEARCH_FIELD_FONT_SIZE = 16;

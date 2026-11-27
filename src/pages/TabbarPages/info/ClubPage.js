@@ -1,17 +1,15 @@
 import React, { memo, useCallback, useContext, useEffect, useMemo, useRef, useState, } from 'react';
-import { View, RefreshControl, TouchableOpacity, Alert, SectionList, Dimensions, FlatList, Platform, Animated, StyleSheet, } from 'react-native';
-import { BlurView } from 'expo-blur';
+import { View, RefreshControl, TouchableOpacity, Alert, SectionList, Dimensions, FlatList, Platform, Animated, } from 'react-native';
 
 import Text from '../../../components/AppText';
+import ScalePressable from '../../../components/ScalePressable';
 import TopScrollEdgeBackdrop from '../../../components/TopScrollEdgeBackdrop';
-import { SEARCH_FIELD_MIN_HEIGHT } from '../../../components/searchFieldStyles';
 import { uiStyle, ThemeContext, } from '../../../components/ThemeContext';
 import { BASE_URI, BASE_HOST, GET, USUAL_Q } from '../../../utils/pathMap';
 import { clubTagList, clubTagMap } from '../../../utils/clubMap';
 import { openLink } from '../../../utils/browser';
 import { trigger } from '../../../utils/trigger';
 import ClubCard from './components/ClubCard';
-import ClubSearchBar from './components/ClubSearchBar';
 import { filterClubsBySearchQuery } from './utils/clubSearchFilter';
 import axios from 'axios';
 import { scale, verticalScale } from 'react-native-size-matters';
@@ -98,7 +96,7 @@ const buildSections = (clubDataList) => {
     return sections;
 };
 
-function ClubPage({ topChromeHeight }) {
+function ClubPage({ topChromeHeight, useNativeLiquidGlassHeader = false, searchQuery = '' }) {
     const { theme } = useContext(ThemeContext);
     const { themeColor, black, white } = theme;
     const insets = useSafeAreaInsets();
@@ -106,17 +104,20 @@ function ClubPage({ topChromeHeight }) {
     const tabBarHeight =
         useContext(BottomTabBarHeightContext) ?? insets.bottom + 49;
     const [allClubs, setAllClubs] = useState([]);
-    const [searchQuery, setSearchQuery] = useState('');
     const [isLoading, setIsLoading] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [isOtherViewVisible, setIsOtherViewVisible] = useState(true);
-    const [searchHeaderHeight, setSearchHeaderHeight] = useState(SEARCH_FIELD_MIN_HEIGHT + scale(16));
+    const [activeSectionIndex, setActiveSectionIndex] = useState(0);
     const [scrollY] = useState(() => new Animated.Value(0));
-    const headerHeight = topChromeHeight + searchHeaderHeight;
+    const headerHeight = topChromeHeight;
     const nativeTopInset = Platform.OS === 'ios' ? headerHeight : 0;
     const sectionListRef = useRef(null);
     const firstSectionHeaderHeightRef = useRef(0);
     const clubRowHeightRef = useRef(0);
+    const activeSectionIndexRef = useRef(0);
+    // 側欄點選觸發的程式捲動期間鎖定 scroll-spy，避免高亮被中間區段來回覆寫
+    const isProgrammaticScrollRef = useRef(false);
+    const programmaticScrollTimerRef = useRef(null);
 
     const filteredClubs = useMemo(
         () => filterClubsBySearchQuery(allClubs, searchQuery),
@@ -125,19 +126,94 @@ function ClubPage({ topChromeHeight }) {
 
     const sections = useMemo(() => buildSections(filteredClubs), [filteredClubs]);
 
-    const handleScrollStart = useCallback(() => {
-        setIsOtherViewVisible(false);
+    useEffect(() => {
+        activeSectionIndexRef.current = 0;
+        setActiveSectionIndex(0);
+    }, [sections]);
+
+    const finishProgrammaticScroll = useCallback(() => {
+        if (programmaticScrollTimerRef.current) {
+            clearTimeout(programmaticScrollTimerRef.current);
+            programmaticScrollTimerRef.current = null;
+        }
+        isProgrammaticScrollRef.current = false;
     }, []);
+
+    useEffect(() => () => {
+        if (programmaticScrollTimerRef.current) {
+            clearTimeout(programmaticScrollTimerRef.current);
+        }
+    }, []);
+
+    const armProgrammaticScroll = useCallback(() => {
+        isProgrammaticScrollRef.current = true;
+        if (programmaticScrollTimerRef.current) {
+            clearTimeout(programmaticScrollTimerRef.current);
+        }
+        // 部分平台 animated scrollTo 未必觸發 momentum end；長距離跳轉也較久，逾時後再恢復 scroll-spy
+        programmaticScrollTimerRef.current = setTimeout(finishProgrammaticScroll, 700);
+    }, [finishProgrammaticScroll]);
+
+    const handleScrollStart = useCallback(() => {
+        // 用戶手勢接管時立刻解鎖，讓高亮重新跟隨手指捲動
+        finishProgrammaticScroll();
+        setIsOtherViewVisible(false);
+    }, [finishProgrammaticScroll]);
+
+    const handleScrollEndDrag = useCallback((event) => {
+        finishProgrammaticScroll();
+        // 仍有慣性時等 momentum end 再顯示側欄，避免滑動中途閃現
+        const velocityY = event?.nativeEvent?.velocity?.y ?? 0;
+        if (Math.abs(velocityY) < 0.01) {
+            setIsOtherViewVisible(true);
+        }
+    }, [finishProgrammaticScroll]);
 
     const handleScrollEnd = useCallback(() => {
+        finishProgrammaticScroll();
         setIsOtherViewVisible(true);
-    }, []);
+    }, [finishProgrammaticScroll]);
 
     const handleScroll = useCallback(event => {
-        scrollY.setValue(event.nativeEvent.contentOffset.y + nativeTopInset);
-    }, [nativeTopInset, scrollY]);
+        const scrollOffset = event.nativeEvent.contentOffset.y + nativeTopInset;
+        scrollY.setValue(scrollOffset);
+
+        // 程式捲動中略過區段同步，只保留頂部 backdrop 的 scrollY
+        if (isProgrammaticScrollRef.current) {
+            return;
+        }
+
+        const firstHeaderHeight = firstSectionHeaderHeightRef.current;
+        const rowHeight = clubRowHeightRef.current;
+        if (!firstHeaderHeight || !rowHeight || sections.length <= 1) {
+            return;
+        }
+
+        const sectionHeaderHeight = firstHeaderHeight + SECTION_HEADER_EXTRA_TOP_PADDING;
+        const probeOffset = scrollOffset + scale(24);
+        let accumulated = 0;
+        let nextIndex = 0;
+        for (let i = 0; i < sections.length; i += 1) {
+            if (probeOffset >= accumulated) {
+                nextIndex = i;
+            } else {
+                break;
+            }
+            accumulated +=
+                (i === 0 ? firstHeaderHeight : sectionHeaderHeight) +
+                sections[i].data.length * rowHeight;
+        }
+
+        if (nextIndex !== activeSectionIndexRef.current) {
+            activeSectionIndexRef.current = nextIndex;
+            setActiveSectionIndex(nextIndex);
+        }
+    }, [nativeTopInset, scrollY, sections]);
 
     const scrollToSection = useCallback((sectionIndex) => {
+        activeSectionIndexRef.current = sectionIndex;
+        setActiveSectionIndex(sectionIndex);
+        armProgrammaticScroll();
         if (sectionIndex === 0) {
             sectionListRef.current?.getScrollResponder()?.scrollTo({ y: -nativeTopInset, animated: true });
             return;
@@ -146,6 +222,7 @@ function ClubPage({ topChromeHeight }) {
         const firstHeaderHeight = firstSectionHeaderHeightRef.current;
         const rowHeight = clubRowHeightRef.current;
         if (!firstHeaderHeight || !rowHeight) {
+            finishProgrammaticScroll();
             return;
         }
 
@@ -162,7 +239,7 @@ function ClubPage({ topChromeHeight }) {
             y: offset - nativeTopInset,
             animated: true,
         });
-    }, [nativeTopInset, sections]);
+    }, [armProgrammaticScroll, finishProgrammaticScroll, nativeTopInset, sections]);
 
     const getData = useCallback(async ({ refreshing = false } = {}) => {
         handleScrollStart();
@@ -196,10 +273,6 @@ function ClubPage({ topChromeHeight }) {
     useEffect(() => {
         getData();
     }, [getData]);
-
-    const handleSearchFocus = useCallback(() => {
-        trigger();
-    }, []);
 
     const renderBottomInfo = useCallback(() => (
         <View style={{ marginBottom: tabBarHeight + scale(20) }}>
@@ -252,7 +325,7 @@ function ClubPage({ topChromeHeight }) {
 
     // 組織列表骨架：區段標題 + 三欄圓形 Logo 卡
     const renderClubSkeleton = useCallback(() => {
-        const { white, tonal, themeColor, bg_color } = theme;
+        const { white, tonal } = theme;
         return (
             <View style={{ paddingBottom: scale(40) }}>
                 {SKELETON_SECTION_ROWS.map((rowCount, sectionIndex) => (
@@ -261,23 +334,13 @@ function ClubPage({ topChromeHeight }) {
                             style={{
                                 flexDirection: 'row',
                                 alignItems: 'center',
-                                paddingHorizontal: CLUB_GRID_HORIZONTAL_PADDING,
-                                paddingTop: sectionIndex === 0 ? scale(6) : scale(18),
+                                paddingHorizontal: CLUB_GRID_HORIZONTAL_PADDING + scale(4),
+                                paddingTop: sectionIndex === 0 ? scale(8) : scale(20),
                                 paddingBottom: scale(8),
-                                backgroundColor: bg_color,
                             }}>
                             <View
                                 style={{
-                                    width: scale(3),
                                     height: verticalScale(15),
-                                    borderRadius: scale(2),
-                                    backgroundColor: themeColor,
-                                    marginRight: scale(10),
-                                }}
-                            />
-                            <View
-                                style={{
-                                    height: verticalScale(14),
                                     width: SKELETON_TITLE_WIDTHS[sectionIndex],
                                     borderRadius: scale(4),
                                     backgroundColor: tonal.primary15,
@@ -324,30 +387,35 @@ function ClubPage({ topChromeHeight }) {
                 }}>
                     <FlatList
                         data={sections.map(sec => sec.title)}
+                        extraData={activeSectionIndex}
                         contentContainerStyle={{
-                            paddingHorizontal: scale(3),
+                            padding: scale(3),
                         }}
                         renderItem={(itm) => {
+                            const isActive = itm.index === activeSectionIndex;
                             return (
-                                <TouchableOpacity
+                                <ScalePressable
                                     onPress={() => {
-                                        trigger();
+                                        trigger('selection');
                                         scrollToSection(itm.index);
                                     }}
                                     style={{
-                                        padding: scale(5),
+                                        paddingVertical: scale(4),
+                                        paddingHorizontal: scale(6),
+                                        borderRadius: scale(6),
+                                        backgroundColor: isActive ? theme.tonal.primary15 : 'transparent',
                                         width: '100%',
                                     }}
                                 >
                                     <Text style={{
                                         ...uiStyle.defaultText,
-                                        color: black.third,
+                                        color: isActive ? themeColor : black.third,
                                         fontSize: verticalScale(11),
-                                        fontWeight: 'bold'
+                                        fontWeight: isActive ? '700' : '600',
                                     }}>
                                         {clubTagMap(itm.item)}
                                     </Text>
-                                </TouchableOpacity>
+                                </ScalePressable>
                             );
                         }}
                         keyExtractor={item => item}
@@ -373,9 +441,6 @@ function ClubPage({ topChromeHeight }) {
                 }}
                 renderSectionHeader={({ section }) => {
                     const isFirstSection = section.title === sections[0]?.title;
-                    const blurTint = theme.isLight
-                        ? 'systemUltraThinMaterialLight'
-                        : 'systemUltraThinMaterialDark';
                     return (
                         <View
                             onLayout={({ nativeEvent }) => {
@@ -384,47 +449,23 @@ function ClubPage({ topChromeHeight }) {
                                 }
                             }}
                             style={{
-                                overflow: 'hidden',
-                                paddingHorizontal: CLUB_GRID_HORIZONTAL_PADDING,
-                                paddingTop: isFirstSection ? scale(6) : scale(18),
+                                flexDirection: 'row',
+                                alignItems: 'baseline',
+                                paddingHorizontal: CLUB_GRID_HORIZONTAL_PADDING + scale(4),
+                                paddingTop: isFirstSection ? scale(8) : scale(20),
                                 paddingBottom: scale(8),
                             }}>
-                            {/* 與頂部 TopScrollEdgeBackdrop 對齊的 sticky 毛玻璃，避免實色標題切斷透光層 */}
-                            <BlurView
-                                intensity={42}
-                                tint={blurTint}
-                                style={[
-                                    StyleSheet.absoluteFill,
-                                    { backgroundColor: theme.glassBg },
-                                ]}
-                            />
-                            <View
+                            <Text
                                 style={{
-                                    flexDirection: 'row',
-                                    alignItems: 'center',
-                                }}>
-                                <View
-                                    style={{
-                                        width: scale(3),
-                                        height: verticalScale(15),
-                                        borderRadius: scale(2),
-                                        backgroundColor: theme.themeColor,
-                                        marginRight: scale(10),
-                                    }}
-                                />
-                                <Text
-                                    style={{
-                                        ...uiStyle.defaultText,
-                                        flex: 1,
-                                        color: black.second,
-                                        fontSize: verticalScale(16),
-                                        fontWeight: '700',
-                                        letterSpacing: -0.25,
-                                    }}
-                                    numberOfLines={1}>
-                                    {clubTagMap(section.title) || section.title}
-                                </Text>
-                            </View>
+                                    ...uiStyle.defaultText,
+                                    color: black.main,
+                                    fontSize: verticalScale(16),
+                                    fontWeight: '700',
+                                    letterSpacing: -0.3,
+                                }}
+                                numberOfLines={1}>
+                                {clubTagMap(section.title) || section.title}
+                            </Text>
                         </View>
                     );
                 }}
@@ -462,29 +503,21 @@ function ClubPage({ topChromeHeight }) {
                 onScroll={handleScroll}
                 scrollEventThrottle={16}
                 onScrollBeginDrag={handleScrollStart}
+                onScrollEndDrag={handleScrollEndDrag}
                 onMomentumScrollEnd={handleScrollEnd}
                 ListEmptyComponent={isLoading ? renderClubSkeleton() : null}
                 ListFooterComponent={!isLoading ? renderBottomInfo : null}
                 showsVerticalScrollIndicator={false}
-                stickySectionHeadersEnabled
+                stickySectionHeadersEnabled={false}
                 initialNumToRender={10}
                 maxToRenderPerBatch={10}
                 windowSize={7}
                 // Android + Fabric：removeClippedSubviews 與 sticky 區段標題會導致掛載索引錯亂而閃退（addViewAt / IndexOutOfBounds）
                 removeClippedSubviews={Platform.OS === 'ios'}
             />
-            <TopScrollEdgeBackdrop headerHeight={headerHeight} scrollY={scrollY} />
-            <View
-                onLayout={event => setSearchHeaderHeight(event.nativeEvent.layout.height)}
-                style={{ position: 'absolute', top: topChromeHeight, left: 0, right: 0, zIndex: 2 }}>
-                <ClubSearchBar
-                    value={searchQuery}
-                    onChangeText={setSearchQuery}
-                    loading={isLoading}
-                    onFocus={handleSearchFocus}
-                    onCancel={() => setSearchQuery('')}
-                />
-            </View>
+            {useNativeLiquidGlassHeader ? null : (
+                <TopScrollEdgeBackdrop headerHeight={headerHeight} scrollY={scrollY} />
+            )}
         </View>
     );
 }

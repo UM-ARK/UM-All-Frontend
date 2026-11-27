@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import React, { forwardRef, memo, useState, useRef, useEffect, useCallback, useImperativeHandle, useMemo } from 'react';
 import {
     Animated,
     ScrollView,
@@ -11,8 +11,10 @@ import {
     AppState,
     Keyboard,
     FlatList,
+    StyleSheet,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
+import Reanimated, { useAnimatedReaction, useAnimatedRef, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 
 // 本地工具
 import Text from '../../../../components/AppText';
@@ -46,8 +48,7 @@ import { recordFeatureUsage } from '../../../../utils/featureRecentUsage';
 import { toastTextArr, toastKaomojiArr } from '../../../../static/UMARK_Assets/EasterEgg.js';
 import CustomBottomSheet from '../../../../utils/BottomSheet';
 import HyperlinkText from '../../../../components/HyperlinkText.js';
-import SearchBar from './components/SearchBar.js';
-import CalendarBar from './components/CalendarBar';
+import HomeCoast from './components/HomeCoast';
 import Toast from 'react-native-toast-message';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
@@ -57,13 +58,10 @@ import moment from 'moment';
 import lodash from 'lodash';
 import { useTranslation } from 'react-i18next';
 import { BottomSheetScrollView, BottomSheetFlatList } from '@gorhom/bottom-sheet';
-import ScrollToTopButton from '../../../../components/ScrollToTopButton';
 import TopScrollEdgeBackdrop from '../../../../components/TopScrollEdgeBackdrop';
-import TouchableScale from '../../../../components/TouchableScale';
+import ScalePressable from '../../../../components/ScalePressable';
 import FeatureIcon from './search/components/FeatureIcon';
-import PhosphorFeatureIcon from './search/components/PhosphorFeatureIcon';
 import Ionicons from '@react-native-vector-icons/ionicons';
-import { SEARCH_FIELD_BORDER_RADIUS } from '../../../../components/searchFieldStyles';
 
 const MIN_REFRESH_DURATION = 800;
 const DONATE_PROBE_TIMEOUT_MS = 2500;
@@ -105,15 +103,42 @@ const iconTypes = {
     materialCommunityIcons: 'MaterialCommunityIcons',
 };
 
-const HomeScreen = ({ navigation, topChromeHeight }) => {
+const HomeScreen = forwardRef(function HomeScreen({
+    navigation,
+    topChromeHeight,
+    useNativeLiquidGlassHeader = false,
+    isActive = true,
+    onCalendarTouchChange,
+    headerTint,
+}, ref) {
     const { theme } = useTheme();
-    const { white, bg_color, black, themeColor, themeColorLight, themeColorUltraLight, viewShadow, TIME_TABLE_COLOR, featureIconTones } = theme;
+    const { white, bg_color, black, themeColor, themeColorLight, themeColorUltraLight, viewShadow, TIME_TABLE_COLOR, homeCoast } = theme;
     const { t, i18n } = useTranslation(['common', 'home']);
     const { programmeLevel } = useProgrammeLevel();
     const isTc = i18n.language === 'tc';
     const featureFontSize = isTc ? verticalScale(8) : verticalScale(7);
     const [scrollY] = useState(() => new Animated.Value(0));
-    const [viewport, setViewport] = useState(null);
+    const coastScrollY = useSharedValue(0);
+    const deepSeaHeight = useSharedValue(0);
+    const estimatedDeepSeaHeight = topChromeHeight + verticalScale(85);
+    const seaBackdropStyle = useAnimatedStyle(() => {
+        const height = deepSeaHeight.get() || estimatedDeepSeaHeight;
+        const offset = coastScrollY.get();
+        return {
+            height,
+            transform: [
+                { translateY: -Math.max(0, offset) },
+                { scaleY: 1 + Math.max(0, -offset) / height },
+            ],
+        };
+    });
+    useAnimatedReaction(
+        () => {
+            const height = deepSeaHeight.get() || estimatedDeepSeaHeight;
+            return topChromeHeight > 0 ? Math.max(0, Math.min(1, (height - coastScrollY.get()) / topChromeHeight)) : 1;
+        },
+        coverage => { headerTint?.set(coverage); },
+    );
 
     // 狀態
     const functionArray = useMemo(() => [
@@ -124,10 +149,12 @@ const HomeScreen = ({ navigation, topChromeHeight }) => {
             iconTone: 'transport',
             function_name: t('校園巴士', { ns: 'home' }),
             func: () => {
-                trigger();
                 // 與服務頁共用常用紀錄（key_name 對齊 FeatureList）
                 recordFeatureUsage('校園巴士');
-                navigation.navigate('Bus');
+                // 延後導航，避免 Bus 重頁初始化堵住 onPressIn 已送出的觸覺
+                setTimeout(() => {
+                    navigation.navigate('Bus');
+                }, 50);
             },
         },
         {
@@ -137,7 +164,6 @@ const HomeScreen = ({ navigation, topChromeHeight }) => {
             iconTone: 'academic',
             function_name: t('Moodle', { ns: 'home' }),
             func: () => {
-                trigger();
                 logToFirebase('openPage', { page: 'moodle' });
                 recordFeatureUsage('Moodle');
                 openLink(UM_Moodle);
@@ -148,7 +174,6 @@ const HomeScreen = ({ navigation, topChromeHeight }) => {
         //     icon_type: iconTypes.materialCommunityIcons,
         //     function_name: t('新想法', { ns: 'home' }),
         //     func: () => {
-        //         trigger();
         //         logToFirebase('funcUse', { funcName: 'harbor_new' });
         //         navigation.navigate('HarborComposer', { mode: 'newTopic' });
         //     },
@@ -160,7 +185,6 @@ const HomeScreen = ({ navigation, topChromeHeight }) => {
             iconTone: 'campus',
             function_name: t('支持我們', { ns: 'home' }),
             func: () => {
-                trigger();
                 logToFirebase('funcUse', { funcName: 'donate' });
                 // 愛發電無法連線時改用 GitHub 捐贈頁
                 openDonateLink();
@@ -180,16 +204,14 @@ const HomeScreen = ({ navigation, topChromeHeight }) => {
             iconTone: 'academic',
             function_name: t('常見問題', { ns: 'home' }),
             func: () => {
-                trigger();
                 logToFirebase('funcUse', { funcName: 'usual_q' });
                 openLink(USUAL_Q);
             },
         },
     ], [navigation, t]);
-    // 快捷項固定寬度 + 固定間距，整組置中，兩側自然留白（不均分視窗寬）
-    const quickFeatureItemWidth = scale(56);
-    const quickFeatureGap = scale(20);
     const [calRefreshKey, setCalRefreshKey] = useState(0);
+    const [isCoastVisible, setIsCoastVisible] = useState(true);
+    const [isForeground, setIsForeground] = useState(() => !['inactive', 'background'].includes(AppState.currentState));
     const [isShowModal, setIsShowModal] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
@@ -207,13 +229,25 @@ const HomeScreen = ({ navigation, topChromeHeight }) => {
 
     // ref
     const eventPage = useRef(null);
-    const scrollView = useRef(null);
+    const scrollView = useAnimatedRef();
+    const coastLayoutRef = useRef(null);
+    const coastVisibleRef = useRef(true);
     const textInputRef = useRef(null);
     const toastTimer = useRef(null);
     const appStateListener = useRef(null);
     const bottomSheetRef = useRef(null);
     const refreshingRef = useRef(false);
     const upcomingCourseRequestRef = useRef(0);
+
+    useImperativeHandle(
+        ref,
+        () => ({
+            scrollToTop: () => {
+                scrollView.current?.scrollTo({ x: 0, y: 0, animated: true });
+            },
+        }),
+        [],
+    );
 
     // 生命週期
     useEffect(() => {
@@ -235,7 +269,8 @@ const HomeScreen = ({ navigation, topChromeHeight }) => {
     // App 從背景回到前景時：更新 App 資訊、曆與下節課，但不自動重打活動 API，
     // 否則每次從多工或鎖定回來都會讓活動列表閃爍/重載，體感不佳。活動列表請用下拉重新整理。
     const handleAppStateChange = (nextAppState) => {
-        if (AppState.currentState == 'active') {
+        setIsForeground(nextAppState === 'active');
+        if (nextAppState === 'active') {
             if (navigation?.isFocused()) {
                 setIsLoading(true);
                 getAppData(false);
@@ -355,7 +390,7 @@ const HomeScreen = ({ navigation, topChromeHeight }) => {
         //     onPress: () => Toast.hide(),
         // });
 
-        getUpcomingCourse();
+        return getUpcomingCourse();
     }, [getUpcomingCourse]);
 
     const handleRefresh = async () => {
@@ -365,10 +400,10 @@ const HomeScreen = ({ navigation, topChromeHeight }) => {
 
         refreshingRef.current = true;
         setIsRefreshing(true);
-        onRefresh();
 
         try {
             await Promise.allSettled([
+                onRefresh(),
                 getAppData(),
                 eventPage.current?.onRefresh(),
                 wait(MIN_REFRESH_DURATION),
@@ -382,40 +417,57 @@ const HomeScreen = ({ navigation, topChromeHeight }) => {
     // 快捷功能：與服務頁相同的 FeatureIcon + 文字樣式
     const renderQuickFeature = useCallback(
         item => (
-            <TouchableScale
+            <ScalePressable
+                accessibilityRole="button"
                 style={{
-                    width: quickFeatureItemWidth,
+                    flex: 1,
+                    minHeight: 48,
+                    maxWidth: scale(92),
                     justifyContent: 'center',
                     alignItems: 'center',
                 }}
-                activeOpacity={0.7}
+                onPressIn={() => {
+                    trigger();
+                }}
                 onPress={item.func}
                 key={item.function_name}>
-                <FeatureIcon item={item} size={scale(22)} />
+                <FeatureIcon item={item} size={scale(22)} showBackground={false} />
                 <Text
                     style={{
                         ...uiStyle.defaultText,
-                        fontSize: featureFontSize,
+                        fontSize: Math.max(featureFontSize, scale(10)),
                         color: black.second,
                         textAlign: 'center',
-                        marginTop: verticalScale(2),
+                        marginTop: -verticalScale(2),
                     }}>
                     {item.function_name}
                 </Text>
-            </TouchableScale>
+            </ScalePressable>
         ),
-        [black.second, featureFontSize, quickFeatureItemWidth],
+        [black.second, featureFontSize],
     );
 
     // 打開/關閉底部Modal
     const tiggerModalBottom = () => setIsShowModal(!isShowModal);
 
+    const handleDeepSeaLayout = useCallback(event => {
+        deepSeaHeight.set(event.nativeEvent.layout.height);
+    }, [deepSeaHeight]);
+
     // 處理 Scroll：觸底加載更多數據
     const handleScroll = (event) => {
         const {layoutMeasurement, contentOffset, contentSize} = event.nativeEvent;
         scrollY.setValue(contentOffset.y);
+        const coastLayout = coastLayoutRef.current;
+        if (coastLayout) {
+            const visible = coastLayout.y + coastLayout.height > contentOffset.y + topChromeHeight;
+            if (visible !== coastVisibleRef.current) {
+                coastVisibleRef.current = visible;
+                setIsCoastVisible(visible);
+            }
+        }
 
-        if (isLoading || isLoadMore) {return;}
+        if (isLoading || isLoadMore || refreshingRef.current) {return;}
         // 僅 ARK 活動時瀑布流較短，提前約一屏觸發預載，避免滑到底才開始請求
         const bottomThreshold = Math.max(layoutMeasurement.height, verticalScale(400));
         const isCloseToBottom = layoutMeasurement.height + contentOffset.y >= contentSize.height - bottomThreshold;
@@ -515,9 +567,14 @@ const HomeScreen = ({ navigation, topChromeHeight }) => {
     // 主渲染
     return (
         <View
-            onLayout={event => setViewport(event.nativeEvent.layout)}
             style={{ flex: 1, backgroundColor: bg_color, alignItems: 'center', justifyContent: 'center' }}>
-            <ScrollView
+            <View pointerEvents="none" style={[StyleSheet.absoluteFill, { overflow: 'hidden' }]}>
+                <Reanimated.View style={[
+                    { position: 'absolute', top: 0, left: 0, right: 0, backgroundColor: homeCoast.deep, transformOrigin: 'center top' },
+                    seaBackdropStyle,
+                ]} />
+            </View>
+            <Reanimated.ScrollView
                 style={{ width: '100%' }}
                 contentInsetAdjustmentBehavior="never"
                 scrollIndicatorInsets={{ top: topChromeHeight }}
@@ -532,87 +589,26 @@ const HomeScreen = ({ navigation, topChromeHeight }) => {
                 }
                 alwaysBounceHorizontal={false}
                 ref={scrollView}
+                scrollViewOffset={coastScrollY}
                 showsVerticalScrollIndicator={true}
                 onScroll={handleScroll}
                 scrollEventThrottle={16}
                 keyboardDismissMode={Platform.OS === 'android' ? 'none' : 'on-drag'}
                 keyboardShouldPersistTaps={Platform.OS === 'android' ? 'always' : 'handled'}
-                contentContainerStyle={{ width: '100%', alignItems: 'center', paddingTop: topChromeHeight }}
+                contentContainerStyle={{ width: '100%', alignItems: 'center' }}
             >
 
-                <SearchBar navigation={navigation} />
-
-                {/* 校曆列表 */}
-                <CalendarBar refreshTrigger={calRefreshKey} />
-
-                {/** 即將到來的課程：無課時不展示 */}
-                {upcomingCourse ? (
-                    <View style={{
-                        flexDirection: 'row',
-                        alignItems: 'center', justifyContent: 'center',
-                        alignSelf: 'center',
-                        width: '80%',
-                        marginTop: verticalScale(6),
-                    }}>
-                        <TouchableScale
-                            style={{ width: '100%' }}
-                            onPress={() => {
-                                trigger();
-                                navigateToCourseTab(navigation, {
-                                    segment: 'timetable',
-                                });
-                            }}>
-                            <View style={{
-                                flexDirection: 'column', flex: 1,
-                                alignItems: 'center', justifyContent: 'center',
-                                gap: scale(3),
-                                backgroundColor: white,
-                                paddingHorizontal: scale(20),
-                                paddingVertical: verticalScale(6),
-                                borderRadius: SEARCH_FIELD_BORDER_RADIUS,
-                            }}>
-                                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: scale(3) }}>
-                                    <PhosphorFeatureIcon
-                                        name="alarm-clock"
-                                        size={verticalScale(10)}
-                                        color={featureIconTones.green.foreground}
-                                    />
-                                    <Text style={{ ...uiStyle.defaultText, color: featureIconTones.green.foreground, fontWeight: 'bold', fontSize: verticalScale(10), lineHeight: verticalScale(14) }}>{t('下節課：', { ns: 'timetable' })}</Text>
-                                    <Text style={{ ...uiStyle.defaultText, color: black.main, fontWeight: '600', fontSize: verticalScale(10), lineHeight: verticalScale(14) }}>{upcomingCourse['Course Code']}</Text>
-                                    <Text style={{ ...uiStyle.defaultText, color: black.second, fontSize: verticalScale(10), lineHeight: verticalScale(14) }}>{upcomingCourse['Time From']}</Text>
-                                </View>
-                                {upcomingCourse.Classroom?.trim?.() ? (
-                                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: scale(3) }}>
-                                        <PhosphorFeatureIcon
-                                            name="map-pin"
-                                            size={verticalScale(10)}
-                                            color={black.third}
-                                        />
-                                        <Text
-                                            style={{ ...uiStyle.defaultText, color: black.third, fontSize: verticalScale(10), lineHeight: verticalScale(14) }}
-                                            numberOfLines={1}>
-                                            {upcomingCourse.Classroom.trim()}
-                                        </Text>
-                                    </View>
-                                ) : null}
-                            </View>
-                        </TouchableScale>
-                    </View>
-                ) : null}
-
-                {/* 快捷功能圖標（固定寬與間距，整組置中聚攏） */}
-                <View
-                    style={{
-                        width: '100%',
-                        alignSelf: 'center',
-                        marginTop: verticalScale(6),
-                        flexDirection: 'row',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        gap: quickFeatureGap,
-                    }}>
+                <HomeCoast
+                    topInset={topChromeHeight}
+                    refreshTrigger={calRefreshKey}
+                    upcomingCourse={upcomingCourse}
+                    motionEnabled={isActive && isCoastVisible && isForeground}
+                    onLayout={event => { coastLayoutRef.current = event.nativeEvent.layout; }}
+                    onDeepSeaLayout={handleDeepSeaLayout}
+                    onDateTouchChange={onCalendarTouchChange}
+                    onOpenTimetable={() => navigateToCourseTab(navigation, { segment: 'timetable' })}>
                     {functionArray.map(item => renderQuickFeature(item))}
-                </View>
+                </HomeCoast>
 
                 {/* 更新提示 */}
                 {showUpdateInfo ?
@@ -760,10 +756,11 @@ const HomeScreen = ({ navigation, topChromeHeight }) => {
                 {networkError ? (
                     <Text style={{ alignSelf: 'center', marginTop: verticalScale(3), ...uiStyle.defaultText, color: black.third }}>網絡錯誤，請手動刷新！</Text>
                 ) : null}
-                {/* 活動瀑布流，預留間距避免遮擋上方快捷入口 */}
-                <EventPage ref={eventPage} style={{ marginTop: verticalScale(3) }} />
-            </ScrollView>
-            <TopScrollEdgeBackdrop headerHeight={topChromeHeight} scrollY={scrollY} />
+                <EventPage ref={eventPage} />
+            </Reanimated.ScrollView>
+            {useNativeLiquidGlassHeader ? null : (
+                <TopScrollEdgeBackdrop headerHeight={topChromeHeight} scrollY={scrollY} />
+            )}
 
             {/* Modal */}
             {isShowModal && (
@@ -825,20 +822,11 @@ const HomeScreen = ({ navigation, topChromeHeight }) => {
                 </ModalBottom>
             )}
 
-            {viewport && (
-                <ScrollToTopButton
-                    viewport={viewport}
-                    topInset={topChromeHeight}
-                    virtualizedListRef={scrollView}
-                    style={{ zIndex: 2 }}
-                />
-            )}
-
             <CustomBottomSheet ref={bottomSheetRef} page={'home'} onSheetIndexChange={(idx) => setSheetIndex(idx)}>
                 {renderBottomSheet()}
             </CustomBottomSheet>
         </View>
     );
-};
+});
 
-export default HomeScreen;
+export default memo(HomeScreen);

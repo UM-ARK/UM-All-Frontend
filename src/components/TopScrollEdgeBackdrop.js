@@ -9,6 +9,14 @@ import { useTheme } from './ThemeContext';
 export const SCROLL_EDGE_FADE_HEIGHT = verticalScale(12);
 const SCROLL_EDGE_FADE_DISTANCE = 16;
 
+// 統一頂部與 sticky 毛玻璃參數：深色模式降低強度避免過暗
+export const getTopScrollEdgeBlurProps = isLight => ({
+    intensity: isLight ? 42 : 30,
+    tint: isLight
+        ? 'systemUltraThinMaterialLight'
+        : 'systemUltraThinMaterialDark',
+});
+
 const withHexAlpha = (hex, alpha) => {
     if (typeof hex !== 'string' || !hex.startsWith('#')) {
         return hex;
@@ -69,24 +77,26 @@ const TopScrollEdgeBackdrop = ({
         }
         const midStop = Math.min(0.9, Math.max(0.05, (headerHeight * 0.72) / totalHeight));
         const headerStop = Math.min(0.96, Math.max(midStop + 0.02, headerHeight / totalHeight));
+        // 深色模式下毛玻璃本身已偏暗，降低遮罩不透明度避免底緣出現過重黑影
+        const [topAlpha, midAlpha, edgeAlpha] = isLight
+            ? [0.85, 0.68, 0.96]
+            : [0.68, 0.42, 0.55];
         return {
             gradientColors: [
-                withHexAlpha(effectiveBgColor, 0.85),
-                withHexAlpha(effectiveBgColor, 0.68),
-                withHexAlpha(effectiveBgColor, 0.96),
+                withHexAlpha(effectiveBgColor, topAlpha),
+                withHexAlpha(effectiveBgColor, midAlpha),
+                withHexAlpha(effectiveBgColor, edgeAlpha),
                 withHexAlpha(effectiveBgColor, 0),
             ],
             gradientLocations: [0, midStop, headerStop, 1],
         };
-    }, [effectiveBgColor, headerHeight, totalHeight]);
+    }, [effectiveBgColor, headerHeight, isLight, totalHeight]);
 
     if (headerHeight <= 0) {
         return null;
     }
 
-    const blurTint = isLight
-        ? 'systemUltraThinMaterialLight'
-        : 'systemUltraThinMaterialDark';
+    const blurProps = getTopScrollEdgeBlurProps(isLight);
 
     return (
         <Animated.View
@@ -97,8 +107,7 @@ const TopScrollEdgeBackdrop = ({
             ]}>
             <View style={[styles.blurBand, { height: headerHeight }]}>
                 <BlurView
-                    intensity={42}
-                    tint={blurTint}
+                    {...blurProps}
                     style={StyleSheet.absoluteFill}
                 />
             </View>

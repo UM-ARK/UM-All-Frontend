@@ -16,7 +16,8 @@ import HarborStatsCard from './HarborStatsCard';
 import {myCardStyles} from './myCardStyles';
 
 const QUICK_ACTION_ROUTES = {
-    messages: navigation => navigation.navigate('HarborInbox'),
+    chat: navigation => navigation.navigate('HarborChatList'),
+    notifications: navigation => navigation.navigate('HarborInbox'),
     bookmarks: (navigation, t) =>
         navigation.navigate('HarborActivity', {
             kind: 'bookmarks',
@@ -34,10 +35,9 @@ const QUICK_ACTION_ROUTES = {
 const HarborProfileOverview = ({
     user,
     unreadCount,
-    chatUnreadCount,
+    chatUnreadCount = 0,
     reviewCount = 0,
     navigation,
-    onChatPress,
     onSettingsPress,
     teamSchedule,
 }) => {
@@ -122,8 +122,6 @@ const HarborProfileOverview = ({
                             })
                         : undefined
                 }
-                onChatPress={onChatPress}
-                chatUnreadCount={chatUnreadCount}
                 onSettingsPress={onSettingsPress}
             />
             {user.partialProfile ? (
@@ -163,6 +161,7 @@ const HarborProfileOverview = ({
                 </View>
                 <HarborQuickActions
                     unreadCount={unreadCount}
+                    chatUnreadCount={chatUnreadCount}
                     onSelect={handleQuickAction}
                 />
 
@@ -210,10 +209,10 @@ const HarborProfileOverview = ({
                         {reviewCount > 0 ? (
                             <View
                                 style={[
-                                    styles.reviewBadge,
+                                    styles.countBadge,
                                     {backgroundColor: theme.unreadForeground},
                                 ]}>
-                                <Text style={[styles.reviewBadgeText, {color: theme.white}]}>
+                                <Text style={[styles.countBadgeText, {color: theme.white}]}>
                                     {reviewCount > 99 ? '99+' : reviewCount}
                                 </Text>
                             </View>
@@ -282,7 +281,7 @@ const styles = StyleSheet.create({
         lineHeight: verticalScale(14),
         marginTop: verticalScale(2),
     },
-    reviewBadge: {
+    countBadge: {
         minWidth: scale(24),
         height: scale(24),
         borderRadius: scale(12),
@@ -290,7 +289,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         paddingHorizontal: scale(6),
     },
-    reviewBadgeText: {
+    countBadgeText: {
         ...uiStyle.defaultText,
         fontSize: scale(9),
         fontWeight: '800',

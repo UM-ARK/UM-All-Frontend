@@ -7,10 +7,12 @@ import { useTranslation } from 'react-i18next';
 import Text from '../../../components/AppText';
 import TextInput from '../../../components/AppTextInput';
 import ScalePressable from '../../../components/ScalePressable';
+import SearchFieldContainer from '../../../components/SearchFieldContainer';
 import searchFieldStyles, {
     SEARCH_FIELD_CLEAR_ICON_SIZE,
     SEARCH_FIELD_ICON_SIZE,
     SEARCH_FIELD_MAX_FONT_SIZE_MULTIPLIER,
+    TOP_SEGMENT_SEARCH_GAP,
 } from '../../../components/searchFieldStyles';
 import { useTheme, uiStyle } from '../../../components/ThemeContext';
 import { logToFirebase } from '../../../utils/firebaseAnalytics';
@@ -24,6 +26,7 @@ export default function FeatureSearchBar({
     onWebSearch,
     hasQuery,
     matchCount,
+    liquidGlass = false,
 }) {
     const { theme } = useTheme();
     const { black, featuresScreen, themeColor } = theme;
@@ -33,14 +36,17 @@ export default function FeatureSearchBar({
 
     return (
         <View style={styles.root}>
-            <View style={[
-                searchFieldStyles.field,
-                searchFieldStyles.borderedField,
-                {
-                    backgroundColor: featuresScreen.searchBg,
-                    borderColor: isFocused ? themeColor : featuresScreen.searchBg,
-                },
-            ]}>
+            <SearchFieldContainer
+                liquidGlass={liquidGlass}
+                fieldStyle={[
+                    searchFieldStyles.borderedField,
+                    {
+                        backgroundColor: featuresScreen.searchBg,
+                        borderColor: isFocused
+                            ? themeColor
+                            : featuresScreen.searchBg,
+                    },
+                ]}>
                 <Ionicons name="search" size={SEARCH_FIELD_ICON_SIZE} color={isFocused ? themeColor : black.third} />
                 <TextInput
                     ref={inputRef}
@@ -79,7 +85,7 @@ export default function FeatureSearchBar({
                         <Ionicons name="close-circle" size={SEARCH_FIELD_CLEAR_ICON_SIZE} color={black.third} />
                     </ScalePressable>
                 ) : null}
-            </View>
+            </SearchFieldContainer>
             {hasQuery ? (
                 <View style={styles.statusRow}>
                     <Text
@@ -109,7 +115,7 @@ const styles = StyleSheet.create({
         width: '100%',
         maxWidth: WIDE_CONTENT_MAX_WIDTH,
         alignSelf: 'center',
-        marginTop: verticalScale(10),
+        marginTop: TOP_SEGMENT_SEARCH_GAP,
         paddingHorizontal: scale(12),
     },
     statusRow: {

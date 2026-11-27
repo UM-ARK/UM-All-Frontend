@@ -31,7 +31,7 @@ import { isLiquidGlassSupported } from '../../../../utils/glassEffect';
 import Text from '../../../../components/AppText';
 import ARKImageView from '../../../../components/ARKImageView';
 import HyperlinkText from '../../../../components/HyperlinkText';
-import SegmentedTabControl from '../../../../components/SegmentedTabControl';
+import NativeHeaderSegmentControl from '../../../../components/NativeHeaderSegmentControl';
 import {
     uiStyle,
     useTheme,
@@ -742,12 +742,10 @@ const UMEventDetail = ({ navigation, route }) => {
                                     {LANGUAGE_LABELS.event[selectedLanguage]}
                                 </Text>
                                 {languageSegmentOptions.length > 0 ? (
-                                    <SegmentedTabControl
+                                    <NativeHeaderSegmentControl
                                         compact
-                                        compactItemWidth={scale(40)}
                                         onChange={handleLanguageSelect}
                                         options={languageSegmentOptions}
-                                        raisedTrack
                                         selectedIndex={
                                             languageSegmentSelectedIndex
                                         }

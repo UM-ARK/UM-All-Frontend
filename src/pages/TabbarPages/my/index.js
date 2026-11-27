@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
     Alert,
     RefreshControl,
@@ -68,6 +68,11 @@ const MyScreen = ({ navigation }) => {
     const backgroundColor = theme.isLight
         ? (isSignedIn ? theme.bg_color : theme.white)
         : theme.harbor_bg_color;
+
+    const handleSettingsPress = useCallback(() => {
+        navigation.navigate('SettingPage');
+    }, [navigation]);
+
     // 漸變只改變頁面底色的透明度，避免混入黑色。
     const fadeStartColor = backgroundColor.length === 4
         ? `${backgroundColor}0`
@@ -266,9 +271,7 @@ const MyScreen = ({ navigation }) => {
                     <HarborPageHeader
                         compact={isSignedIn}
                         // user={isSignedIn ? user : undefined}
-                        onSettingsPress={() =>
-                            navigation.navigate('SettingPage')
-                        }
+                        onSettingsPress={handleSettingsPress}
                     />
                     {harborError}
                     {isSignedIn ? (
@@ -278,12 +281,7 @@ const MyScreen = ({ navigation }) => {
                             chatUnreadCount={chatUnreadCount}
                             reviewCount={reviewCount}
                             navigation={navigation}
-                            onChatPress={() =>
-                                navigation.navigate('HarborChatList')
-                            }
-                            onSettingsPress={() =>
-                                navigation.navigate('SettingPage')
-                            }
+                            onSettingsPress={handleSettingsPress}
                             teamSchedule={
                                 <TeamSchedulePreviewSection
                                     ref={teamSchedulePreviewRef}

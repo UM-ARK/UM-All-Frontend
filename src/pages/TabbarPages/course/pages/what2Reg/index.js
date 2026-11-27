@@ -43,7 +43,10 @@ import useCourseSearch from './hooks/useCourseSearch';
 import useFirstLetterNav from './hooks/useFirstLetterNav';
 import FilterPanel from './components/FilterPanel';
 import SearchBarSection from './components/SearchBarSection';
-import { SEARCH_FIELD_MIN_HEIGHT } from '../../../../../components/searchFieldStyles';
+import {
+    SEARCH_FIELD_MIN_HEIGHT,
+    TOP_SEGMENT_SEARCH_GAP,
+} from '../../../../../components/searchFieldStyles';
 import FirstLetterNav from './components/FirstLetterNav';
 import { unitMap, depaMap, geClassMap } from './constants/maps';
 import { adpeMap, CMGEList, dayList, defaultFilterOptions, defaultTimeFilter, modeENStr } from './constants/options';
@@ -73,6 +76,7 @@ const CourseCardRow = ({
     courseMode,
     isHistoricalPeriod,
     sectionStatusesByCourseCode,
+    letterShakeTarget,
 }) => {
     const [measuredHeights, setMeasuredHeights] = useState({});
     const isRowMeasured = entries.every(entry => measuredHeights[entry.key] > 0);
@@ -91,24 +95,30 @@ const CourseCardRow = ({
 
     return (
         <View style={{ flexDirection: 'row', alignItems: 'flex-start', columnGap: COURSE_CARD_GAP }}>
-            {entries.map(entry => (
-                <CourseCard
-                    key={entry.key}
-                    item={entry.item}
-                    mode={'json'}
-                    programmeLevel={programmeLevel}
-                    courseMode={courseMode}
-                    isHistoricalPeriod={isHistoricalPeriod}
-                    cardWidth={getCourseCardWidth(entry.span, availableWidth, COURSE_CARD_GAP, columnCount)}
-                    cardHeight={rowHeight}
-                    onMeasureHeight={height => handleMeasureHeight(entry.key, height)}
-                    sectionStatuses={
-                        sectionStatusesByCourseCode?.[
-                        entry.item['Course Code'] || entry.item.New_code
-                        ]
-                    }
-                />
-            ))}
+            {entries.map(entry => {
+                const courseCode = entry.item['Course Code'] || entry.item.New_code;
+                return (
+                    <CourseCard
+                        key={entry.key}
+                        item={entry.item}
+                        mode={'json'}
+                        programmeLevel={programmeLevel}
+                        courseMode={courseMode}
+                        isHistoricalPeriod={isHistoricalPeriod}
+                        cardWidth={getCourseCardWidth(entry.span, availableWidth, COURSE_CARD_GAP, columnCount)}
+                        cardHeight={rowHeight}
+                        onMeasureHeight={height => handleMeasureHeight(entry.key, height)}
+                        sectionStatuses={
+                            sectionStatusesByCourseCode?.[courseCode]
+                        }
+                        shakeNonce={
+                            letterShakeTarget?.courseCode === courseCode
+                                ? letterShakeTarget.nonce
+                                : undefined
+                        }
+                    />
+                );
+            })}
         </View>
     );
 };
@@ -142,13 +152,16 @@ const What2Reg = ({ isSplitPane = false }) => {
     // 可用寬度每 440px 開一條「車道」，卡片仍維持手機上的 1/3、1/2、全寬三檔
     const courseGridColumnCount = getLaneCount(courseGridWidth) * LANE_COLUMN_COUNT;
     const [loadedFilterStorageKey, setLoadedFilterStorageKey] = useState(null);
+    // 右側首字母跳轉後，讓該字母第一張課程卡短抖一次（nonce 可重複點同一字母）
+    const [letterShakeTarget, setLetterShakeTarget] = useState(null);
+    const letterShakeTimerRef = useRef(null);
 
     const textInputRef = useRef(null);
     const scrollViewRef = useRef(null);
     const scrollY = useRef(new Animated.Value(0)).current;
     const rightScrollY = useRef(new Animated.Value(0)).current;
-    const [searchHeaderHeight, setSearchHeaderHeight] = useState(SEARCH_FIELD_MIN_HEIGHT + scale(5));
-    const { topChromeHeight } = useCourseChrome();
+    const [searchHeaderHeight, setSearchHeaderHeight] = useState(SEARCH_FIELD_MIN_HEIGHT + TOP_SEGMENT_SEARCH_GAP);
+    const { topChromeHeight, useNativeLiquidGlassHeader } = useCourseChrome();
     const totalSearchHeaderHeight = topChromeHeight + searchHeaderHeight;
 
     const insets = useSafeAreaInsets();
@@ -416,13 +429,34 @@ const What2Reg = ({ isSplitPane = false }) => {
         }
     }, [selectCoursePeriod]);
 
+    useEffect(() => () => {
+        if (letterShakeTimerRef.current) {
+            clearTimeout(letterShakeTimerRef.current);
+        }
+    }, []);
+
     const onScrollToLetter = useCallback(letter => {
         trigger();
         const offsetY = scrollData[letter];
         if (typeof offsetY === 'number') {
-            scrollViewRef.current?.scrollTo({ y: offsetY });
+            scrollViewRef.current?.scrollTo({ y: offsetY, animated: true });
         }
-    }, [scrollData]);
+        const firstCourse = (visibleCourseList || []).find(
+            itm => itm['Course Code']?.[0] === letter,
+        );
+        const courseCode = firstCourse?.['Course Code'] || firstCourse?.New_code;
+        if (!courseCode) {
+            return;
+        }
+        // 等滾動動畫大致到位後再抖，避免動畫在螢幕外播完
+        if (letterShakeTimerRef.current) {
+            clearTimeout(letterShakeTimerRef.current);
+        }
+        letterShakeTimerRef.current = setTimeout(() => {
+            letterShakeTimerRef.current = null;
+            setLetterShakeTarget({ courseCode, nonce: Date.now() });
+        }, 320);
+    }, [scrollData, visibleCourseList]);
 
     /**
      * 課程卡片以 flexWrap 容器渲染（非 FlatList）。
@@ -460,11 +494,12 @@ const What2Reg = ({ isSplitPane = false }) => {
                                 ? sectionStatusesByCourseCode
                                 : null
                         }
+                        letterShakeTarget={letterShakeTarget}
                     />
                 ))
                 : null}
         </View>
-    ), [activeCoursePeriod?.id, courseGridColumnCount, courseGridWidth, courseMode, isHistoricalPeriod, programmeLevel, sectionStatusesByCourseCode]);
+    ), [activeCoursePeriod?.id, courseGridColumnCount, courseGridWidth, courseMode, isHistoricalPeriod, letterShakeTarget, programmeLevel, sectionStatusesByCourseCode]);
 
     // 搜尋結果不套用星期／時段篩選：此時 FilterPanel 不渲染，使用者既看不到也無法清除該篩選
     const hasSearchResult = searchFilterCourse?.length > 0;
@@ -496,11 +531,13 @@ const What2Reg = ({ isSplitPane = false }) => {
                 zIndex: 2,
             }}
         >
-            <TopScrollEdgeBackdrop
-                headerHeight={totalSearchHeaderHeight}
-                fadeHeight={SCROLL_EDGE_FADE_HEIGHT}
-                scrollY={scrollY}
-            />
+            {useNativeLiquidGlassHeader ? null : (
+                <TopScrollEdgeBackdrop
+                    headerHeight={totalSearchHeaderHeight}
+                    fadeHeight={SCROLL_EDGE_FADE_HEIGHT}
+                    scrollY={scrollY}
+                />
+            )}
             <View
                 pointerEvents="box-none"
                 style={{ paddingTop: topChromeHeight, zIndex: 2 }}
@@ -514,6 +551,7 @@ const What2Reg = ({ isSplitPane = false }) => {
                         onChangeText={setInputText}
                         onClear={onClearInput}
                         onPressAction={onPressSearchAction}
+                        liquidGlass={useNativeLiquidGlassHeader}
                         trigger={trigger}
                     />
                 </View>
@@ -698,12 +736,14 @@ const What2Reg = ({ isSplitPane = false }) => {
                             {courseGrid}
                             {footer}
                         </KeyboardAwareScrollView>
-                        <TopScrollEdgeBackdrop
-                            headerHeight={topChromeHeight}
-                            fadeHeight={SCROLL_EDGE_FADE_HEIGHT}
-                            scrollY={rightScrollY}
-                            zIndex={2}
-                        />
+                        {useNativeLiquidGlassHeader ? null : (
+                            <TopScrollEdgeBackdrop
+                                headerHeight={topChromeHeight}
+                                fadeHeight={SCROLL_EDGE_FADE_HEIGHT}
+                                scrollY={rightScrollY}
+                                zIndex={2}
+                            />
+                        )}
                     </View>
                 </View>
             ) : (
@@ -740,6 +780,8 @@ const What2Reg = ({ isSplitPane = false }) => {
                 scrollData={scrollData}
                 theme={theme}
                 onScrollTo={onScrollToLetter}
+                topInset={totalSearchHeaderHeight}
+                bottom={floatingBottom}
             />
 
             {/* 已排課程數與衝突提示，點擊切到課表段落；分屏時課表就在右欄，不需要 */}

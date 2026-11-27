@@ -339,6 +339,9 @@ function DraggableFrequentTile({
                         accessibilityRole="button"
                         style={styles.fullWidth}
                         activeOpacity={0.7}
+                        onPressIn={() => {
+                            trigger();
+                        }}
                         onPress={() => onPressItem(item)}
                         onLongPress={() => onLongPressItem(item)}>
                         {tileBody}

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback, useContext, useMemo, useEffect } from 'react';
+import React, { useState, useRef, useCallback, useContext, useMemo, useEffect, useLayoutEffect } from 'react';
 import {
     Animated as RNAnimated,
     Platform,
@@ -8,15 +8,21 @@ import {
 } from 'react-native';
 
 import Text from '../../../components/AppText';
+import NativeHeaderSegmentControl from '../../../components/NativeHeaderSegmentControl';
 import ScalePressable from '../../../components/ScalePressable';
+import { SEGMENTED_TAB_CONTROL_HEIGHT } from '../../../components/SegmentedTabControl';
 import SegmentedTopTabBar, {
     SEGMENTED_TOP_TAB_BAR_HEIGHT,
 } from '../../../components/SegmentedTopTabBar';
 import TopScrollEdgeBackdrop, {
     SCROLL_EDGE_FADE_HEIGHT,
 } from '../../../components/TopScrollEdgeBackdrop';
-import { SEARCH_FIELD_MIN_HEIGHT } from '../../../components/searchFieldStyles';
+import {
+    SEARCH_FIELD_MIN_HEIGHT,
+    TOP_SEGMENT_SEARCH_GAP,
+} from '../../../components/searchFieldStyles';
 import { useTheme, uiStyle } from '../../../components/ThemeContext';
+import { isLiquidGlassSupported } from '../../../utils/glassEffect';
 import { useHarborSession } from '../../../contexts/HarborSessionContext';
 import { logToFirebase } from '../../../utils/firebaseAnalytics';
 import { openLink } from '../../../utils/browser';
@@ -34,8 +40,6 @@ import {
     resolveCustomFrequentFeatures,
     saveCustomFrequentFeatureKeys,
 } from '../../../utils/customFrequentFeatures';
-import { GlassView, isLiquidGlassSupported } from '../../../utils/glassEffect';
-import { SEGMENTED_TAB_CONTROL_HEIGHT } from '../../../components/SegmentedTabControl';
 import FrequentFeaturesGrid, {
     FeatureCornerBadge,
     WiggleIconWrapper,
@@ -60,6 +64,7 @@ import WikiHome from '../arkwiki';
 
 import { FlatGrid } from 'react-native-super-grid';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
+import { HeaderHeightContext } from '@react-navigation/elements';
 import * as Clipboard from 'expo-clipboard';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import { scale, verticalScale } from 'react-native-size-matters';
@@ -68,7 +73,7 @@ import { SlidersHorizontal } from 'phosphor-react-native/src/icons/SlidersHorizo
 import Toast from 'react-native-simple-toast';
 import TouchableScale from '../../../components/TouchableScale';
 import { useTranslation } from 'react-i18next';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { cubicBezier } from 'react-native-reanimated';
@@ -162,12 +167,13 @@ function FeatureListPage({ navigation }) {
     const insets = useSafeAreaInsets();
     const {
         topChromeHeight,
+        useNativeLiquidGlassHeader,
         isEditingFrequent,
         setIsEditingFrequent,
     } = useFeaturesChrome();
     const scrollY = useRef(new RNAnimated.Value(0)).current;
     const [searchHeaderHeight, setSearchHeaderHeight] = useState(
-        SEARCH_FIELD_MIN_HEIGHT + 2 + verticalScale(10),
+        SEARCH_FIELD_MIN_HEIGHT + 2 + TOP_SEGMENT_SEARCH_GAP,
     );
     const totalSearchHeaderHeight = topChromeHeight + searchHeaderHeight;
     const handleSearchChromeScroll = useCallback(event => {
@@ -338,7 +344,6 @@ function FeatureListPage({ navigation }) {
 
     const handleFeaturePress = useCallback(
         item => {
-            trigger();
             searchInputRef.current?.blur();
             logToFirebase('funcUse', {
                 funcName: item.fn_name,
@@ -461,16 +466,15 @@ function FeatureListPage({ navigation }) {
                         reducedMotion={reducedMotion}
                         style={{
                             width: '100%',
-                            opacity: isInFrequent ? 0.52 : 1,
+                            opacity: isInFrequent ? 0.72 : 1,
                         }}>
                         <TouchableScale
                             accessibilityRole="button"
                             accessibilityLabel={
                                 isInFrequent
-                                    ? item.fn_name
+                                    ? `${t('移除常用服務', { ns: 'features' })} ${item.fn_name}`
                                     : `${t('添加到常用服務', { ns: 'features' })} ${item.fn_name}`
                             }
-                            disabled={isInFrequent}
                             style={{
                                 width: '100%',
                                 justifyContent: 'flex-start',
@@ -478,7 +482,11 @@ function FeatureListPage({ navigation }) {
                                 paddingTop: verticalScale(2),
                             }}
                             activeOpacity={0.7}
-                            onPress={() => handleAddFrequent(item)}>
+                            onPress={() =>
+                                isInFrequent
+                                    ? handleRemoveFrequent(item)
+                                    : handleAddFrequent(item)
+                            }>
                             <View
                                 style={{
                                     width: scale(30),
@@ -490,13 +498,20 @@ function FeatureListPage({ navigation }) {
                                 <FeatureIcon
                                     item={item}
                                     size={scale(26)}
-                                    muted={isInFrequent}
                                     showBackground={false}
                                 />
                                 <FeatureCornerBadge
-                                    variant={isInFrequent ? 'added' : 'add'}
-                                    accessibilityLabel={t('添加到常用服務', { ns: 'features' })}
-                                    onPress={isInFrequent ? undefined : () => handleAddFrequent(item)}
+                                    variant={isInFrequent ? 'remove' : 'add'}
+                                    accessibilityLabel={
+                                        isInFrequent
+                                            ? t('移除常用服務', { ns: 'features' })
+                                            : t('添加到常用服務', { ns: 'features' })
+                                    }
+                                    onPress={() =>
+                                        isInFrequent
+                                            ? handleRemoveFrequent(item)
+                                            : handleAddFrequent(item)
+                                    }
                                 />
                             </View>
                             <Text
@@ -506,7 +521,7 @@ function FeatureListPage({ navigation }) {
                                     fontSize: fontSize,
                                     lineHeight: featureLabelLineHeight,
                                     height: featureLabelHeight,
-                                    color: isInFrequent ? black.third : black.second,
+                                    color: black.second,
                                     textAlign: 'center',
                                     marginTop: verticalScale(6),
                                 }}>
@@ -525,6 +540,9 @@ function FeatureListPage({ navigation }) {
                     alignItems: 'center',
                 }}
                 activeOpacity={0.7}
+                onPressIn={() => {
+                    trigger();
+                }}
                 onPress={() => handleFeaturePress(item)}
                 onLongPress={() => handleFeatureLongPress(item)}
                 key={itemKey}>
@@ -574,6 +592,7 @@ function FeatureListPage({ navigation }) {
             handleAddFrequent,
             handleFeatureLongPress,
             handleFeaturePress,
+            handleRemoveFrequent,
             isEditingFrequent,
             isTc,
             matchedFeatures,
@@ -938,12 +957,14 @@ function FeatureListPage({ navigation }) {
                     right: 0,
                     zIndex: 2,
                 }}>
-                <TopScrollEdgeBackdrop
-                    headerHeight={totalSearchHeaderHeight}
-                    fadeHeight={SCROLL_EDGE_FADE_HEIGHT}
-                    scrollY={scrollY}
-                    backgroundColor={featuresScreen.bg_color}
-                />
+                {useNativeLiquidGlassHeader ? null : (
+                    <TopScrollEdgeBackdrop
+                        headerHeight={totalSearchHeaderHeight}
+                        fadeHeight={SCROLL_EDGE_FADE_HEIGHT}
+                        scrollY={scrollY}
+                        backgroundColor={featuresScreen.bg_color}
+                    />
+                )}
                 <View
                     pointerEvents="box-none"
                     style={{ paddingTop: topChromeHeight, zIndex: 2 }}>
@@ -955,6 +976,7 @@ function FeatureListPage({ navigation }) {
                             onWebSearch={handleWebSearch}
                             hasQuery={isSearching}
                             matchCount={matchedFeatures?.size ?? 0}
+                            liquidGlass={useNativeLiquidGlassHeader}
                         />
                     </View>
                 </View>
@@ -978,19 +1000,72 @@ function FeatureListPage({ navigation }) {
     );
 }
 
+const FeaturesNativeSegmentTitle = ({
+    values,
+    options,
+    selectedIndex,
+    onSelect,
+}) => (
+    <NativeHeaderSegmentControl
+        values={values}
+        options={options}
+        selectedIndex={selectedIndex}
+        onChange={onSelect}
+    />
+);
+
+const FeaturesNativeEditButton = ({
+    isEditingFrequent,
+    label,
+    themeColor,
+    trueWhite,
+    iconColor,
+    onPress,
+    onPressIn,
+}) => (
+    <ScalePressable
+        accessibilityRole="button"
+        accessibilityLabel={label}
+        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        onPressIn={onPressIn}
+        onPress={onPress}>
+        <View
+            style={[
+                featuresNativeHeaderStyles.editButton,
+                isEditingFrequent && {
+                    backgroundColor: themeColor,
+                },
+            ]}>
+            {isEditingFrequent ? (
+                <Check size={scale(17)} color={trueWhite} weight="bold" />
+            ) : (
+                <SlidersHorizontal
+                    size={scale(17)}
+                    color={iconColor}
+                    weight="duotone"
+                />
+            )}
+        </View>
+    </ScalePressable>
+);
+
 export default function Index() {
     const { theme } = useTheme();
     const {
-        isLight,
-        white,
         trueWhite,
         black,
         themeColor,
         featuresScreen,
-        viewShadow,
     } = theme;
     const { t } = useTranslation(['common', 'features']);
+    const navigation = useNavigation();
     const insets = useSafeAreaInsets();
+    const useNativeHeader = Platform.OS === 'ios';
+    const useNativeLiquidGlassHeader =
+        useNativeHeader && isLiquidGlassSupported;
+    const nativeHeaderHeight = useContext(HeaderHeightContext) ?? 0;
+    const topTabNavigationRef = useRef(null);
+    const [activeTabName, setActiveTabName] = useState('FeatureList');
     const [isEditingFrequent, setIsEditingFrequent] = useState(false);
     const [topBarRowHeight, setTopBarRowHeight] = useState(
         SEGMENTED_TOP_TAB_BAR_HEIGHT,
@@ -1001,17 +1076,105 @@ export default function Index() {
             Math.abs(current - nextHeight) > 0.5 ? nextHeight : current,
         );
     }, []);
-    const handleToggleEditFrequent = useCallback(() => {
+    const handleToggleEditFrequentPressIn = useCallback(() => {
         trigger('selection');
+    }, []);
+    const handleToggleEditFrequent = useCallback(() => {
         setIsEditingFrequent(current => !current);
     }, []);
-    const topChromeHeight = insets.top + topBarRowHeight;
+    const handleTopTabStateChange = useCallback(e => {
+        const state = e.data.state;
+        const routeName = state?.routes?.[state.index]?.name;
+        if (routeName === 'FeatureList' || routeName === 'WikiHome') {
+            setActiveTabName(routeName);
+        }
+    }, []);
+    const activeTabIndex = activeTabName === 'WikiHome' ? 1 : 0;
+    const segmentValues = useMemo(() => [t('服務'), t('百科')], [t]);
+    const segmentOptions = useMemo(
+        () => [
+            { key: 'FeatureList', label: t('服務') },
+            { key: 'WikiHome', label: t('百科') },
+        ],
+        [t],
+    );
+    const handleSelectNativeSegment = useCallback(
+        index => {
+            const targetRoute = index === 1 ? 'WikiHome' : 'FeatureList';
+            if (activeTabIndex === index) {
+                trigger();
+                return;
+            }
+            trigger('selection');
+            setActiveTabName(targetRoute);
+            topTabNavigationRef.current?.navigate(targetRoute);
+        },
+        [activeTabIndex],
+    );
+
+    useLayoutEffect(() => {
+        if (!useNativeHeader) {
+            return;
+        }
+        const editLabel = isEditingFrequent
+            ? t('完成', { ns: 'features' })
+            : t('調整', { ns: 'features' });
+        navigation.setOptions({
+            headerShown: true,
+            contentStyle: { backgroundColor: featuresScreen.bg_color },
+            headerTitle: () => (
+                <FeaturesNativeSegmentTitle
+                    values={segmentValues}
+                    options={segmentOptions}
+                    selectedIndex={activeTabIndex}
+                    onSelect={handleSelectNativeSegment}
+                />
+            ),
+            headerRight:
+                activeTabName === 'FeatureList'
+                    ? () => (
+                        <FeaturesNativeEditButton
+                            isEditingFrequent={isEditingFrequent}
+                            label={editLabel}
+                            themeColor={themeColor}
+                            trueWhite={trueWhite}
+                            iconColor={black.second}
+                            onPressIn={handleToggleEditFrequentPressIn}
+                            onPress={handleToggleEditFrequent}
+                        />
+                    )
+                    : undefined,
+        });
+    }, [
+        activeTabIndex,
+        activeTabName,
+        black.second,
+        featuresScreen.bg_color,
+        handleSelectNativeSegment,
+        handleToggleEditFrequent,
+        handleToggleEditFrequentPressIn,
+        isEditingFrequent,
+        navigation,
+        segmentOptions,
+        segmentValues,
+        t,
+        theme.isLight,
+        themeColor,
+        trueWhite,
+        useNativeHeader,
+    ]);
+
+    const topChromeHeight = useNativeHeader
+        ? nativeHeaderHeight || insets.top + SEGMENTED_TOP_TAB_BAR_HEIGHT
+        : insets.top + topBarRowHeight;
     const renderTopTabBar = useCallback(
         props => {
+            topTabNavigationRef.current = props.navigation;
+            if (useNativeHeader) {
+                return null;
+            }
             const activeRouteName = props.state.routes[props.state.index]?.name;
             const showEditButton = activeRouteName === 'FeatureList';
-            const EditButtonSurface =
-                isLiquidGlassSupported && !isEditingFrequent ? GlassView : View;
 
             return (
                 <View
@@ -1050,23 +1213,21 @@ export default function Index() {
                                             : t('調整', { ns: 'features' })
                                     }
                                     hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                                    onPressIn={handleToggleEditFrequentPressIn}
                                     onPress={handleToggleEditFrequent}>
-                                    <EditButtonSurface
+                                    <View
                                         style={[
                                             {
                                                 width: SEGMENTED_TAB_CONTROL_HEIGHT,
                                                 height: SEGMENTED_TAB_CONTROL_HEIGHT,
-                                                borderRadius: scale(999),
                                                 alignItems: 'center',
                                                 justifyContent: 'center',
+                                            },
+                                            isEditingFrequent && {
+                                                borderRadius: scale(999),
+                                                backgroundColor: themeColor,
                                                 overflow: 'hidden',
                                             },
-                                            isEditingFrequent
-                                                ? { backgroundColor: themeColor }
-                                                : !isLiquidGlassSupported && [
-                                                    { backgroundColor: white },
-                                                    isLight && viewShadow,
-                                                ],
                                         ]}>
                                         {isEditingFrequent ? (
                                             <Check
@@ -1081,7 +1242,7 @@ export default function Index() {
                                                 weight="duotone"
                                             />
                                         )}
-                                    </EditButtonSurface>
+                                    </View>
                                 </ScalePressable>
                             </View>
                         ) : null}
@@ -1092,15 +1253,14 @@ export default function Index() {
         [
             black.second,
             handleToggleEditFrequent,
+            handleToggleEditFrequentPressIn,
             handleTopBarLayout,
             insets.top,
             isEditingFrequent,
-            isLight,
             t,
             themeColor,
             trueWhite,
-            viewShadow,
-            white,
+            useNativeHeader,
         ],
     );
 
@@ -1108,10 +1268,14 @@ export default function Index() {
         <View style={{ flex: 1, backgroundColor: featuresScreen.bg_color }}>
             <FeaturesChromeProvider
                 topChromeHeight={topChromeHeight}
+                useNativeLiquidGlassHeader={useNativeLiquidGlassHeader}
                 isEditingFrequent={isEditingFrequent}
                 setIsEditingFrequent={setIsEditingFrequent}>
                 <Tab.Navigator
                     tabBar={renderTopTabBar}
+                    screenListeners={{
+                        state: handleTopTabStateChange,
+                    }}
                     screenOptions={{
                         lazy: true,
                     }}
@@ -1131,3 +1295,14 @@ export default function Index() {
         </View>
     );
 }
+
+const featuresNativeHeaderStyles = StyleSheet.create({
+    editButton: {
+        width: scale(32),
+        height: scale(32),
+        borderRadius: scale(16),
+        alignItems: 'center',
+        justifyContent: 'center',
+        overflow: 'hidden',
+    },
+});

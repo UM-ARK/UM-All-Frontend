@@ -8,7 +8,7 @@ import Text from '../../../../../../components/AppText';
 import { useTheme, uiStyle } from '../../../../../../components/ThemeContext';
 import { getDeepLinkShareHeaderOptions } from '../../../../../../components/DeepLinkShareButton';
 import { useAppShare } from '../../../../../../contexts/AppShareContext';
-import SegmentedTabControl from '../../../../../../components/SegmentedTabControl';
+import NativeHeaderSegmentControl from '../../../../../../components/NativeHeaderSegmentControl';
 import { ARK_COURSE_SHARE_URL, ARK_WIKI_SEARCH } from '../../../../../../utils/pathMap';
 import { openLink } from '../../../../../../utils/browser';
 import { trigger } from '../../../../../../utils/trigger';
@@ -567,7 +567,7 @@ const LocalCourse = (props) => {
 
                     {/* 按班別／教師切換 */}
                     <View style={{ alignSelf: 'center', marginVertical: scale(10) }}>
-                        <SegmentedTabControl
+                        <NativeHeaderSegmentControl
                             options={groupByOptions}
                             selectedIndex={groupChoice === 'section' ? 0 : 1}
                             onChange={index => {
@@ -580,7 +580,7 @@ const LocalCourse = (props) => {
                                 );
                                 setGroupChoice(nextChoice);
                             }}
-                            raisedTrack
+                            compact
                         />
                     </View>
 

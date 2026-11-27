@@ -1,12 +1,17 @@
 import React, {
     useCallback,
+    useContext,
     useEffect,
+    useLayoutEffect,
     useMemo,
     useRef,
     useState,
 } from 'react';
-import { Alert, View } from 'react-native';
+import { Alert, Platform, StyleSheet, View } from 'react-native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
+import { HeaderHeightContext } from '@react-navigation/elements';
+import { DotsThree } from 'phosphor-react-native/src/icons/DotsThree';
+import { scale } from 'react-native-size-matters';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
     useIsFocused,
@@ -16,7 +21,10 @@ import {
 import { Dialog } from '@rneui/themed';
 import { useTranslation } from 'react-i18next';
 
+import NativeHeaderSegmentControl from '../../../components/NativeHeaderSegmentControl';
+import ScalePressable from '../../../components/ScalePressable';
 import { useTheme } from '../../../components/ThemeContext';
+import { isLiquidGlassSupported } from '../../../utils/glassEffect';
 import { trigger } from '../../../utils/trigger';
 import { openLink } from '../../../utils/browser';
 import { UM_PRE_ENROLMENT_EXCEL } from '../../../utils/pathMap';
@@ -31,10 +39,14 @@ import { useWindowSizeClass } from '../../../utils/windowSizeClass';
 import { SEGMENTED_TOP_TAB_BAR_HEIGHT } from '../../../components/SegmentedTopTabBar';
 import What2Reg from './pages/what2Reg';
 import CourseSim from './pages/courseSim';
+import CourseMoreMenu from './components/CourseMoreMenu';
 import CourseTabBar from './components/CourseTabBar';
 import CoursePaneHeader from './components/CoursePaneHeader';
 import SplitPaneDivider from './components/SplitPaneDivider';
-import { TimetableTabBadge } from './components/TimetableTabLabel';
+import {
+    TimetableTabBadge,
+    TimetableTabBadgeView,
+} from './components/TimetableTabLabel';
 import { CourseChromeProvider } from './context/CourseChromeContext';
 import { CoursePlanProvider, useCoursePlan } from './context/CoursePlanContext';
 import {
@@ -45,6 +57,39 @@ import {
 } from './constants';
 
 const Tab = createMaterialTopTabNavigator();
+
+const CourseNativeSegmentTitle = ({
+    values,
+    options,
+    selectedIndex,
+    conflictCount,
+    planCount,
+    onSelect,
+}) => (
+    <NativeHeaderSegmentControl
+        values={values}
+        options={options}
+        selectedIndex={selectedIndex}
+        onChange={onSelect}
+        badge={(
+            <TimetableTabBadgeView
+                conflictCount={conflictCount}
+                planCount={planCount}
+            />
+        )}
+    />
+);
+
+const CourseNativeMoreButton = ({ color, label, onPress }) => (
+    <ScalePressable
+        accessibilityRole="button"
+        accessibilityLabel={label}
+        hitSlop={scale(8)}
+        onPress={onPress}
+        style={nativeHeaderStyles.iconButton}>
+        <DotsThree size={scale(20)} color={color} weight="bold" />
+    </ScalePressable>
+);
 
 /**
  * 選課頁內容：頂欄（段落 Tab + ⋯）+ 兩個段落。
@@ -60,10 +105,16 @@ const CourseTabContent = () => {
     const route = useRoute();
     // 達到 large（≥ 1200）才分屏：搵課自己在 ≥ 840 已會左右分欄，再窄就是三欄擠在一起
     const { isLarge } = useWindowSizeClass();
+    const useNativeHeader = Platform.OS === 'ios' && !isLarge;
+    const useNativeLiquidGlassHeader =
+        useNativeHeader && isLiquidGlassSupported;
+    const nativeHeaderHeight = useContext(HeaderHeightContext) ?? 0;
     const insets = useSafeAreaInsets();
     const [topBarRowHeight, setTopBarRowHeight] = useState(
         SEGMENTED_TOP_TAB_BAR_HEIGHT,
     );
+    const topTabNavigationRef = useRef(null);
+    const moreMenuRef = useRef(null);
     // 分屏左欄寬度：用戶可拖分隔線調整並持久化；右欄吃剩下的空間
     const [searchPaneWidth, setSearchPaneWidth] = useState(
         SEARCH_PANE_DEFAULT_WIDTH,
@@ -79,6 +130,7 @@ const CourseTabContent = () => {
         initCourseData,
         refreshCourseData,
         planList,
+        conflictCount,
         clearPlan,
     } = useCoursePlan();
 
@@ -86,6 +138,7 @@ const CourseTabContent = () => {
     const canClear = planList.length > 0;
     // null：尚未讀完上次段落；讀完後才掛 Navigator，避免 initialRouteName 失效閃一下
     const [initialSegment, setInitialSegment] = useState(null);
+    const [activeSegment, setActiveSegment] = useState(COURSE_SEARCH_SEGMENT);
 
     // 課程資料初始化改由容器負責：段落是 lazy 的，若外部直接跳到課表段落，
     // 搵課段落還沒掛載，資料就永遠停在打包的 JSON
@@ -110,9 +163,11 @@ const CourseTabContent = () => {
             if (cancelled) {
                 return;
             }
-            setInitialSegment(
-                isCourseSegment(stored) ? stored : COURSE_SEARCH_SEGMENT,
-            );
+            const nextSegment = isCourseSegment(stored)
+                ? stored
+                : COURSE_SEARCH_SEGMENT;
+            setInitialSegment(nextSegment);
+            setActiveSegment(nextSegment);
         });
 
         return () => {
@@ -220,9 +275,89 @@ const CourseTabContent = () => {
         const state = e.data.state;
         const routeName = state?.routes?.[state.index]?.name;
         if (isCourseSegment(routeName)) {
+            setActiveSegment(routeName);
             setLocalStorage(COURSE_TOP_TAB_STORAGE_KEY, routeName);
         }
     }, []);
+
+    const activeSegmentIndex =
+        activeSegment === COURSE_TIMETABLE_SEGMENT ? 1 : 0;
+    const segmentValues = useMemo(() => [t('搵課'), t('課表')], [t]);
+    const planCount = planList.length;
+    const segmentOptions = useMemo(
+        () => [
+            { key: COURSE_SEARCH_SEGMENT, label: t('搵課') },
+            {
+                key: COURSE_TIMETABLE_SEGMENT,
+                label: t('課表'),
+                badge: (
+                    <TimetableTabBadgeView
+                        conflictCount={conflictCount}
+                        planCount={planCount}
+                    />
+                ),
+            },
+        ],
+        [conflictCount, planCount, t],
+    );
+    const handleSelectNativeSegment = useCallback(
+        index => {
+            const targetRoute =
+                index === 1 ? COURSE_TIMETABLE_SEGMENT : COURSE_SEARCH_SEGMENT;
+            if (activeSegmentIndex === index) {
+                trigger();
+                return;
+            }
+            trigger('selection');
+            setActiveSegment(targetRoute);
+            topTabNavigationRef.current?.navigate(targetRoute);
+        },
+        [activeSegmentIndex],
+    );
+    const handleOpenNativeMoreMenu = useCallback(() => {
+        moreMenuRef.current?.open();
+    }, []);
+
+    useLayoutEffect(() => {
+        if (!useNativeHeader) {
+            return;
+        }
+        navigation.setOptions({
+            headerShown: true,
+            contentStyle: { backgroundColor: bg_color },
+            headerTitle: () => (
+                <CourseNativeSegmentTitle
+                    values={segmentValues}
+                    options={segmentOptions}
+                    selectedIndex={activeSegmentIndex}
+                    conflictCount={conflictCount}
+                    planCount={planCount}
+                    onSelect={handleSelectNativeSegment}
+                />
+            ),
+            headerRight: () => (
+                <CourseNativeMoreButton
+                    color={theme.black.main}
+                    label={t('更多')}
+                    onPress={handleOpenNativeMoreMenu}
+                />
+            ),
+        });
+    }, [
+        activeSegmentIndex,
+        bg_color,
+        conflictCount,
+        handleOpenNativeMoreMenu,
+        handleSelectNativeSegment,
+        navigation,
+        planCount,
+        segmentOptions,
+        segmentValues,
+        t,
+        theme.black.main,
+        theme.isLight,
+        useNativeHeader,
+    ]);
 
     const menuProps = {
         programmeLevel,
@@ -240,24 +375,31 @@ const CourseTabContent = () => {
         );
     }, []);
 
-    const topChromeHeight =
-        insets.top + (isLarge ? SEGMENTED_TOP_TAB_BAR_HEIGHT : topBarRowHeight);
+    const topChromeHeight = useNativeHeader
+        ? nativeHeaderHeight || insets.top + SEGMENTED_TOP_TAB_BAR_HEIGHT
+        : insets.top + (isLarge ? SEGMENTED_TOP_TAB_BAR_HEIGHT : topBarRowHeight);
 
     const renderTabBar = useCallback(
-        props => (
-            <CourseTabBar
-                {...props}
-                floating
-                topInset={insets.top}
-                onBarLayout={handleTopBarLayout}
-                programmeLevel={programmeLevel}
-                catalogMetadata={catalogMetadata}
-                onManualUpdate={handleManualUpdate}
-                onOpenSharePoint={handleOpenSharePoint}
-                canClear={canClear}
-                onClearPress={handleClearPlan}
-            />
-        ),
+        props => {
+            topTabNavigationRef.current = props.navigation;
+            if (useNativeHeader) {
+                return null;
+            }
+            return (
+                <CourseTabBar
+                    {...props}
+                    floating
+                    topInset={insets.top}
+                    onBarLayout={handleTopBarLayout}
+                    programmeLevel={programmeLevel}
+                    catalogMetadata={catalogMetadata}
+                    onManualUpdate={handleManualUpdate}
+                    onOpenSharePoint={handleOpenSharePoint}
+                    canClear={canClear}
+                    onClearPress={handleClearPlan}
+                />
+            );
+        },
         [
             catalogMetadata,
             programmeLevel,
@@ -267,6 +409,7 @@ const CourseTabContent = () => {
             handleTopBarLayout,
             insets.top,
             canClear,
+            useNativeHeader,
         ],
     );
 
@@ -289,7 +432,9 @@ const CourseTabContent = () => {
 
     return (
         <View style={{ backgroundColor: bg_color, flex: 1 }}>
-            <CourseChromeProvider topChromeHeight={topChromeHeight}>
+            <CourseChromeProvider
+                topChromeHeight={topChromeHeight}
+                useNativeLiquidGlassHeader={useNativeLiquidGlassHeader}>
                 {isLarge ? (
                     // 寬屏：左挑右看。兩個段落同時掛載，共用 CoursePlanProvider，
                     // 左邊加課右邊課表即時重繪，不需要另外的同步機制。
@@ -358,6 +503,10 @@ const CourseTabContent = () => {
                 ) : null}
             </CourseChromeProvider>
 
+            {useNativeHeader ? (
+                <CourseMoreMenu ref={moreMenuRef} hideTrigger {...menuProps} />
+            ) : null}
+
             <Dialog
                 isVisible={isUpdating}
                 statusBarTranslucent
@@ -367,6 +516,16 @@ const CourseTabContent = () => {
         </View>
     );
 };
+
+const nativeHeaderStyles = StyleSheet.create({
+    iconButton: {
+        width: scale(32),
+        height: scale(32),
+        borderRadius: scale(16),
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+});
 
 /**
  * 選課頁容器：把「搵課」與「課表」收成同一個底部 Tab 的兩個段落，

@@ -7,7 +7,13 @@ const columnWidth = Math.max(44, scale(48));
 
 export const myCardStyles = StyleSheet.create({
     column: {
-        width: columnWidth,
+        flex: 1,
+        minWidth: 0,
+    },
+    englishLabel: {
+        fontSize: scale(10),
+        lineHeight: verticalScale(14),
+        paddingHorizontal: scale(1),
     },
     iconColumn: {
         width: columnWidth,

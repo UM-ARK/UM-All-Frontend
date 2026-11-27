@@ -1,5 +1,5 @@
 import React, {useCallback, useEffect, useMemo} from 'react';
-import {ScrollView, StyleSheet, View} from 'react-native';
+import {Platform, ScrollView, StyleSheet, View} from 'react-native';
 import {Gesture, GestureDetector} from 'react-native-gesture-handler';
 import Animated, {
     Extrapolation,
@@ -10,6 +10,7 @@ import Animated, {
     withSpring,
 } from 'react-native-reanimated';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {verticalScale} from 'react-native-size-matters';
 import PhosphorFeatureIcon from '../../TabbarPages/info/home/search/components/PhosphorFeatureIcon';
 
 import Text from '../../../components/AppText';
@@ -31,7 +32,21 @@ const BUS_PANEL_COLLAPSED_EMPTY = 114;
 const BUS_PANEL_COLLAPSED = 116;
 const BUS_PANEL_DESTINATION_HEIGHT = 20;
 const BUS_PANEL_SECONDARY_ETA_HEIGHT = 22;
-export const BUS_PANEL_EXPANDED = 440;
+// 展開態需容納站點 chips + 統計列 + 至少一張完整車輛卡（Android 字高通常比 iOS 高）
+export const BUS_PANEL_EXPANDED = 520;
+// 底部內容內距；高度與 paddingBottom 必須用同一值，否則車輛卡會被裁切
+const BUS_PANEL_BOTTOM_PAD = 10;
+// Android 部分機型 insets.bottom 為 0 但仍有手勢條，需保底
+const BUS_PANEL_ANDROID_MIN_SAFE_BOTTOM = 24;
+
+export const getBusPanelBottomInset = (safeBottom = 0) => (
+    BUS_PANEL_BOTTOM_PAD + Math.max(
+        safeBottom || 0,
+        Platform.OS === 'android'
+            ? verticalScale(BUS_PANEL_ANDROID_MIN_SAFE_BOTTOM)
+            : 0,
+    )
+);
 
 export const getBusPanelCollapsedHeight = (
     hasVehicles,
@@ -125,8 +140,8 @@ const BusArrivalPanel = ({
     const headingVehicle = vehicles.find(
         vehicle => vehicle.vehiclePlateNumber === selectedVehiclePlate,
     ) || vehicles[0];
-    const bottomInset = 8 + insets.bottom;
-    const expandedHeight = BUS_PANEL_EXPANDED + insets.bottom;
+    const bottomInset = getBusPanelBottomInset(insets.bottom);
+    const expandedHeight = BUS_PANEL_EXPANDED + bottomInset;
 
     const styles = useMemo(() => StyleSheet.create({
         container: {
@@ -296,7 +311,7 @@ const BusArrivalPanel = ({
             flex: 1,
         },
         listContent: {
-            paddingBottom: 2,
+            paddingBottom: 8,
         },
         vehicleRow: {
             minHeight: 70,
@@ -500,7 +515,7 @@ const BusArrivalPanel = ({
         hasVehicles,
         Boolean(selectedStopInfo),
         Boolean(summaryEtaPresentation?.secondary),
-    ) + insets.bottom;
+    ) + bottomInset;
     const panelHeight = useSharedValue(expanded ? expandedHeight : collapsedHeight);
     const dragStartHeight = useSharedValue(0);
 
@@ -591,10 +606,10 @@ const BusArrivalPanel = ({
                         accessibilityLabel={expanded ? translate('收起到站資訊') : translate('展開到站資訊')}
                         accessibilityState={{expanded}}
                         hitSlop={8}
-                        onPress={() => {
+                        onPressIn={() => {
                             trigger();
-                            onToggleExpanded();
                         }}
+                        onPress={onToggleExpanded}
                         style={styles.handleHit}>
                         <View style={styles.handle} />
                     </ScalePressable>
@@ -603,10 +618,10 @@ const BusArrivalPanel = ({
                             accessibilityRole="button"
                             accessibilityLabel={expanded ? translate('收起到站資訊') : translate('展開到站資訊')}
                             accessibilityState={{expanded}}
-                            onPress={() => {
+                            onPressIn={() => {
                                 trigger();
-                                onToggleExpanded();
                             }}
+                            onPress={onToggleExpanded}
                             style={styles.headingContent}>
                             <View style={styles.statusRow}>
                                 <PhosphorFeatureIcon
@@ -635,10 +650,10 @@ const BusArrivalPanel = ({
                                 <ScalePressable
                                     accessibilityRole="button"
                                     accessibilityLabel={translate('查看車站圖片')}
-                                    onPress={() => {
+                                    onPressIn={() => {
                                         trigger();
-                                        onViewStop();
                                     }}
+                                    onPress={onViewStop}
                                     style={styles.headingAction}>
                                     <PhosphorFeatureIcon
                                         name="image"
@@ -650,10 +665,10 @@ const BusArrivalPanel = ({
                             <ScalePressable
                                 accessibilityRole="button"
                                 accessibilityLabel={translate('校園地圖')}
-                                onPress={() => {
+                                onPressIn={() => {
                                     trigger();
-                                    onOpenMap();
                                 }}
+                                onPress={onOpenMap}
                                 style={styles.headingAction}>
                                 <PhosphorFeatureIcon
                                     name="map"
@@ -665,6 +680,9 @@ const BusArrivalPanel = ({
                                 accessibilityRole="button"
                                 accessibilityLabel={translate('更新巴士資料')}
                                 disabled={refreshing}
+                                onPressIn={() => {
+                                    trigger();
+                                }}
                                 onPress={onRefresh}
                                 style={styles.headingAction}>
                                 <PhosphorFeatureIcon
@@ -677,10 +695,10 @@ const BusArrivalPanel = ({
                                 accessibilityRole="button"
                                 accessibilityLabel={expanded ? translate('收起到站資訊') : translate('展開到站資訊')}
                                 accessibilityState={{expanded}}
-                                onPress={() => {
+                                onPressIn={() => {
                                     trigger();
-                                    onToggleExpanded();
                                 }}
+                                onPress={onToggleExpanded}
                                 style={styles.headingAction}>
                                 <PhosphorFeatureIcon
                                     name={expanded ? 'caret-down' : 'caret-up'}
@@ -762,8 +780,10 @@ const BusArrivalPanel = ({
                                     key={stop.code}
                                     accessibilityRole="button"
                                     accessibilityState={{selected}}
-                                    onPress={() => {
+                                    onPressIn={() => {
                                         trigger();
+                                    }}
+                                    onPress={() => {
                                         onSelectStop(stop.code);
                                     }}
                                     style={[
@@ -785,10 +805,10 @@ const BusArrivalPanel = ({
                         <ScalePressable
                             accessibilityRole="button"
                             accessibilityLabel={translate('查看到站時間統計')}
-                            onPress={() => {
+                            onPressIn={() => {
                                 trigger();
-                                onOpenStats();
                             }}
+                            onPress={onOpenStats}
                             style={styles.statsButton}>
                             <PhosphorFeatureIcon name="chart-line-up" color={featureIconTones.blue.foreground} size={20} />
                             <View style={styles.statsButtonContent}>
@@ -812,8 +832,10 @@ const BusArrivalPanel = ({
                                     key={vehicle.vehiclePlateNumber}
                                     accessibilityRole="button"
                                     accessibilityState={{selected}}
-                                    onPress={() => {
+                                    onPressIn={() => {
                                         trigger();
+                                    }}
+                                    onPress={() => {
                                         onSelectVehicle(vehicle.vehiclePlateNumber);
                                     }}
                                     style={[styles.vehicleRow, selected && {backgroundColor: featuresScreen.divider}]}>

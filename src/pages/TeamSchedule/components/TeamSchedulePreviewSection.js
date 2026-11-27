@@ -37,7 +37,6 @@ const TeamSchedulePreviewSection = forwardRef(
     ({navigation, refreshHandle}, ref) => {
         const {theme} = useTheme();
         const {t} = useTranslation('my');
-        const [expanded, setExpanded] = useState(true);
         const [joinSheetVisible, setJoinSheetVisible] = useState(false);
         const [introSheetVisible, setIntroSheetVisible] = useState(false);
         const {
@@ -142,15 +141,7 @@ const TeamSchedulePreviewSection = forwardRef(
 
         return (
             <>
-                <ScalePressable
-                    accessibilityRole="button"
-                    accessibilityLabel={t('組隊約時間')}
-                    accessibilityState={{expanded}}
-                    onPress={() => {
-                        trigger();
-                        setExpanded(current => !current);
-                    }}
-                    style={myCardStyles.heading}>
+                <View style={myCardStyles.heading}>
                     <View style={myCardStyles.iconColumn}>
                         <PhosphorFeatureIcon
                             name="calendar-check"
@@ -161,90 +152,81 @@ const TeamSchedulePreviewSection = forwardRef(
                     <Text
                         style={[
                             myCardStyles.headingTitle,
+                            styles.headingTitle,
                             {color: theme.black.main},
                         ]}>
                         {t('組隊約時間')}
                     </Text>
-                    <View style={myCardStyles.iconColumn}>
-                        <Ionicons
-                            name={expanded ? 'chevron-up' : 'chevron-down'}
-                            size={scale(17)}
-                            color={theme.black.third}
-                        />
-                    </View>
-                </ScalePressable>
-
-                <View style={[styles.actionRow, !expanded && styles.collapsed]}>
-                    <View style={styles.primaryActions}>
-                        <ScalePressable
-                            accessibilityRole="button"
-                            accessibilityLabel={t('新建組隊')}
-                            onPress={openCreate}
-                            hitSlop={{top: 4, bottom: 4}}
-                            style={[
-                                styles.actionButton,
-                                {backgroundColor: theme.white},
-                                theme.viewShadow,
-                            ]}>
-                            <PhosphorFeatureIcon
-                                name="plus-circle"
-                                size={scale(17)}
-                                color={theme.themeColor}
-                            />
-                            <Text
-                                numberOfLines={1}
-                                style={[
-                                    styles.actionButtonText,
-                                    {color: theme.accentForeground},
-                                ]}>
-                                {t('新建組隊')}
-                            </Text>
-                        </ScalePressable>
-                        <ScalePressable
-                            accessibilityRole="button"
-                            accessibilityLabel={t('加入隊伍')}
-                            onPress={openJoin}
-                            hitSlop={{top: 4, bottom: 4}}
-                            style={[
-                                styles.actionButton,
-                                {backgroundColor: theme.white},
-                                theme.viewShadow,
-                            ]}>
-                            <PhosphorFeatureIcon
-                                name="user-plus"
-                                size={scale(17)}
-                                color={theme.themeColor}
-                            />
-                            <Text
-                                numberOfLines={1}
-                                style={[
-                                    styles.actionButtonText,
-                                    {color: theme.accentForeground},
-                                ]}>
-                                {t('加入隊伍')}
-                            </Text>
-                        </ScalePressable>
-                    </View>
                     <ScalePressable
                         accessibilityRole="button"
                         accessibilityLabel={t('了解組隊約時間')}
                         onPress={openIntro}
-                        style={[
-                            myCardStyles.iconColumn,
-                            styles.infoButton,
-                        ]}>
+                        style={styles.infoButton}>
                         <Ionicons
                             name="information-circle-outline"
-                            size={scale(18)}
+                            size={scale(16)}
                             color={theme.black.third}
                         />
+                    </ScalePressable>
+                    <ScalePressable
+                        accessibilityRole="button"
+                        accessibilityLabel={t('全部組隊約時間')}
+                        onPress={openList}
+                        style={styles.listLink}>
+                        <Text
+                            style={[
+                                styles.listLinkText,
+                                {color: theme.accentForeground},
+                            ]}>
+                            {t('隊伍列表')}
+                        </Text>
+                    </ScalePressable>
+                </View>
+
+                <View style={styles.actionRow}>
+                    <ScalePressable
+                        accessibilityRole="button"
+                        accessibilityLabel={t('新建組隊')}
+                        onPress={openCreate}
+                        style={styles.actionButton}>
+                        <PhosphorFeatureIcon
+                            name="plus-circle"
+                            size={scale(22)}
+                            color={theme.featureIconTones.orange.foreground}
+                        />
+                        <Text
+                            numberOfLines={2}
+                            style={[
+                                styles.actionButtonText,
+                                {color: theme.black.main},
+                            ]}>
+                            {t('新建組隊')}
+                        </Text>
+                    </ScalePressable>
+                    <ScalePressable
+                        accessibilityRole="button"
+                        accessibilityLabel={t('加入隊伍')}
+                        onPress={openJoin}
+                        style={styles.actionButton}>
+                        <PhosphorFeatureIcon
+                            name="user-plus"
+                            size={scale(22)}
+                            color={theme.featureIconTones.orange.foreground}
+                        />
+                        <Text
+                            numberOfLines={2}
+                            style={[
+                                styles.actionButtonText,
+                                {color: theme.black.main},
+                            ]}>
+                            {t('加入隊伍')}
+                        </Text>
                     </ScalePressable>
                 </View>
 
                 <View
                     style={[
                         styles.listWrap,
-                        !expanded && styles.collapsed,
                         {borderTopColor: theme.disabled},
                     ]}>
                     {showSkeleton ? (
@@ -292,36 +274,12 @@ const TeamSchedulePreviewSection = forwardRef(
                                     <PhosphorFeatureIcon
                                         name="users"
                                         size={scale(20)}
-                                        color={theme.featureIconTones.green.foreground}
+                                        color={theme.featureIconTones.blue.foreground}
                                     />
                                 </View>
                             }
                         />
                     ))}
-                    <ScalePressable
-                        accessibilityRole="button"
-                        accessibilityLabel={t('全部組隊約時間')}
-                        onPress={openList}
-                        hitSlop={{top: 4, bottom: 4}}
-                        style={[
-                            styles.listLink,
-                            {borderTopColor: theme.disabled},
-                        ]}>
-                        <Text
-                            style={[
-                                styles.listLinkText,
-                                {color: theme.accentForeground},
-                            ]}>
-                            {t('全部')}
-                        </Text>
-                        <View style={myCardStyles.iconColumn}>
-                            <Ionicons
-                                name="chevron-forward"
-                                size={scale(17)}
-                                color={theme.black.third}
-                            />
-                        </View>
-                    </ScalePressable>
                 </View>
 
                 <JoinTeamSheet
@@ -341,58 +299,50 @@ const TeamSchedulePreviewSection = forwardRef(
 TeamSchedulePreviewSection.displayName = 'TeamSchedulePreviewSection';
 
 const styles = StyleSheet.create({
-    collapsed: {
-        display: 'none',
+    headingTitle: {
+        flex: 0,
+        flexShrink: 1,
     },
     infoButton: {
+        width: 44,
         minHeight: 44,
+        alignItems: 'flex-start',
+        justifyContent: 'center',
+        paddingLeft: scale(6),
     },
     actionRow: {
-        flexDirection: 'row',
         alignItems: 'center',
-        paddingLeft: scale(10),
-        gap: scale(6),
-    },
-    primaryActions: {
-        flex: 1,
-        minWidth: 0,
         flexDirection: 'row',
-        alignItems: 'center',
         gap: scale(8),
     },
     actionButton: {
         flex: 1,
         minWidth: 0,
-        flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: verticalScale(38),
+        minHeight: 44,
         paddingHorizontal: scale(12),
         paddingVertical: verticalScale(7),
-        borderRadius: scale(10),
-        borderCurve: 'continuous',
-        gap: scale(6),
+        gap: verticalScale(4),
     },
     actionButtonText: {
         ...uiStyle.defaultText,
-        flexShrink: 1,
-        fontSize: scale(13),
-        fontWeight: '600',
+        fontSize: scale(11),
+        fontWeight: '500',
+        textAlign: 'center',
     },
     listWrap: {
         borderTopWidth: StyleSheet.hairlineWidth,
         overflow: 'hidden',
     },
     listLink: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'flex-end',
-        minHeight: verticalScale(38),
-        borderTopWidth: StyleSheet.hairlineWidth,
+        marginLeft: 'auto',
+        justifyContent: 'center',
+        minHeight: 44,
+        paddingHorizontal: scale(8),
     },
     listLinkText: {
         ...uiStyle.defaultText,
-        fontSize: scale(13),
+        fontSize: scale(12),
         fontWeight: '600',
     },
     listInner: {

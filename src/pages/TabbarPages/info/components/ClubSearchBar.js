@@ -14,6 +14,7 @@ import Animated, {
 import { useTranslation } from 'react-i18next';
 import Text from '../../../../components/AppText';
 import TextInput from '../../../../components/AppTextInput';
+import SearchFieldContainer from '../../../../components/SearchFieldContainer';
 import searchFieldStyles, {
     SEARCH_FIELD_CLEAR_ICON_SIZE,
     SEARCH_FIELD_ICON_SIZE,
@@ -42,6 +43,7 @@ function ClubSearchBar({
     placeholder,
     cancelLabel,
     clearAccessibilityLabel,
+    liquidGlass = false,
 }) {
     const { t } = useTranslation(['club']);
     const { theme } = useTheme();
@@ -90,7 +92,10 @@ function ClubSearchBar({
         <View style={[styles.outer, containerStyle]}>
             <View style={styles.row}>
                 <Animated.View style={[styles.inputOuter, inputOuterAnimated]}>
-                    <View style={[searchFieldStyles.field, styles.pill, { backgroundColor: searchFieldBg }]}>
+                    <SearchFieldContainer
+                        liquidGlass={liquidGlass}
+                        containerStyle={styles.pill}
+                        fieldStyle={{ backgroundColor: searchFieldBg }}>
                         <Ionicons name="search" size={SEARCH_FIELD_ICON_SIZE} color={black.third} />
                         <TextInput
                             ref={inputRef}
@@ -131,7 +136,7 @@ function ClubSearchBar({
                                 />
                             </TouchableScale>
                         ) : null}
-                    </View>
+                    </SearchFieldContainer>
                 </Animated.View>
 
                 <Animated.View
@@ -175,13 +180,13 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         width: '100%',
-        overflow: 'hidden',
     },
     inputOuter: {
         flex: 1,
         minWidth: 0,
     },
     pill: {
+        width: 'auto',
         marginLeft: scale(4),
         marginRight: scale(4),
     },

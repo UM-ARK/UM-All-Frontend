@@ -3,10 +3,12 @@ import { Keyboard, Pressable, StyleSheet, View } from 'react-native';
 import PhosphorFeatureIcon from '../../../../info/home/search/components/PhosphorFeatureIcon';
 import Text from '../../../../../../components/AppText';
 import TextInput from '../../../../../../components/AppTextInput';
+import SearchFieldContainer from '../../../../../../components/SearchFieldContainer';
 import searchFieldStyles, {
     SEARCH_FIELD_CLEAR_ICON_SIZE,
     SEARCH_FIELD_ICON_SIZE,
     SEARCH_FIELD_MAX_FONT_SIZE_MULTIPLIER,
+    TOP_SEGMENT_SEARCH_GAP,
 } from '../../../../../../components/searchFieldStyles';
 import { scale, verticalScale } from 'react-native-size-matters';
 import { t } from 'i18next';
@@ -24,6 +26,7 @@ const SearchBarSection = ({
     onClear,
     onPressAction,
     showOfficial = true,
+    liquidGlass = false,
     trigger,
 }) => {
     const { themeColor, black, white } = theme;
@@ -56,19 +59,17 @@ const SearchBarSection = ({
         <View
             style={{
                 width: '100%',
-                paddingTop: scale(5),
+                paddingTop: TOP_SEGMENT_SEARCH_GAP,
                 paddingHorizontal: scale(10),
             }}>
-            <View
-                style={[
-                    searchFieldStyles.field,
-                    {
-                        backgroundColor: white,
-                        borderWidth: StyleSheet.hairlineWidth,
-                        borderColor: isFocused ? themeColor : `${black.third}33`,
-                        width: '100%',
-                    },
-                ]}>
+            <SearchFieldContainer
+                liquidGlass={liquidGlass}
+                fieldStyle={{
+                    backgroundColor: white,
+                    borderWidth: StyleSheet.hairlineWidth,
+                    borderColor: isFocused ? themeColor : `${black.third}33`,
+                    width: '100%',
+                }}>
                 <PhosphorFeatureIcon
                     name="search"
                     weight="regular"
@@ -114,7 +115,7 @@ const SearchBarSection = ({
                         />
                     </Pressable>
                 ) : null}
-            </View>
+            </SearchFieldContainer>
 
             {inputOK ? (
                 <View

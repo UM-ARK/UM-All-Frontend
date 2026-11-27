@@ -138,7 +138,6 @@ const SettingPage = () => {
                         rightElement={
                             <SettingSegmentControl
                                 options={languageOptions}
-                                optionWidth={38}
                                 selectedIndex={languageIndex}
                                 onChange={index =>
                                     i18n.changeLanguage(
@@ -166,7 +165,6 @@ const SettingPage = () => {
                         rightElement={
                             <SettingSegmentControl
                                 options={programmeLevelOptions}
-                                optionWidth={i18n.language === 'en' ? 88 : 54}
                                 selectedIndex={programmeLevelIndex}
                                 onChange={index =>
                                     setProgrammeLevel(

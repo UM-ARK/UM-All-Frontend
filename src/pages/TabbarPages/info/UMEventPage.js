@@ -1,5 +1,6 @@
 import React, {
     forwardRef,
+    memo,
     useState,
     useEffect,
     useRef,
@@ -14,7 +15,6 @@ import { AnimatedFlashList } from '@shopify/flash-list';
 import { ThemeContext } from '../../../components/ThemeContext';
 import TopScrollEdgeBackdrop from '../../../components/TopScrollEdgeBackdrop';
 import { UM_API_EVENT, UM_API_TOKEN } from '../../../utils/pathMap';
-import { trigger } from '../../../utils/trigger';
 import {
     readUMOpenDataCache,
     UM_EVENT_CACHE_KEY,
@@ -23,14 +23,12 @@ import {
 
 import NewsCard, { NewsRowSeparator } from './components/NewsCard';
 import NewsListSkeleton from './components/NewsListSkeleton';
-import ClubSearchBar from './components/ClubSearchBar';
 import { filterUMOpenDataItemsBySearchQuery } from './utils/umOpenDataSearch';
-import { useCollapsingSearchHeader } from './utils/useCollapsingSearchHeader';
+import { useStickySearchHeader } from './utils/useCollapsingSearchHeader';
 
 import axios from 'axios';
 import moment from 'moment-timezone';
 import { useTranslation } from 'react-i18next';
-import Reanimated from 'react-native-reanimated';
 import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { verticalScale } from 'react-native-size-matters';
@@ -81,7 +79,11 @@ const orderEventData = result => {
 /**
  * 澳大活動列表
  */
-const UMEventPage = forwardRef(function UMEventPage({ topHeaderHeight }, ref) {
+const UMEventPage = forwardRef(function UMEventPage({
+    topHeaderHeight,
+    useNativeLiquidGlassHeader = false,
+    searchQuery = '',
+}, ref) {
     const scrollViewRef = useRef(null);
     const mountedRef = useRef(true);
     const hasVisibleDataRef = useRef(false);
@@ -95,23 +97,15 @@ const UMEventPage = forwardRef(function UMEventPage({ topHeaderHeight }, ref) {
     const listBottomPad = Platform.OS === 'ios'
         ? tabBarHeight + verticalScale(10)
         : verticalScale(10);
-    const { t, i18n } = useTranslation('common');
+    const { i18n } = useTranslation('common');
     const currentLanguage = i18n.resolvedLanguage || i18n.language;
 
     const [data, setData] = useState(undefined);
-    const [searchQuery, setSearchQuery] = useState('');
     const [isLoading, setIsLoading] = useState(true);
     const {
         scrollY,
         onScroll: onSearchScroll,
-        onScrollBeginDrag: onSearchScrollBeginDrag,
-        onScrollEndDrag: onSearchScrollEndDrag,
-        onMomentumScrollEnd: onSearchMomentumScrollEnd,
-        onBarLayout: onSearchBarLayout,
-        animatedStyle: searchBarAnimatedStyle,
-        barHeight: searchBarHeight,
-        collapsed: searchCollapsed,
-    } = useCollapsingSearchHeader();
+    } = useStickySearchHeader();
     const [isRefreshing, setIsRefreshing] = useState(false);
 
     useImperativeHandle(
@@ -212,10 +206,6 @@ const UMEventPage = forwardRef(function UMEventPage({ topHeaderHeight }, ref) {
         [data, searchQuery],
     );
 
-    const handleSearchFocus = useCallback(() => {
-        trigger();
-    }, []);
-
     // 渲染列表 Item
     const renderItem = useCallback(
         ({ item }) => (
@@ -239,13 +229,10 @@ const UMEventPage = forwardRef(function UMEventPage({ topHeaderHeight }, ref) {
                     style={{ flex: 1, width: '100%' }}
                     data={filteredData}
                     contentContainerStyle={{
-                        paddingTop: topHeaderHeight + searchBarHeight,
+                        paddingTop: topHeaderHeight + verticalScale(8),
                         paddingBottom: listBottomPad,
                     }}
                     onScroll={onSearchScroll}
-                    onScrollBeginDrag={onSearchScrollBeginDrag}
-                    onScrollEndDrag={onSearchScrollEndDrag}
-                    onMomentumScrollEnd={onSearchMomentumScrollEnd}
                     scrollEventThrottle={16}
                     // 只關 contentInset 不夠。指示器預設仍會把外層橫向 Pager 的
                     // safe area 疊加上去；17 Pro 貼齊右緣時，這段間距會被算到
@@ -266,41 +253,19 @@ const UMEventPage = forwardRef(function UMEventPage({ topHeaderHeight }, ref) {
                             colors={[themeColor]}
                             tintColor={themeColor}
                             refreshing={isRefreshing}
-                            progressViewOffset={topHeaderHeight + searchBarHeight}
+                            progressViewOffset={topHeaderHeight}
                             onRefresh={() => {
                                 getData({ refreshing: true });
                             }}
                         />
                     }
                 />
-                <TopScrollEdgeBackdrop headerHeight={topHeaderHeight} scrollY={scrollY} />
-                <View
-                    onLayout={onSearchBarLayout}
-                    pointerEvents={searchCollapsed ? 'none' : 'auto'}
-                    accessibilityElementsHidden={searchCollapsed}
-                    importantForAccessibility={
-                        searchCollapsed ? 'no-hide-descendants' : 'auto'
-                    }
-                    style={{
-                        position: 'absolute',
-                        top: topHeaderHeight,
-                        left: 0,
-                        right: 0,
-                        zIndex: 2,
-                        overflow: 'hidden',
-                    }}>
-                    <Reanimated.View style={searchBarAnimatedStyle}>
-                        <ClubSearchBar
-                            value={searchQuery}
-                            onChangeText={setSearchQuery}
-                            loading={isRefreshing}
-                            onFocus={handleSearchFocus}
-                            placeholder={t('搜索澳大活動')}
-                            cancelLabel={t('取消')}
-                            clearAccessibilityLabel={t('清除搜尋')}
-                        />
-                    </Reanimated.View>
-                </View>
+                {useNativeLiquidGlassHeader ? null : (
+                    <TopScrollEdgeBackdrop
+                        headerHeight={topHeaderHeight}
+                        scrollY={scrollY}
+                    />
+                )}
             </View>
         );
     };
@@ -324,4 +289,4 @@ const UMEventPage = forwardRef(function UMEventPage({ topHeaderHeight }, ref) {
     );
 });
 
-export default UMEventPage;
+export default memo(UMEventPage);

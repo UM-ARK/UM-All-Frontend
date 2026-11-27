@@ -1,30 +1,31 @@
 export const BUS_STOPS = [
-    {code: 'PGH', name: '研究生宿舍', shortName: '研究生宿舍', terminalLabel: '起', x: 275.5, y: 529, labelSide: 'left'},
+    // PGH 略下移避開 S1；左側三站標籤靠路線右側空隙，避免壓到書院。
+    {code: 'PGH', name: '研究生宿舍', shortName: '研究生宿舍', terminalLabel: '起', x: 275.5, y: 552, labelSide: 'left'},
     {code: 'E4', name: '劉少榮樓', shortName: '劉少榮樓', x: 275.5, y: 356, labelSide: 'left'},
     {code: 'N2', name: '大學會堂', shortName: '大學會堂', x: 275.5, y: 105, labelSide: 'left'},
-    {code: 'N6', name: '行政樓', shortName: '行政樓', x: 147.5, y: 105, labelSide: 'right'},
+    {code: 'N6', name: '行政樓', shortName: '行政樓', x: 147.5, y: 125, labelSide: 'right'},
     {code: 'E11', name: '工學院、信息學院、理學院', shortName: '工學院、信息學院、理學院', x: 77.5, y: 193, labelSide: 'right'},
     {code: 'E21', name: '人文社科樓', shortName: '人文社科樓', x: 77.5, y: 314, labelSide: 'right'},
     {code: 'E32', name: '法學院', shortName: '法學院', x: 77.5, y: 461, labelSide: 'right'},
-    {code: 'S4', name: '研究生宿舍南四座', shortName: '研究生宿舍南四座', terminalLabel: '終', x: 202, y: 607, labelSide: 'top'},
+    {code: 'S4', name: '研究生宿舍南四座', shortName: '研究生宿舍南四座', terminalLabel: '終', x: 205, y: 607, labelSide: 'top'},
 ];
 
 export const BUS_POSITIONS = [
-    {code: 'PGH', x: 275.5, y: 529},
-    {code: 'PGH_TO_E4', x: 275.5, y: 442.5},
+    {code: 'PGH', x: 275.5, y: 552},
+    {code: 'PGH_TO_E4', x: 275.5, y: 454},
     {code: 'E4', x: 275.5, y: 356},
     {code: 'E4_TO_N2', x: 275.5, y: 230.5},
     {code: 'N2', x: 275.5, y: 105},
     {code: 'N2_TO_N6', x: 211.5, y: 65},
-    {code: 'N6', x: 147.5, y: 105},
+    {code: 'N6', x: 147.5, y: 125},
     {code: 'N6_TO_E11', x: 108, y: 137},
     {code: 'E11', x: 77.5, y: 193},
     {code: 'E11_TO_E21', x: 77.5, y: 253.5},
     {code: 'E21', x: 77.5, y: 314},
     {code: 'E21_TO_E32', x: 77.5, y: 387.5},
     {code: 'E32', x: 77.5, y: 461},
-    {code: 'E32_TO_S4', x: 84, y: 606},
-    {code: 'S4', x: 202, y: 607},
+    {code: 'E32_TO_S4', x: 140, y: 607},
+    {code: 'S4', x: 205, y: 607},
     {code: 'S4_TO_PGH', x: 275.5, y: 590},
 ];
 

@@ -8,7 +8,7 @@ import ARKImageView from '../../../../components/ARKImageView';
 import { logToFirebase } from '../../../../utils/firebaseAnalytics';
 import { openLink } from '../../../../utils/browser';
 import { trigger } from '../../../../utils/trigger';
-import SegmentedTabControl from '../../../../components/SegmentedTabControl';
+import NativeHeaderSegmentControl from '../../../../components/NativeHeaderSegmentControl';
 import ScalePressable from '../../../../components/ScalePressable';
 
 import { Image } from 'expo-image';
@@ -336,7 +336,7 @@ const NewsDetail = ({ route, navigation }) => {
                     </Text>
                     <View style={styles.metaRow}>
                         {languageSegmentOptions.length > 0 ? (
-                            <SegmentedTabControl
+                            <NativeHeaderSegmentControl
                                 options={languageSegmentOptions}
                                 selectedIndex={languageSegmentSelectedIndex}
                                 onChange={(segIdx) => {

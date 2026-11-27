@@ -10,6 +10,8 @@ import Animated, {
 import { ThemeContext } from './ThemeContext';
 import { trigger } from '../utils/trigger';
 import Ionicons from "@react-native-vector-icons/ionicons";
+import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { scale, verticalScale } from 'react-native-size-matters';
 import { GlassView, isLiquidGlassSupported } from '../utils/glassEffect';
 
@@ -29,22 +31,28 @@ import { GlassView, isLiquidGlassSupported } from '../utils/glassEffect';
  * @param {Object} [props.style] - 附加在按鈕容器上的樣式，例如層級
  */
 const ScrollToTopButton = ({ viewport, topInset = 0, visible = true, onScrollToTop, virtualizedListRef, initialSnapPointIndex = 5, style }) => {
-    // 獲取主題上下文
+    // 獲取主題上下文與底部導覽列高度
     const { theme } = useContext(ThemeContext);
+    const insets = useSafeAreaInsets();
+    const tabBarHeight =
+        useContext(BottomTabBarHeightContext) ?? insets.bottom + 49;
 
     // 按鈕尺寸
     const buttonSize = scale(50);
     const buttonRadius = buttonSize / 2;
 
-    // 透明頁頭移出排版後，將原本的吸附位置換算為分頁內坐標。
+    // 依頂部浮層高度與底欄高度計算吸附位置，避免頂部搜尋列／分段切換器改變高度時壓低按鈕。
     const { width, height } = viewport;
     const snapPoints = useMemo(() => {
         const left = Math.min(scale(20) + buttonRadius, width / 2);
         const right = width - left;
-        const bottomMargin = Math.max(scale(20), verticalScale(160) - topInset);
+        const bottomMargin = tabBarHeight + verticalScale(16);
         const bottom = Math.max(buttonRadius, height - bottomMargin - buttonRadius);
-        const top = Math.min(topInset + verticalScale(80) + buttonRadius, bottom);
-        const middle = Math.min(Math.max(topInset + height / 2, top), bottom);
+        const top = Math.min(topInset + verticalScale(16) + buttonRadius, bottom);
+        const middle = Math.min(
+            Math.max(topInset + (height - topInset - bottomMargin) / 2, top),
+            bottom,
+        );
 
         return [
             { x: left, y: top },
@@ -54,7 +62,7 @@ const ScrollToTopButton = ({ viewport, topInset = 0, visible = true, onScrollToT
             { x: right, y: middle },
             { x: right, y: bottom },
         ];
-    }, [buttonRadius, height, topInset, width]);
+    }, [buttonRadius, height, tabBarHeight, topInset, width]);
 
     // 根據傳入的索引設置初始位置，默認為右下位置
     const initialPosition = snapPoints[initialSnapPointIndex];

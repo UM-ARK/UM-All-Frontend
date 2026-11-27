@@ -1,7 +1,6 @@
 // 專門存放路由，其他頁面可使用this.props.navigation.navigate("對應下方創建棧的路由名")進行跳轉
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import { Alert, Platform, TouchableOpacity } from 'react-native';
-import Ionicons from "@react-native-vector-icons/ionicons";
+import { Alert, Platform } from 'react-native';
 import {
     NavigationContainer,
     useNavigationContainerRef,
@@ -9,57 +8,14 @@ import {
     DarkTheme,
 } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { HeaderBackButton } from '@react-navigation/elements';
-import { isLiquidGlassSupported } from './utils/glassEffect';
 import * as QuickActions from 'expo-quick-actions';
 import { trigger } from './utils/trigger';
 import { useTranslation } from 'react-i18next';
 
 // 本地頁面，首字母需大寫
 import Tabbar from './Tabbar';
-
-import ClubDetail from './pages/TabbarPages/info/club/ClubDetail';
-import EventDetail from './pages/TabbarPages/info/club/EventDetail';
-import NewsDetail from './pages/TabbarPages/info/news/NewsDetail';
-import UMEventDetail from './pages/TabbarPages/info/news/UMEventDetail';
-import HarborTopicDetail from './pages/TabbarPages/arkHarbor/HarborTopicDetail';
-import SearchScreen from './pages/TabbarPages/info/home/search/SearchScreen';
-import {
-    HarborCategoryListPage,
-    HarborExplorePage,
-    HarborTagListPage,
-} from './pages/TabbarPages/arkHarbor/HarborDirectoryPage';
-import HarborSearchPage from './pages/TabbarPages/arkHarbor/HarborSearchPage';
-import HarborTopicListPage from './pages/TabbarPages/arkHarbor/HarborTopicListPage';
-import HarborComposerPage from './pages/TabbarPages/arkHarbor/HarborComposerPage';
-import HarborDraftsPage from './pages/TabbarPages/arkHarbor/HarborDraftsPage';
-import HarborPendingPostDetailPage from './pages/TabbarPages/arkHarbor/HarborPendingPostDetailPage';
-import HarborPendingPostsPage from './pages/TabbarPages/arkHarbor/HarborPendingPostsPage';
-import HarborChatListPage from './pages/TabbarPages/arkHarbor/HarborChatListPage';
-import HarborChatChannelPage from './pages/TabbarPages/arkHarbor/HarborChatChannelPage';
-import HarborReviewQueuePage from './pages/TabbarPages/arkHarbor/review/HarborReviewQueuePage';
-import HarborAccountSettingsPage from './pages/TabbarPages/my/pages/HarborAccountSettingsPage';
-import HarborProfilePage from './pages/TabbarPages/my/pages/HarborProfilePage';
-import HarborActivityPage from './pages/TabbarPages/my/pages/HarborActivityPage';
-import HarborBadgesPage from './pages/TabbarPages/my/pages/HarborBadgesPage';
-import HarborInboxPage from './pages/TabbarPages/my/pages/HarborInboxPage';
-import TeamScheduleListPage from './pages/TeamSchedule/TeamScheduleListPage';
-import TeamScheduleCreatePage from './pages/TeamSchedule/TeamScheduleCreatePage';
-import TeamScheduleDetailPage from './pages/TeamSchedule/TeamScheduleDetailPage';
-import TeamScheduleEditPage from './pages/TeamSchedule/TeamScheduleEditPage';
-import WikiHome from './pages/TabbarPages/arkwiki';
-import WikiSearchPage from './pages/TabbarPages/arkwiki/WikiSearchPage';
-import WikiArticlePage from './pages/TabbarPages/arkwiki/WikiArticlePage';
-
-import LocalCourse from './pages/TabbarPages/course/pages/what2Reg/pages/LocalCourse';
-
-import Webviewer from './components/Webviewer';
-import AllEvents from './pages/TabbarPages/info/club/AllEvents';
-import Bus from './pages/Features/Bus';
-import CarPark from './pages/Features/CarPark';
-import EatingSchedule from './pages/Features/EatingSchedule';
-import UMOrg from './pages/Features/UMOrg';
-import SettingPage from './pages/Features/SettingPage';
+import { getNativeStackScreenOptions } from './navigation/nativeStackOptions';
+import { renderSharedStackScreens } from './navigation/sharedScreens';
 import { useTheme } from './components/ThemeContext';
 import { useHarborSession } from './contexts/HarborSessionContext';
 import { usePushRegistration } from './contexts/PushRegistrationContext';
@@ -73,7 +29,6 @@ const Stack = createNativeStackNavigator();
 const Nav = () => {
     const { theme } = useTheme();
     const reducedMotion = useAppReducedMotion();
-    const { black } = theme;
     const { t } = useTranslation(['common', 'features', 'event', 'home', 'my']);
     const {
         consumeLoginIntent,
@@ -317,323 +272,17 @@ const Nav = () => {
             onReady={handleNavigationReady}>
             <Stack.Navigator
                 initialRouteName="Tabbar"
-                screenOptions={{
-                    freezeOnBlur: true,
-                    animation: reducedMotion ? 'fade' : undefined,
-                    headerTransparent: isLiquidGlassSupported,
-                    headerBlurEffect: isLiquidGlassSupported
-                        ? null
-                        : 'systemThinMaterial',
-                    headerStyle: {
-                        backgroundColor: isLiquidGlassSupported
-                            ? 'transparent'
-                            : theme.bg_color,
-                        elevation: 0,
-                    },
-                    contentStyle: { backgroundColor: theme.bg_color },
-                    headerTitleAlign: 'center',
-                    headerBackButtonDisplayMode: 'minimal',
-                    headerBackButtonMenuEnabled: false,
-                    gestureEnabled: true,
-                    headerTintColor: black.main,
-                    // 與 ThemeContext 一致（自訂淺/深色時勿跟隨系統預設 auto）
-                    statusBarStyle: theme.isLight ? 'dark' : 'light',
-                }}>
+                screenOptions={getNativeStackScreenOptions({
+                    theme,
+                    reducedMotion,
+                })}>
                 <Stack.Screen
                     name="Tabbar"
                     component={Tabbar}
                     options={{ headerShown: false }}
                 />
 
-                {/* 服務頁保持原有 Modal 配置 */}
-                <Stack.Group
-                    screenOptions={({ navigation }) => ({
-                        headerTitle: '',
-                        presentation: Platform.select({
-                            android: 'card',
-                            ios: Platform.isPad ? 'card' : 'modal',
-                        }),
-                        headerLeft:
-                            Platform.OS === 'android'
-                                ? () => (
-                                    <TouchableOpacity
-                                        onPress={() => {
-                                            trigger();
-                                            navigation.goBack();
-                                        }}
-                                        style={{
-                                            width: 36,
-                                            height: 36,
-                                            borderRadius: 18,
-                                            backgroundColor:
-                                                theme.black.main + '14',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                        }}>
-                                        <Ionicons
-                                            name="chevron-back"
-                                            size={22}
-                                            color={black.main}
-                                        />
-                                    </TouchableOpacity>
-                                )
-                                : Platform.isPad
-                                    ? undefined
-                                    : props => (
-                                        <HeaderBackButton
-                                            {...props}
-                                            onPress={() => {
-                                                trigger();
-                                                navigation.goBack();
-                                            }}
-                                            label=""
-                                        />
-                                    ),
-                    })}>
-                    {/* 服務頁 */}
-                    <Stack.Screen
-                        name="Bus"
-                        component={Bus}
-                        options={{
-                            headerTitle: t('校園巴士'),
-                            // 巴士頁改為全屏堆疊跳轉，不再使用 iOS Modal；iOS 走原生返回鈕（含液態玻璃），避免 iPad 上自訂 headerLeft 卸載閃退
-                            presentation: 'card',
-                            ...(Platform.OS === 'ios'
-                                ? { headerLeft: undefined }
-                                : {}),
-                        }}
-                    />
-                    <Stack.Screen
-                        name="CarPark"
-                        component={CarPark}
-                        options={{ headerTitle: t('車位') }}
-                    />
-                    <Stack.Screen
-                        name="EatingSchedule"
-                        component={EatingSchedule}
-                        options={{ headerTitle: t('幹飯時間') }}
-                    />
-                    <Stack.Screen
-                        name="UMOrg"
-                        component={UMOrg}
-                        options={{ headerTitle: t('澳大部門') }}
-                    />
-
-                    {/* 資訊頁 */}
-                    {/* 圖片大標題頁：強制 light 讓狀態列圖示在深色封面圖上可見 */}
-                    <Stack.Screen
-                        name="ClubDetail"
-                        component={ClubDetail}
-                        options={{
-                            presentation: 'card',
-                            statusBarStyle: 'light',
-                        }}
-                    />
-                    <Stack.Screen
-                        name="EventDetail"
-                        component={EventDetail}
-                        options={{ presentation: 'card' }}
-                    />
-                    <Stack.Screen name="NewsDetail" component={NewsDetail} />
-                    <Stack.Screen
-                        name="UMEventDetail"
-                        component={UMEventDetail}
-                    />
-                    <Stack.Screen
-                        name="HarborExplore"
-                        component={HarborExplorePage}
-                        options={{
-                            // Harbor 瀏覽／搜尋改為一般堆疊，避免再進詳情時變成 Modal 根頁無返回鈕
-                            presentation: 'card',
-                        }}
-                    />
-                    <Stack.Screen
-                        name="HarborCategoryList"
-                        component={HarborCategoryListPage}
-                        options={{
-                            presentation: 'card',
-                        }}
-                    />
-                    <Stack.Screen
-                        name="HarborCategoryTopics"
-                        component={HarborTopicListPage}
-                        options={{
-                            presentation: 'card',
-                        }}
-                    />
-                    <Stack.Screen
-                        name="HarborTagList"
-                        component={HarborTagListPage}
-                        options={{
-                            presentation: 'card',
-                        }}
-                    />
-                    <Stack.Screen
-                        name="HarborTagTopics"
-                        component={HarborTopicListPage}
-                        options={{
-                            presentation: 'card',
-                        }}
-                    />
-                    <Stack.Screen
-                        name="HarborSearch"
-                        component={HarborSearchPage}
-                        options={{
-                            presentation: 'card',
-                        }}
-                    />
-                    <Stack.Screen
-                        name="HarborComposer"
-                        component={HarborComposerPage}
-                        options={({ route }) =>
-                            route.params?.mode === 'reply'
-                                ? {
-                                    animation: 'fade',
-                                    contentStyle: {
-                                        backgroundColor: 'transparent',
-                                    },
-                                    gestureEnabled: false,
-                                    headerShown: false,
-                                    presentation: 'transparentModal',
-                                }
-                                : {
-                                    // 發佈／編輯話題使用一般堆疊頁，避免 iOS Modal 半屏上推
-                                    presentation: 'card',
-                                }
-                        }
-                    />
-                    <Stack.Screen
-                        name="HarborDrafts"
-                        component={HarborDraftsPage}
-                        options={{
-                            // 草稿箱使用一般堆疊頁，避免 iOS Modal 半屏上推
-                            presentation: 'card',
-                        }}
-                    />
-                    <Stack.Screen
-                        name="HarborPendingPosts"
-                        component={HarborPendingPostsPage}
-                    />
-                    <Stack.Screen
-                        name="HarborPendingPostDetail"
-                        component={HarborPendingPostDetailPage}
-                    />
-                    <Stack.Screen name="AllEvents" component={AllEvents} />
-
-                    {/* ARK選課：改為 card，避免再進 Wiki 時被 Modal 蓋住（Wiki 出現在背後） */}
-                    <Stack.Screen
-                        name="LocalCourse"
-                        component={LocalCourse}
-                        options={{
-                            presentation: 'card',
-                        }}
-                    />
-                    {/* Wiki 搜尋／條目：同組 card + headerLeft，與 LocalCourse 堆疊順序一致 */}
-                    <Stack.Screen
-                        name="WikiSearch"
-                        component={WikiSearchPage}
-                        options={{
-                            presentation: 'card',
-                        }}
-                    />
-                    <Stack.Screen
-                        name="WikiArticle"
-                        component={WikiArticlePage}
-                        options={{
-                            presentation: 'card',
-                        }}
-                    />
-                </Stack.Group>
-
-                {/* 普通左右壓動畫組 */}
-                <Stack.Group
-                    screenOptions={{
-                        headerTitle: '',
-                    }}>
-                    <Stack.Screen
-                        name="HarborTopicDetail"
-                        component={HarborTopicDetail}
-                        options={{
-                            // 帖子詳情一律左右推入，不用 Modal
-                            presentation: 'card',
-                        }}
-                    />
-                    <Stack.Screen
-                        name="Search"
-                        component={SearchScreen}
-                        options={{ headerTitle: t('搜索') }}
-                    />
-                    <Stack.Screen name="WikiHome" component={WikiHome} />
-                    <Stack.Screen name="Webviewer" component={Webviewer} />
-                    <Stack.Screen
-                        name="SettingPage"
-                        component={SettingPage}
-                        options={{ headerTitle: t('設置') }}
-                    />
-                    <Stack.Screen
-                        name="HarborActivity"
-                        component={HarborActivityPage}
-                    />
-                    <Stack.Screen
-                        name="HarborRecentReads"
-                        component={HarborTopicListPage}
-                    />
-                    <Stack.Screen
-                        name="HarborInbox"
-                        component={HarborInboxPage}
-                    />
-                    <Stack.Screen
-                        name="HarborChatList"
-                        component={HarborChatListPage}
-                    />
-                    <Stack.Screen
-                        name="HarborChatChannel"
-                        component={HarborChatChannelPage}
-                    />
-                    <Stack.Screen
-                        name="HarborReviewQueue"
-                        component={HarborReviewQueuePage}
-                    />
-                    <Stack.Screen
-                        name="HarborReviewDetail"
-                        component={HarborReviewQueuePage}
-                        options={{
-                            presentation: 'card',
-                        }}
-                    />
-                    <Stack.Screen
-                        name="HarborBadges"
-                        component={HarborBadgesPage}
-                    />
-                    <Stack.Screen
-                        name="HarborAccountSettings"
-                        component={HarborAccountSettingsPage}
-                    />
-                    <Stack.Screen
-                        name="HarborProfile"
-                        component={HarborProfilePage}
-                    />
-                    <Stack.Screen
-                        name="TeamScheduleList"
-                        component={TeamScheduleListPage}
-                        options={{headerTitle: t('全部組隊約時間')}}
-                    />
-                    <Stack.Screen
-                        name="TeamScheduleCreate"
-                        component={TeamScheduleCreatePage}
-                        options={{headerTitle: t('建立組隊')}}
-                    />
-                    <Stack.Screen
-                        name="TeamScheduleDetail"
-                        component={TeamScheduleDetailPage}
-                        options={{headerTitle: t('活動詳情')}}
-                    />
-                    <Stack.Screen
-                        name="TeamScheduleEdit"
-                        component={TeamScheduleEditPage}
-                        options={{headerTitle: t('編輯基本資料')}}
-                    />
-                </Stack.Group>
+                {renderSharedStackScreens(Stack, { theme, t })}
             </Stack.Navigator>
         </NavigationContainer>
     );

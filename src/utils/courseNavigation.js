@@ -1,7 +1,11 @@
 // 選課 Tab 的導覽入口。全站只認這一個 helper，路由名調整時不必再掃各處呼叫點。
+import { Platform } from 'react-native';
 
 /** 底部 Tab 中選課頁的路由名 */
 export const COURSE_TAB_ROUTE = 'CourseTab';
+
+/** iOS 選課 Tab 內建 Native Stack 的首頁路由名 */
+export const COURSE_HOME_ROUTE = 'CourseHome';
 
 /** 選課頁內兩個段落（material top tabs）的路由名 */
 export const COURSE_SEARCH_SEGMENT = 'CourseSearchSegment';
@@ -51,11 +55,18 @@ export const navigateToCourseTab = (navigation, options = {}) => {
         segmentParams.add = add;
     }
 
+    const topTabTarget = {
+        screen: segmentRoute,
+        params: segmentParams,
+    };
+
     navigation.navigate('Tabbar', {
         screen: COURSE_TAB_ROUTE,
-        params: {
-            screen: segmentRoute,
-            params: segmentParams,
-        },
+        params: Platform.OS === 'ios'
+            ? {
+                screen: COURSE_HOME_ROUTE,
+                params: topTabTarget,
+            }
+            : topTabTarget,
     });
 };

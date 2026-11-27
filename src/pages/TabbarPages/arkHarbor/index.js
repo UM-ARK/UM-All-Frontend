@@ -1,35 +1,38 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+    useCallback,
+    useContext,
+    useEffect,
+    useLayoutEffect,
+    useMemo,
+    useRef,
+    useState,
+} from 'react';
 import {
     Alert,
     Animated,
     AppState,
+    Platform,
     StyleSheet,
     View,
 } from 'react-native';
 
 import { createDrawerNavigator } from '@react-navigation/drawer';
+import { HeaderHeightContext } from '@react-navigation/elements';
 import { useIsFocused } from '@react-navigation/native';
 import PagerView from 'react-native-pager-view';
 import { scale, verticalScale } from 'react-native-size-matters';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
-import Reanimated, {
-    Easing,
-    ReduceMotion,
-    interpolate,
-    useAnimatedStyle,
-    useSharedValue,
-    withTiming,
-} from 'react-native-reanimated';
-import { scheduleOnRN } from 'react-native-worklets';
 
 import Text from '../../../components/AppText';
+import NativeHeaderSegmentControl from '../../../components/NativeHeaderSegmentControl';
 import ScalePressable from '../../../components/ScalePressable';
-import SegmentedTabControl from '../../../components/SegmentedTabControl';
+import SearchFieldContainer from '../../../components/SearchFieldContainer';
 import TopScrollEdgeBackdrop, {
     SCROLL_EDGE_FADE_HEIGHT,
 } from '../../../components/TopScrollEdgeBackdrop';
 import { uiStyle, useTheme } from '../../../components/ThemeContext';
+import { isLiquidGlassSupported } from '../../../utils/glassEffect';
 import { useHarborSession } from '../../../contexts/HarborSessionContext';
 import { logToFirebase } from '../../../utils/firebaseAnalytics';
 import { useWindowSizeClass } from '../../../utils/windowSizeClass';
@@ -43,27 +46,49 @@ import PhosphorFeatureIcon from '../info/home/search/components/PhosphorFeatureI
 import HarborDrawerContent from './components/HarborDrawerContent';
 import { harborTopicRowInsets } from './components/HarborTopicCard';
 import HarborTopicList from './components/HarborTopicList';
+import { createHarborNativeStack } from './HarborNativeStack';
 import HarborTopicDetail from './HarborTopicDetail';
 import searchFieldStyles, {
     SEARCH_FIELD_ICON_SIZE,
     SEARCH_FIELD_MAX_FONT_SIZE_MULTIPLIER,
     SEARCH_FIELD_MIN_HEIGHT,
+    TOP_SEGMENT_SEARCH_GAP,
 } from '../../../components/searchFieldStyles';
-import { nextHarborSearchBarProgress } from './harborSearchBarProgress';
 
 const VIEW_CONFIG = {
     latest: { label: '最新', analytics: 'latest' },
     top: { label: '熱門', analytics: 'top' },
     unread: { label: '未讀', analytics: 'unread' },
 };
-// 對齊服務頁頂部液態玻璃膠囊高度。往下瀏覽時搜尋列收進工具列；
-// 往回滑時用較長距離展開，不必回到列表頂部。
+// 對齊服務頁頂部液態玻璃膠囊高度；搜尋列固定顯示，不再隨滾動收合。
 const STICKY_TOOLBAR_HEIGHT = verticalScale(38);
-const SEARCH_BAR_ROW_HEIGHT = SEARCH_FIELD_MIN_HEIGHT + verticalScale(8);
-const SEARCH_BAR_SETTLE_MS = 180;
-const SEARCH_BAR_EASE_OUT = Easing.bezier(0.23, 1, 0.32, 1);
+const SEARCH_BAR_ROW_HEIGHT = SEARCH_FIELD_MIN_HEIGHT + TOP_SEGMENT_SEARCH_GAP;
 const Drawer = createDrawerNavigator();
 const AnimatedPagerView = Animated.createAnimatedComponent(PagerView);
+
+const HarborFeedSegmentControl = ({
+    options,
+    selectedIndex,
+    position,
+    onChange,
+}) => {
+    const unreadBadge = useMemo(
+        () => options.find(option => option.key === 'unread')?.badge ?? null,
+        [options],
+    );
+
+    return (
+        <NativeHeaderSegmentControl
+            options={options}
+            selectedIndex={selectedIndex}
+            position={position}
+            onChange={onChange}
+            compact
+            badge={unreadBadge}
+            badgeStyle={styles.nativeSegmentBadgeAnchor}
+        />
+    );
+};
 
 const HarborStickyToolbar = ({
     segmentOptions,
@@ -83,10 +108,9 @@ const HarborStickyToolbar = ({
     toolbarHeight,
     topInset,
     scrollY,
-    searchProgress,
-    searchCollapsed,
     backgroundColor,
     isCompact,
+    useNativeHeader = false,
 }) => {
     const { theme } = useTheme();
     const { t } = useTranslation('harbor');
@@ -94,29 +118,81 @@ const HarborStickyToolbar = ({
     const showLoginPromptBadge =
         status === 'signedOut' || status === 'expired';
     const searchBarForeground = isCompact ? theme.harborSearch.foreground : theme.black.third;
-    // 展開進度跟滾動方向走：往下瀏覽上移淡出，往回滑再滑出來
-    const searchBarStyle = useAnimatedStyle(() => {
-        const progress = searchProgress.get();
-        return {
-            opacity: interpolate(progress, [0, 0.7], [1, 0], 'clamp'),
-            transform: [{
-                translateY: interpolate(
-                    progress,
-                    [0, 1],
-                    [0, -SEARCH_BAR_ROW_HEIGHT],
-                    'clamp',
-                ),
-            }],
-        };
-    });
-    const searchIconStyle = useAnimatedStyle(() => ({
-        opacity: interpolate(searchProgress.get(), [0.35, 1], [0, 1], 'clamp'),
-    }));
+
+    const renderSearchButton = (liquidGlass = false) => (
+        <SearchFieldContainer
+            liquidGlass={liquidGlass}
+            accessibilityRole="button"
+            accessibilityLabel={t('搜尋 Harbor')}
+            onPress={() => {
+                trigger();
+                onSearchPress();
+            }}
+            fieldStyle={{
+                backgroundColor: isCompact
+                    ? theme.harborSearch.background
+                    : theme.white,
+                borderColor: theme.themeColorUltraLight,
+                borderWidth: isCompact ? 0 : StyleSheet.hairlineWidth,
+            }}>
+            <PhosphorFeatureIcon
+                name="search"
+                size={SEARCH_FIELD_ICON_SIZE}
+                color={searchBarForeground}
+                weight="regular"
+            />
+            <Text
+                numberOfLines={1}
+                maxFontSizeMultiplier={SEARCH_FIELD_MAX_FONT_SIZE_MULTIPLIER}
+                style={[
+                    searchFieldStyles.text,
+                    { color: searchBarForeground },
+                ]}>
+                {t('搜尋 Harbor')}
+            </Text>
+        </SearchFieldContainer>
+    );
+
+    const searchBarContent = (
+        <View
+            style={[
+                styles.searchBarRow,
+                isCompact && styles.compactSearchBarRow,
+            ]}>
+            {renderSearchButton(false)}
+        </View>
+    );
+
+    if (useNativeHeader) {
+        const useLiquidGlassSearch = isLiquidGlassSupported;
+        return (
+            <View pointerEvents="box-none" style={styles.stickyHeader}>
+                {useLiquidGlassSearch ? null : (
+                    <TopScrollEdgeBackdrop
+                        headerHeight={toolbarHeight + SEARCH_BAR_ROW_HEIGHT}
+                        fadeHeight={SCROLL_EDGE_FADE_HEIGHT}
+                        scrollY={scrollY}
+                        backgroundColor={backgroundColor}
+                        zIndex={1}
+                    />
+                )}
+                <View
+                    pointerEvents="box-none"
+                    style={[
+                        styles.nativeStickySearchRow,
+                        isCompact && styles.compactSearchBarRow,
+                        { marginTop: toolbarHeight },
+                    ]}>
+                    {renderSearchButton(useLiquidGlassSearch)}
+                </View>
+            </View>
+        );
+    }
 
     return (
         <View pointerEvents="box-none" style={styles.stickyHeader}>
             <TopScrollEdgeBackdrop
-                headerHeight={toolbarHeight}
+                headerHeight={toolbarHeight + SEARCH_BAR_ROW_HEIGHT}
                 fadeHeight={SCROLL_EDGE_FADE_HEIGHT}
                 scrollY={scrollY}
                 backgroundColor={backgroundColor}
@@ -149,35 +225,9 @@ const HarborStickyToolbar = ({
                             weight="regular"
                         />
                     </ScalePressable>
-                    {/* 搜尋放左側與選單並排，右側未登入時已有「登入」文字按鈕；
-                        搜尋列展開時圖標隱藏且不可點 */}
-                    <Reanimated.View
-                        pointerEvents={searchCollapsed ? 'auto' : 'none'}
-                        accessibilityElementsHidden={!searchCollapsed}
-                        importantForAccessibility={
-                            searchCollapsed ? 'auto' : 'no-hide-descendants'
-                        }
-                        style={searchIconStyle}>
-                        <ScalePressable
-                            accessibilityRole="button"
-                            accessibilityLabel={t('搜尋 Harbor')}
-                            hitSlop={scale(8)}
-                            onPress={() => {
-                                trigger();
-                                onSearchPress();
-                            }}
-                            style={styles.toolbarIconButton}>
-                            <PhosphorFeatureIcon
-                                name="search"
-                                size={scale(20)}
-                                color={theme.black.second}
-                                weight="regular"
-                            />
-                        </ScalePressable>
-                    </Reanimated.View>
                 </View>
 
-                <SegmentedTabControl
+                <HarborFeedSegmentControl
                     options={segmentOptions}
                     selectedIndex={currentIndex}
                     position={tabPosition}
@@ -185,7 +235,6 @@ const HarborStickyToolbar = ({
                         trigger(currentIndex === index ? 'tap' : 'selection');
                         onChange(index);
                     }}
-                    compact
                 />
 
                 <View style={[styles.toolbarSide, styles.toolbarRight]}>
@@ -282,51 +331,7 @@ const HarborStickyToolbar = ({
                     </View>
                 </View>
             </View>
-            <Reanimated.View
-                pointerEvents={searchCollapsed ? 'none' : 'auto'}
-                accessibilityElementsHidden={searchCollapsed}
-                importantForAccessibility={
-                    searchCollapsed ? 'no-hide-descendants' : 'auto'
-                }
-                style={[
-                    styles.searchBarRow,
-                    isCompact && styles.compactSearchBarRow,
-                    searchBarStyle,
-                ]}>
-                <ScalePressable
-                    accessibilityRole="button"
-                    accessibilityLabel={t('搜尋 Harbor')}
-                    onPress={() => {
-                        trigger();
-                        onSearchPress();
-                    }}
-                    style={[
-                        searchFieldStyles.field,
-                        {
-                            backgroundColor: isCompact
-                                ? theme.harborSearch.background
-                                : theme.white,
-                            borderColor: theme.themeColorUltraLight,
-                            borderWidth: isCompact ? 0 : StyleSheet.hairlineWidth,
-                        },
-                    ]}>
-                    <PhosphorFeatureIcon
-                        name="search"
-                        size={SEARCH_FIELD_ICON_SIZE}
-                        color={searchBarForeground}
-                        weight="regular"
-                    />
-                    <Text
-                        numberOfLines={1}
-                        maxFontSizeMultiplier={SEARCH_FIELD_MAX_FONT_SIZE_MULTIPLIER}
-                        style={[
-                            searchFieldStyles.text,
-                            { color: searchBarForeground },
-                        ]}>
-                        {t('搜尋 Harbor')}
-                    </Text>
-                </ScalePressable>
-            </Reanimated.View>
+            {searchBarContent}
         </View>
     );
 };
@@ -337,12 +342,11 @@ const HarborFeedPane = ({
     onCapabilities,
     isTopicPressAllowed,
     contentContainerStyle,
+    scrollIndicatorInsets,
     refreshProgressViewOffset,
     onTopicPress,
     isActive,
     onScrollOffset,
-    onScrollBeginDrag,
-    onScrollSettle,
     onUnseenChange,
 }) => {
     const source = useMemo(
@@ -358,12 +362,6 @@ const HarborFeedPane = ({
         },
         [onScrollOffset, view],
     );
-    const handleScrollBeginDrag = useCallback(() => {
-        onScrollBeginDrag(view);
-    }, [onScrollBeginDrag, view]);
-    const handleScrollSettle = useCallback(() => {
-        onScrollSettle(view);
-    }, [onScrollSettle, view]);
 
     return (
         <View style={styles.feedPage}>
@@ -374,12 +372,10 @@ const HarborFeedPane = ({
                 onCapabilities={onCapabilities}
                 isTopicPressAllowed={isTopicPressAllowed}
                 contentContainerStyle={contentContainerStyle}
+                scrollIndicatorInsets={scrollIndicatorInsets}
                 refreshProgressViewOffset={refreshProgressViewOffset}
                 onTopicPress={onTopicPress}
                 onScroll={handleScroll}
-                onScrollBeginDrag={handleScrollBeginDrag}
-                onScrollEndDrag={handleScrollSettle}
-                onMomentumScrollEnd={handleScrollSettle}
                 isActive={isActive}
                 onUnseenChange={onUnseenChange}
             />
@@ -393,6 +389,10 @@ const HarborFeedPane = ({
 const ForumPage = ({ navigation }) => {
     const { theme } = useTheme();
     const { isCompact, isExpanded } = useWindowSizeClass();
+    const useNativeHeader = Platform.OS === 'ios' && !isExpanded;
+    const useNativeLiquidGlassHeader =
+        useNativeHeader && isLiquidGlassSupported;
+    const nativeHeaderHeight = useContext(HeaderHeightContext) ?? 0;
     const insets = useSafeAreaInsets();
     const backgroundColor = isCompact ? theme.harbor_bg_color : theme.bg_color;
     const { t } = useTranslation('harbor');
@@ -407,13 +407,7 @@ const ForumPage = ({ navigation }) => {
     const pageScrollOffset = useRef(new Animated.Value(0)).current;
     const pageScrollPosition = useRef(new Animated.Value(0)).current;
     const scrollY = useRef(new Animated.Value(0)).current;
-    const searchProgress = useSharedValue(0);
     const scrollOffsetsRef = useRef({});
-    const searchProgressByViewRef = useRef({});
-    const lastScrollYRef = useRef({});
-    const displayedSearchViewRef = useRef('latest');
-    const searchFingerDownRef = useRef(false);
-    const settleTimerRef = useRef(null);
     const currentViewRef = useRef('latest');
     const blockTopicPressUntilRef = useRef(0);
     const capabilitiesRef = useRef(null);
@@ -433,7 +427,6 @@ const ForumPage = ({ navigation }) => {
         unread: false,
     });
     const [consentVisible, setConsentVisible] = useState(false);
-    const [searchCollapsed, setSearchCollapsed] = useState(false);
     const [hasUnseenLatest, setHasUnseenLatest] = useState(false);
     const [hasUnseenPane, setHasUnseenPane] = useState(false);
     const hasUnreadTopics =
@@ -549,123 +542,21 @@ const ForumPage = ({ navigation }) => {
             current[view] ? current : { ...current, [view]: true },
         );
     }, []);
-    const commitSearchProgress = useCallback((view, progress) => {
-        searchProgressByViewRef.current[view] = progress;
-        if (view !== currentViewRef.current) {
-            return;
-        }
-        setSearchCollapsed(progress > 0.5);
-    }, []);
-    const cancelSearchSettle = useCallback(() => {
-        if (settleTimerRef.current != null) {
-            clearTimeout(settleTimerRef.current);
-            settleTimerRef.current = null;
-        }
-    }, []);
-    useEffect(() => cancelSearchSettle, [cancelSearchSettle]);
-    // 各分頁各自記住滾動位置和搜尋列展開程度；切頁時同步到目標分頁
+    // 各分頁各自記住滾動位置；切頁時同步 scrollY 給頂部 Scroll Edge
     const syncSearchScroll = useCallback(
         view => {
-            const previousView = displayedSearchViewRef.current;
-            if (previousView !== view) {
-                searchProgressByViewRef.current[previousView] = searchProgress.get();
-            }
-            displayedSearchViewRef.current = view;
-            cancelSearchSettle();
             const offset = scrollOffsetsRef.current[view] ?? 0;
-            const stored = searchProgressByViewRef.current[view];
-            const progress = offset <= 0 ? 0 : (stored ?? 1);
-            searchProgressByViewRef.current[view] = progress;
-            searchProgress.set(progress);
             scrollY.setValue(Math.max(0, offset));
-            setSearchCollapsed(progress > 0.5);
         },
-        [cancelSearchSettle, scrollY, searchProgress],
+        [scrollY],
     );
-    // 手指放開且列表停下後收到展開或收起，避免停在半截
-    const settleSearchBar = useCallback(view => {
-        if (view !== currentViewRef.current) {
-            return;
-        }
-        const offset = scrollOffsetsRef.current[view] ?? 0;
-        const current = searchProgress.get();
-        // 貼近頂部時維持跟手位置，收起會在內容還沒補上時留空
-        if (offset < SEARCH_BAR_ROW_HEIGHT) {
-            return;
-        }
-        const target = current <= 0.5 ? 0 : 1;
-        if (Math.abs(current - target) < 0.01) {
-            commitSearchProgress(view, target);
-            return;
-        }
-        setSearchCollapsed(target > 0.5);
-        searchProgress.set(withTiming(target, {
-            duration: SEARCH_BAR_SETTLE_MS,
-            easing: SEARCH_BAR_EASE_OUT,
-            reduceMotion: ReduceMotion.System,
-        }, finished => {
-            if (finished) {
-                scheduleOnRN(commitSearchProgress, view, target);
-            }
-        }));
-    }, [commitSearchProgress, searchProgress]);
-    const scheduleSearchSettle = useCallback(view => {
-        if (view !== currentViewRef.current) {
-            return;
-        }
-        cancelSearchSettle();
-        settleTimerRef.current = setTimeout(() => {
-            settleTimerRef.current = null;
-            settleSearchBar(view);
-        }, 70);
-    }, [cancelSearchSettle, settleSearchBar]);
-    const handleSearchScrollBegin = useCallback(view => {
-        if (view !== currentViewRef.current) {
-            return;
-        }
-        searchFingerDownRef.current = true;
-        cancelSearchSettle();
-        const progress = searchProgress.get();
-        searchProgressByViewRef.current[view] = progress;
-        searchProgress.set(progress);
-    }, [cancelSearchSettle, searchProgress]);
     const handleScrollOffset = useCallback((view, offset) => {
-        const previous = lastScrollYRef.current[view] ?? offset;
-        lastScrollYRef.current[view] = offset;
         scrollOffsetsRef.current[view] = offset;
-        const stored = searchProgressByViewRef.current[view] ?? 0;
-        const base = view === currentViewRef.current
-            ? searchProgress.get()
-            : stored;
-        const progress = nextHarborSearchBarProgress(
-            base,
-            offset,
-            offset - previous,
-            SEARCH_BAR_ROW_HEIGHT,
-        );
-        searchProgressByViewRef.current[view] = progress;
         if (view !== currentViewRef.current) {
             return;
         }
         scrollY.setValue(Math.max(0, offset));
-        searchProgress.set(progress);
-        const collapsed = progress > 0.5;
-        setSearchCollapsed(current =>
-            current === collapsed ? current : collapsed,
-        );
-        if (searchFingerDownRef.current) {
-            cancelSearchSettle();
-            return;
-        }
-        scheduleSearchSettle(view);
-    }, [cancelSearchSettle, scheduleSearchSettle, scrollY, searchProgress]);
-    const handleSearchScrollEnd = useCallback(view => {
-        if (view !== currentViewRef.current) {
-            return;
-        }
-        searchFingerDownRef.current = false;
-        scheduleSearchSettle(view);
-    }, [scheduleSearchSettle]);
+    }, [scrollY]);
 
     const handleCapabilities = useCallback(
         nextCapabilities => {
@@ -773,12 +664,22 @@ const ForumPage = ({ navigation }) => {
                 ? t('登入中…')
                 : t('登入');
 
-    const stickyHeaderHeight = toolbarHeight + SEARCH_BAR_ROW_HEIGHT;
+    const effectiveToolbarHeight = useNativeHeader
+        ? nativeHeaderHeight || insets.top + STICKY_TOOLBAR_HEIGHT
+        : toolbarHeight;
+    const stickyHeaderHeight = effectiveToolbarHeight + SEARCH_BAR_ROW_HEIGHT;
     const contentContainerStyle = useMemo(
         () => ({
             paddingTop: stickyHeaderHeight + verticalScale(4),
         }),
         [stickyHeaderHeight],
+    );
+    const scrollIndicatorInsets = useMemo(
+        () =>
+            useNativeLiquidGlassHeader
+                ? { top: stickyHeaderHeight }
+                : undefined,
+        [stickyHeaderHeight, useNativeLiquidGlassHeader],
     );
     const refreshProgressViewOffset = stickyHeaderHeight + verticalScale(8);
 
@@ -789,23 +690,203 @@ const ForumPage = ({ navigation }) => {
         );
     }, []);
 
+    const drawerNavigation = useNativeHeader
+        ? navigation.getParent()
+        : navigation;
+    const handleMenuPress = useCallback(() => {
+        (drawerNavigation?.openDrawer ?? navigation.openDrawer)?.();
+    }, [drawerNavigation, navigation]);
+    const handleChatPress = useCallback(() => {
+        navigation.navigate('HarborChatList');
+    }, [navigation]);
+    const handleComposePress = useCallback(() => {
+        navigation.navigate('HarborComposer', {
+            mode: 'newTopic',
+        });
+    }, [navigation]);
+    const handleSearchPress = useCallback(() => {
+        navigation.navigate('HarborSearch');
+    }, [navigation]);
+
+    useLayoutEffect(() => {
+        if (!useNativeHeader) {
+            return;
+        }
+        const isSignedIn = status === 'signedIn';
+        const showLoginPromptBadge =
+            status === 'signedOut' || status === 'expired';
+        const chatVisible = capabilities?.chat !== false;
+
+        navigation.setOptions({
+            headerShown: true,
+            contentStyle: { backgroundColor },
+            headerLeft: () => (
+                <View style={styles.nativeHeaderSide}>
+                    <ScalePressable
+                        accessibilityRole="button"
+                        accessibilityLabel={t('開啟選單')}
+                        hitSlop={scale(8)}
+                        onPress={() => {
+                            trigger();
+                            handleMenuPress();
+                        }}
+                        style={styles.nativeHeaderIconButton}>
+                        <PhosphorFeatureIcon
+                            name="list"
+                            size={scale(20)}
+                            color={theme.black.second}
+                            weight="regular"
+                        />
+                    </ScalePressable>
+                </View>
+            ),
+            headerTitle: () => (
+                <HarborFeedSegmentControl
+                    options={segmentOptions}
+                    selectedIndex={currentIndex}
+                    position={tabPosition}
+                    onChange={index => {
+                        trigger(currentIndex === index ? 'tap' : 'selection');
+                        selectView(index);
+                    }}
+                />
+            ),
+            headerRight: () => (
+                <View style={styles.nativeHeaderSide}>
+                    {isSignedIn ? null : (
+                        <ScalePressable
+                            accessibilityRole="button"
+                            accessibilityLabel={sessionLabel}
+                            disabled={
+                                status === 'restoring' ||
+                                status === 'authorizing'
+                            }
+                            onPress={() => {
+                                trigger();
+                                handleSessionPress();
+                            }}
+                            style={styles.sessionButton}>
+                            <PhosphorFeatureIcon
+                                name="sign-in"
+                                size={scale(14)}
+                                color={theme.black.second}
+                                weight="regular"
+                            />
+                            <Text
+                                numberOfLines={1}
+                                style={[
+                                    styles.sessionText,
+                                    { color: theme.black.second },
+                                ]}>
+                                {sessionLabel}
+                            </Text>
+                            {showLoginPromptBadge ? (
+                                <View
+                                    pointerEvents="none"
+                                    style={[
+                                        styles.loginPromptBadge,
+                                        { backgroundColor: theme.unread },
+                                    ]}
+                                />
+                            ) : null}
+                        </ScalePressable>
+                    )}
+                    {isSignedIn && chatVisible ? (
+                        <ScalePressable
+                            accessibilityRole="button"
+                            accessibilityLabel={t('Chat')}
+                            hitSlop={scale(8)}
+                            onPress={() => {
+                                trigger();
+                                handleChatPress();
+                            }}
+                            style={styles.nativeHeaderIconButton}>
+                            <PhosphorFeatureIcon
+                                name="message-circle"
+                                size={scale(19)}
+                                color={theme.black.second}
+                                weight="regular"
+                            />
+                            {chatUnreadCount > 0 ? (
+                                <View
+                                    style={[
+                                        styles.chatUnreadBadge,
+                                        { backgroundColor: theme.unread },
+                                    ]}>
+                                    <Text
+                                        style={[
+                                            styles.chatUnreadText,
+                                            { color: theme.trueWhite },
+                                        ]}>
+                                        {chatUnreadCount > 99
+                                            ? '99+'
+                                            : chatUnreadCount}
+                                    </Text>
+                                </View>
+                            ) : null}
+                        </ScalePressable>
+                    ) : null}
+                    <ScalePressable
+                        accessibilityRole="button"
+                        accessibilityLabel={t('建立話題')}
+                        hitSlop={scale(8)}
+                        onPress={() => {
+                            trigger();
+                            handleComposePress();
+                        }}
+                        style={styles.nativeHeaderIconButton}>
+                        <PhosphorFeatureIcon
+                            name="plus"
+                            size={scale(20)}
+                            color={theme.black.second}
+                            weight="regular"
+                        />
+                    </ScalePressable>
+                </View>
+            ),
+        });
+    }, [
+        backgroundColor,
+        capabilities?.chat,
+        chatUnreadCount,
+        currentIndex,
+        handleChatPress,
+        handleComposePress,
+        handleMenuPress,
+        handleSessionPress,
+        navigation,
+        segmentOptions,
+        selectView,
+        sessionLabel,
+        status,
+        t,
+        tabPosition,
+        theme.black.second,
+        theme.trueWhite,
+        theme.unread,
+        useNativeHeader,
+    ]);
+
     // Drawer 側滑開合時攔截貼文點擊，避免誤進詳情後返回造成主頁刷新感
     useEffect(() => {
+        if (!drawerNavigation?.addListener) {
+            return undefined;
+        }
         const blockTopicPress = () => {
             blockTopicPressUntilRef.current = Number.POSITIVE_INFINITY;
         };
         const releaseTopicPress = () => {
             blockTopicPressUntilRef.current = Date.now() + 180;
         };
-        const unsubscribeGestureStart = navigation.addListener(
+        const unsubscribeGestureStart = drawerNavigation.addListener(
             'gestureStart',
             blockTopicPress,
         );
-        const unsubscribeGestureEnd = navigation.addListener(
+        const unsubscribeGestureEnd = drawerNavigation.addListener(
             'gestureEnd',
             releaseTopicPress,
         );
-        const unsubscribeGestureCancel = navigation.addListener(
+        const unsubscribeGestureCancel = drawerNavigation.addListener(
             'gestureCancel',
             releaseTopicPress,
         );
@@ -815,7 +896,7 @@ const ForumPage = ({ navigation }) => {
             unsubscribeGestureEnd();
             unsubscribeGestureCancel();
         };
-    }, [navigation]);
+    }, [drawerNavigation]);
 
     const handlePageScrollStateChanged = useCallback(event => {
         const pageScrollState = event.nativeEvent.pageScrollState;
@@ -864,6 +945,7 @@ const ForumPage = ({ navigation }) => {
                                     onCapabilities={handleCapabilities}
                                     isTopicPressAllowed={isTopicPressAllowed}
                                     contentContainerStyle={contentContainerStyle}
+                                    scrollIndicatorInsets={scrollIndicatorInsets}
                                     refreshProgressViewOffset={
                                         refreshProgressViewOffset
                                     }
@@ -876,8 +958,6 @@ const ForumPage = ({ navigation }) => {
                                         enabledViews[currentIndex] === view
                                     }
                                     onScrollOffset={handleScrollOffset}
-                                    onScrollBeginDrag={handleSearchScrollBegin}
-                                    onScrollSettle={handleSearchScrollEnd}
                                     onUnseenChange={
                                         view === 'latest'
                                             ? setHasUnseenLatest
@@ -904,24 +984,19 @@ const ForumPage = ({ navigation }) => {
                         status={status}
                         sessionLabel={sessionLabel}
                         onSessionPress={handleSessionPress}
-                        onMenuPress={() => navigation.openDrawer()}
-                        onChatPress={() => navigation.navigate('HarborChatList')}
-                        onComposePress={() =>
-                            navigation.navigate('HarborComposer', {
-                                mode: 'newTopic',
-                            })
-                        }
-                        onSearchPress={() => navigation.navigate('HarborSearch')}
+                        onMenuPress={handleMenuPress}
+                        onChatPress={handleChatPress}
+                        onComposePress={handleComposePress}
+                        onSearchPress={handleSearchPress}
                         chatUnreadCount={chatUnreadCount}
                         chatVisible={capabilities?.chat !== false}
                         onToolbarLayout={handleToolbarLayout}
-                        toolbarHeight={toolbarHeight}
+                        toolbarHeight={effectiveToolbarHeight}
                         topInset={insets.top}
                         scrollY={scrollY}
-                        searchProgress={searchProgress}
-                        searchCollapsed={searchCollapsed}
                         backgroundColor={backgroundColor}
                         isCompact={isCompact}
+                        useNativeHeader={useNativeHeader}
                     />
                 </View>
                 {isExpanded ? (
@@ -978,8 +1053,8 @@ const styles = StyleSheet.create({
         zIndex: 2,
     },
     stickyToolbar: {
-        // 蓋在上移中的搜尋列之上
-        zIndex: 1,
+        // 蓋在 TopScrollEdgeBackdrop 之上，避免毛玻璃遮罩把工具列洗白
+        zIndex: 2,
         minHeight: STICKY_TOOLBAR_HEIGHT,
         flexDirection: 'row',
         alignItems: 'center',
@@ -1012,6 +1087,25 @@ const styles = StyleSheet.create({
         borderRadius: scale(10),
         alignItems: 'center',
         justifyContent: 'center',
+    },
+    nativeHeaderSide: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: scale(4),
+    },
+    nativeHeaderIconButton: {
+        width: scale(32),
+        height: scale(32),
+        borderRadius: scale(16),
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    nativeStickySearchRow: {
+        zIndex: 2,
+        height: SEARCH_BAR_ROW_HEIGHT,
+        paddingTop: TOP_SEGMENT_SEARCH_GAP,
+        justifyContent: 'center',
+        paddingHorizontal: scale(6),
     },
     chatUnreadBadge: {
         position: 'absolute',
@@ -1059,8 +1153,14 @@ const styles = StyleSheet.create({
         height: scale(5),
         borderRadius: scale(2.5),
     },
+    nativeSegmentBadgeAnchor: {
+        right: scale(18),
+    },
     searchBarRow: {
+        // 與 nativeStickySearchRow／資訊頁一致，避免 Scroll Edge 遮罩蓋住實色搜尋列
+        zIndex: 2,
         height: SEARCH_BAR_ROW_HEIGHT,
+        paddingTop: TOP_SEGMENT_SEARCH_GAP,
         justifyContent: 'center',
         paddingHorizontal: scale(6),
     },
@@ -1084,6 +1184,8 @@ const styles = StyleSheet.create({
         flex: 1,
     },
 });
+
+const HarborNativeStack = createHarborNativeStack(ForumPage);
 
 const HarborDrawerNavigator = () => {
     const { theme } = useTheme();
@@ -1113,7 +1215,7 @@ const HarborDrawerNavigator = () => {
             }}>
             <Drawer.Screen
                 name="HarborHome"
-                component={ForumPage}
+                component={Platform.OS === 'ios' ? HarborNativeStack : ForumPage}
                 options={{ title: 'Harbor' }}
             />
         </Drawer.Navigator>

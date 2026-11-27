@@ -19,12 +19,10 @@ const HarborProfileCard = ({
     user,
     onProfilePress,
     onEditProfilePress,
-    onChatPress,
-    chatUnreadCount = 0,
     onSettingsPress,
 }) => {
     const {theme} = useTheme();
-    const {t, i18n} = useTranslation('my');
+    const {t, i18n} = useTranslation(['my', 'common']);
     const joinedAt = formatJoinedAt(user.joinedAt, i18n.language);
     const onAvatarPress = onProfilePress || onEditProfilePress;
 
@@ -100,58 +98,21 @@ const HarborProfileCard = ({
                 ) : null}
             </ScalePressable>
 
-            {onChatPress || onSettingsPress ? (
-                <View style={styles.actions}>
-                    {onChatPress ? (
-                        <ScalePressable
-                            accessibilityRole="button"
-                            accessibilityLabel={t('Chat')}
-                            style={styles.actionButton}
-                            onPress={() => {
-                                trigger();
-                                onChatPress();
-                            }}>
-                            <MaterialCommunityIcons
-                                name="chat-outline"
-                                size={scale(18)}
-                                color={theme.black.second}
-                            />
-                            {chatUnreadCount > 0 ? (
-                                <View
-                                    style={[
-                                        styles.chatUnreadBadge,
-                                        {backgroundColor: theme.unreadForeground},
-                                    ]}>
-                                    <Text
-                                        style={[
-                                            styles.chatUnreadText,
-                                            {color: theme.white},
-                                        ]}>
-                                        {chatUnreadCount > 99
-                                            ? '99+'
-                                            : chatUnreadCount}
-                                    </Text>
-                                </View>
-                            ) : null}
-                        </ScalePressable>
-                    ) : null}
-                    {onSettingsPress ? (
-                        <ScalePressable
-                            accessibilityRole="button"
-                            accessibilityLabel={t('設置')}
-                            style={styles.actionButton}
-                            onPress={() => {
-                                trigger();
-                                onSettingsPress();
-                            }}>
-                            <Ionicons
-                                name="settings-outline"
-                                size={scale(18)}
-                                color={theme.black.second}
-                            />
-                        </ScalePressable>
-                    ) : null}
-                </View>
+            {onSettingsPress ? (
+                <ScalePressable
+                    accessibilityRole="button"
+                    accessibilityLabel={t('設置', {ns: 'common'})}
+                    style={styles.actionButton}
+                    onPress={() => {
+                        trigger();
+                        onSettingsPress();
+                    }}>
+                    <Ionicons
+                        name="settings-outline"
+                        size={scale(18)}
+                        color={theme.black.second}
+                    />
+                </ScalePressable>
             ) : null}
         </View>
     );
@@ -165,31 +126,11 @@ const styles = StyleSheet.create({
         paddingTop: verticalScale(4),
         paddingBottom: verticalScale(4),
     },
-    actions: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
     actionButton: {
         width: 44,
         minHeight: 44,
         alignItems: 'center',
         justifyContent: 'center',
-    },
-    chatUnreadBadge: {
-        position: 'absolute',
-        top: scale(3),
-        right: scale(2),
-        minWidth: scale(13),
-        height: scale(13),
-        borderRadius: scale(7),
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingHorizontal: scale(3),
-    },
-    chatUnreadText: {
-        ...uiStyle.defaultText,
-        fontSize: scale(6),
-        fontWeight: '700',
     },
     avatarButton: {
         minWidth: 44,

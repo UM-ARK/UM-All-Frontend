@@ -27,6 +27,8 @@ import { UserCircle } from 'phosphor-react-native/src/icons/UserCircle';
 import { trigger } from './utils/trigger';
 import { uiStyle } from './components/ThemeContext';
 import { isLiquidGlassSupported } from './utils/glassEffect';
+import { createTabNativeStack } from './navigation/createTabNativeStack';
+import { COURSE_HOME_ROUTE } from './utils/courseNavigation';
 import { useHarborSession } from './contexts/HarborSessionContext';
 import { fetchHarborForumBadgeSnapshot } from './utils/harbor/harborApi';
 import {
@@ -60,8 +62,34 @@ const tabScreen = {
     MyTabbar: MyScreen,
 };
 
+// iOS 需要原生 UINavigationBar 的 1 級 Tab 各自包一層單頁 Native Stack（論壇在 Drawer 內建）；
+// 2 級頁統一由外層 Root Stack（src/Nav.js）承接，「我的」頁無原生頂欄直接掛載
+const NewsNativeStack = createTabNativeStack({
+    homeRouteName: 'NewsHome',
+    HomeComponent: NewsScreen,
+    getHomeOptions: () => ({ headerShown: true }),
+});
+const CourseNativeStack = createTabNativeStack({
+    homeRouteName: COURSE_HOME_ROUTE,
+    HomeComponent: CourseTab,
+    getHomeOptions: ({ isLarge }) => ({ headerShown: !isLarge }),
+});
+const FeaturesNativeStack = createTabNativeStack({
+    homeRouteName: 'FeaturesHome',
+    HomeComponent: FeaturesScreen,
+    getHomeOptions: () => ({ headerShown: true }),
+});
+
+const iosTabScreen = {
+    NewsTabbar: NewsNativeStack,
+    ForumTabbar: ForumPage,
+    CourseTab: CourseNativeStack,
+    FeaturesTabbar: FeaturesNativeStack,
+    MyTabbar: MyScreen,
+};
+
 const IOSNativeTabScreen = props => {
-    const Screen = tabScreen[props.route.name];
+    const Screen = iosTabScreen[props.route.name];
     const parentInsets = useSafeAreaInsets();
     const [tabTopInset, setTabTopInset] = useState(parentInsets.top);
 

@@ -3,7 +3,7 @@ import {BUS_STOPS} from './busModel';
 // 每個轉角點可附上二次貝茲曲線的控制點，讓路面與車標共用同一條中心線。
 const ROUTE_CORNERS = {
     N2: [[275.5, 78], [262.5, 65, 275.5, 65], [160.5, 65], [147.5, 78, 147.5, 65]],
-    N6: [[147.5, 124], [134.5, 137, 147.5, 137], [93.5, 137], [77.5, 153, 77.5, 137]],
+    N6: [[134.5, 137, 147.5, 137], [93.5, 137], [77.5, 153, 77.5, 137]],
     E32: [[77.5, 594], [90.5, 607, 77.5, 607]],
     S4: [[262.5, 607], [275.5, 594, 275.5, 607]],
 };
@@ -59,12 +59,13 @@ export function getBusRouteLegPath(legIndex, routeX) {
 }
 
 // 整數代表站點，小數是由這一站出發的路段進度。
-export function getBusRoutePoint(location, distanceOffset = 0) {
+export function getBusRoutePoint(location, distanceOffset = 0, anchorOffset = 0) {
     'worklet';
     const legIndex = Math.floor(location);
     const samples = routeSamples[legIndex];
     const length = samples[samples.length - 1].distance;
-    const distance = Math.max(0, Math.min(length, (location - legIndex) * length + distanceOffset));
+    const anchorDistance = Math.max(0, Math.min(length, (location - legIndex) * length + anchorOffset));
+    const distance = Math.max(0, Math.min(length, anchorDistance + distanceOffset));
     let index = 1;
     while (samples[index].distance < distance) {
         index++;

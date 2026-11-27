@@ -87,7 +87,7 @@ const WikiHome = ({navigation}) => {
     const {t} = useTranslation('wiki');
     const headerHeight = useHeaderHeight();
     const insets = useSafeAreaInsets();
-    const { topChromeHeight } = useFeaturesChrome();
+    const { topChromeHeight, useNativeLiquidGlassHeader } = useFeaturesChrome();
     const hasFloatingChrome = topChromeHeight > 0;
     const scrollY = useRef(new Animated.Value(0)).current;
     const handleTopScroll = useCallback(event => {
@@ -414,7 +414,7 @@ const WikiHome = ({navigation}) => {
                     { paddingTop: topChromeHeight, paddingBottom: listBottomPad },
                 ]}
             />
-            {hasFloatingChrome ? (
+            {hasFloatingChrome && !useNativeLiquidGlassHeader ? (
                 <TopScrollEdgeBackdrop
                     headerHeight={topChromeHeight}
                     fadeHeight={SCROLL_EDGE_FADE_HEIGHT}
