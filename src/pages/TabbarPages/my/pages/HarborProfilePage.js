@@ -16,6 +16,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { useTranslation } from 'react-i18next';
 import Ionicons from "@react-native-vector-icons/ionicons";
 import { KeyboardAwareScrollView, KeyboardToolbar } from 'react-native-keyboard-controller';
+import PagerView from 'react-native-pager-view';
 import Animated, {
     Easing,
     interpolate,
@@ -32,6 +33,7 @@ import ScalePressable from '../../../../components/ScalePressable';
 import TextInput from '../../../../components/AppTextInput';
 import { uiStyle, useTheme } from '../../../../components/ThemeContext';
 import { useHarborSession } from '../../../../contexts/HarborSessionContext';
+import { useAppReducedMotion } from '../../../../contexts/ReducedMotionContext';
 import { useSchedulingSession } from '../../../../contexts/SchedulingSessionContext';
 import HarborAvatarPickerModal from '../components/HarborAvatarPickerModal';
 import HarborBadgeIcon from '../components/HarborBadgeIcon';
@@ -59,6 +61,8 @@ import { trigger } from '../../../../utils/trigger';
 
 const AVATAR_SOURCE = require('../../../../static/img/logo_round.png');
 const UMER_DISPLAY_LABEL = '🎓 UMer';
+const PROFILE_PAGER_SHADOW_SPACE = verticalScale(6);
+const PROFILE_PAGER_INITIAL_HEIGHT = verticalScale(160);
 
 const isUmerGroupLabel = label => {
     const key = String(label || '')
@@ -185,8 +189,44 @@ const ProfileTextField = ({
     );
 };
 
+const ProfileTabPager = ({ pagerRef, activePage, onPageSelected, children }) => {
+    const initialPage = React.useRef(activePage).current;
+    const [pageHeights, setPageHeights] = React.useState({});
+    // 兩頁共用同一高度，選中頁改變時不重排原生分頁容器。
+    const pagerHeight = Math.max(...Object.values(pageHeights), 0) || PROFILE_PAGER_INITIAL_HEIGHT;
+
+    const recordPageHeight = (index, event) => {
+        const height = Math.ceil(event.nativeEvent.layout.height);
+        setPageHeights(previous => (
+            previous[index] === height ? previous : { ...previous, [index]: height }
+        ));
+    };
+
+    return (
+        <PagerView
+            ref={pagerRef}
+            style={[styles.profilePager, { height: pagerHeight }]}
+            initialPage={initialPage}
+            offscreenPageLimit={1}
+            onPageSelected={onPageSelected}>
+            {React.Children.map(children, (page, index) => (
+                <View
+                    collapsable={false}
+                    accessibilityElementsHidden={index !== activePage}
+                    importantForAccessibility={index === activePage ? 'auto' : 'no-hide-descendants'}>
+                    {/* 各頁以內容高度獨立量測，外層仍可上下捲動。 */}
+                    <View style={styles.profilePagerPageContent} onLayout={event => recordPageHeight(index, event)}>
+                        {page}
+                    </View>
+                </View>
+            ))}
+        </PagerView>
+    );
+};
+
 const HarborProfilePage = ({ navigation, route }) => {
     const { theme } = useTheme();
+    const reducedMotion = useAppReducedMotion();
     const {syncIdentity} = useSchedulingSession();
     const { t } = useTranslation('my');
     const { user, refresh } = useHarborSession();
@@ -210,7 +250,23 @@ const HarborProfilePage = ({ navigation, route }) => {
     const [mode, setMode] = React.useState(
         isOwnProfile && route?.params?.mode === 'edit' ? 'edit' : 'preview',
     );
-    const [activeTab, setActiveTab] = React.useState('info');
+    const profilePagerRef = React.useRef(null);
+    const activeProfilePageRef = React.useRef(0);
+    const [activeProfilePage, setActiveProfilePage] = React.useState(0);
+    const selectProfileTab = index => {
+        if (reducedMotion) {
+            profilePagerRef.current?.setPageWithoutAnimation(index);
+        } else {
+            profilePagerRef.current?.setPage(index);
+        }
+    };
+    const handleProfilePageSelected = ({ nativeEvent: { position } }) => {
+        if (activeProfilePageRef.current !== position) {
+            activeProfilePageRef.current = position;
+            setActiveProfilePage(position);
+            trigger('selection');
+        }
+    };
     const isEditing = isOwnProfile && mode === 'edit';
     const username = viewedUser?.username || requestedUsername;
     const profile = React.useMemo(
@@ -1025,6 +1081,7 @@ const HarborProfilePage = ({ navigation, route }) => {
                     isLiquidGlassSupported ? 'never' : 'automatic'
                 }
                 contentContainerStyle={styles.content}
+                directionalLockEnabled={!isEditing}
                 keyboardDismissMode="interactive"
                 keyboardShouldPersistTaps="handled"
                 scrollIndicatorInsets={
@@ -1256,17 +1313,14 @@ const HarborProfilePage = ({ navigation, route }) => {
                                                 ? `${t('論壇成就')} (${viewedUser.badges.length})`
                                                 : t('論壇成就'),
                                         },
-                                    ].map(tab => {
-                                        const isActive = activeTab === tab.key;
+                                    ].map((tab, index) => {
+                                        const isActive = activeProfilePage === index;
                                         return (
                                             <ScalePressable
                                                 accessibilityRole="tab"
                                                 accessibilityState={{ selected: isActive }}
                                                 key={tab.key}
-                                                onPress={() => {
-                                                    trigger('selection');
-                                                    setActiveTab(tab.key);
-                                                }}
+                                                onPress={() => selectProfileTab(index)}
                                                 style={styles.underlineTabButton}>
                                                 <Text
                                                     style={[
@@ -1295,8 +1349,12 @@ const HarborProfilePage = ({ navigation, route }) => {
                                     })}
                                 </View>
 
-                                {activeTab === 'info' ? (
+                                <ProfileTabPager
+                                    pagerRef={profilePagerRef}
+                                    activePage={activeProfilePage}
+                                    onPageSelected={handleProfilePageSelected}>
                                     <View
+                                        key="info"
                                         style={[
                                             styles.list,
                                             theme.viewShadow,
@@ -1382,8 +1440,8 @@ const HarborProfilePage = ({ navigation, route }) => {
                                             );
                                         })}
                                     </View>
-                                ) : (
                                     <View
+                                        key="badges"
                                         style={[
                                             styles.list,
                                             theme.viewShadow,
@@ -1460,7 +1518,7 @@ const HarborProfilePage = ({ navigation, route }) => {
                                             </Text>
                                         )}
                                     </View>
-                                )}
+                                </ProfileTabPager>
                             </>
                         ) : (
                             <>
@@ -1846,6 +1904,18 @@ const styles = StyleSheet.create({
         paddingTop: verticalScale(12),
         paddingBottom: verticalScale(36),
         gap: verticalScale(14),
+    },
+    profilePager: {
+        marginHorizontal: scale(-14),
+        marginVertical: -PROFILE_PAGER_SHADOW_SPACE,
+    },
+    profilePagerPageContent: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        paddingHorizontal: scale(14),
+        paddingVertical: PROFILE_PAGER_SHADOW_SPACE,
     },
     identityCard: {
         alignItems: 'center',
