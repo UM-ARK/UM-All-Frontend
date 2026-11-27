@@ -115,6 +115,9 @@ function ClubPage({ topChromeHeight, useNativeLiquidGlassHeader = false, searchQ
     const firstSectionHeaderHeightRef = useRef(0);
     const clubRowHeightRef = useRef(0);
     const activeSectionIndexRef = useRef(0);
+    // 側欄點選觸發的程式捲動期間鎖定 scroll-spy，避免高亮被中間區段來回覆寫
+    const isProgrammaticScrollRef = useRef(false);
+    const programmaticScrollTimerRef = useRef(null);
 
     const filteredClubs = useMemo(
         () => filterClubsBySearchQuery(allClubs, searchQuery),
@@ -128,17 +131,57 @@ function ClubPage({ topChromeHeight, useNativeLiquidGlassHeader = false, searchQ
         setActiveSectionIndex(0);
     }, [sections]);
 
-    const handleScrollStart = useCallback(() => {
-        setIsOtherViewVisible(false);
+    const finishProgrammaticScroll = useCallback(() => {
+        if (programmaticScrollTimerRef.current) {
+            clearTimeout(programmaticScrollTimerRef.current);
+            programmaticScrollTimerRef.current = null;
+        }
+        isProgrammaticScrollRef.current = false;
     }, []);
 
-    const handleScrollEnd = useCallback(() => {
-        setIsOtherViewVisible(true);
+    useEffect(() => () => {
+        if (programmaticScrollTimerRef.current) {
+            clearTimeout(programmaticScrollTimerRef.current);
+        }
     }, []);
+
+    const armProgrammaticScroll = useCallback(() => {
+        isProgrammaticScrollRef.current = true;
+        if (programmaticScrollTimerRef.current) {
+            clearTimeout(programmaticScrollTimerRef.current);
+        }
+        // 部分平台 animated scrollTo 未必觸發 momentum end；長距離跳轉也較久，逾時後再恢復 scroll-spy
+        programmaticScrollTimerRef.current = setTimeout(finishProgrammaticScroll, 700);
+    }, [finishProgrammaticScroll]);
+
+    const handleScrollStart = useCallback(() => {
+        // 用戶手勢接管時立刻解鎖，讓高亮重新跟隨手指捲動
+        finishProgrammaticScroll();
+        setIsOtherViewVisible(false);
+    }, [finishProgrammaticScroll]);
+
+    const handleScrollEndDrag = useCallback((event) => {
+        finishProgrammaticScroll();
+        // 仍有慣性時等 momentum end 再顯示側欄，避免滑動中途閃現
+        const velocityY = event?.nativeEvent?.velocity?.y ?? 0;
+        if (Math.abs(velocityY) < 0.01) {
+            setIsOtherViewVisible(true);
+        }
+    }, [finishProgrammaticScroll]);
+
+    const handleScrollEnd = useCallback(() => {
+        finishProgrammaticScroll();
+        setIsOtherViewVisible(true);
+    }, [finishProgrammaticScroll]);
 
     const handleScroll = useCallback(event => {
         const scrollOffset = event.nativeEvent.contentOffset.y + nativeTopInset;
         scrollY.setValue(scrollOffset);
+
+        // 程式捲動中略過區段同步，只保留頂部 backdrop 的 scrollY
+        if (isProgrammaticScrollRef.current) {
+            return;
+        }
 
         const firstHeaderHeight = firstSectionHeaderHeightRef.current;
         const rowHeight = clubRowHeightRef.current;
@@ -170,6 +213,7 @@ function ClubPage({ topChromeHeight, useNativeLiquidGlassHeader = false, searchQ
     const scrollToSection = useCallback((sectionIndex) => {
         activeSectionIndexRef.current = sectionIndex;
         setActiveSectionIndex(sectionIndex);
+        armProgrammaticScroll();
         if (sectionIndex === 0) {
             sectionListRef.current?.getScrollResponder()?.scrollTo({ y: -nativeTopInset, animated: true });
             return;
@@ -178,6 +222,7 @@ function ClubPage({ topChromeHeight, useNativeLiquidGlassHeader = false, searchQ
         const firstHeaderHeight = firstSectionHeaderHeightRef.current;
         const rowHeight = clubRowHeightRef.current;
         if (!firstHeaderHeight || !rowHeight) {
+            finishProgrammaticScroll();
             return;
         }
 
@@ -194,7 +239,7 @@ function ClubPage({ topChromeHeight, useNativeLiquidGlassHeader = false, searchQ
             y: offset - nativeTopInset,
             animated: true,
         });
-    }, [nativeTopInset, sections]);
+    }, [armProgrammaticScroll, finishProgrammaticScroll, nativeTopInset, sections]);
 
     const getData = useCallback(async ({ refreshing = false } = {}) => {
         handleScrollStart();
@@ -458,6 +503,7 @@ function ClubPage({ topChromeHeight, useNativeLiquidGlassHeader = false, searchQ
                 onScroll={handleScroll}
                 scrollEventThrottle={16}
                 onScrollBeginDrag={handleScrollStart}
+                onScrollEndDrag={handleScrollEndDrag}
                 onMomentumScrollEnd={handleScrollEnd}
                 ListEmptyComponent={isLoading ? renderClubSkeleton() : null}
                 ListFooterComponent={!isLoading ? renderBottomInfo : null}
