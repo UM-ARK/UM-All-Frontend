@@ -13,11 +13,11 @@ import { useAppReducedMotion } from '../../../../../contexts/ReducedMotionContex
 import { trigger } from '../../../../../utils/trigger';
 import PhosphorFeatureIcon from '../search/components/PhosphorFeatureIcon';
 import CalendarBar from './CalendarBar';
+import { COAST_WAVE_EDGE, COAST_WAVE_VIEW_BOX } from './coastWave';
 
 const TIDE_HEIGHT = verticalScale(15);
 const TIDE_REACH = verticalScale(7);
-const WATER_EDGE = 'M0 24 C28 21 55 15 83 18 S132 27 163 23 S216 15 247 19 S292 29 320 22';
-const WATER_FILL = `${WATER_EDGE} V0 H0 Z`;
+const WATER_FILL = `${COAST_WAVE_EDGE} V0 H0 Z`;
 
 const TidalShoreline = ({ phase, shallow, beach, wetSand, foam }) => {
     const water = useAnimatedStyle(() => {
@@ -35,14 +35,14 @@ const TidalShoreline = ({ phase, shallow, beach, wetSand, foam }) => {
     return (
         <View pointerEvents="none" style={[styles.tidalShoreline, { backgroundColor: beach }]}>
             <Animated.View style={[styles.tideStrip, wet]}>
-                <Svg width="100%" height="100%" viewBox="0 0 320 38" preserveAspectRatio="none">
+                <Svg width="100%" height="100%" viewBox={COAST_WAVE_VIEW_BOX} preserveAspectRatio="none">
                     <Path d={WATER_FILL} fill={wetSand} />
                 </Svg>
             </Animated.View>
             <Animated.View style={[styles.tideStrip, water]}>
-                <Svg width="100%" height="100%" viewBox="0 0 320 38" preserveAspectRatio="none">
+                <Svg width="100%" height="100%" viewBox={COAST_WAVE_VIEW_BOX} preserveAspectRatio="none">
                     <Path d={WATER_FILL} fill={shallow} />
-                    <Path d={WATER_EDGE} fill="none" stroke={foam} strokeOpacity={0.64} strokeWidth={1.1} />
+                    <Path d={COAST_WAVE_EDGE} fill="none" stroke={foam} strokeOpacity={0.64} strokeWidth={1.1} />
                 </Svg>
             </Animated.View>
         </View>

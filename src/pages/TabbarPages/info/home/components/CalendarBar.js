@@ -15,6 +15,7 @@ import { useAppReducedMotion } from '../../../../../contexts/ReducedMotionContex
 import { getWeek } from '../../../../../static/UMCalendar/CalendarConst';
 import { UMCalendar } from '../../../../../static/UMCalendar/UMCalendar';
 import { trigger } from '../../../../../utils/trigger';
+import { COAST_WAVE_EDGE, COAST_WAVE_VIEW_BOX } from './coastWave';
 
 const AnimatedCalendarList = Animated.createAnimatedComponent(VirtualizedList);
 const CALENDAR_INSET = scale(12);
@@ -23,7 +24,7 @@ const WAKE_WIDTH = scale(84);
 const MAX_WAKE_STEP = scale(44);
 const WATER_DRIFT = scale(21);
 const WATER_HEIGHT = BOAT_SIZE + verticalScale(8);
-const SHALLOW_WAVE = 'M0 25 C31 29 51 19 83 22 S139 31 170 24 S225 18 254 23 S309 29 340 21 V36 H0 Z';
+const SHALLOW_WAVE = `${COAST_WAVE_EDGE} V38 H0 Z`;
 const SAIL_EASING = Easing.inOut(Easing.sin);
 const SUMMARY_EASING = Easing.bezier(0.23, 1, 0.32, 1);
 
@@ -69,7 +70,7 @@ const getCurrentSelection = cal => {
 
 const CalendarBar = ({ topInset, onDeepSeaLayout, refreshTrigger = 0, tide, onDateTouchChange }) => {
     const { theme } = useTheme();
-    const { black, accentForeground, themeColor, trueWhite, warning, sand, homeCoast } = theme;
+    const { black, accentForeground, themeColor, themeColorLight, trueWhite, warning, sand, homeCoast } = theme;
     const { t, i18n } = useTranslation('features');
     const reducedMotion = useAppReducedMotion();
     const calScrollRef = useRef(null);
@@ -360,16 +361,16 @@ const CalendarBar = ({ topInset, onDeepSeaLayout, refreshTrigger = 0, tide, onDa
             </View>
             <View pointerEvents="none" importantForAccessibility="no-hide-descendants" accessibilityElementsHidden style={styles.water}>
                 <Animated.View style={[styles.swell, waterStyle]}>
-                    <Svg width="100%" height="100%" viewBox="0 0 340 36" preserveAspectRatio="none">
+                    <Svg width="100%" height="100%" viewBox={COAST_WAVE_VIEW_BOX} preserveAspectRatio="none">
                         <Defs>
                             <LinearGradient id="calendar-swell" x1="0%" y1="0%" x2="0%" y2="100%">
-                                <Stop offset="0%" stopColor={themeColor} stopOpacity={0.34} />
-                                <Stop offset="72%" stopColor={themeColor} stopOpacity={0} />
+                                <Stop offset="0%" stopColor={themeColor} stopOpacity={0.14} />
+                                <Stop offset="42%" stopColor={themeColor} stopOpacity={0} />
                             </LinearGradient>
                         </Defs>
                         <Path d={SHALLOW_WAVE} fill={homeCoast.shallow} />
-                        <Path d="M0 20 C28 13 54 12 85 19 S140 25 171 17 S225 11 256 18 S311 25 340 17 V36 H0 Z" fill="url(#calendar-swell)" />
                         <Path d={SHALLOW_WAVE} fill="url(#calendar-swell)" />
+                        <Path d={COAST_WAVE_EDGE} fill="none" stroke={theme.isLight ? trueWhite : themeColorLight} strokeOpacity={0.68} strokeWidth={1.15} />
                     </Svg>
                 </Animated.View>
                 <Animated.View style={[styles.boat, boatStyle]}>
