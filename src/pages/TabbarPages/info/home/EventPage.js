@@ -487,7 +487,6 @@ const EventPage = forwardRef((props, ref) => {
     }, []);
 
     const loadMoreData = useCallback(async () => {
-        trigger();
         if (isLoading || noMoreData || loadingMoreRef.current) {
             return;
         }
