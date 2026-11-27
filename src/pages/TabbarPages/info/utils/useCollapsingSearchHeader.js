@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Animated } from 'react-native';
 import { scale } from 'react-native-size-matters';
 import {
@@ -18,6 +18,39 @@ import { nextHarborSearchBarProgress } from '../../arkHarbor/harborSearchBarProg
 const FALLBACK_SEARCH_HEADER_HEIGHT = SEARCH_FIELD_MIN_HEIGHT + scale(16);
 const SEARCH_BAR_SETTLE_MS = 180;
 const SEARCH_BAR_EASE_OUT = Easing.bezier(0.23, 1, 0.32, 1);
+
+/**
+ * 固定在頂部導覽下方的 sticky 搜尋列共用狀態：
+ * 僅同步 scrollY 給 TopScrollEdgeBackdrop 與量測搜尋列高度，不做收合隱藏動畫。
+ */
+export function useStickySearchHeader() {
+    const [scrollY] = useState(() => new Animated.Value(0));
+    const [barHeight, setBarHeight] = useState(FALLBACK_SEARCH_HEADER_HEIGHT);
+
+    const onBarLayout = useCallback(event => {
+        const nextHeight = Math.ceil(event.nativeEvent.layout.height);
+        if (nextHeight <= 0) {
+            return;
+        }
+        setBarHeight(current => (current === nextHeight ? current : nextHeight));
+    }, []);
+
+    const onScroll = useMemo(
+        () =>
+            Animated.event(
+                [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+                { useNativeDriver: true },
+            ),
+        [scrollY],
+    );
+
+    return {
+        scrollY,
+        onScroll,
+        onBarLayout,
+        barHeight,
+    };
+}
 
 /**
  * 對齊論壇頁：往下瀏覽時搜尋列上移淡出，往回滑在原地展開，不必回到頂部。

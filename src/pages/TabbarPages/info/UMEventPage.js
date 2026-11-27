@@ -25,12 +25,11 @@ import NewsCard, { NewsRowSeparator } from './components/NewsCard';
 import NewsListSkeleton from './components/NewsListSkeleton';
 import ClubSearchBar from './components/ClubSearchBar';
 import { filterUMOpenDataItemsBySearchQuery } from './utils/umOpenDataSearch';
-import { useCollapsingSearchHeader } from './utils/useCollapsingSearchHeader';
+import { useStickySearchHeader } from './utils/useCollapsingSearchHeader';
 
 import axios from 'axios';
 import moment from 'moment-timezone';
 import { useTranslation } from 'react-i18next';
-import Reanimated from 'react-native-reanimated';
 import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { verticalScale } from 'react-native-size-matters';
@@ -104,14 +103,9 @@ const UMEventPage = forwardRef(function UMEventPage({ topHeaderHeight }, ref) {
     const {
         scrollY,
         onScroll: onSearchScroll,
-        onScrollBeginDrag: onSearchScrollBeginDrag,
-        onScrollEndDrag: onSearchScrollEndDrag,
-        onMomentumScrollEnd: onSearchMomentumScrollEnd,
         onBarLayout: onSearchBarLayout,
-        animatedStyle: searchBarAnimatedStyle,
         barHeight: searchBarHeight,
-        collapsed: searchCollapsed,
-    } = useCollapsingSearchHeader();
+    } = useStickySearchHeader();
     const [isRefreshing, setIsRefreshing] = useState(false);
 
     useImperativeHandle(
@@ -239,13 +233,10 @@ const UMEventPage = forwardRef(function UMEventPage({ topHeaderHeight }, ref) {
                     style={{ flex: 1, width: '100%' }}
                     data={filteredData}
                     contentContainerStyle={{
-                        paddingTop: topHeaderHeight + searchBarHeight,
+                        paddingTop: topHeaderHeight + searchBarHeight + verticalScale(8),
                         paddingBottom: listBottomPad,
                     }}
                     onScroll={onSearchScroll}
-                    onScrollBeginDrag={onSearchScrollBeginDrag}
-                    onScrollEndDrag={onSearchScrollEndDrag}
-                    onMomentumScrollEnd={onSearchMomentumScrollEnd}
                     scrollEventThrottle={16}
                     // 只關 contentInset 不夠。指示器預設仍會把外層橫向 Pager 的
                     // safe area 疊加上去；17 Pro 貼齊右緣時，這段間距會被算到
@@ -253,7 +244,7 @@ const UMEventPage = forwardRef(function UMEventPage({ topHeaderHeight }, ref) {
                     contentInsetAdjustmentBehavior="never"
                     automaticallyAdjustsScrollIndicatorInsets={false}
                     scrollIndicatorInsets={{
-                        top: topHeaderHeight,
+                        top: topHeaderHeight + searchBarHeight,
                         bottom: tabBarHeight,
                         right: 1,
                     }}
@@ -273,33 +264,29 @@ const UMEventPage = forwardRef(function UMEventPage({ topHeaderHeight }, ref) {
                         />
                     }
                 />
-                <TopScrollEdgeBackdrop headerHeight={topHeaderHeight} scrollY={scrollY} />
+                <TopScrollEdgeBackdrop
+                    headerHeight={topHeaderHeight + searchBarHeight}
+                    scrollY={scrollY}
+                />
                 <View
                     onLayout={onSearchBarLayout}
-                    pointerEvents={searchCollapsed ? 'none' : 'auto'}
-                    accessibilityElementsHidden={searchCollapsed}
-                    importantForAccessibility={
-                        searchCollapsed ? 'no-hide-descendants' : 'auto'
-                    }
                     style={{
                         position: 'absolute',
                         top: topHeaderHeight,
                         left: 0,
                         right: 0,
                         zIndex: 2,
-                        overflow: 'hidden',
                     }}>
-                    <Reanimated.View style={searchBarAnimatedStyle}>
-                        <ClubSearchBar
-                            value={searchQuery}
-                            onChangeText={setSearchQuery}
-                            loading={isRefreshing}
-                            onFocus={handleSearchFocus}
-                            placeholder={t('搜索澳大活動')}
-                            cancelLabel={t('取消')}
-                            clearAccessibilityLabel={t('清除搜尋')}
-                        />
-                    </Reanimated.View>
+                    <ClubSearchBar
+                        value={searchQuery}
+                        onChangeText={setSearchQuery}
+                        loading={isRefreshing}
+                        onFocus={handleSearchFocus}
+                        containerStyle={{ paddingBottom: 0 }}
+                        placeholder={t('搜索澳大活動')}
+                        cancelLabel={t('取消')}
+                        clearAccessibilityLabel={t('清除搜尋')}
+                    />
                 </View>
             </View>
         );

@@ -3,7 +3,9 @@ import { View, RefreshControl, TouchableOpacity, Alert, SectionList, Dimensions,
 import { BlurView } from 'expo-blur';
 
 import Text from '../../../components/AppText';
-import TopScrollEdgeBackdrop from '../../../components/TopScrollEdgeBackdrop';
+import TopScrollEdgeBackdrop, {
+    getTopScrollEdgeBlurProps,
+} from '../../../components/TopScrollEdgeBackdrop';
 import { SEARCH_FIELD_MIN_HEIGHT } from '../../../components/searchFieldStyles';
 import { uiStyle, ThemeContext, } from '../../../components/ThemeContext';
 import { BASE_URI, BASE_HOST, GET, USUAL_Q } from '../../../utils/pathMap';
@@ -373,9 +375,7 @@ function ClubPage({ topChromeHeight }) {
                 }}
                 renderSectionHeader={({ section }) => {
                     const isFirstSection = section.title === sections[0]?.title;
-                    const blurTint = theme.isLight
-                        ? 'systemUltraThinMaterialLight'
-                        : 'systemUltraThinMaterialDark';
+                    const blurProps = getTopScrollEdgeBlurProps(theme.isLight);
                     return (
                         <View
                             onLayout={({ nativeEvent }) => {
@@ -391,8 +391,7 @@ function ClubPage({ topChromeHeight }) {
                             }}>
                             {/* 與頂部 TopScrollEdgeBackdrop 對齊的 sticky 毛玻璃，避免實色標題切斷透光層 */}
                             <BlurView
-                                intensity={42}
-                                tint={blurTint}
+                                {...blurProps}
                                 style={[
                                     StyleSheet.absoluteFill,
                                     { backgroundColor: theme.glassBg },

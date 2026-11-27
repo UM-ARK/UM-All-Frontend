@@ -28,7 +28,7 @@ import {
     filterUMOpenDataItemsBySearchQuery,
     pickDisplayedTitles,
 } from './utils/umOpenDataSearch';
-import { useCollapsingSearchHeader } from './utils/useCollapsingSearchHeader';
+import { useStickySearchHeader } from './utils/useCollapsingSearchHeader';
 
 import { uiStyle, ThemeContext } from '../../../components/ThemeContext';
 import { UM_API_NEWS, UM_API_TOKEN } from '../../../utils/pathMap';
@@ -46,7 +46,6 @@ import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import axios from 'axios';
 import { useTranslation } from 'react-i18next';
-import Reanimated from 'react-native-reanimated';
 import { scale, verticalScale } from 'react-native-size-matters';
 import lodash from 'lodash';
 
@@ -137,14 +136,9 @@ const NewsPage = forwardRef(function NewsPage({ topHeaderHeight }, ref) {
     const {
         scrollY,
         onScroll: onSearchScroll,
-        onScrollBeginDrag: onSearchScrollBeginDrag,
-        onScrollEndDrag: onSearchScrollEndDrag,
-        onMomentumScrollEnd: onSearchMomentumScrollEnd,
         onBarLayout: onSearchBarLayout,
-        animatedStyle: searchBarAnimatedStyle,
         barHeight: searchBarHeight,
-        collapsed: searchCollapsed,
-    } = useCollapsingSearchHeader();
+    } = useStickySearchHeader();
 
     const filteredNewsItems = useMemo(
         () => filterUMOpenDataItemsBySearchQuery(newsItems, searchQuery),
@@ -380,9 +374,6 @@ const NewsPage = forwardRef(function NewsPage({ topHeaderHeight }, ref) {
                         ref={virtualizedList}
                         style={{ flex: 1, width: '100%' }}
                         onScroll={onSearchScroll}
-                        onScrollBeginDrag={onSearchScrollBeginDrag}
-                        onScrollEndDrag={onSearchScrollEndDrag}
-                        onMomentumScrollEnd={onSearchMomentumScrollEnd}
                         scrollEventThrottle={16}
                         // 只關 contentInset 不夠。指示器預設仍會把外層橫向 Pager 的
                         // safe area 疊加上去；17 Pro 貼齊右緣時，這段間距會被算到
@@ -390,7 +381,7 @@ const NewsPage = forwardRef(function NewsPage({ topHeaderHeight }, ref) {
                         contentInsetAdjustmentBehavior="never"
                         automaticallyAdjustsScrollIndicatorInsets={false}
                         scrollIndicatorInsets={{
-                            top: topHeaderHeight,
+                            top: topHeaderHeight + searchBarHeight,
                             bottom: tabBarHeight,
                             right: 1,
                         }}
@@ -403,7 +394,7 @@ const NewsPage = forwardRef(function NewsPage({ topHeaderHeight }, ref) {
                         ItemSeparatorComponent={NewsRowSeparator}
                         contentContainerStyle={{
                             width: '100%',
-                            paddingTop: topHeaderHeight + searchBarHeight,
+                            paddingTop: topHeaderHeight + searchBarHeight + verticalScale(8),
                             paddingBottom: listBottomPad,
                         }}
                         keyExtractor={item => item._id}
@@ -428,34 +419,30 @@ const NewsPage = forwardRef(function NewsPage({ topHeaderHeight }, ref) {
                         alwaysBounceHorizontal={false}
                         removeClippedSubviews
                     />
-                    <TopScrollEdgeBackdrop headerHeight={topHeaderHeight} scrollY={scrollY} />
+                    <TopScrollEdgeBackdrop
+                        headerHeight={topHeaderHeight + searchBarHeight}
+                        scrollY={scrollY}
+                    />
                     <View
                         onLayout={onSearchBarLayout}
-                        pointerEvents={searchCollapsed ? 'none' : 'auto'}
-                        accessibilityElementsHidden={searchCollapsed}
-                        importantForAccessibility={
-                            searchCollapsed ? 'no-hide-descendants' : 'auto'
-                        }
                         style={{
                             position: 'absolute',
                             top: topHeaderHeight,
                             left: 0,
                             right: 0,
                             zIndex: 2,
-                            overflow: 'hidden',
                         }}>
-                        <Reanimated.View style={searchBarAnimatedStyle}>
-                            <ClubSearchBar
-                                value={searchQuery}
-                                onChangeText={setSearchQuery}
-                                loading={isRefreshing}
-                                onFocus={handleSearchFocus}
-                                onCancel={() => setSearchQuery('')}
-                                placeholder={t('搜索澳大新聞')}
-                                cancelLabel={t('取消')}
-                                clearAccessibilityLabel={t('清除搜尋')}
-                            />
-                        </Reanimated.View>
+                        <ClubSearchBar
+                            value={searchQuery}
+                            onChangeText={setSearchQuery}
+                            loading={isRefreshing}
+                            onFocus={handleSearchFocus}
+                            onCancel={() => setSearchQuery('')}
+                            containerStyle={{ paddingBottom: 0 }}
+                            placeholder={t('搜索澳大新聞')}
+                            cancelLabel={t('取消')}
+                            clearAccessibilityLabel={t('清除搜尋')}
+                        />
                     </View>
                 </View>
             )}
