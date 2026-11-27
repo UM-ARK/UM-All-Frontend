@@ -1025,11 +1025,13 @@ const FeaturesNativeEditButton = ({
     trueWhite,
     iconColor,
     onPress,
+    onPressIn,
 }) => (
     <ScalePressable
         accessibilityRole="button"
         accessibilityLabel={label}
         hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        onPressIn={onPressIn}
         onPress={onPress}>
         <View
             style={[
@@ -1078,8 +1080,10 @@ export default function Index() {
             Math.abs(current - nextHeight) > 0.5 ? nextHeight : current,
         );
     }, []);
-    const handleToggleEditFrequent = useCallback(() => {
+    const handleToggleEditFrequentPressIn = useCallback(() => {
         trigger('selection');
+    }, []);
+    const handleToggleEditFrequent = useCallback(() => {
         setIsEditingFrequent(current => !current);
     }, []);
     const handleTopTabStateChange = useCallback(e => {
@@ -1140,6 +1144,7 @@ export default function Index() {
                             themeColor={themeColor}
                             trueWhite={trueWhite}
                             iconColor={black.second}
+                            onPressIn={handleToggleEditFrequentPressIn}
                             onPress={handleToggleEditFrequent}
                         />
                     )
@@ -1152,6 +1157,7 @@ export default function Index() {
         featuresScreen.bg_color,
         handleSelectNativeSegment,
         handleToggleEditFrequent,
+        handleToggleEditFrequentPressIn,
         isEditingFrequent,
         navigation,
         segmentOptions,
@@ -1212,6 +1218,7 @@ export default function Index() {
                                             : t('調整', { ns: 'features' })
                                     }
                                     hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                                    onPressIn={handleToggleEditFrequentPressIn}
                                     onPress={handleToggleEditFrequent}>
                                     <View
                                         style={[
@@ -1251,6 +1258,7 @@ export default function Index() {
         [
             black.second,
             handleToggleEditFrequent,
+            handleToggleEditFrequentPressIn,
             handleTopBarLayout,
             insets.top,
             isEditingFrequent,
