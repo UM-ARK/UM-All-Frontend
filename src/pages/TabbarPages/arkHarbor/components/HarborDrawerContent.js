@@ -9,6 +9,7 @@ import React, {
 import {
     ActivityIndicator,
     Image,
+    Platform,
     StyleSheet,
     View,
 } from 'react-native';
@@ -396,6 +397,15 @@ const HarborDrawerContent = ({ navigation }) => {
 
     const navigateFromDrawer = useCallback(
         (routeName, params) => {
+            if (Platform.OS === 'ios') {
+                // iOS 論壇頁內建原生 Stack，需關閉抽屜並推入 HarborHome 子棧
+                navigation.closeDrawer();
+                navigation.navigate('HarborHome', {
+                    screen: routeName,
+                    params,
+                });
+                return;
+            }
             // 不自動收起抽屜，由用戶自行關閉（關閉鈕 / 手勢）
             navigation.navigate(routeName, params);
         },

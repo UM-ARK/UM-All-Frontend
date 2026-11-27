@@ -1,13 +1,23 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+    useCallback,
+    useContext,
+    useEffect,
+    useLayoutEffect,
+    useMemo,
+    useRef,
+    useState,
+} from 'react';
 import {
     Alert,
     Animated,
     AppState,
+    Platform,
     StyleSheet,
     View,
 } from 'react-native';
 
 import { createDrawerNavigator } from '@react-navigation/drawer';
+import { HeaderHeightContext } from '@react-navigation/elements';
 import { useIsFocused } from '@react-navigation/native';
 import PagerView from 'react-native-pager-view';
 import { scale, verticalScale } from 'react-native-size-matters';
@@ -43,6 +53,7 @@ import PhosphorFeatureIcon from '../info/home/search/components/PhosphorFeatureI
 import HarborDrawerContent from './components/HarborDrawerContent';
 import { harborTopicRowInsets } from './components/HarborTopicCard';
 import HarborTopicList from './components/HarborTopicList';
+import { createHarborNativeStack } from './HarborNativeStack';
 import HarborTopicDetail from './HarborTopicDetail';
 import searchFieldStyles, {
     SEARCH_FIELD_ICON_SIZE,
@@ -87,6 +98,7 @@ const HarborStickyToolbar = ({
     searchCollapsed,
     backgroundColor,
     isCompact,
+    useNativeHeader = false,
 }) => {
     const { theme } = useTheme();
     const { t } = useTranslation('harbor');
@@ -112,6 +124,109 @@ const HarborStickyToolbar = ({
     const searchIconStyle = useAnimatedStyle(() => ({
         opacity: interpolate(searchProgress.get(), [0.35, 1], [0, 1], 'clamp'),
     }));
+
+    const searchBarContent = (
+        <Reanimated.View
+            pointerEvents={searchCollapsed ? 'none' : 'auto'}
+            accessibilityElementsHidden={searchCollapsed}
+            importantForAccessibility={
+                searchCollapsed ? 'no-hide-descendants' : 'auto'
+            }
+            style={[
+                styles.searchBarRow,
+                isCompact && styles.compactSearchBarRow,
+                searchBarStyle,
+            ]}>
+            <ScalePressable
+                accessibilityRole="button"
+                accessibilityLabel={t('搜尋 Harbor')}
+                onPress={() => {
+                    trigger();
+                    onSearchPress();
+                }}
+                style={[
+                    searchFieldStyles.field,
+                    {
+                        backgroundColor: isCompact
+                            ? theme.harborSearch.background
+                            : theme.white,
+                        borderColor: theme.themeColorUltraLight,
+                        borderWidth: isCompact ? 0 : StyleSheet.hairlineWidth,
+                    },
+                ]}>
+                <PhosphorFeatureIcon
+                    name="search"
+                    size={SEARCH_FIELD_ICON_SIZE}
+                    color={searchBarForeground}
+                    weight="regular"
+                />
+                <Text
+                    numberOfLines={1}
+                    maxFontSizeMultiplier={SEARCH_FIELD_MAX_FONT_SIZE_MULTIPLIER}
+                    style={[
+                        searchFieldStyles.text,
+                        { color: searchBarForeground },
+                    ]}>
+                    {t('搜尋 Harbor')}
+                </Text>
+            </ScalePressable>
+        </Reanimated.View>
+    );
+
+    if (useNativeHeader) {
+        return (
+            <View pointerEvents="box-none" style={styles.stickyHeader}>
+                <TopScrollEdgeBackdrop
+                    headerHeight={toolbarHeight + SEARCH_BAR_ROW_HEIGHT}
+                    fadeHeight={SCROLL_EDGE_FADE_HEIGHT}
+                    scrollY={scrollY}
+                    backgroundColor={backgroundColor}
+                    zIndex={1}
+                />
+                <View
+                    pointerEvents="box-none"
+                    style={[
+                        styles.nativeStickySearchRow,
+                        isCompact && styles.compactSearchBarRow,
+                        { marginTop: toolbarHeight },
+                    ]}>
+                    <ScalePressable
+                        accessibilityRole="button"
+                        accessibilityLabel={t('搜尋 Harbor')}
+                        onPress={() => {
+                            trigger();
+                            onSearchPress();
+                        }}
+                        style={[
+                            searchFieldStyles.field,
+                            {
+                                backgroundColor: isCompact
+                                    ? theme.harborSearch.background
+                                    : theme.white,
+                                borderColor: theme.themeColorUltraLight,
+                                borderWidth: isCompact ? 0 : StyleSheet.hairlineWidth,
+                            },
+                        ]}>
+                        <PhosphorFeatureIcon
+                            name="search"
+                            size={SEARCH_FIELD_ICON_SIZE}
+                            color={searchBarForeground}
+                            weight="regular"
+                        />
+                        <Text
+                            numberOfLines={1}
+                            maxFontSizeMultiplier={SEARCH_FIELD_MAX_FONT_SIZE_MULTIPLIER}
+                            style={[
+                                searchFieldStyles.text,
+                                { color: searchBarForeground },
+                            ]}>
+                            {t('搜尋 Harbor')}
+                        </Text>
+                    </ScalePressable>
+                </View>
+            </View>
+        );
+    }
 
     return (
         <View pointerEvents="box-none" style={styles.stickyHeader}>
@@ -282,51 +397,7 @@ const HarborStickyToolbar = ({
                     </View>
                 </View>
             </View>
-            <Reanimated.View
-                pointerEvents={searchCollapsed ? 'none' : 'auto'}
-                accessibilityElementsHidden={searchCollapsed}
-                importantForAccessibility={
-                    searchCollapsed ? 'no-hide-descendants' : 'auto'
-                }
-                style={[
-                    styles.searchBarRow,
-                    isCompact && styles.compactSearchBarRow,
-                    searchBarStyle,
-                ]}>
-                <ScalePressable
-                    accessibilityRole="button"
-                    accessibilityLabel={t('搜尋 Harbor')}
-                    onPress={() => {
-                        trigger();
-                        onSearchPress();
-                    }}
-                    style={[
-                        searchFieldStyles.field,
-                        {
-                            backgroundColor: isCompact
-                                ? theme.harborSearch.background
-                                : theme.white,
-                            borderColor: theme.themeColorUltraLight,
-                            borderWidth: isCompact ? 0 : StyleSheet.hairlineWidth,
-                        },
-                    ]}>
-                    <PhosphorFeatureIcon
-                        name="search"
-                        size={SEARCH_FIELD_ICON_SIZE}
-                        color={searchBarForeground}
-                        weight="regular"
-                    />
-                    <Text
-                        numberOfLines={1}
-                        maxFontSizeMultiplier={SEARCH_FIELD_MAX_FONT_SIZE_MULTIPLIER}
-                        style={[
-                            searchFieldStyles.text,
-                            { color: searchBarForeground },
-                        ]}>
-                        {t('搜尋 Harbor')}
-                    </Text>
-                </ScalePressable>
-            </Reanimated.View>
+            {searchBarContent}
         </View>
     );
 };
@@ -393,6 +464,8 @@ const HarborFeedPane = ({
 const ForumPage = ({ navigation }) => {
     const { theme } = useTheme();
     const { isCompact, isExpanded } = useWindowSizeClass();
+    const useNativeHeader = Platform.OS === 'ios' && !isExpanded;
+    const nativeHeaderHeight = useContext(HeaderHeightContext) ?? 0;
     const insets = useSafeAreaInsets();
     const backgroundColor = isCompact ? theme.harbor_bg_color : theme.bg_color;
     const { t } = useTranslation('harbor');
@@ -773,7 +846,10 @@ const ForumPage = ({ navigation }) => {
                 ? t('登入中…')
                 : t('登入');
 
-    const stickyHeaderHeight = toolbarHeight + SEARCH_BAR_ROW_HEIGHT;
+    const effectiveToolbarHeight = useNativeHeader
+        ? nativeHeaderHeight || insets.top + STICKY_TOOLBAR_HEIGHT
+        : toolbarHeight;
+    const stickyHeaderHeight = effectiveToolbarHeight + SEARCH_BAR_ROW_HEIGHT;
     const contentContainerStyle = useMemo(
         () => ({
             paddingTop: stickyHeaderHeight + verticalScale(4),
@@ -789,23 +865,204 @@ const ForumPage = ({ navigation }) => {
         );
     }, []);
 
+    const drawerNavigation = useNativeHeader
+        ? navigation.getParent()
+        : navigation;
+    const handleMenuPress = useCallback(() => {
+        (drawerNavigation?.openDrawer ?? navigation.openDrawer)?.();
+    }, [drawerNavigation, navigation]);
+    const handleChatPress = useCallback(() => {
+        navigation.navigate('HarborChatList');
+    }, [navigation]);
+    const handleComposePress = useCallback(() => {
+        navigation.navigate('HarborComposer', {
+            mode: 'newTopic',
+        });
+    }, [navigation]);
+    const handleSearchPress = useCallback(() => {
+        navigation.navigate('HarborSearch');
+    }, [navigation]);
+
+    useLayoutEffect(() => {
+        if (!useNativeHeader) {
+            return;
+        }
+        const isSignedIn = status === 'signedIn';
+        const showLoginPromptBadge =
+            status === 'signedOut' || status === 'expired';
+        const chatVisible = capabilities?.chat !== false;
+
+        navigation.setOptions({
+            headerShown: true,
+            contentStyle: { backgroundColor },
+            headerLeft: () => (
+                <View style={styles.nativeHeaderSide}>
+                    <ScalePressable
+                        accessibilityRole="button"
+                        accessibilityLabel={t('開啟選單')}
+                        hitSlop={scale(8)}
+                        onPress={() => {
+                            trigger();
+                            handleMenuPress();
+                        }}
+                        style={styles.nativeHeaderIconButton}>
+                        <PhosphorFeatureIcon
+                            name="list"
+                            size={scale(20)}
+                            color={theme.black.second}
+                            weight="regular"
+                        />
+                    </ScalePressable>
+                </View>
+            ),
+            headerTitle: () => (
+                <SegmentedTabControl
+                    options={segmentOptions}
+                    selectedIndex={currentIndex}
+                    position={tabPosition}
+                    onChange={index => {
+                        trigger(currentIndex === index ? 'tap' : 'selection');
+                        selectView(index);
+                    }}
+                    compact
+                />
+            ),
+            headerRight: () => (
+                <View style={styles.nativeHeaderSide}>
+                    {isSignedIn ? null : (
+                        <ScalePressable
+                            accessibilityRole="button"
+                            accessibilityLabel={sessionLabel}
+                            disabled={
+                                status === 'restoring' ||
+                                status === 'authorizing'
+                            }
+                            onPress={() => {
+                                trigger();
+                                handleSessionPress();
+                            }}
+                            style={styles.sessionButton}>
+                            <PhosphorFeatureIcon
+                                name="sign-in"
+                                size={scale(14)}
+                                color={theme.black.second}
+                                weight="regular"
+                            />
+                            <Text
+                                numberOfLines={1}
+                                style={[
+                                    styles.sessionText,
+                                    { color: theme.black.second },
+                                ]}>
+                                {sessionLabel}
+                            </Text>
+                            {showLoginPromptBadge ? (
+                                <View
+                                    pointerEvents="none"
+                                    style={[
+                                        styles.loginPromptBadge,
+                                        { backgroundColor: theme.unread },
+                                    ]}
+                                />
+                            ) : null}
+                        </ScalePressable>
+                    )}
+                    {isSignedIn && chatVisible ? (
+                        <ScalePressable
+                            accessibilityRole="button"
+                            accessibilityLabel={t('Chat')}
+                            hitSlop={scale(8)}
+                            onPress={() => {
+                                trigger();
+                                handleChatPress();
+                            }}
+                            style={styles.nativeHeaderIconButton}>
+                            <PhosphorFeatureIcon
+                                name="message-circle"
+                                size={scale(19)}
+                                color={theme.black.second}
+                                weight="regular"
+                            />
+                            {chatUnreadCount > 0 ? (
+                                <View
+                                    style={[
+                                        styles.chatUnreadBadge,
+                                        { backgroundColor: theme.unread },
+                                    ]}>
+                                    <Text
+                                        style={[
+                                            styles.chatUnreadText,
+                                            { color: theme.trueWhite },
+                                        ]}>
+                                        {chatUnreadCount > 99
+                                            ? '99+'
+                                            : chatUnreadCount}
+                                    </Text>
+                                </View>
+                            ) : null}
+                        </ScalePressable>
+                    ) : null}
+                    <ScalePressable
+                        accessibilityRole="button"
+                        accessibilityLabel={t('建立話題')}
+                        hitSlop={scale(8)}
+                        onPress={() => {
+                            trigger();
+                            handleComposePress();
+                        }}
+                        style={styles.nativeHeaderIconButton}>
+                        <PhosphorFeatureIcon
+                            name="plus"
+                            size={scale(20)}
+                            color={theme.black.second}
+                            weight="regular"
+                        />
+                    </ScalePressable>
+                </View>
+            ),
+        });
+    }, [
+        backgroundColor,
+        capabilities?.chat,
+        chatUnreadCount,
+        currentIndex,
+        handleChatPress,
+        handleComposePress,
+        handleMenuPress,
+        handleSessionPress,
+        navigation,
+        segmentOptions,
+        selectView,
+        sessionLabel,
+        status,
+        t,
+        tabPosition,
+        theme.black.second,
+        theme.trueWhite,
+        theme.unread,
+        useNativeHeader,
+    ]);
+
     // Drawer 側滑開合時攔截貼文點擊，避免誤進詳情後返回造成主頁刷新感
     useEffect(() => {
+        if (!drawerNavigation?.addListener) {
+            return undefined;
+        }
         const blockTopicPress = () => {
             blockTopicPressUntilRef.current = Number.POSITIVE_INFINITY;
         };
         const releaseTopicPress = () => {
             blockTopicPressUntilRef.current = Date.now() + 180;
         };
-        const unsubscribeGestureStart = navigation.addListener(
+        const unsubscribeGestureStart = drawerNavigation.addListener(
             'gestureStart',
             blockTopicPress,
         );
-        const unsubscribeGestureEnd = navigation.addListener(
+        const unsubscribeGestureEnd = drawerNavigation.addListener(
             'gestureEnd',
             releaseTopicPress,
         );
-        const unsubscribeGestureCancel = navigation.addListener(
+        const unsubscribeGestureCancel = drawerNavigation.addListener(
             'gestureCancel',
             releaseTopicPress,
         );
@@ -815,7 +1072,7 @@ const ForumPage = ({ navigation }) => {
             unsubscribeGestureEnd();
             unsubscribeGestureCancel();
         };
-    }, [navigation]);
+    }, [drawerNavigation]);
 
     const handlePageScrollStateChanged = useCallback(event => {
         const pageScrollState = event.nativeEvent.pageScrollState;
@@ -904,24 +1161,21 @@ const ForumPage = ({ navigation }) => {
                         status={status}
                         sessionLabel={sessionLabel}
                         onSessionPress={handleSessionPress}
-                        onMenuPress={() => navigation.openDrawer()}
-                        onChatPress={() => navigation.navigate('HarborChatList')}
-                        onComposePress={() =>
-                            navigation.navigate('HarborComposer', {
-                                mode: 'newTopic',
-                            })
-                        }
-                        onSearchPress={() => navigation.navigate('HarborSearch')}
+                        onMenuPress={handleMenuPress}
+                        onChatPress={handleChatPress}
+                        onComposePress={handleComposePress}
+                        onSearchPress={handleSearchPress}
                         chatUnreadCount={chatUnreadCount}
                         chatVisible={capabilities?.chat !== false}
                         onToolbarLayout={handleToolbarLayout}
-                        toolbarHeight={toolbarHeight}
+                        toolbarHeight={effectiveToolbarHeight}
                         topInset={insets.top}
                         scrollY={scrollY}
                         searchProgress={searchProgress}
                         searchCollapsed={searchCollapsed}
                         backgroundColor={backgroundColor}
                         isCompact={isCompact}
+                        useNativeHeader={useNativeHeader}
                     />
                 </View>
                 {isExpanded ? (
@@ -1013,6 +1267,24 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
     },
+    nativeHeaderSide: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: scale(4),
+    },
+    nativeHeaderIconButton: {
+        width: scale(32),
+        height: scale(32),
+        borderRadius: scale(16),
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    nativeStickySearchRow: {
+        zIndex: 2,
+        height: SEARCH_BAR_ROW_HEIGHT,
+        justifyContent: 'center',
+        paddingHorizontal: scale(6),
+    },
     chatUnreadBadge: {
         position: 'absolute',
         top: scale(1),
@@ -1085,6 +1357,8 @@ const styles = StyleSheet.create({
     },
 });
 
+const HarborNativeStack = createHarborNativeStack(ForumPage);
+
 const HarborDrawerNavigator = () => {
     const { theme } = useTheme();
     const { width, isCompact } = useWindowSizeClass();
@@ -1113,7 +1387,7 @@ const HarborDrawerNavigator = () => {
             }}>
             <Drawer.Screen
                 name="HarborHome"
-                component={ForumPage}
+                component={Platform.OS === 'ios' ? HarborNativeStack : ForumPage}
                 options={{ title: 'Harbor' }}
             />
         </Drawer.Navigator>
