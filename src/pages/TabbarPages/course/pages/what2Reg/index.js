@@ -780,6 +780,8 @@ const What2Reg = ({ isSplitPane = false }) => {
                 scrollData={scrollData}
                 theme={theme}
                 onScrollTo={onScrollToLetter}
+                topInset={totalSearchHeaderHeight}
+                bottom={floatingBottom}
             />
 
             {/* 已排課程數與衝突提示，點擊切到課表段落；分屏時課表就在右欄，不需要 */}
