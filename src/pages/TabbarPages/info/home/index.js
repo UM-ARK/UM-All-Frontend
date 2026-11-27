@@ -46,7 +46,7 @@ import { recordFeatureUsage } from '../../../../utils/featureRecentUsage';
 import { toastTextArr, toastKaomojiArr } from '../../../../static/UMARK_Assets/EasterEgg.js';
 import CustomBottomSheet from '../../../../utils/BottomSheet';
 import HyperlinkText from '../../../../components/HyperlinkText.js';
-import HomeCoastCard from './components/HomeCoastCard';
+import HomeCoast from './components/HomeCoast';
 import Toast from 'react-native-toast-message';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
@@ -109,7 +109,7 @@ const HomeScreen = forwardRef(function HomeScreen({
     onCalendarTouchChange,
 }, ref) {
     const { theme } = useTheme();
-    const { white, bg_color, black, themeColor, themeColorLight, themeColorUltraLight, viewShadow, TIME_TABLE_COLOR } = theme;
+    const { white, bg_color, black, themeColor, themeColorLight, themeColorUltraLight, viewShadow, TIME_TABLE_COLOR, homeCoast } = theme;
     const { t, i18n } = useTranslation(['common', 'home']);
     const { programmeLevel } = useProgrammeLevel();
     const isTc = i18n.language === 'tc';
@@ -540,6 +540,7 @@ const HomeScreen = forwardRef(function HomeScreen({
     return (
         <View
             style={{ flex: 1, backgroundColor: bg_color, alignItems: 'center', justifyContent: 'center' }}>
+            <View pointerEvents="none" style={{ position: 'absolute', top: 0, left: 0, right: 0, height: topChromeHeight, backgroundColor: homeCoast.deep }} />
             <ScrollView
                 style={{ width: '100%' }}
                 contentInsetAdjustmentBehavior="never"
@@ -560,10 +561,11 @@ const HomeScreen = forwardRef(function HomeScreen({
                 scrollEventThrottle={16}
                 keyboardDismissMode={Platform.OS === 'android' ? 'none' : 'on-drag'}
                 keyboardShouldPersistTaps={Platform.OS === 'android' ? 'always' : 'handled'}
-                contentContainerStyle={{ width: '100%', alignItems: 'center', paddingTop: topChromeHeight }}
+                contentContainerStyle={{ width: '100%', alignItems: 'center', backgroundColor: homeCoast.beach }}
             >
 
-                <HomeCoastCard
+                <HomeCoast
+                    topInset={topChromeHeight}
                     refreshTrigger={calRefreshKey}
                     upcomingCourse={upcomingCourse}
                     motionEnabled={isActive && isCoastVisible && isForeground}
@@ -571,7 +573,7 @@ const HomeScreen = forwardRef(function HomeScreen({
                     onDateTouchChange={onCalendarTouchChange}
                     onOpenTimetable={() => navigateToCourseTab(navigation, { segment: 'timetable' })}>
                     {functionArray.map(item => renderQuickFeature(item))}
-                </HomeCoastCard>
+                </HomeCoast>
 
                 {/* 更新提示 */}
                 {showUpdateInfo ?
@@ -719,8 +721,7 @@ const HomeScreen = forwardRef(function HomeScreen({
                 {networkError ? (
                     <Text style={{ alignSelf: 'center', marginTop: verticalScale(3), ...uiStyle.defaultText, color: black.third }}>網絡錯誤，請手動刷新！</Text>
                 ) : null}
-                {/* 活動瀑布流，預留間距避免遮擋上方快捷入口 */}
-                <EventPage ref={eventPage} style={{ marginTop: verticalScale(3) }} />
+                <EventPage ref={eventPage} />
             </ScrollView>
             {useNativeLiquidGlassHeader ? null : (
                 <TopScrollEdgeBackdrop headerHeight={topChromeHeight} scrollY={scrollY} />

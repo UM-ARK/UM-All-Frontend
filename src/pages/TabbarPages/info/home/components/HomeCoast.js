@@ -67,7 +67,7 @@ const TidalShoreline = ({ phase, shallow, beach, wetSand, foam }) => {
     );
 };
 
-const HomeCoastCard = ({ refreshTrigger, upcomingCourse, onOpenTimetable, onDateTouchChange, motionEnabled, onLayout, children }) => {
+const HomeCoast = ({ topInset, refreshTrigger, upcomingCourse, onOpenTimetable, onDateTouchChange, motionEnabled, onLayout, children }) => {
     const { theme } = useTheme();
     const { homeCoast, black, accentForeground, trueWhite, themeColorLight } = theme;
     const { t } = useTranslation('timetable');
@@ -87,8 +87,8 @@ const HomeCoastCard = ({ refreshTrigger, upcomingCourse, onOpenTimetable, onDate
     const classroom = upcomingCourse?.Classroom?.trim?.();
 
     return (
-        <View style={styles.card} onLayout={onLayout}>
-            <View style={{ backgroundColor: homeCoast.deep }}>
+        <View style={styles.coast} onLayout={onLayout}>
+            <View style={{ backgroundColor: homeCoast.deep, paddingTop: topInset + verticalScale(4) }}>
                 <CalendarBar refreshTrigger={refreshTrigger} tide={tide} onDateTouchChange={onDateTouchChange} />
             </View>
             <Shoreline upper={homeCoast.deep} lower={homeCoast.shallow} tide={tide} />
@@ -125,14 +125,7 @@ const HomeCoastCard = ({ refreshTrigger, upcomingCourse, onOpenTimetable, onDate
 };
 
 const styles = StyleSheet.create({
-    card: {
-        alignSelf: 'stretch',
-        marginHorizontal: scale(20),
-        marginTop: verticalScale(4),
-        marginBottom: verticalScale(3),
-        borderRadius: scale(16),
-        overflow: 'hidden',
-    },
+    coast: { alignSelf: 'stretch' },
     shoreline: { height: WAVE_HEIGHT, overflow: 'hidden' },
     waveStrip: { position: 'absolute', top: -verticalScale(8), height: verticalScale(20), left: -WAVE_DRIFT, right: -WAVE_DRIFT },
     tidalShoreline: { height: TIDE_HEIGHT, overflow: 'hidden' },
@@ -160,4 +153,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default HomeCoastCard;
+export default HomeCoast;

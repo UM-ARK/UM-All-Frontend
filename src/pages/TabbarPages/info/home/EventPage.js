@@ -37,6 +37,7 @@ import axios from 'axios';
 import Toast from 'react-native-simple-toast';
 import moment from 'moment-timezone';
 import { scale, verticalScale } from 'react-native-size-matters';
+import { LinearGradient } from 'expo-linear-gradient';
 // import TouchableScale from '../../../../components/TouchableScale';
 // import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import lodash from 'lodash';
@@ -370,12 +371,11 @@ const EventPage = forwardRef((props, ref) => {
     // TODO: Harbor Card 暫時關閉
     // const navigation = useNavigation();
     const { theme } = useTheme();
-    const { black, white, themeColor, viewShadow, bg_color } = theme;
+    const { black, white, themeColor, viewShadow, bg_color, homeCoast } = theme;
     const s = StyleSheet.create({
         waterFlowContainer: {
             flexDirection: 'row',
             width: '100%',
-            backgroundColor: bg_color,
             alignItems: 'flex-start',
             // 以內容寬度置中，避免 flex:1 把多餘空白擠到兩欄中間
             justifyContent: 'center',
@@ -807,7 +807,14 @@ const EventPage = forwardRef((props, ref) => {
     return (
         <View
             onLayout={({ nativeEvent }) => setContainerWidth(nativeEvent.layout.width)}
-            style={{ ...props.style, width: '100%' }}>
+            style={{ ...props.style, width: '100%', backgroundColor: bg_color }}>
+            <View pointerEvents="none" style={[StyleSheet.absoluteFill, { overflow: 'hidden' }]}>
+                <LinearGradient
+                    colors={[homeCoast.beach, homeCoast.beach, bg_color]}
+                    locations={[0, 0.15, 1]}
+                    style={{ height: cardWidth + scale(5) }}
+                />
+            </View>
             {isLoading ? (
                 renderSkeletonPage()
             ) : columnsData.some(col => col.length > 0) ? (

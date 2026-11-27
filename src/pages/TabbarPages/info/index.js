@@ -114,6 +114,7 @@ export default function NewsScreen() {
     const searchQueriesRef = useRef(searchQueries);
 
     const activeTabKey = TAB_KEYS[pageIndex] ?? 'home';
+    const topBackgroundColor = activeTabKey === 'home' ? theme.homeCoast.deep : bg_color;
 
     const segmentOptions = useMemo(
         () => [
@@ -311,7 +312,8 @@ export default function NewsScreen() {
                     onSelect={onSegmentPress}
                 />
             ),
-            contentStyle: { backgroundColor: bg_color },
+            ...(!useNativeLiquidGlassHeader ? { headerStyle: { backgroundColor: topBackgroundColor } } : {}),
+            contentStyle: { backgroundColor: topBackgroundColor },
             headerSearchBarOptions: {
                 ref: nativeSearchBarRef,
                 placeholder: activeSearchPlaceholder,
@@ -330,7 +332,6 @@ export default function NewsScreen() {
         });
     }, [
         activeSearchPlaceholder,
-        bg_color,
         black.main,
         black.third,
         handleNativeSearchCancel,
@@ -343,7 +344,9 @@ export default function NewsScreen() {
         segmentValues,
         tabPosition,
         themeColor,
+        topBackgroundColor,
         useNativeHeader,
+        useNativeLiquidGlassHeader,
     ]);
 
     const onPageSelected = useCallback(event => {
@@ -393,7 +396,7 @@ export default function NewsScreen() {
     return (
         <View
             onLayout={event => setViewport(event.nativeEvent.layout)}
-            style={[styles.container, { backgroundColor: bg_color }]}>
+            style={[styles.container, { backgroundColor: topBackgroundColor }]}>
             {useNativeHeader ? null : (
                 <View
                     pointerEvents="box-none"
