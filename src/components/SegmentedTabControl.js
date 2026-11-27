@@ -17,6 +17,19 @@ const SMALL_ITEM_HEIGHT = moderateScale(20, 0.1);
 
 export const SEGMENTED_TAB_CONTROL_HEIGHT = ITEM_HEIGHT + TRACK_PADDING * 2;
 export const SMALL_SEGMENTED_TAB_CONTROL_HEIGHT = SMALL_ITEM_HEIGHT + SMALL_TRACK_PADDING * 2;
+export const NATIVE_SEGMENT_CONTROL_HEIGHT = scale(32);
+
+const NATIVE_SEGMENT_DUAL_WIDTH = scale(136);
+const NATIVE_SEGMENT_MULTI_ITEM_WIDTH = scale(60);
+
+/**
+ * 原生 iOS 26 導覽列分段切換器寬度：
+ * - 2 項統一收窄至 scale(136)（每格 scale(68)），兼顧緊湊比例、英文標籤與課表角標
+ * - 3 項以上維持每格 scale(60)（3 項即 scale(180)），避免擠壓左右導覽列按鈕
+ */
+export const getNativeSegmentControlWidth = (count) => (
+    count <= 2 ? NATIVE_SEGMENT_DUAL_WIDTH : count * NATIVE_SEGMENT_MULTI_ITEM_WIDTH
+);
 
 export default function SegmentedTabControl({
     options,
