@@ -14,14 +14,13 @@ import Animated, {
 import { useTranslation } from 'react-i18next';
 import Text from '../../../../components/AppText';
 import TextInput from '../../../../components/AppTextInput';
+import SearchFieldContainer from '../../../../components/SearchFieldContainer';
 import searchFieldStyles, {
     SEARCH_FIELD_CLEAR_ICON_SIZE,
     SEARCH_FIELD_ICON_SIZE,
     SEARCH_FIELD_MAX_FONT_SIZE_MULTIPLIER,
-    SEARCH_FIELD_MIN_HEIGHT,
 } from '../../../../components/searchFieldStyles';
 import { useTheme } from '../../../../components/ThemeContext';
-import { GlassView } from '../../../../utils/glassEffect';
 import { trigger } from '../../../../utils/trigger';
 import { scale, verticalScale } from 'react-native-size-matters';
 import TouchableScale from '../../../../components/TouchableScale';
@@ -89,21 +88,14 @@ function ClubSearchBar({
         onChangeText('');
     }, [onChangeText]);
 
-    const FieldContainer = liquidGlass ? GlassView : View;
-
     return (
         <View style={[styles.outer, containerStyle]}>
             <View style={styles.row}>
                 <Animated.View style={[styles.inputOuter, inputOuterAnimated]}>
-                    <FieldContainer
-                        {...(liquidGlass ? { isInteractive: true } : {})}
-                        style={[
-                            searchFieldStyles.field,
-                            styles.pill,
-                            liquidGlass
-                                ? styles.liquidGlassPill
-                                : { backgroundColor: searchFieldBg },
-                        ]}>
+                    <SearchFieldContainer
+                        liquidGlass={liquidGlass}
+                        containerStyle={styles.pill}
+                        fieldStyle={{ backgroundColor: searchFieldBg }}>
                         <Ionicons name="search" size={SEARCH_FIELD_ICON_SIZE} color={black.third} />
                         <TextInput
                             ref={inputRef}
@@ -144,7 +136,7 @@ function ClubSearchBar({
                                 />
                             </TouchableScale>
                         ) : null}
-                    </FieldContainer>
+                    </SearchFieldContainer>
                 </Animated.View>
 
                 <Animated.View
@@ -188,20 +180,15 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         width: '100%',
-        overflow: 'hidden',
     },
     inputOuter: {
         flex: 1,
         minWidth: 0,
     },
     pill: {
+        width: 'auto',
         marginLeft: scale(4),
         marginRight: scale(4),
-    },
-    liquidGlassPill: {
-        borderRadius: SEARCH_FIELD_MIN_HEIGHT / 2,
-        paddingHorizontal: 14,
-        overflow: 'hidden',
     },
     loading: {
         marginRight: scale(4),
